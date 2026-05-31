@@ -10,11 +10,22 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// version é injetada via ldflags: -X main.version=1.1.0
+var version = "dev"
+
 var rootCmd = &cobra.Command{
 	Use:   "forge-sdd",
 	Short: "Scaffolda estruturas Forge-SDD em qualquer projeto",
 	Long: `forge-sdd é um CLI que gera a estrutura completa Forge-SDD
 (sdd/, .github/, .vscode/) pronta para uso com GitHub Copilot.`,
+}
+
+var versionCmd = &cobra.Command{
+	Use:   "version",
+	Short: "Exibe a versão do forge-sdd",
+	Run: func(cmd *cobra.Command, args []string) {
+		fmt.Println(version)
+	},
 }
 
 var initCmd = &cobra.Command{
@@ -45,6 +56,11 @@ Preenche os templates com as informações do projeto coletadas interativamente 
 			cfg.DryRun = dryRun
 		}
 
+		// usa versão do binário se não sobrescrita pela flag --version
+		if cfg.SddVersion == config.Defaults().SddVersion && version != "dev" {
+			cfg.SddVersion = version
+		}
+
 		created, err := scaffold.Run(cfg, targetDir)
 		if err != nil {
 			return fmt.Errorf("scaffold falhou: %w", err)
@@ -69,6 +85,7 @@ func init() {
 	initCmd.Flags().String("version", "", "Versão Forge-SDD (default: 1.1.0)")
 	initCmd.Flags().Bool("no-telemetry", false, "Desabilitar telemetria local")
 	rootCmd.AddCommand(initCmd)
+	rootCmd.AddCommand(versionCmd)
 }
 
 func main() {
