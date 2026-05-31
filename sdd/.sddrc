@@ -1,0 +1,10 @@
+{
+  "project": "forge-sdd",
+  "version": "1.1.0",
+  "telemetry": {
+    "enabled": true,
+    "anonymous": true,
+    "endpoint": "local"
+  },
+  "lang": "pt-BR"
+}
