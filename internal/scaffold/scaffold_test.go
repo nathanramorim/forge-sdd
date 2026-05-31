@@ -1,9 +1,11 @@
 package scaffold
 
 import (
+	"os"
 	"strings"
 	"testing"
 
+	"github.com/forge-sdd/cli/internal/config"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -49,4 +51,24 @@ func TestWalkTemplates(t *testing.T) {
 	for _, p := range paths {
 		t.Logf("  %s", p)
 	}
+}
+
+func TestDryRunNoFiles(t *testing.T) {
+	dir := t.TempDir()
+	cfg := config.Config{
+		Project: "demo", Stack: "go", DB: "none",
+		Telemetry: false, Lang: "pt-BR", SddVersion: "1.1.0",
+		DryRun: true,
+	}
+
+	listed, err := Run(cfg, dir)
+	require.NoError(t, err)
+	require.NotEmpty(t, listed, "dry-run deve retornar lista de caminhos")
+
+	// nenhum arquivo deve ter sido criado
+	entries, err := os.ReadDir(dir)
+	require.NoError(t, err)
+	assert.Empty(t, entries, "dry-run não deve criar arquivos em disco")
+
+	t.Logf("✓ %d caminhos listados, 0 arquivos criados", len(listed))
 }

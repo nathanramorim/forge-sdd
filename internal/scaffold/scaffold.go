@@ -44,6 +44,13 @@ func Run(cfg config.Config, targetDir string) ([]string, error) {
 		rel = strings.TrimSuffix(rel, ".tmpl")
 		dest := filepath.Join(targetDir, rel)
 
+		// modo dry-run: apenas listar, sem criar arquivos
+		if cfg.DryRun {
+			fmt.Printf("[DRY] %s\n", dest)
+			created = append(created, dest)
+			return nil
+		}
+
 		// criar diretório pai
 		if err := os.MkdirAll(filepath.Dir(dest), 0755); err != nil {
 			return fmt.Errorf("mkdir %s: %w", filepath.Dir(dest), err)

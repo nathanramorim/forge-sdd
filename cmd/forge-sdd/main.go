@@ -30,16 +30,19 @@ Preenche os templates com as informações do projeto coletadas interativamente 
 		}
 
 		yes, _ := cmd.Flags().GetBool("yes")
+		dryRun, _ := cmd.Flags().GetBool("dry-run")
 
 		var cfg config.Config
 		if yes {
 			cfg = config.FromFlags(cmd)
+			cfg.DryRun = dryRun
 		} else {
 			var err error
 			cfg, err = survey.Run()
 			if err != nil {
 				return fmt.Errorf("formulário cancelado: %w", err)
 			}
+			cfg.DryRun = dryRun
 		}
 
 		created, err := scaffold.Run(cfg, targetDir)
@@ -58,6 +61,7 @@ Preenche os templates com as informações do projeto coletadas interativamente 
 
 func init() {
 	initCmd.Flags().Bool("yes", false, "Pular prompts e usar flags/defaults")
+	initCmd.Flags().Bool("dry-run", false, "Listar arquivos que seriam criados sem gravar no disco")
 	initCmd.Flags().String("name", "", "Nome do projeto")
 	initCmd.Flags().String("stack", "", "Stack principal: go, node, python, rust, other")
 	initCmd.Flags().String("db", "", "Banco de dados: postgres, sqlite, mongo, none")
