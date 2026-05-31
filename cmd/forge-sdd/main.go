@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/forge-sdd/cli/internal/scaffold"
+	"github.com/forge-sdd/cli/internal/survey"
 	"github.com/spf13/cobra"
 )
 
@@ -25,7 +27,22 @@ Preenche os templates com as informações do projeto coletadas interativamente 
 		if len(args) == 1 {
 			targetDir = args[0]
 		}
-		fmt.Printf("forge-sdd init — diretório alvo: %s (stub)\n", targetDir)
+
+		cfg, err := survey.Run()
+		if err != nil {
+			return fmt.Errorf("formulário cancelado: %w", err)
+		}
+
+		created, err := scaffold.Run(cfg, targetDir)
+		if err != nil {
+			return fmt.Errorf("scaffold falhou: %w", err)
+		}
+
+		fmt.Printf("\n✓ Estrutura Forge-SDD criada em %s (%d arquivos)\n\n", targetDir, len(created))
+		fmt.Println("Próximos passos:")
+		fmt.Println("  1. Abra o projeto no VS Code")
+		fmt.Println("  2. Aceite as extensões recomendadas (Copilot, MCP)")
+		fmt.Println("  3. Leia sdd/memory/progress.md para começar")
 		return nil
 	},
 }
