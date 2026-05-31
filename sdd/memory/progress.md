@@ -2,7 +2,7 @@
 
 ## Status
 ```
-Fase 0 — Foundation           [ ] todo
+Fase 0 — Foundation           [x] done
 Fase 1 — Templates embed      [ ] todo
 Fase 2 — Init interativo      [ ] todo
 Fase 3 — Init flags           [ ] todo
@@ -15,13 +15,14 @@ Fase 7 — Release              [ ] todo
 ## Features ativas
 | Feature | Branch | Status |
 |---------|--------|--------|
-| feat-00-foundation | feat/foundation | todo |
+| feat-00-foundation | feat/foundation | done |
+| feat-01-templates-embed | feat/templates-embed | todo |
 
 ## Próximo passo
-**Iniciar:** feat-00-foundation
+**Iniciar:** feat-01-templates-embed
 **Bloqueios:** —
 
 ## Última sessão
-- Estrutura SDD criada — projeto ainda não iniciado
+- 2026-05-31 — feat-00-foundation concluída: go.mod, cobra root, stubs de config/scaffold/survey. go vet passa.
 
 > Histórico completo em `progress-log.md`

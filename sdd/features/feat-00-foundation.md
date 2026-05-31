@@ -3,7 +3,7 @@
 **Branch:** `feat/foundation`
 **Fase:** 0
 **Depende de:** —
-**Status:** `todo`
+**Status:** `done`
 
 ## Objetivo
 Repositório Go compilando com layout de pastas correto, cobra registrado e stubs dos módulos internos.
@@ -17,12 +17,12 @@ go vet ./...
 ```
 
 ## Tarefas
-- [ ] **00-1** `go mod init github.com/forge-sdd/cli`
-- [ ] **00-2** Criar `cmd/forge-sdd/main.go` com cobra root command e `init` subcommand (stub)
-- [ ] **00-3** Criar `internal/config/config.go` com struct `Config` e `Defaults()`
-- [ ] **00-4** Criar `internal/scaffold/scaffold.go` (stub: Walk e Run retornam nil)
-- [ ] **00-5** Criar `internal/survey/survey.go` (stub: Run retorna `Config{}`)
-- [ ] **00-6** `go vet ./...` passa sem erros
+- [x] **00-1** `go mod init github.com/forge-sdd/cli`
+- [x] **00-2** Criar `cmd/forge-sdd/main.go` com cobra root command e `init` subcommand (stub)
+- [x] **00-3** Criar `internal/config/config.go` com struct `Config` e `Defaults()`
+- [x] **00-4** Criar `internal/scaffold/scaffold.go` (stub: Walk e Run retornam nil)
+- [x] **00-5** Criar `internal/survey/survey.go` (stub: Run retorna `Config{}`)
+- [x] **00-6** `go vet ./...` passa sem erros
 
 ## Arquivos gerados
 ```
