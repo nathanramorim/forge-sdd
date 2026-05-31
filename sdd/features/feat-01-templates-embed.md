@@ -3,7 +3,7 @@
 **Branch:** `feat/templates-embed`
 **Fase:** 1
 **Depende de:** `feat/foundation` (mergeada)
-**Status:** `todo`
+**Status:** `done`
 
 ## Objetivo
 Todos os artefatos Forge-SDD embutidos no binário via `embed.FS` e acessíveis por walk em `scaffold.Walk()`.
@@ -15,10 +15,10 @@ go test ./internal/scaffold/... -run TestWalkTemplates -v
 ```
 
 ## Tarefas
-- [ ] **01-1** Criar pasta `templates/` com todos os artefatos Forge-SDD como `*.tmpl` (variáveis `{{.Project}}`, `{{.Stack}}`, etc.)
-- [ ] **01-2** Adicionar `//go:embed templates/**` em `internal/scaffold/scaffold.go`
-- [ ] **01-3** Implementar `scaffold.Walk() []string` que retorna lista de paths via embed.FS
-- [ ] **01-4** Escrever `TestWalkTemplates` em `internal/scaffold/scaffold_test.go` validando contagem e paths esperados
+- [x] **01-1** Criar pasta `templates/` com todos os artefatos Forge-SDD como `*.tmpl` (variáveis `{{.Project}}`, `{{.Stack}}`, etc.)
+- [x] **01-2** Adicionar `//go:embed templates/**` em `internal/scaffold/scaffold.go`
+- [x] **01-3** Implementar `scaffold.Walk() []string` que retorna lista de paths via embed.FS
+- [x] **01-4** Escrever `TestWalkTemplates` em `internal/scaffold/scaffold_test.go` validando contagem e paths esperados
 
 ## Arquivos gerados
 ```
