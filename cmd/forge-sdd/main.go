@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/forge-sdd/cli/internal/config"
 	"github.com/forge-sdd/cli/internal/scaffold"
 	"github.com/forge-sdd/cli/internal/survey"
 	"github.com/spf13/cobra"
@@ -28,9 +29,17 @@ Preenche os templates com as informações do projeto coletadas interativamente 
 			targetDir = args[0]
 		}
 
-		cfg, err := survey.Run()
-		if err != nil {
-			return fmt.Errorf("formulário cancelado: %w", err)
+		yes, _ := cmd.Flags().GetBool("yes")
+
+		var cfg config.Config
+		if yes {
+			cfg = config.FromFlags(cmd)
+		} else {
+			var err error
+			cfg, err = survey.Run()
+			if err != nil {
+				return fmt.Errorf("formulário cancelado: %w", err)
+			}
 		}
 
 		created, err := scaffold.Run(cfg, targetDir)
@@ -48,6 +57,13 @@ Preenche os templates com as informações do projeto coletadas interativamente 
 }
 
 func init() {
+	initCmd.Flags().Bool("yes", false, "Pular prompts e usar flags/defaults")
+	initCmd.Flags().String("name", "", "Nome do projeto")
+	initCmd.Flags().String("stack", "", "Stack principal: go, node, python, rust, other")
+	initCmd.Flags().String("db", "", "Banco de dados: postgres, sqlite, mongo, none")
+	initCmd.Flags().String("lang", "", "Idioma: pt-BR, en")
+	initCmd.Flags().String("version", "", "Versão Forge-SDD (default: 1.1.0)")
+	initCmd.Flags().Bool("no-telemetry", false, "Desabilitar telemetria local")
 	rootCmd.AddCommand(initCmd)
 }
 
