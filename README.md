@@ -80,20 +80,27 @@ sudo mv forge-sdd /usr/local/bin/
 cd meu-projeto
 forge-sdd init
 ```
-Apresenta um formulário no terminal com 5 campos:
+Apresenta um formulário no terminal com 6 campos:
 - **Nome do projeto**
 - **Stack principal** — go, node, python, rust, other
 - **Banco de dados** — postgres, sqlite, mongo, none
+- **Agente(s) de IA** — GitHub Copilot, Claude, Gemini (multi-select)
 - **Telemetria local** — sim/não
 - **Idioma** — pt-BR ou en
 
 ### Modo não-interativo (`--yes`)
 ```bash
-forge-sdd init --yes \
-  --name meu-servico \
-  --stack go \
-  --db postgres \
-  --lang pt-BR
+# GitHub Copilot (default)
+forge-sdd init --yes --name meu-servico --stack go
+
+# Claude
+forge-sdd init --yes --agent claude --name meu-servico
+
+# Gemini
+forge-sdd init --yes --agent gemini --name meu-servico
+
+# Múltiplos agentes
+forge-sdd init --yes --agent copilot,claude --name meu-servico
 ```
 Pula todos os prompts e usa as flags passadas (o resto usa defaults).
 
@@ -105,9 +112,17 @@ Pula todos os prompts e usa as flags passadas (o resto usa defaults).
 | `--stack` | Stack principal | `go` |
 | `--db` | Banco de dados | `none` |
 | `--lang` | Idioma dos templates | `pt-BR` |
+| `--agent` | Agente(s) de IA: `copilot`, `claude`, `gemini` (csv) | `copilot` |
 | `--version` | Versão Forge-SDD | `1.1.0` |
 | `--no-telemetry` | Desabilita telemetria | `false` |
 | `--dry-run` | Lista arquivos sem criar | `false` |
+
+### Agentes suportados
+| Agente | Flag | Arquivos gerados |
+|--------|------|-----------------|
+| GitHub Copilot | `copilot` | `.github/copilot-instructions.md`, chatmodes, prompts |
+| Claude | `claude` | `CLAUDE.md`, `.claude/commands/*.md` |
+| Gemini | `gemini` | `GEMINI.md`, `.gemini/system_instructions.md` |
 
 ### Dry-run (visualizar sem criar)
 ```bash

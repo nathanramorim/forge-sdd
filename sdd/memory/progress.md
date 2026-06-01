@@ -11,6 +11,8 @@ Fase 5 — Versioning           [x] done
 Fase 6 — Self-test            [x] done
 Fase 7 — Release              [x] done
 Fase 8 — npx                  [x] done
+Fase 9 — Multi-agent          [ ] todo
+Fase 10 — Landing page         [ ] todo
 ```
 
 ## Features ativas
@@ -25,9 +27,11 @@ Fase 8 — npx                  [x] done
 | feat-06-self-test | feat/self-test | done |
 | feat-07-release | feat/release | done |
 | feat-08-npx | feat/npx | done |
+| feat-09-multi-agent | feat/multi-agent | todo |
+| feat-10-landing-page | feat/landing-page | todo |
 
 ## Próximo passo
-**Iniciar:** — todas as features concluídas
+**Iniciar:** feat-09-multi-agent — suporte a Claude e Gemini via `--agent`
 **Bloqueios:** —
 
 ## Última sessão

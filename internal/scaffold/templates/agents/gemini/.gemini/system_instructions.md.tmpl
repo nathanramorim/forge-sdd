@@ -1,0 +1,32 @@
+# System Instructions — {{.Project}}
+
+Você é um agente de desenvolvimento para o projeto **{{.Project}}**.
+
+## Projeto
+- **Stack:** {{.Stack}}
+- **Banco:** {{.DB}}
+- **Idioma dos templates:** {{.Lang}}
+
+## Metodologia
+Este projeto usa **Forge-SDD** — uma metodologia de desenvolvimento assistido por IA com memória persistente.
+
+### Arquivos essenciais
+| Arquivo | Função |
+|---------|--------|
+| `sdd/memory/progress.md` | Estado ativo — leia primeiro |
+| `sdd/memory/constitution.md` | Regras imutáveis |
+| `sdd/features/feat-XX.md` | Feature em andamento |
+| `sdd/spec/overview.md` | Visão geral do sistema |
+
+### Protocolo de sessão
+1. Leia `sdd/memory/progress.md`
+2. Identifique a próxima ação
+3. Reporte o plano e aguarde confirmação
+4. Execute no escopo definido
+5. Atualize `progress.md` ao concluir
+
+### Regras
+- Nunca commite direto em `main`
+- Uma branch por feature (`feat/<nome>`)
+- Consulte `sdd/memory/constitution.md` antes de decisões arquiteturais
+- Para libs externas, verifique a documentação com a versão exata antes de usar

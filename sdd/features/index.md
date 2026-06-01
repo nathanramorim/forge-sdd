@@ -13,6 +13,8 @@ main
                   └─ feat/self-test
                      └─ feat/release
             └─ feat/npx
+               └─ feat/multi-agent
+               └─ feat/landing-page  (paralela)
 ```
 
 ## Janelas de paralelismo
@@ -31,3 +33,5 @@ Nenhuma — pipeline estritamente sequencial.
 | 06 | feat-06-self-test.md | feat/self-test | 6 | todo |
 | 07 | feat-07-release.md | feat/release | 7 | done |
 | 08 | feat-08-npx.md | feat/npx | 8 | done |
+| 09 | feat-09-multi-agent.md | feat/multi-agent | 9 | todo |
+| 10 | feat-10-landing-page.md | feat/landing-page | 10 | todo |

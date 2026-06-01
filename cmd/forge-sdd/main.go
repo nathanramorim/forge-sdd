@@ -46,6 +46,14 @@ Preenche os templates com as informações do projeto coletadas interativamente 
 		var cfg config.Config
 		if yes {
 			cfg = config.FromFlags(cmd)
+			// validar --agent explicitamente para retornar erro claro
+			if f := cmd.Flags().Lookup("agent"); f != nil && f.Changed {
+				agents, err := config.ParseAgents(f.Value.String())
+				if err != nil {
+					return err
+				}
+				cfg.Agents = agents
+			}
 			cfg.DryRun = dryRun
 		} else {
 			var err error
@@ -84,6 +92,7 @@ func init() {
 	initCmd.Flags().String("lang", "", "Idioma: pt-BR, en")
 	initCmd.Flags().String("version", "", "Versão Forge-SDD (default: 1.1.0)")
 	initCmd.Flags().Bool("no-telemetry", false, "Desabilitar telemetria local")
+	initCmd.Flags().String("agent", "", "Agente(s) de IA: copilot, claude, gemini (csv, default: copilot)")
 	rootCmd.AddCommand(initCmd)
 	rootCmd.AddCommand(versionCmd)
 }
