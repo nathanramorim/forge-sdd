@@ -37,10 +37,15 @@ sdd/                          → memória e especificação do projeto
 
 ## Instalação
 
-### Homebrew (recomendado)
+### npx (sem instalação)
 ```bash
-# após publicar tap — ainda não disponível
-brew install forge-sdd
+npx forge-sdd@latest init
+```
+Funciona em qualquer máquina com Node.js ≥ 18. O binário Go é baixado automaticamente e cacheado em `~/.cache/forge-sdd/`.
+
+### Homebrew
+```bash
+brew install nathanramorim/forge-sdd/forge-sdd
 ```
 
 ### Download direto

@@ -12,6 +12,7 @@ main
                └─ feat/versioning
                   └─ feat/self-test
                      └─ feat/release
+            └─ feat/npx
 ```
 
 ## Janelas de paralelismo
@@ -28,4 +29,5 @@ Nenhuma — pipeline estritamente sequencial.
 | 04 | feat-04-dry-run.md | feat/dry-run | 4 | todo |
 | 05 | feat-05-versioning.md | feat/versioning | 5 | todo |
 | 06 | feat-06-self-test.md | feat/self-test | 6 | todo |
-| 07 | feat-07-release.md | feat/release | 7 | todo |
+| 07 | feat-07-release.md | feat/release | 7 | done |
+| 08 | feat-08-npx.md | feat/npx | 8 | done |
