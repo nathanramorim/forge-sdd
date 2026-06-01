@@ -103,6 +103,56 @@ git push origin v1.2.0
 
 ---
 
+## Publicar uma release + Homebrew tap
+
+O goreleaser faz tudo automaticamente ao receber uma tag `v*`. Ele:
+1. Compila para 5 plataformas (linux/darwin × amd64/arm64 + windows/amd64)
+2. Cria o GitHub Release com os archives e `checksums.txt`
+3. Faz push de `forge-sdd.rb` no repo `nathanramorim/homebrew-forge-sdd`
+
+### Pré-requisitos (uma vez só)
+
+| Requisito | Onde configurar |
+|-----------|----------------|
+| Repo `nathanramorim/homebrew-forge-sdd` público e vazio | github.com/new |
+| Secret `HOMEBREW_TAP_GITHUB_TOKEN` | forge-sdd → Settings → Secrets → Actions |
+
+**Como criar o PAT (token) para o secret:**
+1. github.com → avatar → Settings → Developer settings → Personal access tokens → **Tokens (classic)**
+2. Scope: marcar **`repo`** (o check principal)
+3. Copiar o token e salvar como secret `HOMEBREW_TAP_GITHUB_TOKEN` no repo `forge-sdd`
+
+### Fluxo de release
+
+```bash
+# commitar tudo que está pronto
+git add .
+git commit -m "chore: prepara v1.x.0"
+
+# criar e enviar a tag → dispara release.yml
+git tag v1.x.0
+git push origin main
+git push origin v1.x.0
+```
+
+### Recriar uma tag já publicada (correção)
+
+```bash
+git tag -d v1.x.0                  # apaga local
+git tag v1.x.0                     # recria no commit atual
+git push origin :v1.x.0            # apaga no remote
+git push origin v1.x.0             # sobe novamente → dispara o workflow
+```
+
+### Instalação pelo usuário final (após o primeiro release)
+
+```bash
+brew tap nathanramorim/forge-sdd
+brew install forge-sdd
+```
+
+---
+
 ## Dependências principais
 
 | Lib | Versão | Função |

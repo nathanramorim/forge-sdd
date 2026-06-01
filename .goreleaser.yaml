@@ -42,6 +42,9 @@ checksum:
 snapshot:
   version_template: "{{ incpatch .Version }}-next"
 
+release:
+  draft: false
+
 brews:
   - name: forge-sdd
     repository:
