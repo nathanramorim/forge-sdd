@@ -1,0 +1,35 @@
+# Constituição — forge-sdd
+
+## Missão
+CLI Go de comando único (`forge-sdd init`) que scaffolda estruturas Forge-SDD em qualquer projeto de software.
+
+## Stack
+| Camada | Escolha | Motivo |
+|--------|---------|--------|
+| Runtime | Go 1.22+ | Binário estático, cross-platform, sem runtime externo |
+| CLI framework | cobra v1.8 | Padrão Go, flags + help automático |
+| Prompts interativos | huh v0.3 | Sem CGO, TUI moderno |
+| Templates | embed.FS (stdlib) | Zero dependência para templates |
+| Render | text/template (stdlib) | Suficiente, zero deps |
+| Testes | testify v1.9 | Assertions claras |
+| Release | goreleaser v2 | Multi-OS automatizado |
+
+## Decisões resolvidas
+| Decisão | Resolução |
+|---------|-----------|
+| Linguagem | Go — binário estático, sem runtime |
+| Único comando público | `init` — upgrade/doctor/archive são chatmodes Copilot |
+| Embed de templates | `embed.FS` — binário único, sem assets externos |
+| Não sobrescrever arquivos | Erro com lista de conflitos — evitar perda de dados |
+
+## Regras (máx. 10)
+1. Sem commits diretos em main
+2. Branch por feature (`feat/*`)
+3. Templates embutidos via `embed.FS` (nunca arquivo externo em runtime)
+4. Secrets nunca no binário ou repositório
+5. Antes de qualquer `go get`, consultar context7 com versão exata
+6. Toda feature tem critério executável (`go build` ou `go test`)
+7. `go vet ./...` deve passar após cada task
+8. Binário final sem dependências de runtime além da stdlib
+9. `--dry-run` nunca cria arquivos — apenas imprime árvore
+10. CLI só expõe `init` — sem subcomandos de runtime

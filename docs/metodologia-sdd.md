@@ -1,396 +1,432 @@
-# Metodologia SDD — Guia de Replicação
+# Forge-SDD — Metodologia v1.1.0
 
-Guia completo para replicar esta estrutura de planejamento orientado a agentes em qualquer projeto de software.
+Documento substituto e consolidado da v1.0. Principais mudanças:
+
+- Escopo do CLI: apenas `forge-sdd init`. Todo o restante (upgrade, doctor, archive, métricas) é acionado via chatmodes/prompts do GitHub Copilot.
+- Orçamentos de tokens explícitos por artefato.
+- Ciclo de sessão unificado (todos os chatmodes seguem o mesmo lifecycle).
+- Telemetria com responsável definido (Orquestrador escreve via filesystem MCP).
+- Skills index para descoberta sob demanda.
+- Chatmodes ampliados: Archivist (manutenção) e Migrator (upgrade de versão).
+- Protocolos de paralelismo e rollback definidos.
+- Templates revisados (fechamento de blocos, regras duplicadas removidas).
+
+**Versão:** 1.1.0
+**Última atualização:** 30 de maio de 2026
 
 ---
 
-## O que é esta metodologia
+## 1. Diferenças v1.0 → v1.1
 
-Um sistema de documentação viva que combina três elementos:
-
-1. **SDD (Software Design Document)** — especificação técnica do sistema
-2. **Memória de projeto** — estado atual, regras imutáveis e histórico
-3. **Agentes Copilot** — especialistas que executam partes do projeto com contexto correto
-
-O resultado é um fluxo de desenvolvimento onde o Copilot consegue retomar qualquer sessão, entender onde está, e executar a próxima tarefa sem perda de contexto.
+| Área | v1.0 | v1.1 |
+|------|------|------|
+| CLI | Implícito (init, upgrade, doctor) | Apenas init |
+| Upgrade entre versões | `forge-sdd upgrade` | Prompt `/upgrade-sdd` (chatmode Migrator) |
+| Health check | `forge-sdd doctor` | Prompt `/doctor` (chatmode Orquestrador) |
+| Arquivamento de progress.md | Manual | Prompt `/archive` (chatmode Archivist) |
+| Métricas | "endpoint local" vago | Schema fixo + escritor definido (Orquestrador) |
+| Skills | Sem índice | `skills/index.md` obrigatório |
+| Token budget | Texto solto | Tabela canônica (§5) |
+| Paralelismo | Mencionado | Protocolo formal (§9) |
+| Rollback | Ausente | Protocolo formal (§10) |
 
 ---
 
-## Estrutura de arquivos
+## 2. Princípios fundamentais
+
+### Mantidos da v1.0
+
+- **P1 — Hierarquia de leitura mínima.** Agente lê apenas o necessário por padrão; o resto é buscado sob demanda.
+- **P2 — SDD particionado.** SDD dividido por domínio; agente carrega só o chunk relevante.
+- **P3 — Estado vivo separado de histórico.** `progress.md` curto e ativo; `progress-log.md` arquiva.
+- **P4 — Chatmodes minimalistas + Skills sob demanda.** Chatmode = papel + protocolo (≤500 tokens). Skills = conhecimento detalhado.
+- **P5 — Critério de conclusão executável.** Toda feature tem comando que comprova término.
+- **P6 — MCPs como memória externa.** Conhecimento mutável vive em MCPs.
+- **P7 — Medir é parte da metodologia.** Cada sessão grava métricas.
+
+### Adicionados em v1.1
+
+- **P8 — CLI mínimo, runtime via agente.** O CLI só prepara o solo. Ciclo de vida é 100% conduzido por chatmodes
+- **P9 — Escritor único por artefato.** Cada arquivo tem um único responsável.
+- **P10 — Orçamento de tokens é contrato.** Exceder o budget dispara `/archive` ou particionamento.
+
+---
+
+## 3. Estrutura de arquivos canônica
 
 ```
-sdd/
-├── README.md                  ← Guia de navegação do SDD
-├── sdd-<projeto>.md           ← Especificação completa (a "bíblia")
-├── plan-<projeto>.md          ← Roadmap faseado com tarefas numeradas
-├── memory/
-│   ├── constitution.md        ← Regras que nunca mudam
-│   └── progress.md            ← Estado vivo do projeto (atualizado sempre)
-└── features/
-    ├── index.md               ← Tabela de todas as features
-    ├── feat-00-foundation.md
-    ├── feat-01-nome.md
-    └── ...
-
-.github/
-├── copilot-instructions.md    ← Instruções globais para o Copilot
-├── agents/
-│   ├── orquestrador.agent.md
-│   ├── builder-X.agent.md
-│   └── revisor.agent.md
-└── prompts/
-    ├── proxima-feature.prompt.md
-    └── ...
+/
+├── .github/
+│   ├── copilot-instructions.md
+│   ├── chatmodes/
+│   │   ├── orquestrador.chatmode.md
+│   │   ├── specifier.chatmode.md
+│   │   ├── builder.chatmode.md
+│   │   ├── revisor.chatmode.md
+│   │   ├── archivist.chatmode.md   # NOVO
+│   │   └── migrator.chatmode.md    # NOVO
+│   └── prompts/
+│       ├── proxima-feature.prompt.md
+│       ├── nova-feature.prompt.md
+│       ├── revisar.prompt.md
+│       ├── status.prompt.md
+│       ├── archive.prompt.md       # NOVO
+│       ├── doctor.prompt.md        # NOVO
+│       └── upgrade-sdd.prompt.md   # NOVO
+│
+├── .vscode/
+│   └── mcp.json
+│
+└── sdd/
+    ├── .sdd-version
+    ├── .sddrc
+    ├── README.md
+    ├── HOWTO.md
+    ├── memory/
+    │   ├── constitution.md
+    │   ├── progress.md
+    │   ├── progress-log.md
+    │   └── mcps.md
+    ├── spec/
+    │   ├── overview.md
+    │   ├── stack.md
+    │   ├── modules.md
+    │   ├── flows.md
+    │   └── decisions.md
+    ├── plan.md
+    ├── features/
+    │   ├── index.md
+    │   ├── feat-00-foundation.md
+    │   └── feat-XX-*.md
+    ├── skills/
+    │   ├── index.md                 # NOVO — obrigatório
+    │   └── *.md
+    └── .metrics/
+        ├── schema.json              # NOVO — contrato de telemetria
+        └── session-*.json
 ```
 
 ---
 
-## Os 4 artefatos essenciais
+## 4. Responsabilidade única por artefato
 
-### 1. `sdd/memory/constitution.md` — A Lei
+| Artefato | Único escritor | Leitores |
+|----------|----------------|----------|
+| `constitution.md` | humano | todos |
+| `progress.md` | Orquestrador | todos |
+| `progress-log.md` | Archivist | nenhum (auditoria humana) |
+| `mcps.md` | humano (init) + Migrator | todos |
+| `spec/*.md` | Specifier + humano | Builder, Revisor |
+| `plan.md` | humano | Orquestrador, Specifier |
+| `features/index.md` | Specifier + Orquestrador | todos |
+| `features/feat-XX.md` | Specifier (cria), Builder (tasks), Revisor (status final) | todos |
+| `skills/*.md` | humano | Builder |
+| `skills/index.md` | humano + Specifier | Builder |
+| `.metrics/session-*.json` | Orquestrador | benchmark externo |
+| `.sdd-version` | CLI (init) + Migrator | Orquestrador |
 
-O que nunca muda. Escreva aqui **antes de qualquer código**.
+**Regra:** se dois agentes editam o mesmo arquivo na mesma sessão, falhou o protocolo. Reabrir o ciclo.
+
+---
+
+## 5. Orçamento de tokens (contrato)
+
+| Arquivo | Limite duro | Ação ao exceder |
+|---------|-------------|-----------------|
+| `copilot-instructions.md` | 1.5 KB | Mover detalhe para `skills/` |
+| `constitution.md` | 2 KB | Recusar nova regra; revisar conjunto |
+| `progress.md` | 1 KB | `/archive` automático |
+| `chatmode.md` (cada) | 500 tokens (~2 KB) | Mover detalhe para `skills/` |
+| `spec/<arquivo>.md` | 2 KB | Particionar |
+| `feat-XX.md` | 2 KB | Quebrar em duas features |
+| `skills/<arquivo>.md` | sem limite | — |
+
+O Orquestrador valida `progress.md` ao final de toda sessão. Se exceder, dispara Archivist antes de encerrar.
+
+---
+
+## 6. Lifecycle unificado de sessão
+
+Todo chatmode (exceto Migrator) segue:
+
+```
+READ-MIN
+  Sempre: progress.md
+  Se relevante: feat ativa, constitution
+
+PLAN
+  Reportar entendimento + intenção
+  Aguardar confirmação humana (exceto se prompt explícito)
+
+ACT
+  Executar dentro do escopo do papel
+  Consultar MCPs sob demanda (context7, git)
+
+WRITE
+  Editar apenas arquivos do seu escopo (§4)
+
+CLOSE (apenas Orquestrador)
+  Atualizar progress.md
+  Validar budgets (§5)
+  Gravar .metrics/session-<timestamp>.json
+  Disparar /archive se progress.md > 1 KB
+```
+
+Chatmodes não-Orquestrador devolvem controle ao Orquestrador ao terminar; não fecham a sessão.
+
+---
+
+## 7. Chatmodes
+
+### 7.1 Orquestrador
+
+Lê estado, decide, delega, fecha sessão. Único que escreve `progress.md` e `.metrics/`. Nunca implementa.
+
+### 7.2 Specifier
+
+Cria `feat-XX-*.md` e atualiza `index.md`. Pode editar `spec/*` quando uma feature exige novo módulo/decisão.
+
+**Bloqueios — NÃO criar se:**
+- Critério de conclusão for subjetivo
+- Não couber em uma sessão
+- Conflitar com a constitution
+
+### 7.3 Builder
+
+Implementa código. Lê `feat-XX.md` + `spec/*` necessário. Consulta context7 antes de qualquer lib externa. Marca tasks `[x]`.
+
+**Quando o Builder DEVE usar context7:**
+1. Ao instalar/usar nova dependência
+2. Ao implementar integração com API externa
+3. Quando a constitution exige versão específica
+4. Em caso de erro de tipo/assinatura inesperado
+
+### 7.4 Revisor
+
+Roda critério executável. Valida aderência à constitution. Atualiza Status da feature. Aprova/reprova.
+
+### 7.5 Archivist *(NOVO)*
+
+Aciona-se via `/archive` ou automaticamente quando `progress.md` > 1 KB.
+
+- Move entradas antigas (>5 sessões) para `progress-log.md`
+- Compacta a seção "Última sessão" em uma linha
+- Não toca em features ou specs
+
+### 7.6 Migrator *(NOVO)*
+
+Aciona-se via `/upgrade-sdd <versão>`.
+
+- Lê `.sdd-version`
+- Aplica diff entre versões da metodologia (templates, novos arquivos, renames)
+- Atualiza `.sdd-version`
+- Não modifica conteúdo de domínio (apenas estrutura)
+
+---
+
+## 8. Prompts oficiais
+
+| Prompt | Modo | Aciona | Uso |
+|--------|------|--------|-----|
+| `/proxima-feature` | agent | Orquestrador | Continuar trabalho |
+| `/nova-feature` | agent | Specifier | Criar feat a partir de descrição |
+| `/revisar` | agent | Revisor | Validar feature ativa |
+| `/status` | ask | Orquestrador (read-only) | Diagnóstico sem ação |
+| `/archive` | agent | Archivist | Compactar progress.md |
+| `/doctor` | ask | Orquestrador | Health check (budgets, refs, MCPs) |
+| `/upgrade-sdd` | agent | Migrator | Migrar versão |
+
+---
+
+## 9. Protocolo de paralelismo
+
+Quando `index.md` declara janela de paralelismo (duas features sem dependência mútua):
+
+1. Orquestrador identifica par compatível (mesma fase, sem deps cruzadas).
+2. Cria branches `feat/A` e `feat/B` a partir do mesmo commit base.
+3. Cada feature é executada em sessões separadas (uma por feature). Nunca duas no mesmo turno.
+4. `progress.md` lista ambas como `in-progress` com branch distinta.
+5. Merge segue ordem de aprovação do Revisor.
+6. Conflito de merge → Orquestrador delega ao Builder da feature mais recente.
+
+---
+
+## 10. Protocolo de rollback
+
+Quando o Revisor reprovar e Builder não conseguir corrigir em ≤2 turnos:
+
+1. Orquestrador marca a feature como `blocked` em `progress.md`.
+2. Reverte commits da branch (`git reset --hard <base>`), mantém branch viva.
+3. Registra incidente em `progress-log.md` (via Archivist).
+4. Sugere ao humano: redividir feature, revisar critério ou reescrever do zero.
+5. Não tenta novamente sem confirmação humana.
+
+---
+
+## 11. Telemetria (schema fixo)
+
+Arquivo `.metrics/schema.json` — contrato versionado:
+
+```json
+{
+  "$schema": "forge-sdd/metrics/1.0",
+  "feature": "string",
+  "phase": "integer",
+  "agent_path": ["orquestrador", "builder", "revisor"],
+  "tokens_input": "integer",
+  "tokens_output": "integer",
+  "turns": "integer",
+  "duration_seconds": "integer",
+  "criterio_atendido": "boolean",
+  "model": "string",
+  "rework_lines": "integer",
+  "context7_calls": "integer",
+  "git_calls": "integer",
+  "files_touched": ["string"],
+  "outcome": "approved | rejected | blocked",
+  "sdd_version": "string"
+}
+```
+
+**Escritor:** Orquestrador, na fase CLOSE.
+**Como:** filesystem MCP (já nativo). Nome: `session-<ISO8601>.json`.
+
+Telemetria desabilitada (`.sddrc.telemetry.enabled = false`) → fase CLOSE pula a escrita.
+
+### Hipóteses verificáveis (benchmark)
+
+- **H1:** Forge-SDD reduz tokens em ≥30% vs readme-only em tasks ≥4h
+- **H2:** Forge-SDD reduz turnos até conclusão em ≥40% vs vibe coding
+- **H3:** Forge-SDD aumenta aderência ao critério em ≥25%
+- **H4:** Forge-SDD reduz drift de contexto em ≥60%
+
+---
+
+## 12. Skills index
+
+`sdd/skills/index.md` é obrigatório. Builder consulta-o antes de carregar qualquer skill.
+
+Exemplo:
 
 ```markdown
-## Missão
-[Uma frase descrevendo o que o sistema faz]
+# Skills Index
 
-## Stack (não alterar sem revisão)
-| Camada | Escolha | Motivo |
-...
-
-## Decisões de arquitetura resolvidas
-| Decisão | Resolução |
-...
-
-## Regras de desenvolvimento
-1. Sem commits diretos em main
-2. Cada feature em sua própria branch
-3. Config centralizado em arquivo (nunca hardcode)
-4. Prompts em arquivos separados
-5. [suas regras específicas]
+| Skill | Quando usar | Tamanho |
+|-------|-------------|---------|
+| python-conventions.md | Python ≥3.11, type hints, ruff | 3 KB |
+| stripe-integration.md | Pagamentos, webhooks Stripe | 5 KB |
+| pgvector-queries.md | Busca semântica Postgres | 4 KB |
 ```
 
-**Critério:** se alguém novo ler este arquivo, entende o que pode e não pode fazer.
+**Sem index, Builder não carrega skill (regra dura).**
 
 ---
 
-### 2. `sdd/memory/progress.md` — O Mapa Vivo
+## 13. CLI — escopo definitivo
 
-Atualizado ao **fim de cada sessão ou feature**. É o primeiro arquivo que o agente lê.
+Único comando: `forge-sdd init [opções]`.
 
-```markdown
-## Status geral
+### 13.1 O que `init` faz
+
+1. Pergunta interativamente (ou via flags):
+   - Nome do projeto
+   - Stack principal (runtime, db, config, secrets)
+   - Versão do Forge-SDD a usar (default: latest)
+   - Telemetria (sim/não)
+   - Idioma dos templates (pt-BR/en)
+2. Cria toda a árvore da §3.
+3. Preenche templates com valores informados.
+4. Inicializa `.sdd-version`, `.sddrc`, `.metrics/schema.json`.
+5. Não roda `git init` (responsabilidade do humano).
+6. Não instala dependências de runtime do projeto.
+7. Imprime próximos passos: abrir VS Code, instalar Copilot, rodar `/proxima-feature`.
+
+### 13.2 Flags propostas
+
 ```
-Fase 0 — Foundation   [x] done
-Fase 1 — Core         [ ] todo
+forge-sdd init
+  --stack node|python|go|rust|other
+  --db    postgres|sqlite|mongo|none
+  --telemetry on|off
+  --lang  pt-BR|en
+  --version 1.1.0
+  --yes       # não-interativo, usa defaults
+  --dry-run   # mostra árvore sem criar
 ```
 
-## Features
-| Feature | Branch | Status | Notas |
-|---------|--------|--------|-------|
-| feat-00 | feat/foundation | done | — |
-| feat-01 | feat/core       | todo | — |
+### 13.3 O que `init` NÃO faz
 
-## Próximo passo
-**Iniciar por:** `feat/core`
-...
+| Operação | Onde fica |
+|----------|-----------|
+| Upgrade de versão | `/upgrade-sdd` (Migrator) |
+| Health check | `/doctor` (Orquestrador) |
+| Adicionar feature | `/nova-feature` (Specifier) |
+| Compactar progress | `/archive` (Archivist) |
+| Validar estrutura | `/doctor` |
+| Reset/wipe | manual (humano) |
 
-## Histórico de sessões
-### YYYY-MM-DD — O que foi feito
-- item 1
-- item 2
-- **Próximo:** feat-XX
-```
+**Justificativa:** manter o CLI minúsculo, sem dependência de runtime, sem manutenção de features que evoluem rápido. Toda evolução vive em chatmodes versionados junto com a metodologia.
 
-**Critério:** ao abrir uma nova sessão, lendo só este arquivo você sabe exatamente o que fazer.
+### 13.4 Distribuição sugerida
+
+- Binário único (Go ou Rust), ou
+- `npx forge-sdd init` (Node), ou
+- `pipx run forge-sdd init` (Python)
+
+**Recomendação:** Go — binário estático, sem runtime, cross-platform. Templates embutidos via `embed.FS`.
 
 ---
 
-### 3. `sdd/features/feat-XX-nome.md` — A Tarefa
+## 14. Templates revisados
 
-Um arquivo por feature. Estrutura padrão:
+### 14.1 `feat-XX.md`
 
 ```markdown
-# feat/nome-da-feature
+# feat/<nome>
 
-**Branch:** `feat/nome`
-**Fase do plano:** N
-**Depende de:** `feat/outra` (mergeada)
-**Bloqueada por:** —
-**Status:** `todo` | `in-progress` | `done`
+**Branch:** `feat/<nome>`
+**Fase:** N
+**Depende de:** —
+**Status:** `todo`
 
 ## Objetivo
-[Uma frase do que esta feature entrega]
 
-## Tarefas
-- [ ] **F0-1** Descrição da tarefa
-  - Detalhe ou código de exemplo
+[Uma frase]
 
 ## Critério de conclusão
+
 ```bash
-# comando que comprova que funciona
-python test_X.py  # → saída esperada
+<comando executável>
 ```
 
-## Arquivos gerados por esta feature
+## Tarefas
+
+- [ ] **XX-1**
+- [ ] **XX-2**
+
+## Arquivos gerados
+
 ```
-arquivo1.py
-arquivo2.py
-```
+arquivo1
+arquivo2
 ```
 
-**Critério:** ao ler este arquivo, o agente sabe exatamente o que criar, como testar e quando parar.
+## Skills relevantes
 
----
+(consultar `skills/index.md`)
+```
 
-### 4. `sdd/features/index.md` — O Mapa de Features
+### 14.2 `constitution.md`
 
 ```markdown
-## Dependency graph
-```
-main
- └─ feat/foundation
-      ├─ feat/core-a  (deps: foundation)
-      └─ feat/core-b  (deps: foundation)
-          feat/pipeline  (deps: core-a + core-b)
-```
-
-## Janelas de trabalho paralelo
-| Janela | Branches simultâneas |
-|--------|----------------------|
-| Após foundation merge | core-a + core-b |
-
-## Índice de features
-| # | Arquivo | Branch | Fase | Status |
-|---|---------|--------|------|--------|
-| 00 | feat-00.md | feat/foundation | 0 | done |
-```
-
----
-
-## Os agentes Copilot
-
-### Estrutura mínima de um agente (`.github/agents/nome.agent.md`)
-
-```markdown
----
-description: "Quando invocar este agente (triggers em linguagem natural)"
-name: "Nome do Agente"
-tools: [read, edit, search, execute]
-user-invocable: true   # false = só invocado por outros agentes
----
-
-Você é [papel]. Sua responsabilidade é [objetivo].
-
-## Antes de começar
-1. Leia [arquivo de contexto]
-2. Leia [regras]
-
-## O que fazer
-[instruções específicas com exemplos de código se necessário]
-
-## Ao finalizar
-1. Atualize progress.md
-2. Marque tasks em feat-XX.md
-3. Atualize index.md
-```
-
-### Tipos de agente por responsabilidade
-
-| Tipo | Função | Quantidade |
-|------|--------|-----------|
-| **Orquestrador** | Lê o estado, decide o que fazer, delega | 1 |
-| **Builder** | Implementa uma fase/domínio específico | 1 por fase |
-| **Revisor** | Valida o código gerado contra o SDD | 1 |
-| **Gerador** | Usa o sistema pronto para produzir outputs | 1 por tipo de output |
-
-### Orquestrador — protocolo obrigatório
-
-```markdown
-## Protocolo de início de sessão
-1. Leia progress.md → identifique próxima feature
-2. Leia constitution.md → relembre regras
-3. Leia feat-XX.md → entenda as tarefas
-4. Reporte ao usuário e aguarde confirmação
-5. Delegue para o builder correto
-6. Após conclusão, invoque o revisor
-7. Atualize progress.md, feat-XX.md, index.md
-```
-
-### Prompt de entrada rápida (`.github/prompts/proxima-feature.prompt.md`)
-
-```markdown
----
-description: "Inicia sessão de desenvolvimento"
-agent: "Orquestrador"
----
-Inicie a sessão: leia progress.md, identifique a próxima feature,
-reporte o status e aguarde confirmação.
-```
-
----
-
-## O fluxo de desenvolvimento
-
-```
-Sessão nova
-    ↓
-[Orquestrador] lê progress.md
-    ↓
-Identifica próxima feature (status: todo)
-    ↓
-Lê feat-XX.md + constitution.md
-    ↓
-Reporta tarefas → aguarda confirmação
-    ↓
-Delega para [Builder correspondente]
-    ↓
-Builder implementa + testa
-    ↓
-[Revisor] valida contra SDD
-    ↓
-Orquestrador atualiza progress.md + feat-XX.md + index.md
-    ↓
-git commit + push + PR
-```
-
----
-
-## Como criar o SDD de um novo projeto
-
-### Passo 1 — Defina a missão (15 min)
-
-Responda em uma frase:
-> "Este sistema [faz o quê] para [quem] usando [como]."
-
-### Passo 2 — Escolha a stack (30 min)
-
-Documente em `constitution.md`:
-- Runtime / linguagem
-- Banco de dados (ou ausência)
-- Frameworks principais
-- Como a config será gerenciada
-- Onde ficam segredos (`.env`)
-
-### Passo 3 — Mapeie as fases (1h)
-
-Decomponha o sistema em 4–8 fases sequenciais. Cada fase:
-- Entrega algo **testável e funcional**
-- Tem dependências claras das fases anteriores
-- Pode ser paralelizada onde possível
-
-Exemplo de fases para qualquer projeto:
-```
-Fase 0 — Foundation      (scaffolding, config, state)
-Fase 1 — Core Domain     (a lógica central do sistema)
-Fase 2 — Integrações     (APIs externas, banco, storage)
-Fase 3 — Interface       (CLI, API HTTP, UI)
-Fase 4 — Observabilidade (logs, métricas, retry)
-Fase 5 — Robustez        (edge cases, rate limits, falhas)
-```
-
-### Passo 4 — Crie os arquivos de feature
-
-Para cada tarefa significativa, crie `sdd/features/feat-XX-nome.md` com:
-- Objetivo em uma frase
-- Lista de tarefas atômicas (`- [ ]`)
-- Critério de conclusão executável
-- Lista de arquivos que serão criados
-
-### Passo 5 — Crie os agentes
-
-Mínimo viável:
-1. `orquestrador.agent.md` — lê progress.md, roteia para builders
-2. `builder-foundation.agent.md` — implementa feat-00
-3. `builder-core.agent.md` — implementa feats do domínio principal
-4. `revisor.agent.md` — valida contra SDD
-
-### Passo 6 — Configure o Copilot
-
-Em `.github/copilot-instructions.md`:
-
-```markdown
-## Contexto do projeto
-[descrição em 2-3 linhas]
-
-## Antes de começar qualquer tarefa
-1. Leia sdd/memory/progress.md
-2. Leia o feat-XX-*.md da feature atual
-
-## Ao finalizar
-1. Atualize sdd/memory/progress.md
-2. Marque tasks em sdd/features/feat-XX-*.md
-3. Atualize sdd/features/index.md
-
-## Regras obrigatórias
-[suas regras específicas]
-```
-
----
-
-## Regras de ouro da metodologia
-
-### 1. Progress.md é a fonte de verdade
-Nunca encerre uma sessão sem atualizar. É o que permite retomar sem perda de contexto.
-
-### 2. Constitution.md é imutável
-Só mude com justificativa explícita. Se você está mudando constantemente, as decisões não estavam maduras.
-
-### 3. Critério de conclusão é executável
-Todo feat-XX.md precisa ter um comando que você pode rodar agora e verificar se passou. Se o critério for subjetivo, o agente vai travar.
-
-### 4. Uma feature = um entregável testável
-Não agrupe features por conveniência. Se não dá para testar isoladamente, divida mais.
-
-### 5. Agentes têm contexto mínimo necessário
-Um builder não precisa conhecer outros builders. Dê a ele apenas o que precisa: o feat-XX.md, a constitution.md e os arquivos que vai modificar.
-
-### 6. O orquestrador nunca implementa
-Só lê, decide e delega. Se o orquestrador começa a criar arquivos, a separação de responsabilidades quebrou.
-
----
-
-## Checklist para novo projeto
-
-```
-[ ] Criou sdd/memory/constitution.md com missão + stack + regras
-[ ] Criou sdd/memory/progress.md com tabela de features e "Próximo passo"
-[ ] Criou sdd/features/index.md com grafo de dependências
-[ ] Criou sdd/features/feat-00-foundation.md com critério executável
-[ ] Criou .github/copilot-instructions.md com as 3 seções obrigatórias
-[ ] Criou orquestrador.agent.md com protocolo de sessão
-[ ] Criou pelo menos um builder.agent.md
-[ ] Criou revisor.agent.md
-[ ] Testou: abriu sessão nova e o orquestrador soube o que fazer
-```
-
----
-
-## Anti-padrões a evitar
-
-| Anti-padrão | Problema | Solução |
-|-------------|----------|---------|
-| progress.md desatualizado | Agente não sabe onde está | Atualizar **sempre** ao encerrar sessão |
-| Features sem critério executável | Agente nunca sabe se terminou | Adicionar comando de validação em cada feat-XX.md |
-| Constitution.md com 50 regras | Agente ignora por excesso | Máximo 10 regras, apenas as que realmente mudariam o código |
-| Agente faz tudo | Perde especialização e contexto | Um builder por domínio/fase |
-| Branches sem PR | Difícil rastrear o que foi mergeado | Sempre feat/* → PR → main |
-| Config hardcoded no código | Agente não sabe onde ajustar | Centralizar em config.toml ou equivalente |
-
----
-
-## Template de constitution.md
-
-```markdown
-# Constituição — [nome-do-projeto]
-
-Documento imutável. Atualizar apenas com justificativa explícita.
+# Constituição — <projeto>
 
 ## Missão
+
 [Uma frase]
 
 ## Stack
+
 | Camada | Escolha | Motivo |
 |--------|---------|--------|
 | Runtime | | |
@@ -398,47 +434,294 @@ Documento imutável. Atualizar apenas com justificativa explícita.
 | Config | | |
 | Secrets | | |
 
-## Decisões de arquitetura resolvidas
+## Decisões resolvidas
+
 | Decisão | Resolução |
 |---------|-----------|
-| [decisão] | [resolução] |
 
-## Regras de desenvolvimento
+## Regras (máx. 10)
+
 1. Sem commits diretos em main
-2. [regra específica do projeto]
-3. Config centralizado em [arquivo]
-4. Secrets em .env (nunca commitar)
+2. Branch por feature
+3. Config centralizado em <arquivo>
+4. Secrets em .env (nunca commit)
+5. Antes de usar lib externa, consultar context7 com versão exata
+6. Toda feature tem critério executável
+7. <regra específica>
 ```
 
-## Template de feat-XX.md
+### 14.3 `progress.md`
 
 ```markdown
-# feat/nome
+# Progress — <projeto>
 
-**Branch:** `feat/nome`
-**Fase:** N
-**Depende de:** `feat/outra` (mergeada)
-**Status:** `todo`
+## Status
 
-## Objetivo
-[Uma frase]
-
-## Tarefas
-- [ ] **X-1** Tarefa 1
-- [ ] **X-2** Tarefa 2
-
-## Critério de conclusão
-```bash
-python test_X.py  # → saída esperada
+```
+Fase 0 — Foundation   [ ] todo
 ```
 
-## Arquivos gerados
+## Features ativas
+
+| Feature | Branch | Status |
+|---------|--------|--------|
+| feat-00-foundation | feat/foundation | todo |
+
+## Próximo passo
+
+**Iniciar:** feat-00-foundation
+**Bloqueios:** —
+
+## Última sessão
+
+- Projeto criado via Forge-SDD CLI
 ```
-arquivo1.py
-arquivo2.py
+
+### 14.4 `copilot-instructions.md`
+
+```markdown
+# Copilot Instructions — <projeto>
+
+## Contexto
+
+<2 linhas>
+
+## Lifecycle (todo agente)
+
+1. **READ-MIN:** ler `sdd/memory/progress.md`
+2. **PLAN:** reportar intenção, aguardar confirmação
+3. **ACT:** executar no escopo do papel
+4. **WRITE:** editar apenas arquivos do escopo
+5. **CLOSE** (Orquestrador): atualizar progress, métricas, archive se necessário
+
+## Arquivos críticos
+
+- `sdd/memory/progress.md` — estado ativo
+- `sdd/memory/constitution.md` — regras imutáveis
+- `sdd/features/feat-XX-*.md` — tarefa atual
+
+## MCPs
+
+- **context7** — obrigatório antes de lib externa
+- **git** — status antes de iniciar/encerrar feature
+
+## Orçamentos
+
+- `progress.md` ≤ 1 KB → exceder dispara `/archive`
+- `chatmode` ≤ 500 tokens → detalhe vai para `skills/`
 ```
+
+### 14.5 `archivist.chatmode.md` *(NOVO)*
+
+```markdown
+---
+description: "Compacta progress.md e move histórico para progress-log.md"
+tools: [read, edit]
+mcps: []
+---
+
+Você é o Archivist. Sua única responsabilidade é manter `progress.md` ≤ 1 KB.
+
+## Antes
+
+1. Leia `sdd/memory/progress.md`
+2. Leia `sdd/memory/progress-log.md` (últimas 3 entradas)
+
+## O que fazer
+
+1. Identifique entradas em "Última sessão" / histórico com >5 sessões
+2. Mova-as para `progress-log.md` (topo, com data)
+3. Compacte "Última sessão" em uma linha resumo
+4. Mantenha intactas: Status, Features ativas, Próximo passo, Bloqueios
+
+## Bloqueios
+
+- Não modifique features
+- Não modifique specs
+- Não escreva métricas
+
+## Ao finalizar
+
+Reporte ao Orquestrador: tamanho final de `progress.md`.
+```
+
+### 14.6 `migrator.chatmode.md` *(NOVO)*
+
+```markdown
+---
+description: "Migra a estrutura SDD de uma versão para outra"
+tools: [read, edit, search]
+mcps: [git]
+---
+
+Você é o Migrator. Aplica diffs estruturais entre versões do Forge-SDD.
+
+## Antes
+
+1. Leia `sdd/.sdd-version`
+2. Leia o diff oficial da versão alvo
+3. Confirme com o usuário a versão alvo
+
+## O que fazer
+
+1. Aplique renomes, novos arquivos, novos chatmodes/prompts
+2. Atualize `.sdd-version`
+3. NÃO altere conteúdo de domínio (constitution, features, specs)
+4. Em caso de ambiguidade, pergunte
+
+## Ao finalizar
+
+1. Liste arquivos criados/movidos/renomeados
+2. Devolva controle ao Orquestrador
+3. Sugira rodar `/doctor`
+```
+
+### 14.7 `mcp.json`
+
+```json
+{
+  "servers": {
+    "context7": {
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp"]
+    },
+    "git": {
+      "command": "uvx",
+      "args": ["mcp-server-git", "--repository", "."]
+    }
+  }
+}
 ```
 
 ---
 
-**Última atualização:** 30 de maio de 2026
+## 15. Fluxo de desenvolvimento
+
+```
+Sessão nova
+   ↓
+[Orquestrador] lê progress.md (apenas)
+   ↓
+Identifica próxima feature (status: todo)
+   ↓
+Lê feat-XX.md + constitution.md (se necessário)
+   ↓
+Reporta tarefas → aguarda confirmação
+   ↓
+Delega para [Builder]
+   ↓
+Builder lê critério → consulta context7 se preciso → implementa → testa
+   ↓
+[Revisor] valida contra SDD + critério
+   ↓
+Orquestrador atualiza progress.md + feat-XX + index
+   ↓
+Grava .metrics/session-*.json
+   ↓
+Se progress.md > 1 KB → dispara [Archivist]
+   ↓
+git commit + push + PR
+```
+
+---
+
+## 16. Checklist de novo projeto (pós-init)
+
+```
+[ ] forge-sdd init executado sem erros
+[ ] sdd/.sdd-version == versão esperada
+[ ] sdd/memory/constitution.md preenchido (não placeholder)
+[ ] sdd/spec/overview.md + stack.md preenchidos
+[ ] sdd/features/feat-00-foundation.md com critério executável
+[ ] sdd/skills/index.md existe (mesmo vazio)
+[ ] .github/chatmodes/ tem 6 arquivos
+[ ] .github/prompts/ tem 7 arquivos
+[ ] .vscode/mcp.json com context7 + git
+[ ] git init + commit inicial feito (manual)
+[ ] /doctor reporta verde
+[ ] /proxima-feature inicia foundation corretamente
+```
+
+---
+
+## 17. Anti-padrões
+
+| Anti-padrão | Problema | Solução |
+|-------------|----------|---------|
+| `progress.md` gigante | Lê arquivo grande toda sessão | Mover histórico para `progress-log.md` |
+| SDD monolítico | Carrega tudo sempre | Particionar em `sdd/spec/` |
+| `constitution` com 30 regras | Agente ignora por excesso | Máximo 10 regras |
+| Chatmode com 2000 tokens | Carrega contexto pesado | Mover detalhe para `skills/` |
+| Features sem critério executável | Agente nunca sabe se terminou | Adicionar comando de validação |
+| Builder sem context7 | Usa API antiga | Tornar consulta obrigatória na constitution |
+| Branches sem PR | Difícil rastrear | `feat/*` → PR → main |
+| Config hardcoded | Agente não sabe onde ajustar | Centralizar em arquivo de config |
+| Sem telemetria | Não dá para otimizar | Habilitar `.metrics/` desde dia 1 |
+| Templates poluídos com comentários | Tokens desperdiçados | Comentários em `HOWTO.md` |
+| CLI inflado com update, add-feature | Manutenção dupla (CLI + chatmode) | Manter CLI = `init` apenas |
+| Builder escrevendo em `progress.md` | Quebra escritor único | Builder reporta; Orquestrador escreve |
+| Skills sem index | Builder carrega tudo ou nada | `skills/index.md` obrigatório |
+| Métricas em formato livre | Impossível benchmarkar | Schema fixo (§11) |
+| Migrator alterando constitution | Mistura estrutura com domínio | Migrator só toca estrutura |
+| Sessão paralela na mesma thread | Estado inconsistente | Uma feature por sessão (§9) |
+| Reprovação infinita do Revisor | Loop de retrabalho | Rollback em ≤2 turnos (§10) |
+
+---
+
+## 18. Roadmap para implementar o CLI
+
+Ordem sugerida de features do próprio `forge-sdd`:
+
+| Feature | Descrição |
+|---------|-----------|
+| `feat-00-foundation` | repo Go, layout `cmd/forge-sdd` |
+| `feat-01-templates-embed` | `embed.FS` dos templates v1.1 |
+| `feat-02-init-interactive` | survey + render |
+| `feat-03-init-flags` | modo não-interativo |
+| `feat-04-dry-run` | preview da árvore |
+| `feat-05-versioning` | escrita de `.sdd-version` |
+| `feat-06-self-test` | golden test (init + diff vs fixture) |
+| `feat-07-release` | goreleaser, binários multi-OS |
+
+Cada uma com critério executável (ex.: `forge-sdd init demo --yes && diff -r demo/ tests/fixtures/expected/`).
+
+---
+
+## 19. Versionamento
+
+`sdd/.sdd-version = 1.1.0` para projetos criados com este documento.
+
+Mudanças seguem semver:
+
+- **MAJOR:** muda estrutura de pastas ou contratos de chatmode
+- **MINOR:** adiciona artefato sem quebrar existentes
+- **PATCH:** ajusta templates, melhora textos
+
+### Migração 1.0 → 1.1 (executada por Migrator)
+
+1. Criar `archivist.chatmode.md`, `migrator.chatmode.md`
+2. Criar `archive.prompt.md`, `doctor.prompt.md`, `upgrade-sdd.prompt.md`
+3. Criar `skills/index.md` (vazio com cabeçalho)
+4. Criar `.metrics/schema.json`
+5. Atualizar `copilot-instructions.md` com seção Lifecycle
+6. Atualizar `.sdd-version` para `1.1.0`
+
+Nenhum conteúdo de domínio é tocado.
+
+---
+
+## 20. Resumo executivo das decisões-chave
+
+1. **CLI = só `init`.** Tudo o mais (upgrade, doctor, archive) virou prompt + chatmode. Reduz superfície de manutenção e garante que a metodologia funcione mesmo sem o CLI instalado.
+2. **2 chatmodes novos:** Archivist (mantém `progress.md` enxuto) e Migrator (upgrade de versão).
+3. **3 prompts novos:** `/archive`, `/doctor`, `/upgrade-sdd`.
+4. **Escritor único por arquivo (§4)** — elimina conflitos.
+5. **Lifecycle unificado (§6)** — todo chatmode segue READ-MIN → PLAN → ACT → WRITE → CLOSE.
+6. **Schema fixo de métricas (§11)** — habilita benchmark real.
+7. **Skills index obrigatório (§12)** — descoberta sob demanda real.
+8. **Protocolos de paralelismo (§9) e rollback (§10)** — preenchem buracos da v1.0.
+9. **Stack sugerida do CLI:** Go + `embed.FS`, distribuído como binário estático.
+
+---
+
+**Forge-SDD v1.1.0** — Última atualização: 30 de maio de 2026

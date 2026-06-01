@@ -1,0 +1,28 @@
+{
+  "name": "@nathanramorim/forge-sdd",
+  "version": "1.1.1",
+  "description": "CLI que scaffolda estruturas Forge-SDD em segundos",
+  "homepage": "https://github.com/nathanramorim/homebrew-forge-sdd",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nathanramorim/forge-sdd.git"
+  },
+  "license": "MIT",
+  "bin": {
+    "forge-sdd": "bin/run.js"
+  },
+  "files": [
+    "bin/run.js",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "scaffold",
+    "cli",
+    "sdd",
+    "forge",
+    "copilot"
+  ]
+}
