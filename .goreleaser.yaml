@@ -44,6 +44,9 @@ snapshot:
 
 release:
   draft: false
+  github:
+    owner: nathanramorim
+    name: homebrew-forge-sdd
 
 brews:
   - name: forge-sdd
