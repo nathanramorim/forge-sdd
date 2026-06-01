@@ -12,7 +12,8 @@
     "forge-sdd": "bin/run.js"
   },
   "files": [
-    "bin/run.js"
+    "bin/run.js",
+    "README.md"
   ],
   "engines": {
     "node": ">=18"
