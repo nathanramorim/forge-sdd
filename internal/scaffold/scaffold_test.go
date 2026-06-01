@@ -2,6 +2,7 @@ package scaffold
 
 import (
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -58,6 +59,7 @@ func TestDryRunNoFiles(t *testing.T) {
 	cfg := config.Config{
 		Project: "demo", Stack: "go", DB: "none",
 		Telemetry: false, Lang: "pt-BR", SddVersion: "1.1.0",
+		Agents: []string{config.AgentCopilot},
 		DryRun: true,
 	}
 
@@ -72,3 +74,70 @@ func TestDryRunNoFiles(t *testing.T) {
 
 	t.Logf("✓ %d caminhos listados, 0 arquivos criados", len(listed))
 }
+
+func TestAgentClaude(t *testing.T) {
+	dir := t.TempDir()
+	cfg := config.Config{
+		Project: "demo", Stack: "go", DB: "none",
+		Telemetry: false, Lang: "pt-BR", SddVersion: "1.1.0",
+		Agents: []string{config.AgentClaude},
+	}
+
+	created, err := Run(cfg, dir)
+	require.NoError(t, err)
+	require.NotEmpty(t, created)
+
+	// deve ter CLAUDE.md
+	claudeMD := filepath.Join(dir, "CLAUDE.md")
+	assert.FileExists(t, claudeMD, "CLAUDE.md deve ser criado para agente claude")
+
+	// deve ter commands
+	assert.FileExists(t, filepath.Join(dir, ".claude", "commands", "proxima-feature.md"))
+	assert.FileExists(t, filepath.Join(dir, ".claude", "commands", "nova-feature.md"))
+	assert.FileExists(t, filepath.Join(dir, ".claude", "commands", "status.md"))
+	assert.FileExists(t, filepath.Join(dir, ".claude", "commands", "revisar.md"))
+
+	// NÃO deve ter copilot-instructions (copilot não foi selecionado)
+	assert.NoFileExists(t, filepath.Join(dir, ".github", "copilot-instructions.md"))
+
+	t.Logf("✓ agente claude: %d arquivos criados", len(created))
+}
+
+func TestAgentGemini(t *testing.T) {
+	dir := t.TempDir()
+	cfg := config.Config{
+		Project: "demo", Stack: "node", DB: "postgres",
+		Telemetry: false, Lang: "pt-BR", SddVersion: "1.1.0",
+		Agents: []string{config.AgentGemini},
+	}
+
+	created, err := Run(cfg, dir)
+	require.NoError(t, err)
+	require.NotEmpty(t, created)
+
+	assert.FileExists(t, filepath.Join(dir, "GEMINI.md"))
+	assert.FileExists(t, filepath.Join(dir, ".gemini", "system_instructions.md"))
+	assert.NoFileExists(t, filepath.Join(dir, ".github", "copilot-instructions.md"))
+
+	t.Logf("✓ agente gemini: %d arquivos criados", len(created))
+}
+
+func TestAgentMultiple(t *testing.T) {
+	dir := t.TempDir()
+	cfg := config.Config{
+		Project: "demo", Stack: "go", DB: "none",
+		Telemetry: false, Lang: "pt-BR", SddVersion: "1.1.0",
+		Agents: []string{config.AgentCopilot, config.AgentClaude},
+	}
+
+	created, err := Run(cfg, dir)
+	require.NoError(t, err)
+
+	// deve ter ambos
+	assert.FileExists(t, filepath.Join(dir, ".github", "copilot-instructions.md"))
+	assert.FileExists(t, filepath.Join(dir, "CLAUDE.md"))
+	assert.NoFileExists(t, filepath.Join(dir, "GEMINI.md"))
+
+	t.Logf("✓ copilot+claude: %d arquivos criados", len(created))
+}
+

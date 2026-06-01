@@ -1,16 +1,56 @@
 package config
 
-import "github.com/spf13/cobra"
+import (
+	"fmt"
+	"strings"
+
+	"github.com/spf13/cobra"
+)
+
+// Agentes suportados.
+const (
+	AgentCopilot = "copilot"
+	AgentClaude  = "claude"
+	AgentGemini  = "gemini"
+)
+
+var validAgents = map[string]bool{
+	AgentCopilot: true,
+	AgentClaude:  true,
+	AgentGemini:  true,
+}
+
+// ParseAgents converte uma string csv ("copilot,claude") em []string validado.
+func ParseAgents(csv string) ([]string, error) {
+	if csv == "" {
+		return []string{AgentCopilot}, nil
+	}
+	parts := strings.Split(csv, ",")
+	seen := make(map[string]bool, len(parts))
+	var result []string
+	for _, p := range parts {
+		p = strings.TrimSpace(strings.ToLower(p))
+		if !validAgents[p] {
+			return nil, fmt.Errorf("agente desconhecido: %q (válidos: copilot, claude, gemini)", p)
+		}
+		if !seen[p] {
+			seen[p] = true
+			result = append(result, p)
+		}
+	}
+	return result, nil
+}
 
 // Config contém todas as configurações coletadas durante o init.
 type Config struct {
-	Project    string // nome do projeto
-	Stack      string // runtime principal: go, node, python, rust, other
-	DB         string // banco de dados: postgres, sqlite, mongo, none
-	Telemetry  bool   // habilitar telemetria local
-	Lang       string // idioma dos templates: pt-BR, en
-	SddVersion string // versão Forge-SDD a usar
-	DryRun     bool   // exibir árvore sem criar arquivos
+	Project    string   // nome do projeto
+	Stack      string   // runtime principal: go, node, python, rust, other
+	DB         string   // banco de dados: postgres, sqlite, mongo, none
+	Telemetry  bool     // habilitar telemetria local
+	Lang       string   // idioma dos templates: pt-BR, en
+	SddVersion string   // versão Forge-SDD a usar
+	DryRun     bool     // exibir árvore sem criar arquivos
+	Agents     []string // agentes de IA: copilot, claude, gemini
 }
 
 // Defaults retorna uma Config com valores padrão.
@@ -23,6 +63,7 @@ func Defaults() Config {
 		Lang:       "pt-BR",
 		SddVersion: "1.1.0",
 		DryRun:     false,
+		Agents:     []string{AgentCopilot},
 	}
 }
 
@@ -48,6 +89,15 @@ func FromFlags(cmd *cobra.Command) Config {
 	if f := cmd.Flags().Lookup("no-telemetry"); f != nil && f.Changed {
 		v, _ := cmd.Flags().GetBool("no-telemetry")
 		cfg.Telemetry = !v
+	}
+	if f := cmd.Flags().Lookup("agent"); f != nil && f.Changed {
+		agents, err := ParseAgents(f.Value.String())
+		if err != nil {
+			// erro de validação — mantém default; será relatado em RunE
+			cfg.Agents = []string{AgentCopilot}
+		} else {
+			cfg.Agents = agents
+		}
 	}
 	return cfg
 }

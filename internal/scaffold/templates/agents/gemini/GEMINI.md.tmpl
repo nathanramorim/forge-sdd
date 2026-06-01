@@ -1,0 +1,25 @@
+# GEMINI.md — {{.Project}}
+
+## Contexto do projeto
+{{.Project}} — stack principal: {{.Stack}}.
+
+## Lifecycle (todo agente)
+1. **READ-MIN:** ler `sdd/memory/progress.md`
+2. **PLAN:** reportar intenção, aguardar confirmação
+3. **ACT:** executar no escopo do papel
+4. **WRITE:** editar apenas arquivos do escopo
+5. **CLOSE** (Orquestrador): atualizar progress, métricas, archive se necessário
+
+## Arquivos críticos
+- `sdd/memory/progress.md` — estado ativo (leia primeiro a cada sessão)
+- `sdd/memory/constitution.md` — regras imutáveis
+- `sdd/features/feat-XX-*.md` — tarefa atual
+
+## Orçamentos
+- `progress.md` ≤ 1 KB
+- Resposta de planejamento ≤ 500 tokens — detalhe vai para `sdd/skills/`
+
+## Regras
+- Nunca commite direto em `main`
+- Consulte `sdd/memory/constitution.md` antes de decisões arquiteturais
+- Use ferramentas de leitura antes de editar qualquer arquivo

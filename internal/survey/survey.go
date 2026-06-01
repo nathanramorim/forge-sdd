@@ -45,6 +45,22 @@ func Run() (config.Config, error) {
 				).
 				Value(&cfg.DB),
 
+			huh.NewMultiSelect[string]().
+				Title("Agente(s) de IA").
+				Description("Selecione um ou mais agentes que utilizará no projeto").
+				Options(
+					huh.NewOption("GitHub Copilot", config.AgentCopilot).Selected(true),
+					huh.NewOption("Claude (Anthropic)", config.AgentClaude),
+					huh.NewOption("Gemini (Google)", config.AgentGemini),
+				).
+				Value(&cfg.Agents).
+				Validate(func(v []string) error {
+					if len(v) == 0 {
+						return fmt.Errorf("selecione ao menos um agente")
+					}
+					return nil
+				}),
+
 			huh.NewConfirm().
 				Title("Habilitar telemetria local?").
 				Value(&cfg.Telemetry),
@@ -65,3 +81,4 @@ func Run() (config.Config, error) {
 
 	return cfg, nil
 }
+

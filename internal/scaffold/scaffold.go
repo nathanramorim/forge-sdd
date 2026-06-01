@@ -29,40 +29,104 @@ func Walk() []string {
 	return paths
 }
 
+// agentTemplateRoot retorna o prefixo de template para cada agente.
+// Retorna "" para agentes sem subdiretório dedicado (copilot usa as pastas globais).
+func agentTemplateRoot(agent string) string {
+	switch agent {
+	case config.AgentClaude:
+		return "templates/agents/claude"
+	case config.AgentGemini:
+		return "templates/agents/gemini"
+	default:
+		return ""
+	}
+}
+
 // Run renderiza os templates com cfg e escreve os arquivos em targetDir.
 // Retorna a lista de arquivos criados.
 func Run(cfg config.Config, targetDir string) ([]string, error) {
 	var created []string
 
-	err := fs.WalkDir(templatesFS, "templates", func(path string, d fs.DirEntry, err error) error {
+	// Garante ao menos um agente
+	agents := cfg.Agents
+	if len(agents) == 0 {
+		agents = []string{config.AgentCopilot}
+	}
+
+	// 1. Templates globais (sdd/, .vscode/, e .github/ do copilot)
+	//    Sempre renderizados — são agnósticos ao agente de IA.
+	globalRoots := []string{"templates/sdd", "templates/.vscode"}
+
+	// .github/ só é incluído quando copilot está selecionado
+	copilotSelected := false
+	for _, a := range agents {
+		if a == config.AgentCopilot {
+			copilotSelected = true
+			break
+		}
+	}
+	if copilotSelected {
+		globalRoots = append(globalRoots, "templates/.github")
+	}
+
+	for _, root := range globalRoots {
+		// stripPrefix = "templates" para preservar o nome do subdiretório no destino
+		// ex: templates/.github/foo.tmpl → .github/foo
+		files, err := renderDir(templatesFS, root, "templates", cfg, targetDir)
+		if err != nil {
+			return nil, err
+		}
+		created = append(created, files...)
+	}
+
+	// 2. Templates específicos por agente
+	for _, agent := range agents {
+		root := agentTemplateRoot(agent)
+		if root == "" {
+			continue // copilot já foi tratado acima
+		}
+		// stripPrefix = root do agente para que CLAUDE.md fique na raiz do projeto
+		// ex: templates/agents/claude/CLAUDE.md.tmpl → CLAUDE.md
+		files, err := renderDir(templatesFS, root, root, cfg, targetDir)
+		if err != nil {
+			return nil, err
+		}
+		created = append(created, files...)
+	}
+
+	return created, nil
+}
+
+// renderDir percorre fsys a partir de root, renderiza cada template e escreve em targetDir.
+// stripPrefix é o prefixo a remover do path para calcular o destino.
+func renderDir(fsys embed.FS, root, stripPrefix string, cfg config.Config, targetDir string) ([]string, error) {
+	var created []string
+
+	err := fs.WalkDir(fsys, root, func(path string, d fs.DirEntry, err error) error {
 		if err != nil || d.IsDir() {
 			return err
 		}
 
-		// destPath: strip "templates/" prefix e ".tmpl" suffix
-		rel := strings.TrimPrefix(path, "templates/")
+		// destPath: strip prefix e ".tmpl" suffix
+		rel := strings.TrimPrefix(path, stripPrefix+"/")
 		rel = strings.TrimSuffix(rel, ".tmpl")
 		dest := filepath.Join(targetDir, rel)
 
-		// modo dry-run: apenas listar, sem criar arquivos
 		if cfg.DryRun {
 			fmt.Printf("[DRY] %s\n", dest)
 			created = append(created, dest)
 			return nil
 		}
 
-		// criar diretório pai
 		if err := os.MkdirAll(filepath.Dir(dest), 0755); err != nil {
 			return fmt.Errorf("mkdir %s: %w", filepath.Dir(dest), err)
 		}
 
-		// ler conteúdo do template
-		data, err := templatesFS.ReadFile(path)
+		data, err := fsys.ReadFile(path)
 		if err != nil {
 			return fmt.Errorf("read template %s: %w", path, err)
 		}
 
-		// renderizar
 		tmpl, err := template.New(path).Parse(string(data))
 		if err != nil {
 			return fmt.Errorf("parse template %s: %w", path, err)
@@ -73,7 +137,6 @@ func Run(cfg config.Config, targetDir string) ([]string, error) {
 			return fmt.Errorf("render template %s: %w", path, err)
 		}
 
-		// escrever arquivo
 		if err := os.WriteFile(dest, buf.Bytes(), 0644); err != nil {
 			return fmt.Errorf("write %s: %w", dest, err)
 		}
@@ -82,9 +145,6 @@ func Run(cfg config.Config, targetDir string) ([]string, error) {
 		return nil
 	})
 
-	if err != nil {
-		return nil, err
-	}
-
-	return created, nil
+	return created, err
 }
+
