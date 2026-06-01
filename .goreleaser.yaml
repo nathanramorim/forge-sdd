@@ -45,10 +45,10 @@ snapshot:
 brews:
   - name: forge-sdd
     repository:
-      owner: forge-sdd          # ← troque pelo seu user/org do GitHub
-      name: homebrew-forge-sdd  # ← nome do tap repo
+      owner: nathanramorim
+      name: homebrew-forge-sdd
       token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
-    homepage: https://github.com/forge-sdd/cli
+    homepage: https://github.com/nathanramorim/forge-sdd
     description: "CLI que scaffolda estruturas Forge-SDD em segundos"
     license: MIT
     install: |
