@@ -54,7 +54,7 @@ brews:
       owner: nathanramorim
       name: homebrew-forge-sdd
       token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
-    homepage: https://github.com/nathanramorim/forge-sdd
+    homepage: https://github.com/nathanramorim/homebrew-forge-sdd
     description: "CLI que scaffolda estruturas Forge-SDD em segundos"
     license: MIT
     install: |
