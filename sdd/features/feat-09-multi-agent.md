@@ -3,7 +3,7 @@
 **Branch:** `feat/multi-agent`
 **Fase:** 9
 **Depende de:** `feat/npx` (mergeada)
-**Status:** `todo`
+**Status:** `done`
 
 ## Objetivo
 Suportar múltiplos agentes de IA no scaffolding: além do **GitHub Copilot** (atual), permitir escolher **Claude (Anthropic)** e **Gemini (Google)** — via formulário interativo ou flag `--agent`.

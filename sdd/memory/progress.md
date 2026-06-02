@@ -11,7 +11,7 @@ Fase 5 — Versioning           [x] done
 Fase 6 — Self-test            [x] done
 Fase 7 — Release              [x] done
 Fase 8 — npx                  [x] done
-Fase 9 — Multi-agent          [ ] todo
+Fase 9 — Multi-agent          [x] done
 Fase 10 — Landing page         [ ] todo
 ```
 
@@ -27,14 +27,15 @@ Fase 10 — Landing page         [ ] todo
 | feat-06-self-test | feat/self-test | done |
 | feat-07-release | feat/release | done |
 | feat-08-npx | feat/npx | done |
-| feat-09-multi-agent | feat/multi-agent | todo |
+| feat-09-multi-agent | feat/multi-agent | done |
 | feat-10-landing-page | feat/landing-page | todo |
 
 ## Próximo passo
-**Iniciar:** feat-09-multi-agent — suporte a Claude e Gemini via `--agent`
+**Iniciar:** feat-10-landing-page — página estática na Vercel
 **Bloqueios:** —
 
 ## Última sessão
+- 2026-06-01 — feat-09-multi-agent concluída: Claude, Gemini, MultiSelect, --agent flag, 4 testes
 - 2026-06-01 — feat-08-npx concluída: wrapper Node.js + npm-publish.yml + README atualizado
 - 2026-05-31 — feat-07-release concluída: .goreleaser.yaml v2, release.yml, 5 plat (linux/darwin/windows amd64+arm64), sem DEPRECATED.
 
