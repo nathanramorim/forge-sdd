@@ -88,11 +88,38 @@ forge-sdd init --yes --agent copilot,claude,gemini
 ```
 
 ### Agentes suportados
-| Agente | Flag | Estrutura de Comandos |
-|--------|------|-----------------------|
-| GitHub Copilot | `copilot` | `.github/chatmodes/` & `.github/prompts/` |
-| Claude | `claude` | `CLAUDE.md` & `.claude/commands/` |
-| Gemini | `gemini` | `GEMINI.md`, `.gemini/skills/` & `.gemini/prompts/` |
+
+Cada agente possui uma interface otimizada para a Metodologia SDD:
+
+| Agente | Flag | Estrutura de Comandos | Como Usar |
+|--------|------|-----------------------|-----------|
+| **GitHub Copilot** | `copilot` | `.github/chatmodes/` & `.github/prompts/` | Use `/` no chat (ex: `/status`) |
+| **Claude** | `claude` | `CLAUDE.md` & `.claude/commands/` | Mencione o comando (ex: `/revisar`) |
+| **Gemini** | `gemini` | `GEMINI.md`, `.gemini/skills/` & `.gemini/prompts/` | Peça o comando ou anexe a skill |
+
+---
+
+## Como interagir com os Agentes
+
+Após o `init`, você terá acesso a comandos poderosos que automatizam o fluxo de desenvolvimento.
+
+### 🤖 GitHub Copilot (VS Code Chat)
+O Copilot utiliza **Chatmodes** para definir o comportamento e **Prompts** para comandos rápidos.
+- **Modo Orquestrador:** "Ative o chatmode orquestrador para iniciar a sessão."
+- **Comandos Slash:**
+  - `/status` — Diagnóstico do projeto e progresso atual.
+  - `/proxima-feature` — Inicia automaticamente a próxima tarefa do `index.md`.
+  - `/revisar` — Chama o Revisor para validar o código contra o critério de conclusão.
+  - `/nova-feature "descrição"` — O Specifier cria os arquivos e atualiza o mapa.
+
+### ♊ Gemini (Google AI Studio / CLI)
+O Gemini utiliza **Skills** (carregadas automaticamente via `GEMINI.md`) e **Prompts** de referência.
+- **Interação:** Basta pedir ao Gemini para executar uma das tarefas definidas em `.gemini/prompts/`.
+- **Comandos Disponíveis:**
+  - `status.prompt.md` — Visão geral das fases e bloqueios.
+  - `proxima-feature.prompt.md` — Orquestração da próxima tarefa.
+  - `doctor.prompt.md` — Verifica integridade dos arquivos e budgets de tokens.
+  - `archive.prompt.md` — Limpa o `progress.md` e move histórico para o log.
 
 ---
 
