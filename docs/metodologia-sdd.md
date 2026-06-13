@@ -253,7 +253,20 @@ Toda sessão deve respeitar as travas automáticas por fase:
 
 ---
 
-## 10. Protocolo de paralelismo
+## 10. Protocolo de Handoff (Transição de Contexto)
+
+O Handoff é obrigatório ao final de cada fase para garantir que a inteligência gerada seja aproveitada pelo próximo agente:
+
+| Transição | Conteúdo do Handoff | Destino |
+|-----------|----------------------|---------|
+| **Discovery → Spec** | Resumo do produto, arquivos gerados em `discovery/` e riscos. | `/nova-feature` |
+| **Spec → Act** | Nome da branch, feature ID e tarefas prioritárias. | `/proxima-feature` |
+| **Act → Review** | Lista de arquivos alterados e pontos de atenção para testes. | `/revisar` |
+| **Sessão → Sessão** | Resumo do estado atual e bloqueios. | `progress.md` (Handoff Context) |
+
+---
+
+## 11. Protocolo de paralelismo
 
 Quando `index.md` declara janela de paralelismo (duas features sem dependência mútua):
 
@@ -315,9 +328,18 @@ Telemetria desabilitada (`.sddrc.telemetry.enabled = false`) → fase CLOSE pula
 - **H3:** Forge-SDD aumenta aderência ao critério em ≥25%
 - **H4:** Forge-SDD reduz drift de contexto em ≥60%
 
+## 12. Visualização Arquitetural (C4 Model)
+
+O SDD utiliza o framework **C4 Model** representado em **Mermaid** para documentar arquiteturas:
+
+1. **Nível 1 (Contexto):** Flowcharts (`graph TB`) para interações macro.
+2. **Nível 2 (Container):** Flowcharts para detalhar aplicações e persistência.
+3. **Nível 3 (Componente):** Sequence Diagrams (`sequenceDiagram`) para fluxos de dados e interações temporais.
+4. **Nível 4 (Código):** Markdown estruturado ou diagramas ER simplificados.
+
 ---
 
-## 12. Skills index
+## 13. Skills index
 
 `sdd/skills/index.md` é obrigatório. Builder consulta-o antes de carregar qualquer skill.
 
