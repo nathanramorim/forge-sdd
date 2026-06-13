@@ -51,6 +51,30 @@ Uma árvore de aproximadamente 40 arquivos baseada na **Metodologia Forge-SDD**,
 
 ---
 
+## Como interagir com os Agentes
+
+A Metodologia Forge-SDD v1.3.1 oferece **7 comandos universais** que funcionam de forma idêntica em todos os agentes suportados.
+
+### 🛠️ Comandos Universais (Prompts)
+
+| Comando | O que faz | Agente (Ativação) |
+|---------|-----------|-------------------|
+| `/status` | Diagnóstico rápido do progresso e fases. | Copilot, Claude, Gemini |
+| `/proxima-feature` | Inicia a próxima tarefa (cria branch, delega). | Copilot, Claude, Gemini |
+| `/nova-feature` | Specifier cria nova feature e atualiza índice. | Copilot, Claude, Gemini |
+| `/revisar` | Revisor valida código e critério de conclusão. | Copilot, Claude, Gemini |
+| `/doctor` | Check-up de integridade, MCPs e budgets. | Copilot, Claude, Gemini |
+| `/archive` | Compacta `progress.md` movendo para o log. | Copilot, Claude, Gemini |
+| `/upgrade-sdd` | Migra a estrutura para uma nova versão. | Copilot, Claude, Gemini |
+
+### ♊ Gemini (Google AI Studio / CLI)
+Peça pelo nome do comando ou `/comando` (ex: "rodar o status"). O Gemini carrega automaticamente suas habilidades de Orquestrador, Builder, etc., localizadas em `.gemini/`.
+
+### 🤖 GitHub Copilot (VS Code Chat)
+Use comandos slash diretamente no chat (ex: `/status`). Configuração em `.github/chatmodes/` e `.github/prompts/`.
+
+---
+
 ## Links
 
 - [GitHub Repository](https://github.com/nathanramorim/forge-sdd)
