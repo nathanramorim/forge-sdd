@@ -1,10 +1,15 @@
 # forge-sdd
 
-CLI que scaffolda a estrutura **Forge-SDD** em qualquer projeto — pronta para uso com GitHub Copilot.
+[![NPM Version](https://img.shields.io/npm/v/@nathanramorim/forge-sdd)](https://www.npmjs.com/package/@nathanramorim/forge-sdd)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+CLI que scaffolda a estrutura **Forge-SDD** em qualquer projeto — pronta para uso com **GitHub Copilot, Claude e Gemini**.
+
+🚀 **Landing Page:** [forge-sdd.vercel.app](https://forge-sdd.vercel.app)
 
 ## O que ele gera
 
-Ao rodar `forge-sdd init`, o CLI cria **32 arquivos** divididos em três áreas:
+Ao rodar `forge-sdd init`, o CLI cria a árvore completa da **Metodologia SDD v1.1.0** (aprox. 40 arquivos):
 
 ```
 sdd/                          → memória e especificação do projeto
@@ -24,10 +29,12 @@ sdd/                          → memória e especificação do projeto
   .sddrc                      → config JSON do projeto
   .metrics/schema.json
 
-.github/
-  copilot-instructions.md     → instruções globais para o Copilot
-  chatmodes/                  → 6 modos de agente (orquestrador, builder, revisor…)
-  prompts/                    → 7 prompts reutilizáveis (status, proxima-feature…)
+# Agente Selecionado (Ex: Gemini)
+.gemini/
+  system_instructions.md
+  skills/*.chatmode.md        → 6 papéis (orquestrador, builder, revisor…)
+  prompts/*.prompt.md         → 7 comandos (status, proxima-feature…)
+GEMINI.md                     → Instruções de contexto
 
 .vscode/
   mcp.json                    → configuração dos MCPs (context7, git)
@@ -37,38 +44,15 @@ sdd/                          → memória e especificação do projeto
 
 ## Instalação
 
-### npx (sem instalação)
+### npx (recomendado)
 ```bash
-npx forge-sdd@latest init
+npx @nathanramorim/forge-sdd@latest init
 ```
-Funciona em qualquer máquina com Node.js ≥ 18. O binário Go é baixado automaticamente e cacheado em `~/.cache/forge-sdd/`.
+O binário Go é baixado automaticamente e cacheado em `~/.cache/forge-sdd/`.
 
 ### Homebrew
 ```bash
 brew install nathanramorim/forge-sdd/forge-sdd
-```
-
-### Download direto
-Baixe o binário para seu sistema em [Releases](../../releases):
-
-| Plataforma | Arquivo |
-|------------|---------|
-| macOS Apple Silicon | `forge-sdd_darwin_arm64.tar.gz` |
-| macOS Intel | `forge-sdd_darwin_amd64.tar.gz` |
-| Linux x86-64 | `forge-sdd_linux_amd64.tar.gz` |
-| Windows x86-64 | `forge-sdd_windows_amd64.zip` |
-
-```bash
-tar xzf forge-sdd_darwin_arm64.tar.gz
-sudo mv forge-sdd /usr/local/bin/
-```
-
-### Compilar do código-fonte
-```bash
-git clone https://github.com/forge-sdd/cli
-cd cli
-go build -ldflags "-X main.version=1.1.0" -o forge-sdd ./cmd/forge-sdd
-sudo mv forge-sdd /usr/local/bin/
 ```
 
 ---
@@ -80,62 +64,35 @@ sudo mv forge-sdd /usr/local/bin/
 cd meu-projeto
 forge-sdd init
 ```
-Apresenta um formulário no terminal com 6 campos:
+Apresenta um formulário no terminal para configurar:
 - **Nome do projeto**
-- **Stack principal** — go, node, python, rust, other
-- **Banco de dados** — postgres, sqlite, mongo, none
+- **Stack principal** (go, node, python, rust, other)
+- **Banco de dados** (postgres, sqlite, mongo, none)
 - **Agente(s) de IA** — GitHub Copilot, Claude, Gemini (multi-select)
-- **Telemetria local** — sim/não
-- **Idioma** — pt-BR ou en
+- **Telemetria local**
+- **Idioma** (pt-BR ou en)
 
 ### Modo não-interativo (`--yes`)
 ```bash
-# GitHub Copilot (default)
-forge-sdd init --yes --name meu-servico --stack go
-
-# Claude
-forge-sdd init --yes --agent claude --name meu-servico
-
-# Gemini
+# Gemini (Google)
 forge-sdd init --yes --agent gemini --name meu-servico
 
-# Múltiplos agentes
-forge-sdd init --yes --agent copilot,claude --name meu-servico
-```
-Pula todos os prompts e usa as flags passadas (o resto usa defaults).
+# Claude (Anthropic)
+forge-sdd init --yes --agent claude --name meu-servico
 
-### Flags disponíveis
-| Flag | Descrição | Default |
-|------|-----------|---------|
-| `--yes` | Pula prompts interativos | `false` |
-| `--name` | Nome do projeto | `meu-projeto` |
-| `--stack` | Stack principal | `go` |
-| `--db` | Banco de dados | `none` |
-| `--lang` | Idioma dos templates | `pt-BR` |
-| `--agent` | Agente(s) de IA: `copilot`, `claude`, `gemini` (csv) | `copilot` |
-| `--version` | Versão Forge-SDD | `1.1.0` |
-| `--no-telemetry` | Desabilita telemetria | `false` |
-| `--dry-run` | Lista arquivos sem criar | `false` |
+# GitHub Copilot
+forge-sdd init --yes --agent copilot --name meu-servico
+
+# Múltiplos agentes simultâneos
+forge-sdd init --yes --agent copilot,claude,gemini
+```
 
 ### Agentes suportados
-| Agente | Flag | Arquivos gerados |
-|--------|------|-----------------|
-| GitHub Copilot | `copilot` | `.github/copilot-instructions.md`, chatmodes, prompts |
-| Claude | `claude` | `CLAUDE.md`, `.claude/commands/*.md` |
-| Gemini | `gemini` | `GEMINI.md`, `.gemini/system_instructions.md` |
-
-### Dry-run (visualizar sem criar)
-```bash
-forge-sdd init --dry-run --yes
-# imprime [DRY] /caminho/do/arquivo para cada um dos 32 arquivos
-# nenhum arquivo é criado em disco
-```
-
-### Ver versão
-```bash
-forge-sdd version
-# → 1.1.0
-```
+| Agente | Flag | Estrutura de Comandos |
+|--------|------|-----------------------|
+| GitHub Copilot | `copilot` | `.github/chatmodes/` & `.github/prompts/` |
+| Claude | `claude` | `CLAUDE.md` & `.claude/commands/` |
+| Gemini | `gemini` | `GEMINI.md`, `.gemini/skills/` & `.gemini/prompts/` |
 
 ---
 
@@ -144,4 +101,14 @@ forge-sdd version
 1. Abra o projeto no **VS Code**
 2. Aceite as extensões recomendadas (Copilot, MCP)
 3. Leia `sdd/memory/progress.md` — é o ponto de entrada de cada sessão
-4. Configure o Copilot com o chatmode `orquestrador` para começar a primeira feature
+4. Use o comando `/status` no seu agente para ver o estado inicial do projeto.
+
+---
+
+## Contribuição
+
+Veja [CONTRIBUTING.md](CONTRIBUTING.md) para detalhes sobre como contribuir para o projeto.
+
+## Licença
+
+Distribuído sob a licença MIT. Veja `LICENSE` para mais informações.

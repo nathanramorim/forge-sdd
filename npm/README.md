@@ -1,94 +1,57 @@
-# forge-sdd
+# @nathanramorim/forge-sdd
 
-> CLI que scaffolda a estrutura **Forge-SDD** em qualquer projeto — pronta para uso com GitHub Copilot.
+> CLI que scaffolda a estrutura **Forge-SDD** v1.1.0 em segundos. Suporte total para **GitHub Copilot, Claude e Gemini**.
 
-## Uso rápido
+🚀 **Landing Page:** [forge-sdd.vercel.app](https://forge-sdd.vercel.app)
+
+## Uso rápido (npx)
 
 ```bash
-npx forge-sdd@latest init
+npx @nathanramorim/forge-sdd@latest init
 ```
 
-Apresenta um formulário interativo e cria **32 arquivos** com memória de projeto, spec, chatmodes, prompts e configuração de MCPs.
+Apresenta um formulário interativo e cria toda a infraestrutura de memória de projeto, especificações, agentes e MCPs.
 
 ---
 
 ## Requisitos
 
 - Node.js ≥ 18
-- Acesso à internet (primeiro uso baixa o binário ~5 MB)
-
-O binário Go é baixado automaticamente do GitHub Releases, validado por SHA256 e cacheado em `~/.cache/forge-sdd/`. Execuções seguintes são instantâneas.
+- O binário Go é baixado automaticamente e cacheado em `~/.cache/forge-sdd/`.
 
 ---
 
-## Opções
+## Opções CLI
 
 ```bash
 # Modo interativo (padrão)
-npx forge-sdd@latest init
+npx @nathanramorim/forge-sdd@latest init
 
-# Pular formulário, usar valores padrão
-npx forge-sdd@latest init --yes
+# Gemini (Google) - não interativo
+npx @nathanramorim/forge-sdd@latest init --yes --agent gemini
 
-# Especificar diretório destino
-npx forge-sdd@latest init /caminho/do/projeto
+# Claude (Anthropic)
+npx @nathanramorim/forge-sdd@latest init --yes --agent claude
 
 # Preview sem criar arquivos
-npx forge-sdd@latest init --yes --dry-run
-
-# Ver versão
-npx forge-sdd@latest version
+npx @nathanramorim/forge-sdd@latest init --yes --dry-run
 ```
 
 ---
 
 ## O que é gerado
 
-```
-sdd/                          → memória e especificação do projeto
-  memory/
-    progress.md               → estado ativo (leia primeiro a cada sessão)
-    constitution.md           → regras imutáveis do projeto
-    mcps.md                   → MCPs configurados
-    progress-log.md           → histórico de sessões
-  spec/
-    overview.md, stack.md, modules.md, flows.md, decisions.md
-  features/
-    feat-00-foundation.md
-    index.md
-  skills/index.md
-  plan.md, README.md
+Uma árvore de aproximadamente 40 arquivos baseada na **Metodologia Forge-SDD**, organizada para minimizar o consumo de tokens e maximizar a precisão da IA:
 
-.github/
-  copilot-instructions.md     → instruções globais para o Copilot
-  chatmodes/                  → 6 modos de agente (orquestrador, builder, revisor…)
-  prompts/                    → 7 prompts reutilizáveis
-
-.vscode/
-  mcp.json                    → configuração dos MCPs (context7, git)
-```
-
----
-
-## Instalação permanente (opcional)
-
-Se preferir ter o comando disponível globalmente sem `npx`:
-
-```bash
-npm install -g forge-sdd
-forge-sdd init
-```
-
-Ou via Homebrew (macOS/Linux):
-
-```bash
-brew install nathanramorim/forge-sdd/forge-sdd
-```
+- `sdd/memory/`: Estado ativo e histórico.
+- `sdd/spec/`: Especificação particionada (overview, stack, modules...).
+- `sdd/features/`: Roadmap e tarefas executáveis.
+- **Agentes:** Arquivos de instrução e comandos customizados para o agente escolhido.
+- `.vscode/mcp.json`: Integração com MCP (Context7, Git).
 
 ---
 
 ## Links
 
-- [Repositório do projeto](https://github.com/nathanramorim/homebrew-forge-sdd)
-- [Releases / Changelog](https://github.com/nathanramorim/homebrew-forge-sdd/releases)
-- [Metodologia Forge-SDD](https://github.com/nathanramorim/homebrew-forge-sdd#readme)
+- [GitHub Repository](https://github.com/nathanramorim/forge-sdd)
+- [Metodologia SDD](https://github.com/nathanramorim/forge-sdd#readme)
