@@ -253,7 +253,20 @@ Toda sessão deve respeitar as travas automáticas por fase:
 
 ---
 
-## 10. Protocolo de paralelismo
+## 10. Protocolo de Handoff (Transição de Contexto)
+
+O Handoff é obrigatório ao final de cada fase para garantir que a inteligência gerada seja aproveitada pelo próximo agente:
+
+| Transição | Conteúdo do Handoff | Destino |
+|-----------|----------------------|---------|
+| **Discovery → Spec** | Resumo do produto, arquivos gerados em `discovery/` e riscos. | `/nova-feature` |
+| **Spec → Act** | Nome da branch, feature ID e tarefas prioritárias. | `/proxima-feature` |
+| **Act → Review** | Lista de arquivos alterados e pontos de atenção para testes. | `/revisar` |
+| **Sessão → Sessão** | Resumo do estado atual e bloqueios. | `progress.md` (Handoff Context) |
+
+---
+
+## 11. Protocolo de paralelismo
 
 Quando `index.md` declara janela de paralelismo (duas features sem dependência mútua):
 
