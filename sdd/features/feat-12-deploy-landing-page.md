@@ -24,7 +24,7 @@ curl -I https://forge-sdd.vercel.app | grep "HTTP/2 200"
 
 ## Tarefas
 
-- [ ] **12-1** Atualizar `npm/package.json` para a versão estável atual (v1.3.0 ou superior)
+- [ ] **12-1** Atualizar `npm/package.json` para a versão estável atual (v1.3.1 ou superior)
 - [ ] **12-2** Revisar `.github/workflows/npm-publish.yml` para garantir que o deploy ocorra apenas em tags
 - [ ] **12-3** Finalizar o conteúdo da landing page em `site/` (SEO, links para npm e brew)
 - [ ] **12-4** Configurar o deploy na Vercel para monitorar apenas o diretório `site/` (se aplicável)
