@@ -9,7 +9,7 @@ CLI que scaffolda a estrutura **Forge-SDD** em qualquer projeto — pronta para 
 
 ## O que ele gera
 
-Ao rodar `forge-sdd init`, o CLI cria a árvore completa da **Metodologia SDD v1.3.2** (aprox. 40 arquivos):
+Ao rodar `forge-sdd init`, o CLI cria a árvore completa da **Metodologia SDD v1.3.3** (aprox. 40 arquivos):
 
 ```
 sdd/                          → memória e especificação do projeto
@@ -101,7 +101,7 @@ Cada agente possui uma interface otimizada para a Metodologia SDD:
 
 ## Como interagir com os Agentes
 
-A Metodologia Forge-SDD v1.3.2 oferece **7 comandos universais** que funcionam de forma idêntica em todos os agentes suportados.
+A Metodologia Forge-SDD v1.3.3 oferece **7 comandos universais** que funcionam de forma idêntica em todos os agentes suportados.
 
 ### 🛠️ Comandos Universais (Prompts)
 
@@ -114,6 +114,7 @@ A Metodologia Forge-SDD v1.3.2 oferece **7 comandos universais** que funcionam d
 | `/doctor` | Check-up de integridade, MCPs e budgets. | Copilot, Claude, Gemini |
 | `/archive` | Compacta `progress.md` movendo para o log. | Copilot, Claude, Gemini |
 | `/upgrade-sdd` | Migra a estrutura para uma nova versão. | Copilot, Claude, Gemini |
+| `/discovery` | Processo de Discovery (Produto + Engenharia Sênior). | Copilot, Claude, Gemini |
 
 ---
 

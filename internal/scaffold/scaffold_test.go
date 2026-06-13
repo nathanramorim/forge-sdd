@@ -58,7 +58,7 @@ func TestDryRunNoFiles(t *testing.T) {
 	dir := t.TempDir()
 	cfg := config.Config{
 		Project: "demo", Stack: "go", DB: "none",
-		Telemetry: false, Lang: "pt-BR", SddVersion: "1.3.2",
+		Telemetry: false, Lang: "pt-BR", SddVersion: "1.3.3",
 		Agents: []string{config.AgentCopilot},
 		DryRun: true,
 	}
@@ -79,7 +79,7 @@ func TestAgentClaude(t *testing.T) {
 	dir := t.TempDir()
 	cfg := config.Config{
 		Project: "demo", Stack: "go", DB: "none",
-		Telemetry: false, Lang: "pt-BR", SddVersion: "1.3.2",
+		Telemetry: false, Lang: "pt-BR", SddVersion: "1.3.3",
 		Agents: []string{config.AgentClaude},
 	}
 
@@ -107,7 +107,7 @@ func TestAgentGemini(t *testing.T) {
 	dir := t.TempDir()
 	cfg := config.Config{
 		Project: "demo", Stack: "node", DB: "postgres",
-		Telemetry: false, Lang: "pt-BR", SddVersion: "1.3.2",
+		Telemetry: false, Lang: "pt-BR", SddVersion: "1.3.3",
 		Agents: []string{config.AgentGemini},
 	}
 
@@ -128,7 +128,7 @@ func TestAgentMultiple(t *testing.T) {
 	dir := t.TempDir()
 	cfg := config.Config{
 		Project: "demo", Stack: "go", DB: "none",
-		Telemetry: false, Lang: "pt-BR", SddVersion: "1.3.2",
+		Telemetry: false, Lang: "pt-BR", SddVersion: "1.3.3",
 		Agents: []string{config.AgentCopilot, config.AgentClaude},
 	}
 

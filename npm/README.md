@@ -1,6 +1,6 @@
 # @nathanramorim/forge-sdd
 
-> CLI que scaffolda a estrutura **Forge-SDD** v1.3.2 em segundos. Suporte total para **GitHub Copilot, Claude e Gemini**.
+> CLI que scaffolda a estrutura **Forge-SDD** v1.3.3 em segundos. Suporte total para **GitHub Copilot, Claude e Gemini**.
 
 🚀 **Landing Page:** [forge-sdd.vercel.app](https://forge-sdd.vercel.app)
 
@@ -53,7 +53,7 @@ Uma árvore de aproximadamente 40 arquivos baseada na **Metodologia Forge-SDD**,
 
 ## Como interagir com os Agentes
 
-A Metodologia Forge-SDD v1.3.2 oferece **7 comandos universais** que funcionam de forma idêntica em todos os agentes suportados.
+A Metodologia Forge-SDD v1.3.3 oferece **7 comandos universais** que funcionam de forma idêntica em todos os agentes suportados.
 
 ### 🛠️ Comandos Universais (Prompts)
 

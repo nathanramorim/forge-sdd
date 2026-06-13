@@ -18,7 +18,7 @@ func TestScaffoldIntegration_Gemini(t *testing.T) {
 		DB:         "none",
 		Telemetry:  true,
 		Lang:       "pt-BR",
-		SddVersion: "1.3.2",
+		SddVersion: "1.3.3",
 		Agents:     []string{config.AgentGemini},
 	}
 
@@ -29,6 +29,7 @@ func TestScaffoldIntegration_Gemini(t *testing.T) {
 	// Árvore SDD básica
 	assert.FileExists(t, filepath.Join(dir, "sdd", ".sdd-version"))
 	assert.FileExists(t, filepath.Join(dir, "sdd", "memory", "progress.md"))
+	assert.DirExists(t, filepath.Join(dir, "sdd", "discovery"))
 	assert.FileExists(t, filepath.Join(dir, "sdd", ".metrics", "schema.json"))
 
 	// Configuração Gemini
