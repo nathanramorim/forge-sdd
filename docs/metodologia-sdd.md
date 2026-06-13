@@ -239,7 +239,20 @@ Aciona-se via `/upgrade-sdd <versão>`.
 
 ---
 
-## 9. Protocolo de paralelismo
+## 9. Protocolo de Guardrails (Segurança e Qualidade)
+
+Toda sessão deve respeitar as travas automáticas por fase:
+
+| Fase | Guardrail | Responsável | Ação em caso de falha |
+|------|-----------|-------------|----------------------|
+| **Plan** | Budget de `progress.md` (≤ 1 KB) | Orquestrador | Bloquear e exigir `/archive` |
+| **Act** | Validação Local (`go vet` / linter) | Builder | Corrigir antes de reportar conclusão |
+| **Review** | Escopo de Arquivos (Gerados vs Modificados) | Revisor | Rejeitar se houver drift de escopo |
+| **Close** | Registro de Telemetria (`.metrics/`) | Orquestrador | Gravar antes de encerrar sessão |
+
+---
+
+## 10. Protocolo de paralelismo
 
 Quando `index.md` declara janela de paralelismo (duas features sem dependência mútua):
 

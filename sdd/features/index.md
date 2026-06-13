@@ -18,6 +18,7 @@ main
                      └─ feat/npm-release-and-deploy
                         └─ feat/update-readmes-multiagent
                            └─ feat/discovery-command
+                              └─ feat/sdd-guardrails
                └─ feat/landing-page  (paralela)
 ```
 
@@ -43,3 +44,4 @@ Nenhuma — pipeline estritamente sequencial.
 | 12 | feat-12-deploy-landing-page.md | feat/npm-release-and-deploy | 12 | done |
 | 13 | feat-13-update-readmes-multiagent.md | feat/update-readmes-multiagent | 13 | done |
 | 14 | feat-14-discovery-command.md | feat/discovery-command | 14 | done |
+| 15 | feat-15-sdd-guardrails.md | feat/sdd-guardrails | 15 | todo |
