@@ -56,8 +56,8 @@ Uma árvore de aproximadamente 40 arquivos baseada na **Metodologia Forge-SDD**,
 ### 🆕 Trilha para Novos Projetos (Do Zero)
 1. `npx @nathanramorim/forge-sdd@latest init`
 2. `/constitution` → Define arquitetura e regras base.
-3. `/discovery "sua ideia"` → Estrutura produto e requisitos técnicos.
-4. `/nova-feature` → Mapeia o roadmap de tarefas.
+3. `/discovery "sua ideia"` → **Discovery de Produto:** Onde o agente define o "que" e o "para quem" será construído.
+4. `/nova-feature` → Mapeia o roadmap de tarefas baseado no discovery.
 5. `/proxima-feature` → Inicia a implementação.
 
 ### 🏗️ Trilha para Projetos Existentes (Adoção)
@@ -70,7 +70,7 @@ Uma árvore de aproximadamente 40 arquivos baseada na **Metodologia Forge-SDD**,
 
 ## Como interagir com os Agentes
 
-A Metodologia Forge-SDD v1.3.8 oferece **7 comandos universais** que funcionam de forma idêntica em todos os agentes suportados.
+A Metodologia Forge-SDD v1.3.9 oferece **7 comandos universais** que funcionam de forma idêntica em todos os agentes suportados.
 
 ### 🛠️ Comandos Universais (Prompts)
 
