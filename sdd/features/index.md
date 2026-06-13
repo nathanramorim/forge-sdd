@@ -16,6 +16,7 @@ main
                └─ feat/multi-agent
                   └─ feat/unify-agent-structures
                      └─ feat/npm-release-and-deploy
+                        └─ feat/update-readmes-multiagent
                └─ feat/landing-page  (paralela)
 ```
 
@@ -39,3 +40,4 @@ Nenhuma — pipeline estritamente sequencial.
 | 10 | feat-10-landing-page.md | feat/landing-page | 10 | todo |
 | 11 | feat-11-unify-agent-structures.md | feat/unify-agent-structures | 11 | done |
 | 12 | feat-12-deploy-landing-page.md | feat/npm-release-and-deploy | 12 | todo |
+| 13 | feat-13-update-readmes-multiagent.md | feat/update-readmes-multiagent | 13 | todo |
