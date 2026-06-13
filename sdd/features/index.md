@@ -20,6 +20,7 @@ main
                            └─ feat/discovery-command
                               └─ feat/sdd-guardrails
                            └─ feat/constitution-command
+                              └─ feat/unified-onboarding-docs
                └─ feat/landing-page  (paralela)
 ```
 
@@ -47,3 +48,4 @@ Nenhuma — pipeline estritamente sequencial.
 | 14 | feat-14-discovery-command.md | feat/discovery-command | 14 | done |
 | 15 | feat-15-sdd-guardrails.md | feat/sdd-guardrails | 15 | done |
 | 16 | feat-16-constitution-command.md | feat/constitution-command | 16 | done |
+| 17 | feat-17-unified-onboarding-docs.md | feat/unified-onboarding-docs | 17 | todo |
