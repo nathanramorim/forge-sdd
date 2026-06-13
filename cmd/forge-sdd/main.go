@@ -11,7 +11,7 @@ import (
 )
 
 // version é injetada via ldflags: -X main.version=1.4.2
-var version = "dev"
+var version = "1.4.2"
 
 var rootCmd = &cobra.Command{
 	Use:   "forge-sdd",

@@ -70,7 +70,7 @@ Uma árvore de aproximadamente 40 arquivos baseada na **Metodologia Forge-SDD**,
 
 ## Como interagir com os Agentes
 
-A Metodologia Forge-SDD v1.4.2 oferece **7 comandos universais** que funcionam de forma idêntica em todos os agentes suportados.
+A Metodologia Forge-SDD v1.4.2
 
 ### 🛠️ Comandos Universais (Prompts)
 
