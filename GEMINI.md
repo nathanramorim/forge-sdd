@@ -1,7 +1,7 @@
-# GEMINI.md — {{.Project}}
+# GEMINI.md — forge-sdd
 
 ## Contexto do projeto
-{{.Project}} — stack principal: {{.Stack}}.
+forge-sdd — CLI Go para scaffolding de estruturas SDD (Software Design Doc) v1.1.0.
 
 ## Lifecycle (todo agente)
 1. **READ-MIN:** ler `sdd/memory/progress.md`

@@ -92,10 +92,10 @@ func TestAgentClaude(t *testing.T) {
 	assert.FileExists(t, claudeMD, "CLAUDE.md deve ser criado para agente claude")
 
 	// deve ter commands
-	assert.FileExists(t, filepath.Join(dir, ".claude", "commands", "proxima-feature.md"))
-	assert.FileExists(t, filepath.Join(dir, ".claude", "commands", "nova-feature.md"))
-	assert.FileExists(t, filepath.Join(dir, ".claude", "commands", "status.md"))
-	assert.FileExists(t, filepath.Join(dir, ".claude", "commands", "revisar.md"))
+	assert.FileExists(t, filepath.Join(dir, ".claude", "commands", "proxima-feature.prompt.md"))
+	assert.FileExists(t, filepath.Join(dir, ".claude", "commands", "nova-feature.prompt.md"))
+	assert.FileExists(t, filepath.Join(dir, ".claude", "commands", "status.prompt.md"))
+	assert.FileExists(t, filepath.Join(dir, ".claude", "commands", "revisar.prompt.md"))
 
 	// NÃO deve ter copilot-instructions (copilot não foi selecionado)
 	assert.NoFileExists(t, filepath.Join(dir, ".github", "copilot-instructions.md"))
@@ -117,6 +117,8 @@ func TestAgentGemini(t *testing.T) {
 
 	assert.FileExists(t, filepath.Join(dir, "GEMINI.md"))
 	assert.FileExists(t, filepath.Join(dir, ".gemini", "system_instructions.md"))
+	assert.FileExists(t, filepath.Join(dir, ".gemini", "skills", "orquestrador.chatmode.md"))
+	assert.FileExists(t, filepath.Join(dir, ".gemini", "prompts", "status.prompt.md"))
 	assert.NoFileExists(t, filepath.Join(dir, ".github", "copilot-instructions.md"))
 
 	t.Logf("✓ agente gemini: %d arquivos criados", len(created))

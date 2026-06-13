@@ -14,6 +14,7 @@ main
                      └─ feat/release
             └─ feat/npx
                └─ feat/multi-agent
+                  └─ feat/unify-agent-structures
                └─ feat/landing-page  (paralela)
 ```
 
@@ -35,3 +36,4 @@ Nenhuma — pipeline estritamente sequencial.
 | 08 | feat-08-npx.md | feat/npx | 8 | done |
 | 09 | feat-09-multi-agent.md | feat/multi-agent | 9 | done |
 | 10 | feat-10-landing-page.md | feat/landing-page | 10 | todo |
+| 11 | feat-11-unify-agent-structures.md | feat/unify-agent-structures | 11 | done |

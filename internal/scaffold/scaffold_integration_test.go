@@ -2,41 +2,57 @@ package scaffold
 
 import (
 	"os"
-	"strings"
+	"path/filepath"
 	"testing"
+
 	"github.com/forge-sdd/cli/internal/config"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
-func TestRunIntegration(t *testing.T) {
+func TestScaffoldIntegration_Gemini(t *testing.T) {
 	dir := t.TempDir()
 	cfg := config.Config{
-		Project: "demo", Stack: "go", DB: "postgres",
-		Telemetry: true, Lang: "pt-BR", SddVersion: "1.1.0",
-	}
-	files, err := Run(cfg, dir)
-	if err != nil {
-		t.Fatalf("Run: %v", err)
-	}
-	if len(files) == 0 {
-		t.Fatal("nenhum arquivo criado")
-	}
-	t.Logf("✓ %d arquivos criados", len(files))
-
-	for _, f := range []string{
-		dir + "/sdd/memory/constitution.md",
-		dir + "/.github/copilot-instructions.md",
-		dir + "/.vscode/mcp.json",
-	} {
-		if _, e := os.Stat(f); e != nil {
-			t.Errorf("arquivo faltando: %s", f)
-		}
+		Project:    "integration-test",
+		Stack:      "go",
+		DB:         "none",
+		Telemetry:  true,
+		Lang:       "pt-BR",
+		SddVersion: "1.1.0",
+		Agents:     []string{config.AgentGemini},
 	}
 
-	data, err := os.ReadFile(dir + "/sdd/memory/constitution.md")
-	if err != nil {
-		t.Fatal(err)
+	created, err := Run(cfg, dir)
+	require.NoError(t, err)
+	require.NotEmpty(t, created)
+
+	// Árvore SDD básica
+	assert.FileExists(t, filepath.Join(dir, "sdd", ".sdd-version"))
+	assert.FileExists(t, filepath.Join(dir, "sdd", "memory", "progress.md"))
+	assert.FileExists(t, filepath.Join(dir, "sdd", ".metrics", "schema.json"))
+
+	// Configuração Gemini
+	assert.FileExists(t, filepath.Join(dir, "GEMINI.md"))
+	assert.FileExists(t, filepath.Join(dir, ".gemini", "system_instructions.md"))
+
+	// Skills (Chatmodes)
+	skills := []string{"orquestrador", "builder", "revisor", "archivist", "specifier", "migrator"}
+	for _, s := range skills {
+		assert.FileExists(t, filepath.Join(dir, ".gemini", "skills", s+".chatmode.md"))
 	}
-	if !strings.Contains(string(data), "demo") {
-		t.Error("'demo' não encontrado em constitution.md")
+
+	// Prompts
+	prompts := []string{"status", "proxima-feature", "nova-feature", "revisar", "archive", "doctor", "upgrade-sdd"}
+	for _, p := range prompts {
+		assert.FileExists(t, filepath.Join(dir, ".gemini", "prompts", p+".prompt.md"))
 	}
+
+	// VSCode / MCP
+	assert.FileExists(t, filepath.Join(dir, ".vscode", "mcp.json"))
+	
+	// Verificar conteúdo do mcp.json
+	data, err := os.ReadFile(filepath.Join(dir, ".vscode", "mcp.json"))
+	require.NoError(t, err)
+	assert.Contains(t, string(data), "context7")
+	assert.Contains(t, string(data), "git")
 }

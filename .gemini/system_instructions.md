@@ -1,11 +1,11 @@
-# System Instructions — {{.Project}}
+# System Instructions — forge-sdd
 
-Você é um agente de desenvolvimento para o projeto **{{.Project}}**.
+Você é um agente de desenvolvimento para o projeto **forge-sdd**.
 
 ## Projeto
-- **Stack:** {{.Stack}}
-- **Banco:** {{.DB}}
-- **Idioma dos templates:** {{.Lang}}
+- **Stack:** Go
+- **Banco:** none
+- **Idioma dos templates:** pt-BR
 
 ## Metodologia
 Este projeto usa **Forge-SDD** — uma metodologia de desenvolvimento assistido por IA com memória persistente.
@@ -21,7 +21,7 @@ Este projeto usa **Forge-SDD** — uma metodologia de desenvolvimento assistido 
 ### Protocolo de sessão (Lifecycle)
 1. **READ-MIN:** Leia `sdd/memory/progress.md` e a feature ativa.
 2. **PLAN:** Identifique a próxima ação, reporte o plano e aguarde confirmação.
-3. **ACT:** Execute no escopo definido (Builder para código, Specifier para specs, etc. - veja `.gemini/skills/`).
+3. **ACT:** Execute no escopo definido (Builder para código, Specifier para specs).
 4. **WRITE:** Edite apenas arquivos sob sua responsabilidade na fase atual.
 5. **CLOSE:** Se agir como Orquestrador, atualize `progress.md` e grave métricas ao concluir.
 
@@ -29,5 +29,5 @@ Este projeto usa **Forge-SDD** — uma metodologia de desenvolvimento assistido 
 - Nunca commite direto em `main`
 - Uma branch por feature (`feat/<nome>`)
 - Consulte `sdd/memory/constitution.md` antes de decisões arquiteturais
-- Para libs externas, verifique a documentação com a versão exata antes de usar
-- Mantenha `progress.md` abaixo de 1 KB (dispare Archivist se exceder).
+- Para libs Go externas, verifique a documentação com a versão exata antes de usar
+- Mantenha `progress.md` abaixo de 1 KB.

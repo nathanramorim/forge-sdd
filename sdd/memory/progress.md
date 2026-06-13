@@ -13,6 +13,7 @@ Fase 7 — Release              [x] done
 Fase 8 — npx                  [x] done
 Fase 9 — Multi-agent          [x] done
 Fase 10 — Landing page         [ ] todo
+Fase 11 — Unify agent structures [x] done
 ```
 
 ## Features ativas
@@ -29,12 +30,14 @@ Fase 10 — Landing page         [ ] todo
 | feat-08-npx | feat/npx | done |
 | feat-09-multi-agent | feat/multi-agent | done |
 | feat-10-landing-page | feat/landing-page | todo |
+| feat-11-unify-agent-structures | feat/unify-agent-structures | done |
 
 ## Próximo passo
 **Iniciar:** feat-10-landing-page — página estática na Vercel
 **Bloqueios:** —
 
 ## Última sessão
+- 2026-06-12 — feat-11-unify-agent-structures concluída: Unificação de nomenclatura (.chatmode.md, .prompt.md) entre Gemini, Claude e Copilot. Paridade de Lifecycle 1.1.0 e comandos em todos os templates. Teste de integração adicionado.
 - 2026-06-01 — feat-09-multi-agent concluída: Claude, Gemini, MultiSelect, --agent flag, 4 testes
 - 2026-06-01 — feat-08-npx concluída: wrapper Node.js + npm-publish.yml + README atualizado
 - 2026-05-31 — feat-07-release concluída: .goreleaser.yaml v2, release.yml, 5 plat (linux/darwin/windows amd64+arm64), sem DEPRECATED.
