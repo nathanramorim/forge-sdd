@@ -101,25 +101,36 @@ Cada agente possui uma interface otimizada para a Metodologia SDD:
 
 ## Como interagir com os Agentes
 
-Após o `init`, você terá acesso a comandos poderosos que automatizam o fluxo de desenvolvimento.
+A Metodologia Forge-SDD v1.3.0 oferece **7 comandos universais** que funcionam de forma idêntica em todos os agentes suportados.
+
+### 🛠️ Comandos Universais (Prompts)
+
+| Comando | O que faz | Agente (Ativação) |
+|---------|-----------|-------------------|
+| `/status` | Diagnóstico rápido do progresso e fases. | Copilot, Claude, Gemini |
+| `/proxima-feature` | Inicia a próxima tarefa (cria branch, delega). | Copilot, Claude, Gemini |
+| `/nova-feature` | Specifier cria nova feature e atualiza índice. | Copilot, Claude, Gemini |
+| `/revisar` | Revisor valida código e critério de conclusão. | Copilot, Claude, Gemini |
+| `/doctor` | Check-up de integridade, MCPs e budgets. | Copilot, Claude, Gemini |
+| `/archive` | Compacta `progress.md` movendo para o log. | Copilot, Claude, Gemini |
+| `/upgrade-sdd` | Migra a estrutura para uma nova versão. | Copilot, Claude, Gemini |
+
+---
 
 ### 🤖 GitHub Copilot (VS Code Chat)
-O Copilot utiliza **Chatmodes** para definir o comportamento e **Prompts** para comandos rápidos.
-- **Modo Orquestrador:** "Ative o chatmode orquestrador para iniciar a sessão."
-- **Comandos Slash:**
-  - `/status` — Diagnóstico do projeto e progresso atual.
-  - `/proxima-feature` — Inicia automaticamente a próxima tarefa do `index.md`.
-  - `/revisar` — Chama o Revisor para validar o código contra o critério de conclusão.
-  - `/nova-feature "descrição"` — O Specifier cria os arquivos e atualiza o mapa.
+- **Interface:** Use comandos slash diretamente no chat (ex: `/status`).
+- **Modos:** Você pode pedir explicitamente: *"Ative o chatmode orquestrador"* para gerenciar a sessão.
+- **Configuração:** Localizada em `.github/chatmodes/` e `.github/prompts/`.
 
-### ♊ Gemini (Google AI Studio / CLI)
-O Gemini utiliza **Skills** (carregadas automaticamente via `GEMINI.md`) e **Prompts** de referência.
-- **Interação:** Basta pedir ao Gemini para executar uma das tarefas definidas em `.gemini/prompts/`.
-- **Comandos Disponíveis:**
-  - `status.prompt.md` — Visão geral das fases e bloqueios.
-  - `proxima-feature.prompt.md` — Orquestração da próxima tarefa.
-  - `doctor.prompt.md` — Verifica integridade dos arquivos e budgets de tokens.
-  - `archive.prompt.md` — Limpa o `progress.md` e move histórico para o log.
+### ♊ Gemini (Google AI Studio / CLI / Code Assist)
+- **Interface:** Peça pelo nome do comando ou `/comando` (ex: "rodar o status").
+- **Skills:** O Gemini carrega automaticamente suas habilidades de Orquestrador, Builder, etc.
+- **Configuração:** Localizada em `.gemini/skills/` e `.gemini/prompts/`.
+
+### 📝 Claude (Claude.ai / Desktop / Dev)
+- **Interface:** Mencione o comando no chat (ex: `/revisar`).
+- **Comandos:** Segue as instruções em `CLAUDE.md`.
+- **Configuração:** Localizada em `.claude/commands/`.
 
 ---
 
