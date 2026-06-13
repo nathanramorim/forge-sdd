@@ -44,3 +44,4 @@ Se o usuário solicitar um comando (ex: `/status`), consulte a instrução em `.
 - `/doctor` -> `.gemini/prompts/doctor.prompt.md`
 - `/upgrade-sdd` -> `.gemini/prompts/upgrade-sdd.prompt.md`
 - `/discovery` -> `.gemini/prompts/discovery.prompt.md`
+- `/constitution` -> `.gemini/prompts/constitution.prompt.md`
