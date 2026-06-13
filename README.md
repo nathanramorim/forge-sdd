@@ -9,7 +9,7 @@ CLI que scaffolda a estrutura **Forge-SDD** em qualquer projeto — pronta para 
 
 ## O que ele gera
 
-Ao rodar `forge-sdd init`, o CLI cria a árvore completa da **Metodologia SDD v1.3.7** (aprox. 40 arquivos):
+Ao rodar `forge-sdd init`, o CLI cria a árvore completa da **Metodologia SDD v1.3.8** (aprox. 40 arquivos):
 
 ```
 sdd/                          → memória e especificação do projeto
@@ -99,9 +99,28 @@ Cada agente possui uma interface otimizada para a Metodologia SDD:
 
 ---
 
+## 🚀 Guia de Início Rápido
+
+Dependendo do seu cenário, siga uma das trilhas lógicas abaixo para extrair o máximo do SDD:
+
+### 🆕 Trilha para Novos Projetos (Do Zero)
+1. `npx @nathanramorim/forge-sdd@latest init`
+2. `/constitution` → Define arquitetura e regras base.
+3. `/discovery "sua ideia"` → Estrutura produto e requisitos técnicos.
+4. `/nova-feature` → Mapeia o roadmap de tarefas.
+5. `/proxima-feature` → Inicia a implementação.
+
+### 🏗️ Trilha para Projetos Existentes (Adoção)
+1. `npx @nathanramorim/forge-sdd@latest init --yes`
+2. `/constitution` → O agente faz o **scan do seu codebase** e aprende suas regras.
+3. `/status` → Sincroniza o estado atual do projeto.
+4. `/nova-feature` → Mapeia a próxima evolução ou correção necessária.
+
+---
+
 ## Como interagir com os Agentes
 
-A Metodologia Forge-SDD v1.3.7 oferece **7 comandos universais** que funcionam de forma idêntica em todos os agentes suportados.
+A Metodologia Forge-SDD v1.3.8 oferece **7 comandos universais** que funcionam de forma idêntica em todos os agentes suportados.
 
 ### 🛠️ Comandos Universais (Prompts)
 
