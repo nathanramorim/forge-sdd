@@ -1,6 +1,6 @@
 # @nathanramorim/forge-sdd
 
-> CLI que scaffolda a estrutura **Forge-SDD** v1.1.0 em segundos. Suporte total para **GitHub Copilot, Claude e Gemini**.
+> CLI que scaffolda a estrutura **Forge-SDD** v1.3.0 em segundos. Suporte total para **GitHub Copilot, Claude e Gemini**.
 
 🚀 **Landing Page:** [forge-sdd.vercel.app](https://forge-sdd.vercel.app)
 

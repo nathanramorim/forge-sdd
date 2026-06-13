@@ -9,7 +9,7 @@ CLI que scaffolda a estrutura **Forge-SDD** em qualquer projeto — pronta para 
 
 ## O que ele gera
 
-Ao rodar `forge-sdd init`, o CLI cria a árvore completa da **Metodologia SDD v1.1.0** (aprox. 40 arquivos):
+Ao rodar `forge-sdd init`, o CLI cria a árvore completa da **Metodologia SDD v1.3.0** (aprox. 40 arquivos):
 
 ```
 sdd/                          → memória e especificação do projeto
