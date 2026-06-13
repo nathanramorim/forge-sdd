@@ -1,6 +1,6 @@
 # @nathanramorim/forge-sdd
 
-> CLI que scaffolda a estrutura **Forge-SDD** v1.3.3 em segundos. Suporte total para **GitHub Copilot, Claude e Gemini**.
+> CLI que scaffolda a estrutura **Forge-SDD** v1.4.2 em segundos. Suporte total para **GitHub Copilot, Claude e Gemini**.
 
 🚀 **Landing Page:** [forge-sdd.vercel.app](https://forge-sdd.vercel.app)
 
@@ -70,7 +70,7 @@ Uma árvore de aproximadamente 40 arquivos baseada na **Metodologia Forge-SDD**,
 
 ## Como interagir com os Agentes
 
-A Metodologia Forge-SDD v1.4.1 oferece **7 comandos universais** que funcionam de forma idêntica em todos os agentes suportados.
+A Metodologia Forge-SDD v1.4.2 oferece **7 comandos universais** que funcionam de forma idêntica em todos os agentes suportados.
 
 ### 🛠️ Comandos Universais (Prompts)
 
@@ -83,7 +83,9 @@ A Metodologia Forge-SDD v1.4.1 oferece **7 comandos universais** que funcionam d
 | `/doctor` | Check-up de integridade, MCPs e budgets. | Copilot, Claude, Gemini |
 | `/archive` | Compacta `progress.md` movendo para o log. | Copilot, Claude, Gemini |
 | `/upgrade-sdd` | Migra a estrutura para uma nova versão. | Copilot, Claude, Gemini |
-| /discovery | Processo de Discovery (Produto + Engenharia Sênior). | Copilot, Claude, Gemini |
+| `/discovery` | Processo de Discovery (Produto + Engenharia Sênior). | Copilot, Claude, Gemini |
+| `/c4-architecture` | Gera diagramas C4 Model em Mermaid. | Copilot, Claude, Gemini |
+
 ### ♊ Gemini (Google AI Studio / CLI)
 Peça pelo nome do comando ou `/comando` (ex: "rodar o status"). O Gemini carrega automaticamente suas habilidades de Orquestrador, Builder, etc., localizadas em `.gemini/`.
 

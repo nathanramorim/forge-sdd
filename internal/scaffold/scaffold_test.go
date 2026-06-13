@@ -58,7 +58,7 @@ func TestDryRunNoFiles(t *testing.T) {
 	dir := t.TempDir()
 	cfg := config.Config{
 		Project: "demo", Stack: "go", DB: "none",
-		Telemetry: false, Lang: "pt-BR", SddVersion: "1.3.3",
+		Telemetry: false, Lang: "pt-BR", SddVersion: "1.4.2",
 		Agents: []string{config.AgentCopilot},
 		DryRun: true,
 	}
@@ -79,7 +79,7 @@ func TestAgentClaude(t *testing.T) {
 	dir := t.TempDir()
 	cfg := config.Config{
 		Project: "demo", Stack: "go", DB: "none",
-		Telemetry: false, Lang: "pt-BR", SddVersion: "1.3.3",
+		Telemetry: false, Lang: "pt-BR", SddVersion: "1.4.2",
 		Agents: []string{config.AgentClaude},
 	}
 
@@ -107,7 +107,7 @@ func TestAgentGemini(t *testing.T) {
 	dir := t.TempDir()
 	cfg := config.Config{
 		Project: "demo", Stack: "node", DB: "postgres",
-		Telemetry: false, Lang: "pt-BR", SddVersion: "1.3.3",
+		Telemetry: false, Lang: "pt-BR", SddVersion: "1.4.2",
 		Agents: []string{config.AgentGemini},
 	}
 
@@ -118,7 +118,9 @@ func TestAgentGemini(t *testing.T) {
 	assert.FileExists(t, filepath.Join(dir, "GEMINI.md"))
 	assert.FileExists(t, filepath.Join(dir, ".gemini", "system_instructions.md"))
 	assert.FileExists(t, filepath.Join(dir, ".gemini", "skills", "orquestrador.chatmode.md"))
+	assert.FileExists(t, filepath.Join(dir, ".gemini", "skills", "c4-architecture.chatmode.md"))
 	assert.FileExists(t, filepath.Join(dir, ".gemini", "prompts", "status.prompt.md"))
+	assert.FileExists(t, filepath.Join(dir, ".gemini", "prompts", "c4-architecture.prompt.md"))
 	assert.NoFileExists(t, filepath.Join(dir, ".github", "copilot-instructions.md"))
 
 	t.Logf("✓ agente gemini: %d arquivos criados", len(created))
@@ -128,7 +130,7 @@ func TestAgentMultiple(t *testing.T) {
 	dir := t.TempDir()
 	cfg := config.Config{
 		Project: "demo", Stack: "go", DB: "none",
-		Telemetry: false, Lang: "pt-BR", SddVersion: "1.3.3",
+		Telemetry: false, Lang: "pt-BR", SddVersion: "1.4.2",
 		Agents: []string{config.AgentCopilot, config.AgentClaude},
 	}
 

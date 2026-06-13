@@ -9,7 +9,7 @@ CLI que scaffolda a estrutura **Forge-SDD** em qualquer projeto — pronta para 
 
 ## O que ele gera
 
-Ao rodar `forge-sdd init`, o CLI cria a árvore completa da **Metodologia SDD v1.4.1** (aprox. 40 arquivos):
+Ao rodar `forge-sdd init`, o CLI cria a árvore completa da **Metodologia SDD v1.4.2** (aprox. 40 arquivos):
 
 ```
 sdd/                          → memória e especificação do projeto
@@ -120,7 +120,7 @@ Dependendo do seu cenário, siga uma das trilhas lógicas abaixo para extrair o 
 
 ## Como interagir com os Agentes
 
-A Metodologia Forge-SDD v1.4.1 oferece **7 comandos universais** que funcionam de forma idêntica em todos os agentes suportados.
+A Metodologia Forge-SDD v1.4.2 oferece **7 comandos universais** que funcionam de forma idêntica em todos os agentes suportados.
 
 ### 🛠️ Comandos Universais (Prompts)
 
@@ -135,6 +135,7 @@ A Metodologia Forge-SDD v1.4.1 oferece **7 comandos universais** que funcionam d
 | `/upgrade-sdd` | Migra a estrutura para uma nova versão. | Copilot, Claude, Gemini |
 | `/discovery` | Processo de Discovery (Produto + Engenharia Sênior). | Copilot, Claude, Gemini |
 | `/constitution` | Analisa codebase e alinha arquitetura/regras no SDD. | Copilot, Claude, Gemini |
+| `/c4-architecture` | Gera diagramas C4 Model (Contexto, Container, Seq) em Mermaid. | Copilot, Claude, Gemini |
 
 ---
 

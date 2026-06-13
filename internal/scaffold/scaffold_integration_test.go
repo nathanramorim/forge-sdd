@@ -18,7 +18,7 @@ func TestScaffoldIntegration_Gemini(t *testing.T) {
 		DB:         "none",
 		Telemetry:  true,
 		Lang:       "pt-BR",
-		SddVersion: "1.3.3",
+		SddVersion: "1.4.2",
 		Agents:     []string{config.AgentGemini},
 	}
 
@@ -37,13 +37,13 @@ func TestScaffoldIntegration_Gemini(t *testing.T) {
 	assert.FileExists(t, filepath.Join(dir, ".gemini", "system_instructions.md"))
 
 	// Skills (Chatmodes)
-	skills := []string{"orquestrador", "builder", "revisor", "archivist", "specifier", "migrator"}
+	skills := []string{"orquestrador", "builder", "revisor", "archivist", "specifier", "migrator", "c4-architecture"}
 	for _, s := range skills {
 		assert.FileExists(t, filepath.Join(dir, ".gemini", "skills", s+".chatmode.md"))
 	}
 
 	// Prompts
-	prompts := []string{"status", "proxima-feature", "nova-feature", "revisar", "archive", "doctor", "upgrade-sdd"}
+	prompts := []string{"status", "proxima-feature", "nova-feature", "revisar", "archive", "doctor", "upgrade-sdd", "discovery", "constitution", "c4-architecture"}
 	for _, p := range prompts {
 		assert.FileExists(t, filepath.Join(dir, ".gemini", "prompts", p+".prompt.md"))
 	}
