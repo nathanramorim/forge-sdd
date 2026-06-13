@@ -15,6 +15,7 @@ Fase 9 — Multi-agent          [x] done
 Fase 10 — Landing page         [ ] todo
 Fase 11 — Unify agent structures [x] done
 Fase 14 — Discovery command        [x] done
+Fase 16 — Constitution command     [x] done
 ```
 
 ## Features ativas
@@ -33,12 +34,14 @@ Fase 14 — Discovery command        [x] done
 | feat-10-landing-page | feat/landing-page | todo |
 | feat-11-unify-agent-structures | feat/unify-agent-structures | done |
 | feat-14-discovery-command | feat/discovery-command | done |
+| feat-16-constitution-command | feat/constitution-command | done |
 
 ## Próximo passo
 **Iniciar:** feat-10-landing-page — página estática na Vercel
 **Bloqueios:** —
 
 ## Última sessão
+- 2026-06-12 — feat-16-constitution-command concluída: Novo comando /constitution adicionado. Realiza scan do codebase para alinhar constitution.md e stack.md com a realidade técnica do projeto.
 - 2026-06-12 — feat-14-discovery-command concluída: Novo comando /discovery adicionado a todos os agentes. Gera artefatos de produto e critérios técnicos simulando personas sênior. Pasta sdd/discovery criada.
 - 2026-06-12 — feat-11-unify-agent-structures concluída: Unificação de nomenclatura (.chatmode.md, .prompt.md) entre Gemini, Claude e Copilot. Paridade de Lifecycle 1.1.0 e comandos em todos os templates. Teste de integração adicionado.
 - 2026-06-01 — feat-09-multi-agent concluída: Claude, Gemini, MultiSelect, --agent flag, 4 testes

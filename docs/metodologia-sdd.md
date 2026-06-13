@@ -236,6 +236,7 @@ Aciona-se via `/upgrade-sdd <versão>`.
 | `/doctor` | ask | Orquestrador | Health check (budgets, refs, MCPs) |
 | `/upgrade-sdd` | agent | Migrator | Migrar versão |
 | `/discovery` | agent | Specifier | Discovery (Produto + Eng Senior) |
+| `/constitution` | agent | Specifier | Architectural Alignment (Codebase Scan) |
 
 ---
 
