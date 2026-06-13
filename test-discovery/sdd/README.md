@@ -1,0 +1,31 @@
+# SDD — meu-projeto
+
+Navegação rápida:
+
+| Arquivo | Função |
+|---------|--------|
+| `memory/progress.md` | Estado ativo — leia primeiro |
+| `memory/constitution.md` | Regras imutáveis |
+| `spec/overview.md` | Visão geral do sistema |
+| `features/index.md` | Mapa de features |
+| `plan.md` | Roadmap faseado |
+| `skills/index.md` | Skills disponíveis |
+
+> Tutoriais: `HOWTO.md` | Métricas: `.metrics/`
+
+---
+
+## Metodologia Forge-SDD v1.3.3
+
+Este projeto utiliza a metodologia Forge-SDD para desenvolvimento assistido por IA.
+
+### Como começar
+1. **Leia** `memory/progress.md` para entender o estado atual.
+2. **Ative** o agente de IA correspondente (Copilot, Claude ou Gemini).
+3. **Use** os comandos/prompts disponíveis em `.github/prompts/`, `.claude/commands/` ou `.gemini/prompts/`.
+
+### Estrutura de Agentes
+- **Copilot:** Use os chatmodes em `.github/chatmodes/`.
+- **Claude:** Use os comandos em `.claude/commands/`.
+- **Gemini:** Use as skills em `.gemini/skills/`.
+
