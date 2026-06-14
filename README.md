@@ -137,6 +137,7 @@ A Metodologia Forge-SDD v1.4.3
 | `/constitution` | Analisa codebase e alinha arquitetura/regras no SDD. | Copilot, Claude, Gemini |
 | `/c4-architecture` | Gera diagramas C4 Model (Contexto, Container, Seq) em Mermaid. | Copilot, Claude, Gemini |
 | `/split-features` | Quebra um plano de discovery em múltiplas features independentes. | Copilot, Claude, Gemini |
+| `/install-skill` | Importa e adapta uma skill a partir de uma URL do GitHub/Raw. | Copilot, Claude, Gemini |
 
 ---
 
