@@ -86,6 +86,7 @@ A Metodologia Forge-SDD v1.4.3
 | `/discovery` | Processo de Discovery (Produto + Engenharia Sênior). | Copilot, Claude, Gemini |
 | `/c4-architecture` | Gera diagramas C4 Model em Mermaid. | Copilot, Claude, Gemini |
 | `/split-features` | Quebra um plano de discovery em múltiplas features. | Copilot, Claude, Gemini |
+| `/install-skill` | Instala uma skill via URL do GitHub/Raw. | Copilot, Claude, Gemini |
 
 ### ♊ Gemini (Google AI Studio / CLI)
 Peça pelo nome do comando ou por uma frase de ação (ex: "rodar o status" ou "iniciar próxima tarefa"). O Gemini carrega automaticamente suas habilidades de Orquestrador, Builder, etc., localizadas em `.gemini/`.
