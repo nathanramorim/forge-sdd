@@ -9,7 +9,7 @@ CLI que scaffolda a estrutura **Forge-SDD** em qualquer projeto — pronta para 
 
 ## O que ele gera
 
-Ao rodar `forge-sdd init`, o CLI cria a árvore completa da **Metodologia SDD v1.4.2
+Ao rodar `forge-sdd init`, o CLI cria a árvore completa da **Metodologia SDD v1.4.3
 
 ```
 sdd/                          → memória e especificação do projeto
@@ -120,7 +120,7 @@ Dependendo do seu cenário, siga uma das trilhas lógicas abaixo para extrair o 
 
 ## Como interagir com os Agentes
 
-A Metodologia Forge-SDD v1.4.2
+A Metodologia Forge-SDD v1.4.3
 
 ### 🛠️ Comandos Universais (Prompts)
 
@@ -145,7 +145,7 @@ A Metodologia Forge-SDD v1.4.2
 - **Configuração:** Localizada em `.github/chatmodes/` e `.github/prompts/`.
 
 ### ♊ Gemini (Google AI Studio / CLI / Code Assist)
-- **Interface:** Peça pelo nome do comando ou `/comando` (ex: "rodar o status").
+- **Interface:** Peça pelo nome do comando ou por uma frase de ação (ex: "rodar o status" ou "desenhar arquitetura").
 - **Skills:** O Gemini carrega automaticamente suas habilidades de Orquestrador, Builder, etc.
 - **Configuração:** Localizada em `.gemini/skills/` e `.gemini/prompts/`.
 

@@ -1,7 +1,7 @@
 # GEMINI.md — forge-sdd
 
 ## Contexto do projeto
-forge-sdd — CLI Go para scaffolding de estruturas SDD (Software Design Doc) v1.4.2.
+forge-sdd — CLI Go para scaffolding de estruturas SDD (Software Design Doc) v1.4.3.
 
 ## Lifecycle (todo agente)
 1. **READ-MIN:** ler `sdd/memory/progress.md`
@@ -36,14 +36,15 @@ Este projeto define papéis específicos em `.gemini/skills/`. Carregue a instru
 - **Architect:** `.gemini/skills/c4-architecture.chatmode.md`
 
 ## Prompts (Comandos)
-Se o usuário solicitar um comando (ex: `/status`), consulte a instrução em `.gemini/prompts/`:
-- `/status` -> `.gemini/prompts/status.prompt.md`
-- `/proxima-feature` -> `.gemini/prompts/proxima-feature.prompt.md`
-- `/nova-feature` -> `.gemini/prompts/nova-feature.prompt.md`
-- `/revisar` -> `.gemini/prompts/revisar.prompt.md`
-- `/archive` -> `.gemini/prompts/archive.prompt.md`
-- `/doctor` -> `.gemini/prompts/doctor.prompt.md`
-- `/upgrade-sdd` -> `.gemini/prompts/upgrade-sdd.prompt.md`
-- `/discovery` -> `.gemini/prompts/discovery.prompt.md`
-- `/constitution` -> `.gemini/prompts/constitution.prompt.md`
-- `/c4-architecture` -> `.gemini/prompts/c4-architecture.prompt.md`
+Para executar uma tarefa, peça pelo nome do comando ou utilize uma das frases de exemplo. Eu consultarei a instrução correspondente em `.gemini/prompts/`:
+
+- **Status:** "rodar o status", "qual o progresso?" → `status.prompt.md`
+- **Próxima Feature:** "iniciar próxima tarefa", "proxima-feature" → `proxima-feature.prompt.md`
+- **Nova Feature:** "criar nova feature [descrição]", "nova-feature" → `nova-feature.prompt.md`
+- **Revisar:** "validar feature", "rodar o revisar" → `revisar.prompt.md`
+- **Discovery:** "discovery [ideia]", "fazer discovery de..." → `discovery.prompt.md`
+- **Constitution:** "alinhar arquitetura", "rodar constitution" → `constitution.prompt.md`
+- **C4 Architecture:** "gerar diagrama C4", "desenhar arquitetura" → `c4-architecture.prompt.md`
+- **Doctor:** "check-up do projeto", "rodar doctor" → `doctor.prompt.md`
+- **Archive:** "limpar progresso", "rodar archive" → `archive.prompt.md`
+- **Upgrade:** "atualizar sdd para vX", "upgrade-sdd" → `upgrade-sdd.prompt.md`
