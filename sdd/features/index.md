@@ -23,6 +23,7 @@ main
                               └─ feat/unified-onboarding-docs
                                  └─ feat/sdd-handoffs
                                  └─ feat/c4-model-mermaid
+                                    └─ feat/advanced-discovery-and-c4-refinement
                                  └─ feat/landing-page  (paralela)
                                  ```
 
@@ -53,3 +54,5 @@ main
                                  | 17 | feat-17-unified-onboarding-docs.md | feat/unified-onboarding-docs | 17 | done |
                                  | 18 | feat-18-sdd-handoffs.md | feat/sdd-handoffs | 18 | done |
                                  | 19 | feat-19-c4-model-mermaid.md | feat/c4-model-mermaid | 19 | done |
+                                 | 20 | feat-20-advanced-discovery-and-c4-refinement.md | feat/advanced-discovery-and-c4-refinement | 20 | todo |
+
