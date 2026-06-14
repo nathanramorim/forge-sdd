@@ -20,4 +20,6 @@
 |---|---------|
 | D10 | [ ] Suportar `--lang en` com templates em inglês? Duplicar templates ou sistema de i18n? |
 | D11 | [ ] `forge-sdd init` em diretório não-vazio: bloquear tudo ou listar conflitos e continuar? |
-| D12 | [ ] Embutir versão da metodologia no binário via `ldflags` ou constante em `internal/config`? |
+| D12 | Embutir versão da metodologia no binário via `ldflags` ou constante em `internal/config`? |
+| D13 | Configurações de MCP | Separadas por agente (`.gemini/`, `.vscode/`, etc.) | Cada agente possui formas distintas de gerenciar MCPs e habilidades. |
+

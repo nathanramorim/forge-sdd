@@ -38,14 +38,18 @@ Fase 18 — SDD Handoff Protocol     [x] done
 | feat-14-discovery-command | feat/discovery-command | done |
 | feat-16-constitution-command | feat/constitution-command | done |
 | feat-17-unified-onboarding-docs | feat/unified-onboarding-docs | done |
-| feat-18-sdd-handoffs | feat/sdd-handoffs | done |
+| feat-21-install-skill-from-url | feat/install-skill-from-url | done |
+| feat-22-smart-upgrade-detection | feat/smart-upgrade-detection | done |
+| feat-23-agent-specific-mcp-config | feat/agent-specific-mcp-config | todo |
+| feat-24-automated-handoff-flow | feat/automated-handoff-flow | todo |
 
 ## Próximo passo
-**Iniciar:** feat-10-landing-page — página estática na Vercel
+**Iniciar:** feat-23-agent-specific-mcp-config — Separar configurações de MCP por agente.
 **Bloqueios:** —
 
 ## Handoff da última sessão
-- Protocolo de Handoff (§10) implementado em todos os prompts. Próximo passo: evoluir a Landing Page para refletir essas mudanças de processo.
+- Nova feature `feat-23-agent-specific-mcp-config` criada para resolver a centralização indevida de configurações de MCP no VS Code para agentes não-VS Code (Gemini, Claude).
+- Próximo passo: Pesquisar e implementar a separação de templates de MCP.
 
 ## Última sessão
 - 2026-06-12 — feat-18-sdd-handoffs concluída: Formalizado o Protocolo de Handoff entre fases (Discovery, Spec, Act, Review). Campo Handoff Context adicionado ao progress.md para persistência de memória.

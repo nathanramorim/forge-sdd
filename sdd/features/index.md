@@ -26,6 +26,8 @@ main
                                     └─ feat/advanced-discovery-and-c4-refinement
                                        └─ feat/install-skill-from-url
                                           └─ feat/smart-upgrade-detection
+                                          └─ feat/agent-specific-mcp-config
+                                          └─ feat/automated-handoff-flow
                                        └─ feat/landing-page  (paralela)
                                        ```
 
@@ -59,6 +61,8 @@ main
                                        | 20 | feat-20-advanced-discovery-and-c4-refinement.md | feat/advanced-discovery-and-c4-refinement | 20 | done |
                                        | 21 | feat-21-install-skill-from-url.md | feat/install-skill-from-url | 21 | done |
                                        | 22 | feat-22-smart-upgrade-detection.md | feat/smart-upgrade-detection | 22 | done |
+                                       | 23 | feat-23-agent-specific-mcp-config.md | feat/agent-specific-mcp-config | 23 | todo |
+                                       | 24 | feat-24-automated-handoff-flow.md | feat/automated-handoff-flow | 24 | todo |
 
 
 
