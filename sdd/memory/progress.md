@@ -44,6 +44,7 @@ Fase 18 — SDD Handoff Protocol     [x] done
 | feat-24-automated-handoff-flow | feat/automated-handoff-flow | todo |
 | feat-25-openai-codex-adaptation | feat/openai-codex-adaptation | todo |
 | feat-26-open-source-readme | feat/open-source-readme | done |
+| feat-27-upgrade-node-ci | feat/upgrade-node-ci | todo |
 
 ## Próximo passo
 **Iniciar:** feat-23-agent-specific-mcp-config — Separar configurações de MCP por agente.

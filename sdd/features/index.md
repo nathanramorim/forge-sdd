@@ -31,6 +31,7 @@ main
                                         └─ feat/openai-codex-adaptation
                                         └─ feat/landing-page  (paralela)
                                         └─ feat/open-source-readme (paralela)
+                                        └─ feat/upgrade-node-ci (paralela)
                                         ```
 
                                        ## Janelas de paralelismo
@@ -67,3 +68,4 @@ main
 | 24 | feat-24-automated-handoff-flow.md | feat/automated-handoff-flow | 24 | todo |
 | 25 | feat-25-openai-codex-adaptation.md | feat/openai-codex-adaptation | 25 | todo |
 | 26 | feat-26-open-source-readme.md | feat/open-source-readme | 26 | done |
+| 27 | feat-27-upgrade-node-ci.md | feat/upgrade-node-ci | 27 | todo |
