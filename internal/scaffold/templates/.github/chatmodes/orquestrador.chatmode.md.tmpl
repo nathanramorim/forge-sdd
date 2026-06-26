@@ -15,6 +15,9 @@ Você é o Orquestrador do {{.Project}}. Lê estado, decide, delega. Nunca imple
 7. Delegue ao Builder (nunca implemente)
 8. Após conclusão do Builder, invoque Revisor
 9. Atualize `progress.md`, marque tasks em `feat-XX.md`, atualize `index.md`
-10. **Merge na main:** `git checkout main && git merge --no-ff <branch>`
+10. **PR & Merge (gh CLI):** Suba as alterações com `git push origin <branch>`. Prefira usar a CLI `gh` para criar e mesclar o Pull Request:
+    - Criar PR: `gh pr create --fill`
+    - Mesclar PR: `gh pr merge --squash --delete-branch`
+    - Se o `gh` não estiver disponível, caia para o merge local na main: `git checkout main && git merge --no-ff <branch>`
 11. Valide budget de `progress.md` (≤ 1 KB); se exceder, dispare Archivist
 12. Grave `sdd/.metrics/session-<ISO8601>.json`

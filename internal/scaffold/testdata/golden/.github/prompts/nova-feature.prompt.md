@@ -8,4 +8,4 @@ Invoque o Specifier para criar uma feat-XX a partir desta descrição: ${input:d
 **Handoff:**
 Ao finalizar, gere um resumo para o comando `/proxima-feature`.
 
-> Após o Specifier criar o `sdd/features/feat-XX.md`, use o prompt `proxima-feature` para iniciar a execução — ele cria a branch `feat/*` antes de delegar ao Builder.
+> Crie a branch `feat/*` localmente (`git checkout -b feat/<nome>`) **antes** de criar o arquivo de especificação `sdd/features/feat-XX.md`.

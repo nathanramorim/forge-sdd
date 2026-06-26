@@ -3,7 +3,7 @@
 **Branch:** `feat/dev-flow-guide`
 **Fase:** 28
 **Depende de:** `feat-17-unified-onboarding-docs`
-**Status:** `todo`
+**Status:** `done`
 
 ## Objetivo
 Documentar e embutir no SDD um **Guia de Fluxo de Desenvolvimento**, ensinando ao desenvolvedor e aos agentes as regras de uso dos comandos e quando acioná-los:
@@ -23,13 +23,13 @@ grep -q "git checkout -b" .gemini/prompts/nova-feature.prompt.md
 ```
 
 ## Tarefas
-- [ ] **28-1** Criar `sdd/FLOW.md` com o Guia Completo de Fluxo de Desenvolvimento.
-- [ ] **28-2** Documentar os critérios de quebra de features (decoupling, incrementalidade, arquitetura evolutiva).
-- [ ] **28-3** Atualizar `.gemini/prompts/nova-feature.prompt.md` para criar a branch ANTES do arquivo `feat-XX.md`.
-- [ ] **28-4** Atualizar `.gemini/skills/orquestrador.chatmode.md` para preferir `gh` CLI em operações de PR/push.
-- [ ] **28-5** Atualizar `.gemini/skills/specifier.chatmode.md` para incluir a instrução de criação de branch antecipada.
-- [ ] **28-6** Propagar as alterações para os templates dos demais agentes (Copilot/Claude) em `internal/scaffold/templates/`.
-- [ ] **28-7** Atualizar golden tests (`go test ./internal/scaffold -update`).
+- [x] **28-1** Criar `sdd/FLOW.md` com o Guia Completo de Fluxo de Desenvolvimento.
+- [x] **28-2** Documentar os critérios de quebra de features (decoupling, incrementalidade, arquitetura evolutiva).
+- [x] **28-3** Atualizar `.gemini/prompts/nova-feature.prompt.md` para criar a branch ANTES do arquivo `feat-XX.md`.
+- [x] **28-4** Atualizar `.gemini/skills/orquestrador.chatmode.md` para preferir `gh` CLI em operações de PR/push.
+- [x] **28-5** Atualizar `.gemini/skills/specifier.chatmode.md` para incluir a instrução de criação de branch antecipada.
+- [x] **28-6** Propagar as alterações para os templates dos demais agentes (Copilot/Claude) em `internal/scaffold/templates/`.
+- [x] **28-7** Atualizar golden tests (`go test ./internal/scaffold -update`).
 
 ## Arquivos gerados/modificados
 ```
