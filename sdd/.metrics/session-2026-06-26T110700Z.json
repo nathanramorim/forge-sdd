@@ -1,0 +1,23 @@
+{
+  "$schema": "forge-sdd/metrics/1.0",
+  "feature": "feat-26-open-source-readme",
+  "phase": 26,
+  "agent_path": ["orquestrador", "specifier", "builder"],
+  "tokens_input": 0,
+  "tokens_output": 0,
+  "turns": 4,
+  "duration_seconds": 300,
+  "criterio_atendido": true,
+  "model": "Gemini 3.5 Flash (Medium)",
+  "rework_lines": 0,
+  "context7_calls": 0,
+  "git_calls": 4,
+  "files_touched": [
+    "README.md",
+    "sdd/features/feat-26-open-source-readme.md",
+    "sdd/features/index.md",
+    "sdd/memory/progress.md"
+  ],
+  "outcome": "approved",
+  "sdd_version": "1.5.2"
+}

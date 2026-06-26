@@ -100,3 +100,4 @@ Use comandos slash diretamente no chat (ex: `/status`). Configuração em `.gith
 
 - [GitHub Repository](https://github.com/nathanramorim/forge-sdd)
 - [Metodologia SDD](https://github.com/nathanramorim/forge-sdd#readme)
+
