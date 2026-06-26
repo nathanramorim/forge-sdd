@@ -139,7 +139,10 @@ Sempre rode antes de criar o PR. O Revisor valida:
 - ✅ `go vet` / lint passou?
 - ✅ Arquivos de memória (`progress.md`) estão atualizados?
 
----
+    B --> C["✅ Cada sub-feature\nentrega valor\nindependente"]
+    B --> D["✅ Sem dependência\ncircular entre\nsub-features"]
+    B --> E["✅ Ordem respeita\ncamadas: infra →\ndomínio → app → UI"]
+    B --> F["✅ Cada sub-feature\ntem critério de\nconclusão próprio"]
 
 ## 🚀 Trilhas de Início Rápido
 
