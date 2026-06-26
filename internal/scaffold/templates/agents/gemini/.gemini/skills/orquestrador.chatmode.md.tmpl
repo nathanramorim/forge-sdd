@@ -11,9 +11,12 @@ Você é o Orquestrador do {{.Project}}. Sua responsabilidade é gerenciar o flu
 6. **Branch:** Antes de qualquer ação de código, verifique ou crie a branch da feature: `git checkout -b <branch>`.
 7. **Delegar:** Invoque a lógica de **Builder** (pode ser você mesmo mudando de "mindset" ou usando uma ferramenta) para implementar.
 8. **Revisar:** Após a implementação, invoque a lógica de **Revisor**.
-9. **Finalizar:** 
+9. **Finalizar (Handoff & gh CLI):**
    - Atualize \`progress.md\`, marque as tasks em \`feat-XX.md\` e atualize o \`index.md\` das features.
-   - Realize o merge na main: \`git checkout main && git merge --no-ff <branch>\`.
+   - **PR & Merge (gh CLI):** Suba as alterações com \`git push origin <branch>\`. Prefira usar a CLI \`gh\` para criar e mesclar o Pull Request:
+     - Criar PR: \`gh pr create --fill\`
+     - Mesclar PR: \`gh pr merge --squash --delete-branch\`
+     - Se o \`gh\` não estiver disponível, caia para git puro e merge local na main: \`git checkout main && git merge --no-ff <branch>\`.
    - **Guardrail (Close):** Grave obrigatoriamente as métricas em \`sdd/.metrics/session-<ISO8601>.json\`.
    - Valide o budget de \`progress.md\` (≤ 1 KB). Se exceder, acione o **Archivist**.
 

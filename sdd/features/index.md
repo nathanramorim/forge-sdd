@@ -32,6 +32,7 @@ main
                                         └─ feat/landing-page  (paralela)
                                         └─ feat/open-source-readme (paralela)
                                         └─ feat/upgrade-node-ci (paralela)
+                                        └─ feat/dev-flow-guide (paralela)
                                         ```
 
                                        ## Janelas de paralelismo
@@ -69,3 +70,4 @@ main
 | 25 | feat-25-openai-codex-adaptation.md | feat/openai-codex-adaptation | 25 | todo |
 | 26 | feat-26-open-source-readme.md | feat/open-source-readme | 26 | done |
 | 27 | feat-27-upgrade-node-ci.md | feat/upgrade-node-ci | 27 | done |
+| 28 | feat-28-dev-flow-guide.md | feat/dev-flow-guide | 28 | done |
