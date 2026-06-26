@@ -28,8 +28,10 @@ main
                                           └─ feat/smart-upgrade-detection
                                           └─ feat/agent-specific-mcp-config
                                           └─ feat/automated-handoff-flow
-                                       └─ feat/landing-page  (paralela)
-                                       ```
+                                        └─ feat/openai-codex-adaptation
+                                        └─ feat/landing-page  (paralela)
+                                        └─ feat/open-source-readme (paralela)
+                                        ```
 
                                        ## Janelas de paralelismo
                                        Nenhuma — pipeline estritamente sequencial.
@@ -62,7 +64,6 @@ main
                                        | 21 | feat-21-install-skill-from-url.md | feat/install-skill-from-url | 21 | done |
                                        | 22 | feat-22-smart-upgrade-detection.md | feat/smart-upgrade-detection | 22 | done |
                                        | 23 | feat-23-agent-specific-mcp-config.md | feat/agent-specific-mcp-config | 23 | todo |
-                                       | 24 | feat-24-automated-handoff-flow.md | feat/automated-handoff-flow | 24 | todo |
-
-
-
+| 24 | feat-24-automated-handoff-flow.md | feat/automated-handoff-flow | 24 | todo |
+| 25 | feat-25-openai-codex-adaptation.md | feat/openai-codex-adaptation | 25 | todo |
+| 26 | feat-26-open-source-readme.md | feat/open-source-readme | 26 | done |

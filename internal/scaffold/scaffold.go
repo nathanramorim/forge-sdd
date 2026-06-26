@@ -37,6 +37,8 @@ func agentTemplateRoot(agent string) string {
 		return "templates/agents/claude"
 	case config.AgentGemini:
 		return "templates/agents/gemini"
+	case config.AgentOpenAI:
+		return "templates/agents/openai"
 	default:
 		return ""
 	}

@@ -52,6 +52,7 @@ func Run() (config.Config, error) {
 					huh.NewOption("GitHub Copilot", config.AgentCopilot).Selected(true),
 					huh.NewOption("Claude (Anthropic)", config.AgentClaude),
 					huh.NewOption("Gemini (Google)", config.AgentGemini),
+					huh.NewOption("OpenAI (GPT-4/Codex)", config.AgentOpenAI),
 				).
 				Value(&cfg.Agents).
 				Validate(func(v []string) error {

@@ -7,6 +7,18 @@ CLI que scaffolda a estrutura **Forge-SDD** em qualquer projeto — pronta para 
 
 🚀 **Landing Page:** [forge-sdd.vercel.app](https://forge-sdd.vercel.app)
 
+## Por que o forge-sdd? (Open Source)
+
+O **forge-sdd** nasceu para **mudar a dinâmica de desenvolvimento orientado a IA**. No cenário atual, com novas ideias, ferramentas e informações surgindo diariamente no ecossistema de inteligência artificial, manter a consistência e a velocidade do desenvolvimento pode ser um desafio. 
+
+Este projeto foi criado para resolver esses problemas através de quatro pilares fundamentais:
+- 🤖 **Controle de Fluxo com IA:** Fornece um framework estruturado de ciclos de desenvolvimento onde a IA atua de forma guiada e previsível (Orquestrador, Builder, Revisor).
+- 🧠 **Fim da Replicação de Instruções:** Chega de copiar e colar regras de arquitetura, preferências de estilo ou restrições do projeto a cada nova sessão de chat. O forge-sdd centraliza a memória técnica do projeto em arquivos locais (`progress.md`, `constitution.md`).
+- 🔄 **Padrões & Reutilização Incremental:** Garante que cada evolução do código siga padrões arquiteturais sólidos e que novas informações sejam agregadas de maneira incremental e reutilizável.
+- 🎓 **Expertise Sênior Integrada:** Injeta no ciclo de vida do projeto processos e metodologias com a maturidade de engenheiros de software seniores (fases de Discovery, especificações claras e revisões de código automatizadas).
+
+Como um projeto **Open Source** licenciado sob a licença MIT, o forge-sdd foi aberto para que a comunidade possa evoluir e adaptar o fluxo de scaffolding de SDDs para qualquer stack de desenvolvimento.
+
 ## O que ele gera
 
 Ao rodar `forge-sdd init`, o CLI cria a árvore completa da **Metodologia SDD v1.5.2

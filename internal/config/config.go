@@ -12,12 +12,14 @@ const (
 	AgentCopilot = "copilot"
 	AgentClaude  = "claude"
 	AgentGemini  = "gemini"
+	AgentOpenAI  = "openai"
 )
 
 var validAgents = map[string]bool{
 	AgentCopilot: true,
 	AgentClaude:  true,
 	AgentGemini:  true,
+	AgentOpenAI:  true,
 }
 
 // ParseAgents converte uma string csv ("copilot,claude") em []string validado.
@@ -31,7 +33,7 @@ func ParseAgents(csv string) ([]string, error) {
 	for _, p := range parts {
 		p = strings.TrimSpace(strings.ToLower(p))
 		if !validAgents[p] {
-			return nil, fmt.Errorf("agente desconhecido: %q (válidos: copilot, claude, gemini)", p)
+			return nil, fmt.Errorf("agente desconhecido: %q (válidos: copilot, claude, gemini, openai)", p)
 		}
 		if !seen[p] {
 			seen[p] = true

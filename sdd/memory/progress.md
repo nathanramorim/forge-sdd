@@ -42,6 +42,8 @@ Fase 18 — SDD Handoff Protocol     [x] done
 | feat-22-smart-upgrade-detection | feat/smart-upgrade-detection | done |
 | feat-23-agent-specific-mcp-config | feat/agent-specific-mcp-config | todo |
 | feat-24-automated-handoff-flow | feat/automated-handoff-flow | todo |
+| feat-25-openai-codex-adaptation | feat/openai-codex-adaptation | todo |
+| feat-26-open-source-readme | feat/open-source-readme | done |
 
 ## Próximo passo
 **Iniciar:** feat-23-agent-specific-mcp-config — Separar configurações de MCP por agente.
@@ -52,6 +54,7 @@ Fase 18 — SDD Handoff Protocol     [x] done
 - Próximo passo: Pesquisar e implementar a separação de templates de MCP.
 
 ## Última sessão
+- 2026-06-26 — feat-26-open-source-readme concluída: Atualizado o README.md do projeto para declarar o status de Open Source e documentar o propósito de facilitação e controle do desenvolvimento orientado a IA.
 - 2026-06-12 — feat-18-sdd-handoffs concluída: Formalizado o Protocolo de Handoff entre fases (Discovery, Spec, Act, Review). Campo Handoff Context adicionado ao progress.md para persistência de memória.
 - 2026-06-12 — feat-17-unified-onboarding-docs concluída: Criado o Guia de Início Rápido (Getting Started) com trilhas para projetos Novos e Existentes em todos os READMEs e no novo HOWTO.md template.
 - 2026-06-12 — feat-16-constitution-command concluída: Novo comando /constitution adicionado. Realiza scan do codebase para alinhar constitution.md e stack.md com a realidade técnica do projeto.
