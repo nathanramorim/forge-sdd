@@ -14,7 +14,9 @@ Fase 0 — Foundation   [ ] todo
 **Iniciar:** feat-00-foundation
 **Bloqueios:** —
 
-## Última sessão
+## Handoff da última sessão
 - Projeto criado via Forge-SDD CLI
+
+## Última sessão
 
 > Histórico completo em `progress-log.md`
