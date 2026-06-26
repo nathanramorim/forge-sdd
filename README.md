@@ -65,30 +65,21 @@ O Forge-SDD organiza o trabalho em ciclos curtos e incrementais. O diagrama abai
 
 ```mermaid
 flowchart TD
-    A([🚀 Início da Sessão]) --> B[/status\nEntende o estado atual]
-
-    B --> C{Existe feature\nem andamento?}
-
-    C -- Sim --> D[/proxima-feature\nRetoma a feature]
-    C -- Não --> E{Tenho uma\nideia nova?}
-
-    E -- Sim, preciso\nexplorar --> F[/discovery\nExplora produto\ne engenharia]
-    E -- Já sei o\nque fazer --> G[/nova-feature\nEspecifica e\ncria a branch]
-
-    F --> H{Feature ficou\nmuito grande?}
+    A([🚀 Início da Sessão]) --> B["/status<br/>Entende o estado atual"]
+    B --> C{"Existe feature<br/>em andamento?"}
+    C -- Sim --> D["/proxima-feature<br/>Retoma a feature"]
+    C -- Não --> E{"Tenho uma<br/>ideia nova?"}
+    E -- "Sim, preciso explorar" --> F["/discovery<br/>Explora produto<br/>e engenharia"]
+    E -- "Já sei o que fazer" --> G["/nova-feature<br/>Especifica e<br/>cria a branch"]
+    F --> H{"Feature ficou<br/>muito grande?"}
     G --> H
-
-    H -- Sim, mais\nde 7 tasks --> I[/split-features\nQuebra em\nfeat independentes]
+    H -- "Sim, mais de 7 tasks" --> I["/split-features<br/>Quebra em<br/>feats independentes"]
     H -- Não --> D
-
     I --> D
-
-    D --> J[🔨 Builder implementa]
-    J --> K[/revisar\nRevisor valida\ncritério de conclusão]
-
-    K -- Aprovado --> L[🔀 PR via gh cli\nMerge na main]
+    D --> J["🔨 Builder implementa"]
+    J --> K["/revisar<br/>Revisor valida<br/>critério de conclusão"]
+    K -- Aprovado --> L["🔀 PR via gh cli<br/>Merge na main"]
     K -- Reprovado --> J
-
     L --> M([🔁 Próximo ciclo])
 ```
 
