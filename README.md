@@ -22,11 +22,16 @@ O forge-sdd foi aberto para que a comunidade possa evoluir e adaptar o fluxo de 
 
 ---
 
-## Instalação
+## Instalação & Inicialização
+
+Você pode rodar o CLI sem instalação global (recomendado) ou instalá-lo via Homebrew. Durante a inicialização, você deve definir para quais agentes de IA deseja gerar a estrutura do SDD (Copilot, Gemini ou Claude):
 
 ```bash
-# Recomendado — sem instalação global
+# Inicialização interativa (permite escolher os agentes no menu)
 npx @nathanramorim/forge-sdd@latest init
+
+# Inicialização direta no diretório atual especificando os agentes
+npx @nathanramorim/forge-sdd@latest init . --agent copilot,gemini,claude --name meu-projeto
 
 # Via Homebrew
 brew install nathanramorim/forge-sdd/forge-sdd
@@ -65,30 +70,21 @@ O Forge-SDD organiza o trabalho em ciclos curtos e incrementais. O diagrama abai
 
 ```mermaid
 flowchart TD
-    A([🚀 Início da Sessão]) --> B[/status\nEntende o estado atual]
-
-    B --> C{Existe feature\nem andamento?}
-
-    C -- Sim --> D[/proxima-feature\nRetoma a feature]
-    C -- Não --> E{Tenho uma\nideia nova?}
-
-    E -- Sim, preciso\nexplorar --> F[/discovery\nExplora produto\ne engenharia]
-    E -- Já sei o\nque fazer --> G[/nova-feature\nEspecifica e\ncria a branch]
-
-    F --> H{Feature ficou\nmuito grande?}
+    A([🚀 Início da Sessão]) --> B["/status<br/>Entende o estado atual"]
+    B --> C{"Existe feature<br/>em andamento?"}
+    C -- Sim --> D["/proxima-feature<br/>Retoma a feature"]
+    C -- Não --> E{"Tenho uma<br/>ideia nova?"}
+    E -- "Sim, preciso explorar" --> F["/discovery<br/>Explora produto<br/>e engenharia"]
+    E -- "Já sei o que fazer" --> G["/nova-feature<br/>Especifica e<br/>cria a branch"]
+    F --> H{"Feature ficou<br/>muito grande?"}
     G --> H
-
-    H -- Sim, mais\nde 7 tasks --> I[/split-features\nQuebra em\nfeat independentes]
+    H -- "Sim, mais de 7 tasks" --> I["/split-features<br/>Quebra em<br/>feats independentes"]
     H -- Não --> D
-
     I --> D
-
-    D --> J[🔨 Builder implementa]
-    J --> K[/revisar\nRevisor valida\ncritério de conclusão]
-
-    K -- Aprovado --> L[🔀 PR via gh cli\nMerge na main]
+    D --> J["🔨 Builder implementa"]
+    J --> K["/revisar<br/>Revisor valida<br/>critério de conclusão"]
+    K -- Aprovado --> L["🔀 PR via gh cli<br/>Merge na main"]
     K -- Reprovado --> J
-
     L --> M([🔁 Próximo ciclo])
 ```
 
@@ -143,11 +139,16 @@ Sempre rode antes de criar o PR. O Revisor valida:
 - ✅ `go vet` / lint passou?
 - ✅ Arquivos de memória (`progress.md`) estão atualizados?
 
----
+    B --> C["✅ Cada sub-feature\nentrega valor\nindependente"]
+    B --> D["✅ Sem dependência\ncircular entre\nsub-features"]
+    B --> E["✅ Ordem respeita\ncamadas: infra →\ndomínio → app → UI"]
+    B --> F["✅ Cada sub-feature\ntem critério de\nconclusão próprio"]
 
 ## 🚀 Trilhas de Início Rápido
 
 ### 🆕 Projeto do Zero
+
+Ao iniciar um projeto do zero, você pode escolher quais agentes deseja configurar (Copilot, Gemini ou Claude). Use a flag `--agent` no `init` para configurar múltiplos agentes simultaneamente.
 
 ```mermaid
 flowchart LR
@@ -157,7 +158,7 @@ flowchart LR
     D --> E["/proxima-feature\nInicia a\nimplementação"]
 ```
 
-1. `npx @nathanramorim/forge-sdd@latest init`
+1. `npx @nathanramorim/forge-sdd@latest init` (especifique os agentes desejados como Copilot, Gemini ou Claude)
 2. `/constitution` → define arquitetura e regras base
 3. `/discovery "sua ideia"` → explora produto e engenharia
 4. `/nova-feature` → cria features do roadmap
@@ -165,16 +166,18 @@ flowchart LR
 
 ### 🏗️ Projeto Existente (Adoção)
 
+Para adotar a metodologia em um projeto existente sem alterar sua estrutura atual, inicialize diretamente no diretório corrente (`.`) e informe para quais agentes deseja gerar os arquivos (ex: `copilot`, `gemini`, `claude`):
+
 ```mermaid
 flowchart LR
-    A["npx forge-sdd init --yes"] --> B["/constitution\nScan do codebase\naprender as regras"]
+    A["npx forge-sdd init . --yes"] --> B["/constitution\nScan do codebase\naprender as regras"]
     B --> C["/status\nSincroniza\nestado atual"]
-    C --> D["/nova-feature\nMapeie a próxima\nevoluçõa"]
+    C --> D["/nova-feature\nMapeie a próxima\nevolução"]
 ```
 
-1. `npx @nathanramorim/forge-sdd@latest init --yes`
-2. `/constitution` → o agente escaneia seu codebase e aprende as regras
-3. `/status` → sincroniza o estado atual
+1. `npx @nathanramorim/forge-sdd@latest init . --yes` (especifique os agentes desejados via flags, ex: `--agent copilot,gemini`)
+2. `/constitution` → o agente escaneia seu codebase e aprende as regras do seu projeto
+3. `/status` → sincroniza o estado atual do progresso
 4. `/nova-feature` → mapeia a próxima evolução
 
 ---
