@@ -217,7 +217,7 @@ Aciona-se via `/archive` ou automaticamente quando `progress.md` > 1 KB.
 
 Aciona-se via `/upgrade-sdd <versão>`.
 
-- **Environment Detection:** Identifica o método de instalação (Homebrew vs NPX) para sugerir o comando de atualização do binário.
+- **Environment Detection:** Identifica se o binário está em cache do NPX para sugerir limpeza de cache (`rm -rf ~/.cache/forge-sdd`) ou reinstalação via `npx @nathanramorim/forge-sdd@latest`.
 - Lê `.sdd-version`
 - Aplica diff entre versões da metodologia (templates, novos arquivos, renames)
 - Atualiza `.sdd-version`

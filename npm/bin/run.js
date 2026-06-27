@@ -13,18 +13,18 @@ const zlib = require('zlib');
 // ─── helpers ──────────────────────────────────────────────────────────────────
 
 const VERSION = require('../package.json').version;
-const BASE_URL = `https://github.com/nathanramorim/homebrew-forge-sdd/releases/download/v${VERSION}`;
+const BASE_URL = `https://github.com/nathanramorim/forge-sdd/releases/download/v${VERSION}`;
 
 function platformAsset() {
   const plat = process.platform;
   const arch = process.arch;
 
   const map = {
-    'linux-x64':    { file: `homebrew-forge-sdd_linux_amd64.tar.gz`,   ext: 'tar.gz' },
-    'linux-arm64':  { file: `homebrew-forge-sdd_linux_arm64.tar.gz`,   ext: 'tar.gz' },
-    'darwin-x64':   { file: `homebrew-forge-sdd_darwin_amd64.tar.gz`,  ext: 'tar.gz' },
-    'darwin-arm64': { file: `homebrew-forge-sdd_darwin_arm64.tar.gz`,  ext: 'tar.gz' },
-    'win32-x64':    { file: `homebrew-forge-sdd_windows_amd64.zip`,    ext: 'zip'    },
+    'linux-x64':    { file: `forge-sdd_linux_amd64.tar.gz`,   ext: 'tar.gz' },
+    'linux-arm64':  { file: `forge-sdd_linux_arm64.tar.gz`,   ext: 'tar.gz' },
+    'darwin-x64':   { file: `forge-sdd_darwin_amd64.tar.gz`,  ext: 'tar.gz' },
+    'darwin-arm64': { file: `forge-sdd_darwin_arm64.tar.gz`,  ext: 'tar.gz' },
+    'win32-x64':    { file: `forge-sdd_windows_amd64.zip`,    ext: 'zip'    },
   };
 
   const key = `${plat}-${arch}`;
