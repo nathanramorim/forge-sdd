@@ -33,6 +33,7 @@ main
                                         └─ feat/open-source-readme (paralela)
                                         └─ feat/upgrade-node-ci (paralela)
                                         └─ feat/dev-flow-guide (paralela)
+                                           └─ feat/remove-homebrew
                                         ```
 
                                        ## Janelas de paralelismo
@@ -71,3 +72,4 @@ main
 | 26 | feat-26-open-source-readme.md | feat/open-source-readme | 26 | done |
 | 27 | feat-27-upgrade-node-ci.md | feat/upgrade-node-ci | 27 | done |
 | 28 | feat-28-dev-flow-guide.md | feat/dev-flow-guide | 28 | done |
+| 29 | feat-29-remove-homebrew.md | feat/remove-homebrew | 29 | done |

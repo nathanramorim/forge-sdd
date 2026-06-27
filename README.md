@@ -24,7 +24,7 @@ O forge-sdd foi aberto para que a comunidade possa evoluir e adaptar o fluxo de 
 
 ## Instalação & Inicialização
 
-Você pode rodar o CLI sem instalação global (recomendado) ou instalá-lo via Homebrew. Durante a inicialização, você deve definir para quais agentes de IA deseja gerar a estrutura do SDD (Copilot, Gemini ou Claude):
+Durante a inicialização, você deve definir para quais agentes de IA deseja gerar a estrutura do SDD (Copilot, Gemini ou Claude):
 
 ```bash
 # Inicialização interativa (permite escolher os agentes no menu)
@@ -32,9 +32,6 @@ npx @nathanramorim/forge-sdd@latest init
 
 # Inicialização direta no diretório atual especificando os agentes
 npx @nathanramorim/forge-sdd@latest init . --agent copilot,gemini,claude --name meu-projeto
-
-# Via Homebrew
-brew install nathanramorim/forge-sdd/forge-sdd
 ```
 
 ---

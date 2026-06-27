@@ -46,6 +46,7 @@ Fase 18 — SDD Handoff Protocol     [x] done
 | feat-26-open-source-readme | feat/open-source-readme | done |
 | feat-27-upgrade-node-ci | feat/upgrade-node-ci | done |
 | feat-28-dev-flow-guide | feat/dev-flow-guide | done |
+| feat-29-remove-homebrew | feat/remove-homebrew | done |
 
 ## Próximo passo
 **Iniciar:** feat-23-agent-specific-mcp-config — Separar configurações de MCP por agente.
