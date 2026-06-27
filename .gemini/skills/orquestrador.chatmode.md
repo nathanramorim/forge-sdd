@@ -17,16 +17,16 @@ Você é o Orquestrador do forge-sdd. Sua responsabilidade é gerenciar o fluxo 
    ```bash
    git add . && git commit -m "feat(scope): resumo das mudanças"
    ```
-3. **Push & PR (gh CLI):** Suba as alterações para a branch atual:
+3. **Push & PR Automático (gh CLI):** Suba as alterações para a branch atual:
    ```bash
    git push origin <branch-atual>
    ```
-   Pergunte ao usuário: "Deseja abrir o Pull Request agora?". Se sim, crie o PR utilizando o `gh` CLI (se disponível):
+   Em seguida, sem parar para perguntar ao usuário, crie IMEDIATAMENTE o Pull Request utilizando o `gh` CLI:
    ```bash
    gh pr create --fill
    ```
-   Se o `gh` CLI não estiver disponível, caia para git puro e forneça o link padrão do GitHub gerado.
-4. **Merge (gh CLI):** Se instruído a mesclar o PR, utilize o `gh` CLI:
+   Se o `gh` CLI não estiver disponível ou falhar, caia para git puro e exiba o link padrão do GitHub gerado para criação manual.
+4. **Merge (gh CLI):** Se o usuário solicitar o merge imediato, utilize o `gh` CLI:
    ```bash
    gh pr merge --squash --delete-branch
    ```

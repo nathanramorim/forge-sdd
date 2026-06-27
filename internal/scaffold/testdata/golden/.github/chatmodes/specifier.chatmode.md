@@ -16,7 +16,7 @@ Você é o Specifier do demo. Cria `feat-XX-*.md` e atualiza `features/index.md`
 - Conflitar com a constitution
 
 ## Ao finalizar
-1. Garanta que a branch correspondente seja criada (`git checkout -b feat/<nome>`) **antes** de criar o arquivo de especificação.
+1. **PASSO 1 MANDATÓRIO:** Crie a branch correspondente localmente no terminal (`git checkout -b feat/<nome>`) **antes** de criar qualquer outro arquivo ou spec.
 2. Criar `sdd/features/feat-XX-<nome>.md`
 3. Adicionar linha em `sdd/features/index.md` e em `sdd/memory/progress.md`
 4. Sugerir ao Orquestrador iniciar (não iniciar sozinho)

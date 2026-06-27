@@ -34,6 +34,7 @@ main
                                         └─ feat/upgrade-node-ci (paralela)
                                         └─ feat/dev-flow-guide (paralela)
                                            └─ feat/remove-homebrew
+                                              └─ feat/fix-branch-pr-flow
                                         ```
 
                                        ## Janelas de paralelismo
@@ -53,7 +54,7 @@ main
                                        | 07 | feat-07-release.md | feat/release | 7 | done |
                                        | 08 | feat-08-npx.md | feat/npx | 8 | done |
                                        | 09 | feat-09-multi-agent.md | feat/multi-agent | 9 | done |
-                                       | 10 | feat-10-landing-page.md | feat/landing-page | 10 | todo |
+                                       | 10 | feat-10-landing-page.md | feat/landing-page | 10 | done |
                                        | 11 | feat-11-unify-agent-structures.md | feat/unify-agent-structures | 11 | done |
                                        | 12 | feat-12-deploy-landing-page.md | feat/npm-release-and-deploy | 12 | done |
                                        | 13 | feat-13-update-readmes-multiagent.md | feat/update-readmes-multiagent | 13 | done |
@@ -72,4 +73,5 @@ main
 | 26 | feat-26-open-source-readme.md | feat/open-source-readme | 26 | done |
 | 27 | feat-27-upgrade-node-ci.md | feat/upgrade-node-ci | 27 | done |
 | 28 | feat-28-dev-flow-guide.md | feat/dev-flow-guide | 28 | done |
-| 29 | feat-29-remove-homebrew.md | feat/remove-homebrew | 29 | done |
+                                         | 29 | feat-29-remove-homebrew.md | feat/remove-homebrew | 29 | done |
+                                         | 30 | feat-30-fix-branch-pr-flow.md | feat/fix-branch-pr-flow | 30 | done |
