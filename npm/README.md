@@ -74,22 +74,22 @@ O Forge-SDD organiza o trabalho em ciclos curtos e incrementais. O diagrama abai
 
 ```mermaid
 flowchart TD
-    A([🚀 Início da Sessão]) --> B["/status<br/>Entende o estado atual"]
+    A([Inicio da Sessao]) --> B["/status<br/>Entende o estado atual"]
     B --> C{"Existe feature<br/>em andamento?"}
     C -- Sim --> D["/proxima-feature<br/>Retoma a feature"]
-    C -- Não --> E{"Tenho uma<br/>ideia nova?"}
-    E -- "Sim, preciso explorar" --> F["/discovery<br/>Explora produto<br/>e engenharia"]
-    E -- "Já sei o que fazer" --> G["/nova-feature<br/>Especifica e<br/>cria a branch"]
+    C -- Nao --> E{"Tenho uma<br/>ideia nova?"}
+    E -- Explorar --> F["/discovery<br/>Explora produto<br/>e engenharia"]
+    E -- Ja sei --> G["/nova-feature<br/>Especifica e<br/>cria a branch"]
     F --> H{"Feature ficou<br/>muito grande?"}
     G --> H
-    H -- "Sim, mais de 7 tasks" --> I["/split-features<br/>Quebra em<br/>feats independentes"]
-    H -- Não --> D
+    H -- mais de 7 tasks --> I["/split-features<br/>Quebra em<br/>feats independentes"]
+    H -- Nao --> D
     I --> D
-    D --> J["🔨 Builder implementa"]
-    J --> K["/revisar<br/>Revisor valida<br/>critério de conclusão"]
-    K -- Aprovado --> L["🔀 PR via gh cli<br/>Merge na main"]
+    D --> J["Builder implementa"]
+    J --> K["/revisar<br/>Revisor valida<br/>criterio de conclusao"]
+    K -- Aprovado --> L["PR via gh cli<br/>Merge na main"]
     K -- Reprovado --> J
-    L --> M([🔁 Próximo ciclo])
+    L --> M([Proximo ciclo])
 ```
 
 ---
@@ -122,14 +122,12 @@ Use quando uma feature ficou **grande demais** (mais de 7 tasks ou abrange mais 
 
 ```mermaid
 flowchart LR
-    A["feature-grande\n12 tasks, 3 domínios"] --> B{Critérios\nde quebra}
-
-    B --> C["✅ Cada sub-feature\nentrega valor\nindependente"]
-    B --> D["✅ Sem dependência\ncircular entre\nsub-features"]
-    B --> E["✅ Ordem respeita\ncamadas: infra →\ndomínio → app → UI"]
-    B --> F["✅ Cada sub-feature\ntem critério de\nconclusão próprio"]
-
-    C & D & E & F --> G["feat-XX-a\nfeat-XX-b\nfeat-XX-c"]
+    A["feature-grande<br/>12 tasks, 3 dominios"] --> B{"Criterios<br/>de quebra"}
+    B --> C["Entrega valor<br/>independente"]
+    B --> D["Sem dependencia<br/>circular"]
+    B --> E["Respeita camadas<br/>infra → dominio → UI"]
+    B --> F["Criterio de conclusao<br/>proprio"]
+    C & D & E & F --> G["feat-XX-a<br/>feat-XX-b<br/>feat-XX-c"]
 ```
 
 ### `/proxima-feature` — Implemente
@@ -153,10 +151,10 @@ Ao iniciar um projeto do zero, você pode escolher quais agentes deseja configur
 
 ```mermaid
 flowchart LR
-    A["npx forge-sdd init"] --> B["/constitution\nDefine arquitetura\ne regras base"]
-    B --> C["/discovery\nExplora a ideia"]
-    C --> D["/nova-feature\nCria as features\ndo roadmap"]
-    D --> E["/proxima-feature\nInicia a\nimplementação"]
+    A["npx forge-sdd init"] --> B["/constitution<br/>Define arquitetura<br/>e regras base"]
+    B --> C["/discovery<br/>Explora a ideia"]
+    C --> D["/nova-feature<br/>Cria as features<br/>do roadmap"]
+    D --> E["/proxima-feature<br/>Inicia a implementacao"]
 ```
 
 1. `npx @nathanramorim/forge-sdd@latest init` (especifique os agentes: `--agent copilot`, `--agent gemini` ou `--agent claude`)
@@ -171,9 +169,9 @@ Para adotar a metodologia em um projeto existente sem alterar sua estrutura atua
 
 ```mermaid
 flowchart LR
-    A["npx forge-sdd init . --yes"] --> B["/constitution\nScan do codebase\naprende as regras"]
-    B --> C["/status\nSincroniza\nestado atual"]
-    C --> D["/nova-feature\nMapeie a próxima\nevolução"]
+    A["npx forge-sdd init . --yes"] --> B["/constitution<br/>Scan do codebase<br/>aprende as regras"]
+    B --> C["/status<br/>Sincroniza<br/>estado atual"]
+    C --> D["/nova-feature<br/>Mapeie a proxima<br/>evolucao"]
 ```
 
 1. `npx @nathanramorim/forge-sdd@latest init . --yes` (especifique os agentes via flags, ex: `--agent copilot,gemini`)
