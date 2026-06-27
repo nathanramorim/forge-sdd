@@ -12,12 +12,13 @@ Fase 6 — Self-test            [x] done
 Fase 7 — Release              [x] done
 Fase 8 — npx                  [x] done
 Fase 9 — Multi-agent          [x] done
-Fase 10 — Landing page         [ ] todo
+Fase 10 — Landing page         [x] done
 Fase 11 — Unify agent structures [x] done
 Fase 14 — Discovery command        [x] done
 Fase 16 — Constitution command     [x] done
 Fase 17 — Unified onboarding docs  [x] done
 Fase 18 — SDD Handoff Protocol     [x] done
+Fase 30 — Fix branch & PR flow      [x] done
 ```
 
 ## Features ativas
@@ -33,7 +34,7 @@ Fase 18 — SDD Handoff Protocol     [x] done
 | feat-07-release | feat/release | done |
 | feat-08-npx | feat/npx | done |
 | feat-09-multi-agent | feat/multi-agent | done |
-| feat-10-landing-page | feat/landing-page | todo |
+| feat-10-landing-page | feat/landing-page | done |
 | feat-11-unify-agent-structures | feat/unify-agent-structures | done |
 | feat-14-discovery-command | feat/discovery-command | done |
 | feat-16-constitution-command | feat/constitution-command | done |
@@ -43,18 +44,15 @@ Fase 18 — SDD Handoff Protocol     [x] done
 | feat-23-agent-specific-mcp-config | feat/agent-specific-mcp-config | todo |
 | feat-24-automated-handoff-flow | feat/automated-handoff-flow | todo |
 | feat-25-openai-codex-adaptation | feat/openai-codex-adaptation | todo |
-| feat-26-open-source-readme | feat/open-source-readme | done |
-| feat-27-upgrade-node-ci | feat/upgrade-node-ci | done |
-| feat-28-dev-flow-guide | feat/dev-flow-guide | done |
-| feat-29-remove-homebrew | feat/remove-homebrew | done |
+| feat-30-fix-branch-pr-flow | feat/fix-branch-pr-flow | done |
 
 ## Próximo passo
 **Iniciar:** feat-23-agent-specific-mcp-config — Separar configurações de MCP por agente.
 **Bloqueios:** —
 
 ## Handoff da última sessão
-- Nova feature `feat-23-agent-specific-mcp-config` criada para resolver a centralização indevida de configurações de MCP no VS Code para agentes não-VS Code (Gemini, Claude).
-- Próximo passo: Pesquisar e implementar a separação de templates de MCP.
+- Feature 30 concluída (ajuste de criação de branch e PR).
+- Próximo passo: Retomar o backlog e iniciar a feature 23 (separação de MCPs).
 
 ## Última sessão
 - 2026-06-26 — feat-27-upgrade-node-ci concluída: Atualizado o setup-node de v20 para v24 no workflow npm-publish.yml para contornar avisos de obsolescência do Node 20.
