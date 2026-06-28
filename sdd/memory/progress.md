@@ -44,7 +44,6 @@ Fase 31 — Upgrade domain preservation [x] done
 | feat-22-smart-upgrade-detection | feat/smart-upgrade-detection | done |
 | feat-23-agent-specific-mcp-config | feat/agent-specific-mcp-config | todo |
 | feat-24-automated-handoff-flow | feat/automated-handoff-flow | todo |
-| feat-25-openai-codex-adaptation | feat/openai-codex-adaptation | todo |
 | feat-30-fix-branch-pr-flow | feat/fix-branch-pr-flow | done |
 | feat-31-upgrade-preserves-domain | feat/upgrade-preserves-domain | done |
 
