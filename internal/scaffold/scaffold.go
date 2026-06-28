@@ -176,7 +176,7 @@ func shouldPreserve(dest string, targetDir string) bool {
 		if rel == "sdd/.sdd-version" || rel == "sdd/.sddrc" {
 			return false
 		}
-		// Todo o restante do domínio (memory, spec, features, README, HOWTO, plan) é preservado
+		// Todo o restante do domínio (memory, spec, features, releases, README, HOWTO, plan) é preservado
 		return true
 	}
 

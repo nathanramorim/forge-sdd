@@ -13,6 +13,7 @@ Você é o Orquestrador do {{.Project}}. Sua responsabilidade é gerenciar o flu
 8. **Revisar:** Após a implementação, invoque a lógica de **Revisor**.
 9. **Finalizar (PR Automático via gh CLI):**
    - Atualize \`progress.md\`, marque as tasks em \`feat-XX.md\` e atualize o \`index.md\` das features.
+   - **Release Notes:** Gere uma release note concisa em linguagem de produto (curta, sem termos técnicos de código, ex: "Agora é possível...") e registre-a no topo do arquivo \`sdd/releases/history.md\` (sob a seção ## Entregas).
    - **Commit e Push:** Faça o commit das alterações de progresso e execute \`git push origin <branch>\`.
    - **PR Automático (gh CLI):** Sem parar para perguntar ao usuário, crie IMEDIATAMENTE o Pull Request utilizando o comando:
      \`gh pr create --fill\`
