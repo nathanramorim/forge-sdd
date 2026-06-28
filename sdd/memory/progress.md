@@ -19,6 +19,7 @@ Fase 16 — Constitution command     [x] done
 Fase 17 — Unified onboarding docs  [x] done
 Fase 18 — SDD Handoff Protocol     [x] done
 Fase 30 — Fix branch & PR flow      [x] done
+Fase 31 — Upgrade domain preservation [x] done
 ```
 
 ## Features ativas
@@ -45,14 +46,15 @@ Fase 30 — Fix branch & PR flow      [x] done
 | feat-24-automated-handoff-flow | feat/automated-handoff-flow | todo |
 | feat-25-openai-codex-adaptation | feat/openai-codex-adaptation | todo |
 | feat-30-fix-branch-pr-flow | feat/fix-branch-pr-flow | done |
+| feat-31-upgrade-preserves-domain | feat/upgrade-preserves-domain | done |
 
 ## Próximo passo
 **Iniciar:** feat-23-agent-specific-mcp-config — Separar configurações de MCP por agente.
 **Bloqueios:** —
 
 ## Handoff da última sessão
-- Feature 30 concluída (ajuste de criação de branch e PR).
-- Próximo passo: Retomar o backlog e iniciar a feature 23 (separação de MCPs).
+- Feature 31 concluída (preservação do domínio em upgrades).
+- Próximo passo: Retomar e iniciar a feature 23 (separação de MCPs).
 
 ## Última sessão
 - 2026-06-26 — feat-27-upgrade-node-ci concluída: Atualizado o setup-node de v20 para v24 no workflow npm-publish.yml para contornar avisos de obsolescência do Node 20.

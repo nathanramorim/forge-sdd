@@ -120,6 +120,12 @@ func renderDir(fsys embed.FS, root, stripPrefix string, cfg config.Config, targe
 			return nil
 		}
 
+		// Se o arquivo destino já existe e deve ser preservado, pulamos a escrita física
+		if shouldPreserve(dest, targetDir) {
+			created = append(created, dest)
+			return nil
+		}
+
 		if err := os.MkdirAll(filepath.Dir(dest), 0755); err != nil {
 			return fmt.Errorf("mkdir %s: %w", filepath.Dir(dest), err)
 		}
@@ -148,5 +154,33 @@ func renderDir(fsys embed.FS, root, stripPrefix string, cfg config.Config, targe
 	})
 
 	return created, err
+}
+
+// shouldPreserve retorna true se o arquivo de destino já existe e deve ser preservado.
+func shouldPreserve(dest string, targetDir string) bool {
+	if _, err := os.Stat(dest); os.IsNotExist(err) {
+		return false
+	}
+
+	rel, err := filepath.Rel(targetDir, dest)
+	if err != nil {
+		return false
+	}
+
+	// Padroniza separadores para "/"
+	rel = filepath.ToSlash(rel)
+
+	// Regras de preservação de domínio sob a pasta sdd/
+	if strings.HasPrefix(rel, "sdd/") {
+		// Exceções estruturais que DEVEM ser atualizadas/sobrescritas:
+		if rel == "sdd/.sdd-version" || rel == "sdd/.sddrc" {
+			return false
+		}
+		// Todo o restante do domínio (memory, spec, features, README, HOWTO, plan) é preservado
+		return true
+	}
+
+	// Arquivos fora de sdd/ (configurações e instruções de agente) devem ser atualizados
+	return false
 }
 
