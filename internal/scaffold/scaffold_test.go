@@ -145,3 +145,60 @@ func TestAgentMultiple(t *testing.T) {
 	t.Logf("✓ copilot+claude: %d arquivos criados", len(created))
 }
 
+func TestUpgradePreservesDomain(t *testing.T) {
+	dir := t.TempDir()
+
+	// 1. Primeira execução (simula inicialização em versão antiga v1.5.2)
+	cfg := config.Config{
+		Project:    "demo",
+		Stack:      "go",
+		DB:         "none",
+		Telemetry:  false,
+		Lang:       "pt-BR",
+		SddVersion: "1.5.2",
+		Agents:     []string{config.AgentGemini},
+	}
+	_, err := Run(cfg, dir)
+	require.NoError(t, err)
+
+	// Modifica os arquivos locais para testar a preservação de conteúdo
+	progressFile := filepath.Join(dir, "sdd", "memory", "progress.md")
+	versionFile := filepath.Join(dir, "sdd", ".sdd-version")
+	geminiFile := filepath.Join(dir, "GEMINI.md")
+
+	err = os.WriteFile(progressFile, []byte("conteudo customizado do progresso"), 0644)
+	require.NoError(t, err)
+
+	err = os.WriteFile(geminiFile, []byte("conteudo customizado do agente"), 0644)
+	require.NoError(t, err)
+
+	// 2. Segunda execução (simula upgrade para v1.5.3 com novos templates)
+	cfgUpgrade := config.Config{
+		Project:    "demo",
+		Stack:      "go",
+		DB:         "none",
+		Telemetry:  false,
+		Lang:       "pt-BR",
+		SddVersion: "1.5.3", // nova versão
+		Agents:     []string{config.AgentGemini},
+	}
+	_, err = Run(cfgUpgrade, dir)
+	require.NoError(t, err)
+
+	// 3. Asserções
+	// a. progress.md DEVE ter sido preservado (conteúdo do usuário intacto)
+	progressData, err := os.ReadFile(progressFile)
+	require.NoError(t, err)
+	assert.Equal(t, "conteudo customizado do progresso", string(progressData))
+
+	// b. .sdd-version DEVE ter sido atualizado para 1.5.3
+	versionData, err := os.ReadFile(versionFile)
+	require.NoError(t, err)
+	assert.Contains(t, string(versionData), "1.5.3")
+
+	// c. GEMINI.md DEVE ter sido atualizado (sobrescrito com o template da nova versão)
+	geminiData, err := os.ReadFile(geminiFile)
+	require.NoError(t, err)
+	assert.NotEqual(t, "conteudo customizado do agente", string(geminiData))
+}
+
