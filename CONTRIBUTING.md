@@ -127,6 +127,34 @@ git push origin main
 git push origin v1.x.0
 ```
 
+### Pré-release (beta) — testar antes de aprovar o PR
+
+Use quando quiser validar uma feature branch via npx antes de mergear para main.
+A tag deve conter `-` (ex: `v1.6.0-beta.0`) — o workflow detecta isso e publica com
+`--tag beta` no npm, sem tocar o canal `@latest`.
+
+```bash
+# na feature branch, com tudo commitado
+git tag v1.6.0-beta.0
+git push origin v1.6.0-beta.0
+# → CI compila + publica @nathanramorim/forge-sdd@beta
+```
+
+Testando como usuário final:
+```bash
+npx @nathanramorim/forge-sdd@beta update --yes --agent claude
+```
+
+Quando o PR for aprovado e mergear para main, publique a versão estável normalmente:
+```bash
+git tag v1.6.0
+git push origin v1.6.0
+# → publica em @latest, sobrepõe o beta
+```
+
+> **Convenção de numeração:** use o mesmo número da próxima versão estável com sufixo
+> `-beta.N`. Assim `v1.6.0-beta.0` → `v1.6.0` é o ciclo completo de uma feature.
+
 ### Recriar uma tag já publicada (correção)
 
 ```bash
@@ -135,6 +163,19 @@ git tag v1.x.0                     # recria no commit atual
 git push origin :v1.x.0            # apaga no remote
 git push origin v1.x.0             # sobe novamente → dispara o workflow
 ```
+
+### Usuários na versão antiga (sem o comando `update`)
+
+O cache do npx é por versão (`~/.cache/forge-sdd/<versão>/`). Quando uma nova versão
+estável é publicada, o npx baixa o novo binário automaticamente na próxima execução.
+
+Para forçar a migração sem esperar:
+```bash
+# seguro: shouldPreserve protege tudo em sdd/ (features, spec, memory)
+npx @nathanramorim/forge-sdd@latest init . --yes --agent <agentes-atuais>
+```
+
+Após isso o binário da nova versão estará no cache e `forge-sdd update` ficará disponível.
 
 ### Instalação pelo usuário final (após o primeiro release)
 

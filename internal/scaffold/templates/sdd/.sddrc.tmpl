@@ -1,6 +1,7 @@
 {
   "project": "{{.Project}}",
   "version": "{{.SddVersion}}",
+  "agents": [{{range $i, $a := .Agents}}{{if $i}}, {{end}}"{{$a}}"{{end}}],
   "telemetry": {
     "enabled": {{.Telemetry}},
     "anonymous": true,
