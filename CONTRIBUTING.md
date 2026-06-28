@@ -155,6 +155,18 @@ git push origin v1.6.0
 > **Convenção de numeração:** use o mesmo número da próxima versão estável com sufixo
 > `-beta.N`. Assim `v1.6.0-beta.0` → `v1.6.0` é o ciclo completo de uma feature.
 
+### Diferenças entre `@latest` e `@beta`
+
+| | `@latest` | `@beta` |
+|---|---|---|
+| **Quem recebe** | Todos os usuários do `npx` | Apenas quem passa `@beta` explicitamente |
+| **Quando é atualizado** | Push de tag sem `-` (ex: `v1.6.0`) | Push de tag com `-` (ex: `v1.6.0-beta.0`) |
+| **Estabilidade** | Aprovado e mergeado em `main` | Feature branch em validação |
+| **Cache local** | `~/.cache/forge-sdd/1.6.0/` | `~/.cache/forge-sdd/1.6.0-beta.0/` |
+| **Binário no GitHub** | Release público, sem label | Release marcado como *pre-release* |
+
+**Regra prática:** um push de `@beta` nunca afeta `@latest`. São canais independentes no npm registry. O `@latest` só avança quando você publica uma tag estável.
+
 ### Recriar uma tag já publicada (correção)
 
 ```bash
