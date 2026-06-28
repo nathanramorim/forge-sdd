@@ -59,6 +59,36 @@ jobs:
           cp -r ../docs/* wiki/
           cp ../README.md wiki/HOME.md
           
+          echo "Updating structure.json..."
+          node -e "
+            const fs = require('fs');
+            const path = require('path');
+            const wikiDir = 'wiki';
+            const structPath = path.join(wikiDir, 'structure.json');
+            if (fs.existsSync(structPath)) {
+              const struct = JSON.parse(fs.readFileSync(structPath, 'utf8'));
+              struct.pages = struct.pages || [];
+              const files = fs.readdirSync(wikiDir).filter(f => f.endsWith('.md') && f !== 'HOME.md');
+              let updated = false;
+              for (const file of files) {
+                if (!struct.pages.some(p => p.file === file)) {
+                  const content = fs.readFileSync(path.join(wikiDir, file), 'utf8');
+                  const match = content.match(/^#\s+(.+)$/m);
+                  const title = match ? match[1].trim() : path.basename(file, '.md').replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+                  const id = path.basename(file, '.md');
+                  struct.pages.push({ id, title, file });
+                  updated = true;
+                  console.log('Added ' + file + ' as \"' + title + '\" to structure.json');
+                }
+              }
+              if (updated) {
+                fs.writeFileSync(structPath, JSON.stringify(struct, null, 2) + '\n');
+              }
+            } else {
+              console.log('structure.json not found, skipping update');
+            }
+          "
+          
           echo "Configuring git user..."
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
