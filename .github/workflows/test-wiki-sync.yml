@@ -1,0 +1,45 @@
+name: Test Wiki Sync
+
+on:
+  push:
+    branches:
+      - feat/sync-wiki-documentation
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Sync Wiki to lp-forge-sdd
+        env:
+          WIKI_PAT: ${{ secrets.LP_FORGE_SDD_TOKEN }}
+        run: |
+          if [ -z "$WIKI_PAT" ]; then
+            echo "Error: LP_FORGE_SDD_TOKEN is not set."
+            exit 1
+          fi
+          
+          echo "Cloning lp-forge-sdd..."
+          git clone "https://x-access-token:${WIKI_PAT}@github.com/nathanramorim/lp-forge-sdd.git" lp-repo
+          
+          echo "Recreating wiki directory in target repo..."
+          rm -rf lp-repo/wiki
+          mkdir -p lp-repo/wiki
+          
+          echo "Copying documentation..."
+          cp -r docs/* lp-repo/wiki/
+          cp README.md lp-repo/wiki/HOME.md
+          
+          echo "Committing and pushing to lp-forge-sdd..."
+          cd lp-repo
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add wiki/
+          
+          if git diff --staged --quiet; then
+            echo "No changes in wiki, skipping commit."
+          else
+            git commit -m "docs: test sync wiki from branch ${GITHUB_REF_NAME}"
+            git push origin main
+          fi
