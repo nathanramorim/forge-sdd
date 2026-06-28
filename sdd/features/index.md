@@ -28,7 +28,6 @@ main
                                           └─ feat/smart-upgrade-detection
                                           └─ feat/agent-specific-mcp-config
                                           └─ feat/automated-handoff-flow
-                                        └─ feat/openai-codex-adaptation
                                         └─ feat/landing-page  (paralela)
                                         └─ feat/open-source-readme (paralela)
                                         └─ feat/upgrade-node-ci (paralela)
@@ -70,7 +69,6 @@ main
                                        | 22 | feat-22-smart-upgrade-detection.md | feat/smart-upgrade-detection | 22 | done |
                                        | 23 | feat-23-agent-specific-mcp-config.md | feat/agent-specific-mcp-config | 23 | todo |
 | 24 | feat-24-automated-handoff-flow.md | feat/automated-handoff-flow | 24 | todo |
-| 25 | feat-25-openai-codex-adaptation.md | feat/openai-codex-adaptation | 25 | todo |
 | 26 | feat-26-open-source-readme.md | feat/open-source-readme | 26 | done |
 | 27 | feat-27-upgrade-node-ci.md | feat/upgrade-node-ci | 27 | done |
 | 28 | feat-28-dev-flow-guide.md | feat/dev-flow-guide | 28 | done |
