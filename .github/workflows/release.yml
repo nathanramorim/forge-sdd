@@ -46,8 +46,7 @@ jobs:
           echo "Cloning lp-forge-sdd..."
           git clone "https://x-access-token:${WIKI_PAT}@github.com/nathanramorim/lp-forge-sdd.git" lp-repo
           
-          echo "Recreating wiki directory in target repo..."
-          rm -rf lp-repo/wiki
+          echo "Creating wiki directory in target repo if it does not exist..."
           mkdir -p lp-repo/wiki
           
           echo "Copying documentation..."
