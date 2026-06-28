@@ -9,10 +9,10 @@ Atualmente, o scaffolding do SDD centraliza a configuração de MCP no arquivo `
 - Evitar que o Gemini dependa de arquivos do VS Code para funcionar corretamente.
 
 ## Critérios de Aceite
-- [ ] Criar templates específicos de MCP para cada agente (se aplicável).
-- [ ] Atualizar `internal/scaffold/scaffold.go` para distribuir as configurações de MCP corretamente.
-- [ ] Garantir que o `GEMINI.md` aponte para as configurações/instruções corretas do Gemini.
-- [ ] O comando `doctor` deve validar as configurações específicas de cada agente.
+- [x] Criar templates específicos de MCP para cada agente (se aplicável).
+- [x] Atualizar `internal/scaffold/scaffold.go` para distribuir as configurações de MCP corretamente.
+- [x] Garantir que o `GEMINI.md` aponte para as configurações/instruções corretas do Gemini.
+- [x] O comando `doctor` deve validar as configurações específicas de cada agente.
 
 ## Plano de Implementação
 1. **Research:** Identificar onde o Gemini e o Claude preferem suas configurações de MCP.

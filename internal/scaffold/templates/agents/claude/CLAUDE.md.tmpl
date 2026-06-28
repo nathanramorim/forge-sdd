@@ -15,6 +15,12 @@
 - `sdd/memory/constitution.md` — regras imutáveis
 - `sdd/features/feat-XX-*.md` — tarefa atual
 
+## MCPs
+O Claude Desktop utiliza a configuração global em `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) ou `%APPDATA%\Claude\claude_desktop_config.json` (Windows).
+Recomenda-se configurar os seguintes MCPs:
+- **context7** (`npx -y @upstash/context7-mcp`)
+- **git** (`uvx mcp-server-git --repository <caminho-do-projeto>`)
+
 ## Orçamentos
 - `progress.md` ≤ 1 KB
 - Resposta de planejamento ≤ 500 tokens — detalhe vai para `sdd/skills/`
