@@ -20,18 +20,23 @@ jobs:
             exit 1
           fi
           
+          COMMIT_SHA=$(git rev-parse --short HEAD)
+          BRANCH_NAME="docs/test-sync-${COMMIT_SHA}"
+          
           echo "Cloning lp-forge-sdd..."
           git clone "https://x-access-token:${WIKI_PAT}@github.com/nathanramorim/lp-forge-sdd.git" lp-repo
           
+          cd lp-repo
+          git checkout -b "${BRANCH_NAME}"
+          
           echo "Creating wiki directory in target repo if it does not exist..."
-          mkdir -p lp-repo/wiki
+          mkdir -p wiki
           
           echo "Copying documentation..."
-          cp -r docs/* lp-repo/wiki/
-          cp README.md lp-repo/wiki/HOME.md
+          cp -r ../docs/* wiki/
+          cp ../README.md wiki/HOME.md
           
-          echo "Committing and pushing to lp-forge-sdd..."
-          cd lp-repo
+          echo "Configuring git user..."
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add wiki/
@@ -40,5 +45,12 @@ jobs:
             echo "No changes in wiki, skipping commit."
           else
             git commit -m "docs: test sync wiki from branch ${GITHUB_REF_NAME}"
-            git push origin main
+            git push origin "${BRANCH_NAME}"
+            
+            echo "Creating Pull Request on lp-forge-sdd..."
+            GH_TOKEN="${WIKI_PAT}" gh pr create --repo nathanramorim/lp-forge-sdd \
+              --base main \
+              --head "${BRANCH_NAME}" \
+              --title "docs: test sync wiki from branch ${GITHUB_REF_NAME}" \
+              --body "Automated documentation sync test from forge-sdd branch ${GITHUB_REF_NAME}."
           fi
