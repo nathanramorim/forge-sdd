@@ -1,50 +1,27 @@
-name: Release
+name: Test Wiki Sync
 
 on:
   push:
-    tags:
-      - 'v*'
-
-permissions:
-  contents: write
-
-env:
-  ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: 'true'
+    branches:
+      - feat/sync-wiki-documentation
 
 jobs:
-  release:
+  sync:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Setup Go
-        uses: actions/setup-go@v5
-        with:
-          go-version-file: go.mod
-          cache: true
-
-      - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v6
-        with:
-          distribution: goreleaser
-          version: "~> v2"
-          args: release --clean
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Sync Wiki to lp-forge-sdd
         env:
           WIKI_PAT: ${{ secrets.LP_FORGE_SDD_TOKEN }}
         run: |
           if [ -z "$WIKI_PAT" ]; then
-            echo "Warning: LP_FORGE_SDD_TOKEN is not set. Skipping wiki sync."
-            exit 0
+            echo "Error: LP_FORGE_SDD_TOKEN is not set."
+            exit 1
           fi
           
-          TAG_NAME="${GITHUB_REF_NAME}"
-          BRANCH_NAME="docs/sync-${TAG_NAME}"
+          COMMIT_SHA=$(git rev-parse --short HEAD)
+          BRANCH_NAME="docs/test-sync-${COMMIT_SHA}"
           
           echo "Cloning lp-forge-sdd..."
           git clone "https://x-access-token:${WIKI_PAT}@github.com/nathanramorim/lp-forge-sdd.git" lp-repo
@@ -108,7 +85,7 @@ jobs:
           if git diff --staged --quiet; then
             echo "No changes in wiki, skipping commit."
           else
-            git commit -m "docs: sync wiki from forge-sdd tag ${TAG_NAME}"
+            git commit -m "docs: test sync wiki from branch ${GITHUB_REF_NAME}"
             git push origin "${BRANCH_NAME}"
             
             echo "Creating Pull Request on lp-forge-sdd via REST API..."
@@ -118,7 +95,7 @@ jobs:
               -H "Authorization: Bearer ${WIKI_PAT}" \
               -H "X-GitHub-Api-Version: 2022-11-28" \
               https://api.github.com/repos/nathanramorim/lp-forge-sdd/pulls \
-              -d "{\"title\":\"docs: sync wiki from forge-sdd ${TAG_NAME}\",\"body\":\"Automated documentation sync from forge-sdd tag ${TAG_NAME}.\",\"head\":\"${BRANCH_NAME}\",\"base\":\"main\"}")
+              -d "{\"title\":\"docs: test sync wiki from branch ${GITHUB_REF_NAME}\",\"body\":\"Automated documentation sync test from forge-sdd branch ${GITHUB_REF_NAME}.\",\"head\":\"${BRANCH_NAME}\",\"base\":\"main\"}")
             
             if [ "$RESPONSE" -eq 201 ] || [ "$RESPONSE" -eq 422 ]; then
               echo "Pull Request created successfully or already exists (HTTP $RESPONSE)."
