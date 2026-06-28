@@ -60,7 +60,7 @@ func TestDryRunNoFiles(t *testing.T) {
 	dir := t.TempDir()
 	cfg := config.Config{
 		Project: "demo", Stack: "go", DB: "none",
-		Telemetry: false, Lang: "pt-BR", SddVersion: "1.5.2",
+		Telemetry: false, Lang: "pt-BR", SddVersion: "1.5.3",
 		Agents: []string{config.AgentCopilot},
 		DryRun: true,
 	}
@@ -81,7 +81,7 @@ func TestAgentClaude(t *testing.T) {
 	dir := t.TempDir()
 	cfg := config.Config{
 		Project: "demo", Stack: "go", DB: "none",
-		Telemetry: false, Lang: "pt-BR", SddVersion: "1.5.2",
+		Telemetry: false, Lang: "pt-BR", SddVersion: "1.5.3",
 		Agents: []string{config.AgentClaude},
 	}
 
@@ -110,7 +110,7 @@ func TestAgentGemini(t *testing.T) {
 	dir := t.TempDir()
 	cfg := config.Config{
 		Project: "demo", Stack: "node", DB: "postgres",
-		Telemetry: false, Lang: "pt-BR", SddVersion: "1.5.2",
+		Telemetry: false, Lang: "pt-BR", SddVersion: "1.5.3",
 		Agents: []string{config.AgentGemini},
 	}
 
@@ -135,7 +135,7 @@ func TestAgentMultiple(t *testing.T) {
 	dir := t.TempDir()
 	cfg := config.Config{
 		Project: "demo", Stack: "go", DB: "none",
-		Telemetry: false, Lang: "pt-BR", SddVersion: "1.5.2",
+		Telemetry: false, Lang: "pt-BR", SddVersion: "1.5.3",
 		Agents: []string{config.AgentCopilot, config.AgentClaude},
 	}
 
@@ -160,7 +160,7 @@ func TestUpgradePreservesDomain(t *testing.T) {
 		DB:         "none",
 		Telemetry:  false,
 		Lang:       "pt-BR",
-		SddVersion: "1.5.2",
+		SddVersion: "1.5.2", // mantém a primeira execução na versão antiga para testar o upgrade
 		Agents:     []string{config.AgentGemini},
 	}
 	_, err := Run(cfg, dir)
