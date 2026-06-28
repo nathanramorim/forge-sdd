@@ -17,8 +17,8 @@ Permitir a geração automática de release notes concisas, escritas em linguage
 ```
 
 ## Tarefas
-- [ ] **32-1** Criar especificação da feature em `sdd/features/feat-32-product-release-notes.md`
-- [ ] **32-2** Criar template `internal/scaffold/templates/sdd/releases/history.md.tmpl`
-- [ ] **32-3** Atualizar templates de Orquestrador em `internal/scaffold/templates/` para incluir o passo de release notes no Handoff
-- [ ] **32-4** Atualizar `internal/scaffold/scaffold.go` e testes para garantir a distribuição de `sdd/releases/history.md`
-- [ ] **32-5** Atualizar logs de progresso e index.md
+- [x] **32-1** Criar especificação da feature em `sdd/features/feat-32-product-release-notes.md`
+- [x] **32-2** Criar template `internal/scaffold/templates/sdd/releases/history.md.tmpl`
+- [x] **32-3** Atualizar templates de Orquestrador em `internal/scaffold/templates/` para incluir o passo de release notes no Handoff
+- [x] **32-4** Atualizar `internal/scaffold/scaffold.go` e testes para garantir a distribuição de `sdd/releases/history.md`
+- [x] **32-5** Atualizar logs de progresso e index.md

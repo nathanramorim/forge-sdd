@@ -31,6 +31,7 @@ func TestWalkTemplates(t *testing.T) {
 		"templates/sdd/memory/progress.md.tmpl",
 		"templates/sdd/features/index.md.tmpl",
 		"templates/sdd/skills/index.md.tmpl",
+		"templates/sdd/releases/history.md.tmpl",
 		"templates/sdd/.metrics/schema.json.tmpl",
 	}
 

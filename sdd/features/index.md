@@ -76,4 +76,4 @@ main
                                          | 29 | feat-29-remove-homebrew.md | feat/remove-homebrew | 29 | done |
                                          | 30 | feat-30-fix-branch-pr-flow.md | feat/fix-branch-pr-flow | 30 | done |
                                          | 31 | feat-31-upgrade-preserves-domain.md | feat/upgrade-preserves-domain | 31 | done |
-| 32 | feat-32-product-release-notes.md | feat/product-release-notes | 32 | todo |
+| 32 | feat-32-product-release-notes.md | feat/product-release-notes | 32 | done |
