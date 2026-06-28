@@ -21,6 +21,7 @@ Fase 18 — SDD Handoff Protocol     [x] done
 Fase 24 — Automated handoff flow    [x] done
 Fase 30 — Fix branch & PR flow      [x] done
 Fase 31 — Upgrade domain preservation [x] done
+Fase 32 — Product release notes       [ ] todo
 ```
 
 ## Features ativas
@@ -47,14 +48,15 @@ Fase 31 — Upgrade domain preservation [x] done
 | feat-24-automated-handoff-flow | feat/automated-handoff-flow | done |
 | feat-30-fix-branch-pr-flow | feat/fix-branch-pr-flow | done |
 | feat-31-upgrade-preserves-domain | feat/upgrade-preserves-domain | done |
+| feat-32-product-release-notes | feat/product-release-notes | todo |
 
 ## Próximo passo
-**Iniciar:** feat-23-agent-specific-mcp-config — Separar configurações de MCP por agente.
+**Iniciar:** feat-32-product-release-notes — Geração automática de release notes concisas em linguagem de produto.
 **Bloqueios:** —
 
 ## Handoff da última sessão
 - Feature 31 concluída (preservação do domínio em upgrades).
-- Próximo passo: Retomar e iniciar a feature 23 (separação de MCPs).
+- Próximo passo: Iniciar e planejar a feature 32 para automação de release notes.
 
 ## Última sessão
 - 2026-06-28 — chore: finalizada a Fase 24 (Handoff Automático) e removida a Fase 25 (OpenAI Codex) do roadmap.
