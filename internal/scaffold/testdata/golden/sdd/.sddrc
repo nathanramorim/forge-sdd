@@ -1,6 +1,7 @@
 {
   "project": "demo",
   "version": "1.5.3",
+  "agents": [],
   "telemetry": {
     "enabled": true,
     "anonymous": true,

@@ -156,6 +156,54 @@ func renderDir(fsys embed.FS, root, stripPrefix string, cfg config.Config, targe
 	return created, err
 }
 
+// RunAgents renderiza apenas os templates de agente(s) especificados, sem tocar em sdd/.
+// Útil para o comando update, que adiciona novos agentes a um projeto existente.
+func RunAgents(cfg config.Config, agents []string, targetDir string) ([]string, error) {
+	var created []string
+	for _, agent := range agents {
+		if agent == config.AgentCopilot {
+			for _, root := range []string{"templates/.vscode", "templates/.github"} {
+				files, err := renderDir(templatesFS, root, "templates", cfg, targetDir)
+				if err != nil {
+					return nil, err
+				}
+				created = append(created, files...)
+			}
+			continue
+		}
+		root := agentTemplateRoot(agent)
+		if root == "" {
+			continue
+		}
+		files, err := renderDir(templatesFS, root, root, cfg, targetDir)
+		if err != nil {
+			return nil, err
+		}
+		created = append(created, files...)
+	}
+	return created, nil
+}
+
+// UpdateSddrc re-renderiza sdd/.sddrc com a config fornecida, sobrescrevendo o existente.
+// Ignora shouldPreserve para que o campo agents seja sempre atualizado.
+func UpdateSddrc(cfg config.Config, targetDir string) error {
+	const tmplPath = "templates/sdd/.sddrc.tmpl"
+	data, err := templatesFS.ReadFile(tmplPath)
+	if err != nil {
+		return fmt.Errorf("read template %s: %w", tmplPath, err)
+	}
+	tmpl, err := template.New(tmplPath).Parse(string(data))
+	if err != nil {
+		return fmt.Errorf("parse template %s: %w", tmplPath, err)
+	}
+	var buf bytes.Buffer
+	if err := tmpl.Execute(&buf, cfg); err != nil {
+		return fmt.Errorf("render template %s: %w", tmplPath, err)
+	}
+	dest := filepath.Join(targetDir, "sdd", ".sddrc")
+	return os.WriteFile(dest, buf.Bytes(), 0644)
+}
+
 // shouldPreserve retorna true se o arquivo de destino já existe e deve ser preservado.
 func shouldPreserve(dest string, targetDir string) bool {
 	if _, err := os.Stat(dest); os.IsNotExist(err) {
