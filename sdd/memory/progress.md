@@ -58,6 +58,7 @@ Fase 31 — Upgrade domain preservation [x] done
 - Roadmap completo do forge-sdd finalizado com sucesso!
 
 ## Última sessão
+- 2026-06-28 — feat: concluída a Fase 23 (MCP e Habilidades Específicas por Agente) e finalizado o roadmap do forge-sdd.
 - 2026-06-28 — chore: finalizada a Fase 24 (Handoff Automático) e removida a Fase 25 (OpenAI Codex) do roadmap.
 
 > Histórico completo em `progress-log.md`
