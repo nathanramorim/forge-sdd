@@ -1,0 +1,24 @@
+{
+  "$schema": "forge-sdd/metrics/1.0",
+  "feature": "feat-33-lp-wiki-sync",
+  "phase": 33,
+  "agent_path": ["specifier", "builder"],
+  "tokens_input": 0,
+  "tokens_output": 0,
+  "turns": 1,
+  "duration_seconds": 180,
+  "criterio_atendido": true,
+  "model": "Gemini 3.5 Flash (Medium)",
+  "rework_lines": 0,
+  "context7_calls": 0,
+  "git_calls": 4,
+  "files_touched": [
+    ".github/workflows/release.yml",
+    "sdd/features/feat-33-lp-wiki-sync.md",
+    "sdd/features/index.md",
+    "sdd/memory/progress.md",
+    "sdd/releases/history.md"
+  ],
+  "outcome": "approved",
+  "sdd_version": "1.5.3"
+}
