@@ -49,11 +49,12 @@ func TestScaffoldIntegration_Gemini(t *testing.T) {
 		assert.FileExists(t, filepath.Join(dir, ".gemini", "prompts", p+".prompt.md"))
 	}
 
-	// VSCode / MCP
-	assert.FileExists(t, filepath.Join(dir, ".vscode", "mcp.json"))
+	// Gemini / MCP
+	assert.FileExists(t, filepath.Join(dir, ".gemini", "mcp.json"))
+	assert.NoFileExists(t, filepath.Join(dir, ".vscode", "mcp.json"))
 	
-	// Verificar conteúdo do mcp.json
-	data, err := os.ReadFile(filepath.Join(dir, ".vscode", "mcp.json"))
+	// Verificar conteúdo do mcp.json do Gemini
+	data, err := os.ReadFile(filepath.Join(dir, ".gemini", "mcp.json"))
 	require.NoError(t, err)
 	assert.Contains(t, string(data), "context7")
 	assert.Contains(t, string(data), "git")

@@ -18,6 +18,7 @@ Fase 14 — Discovery command        [x] done
 Fase 16 — Constitution command     [x] done
 Fase 17 — Unified onboarding docs  [x] done
 Fase 18 — SDD Handoff Protocol     [x] done
+Fase 23 — Agent-specific MCP config   [x] done
 Fase 24 — Automated handoff flow    [x] done
 Fase 30 — Fix branch & PR flow      [x] done
 Fase 31 — Upgrade domain preservation [x] done
@@ -44,7 +45,7 @@ Fase 32 — Product release notes       [x] done
 | feat-17-unified-onboarding-docs | feat/unified-onboarding-docs | done |
 | feat-21-install-skill-from-url | feat/install-skill-from-url | done |
 | feat-22-smart-upgrade-detection | feat/smart-upgrade-detection | done |
-| feat-23-agent-specific-mcp-config | feat/agent-specific-mcp-config | todo |
+| feat-23-agent-specific-mcp-config | feat/agent-specific-mcp-config | done |
 | feat-24-automated-handoff-flow | feat/automated-handoff-flow | done |
 | feat-30-fix-branch-pr-flow | feat/fix-branch-pr-flow | done |
 | feat-31-upgrade-preserves-domain | feat/upgrade-preserves-domain | done |
@@ -56,9 +57,11 @@ Fase 32 — Product release notes       [x] done
 
 ## Handoff da última sessão
 - Feature 32 concluída (geração automática de release notes concisas em linguagem de produto).
+- Feature 23 concluída (MCP e habilidades específicas por agente).
 - Todo o roadmap finalizado com sucesso!
 
 ## Última sessão
+- 2026-06-28 — feat: concluída a Fase 23 (MCP e Habilidades Específicas por Agente) e finalizado o roadmap do forge-sdd.
 - 2026-06-28 — chore: finalizada a Fase 24 (Handoff Automático) e removida a Fase 25 (OpenAI Codex) do roadmap.
 
 > Histórico completo em `progress-log.md`

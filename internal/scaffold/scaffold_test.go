@@ -25,6 +25,7 @@ func TestWalkTemplates(t *testing.T) {
 		"templates/.github/chatmodes/migrator.chatmode.md.tmpl",
 		"templates/.github/prompts/proxima-feature.prompt.md.tmpl",
 		"templates/.vscode/mcp.json.tmpl",
+		"templates/agents/gemini/.gemini/mcp.json.tmpl",
 		"templates/sdd/.sdd-version.tmpl",
 		"templates/sdd/.sddrc.tmpl",
 		"templates/sdd/memory/constitution.md.tmpl",
@@ -100,6 +101,7 @@ func TestAgentClaude(t *testing.T) {
 
 	// NÃO deve ter copilot-instructions (copilot não foi selecionado)
 	assert.NoFileExists(t, filepath.Join(dir, ".github", "copilot-instructions.md"))
+	assert.NoFileExists(t, filepath.Join(dir, ".vscode", "mcp.json"))
 
 	t.Logf("✓ agente claude: %d arquivos criados", len(created))
 }
@@ -122,7 +124,9 @@ func TestAgentGemini(t *testing.T) {
 	assert.FileExists(t, filepath.Join(dir, ".gemini", "skills", "c4-architecture.chatmode.md"))
 	assert.FileExists(t, filepath.Join(dir, ".gemini", "prompts", "status.prompt.md"))
 	assert.FileExists(t, filepath.Join(dir, ".gemini", "prompts", "c4-architecture.prompt.md"))
+	assert.FileExists(t, filepath.Join(dir, ".gemini", "mcp.json"))
 	assert.NoFileExists(t, filepath.Join(dir, ".github", "copilot-instructions.md"))
+	assert.NoFileExists(t, filepath.Join(dir, ".vscode", "mcp.json"))
 
 	t.Logf("✓ agente gemini: %d arquivos criados", len(created))
 }

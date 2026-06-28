@@ -57,9 +57,9 @@ func Run(cfg config.Config, targetDir string) ([]string, error) {
 
 	// 1. Templates globais (sdd/, .vscode/, e .github/ do copilot)
 	//    Sempre renderizados — são agnósticos ao agente de IA.
-	globalRoots := []string{"templates/sdd", "templates/.vscode"}
+	globalRoots := []string{"templates/sdd"}
 
-	// .github/ só é incluído quando copilot está selecionado
+	// .vscode/ e .github/ só são incluídos quando copilot está selecionado
 	copilotSelected := false
 	for _, a := range agents {
 		if a == config.AgentCopilot {
@@ -68,7 +68,7 @@ func Run(cfg config.Config, targetDir string) ([]string, error) {
 		}
 	}
 	if copilotSelected {
-		globalRoots = append(globalRoots, "templates/.github")
+		globalRoots = append(globalRoots, "templates/.vscode", "templates/.github")
 	}
 
 	for _, root := range globalRoots {
