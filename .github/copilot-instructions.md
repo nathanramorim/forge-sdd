@@ -1,7 +1,7 @@
 # Copilot Instructions — forge-sdd
 
 ## Contexto
-CLI Go (cobra + huh) que scaffolda estruturas Forge-SDD. Binário estático, zero runtime externo, único comando público: `forge-sdd init`.
+forge-sdd — stack principal: .
 
 ## Lifecycle (todo agente)
 1. **READ-MIN:** ler `sdd/memory/progress.md`
@@ -16,8 +16,8 @@ CLI Go (cobra + huh) que scaffolda estruturas Forge-SDD. Binário estático, zer
 - `sdd/features/feat-XX-*.md` — tarefa atual
 
 ## MCPs
-- **context7** — obrigatório antes de qualquer `go get` ou uso de lib externa
-- **git** — consultar status antes de iniciar/encerrar feature
+- **context7** — obrigatório antes de lib externa
+- **git** — status antes de iniciar/encerrar feature
 
 ## Orçamentos
 - `progress.md` ≤ 1 KB → exceder dispara `/archive`

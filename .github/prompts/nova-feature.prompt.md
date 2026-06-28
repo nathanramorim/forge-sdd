@@ -1,8 +1,11 @@
 ---
-description: "Cria nova feature para o forge-sdd a partir de uma descrição"
+description: "Cria nova feature para forge-sdd a partir de uma descrição"
 mode: agent
 ---
 
 Invoque o Specifier para criar uma feat-XX a partir desta descrição: ${input:descrição da feature}
 
-> Após o Specifier criar o `sdd/features/feat-XX.md`, use o prompt `proxima-feature` para iniciar a execução — ele cria a branch `feat/*` antes de delegar ao Builder.
+**Handoff:**
+Ao finalizar, gere um resumo para o comando `/proxima-feature`.
+
+> Crie a branch `feat/*` localmente (`git checkout -b feat/<nome>`) **antes** de criar o arquivo de especificação `sdd/features/feat-XX.md`.

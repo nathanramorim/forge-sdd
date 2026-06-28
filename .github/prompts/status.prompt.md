@@ -1,5 +1,5 @@
 ---
-description: "Mostra status atual do forge-sdd sem implementar nada"
+description: "Mostra status atual de forge-sdd sem implementar nada"
 mode: ask
 ---
 
