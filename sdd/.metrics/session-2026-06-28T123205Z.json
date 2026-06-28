@@ -1,0 +1,30 @@
+{
+  "$schema": "forge-sdd/metrics/1.0",
+  "feature": "feat-23-agent-specific-mcp-config",
+  "phase": 23,
+  "agent_path": ["orquestrador", "builder"],
+  "tokens_input": 0,
+  "tokens_output": 0,
+  "turns": 3,
+  "duration_seconds": 360,
+  "criterio_atendido": true,
+  "model": "Gemini 3.5 Flash (Medium)",
+  "rework_lines": 0,
+  "context7_calls": 0,
+  "git_calls": 4,
+  "files_touched": [
+    "internal/scaffold/templates/agents/gemini/.gemini/mcp.json.tmpl",
+    "internal/scaffold/templates/agents/gemini/GEMINI.md.tmpl",
+    "internal/scaffold/templates/agents/claude/CLAUDE.md.tmpl",
+    "internal/scaffold/templates/agents/gemini/.gemini/prompts/doctor.prompt.md.tmpl",
+    "internal/scaffold/templates/agents/claude/.claude/commands/doctor.prompt.md.tmpl",
+    "internal/scaffold/scaffold.go",
+    "internal/scaffold/scaffold_test.go",
+    "internal/scaffold/scaffold_integration_test.go",
+    "sdd/features/feat-23-agent-specific-mcp-config.md",
+    "sdd/features/index.md",
+    "sdd/memory/progress.md"
+  ],
+  "outcome": "approved",
+  "sdd_version": "1.5.2"
+}
