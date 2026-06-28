@@ -18,6 +18,7 @@ Fase 14 — Discovery command        [x] done
 Fase 16 — Constitution command     [x] done
 Fase 17 — Unified onboarding docs  [x] done
 Fase 18 — SDD Handoff Protocol     [x] done
+Fase 24 — Automated handoff flow    [x] done
 Fase 30 — Fix branch & PR flow      [x] done
 Fase 31 — Upgrade domain preservation [x] done
 ```
@@ -43,7 +44,7 @@ Fase 31 — Upgrade domain preservation [x] done
 | feat-21-install-skill-from-url | feat/install-skill-from-url | done |
 | feat-22-smart-upgrade-detection | feat/smart-upgrade-detection | done |
 | feat-23-agent-specific-mcp-config | feat/agent-specific-mcp-config | todo |
-| feat-24-automated-handoff-flow | feat/automated-handoff-flow | todo |
+| feat-24-automated-handoff-flow | feat/automated-handoff-flow | done |
 | feat-30-fix-branch-pr-flow | feat/fix-branch-pr-flow | done |
 | feat-31-upgrade-preserves-domain | feat/upgrade-preserves-domain | done |
 
@@ -56,10 +57,6 @@ Fase 31 — Upgrade domain preservation [x] done
 - Próximo passo: Retomar e iniciar a feature 23 (separação de MCPs).
 
 ## Última sessão
-- 2026-06-26 — feat-27-upgrade-node-ci concluída: Atualizado o setup-node de v20 para v24 no workflow npm-publish.yml para contornar avisos de obsolescência do Node 20.
-- 2026-06-26 — feat-26-open-source-readme concluída: Atualizado o README.md do projeto para declarar o status de Open Source e documentar o propósito de facilitação e controle do desenvolvimento orientado a IA.
-- 2026-06-12 — feat-18-sdd-handoffs concluída: Formalizado o Protocolo de Handoff entre fases (Discovery, Spec, Act, Review). Campo Handoff Context adicionado ao progress.md para persistência de memória.
-- 2026-06-12 — feat-17-unified-onboarding-docs concluída: Criado o Guia de Início Rápido (Getting Started) com trilhas para projetos Novos e Existentes em todos os READMEs e no novo HOWTO.md template.
-- 2026-06-12 — feat-16-constitution-command concluída: Novo comando /constitution adicionado. Realiza scan do codebase para alinhar constitution.md e stack.md com a realidade técnica do projeto.
+- 2026-06-28 — chore: finalizada a Fase 24 (Handoff Automático) e removida a Fase 25 (OpenAI Codex) do roadmap.
 
 > Histórico completo em `progress-log.md`
