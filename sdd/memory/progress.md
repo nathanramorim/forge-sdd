@@ -23,6 +23,7 @@ Fase 24 — Automated handoff flow    [x] done
 Fase 30 — Fix branch & PR flow      [x] done
 Fase 31 — Upgrade domain preservation [x] done
 Fase 32 — Product release notes       [x] done
+Fase 33 — Automated wiki sync         [x] done
 ```
 
 ## Features ativas
@@ -50,17 +51,19 @@ Fase 32 — Product release notes       [x] done
 | feat-30-fix-branch-pr-flow | feat/fix-branch-pr-flow | done |
 | feat-31-upgrade-preserves-domain | feat/upgrade-preserves-domain | done |
 | feat-32-product-release-notes | feat/product-release-notes | done |
+| feat-33-lp-wiki-sync | feat/sync-wiki-documentation | done |
 
 ## Próximo passo
 **Iniciar:** —
 **Bloqueios:** —
 
 ## Handoff da última sessão
+- Feature 33 concluída (sincronização automática da wiki do repositório lp-forge-sdd).
 - Feature 32 concluída (geração automática de release notes concisas em linguagem de produto).
-- Feature 23 concluída (MCP e habilidades específicas por agente).
 - Todo o roadmap finalizado com sucesso!
 
 ## Última sessão
+- 2026-06-28 — feat: concluída a Fase 33 (sincronização automática da wiki no GitHub Actions).
 - 2026-06-28 — feat: concluída a Fase 23 (MCP e Habilidades Específicas por Agente) e finalizado o roadmap do forge-sdd.
 - 2026-06-28 — chore: finalizada a Fase 24 (Handoff Automático) e removida a Fase 25 (OpenAI Codex) do roadmap.
 

@@ -34,9 +34,10 @@ main
                                         └─ feat/dev-flow-guide (paralela)
                                            └─ feat/remove-homebrew
                                               └─ feat/fix-branch-pr-flow
-                                                 └─ feat/upgrade-preserves-domain
-                                                    └─ feat/product-release-notes
-                                         ```
+                                                  └─ feat/upgrade-preserves-domain
+                                                     └─ feat/product-release-notes
+                                                        └─ feat/sync-wiki-documentation
+                                          ```
 
                                        ## Janelas de paralelismo
                                        Nenhuma — pipeline estritamente sequencial.
@@ -77,3 +78,4 @@ main
                                          | 30 | feat-30-fix-branch-pr-flow.md | feat/fix-branch-pr-flow | 30 | done |
                                          | 31 | feat-31-upgrade-preserves-domain.md | feat/upgrade-preserves-domain | 31 | done |
 | 32 | feat-32-product-release-notes.md | feat/product-release-notes | 32 | done |
+| 33 | feat-33-lp-wiki-sync.md | feat/sync-wiki-documentation | 33 | done |
