@@ -1,6 +1,6 @@
 ---
 description: "Health check da estrutura SDD de demo"
-mode: ask
+agent: agent
 ---
 
 Verifique a saúde da estrutura Forge-SDD deste projeto:

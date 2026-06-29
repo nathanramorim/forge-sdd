@@ -36,8 +36,9 @@ main
                                               └─ feat/fix-branch-pr-flow
                                                   └─ feat/upgrade-preserves-domain
                                                      └─ feat/product-release-notes
-                                                        └─ feat/sync-wiki-documentation
-                                          ```
+                                                         └─ feat/sync-wiki-documentation
+                                                            └─ feat/update-agent-prompts
+                                           ```
 
                                        ## Janelas de paralelismo
                                        Nenhuma — pipeline estritamente sequencial.
@@ -79,3 +80,4 @@ main
                                          | 31 | feat-31-upgrade-preserves-domain.md | feat/upgrade-preserves-domain | 31 | done |
 | 32 | feat-32-product-release-notes.md | feat/product-release-notes | 32 | done |
 | 33 | feat-33-lp-wiki-sync.md | feat/sync-wiki-documentation | 33 | done |
+| 34 | feat-34-update-agent-prompts.md | feat/update-agent-prompts | 34 | done |

@@ -1,6 +1,6 @@
 ---
 description: "Cria nova feature para demo a partir de uma descrição"
-mode: agent
+agent: agent
 ---
 
 Invoque o Specifier para criar uma feat-XX a partir desta descrição: ${input:descrição da feature}

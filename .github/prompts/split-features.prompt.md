@@ -1,6 +1,6 @@
 ---
 description: "Quebra um plano de discovery em múltiplas features independentes"
-mode: agent
+agent: agent
 ---
 
 Invoque o Specifier para transformar o plano em features executáveis.

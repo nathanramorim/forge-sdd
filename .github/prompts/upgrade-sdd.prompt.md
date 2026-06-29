@@ -1,6 +1,6 @@
 ---
 description: "Migra a estrutura SDD de forge-sdd para versão mais nova"
-mode: agent
+agent: agent
 ---
 
 Invoque o Migrator para migrar a estrutura Forge-SDD para a versão: ${input:versão alvo, ex: 1.2.0}
