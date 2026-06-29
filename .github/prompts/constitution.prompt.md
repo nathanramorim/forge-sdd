@@ -1,6 +1,6 @@
 ---
 description: "Alinha a constitution e stack do SDD com a realidade do codebase"
-mode: agent
+agent: agent
 ---
 
 Invoque o Specifier para alinhar a estrutura SDD com o codebase atual.

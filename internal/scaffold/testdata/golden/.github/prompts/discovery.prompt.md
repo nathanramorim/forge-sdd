@@ -1,6 +1,6 @@
 ---
 description: "Realiza discovery de demandas complexas (Produto + Engenharia)"
-mode: agent
+agent: agent
 ---
 
 Você deve atuar como um **Analista de Produto Sênior** e um **Engenheiro de Software Sênior**.

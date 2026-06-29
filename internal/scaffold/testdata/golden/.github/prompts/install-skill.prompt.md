@@ -1,6 +1,6 @@
 ---
 description: "Instala e adapta uma skill a partir de uma URL externa"
-mode: agent
+agent: agent
 ---
 
 Invoque o Specifier para importar a skill desta URL: ${input:URL da Skill no GitHub}
