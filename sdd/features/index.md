@@ -38,6 +38,7 @@ main
                                                      └─ feat/product-release-notes
                                                          └─ feat/sync-wiki-documentation
                                                             └─ feat/update-agent-prompts
+                                                                └─ feat/remove-install-skill
                                            ```
 
                                        ## Janelas de paralelismo
@@ -81,3 +82,4 @@ main
 | 32 | feat-32-product-release-notes.md | feat/product-release-notes | 32 | done |
 | 33 | feat-33-lp-wiki-sync.md | feat/sync-wiki-documentation | 33 | done |
 | 34 | feat-34-update-agent-prompts.md | feat/update-agent-prompts | 34 | done |
+| 35 | feat-35-remove-install-skill.md | feat/remove-install-skill | 35 | done |

@@ -196,7 +196,6 @@ flowchart LR
 | `/doctor` | Diagnóstico | Verifica integridade, MCPs e budgets |
 | `/archive` | `progress.md` > 1 KB | Move histórico antigo para o log |
 | `/upgrade-sdd` | Nova versão SDD | Migra a estrutura para a versão mais recente |
-| `/install-skill` | Reutilizar skill | Importa skill de uma URL do GitHub |
 
 ---
 

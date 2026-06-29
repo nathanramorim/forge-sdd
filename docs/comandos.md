@@ -113,12 +113,6 @@ Digitados na interface de chat do agente de IA configurado no projeto (ex: Gemin
 - **Exemplo de uso:** 
   > `/archive`
 
-### `/install-skill`
-- **Quando usar:** Para estender as habilidades da IA com novos scripts ou padrões.
-- **O que faz:** Importa uma pasta de Skill diretamente de uma URL externa (ex: repositório GitHub) para `.gemini/skills/`.
-- **Exemplo de uso:** 
-  > `/install-skill`
-
 ### `/upgrade-sdd <versao>` ou `"atualizar sdd para vX"`
 - **Quando usar:** Quando uma nova versão do framework forge-sdd for lançada.
 - **O que faz:** Inicia a rotina do **Migrator** para atualizar a metodologia no projeto para a versão indicada.

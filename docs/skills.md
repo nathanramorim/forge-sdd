@@ -46,9 +46,3 @@ Uma **Skill** no ecossistema do forge-sdd é uma pasta contendo:
 *   `SKILL.md`: As regras, system prompt e guia de comportamento da persona.
 *   `scripts/` (opcional): Scripts utilitários executáveis pela IA para automatizar tarefas daquela skill.
 *   `examples/` (opcional): Códigos de referência para guiar o aprendizado do modelo.
-
-### Como instalar novas Skills?
-Você pode importar novas habilidades da comunidade ou de repositórios privados usando o comando:
-```bash
-/install-skill https://github.com/usuario/skill-nome
-```

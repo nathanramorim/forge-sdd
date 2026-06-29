@@ -25,6 +25,7 @@ Fase 31 — Upgrade domain preservation [x] done
 Fase 32 — Product release notes       [x] done
 Fase 33 — Automated wiki sync         [x] done
 Fase 34 — Update agent prompts         [x] done
+Fase 35 — Remove install skill         [x] done
 ```
 
 ## Features ativas
@@ -54,16 +55,18 @@ Fase 34 — Update agent prompts         [x] done
 | feat-32-product-release-notes | feat/product-release-notes | done |
 | feat-33-lp-wiki-sync | feat/sync-wiki-documentation | done |
 | feat-34-update-agent-prompts | feat/update-agent-prompts | done |
+| feat-35-remove-install-skill | feat/remove-install-skill | done |
 
 ## Próximo passo
 **Iniciar:** —
 **Bloqueios:** —
 
 ## Handoff da última sessão
+- Feature 35 concluída (deleção completa da funcionalidade não definida /install-skill e de todas as suas referências).
 - Feature 34 concluída (migração dos prompts de Copilot de 'mode' para 'agent' e definição de status e doctor como agent: agent).
-- Feature 33 concluída (sincronização automática da wiki do repositório lp-forge-sdd).
 
 ## Última sessão
+- 2026-06-29 — feat: concluída a Fase 35 (remoção da funcionalidade /install-skill nos três agentes e documentação).
 - 2026-06-29 — feat: concluída a Fase 34 (migração dos prompts do Copilot para nova especificação).
 - 2026-06-28 — feat: concluída a Fase 33 (sincronização automática da wiki no GitHub Actions).
 - 2026-06-28 — feat: concluída a Fase 23 (MCP e Habilidades Específicas por Agente) e finalizado o roadmap do forge-sdd.
