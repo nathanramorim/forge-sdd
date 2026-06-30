@@ -10,9 +10,15 @@ O ecossistema do Forge-SDD organiza o repositório em domínios específicos par
 
 ```
 /
-├── .github/ ou .gemini/             # Domínio das Instruções dos Agentes
-│   ├── chatmodes/                  # Definições de papéis/agentes (Orquestrador, Builder, etc.)
-│   └── prompts/                    # Gatilhos estruturados de prompt (/status, /nova-feature, etc.)
+├── .github/ ou .gemini/ ou .claude/  # Domínio de Instruções e Prompts dos Agentes
+│   ├── chatmodes/                  # (Copilot/Gemini) Definições de papéis de agentes (Orquestrador, etc.)
+│   ├── prompts/                    # (Copilot/Gemini) Gatilhos estruturados de prompt (/status, etc.)
+│   └── commands/                   # (Claude Code em .claude/) Prompts específicos do Claude Code
+│
+├── CLAUDE.md ou GEMINI.md           # Instruções de bootstrapping (para Claude ou Gemini na raiz)
+│
+├── .vscode/                        # Integração com VS Code (opcional se Copilot)
+│   └── mcp.json                    # Declaração local de servidores MCP
 │
 ├── docs/                           # Domínio de Documentação Pública e Guias
 │   ├── introducao.md               # Onboarding de novos membros do time
