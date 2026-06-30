@@ -39,7 +39,8 @@ main
                                                          └─ feat/sync-wiki-documentation
                                                             └─ feat/update-agent-prompts
                                                                 └─ feat/remove-install-skill
-                                           ```
+                                                                    └─ feat/structured-documentation
+            ```
 
                                        ## Janelas de paralelismo
                                        Nenhuma — pipeline estritamente sequencial.
@@ -83,3 +84,4 @@ main
 | 33 | feat-33-lp-wiki-sync.md | feat/sync-wiki-documentation | 33 | done |
 | 34 | feat-34-update-agent-prompts.md | feat/update-agent-prompts | 34 | done |
 | 35 | feat-35-remove-install-skill.md | feat/remove-install-skill | 35 | done |
+| 36 | feat-36-structured-documentation.md | feat/structured-documentation | 36 | done |

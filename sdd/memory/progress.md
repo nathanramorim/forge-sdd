@@ -26,6 +26,7 @@ Fase 32 — Product release notes       [x] done
 Fase 33 — Automated wiki sync         [x] done
 Fase 34 — Update agent prompts         [x] done
 Fase 35 — Remove install skill         [x] done
+Fase 36 — Structured documentation      [x] done
 ```
 
 ## Features ativas
@@ -56,6 +57,7 @@ Fase 35 — Remove install skill         [x] done
 | feat-33-lp-wiki-sync | feat/sync-wiki-documentation | done |
 | feat-34-update-agent-prompts | feat/update-agent-prompts | done |
 | feat-35-remove-install-skill | feat/remove-install-skill | done |
+| feat-36-structured-documentation | feat/structured-documentation | done |
 
 ## Próximo passo
 **Iniciar:** —
@@ -66,6 +68,7 @@ Fase 35 — Remove install skill         [x] done
 - Feature 34 concluída (migração dos prompts de Copilot de 'mode' para 'agent' e definição de status e doctor como agent: agent).
 
 ## Última sessão
+- 2026-06-30 — feat: concluída a Fase 36 (criação da documentação estruturada com diagramas conceituais Mermaid baseados no Craft.ai).
 - 2026-06-29 — feat: concluída a Fase 35 (remoção da funcionalidade /install-skill nos três agentes e documentação).
 - 2026-06-29 — feat: concluída a Fase 34 (migração dos prompts do Copilot para nova especificação).
 - 2026-06-28 — feat: concluída a Fase 33 (sincronização automática da wiki no GitHub Actions).
