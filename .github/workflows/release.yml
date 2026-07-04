@@ -44,17 +44,17 @@ jobs:
             } else {
               notes = `Release notes para a versão ${process.env.GITHUB_REF_NAME}. Veja sdd/releases/history.md para detalhes.`;
             }
-            fs.writeFileSync("RELEASE_NOTES.md", notes + "\n");
+            fs.writeFileSync("/tmp/RELEASE_NOTES.md", notes + "\n");
           ' "${VERSION_BASE}"
           
-          echo "Release notes written to RELEASE_NOTES.md"
+          echo "Release notes written to /tmp/RELEASE_NOTES.md"
 
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v6
         with:
           distribution: goreleaser
           version: "~> v2"
-          args: release --clean --release-notes=RELEASE_NOTES.md
+          args: release --clean --release-notes=/tmp/RELEASE_NOTES.md
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
