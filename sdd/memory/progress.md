@@ -70,7 +70,7 @@ Fase 37 — Publish stable 1.6.0          [x] done
 
 ## Última sessão
 - 2026-07-03 — feat: concluída a Fase 37 (publicação oficial da versão estável v1.6.0).
-- 2026-06-30 — feat: concluída a Fase 36 (criação da documentação estruturada com diagramas conceituais Mermaid baseados no Craft.ai).
+- 2026-06-30 — feat: concluída a Fase 36 (criação da documentação estruturada com diagramas conceituais Mermaid detalhados).
 - 2026-06-29 — feat: concluída a Fase 35 (remoção da funcionalidade /install-skill nos três agentes e documentação).
 - 2026-06-29 — feat: concluída a Fase 34 (migração dos prompts do Copilot para nova especificação).
 - 2026-06-28 — feat: concluída a Fase 33 (sincronização automática da wiki no GitHub Actions).

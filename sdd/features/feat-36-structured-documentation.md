@@ -7,7 +7,7 @@
 
 ## Objetivo
 
-Gerar uma documentação de arquitetura técnica e conceitual unificada e estruturada do framework `forge-sdd`, com mapeamento de pastas/arquivos, papéis e responsabilidades, pipelines operacionais com portões de qualidade, e 6 diagramas Mermaid detalhados, no mesmo nível de riqueza do Craft.ai.
+Gerar uma documentação de arquitetura técnica e conceitual unificada e estruturada do framework `forge-sdd`, com mapeamento de pastas/arquivos, papéis e responsabilidades, pipelines operacionais com portões de qualidade, e 6 diagramas Mermaid detalhados, com alto nível de riqueza e detalhamento conceitual.
 
 ## Critério de conclusão
 

@@ -6,7 +6,7 @@ Este arquivo registra o histórico de entregas de produto deste projeto.
 
 ### Versão 1.6.0 (Estável)
 
-- **Fase 36 — Documentação Estruturada**: Estruturação de diagramas conceituais Mermaid baseados no framework Craft.ai para visualização clara de fluxos e arquitetura.
+- **Fase 36 — Documentação Estruturada**: Estruturação de diagramas conceituais Mermaid detalhados para visualização clara de fluxos e arquitetura.
 - **Fase 35 — Remoção de Skill Incompleta**: Limpeza completa da funcionalidade de instalação de skill (`/install-skill`) em todos os prompts, agentes e documentação.
 - **Fase 34 — Reestruturação de Prompts por Agente**: Migração dos prompts do Copilot e unificação dos prompts de sistema e habilidades customizadas específicas para Gemini, Claude e Copilot.
 - **Fase 33 — Sincronização Automática da Wiki**: A documentação oficial (diretório docs/ e README) agora é enviada e atualizada automaticamente na wiki do repositório lp-forge-sdd a cada nova tag publicada.
