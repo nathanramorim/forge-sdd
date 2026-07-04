@@ -25,12 +25,36 @@ jobs:
           go-version-file: go.mod
           cache: true
 
+      - name: Extract Release Notes
+        run: |
+          TAG_NAME="${GITHUB_REF_NAME}"
+          CLEAN_TAG="${TAG_NAME#v}"
+          VERSION_BASE=$(echo "${CLEAN_TAG}" | cut -d'-' -f1)
+          
+          echo "Extracting release notes for Version ${VERSION_BASE} from sdd/releases/history.md..."
+          node -e '
+            const fs = require("fs");
+            const versionBase = process.argv[1];
+            const content = fs.readFileSync("sdd/releases/history.md", "utf8");
+            const regex = new RegExp(`###\\s+Versão\\s+${versionBase}[\\s\\S]*?(?=\\n###|\\n##|$)`, "i");
+            const match = content.match(regex);
+            let notes = "";
+            if (match) {
+              notes = match[0].trim();
+            } else {
+              notes = `Release notes para a versão ${process.env.GITHUB_REF_NAME}. Veja sdd/releases/history.md para detalhes.`;
+            }
+            fs.writeFileSync("RELEASE_NOTES.md", notes + "\n");
+          ' "${VERSION_BASE}"
+          
+          echo "Release notes written to RELEASE_NOTES.md"
+
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v6
         with:
           distribution: goreleaser
           version: "~> v2"
-          args: release --clean
+          args: release --clean --release-notes=RELEASE_NOTES.md
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
