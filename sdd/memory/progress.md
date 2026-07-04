@@ -27,6 +27,7 @@ Fase 33 — Automated wiki sync         [x] done
 Fase 34 — Update agent prompts         [x] done
 Fase 35 — Remove install skill         [x] done
 Fase 36 — Structured documentation      [x] done
+Fase 37 — Publish stable 1.6.0          [x] done
 ```
 
 ## Features ativas
@@ -58,21 +59,21 @@ Fase 36 — Structured documentation      [x] done
 | feat-34-update-agent-prompts | feat/update-agent-prompts | done |
 | feat-35-remove-install-skill | feat/remove-install-skill | done |
 | feat-36-structured-documentation | feat/structured-documentation | done |
+| feat-37-publish-1.6.0 | feat/publish-1.6.0 | done |
 
 ## Próximo passo
 **Iniciar:** —
 **Bloqueios:** —
 
 ## Handoff da última sessão
-- Feature 35 concluída (deleção completa da funcionalidade não definida /install-skill e de todas as suas referências).
-- Feature 34 concluída (migração dos prompts de Copilot de 'mode' para 'agent' e definição de status e doctor como agent: agent).
+- Feature 37 concluída (versão estável 1.6.0 oficializada no repositório com atualização de metadados, testes, código-fonte e histórico de releases).
 
 ## Última sessão
+- 2026-07-03 — feat: concluída a Fase 37 (publicação oficial da versão estável v1.6.0).
 - 2026-06-30 — feat: concluída a Fase 36 (criação da documentação estruturada com diagramas conceituais Mermaid baseados no Craft.ai).
 - 2026-06-29 — feat: concluída a Fase 35 (remoção da funcionalidade /install-skill nos três agentes e documentação).
 - 2026-06-29 — feat: concluída a Fase 34 (migração dos prompts do Copilot para nova especificação).
 - 2026-06-28 — feat: concluída a Fase 33 (sincronização automática da wiki no GitHub Actions).
 - 2026-06-28 — feat: concluída a Fase 23 (MCP e Habilidades Específicas por Agente) e finalizado o roadmap do forge-sdd.
-- 2026-06-28 — chore: finalizada a Fase 24 (Handoff Automático) e removida a Fase 25 (OpenAI Codex) do roadmap.
 
 > Histórico completo em `progress-log.md`
