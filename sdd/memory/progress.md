@@ -28,7 +28,7 @@ Fase 34 — Update agent prompts         [x] done
 Fase 35 — Remove install skill         [x] done
 Fase 36 — Structured documentation      [x] done
 Fase 37 — Publish stable 1.6.0          [x] done
-Fase 38 — CLI smart upgrade/beta        [ ] todo
+Fase 38 — CLI smart upgrade/beta        [x] done
 ```
 
 ## Features ativas
@@ -61,16 +61,17 @@ Fase 38 — CLI smart upgrade/beta        [ ] todo
 | feat-35-remove-install-skill | feat/remove-install-skill | done |
 | feat-36-structured-documentation | feat/structured-documentation | done |
 | feat-37-publish-1.6.0 | feat/publish-1.6.0 | done |
-| feat-38-cli-detect-existing | feat/cli-detect-existing | todo |
+| feat-38-cli-detect-existing | feat/cli-detect-existing | done |
 
 ## Próximo passo
-**Iniciar:** Implementar detecção de projeto existente e rotina de consulta ao NPM Registry no CLI (Fase 38).
+**Iniciar:** —
 **Bloqueios:** —
 
 ## Handoff da última sessão
-- Feature 37 concluída (versão estável 1.6.0 oficializada no repositório com atualização de metadados, testes, código-fonte e histórico de releases).
+- Feature 38 concluída (CLI agora detecta contextual de forma inteligente projetos existentes e sugere upgrades estáveis/betas consumidos via NPM, publicada tag pre-release beta v1.6.1-beta.0).
 
 ## Última sessão
+- 2026-07-04 — feat: concluída a Fase 38 (detecção inteligente de projeto e lançamento da v1.6.1-beta.0).
 - 2026-07-03 — feat: concluída a Fase 37 (publicação oficial da versão estável v1.6.0).
 - 2026-06-30 — feat: concluída a Fase 36 (criação da documentação estruturada com diagramas conceituais Mermaid detalhados).
 - 2026-06-29 — feat: concluída a Fase 35 (remoção da funcionalidade /install-skill nos três agentes e documentação).
@@ -79,3 +80,4 @@ Fase 38 — CLI smart upgrade/beta        [ ] todo
 - 2026-06-28 — feat: concluída a Fase 23 (MCP e Habilidades Específicas por Agente) e finalizado o roadmap do forge-sdd.
 
 > Histórico completo em `progress-log.md`
+
