@@ -41,6 +41,7 @@ main
                                                                  └─ feat/remove-install-skill
                                                                      └─ feat/structured-documentation
                                                                          └─ feat/publish-1.6.0
+                                                                             └─ feat/cli-detect-existing
             ```
 
                                        ## Janelas de paralelismo
@@ -87,3 +88,4 @@ main
 | 35 | feat-35-remove-install-skill.md | feat/remove-install-skill | 35 | done |
 | 36 | feat-36-structured-documentation.md | feat/structured-documentation | 36 | done |
 | 37 | feat-37-publish-1.6.0.md | feat/publish-1.6.0 | 37 | done |
+| 38 | feat-38-cli-detect-existing.md | feat/cli-detect-existing | 38 | todo |

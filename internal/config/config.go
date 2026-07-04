@@ -3,9 +3,12 @@ package config
 import (
 	"encoding/json"
 	"fmt"
+	"io"
+	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/spf13/cobra"
 )
@@ -166,7 +169,7 @@ func Defaults() Config {
 		DB:         "none",
 		Telemetry:  true,
 		Lang:       "pt-BR",
-		SddVersion: "1.6.0",
+		SddVersion: "1.6.1-beta.0",
 		DryRun:     false,
 		Agents:     []string{AgentCopilot},
 	}
@@ -206,3 +209,47 @@ func FromFlags(cmd *cobra.Command) Config {
 	}
 	return cfg
 }
+
+// DetectProject verifica se o diretório já contém um projeto Forge-SDD.
+func DetectProject(dir string) bool {
+	path := filepath.Join(dir, "sdd", ".sddrc")
+	_, err := os.Stat(path)
+	return err == nil
+}
+
+var npmRegistryURL = "https://registry.npmjs.org/@nathanramorim/forge-sdd"
+
+type npmRegistryResponse struct {
+	DistTags map[string]string `json:"dist-tags"`
+}
+
+// FetchNpmVersions busca as últimas versões publicadas (latest e beta) no NPM Registry.
+func FetchNpmVersions() (latest string, beta string, err error) {
+	client := &http.Client{
+		Timeout: 2 * time.Second,
+	}
+	resp, err := client.Get(npmRegistryURL)
+	if err != nil {
+		return "", "", fmt.Errorf("erro na requisição do NPM Registry: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return "", "", fmt.Errorf("status HTTP inválido: %d", resp.StatusCode)
+	}
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", "", fmt.Errorf("erro ao ler corpo da resposta: %w", err)
+	}
+
+	var data npmRegistryResponse
+	if err := json.Unmarshal(body, &data); err != nil {
+		return "", "", fmt.Errorf("erro ao decodificar JSON do NPM: %w", err)
+	}
+
+	latest = data.DistTags["latest"]
+	beta = data.DistTags["beta"]
+	return latest, beta, nil
+}
+

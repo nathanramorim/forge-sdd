@@ -28,6 +28,7 @@ Fase 34 — Update agent prompts         [x] done
 Fase 35 — Remove install skill         [x] done
 Fase 36 — Structured documentation      [x] done
 Fase 37 — Publish stable 1.6.0          [x] done
+Fase 38 — CLI smart upgrade/beta        [ ] todo
 ```
 
 ## Features ativas
@@ -60,9 +61,10 @@ Fase 37 — Publish stable 1.6.0          [x] done
 | feat-35-remove-install-skill | feat/remove-install-skill | done |
 | feat-36-structured-documentation | feat/structured-documentation | done |
 | feat-37-publish-1.6.0 | feat/publish-1.6.0 | done |
+| feat-38-cli-detect-existing | feat/cli-detect-existing | todo |
 
 ## Próximo passo
-**Iniciar:** —
+**Iniciar:** Implementar detecção de projeto existente e rotina de consulta ao NPM Registry no CLI (Fase 38).
 **Bloqueios:** —
 
 ## Handoff da última sessão
