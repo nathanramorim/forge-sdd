@@ -4,6 +4,11 @@ Este arquivo registra o histórico de entregas de produto deste projeto.
 
 ## Entregas
 
+### Versão 1.6.1-beta.0 (Beta)
+
+- **Fase 38 — Detecção Inteligente e Upgrade no CLI**: O CLI agora detecta automaticamente se o diretório alvo já possui a metodologia estruturada de SDD e redireciona para a interface de upgrade.
+- **Consulta ao NPM Registry**: O CLI consulta de forma assíncrona as versões oficiais (`latest`) e de teste (`beta`) direto no repositório NPM para que o usuário selecione para qual deseja atualizar.
+
 ### Versão 1.6.0 (Estável)
 
 - **Fase 36 — Documentação Estruturada**: Estruturação de diagramas conceituais Mermaid detalhados para visualização clara de fluxos e arquitetura.

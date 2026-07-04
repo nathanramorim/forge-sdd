@@ -164,3 +164,43 @@ func RunUpdate(existing []string, currentVersion, binaryVersion string) (UpdateC
 	}, nil
 }
 
+// RunSmartUpgradePrompt pergunta de forma interativa para qual versão o usuário quer atualizar se um projeto existente for detectado.
+func RunSmartUpgradePrompt(currentVersion, latestVersion, betaVersion string) (string, error) {
+	var targetOption string
+
+	options := []huh.Option[string]{
+		huh.NewOption(fmt.Sprintf("Não atualizar (manter na v%s)", currentVersion), "keep"),
+	}
+
+	if latestVersion != "" {
+		options = append(options, huh.NewOption(fmt.Sprintf("Versão Oficial Estável: v%s (latest)", latestVersion), "latest"))
+	}
+	if betaVersion != "" {
+		options = append(options, huh.NewOption(fmt.Sprintf("Versão de Teste Beta: v%s (beta)", betaVersion), "beta"))
+	}
+
+	form := huh.NewForm(
+		huh.NewGroup(
+			huh.NewSelect[string]().
+				Title("Projeto existente detectado!").
+				Description(fmt.Sprintf("Deseja atualizar a estrutura do Forge-SDD de v%s para uma versão mais recente?", currentVersion)).
+				Options(options...).
+				Value(&targetOption),
+		),
+	)
+
+	if err := form.Run(); err != nil {
+		return "", err
+	}
+
+	switch targetOption {
+	case "latest":
+		return latestVersion, nil
+	case "beta":
+		return betaVersion, nil
+	default:
+		return "", nil // keep/não atualizar
+	}
+}
+
+
