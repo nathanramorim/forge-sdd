@@ -46,3 +46,4 @@ Uma **Skill** no ecossistema do forge-sdd é uma pasta contendo:
 *   `SKILL.md`: As regras, system prompt e guia de comportamento da persona.
 *   `scripts/` (opcional): Scripts utilitários executáveis pela IA para automatizar tarefas daquela skill.
 *   `examples/` (opcional): Códigos de referência para guiar o aprendizado do modelo.
+

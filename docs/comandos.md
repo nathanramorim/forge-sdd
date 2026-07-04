@@ -113,6 +113,7 @@ Digitados na interface de chat do agente de IA configurado no projeto (ex: Gemin
 - **Exemplo de uso:** 
   > `/archive`
 
+
 ### `/upgrade-sdd <versao>` ou `"atualizar sdd para vX"`
 - **Quando usar:** Quando uma nova versão do framework forge-sdd for lançada.
 - **O que faz:** Inicia a rotina do **Migrator** para atualizar a metodologia no projeto para a versão indicada.
