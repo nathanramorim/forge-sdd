@@ -747,6 +747,12 @@ Mudanças seguem semver:
 
 Nenhum conteúdo de domínio é tocado.
 
+### Releases Beta vs Estáveis
+
+Para garantir a estabilidade do fluxo principal:
+- **Lançamentos Beta (`-beta`):** A tag correspondente (ex: `v1.6.1-beta.0`) é criada e enviada diretamente a partir de sua branch de feature. O Pull Request (PR) correspondente deve ser mantido **aberto** no GitHub para testes e validações em ambiente real por um período.
+- **Lançamentos Estáveis/Oficiais:** Apenas após a consolidação dos testes no canal beta, o PR da feature é mergeado na branch `main` e a tag estável (ex: `v1.6.1`) é publicada como oficial.
+
 ---
 
 ## 20. Resumo executivo das decisões-chave
