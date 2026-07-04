@@ -112,11 +112,11 @@ func RunUpdate(existing []string, currentVersion, binaryVersion string) (UpdateC
 	var toAdd []string
 
 	for _, a := range allAgents {
-		opt := huh.NewOption(a.label, a.id)
+		label := a.label
 		if existingSet[a.id] {
-			opt = opt.Selected(true)
-			toAdd = append(toAdd, a.id)
+			label = fmt.Sprintf("%s (Já instalado)", a.label)
 		}
+		opt := huh.NewOption(label, a.id)
 		options = append(options, opt)
 	}
 
@@ -137,7 +137,7 @@ func RunUpdate(existing []string, currentVersion, binaryVersion string) (UpdateC
 	}
 
 	// Campo de agentes
-	desc := "Os agentes já configurados estão marcados e serão atualizados para a nova versão caso mantidos selecionados."
+	desc := "Selecione novos agentes para instalar ou marque os já existentes para reinstalar/atualizar seus prompts."
 	groups = append(groups, huh.NewGroup(
 		huh.NewMultiSelect[string]().
 			Title("Configurar/Atualizar agentes de IA").
