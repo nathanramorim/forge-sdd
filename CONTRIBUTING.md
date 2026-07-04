@@ -107,7 +107,7 @@ git push origin v1.2.0
 
 O goreleaser faz tudo automaticamente ao receber uma tag `v*`. Ele:
 1. Compila para 5 plataformas (linux/darwin × amd64/arm64 + windows/amd64)
-2. Cria o GitHub Release com os archives e `checksums.txt` diretamente neste repositório
+2. Extrai automaticamente as notas de release correspondentes à versão a partir do arquivo [history.md](file:///Users/nathanramorim/git/forge-sdd/sdd/releases/history.md) e cria o GitHub Release contendo as novidades da versão, archives e `checksums.txt` diretamente neste repositório.
 3. O NPM downloader (`npm/bin/run.js`) busca os binários automaticamente a partir do GitHub Release
 
 ### Pré-requisitos

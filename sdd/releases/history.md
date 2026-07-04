@@ -4,10 +4,17 @@ Este arquivo registra o histórico de entregas de produto deste projeto.
 
 ## Entregas
 
+### Versão 1.6.0 (Estável)
+
+- **Fase 36 — Documentação Estruturada**: Estruturação de diagramas conceituais Mermaid baseados no framework Craft.ai para visualização clara de fluxos e arquitetura.
+- **Fase 35 — Remoção de Skill Incompleta**: Limpeza completa da funcionalidade de instalação de skill (`/install-skill`) em todos os prompts, agentes e documentação.
+- **Fase 34 — Reestruturação de Prompts por Agente**: Migração dos prompts do Copilot e unificação dos prompts de sistema e habilidades customizadas específicas para Gemini, Claude e Copilot.
 - **Fase 33 — Sincronização Automática da Wiki**: A documentação oficial (diretório docs/ e README) agora é enviada e atualizada automaticamente na wiki do repositório lp-forge-sdd a cada nova tag publicada.
 - **Fase 32 — Geração de Release Notes**: Agora o agente documenta as entregas de cada feature de forma automática e em linguagem clara de produto ao encerrar as tarefas.
 - **Fase 31 — Preservação de Domínio no Upgrade**: As atualizações do Forge-SDD ou do CLI protegem e preservam todas as suas especificações e arquivos de domínio do usuário.
 - **Fase 30 — Correções de Fluxo de Branches**: Ajustado o fluxo de desenvolvimento automático do agente para garantir criação prévia de branches e integração robusta de PRs via `gh` CLI.
+
+### Versões Anteriores (v1.5.3 para trás)
 - **Fase 29 — Consolidação de Distribuição NPM**: Remoção do suporte ao Homebrew para focar a distribuição e execução do CLI inteiramente via `npx` simplificando pipelines.
 - **Fase 28 — Guia de Fluxo de Desenvolvimento**: Lançamento do Guia de Fluxo do SDD (`sdd/FLOW.md`) detalhando boas práticas de splits de feature e discovery.
 - **Fase 27 — Atualização de Node no CI**: Upgrade dos workflows do GitHub Actions para utilizar Node 24 para garantir o pipeline livre de depreciation warnings.

@@ -11,8 +11,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// version é injetada via ldflags: -X main.version=1.5.3
-var version = "1.5.3"
+// version é injetada via ldflags: -X main.version=1.6.0
+var version = "1.6.0"
 
 var rootCmd = &cobra.Command{
 	Use:   "forge-sdd",
@@ -219,7 +219,7 @@ func init() {
 	initCmd.Flags().String("stack", "", "Stack principal: go, node, python, rust, other")
 	initCmd.Flags().String("db", "", "Banco de dados: postgres, sqlite, mongo, none")
 	initCmd.Flags().String("lang", "", "Idioma: pt-BR, en")
-	initCmd.Flags().String("version", "", "Versão Forge-SDD (default: 1.5.3)")
+	initCmd.Flags().String("version", "", "Versão Forge-SDD (default: 1.6.0)")
 	initCmd.Flags().Bool("no-telemetry", false, "Desabilitar telemetria local")
 	initCmd.Flags().String("agent", "", "Agente(s) de IA: copilot, claude, gemini (csv, default: copilot)")
 	rootCmd.AddCommand(initCmd)
