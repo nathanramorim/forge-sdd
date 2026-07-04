@@ -134,7 +134,7 @@ jobs:
             echo "No changes in wiki, skipping commit."
           else
             git commit -m "docs: sync wiki from forge-sdd tag ${TAG_NAME}"
-            git push origin "${BRANCH_NAME}"
+            git push origin "${BRANCH_NAME}" --force
             
             echo "Creating Pull Request on lp-forge-sdd via REST API..."
             RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" \
