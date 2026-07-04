@@ -96,6 +96,7 @@ func Run(cfg config.Config, targetDir string) ([]string, error) {
 		created = append(created, files...)
 	}
 
+	cleanObsoleteFiles(targetDir)
 	return created, nil
 }
 
@@ -181,6 +182,7 @@ func RunAgents(cfg config.Config, agents []string, targetDir string) ([]string, 
 		}
 		created = append(created, files...)
 	}
+	cleanObsoleteFiles(targetDir)
 	return created, nil
 }
 
@@ -230,5 +232,20 @@ func shouldPreserve(dest string, targetDir string) bool {
 
 	// Arquivos fora de sdd/ (configurações e instruções de agente) devem ser atualizados
 	return false
+}
+
+// cleanObsoleteFiles remove arquivos de templates descontinuados ou obsoletos.
+func cleanObsoleteFiles(targetDir string) {
+	obsolete := []string{
+		filepath.Join(".github", "prompts", "install-skill.prompt.md"),
+		filepath.Join(".gemini", "prompts", "install-skill.prompt.md"),
+		filepath.Join(".claude", "commands", "install-skill.prompt.md"),
+	}
+	for _, rel := range obsolete {
+		path := filepath.Join(targetDir, rel)
+		if _, err := os.Stat(path); err == nil {
+			_ = os.Remove(path)
+		}
+	}
 }
 

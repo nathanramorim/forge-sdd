@@ -184,11 +184,12 @@ func runUpdateFlow(cmd *cobra.Command, targetDir string) error {
 		targetVersion = chosenVersion
 
 		choice, err := survey.RunUpdate(rc.Agents, projectVersion, version)
-		if err == nil {
-			toAdd = choice.AgentsToAdd
-			if targetVersion == "" {
-				targetVersion = choice.TargetVersion
-			}
+		if err != nil {
+			return fmt.Errorf("formulário cancelado: %w", err)
+		}
+		toAdd = choice.AgentsToAdd
+		if targetVersion == "" {
+			targetVersion = choice.TargetVersion
 		}
 	}
 
