@@ -22,7 +22,7 @@ CLI Go de comando único (`forge-sdd init`) que scaffolda estruturas Forge-SDD e
 | Embed de templates | `embed.FS` — binário único, sem assets externos |
 | Não sobrescrever arquivos | Erro com lista de conflitos — evitar perda de dados |
 
-## Regras (máx. 10)
+## Regras (máx. 12)
 1. Sem commits diretos em main
 2. Branch por feature (`feat/*`)
 3. Templates embutidos via `embed.FS` (nunca arquivo externo em runtime)
@@ -32,4 +32,5 @@ CLI Go de comando único (`forge-sdd init`) que scaffolda estruturas Forge-SDD e
 7. `go vet ./...` deve passar após cada task
 8. Binário final sem dependências de runtime além da stdlib
 9. `--dry-run` nunca cria arquivos — apenas imprime árvore
-10. CLI só expõe `init` — sem subcomandos de runtime
+10. CLI expõe os comandos públicos `init` e `update`
+11. Versões Beta (`-beta`) não podem ser mescladas na `main`; a tag é criada diretamente na branch de feature e o PR correspondente deve ser mantido aberto no GitHub para testes de estabilização antes de promover para oficial.
