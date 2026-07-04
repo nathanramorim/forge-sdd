@@ -108,21 +108,19 @@ func RunUpdate(existing []string, currentVersion, binaryVersion string) (UpdateC
 		{config.AgentOpenAI, "OpenAI (GPT-4/Codex)"},
 	}
 
-	var available []huh.Option[string]
+	var options []huh.Option[string]
+	var toAdd []string
+
 	for _, a := range allAgents {
-		if !existingSet[a.id] {
-			available = append(available, huh.NewOption(a.label, a.id))
+		opt := huh.NewOption(a.label, a.id)
+		if existingSet[a.id] {
+			opt = opt.Selected(true)
+			toAdd = append(toAdd, a.id)
 		}
+		options = append(options, opt)
 	}
 
 	versionOutdated := config.CompareVersions(currentVersion, binaryVersion) < 0
-	if !versionOutdated && len(available) == 0 {
-		return UpdateChoice{}, fmt.Errorf(
-			"nada a atualizar: versão %s em dia e todos os agentes configurados (%s)",
-			currentVersion, strings.Join(existing, ", "),
-		)
-	}
-
 	var groups []*huh.Group
 
 	// Campo de versão (apenas se desatualizado)
@@ -138,21 +136,15 @@ func RunUpdate(existing []string, currentVersion, binaryVersion string) (UpdateC
 		))
 	}
 
-	// Campo de agentes (apenas se houver disponíveis)
-	var toAdd []string
-	if len(available) > 0 {
-		desc := "Já configurados: " + strings.Join(existing, ", ")
-		if len(existing) == 0 {
-			desc = "Nenhum agente configurado ainda"
-		}
-		groups = append(groups, huh.NewGroup(
-			huh.NewMultiSelect[string]().
-				Title("Agente(s) a adicionar").
-				Description(desc).
-				Options(available...).
-				Value(&toAdd),
-		))
-	}
+	// Campo de agentes
+	desc := "Os agentes já configurados estão marcados e serão atualizados para a nova versão caso mantidos selecionados."
+	groups = append(groups, huh.NewGroup(
+		huh.NewMultiSelect[string]().
+			Title("Configurar/Atualizar agentes de IA").
+			Description(desc).
+			Options(options...).
+			Value(&toAdd),
+	))
 
 	if err := huh.NewForm(groups...).Run(); err != nil {
 		return UpdateChoice{}, err
