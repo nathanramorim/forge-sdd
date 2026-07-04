@@ -6,6 +6,7 @@
 > CLI open source que instala em qualquer projeto a **Metodologia Forge-SDD** — um framework de desenvolvimento guiado por IA que elimina a repetição de instruções, garante padrões arquiteturais e traz a expertise de um engenheiro sênior para o seu fluxo diário.
 
 🚀 **Landing Page:** [forge-sdd.vercel.app](https://forge-sdd.vercel.app)
+📘 **Arquitetura & Fluxo Conceitual:** [Documentação de Arquitetura e Fluxo do Forge-SDD](docs/arquitetura-e-fluxo-forge-sdd.md)
 
 ## Por que o forge-sdd? (Open Source)
 
@@ -194,7 +195,6 @@ flowchart LR
 | `/doctor` | Diagnóstico | Verifica integridade, MCPs e budgets |
 | `/archive` | `progress.md` > 1 KB | Move histórico antigo para o log |
 | `/upgrade-sdd` | Nova versão SDD | Migra a estrutura para a versão mais recente |
-| `/install-skill` | Reutilizar skill | Importa skill de uma URL do GitHub |
 
 ---
 
