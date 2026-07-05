@@ -6,6 +6,7 @@ agent: agent
 Invoque o Specifier para alinhar a estrutura SDD com o codebase atual.
 
 **Ações obrigatórias:**
+0. Antes de qualquer outra coisa, pergunte ao usuário (a) em qual idioma o chat deve interagir daqui em diante e (b) em qual idioma escrever commits e PRs (título e descrição). Registre a resposta em `sdd/memory/constitution.md`, seção Regras de Ouro, e siga essa escolha a partir desse ponto, inclusive nesta própria sessão.
 1. Ler arquivos de projeto (`go.mod`, `package.json`, etc.) e mapear diretórios.
 2. Identificar a Missão, Stack e Regras de Ouro (máx. 10).
 3. Atualizar:
