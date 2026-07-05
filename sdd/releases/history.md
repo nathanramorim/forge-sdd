@@ -4,6 +4,15 @@ Este arquivo registra o histórico de entregas de produto deste projeto.
 
 ## Entregas
 
+### Versão 1.6.1-beta.2 (Beta)
+
+- **Fase 40 — Refinamento do Comando `init` e Relatórios**:
+  - **Inteligência de Pastas no CLI:**
+    - `forge-sdd init meu-projeto`: Cria a subpasta `./meu-projeto/` e inicializa o scaffolding dentro dela.
+    - `forge-sdd init` (sem argumentos): Abre o formulário interativo e, ao final, cria uma subpasta com o nome digitado para o projeto, inicializando nela.
+    - `forge-sdd init .`: Inicializa na pasta atual, detectando automaticamente o nome do projeto com base no nome do diretório físico.
+  - **Relatórios de Fechamento:** Ao concluir `init` ou `update`, exibe um resumo visual consolidado das escolhas (Nome do projeto, Stack, BD, Idioma, Agentes e Telemetria).
+
 ### Versão 1.6.1-beta.1 (Beta)
 
 - **Fase 39 — Comandos doctor e destroy no CLI**: 

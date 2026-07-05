@@ -30,14 +30,15 @@ npx @nathanramorim/forge-sdd@latest init
 npx @nathanramorim/forge-sdd@latest init . --agent copilot,gemini --name meu-projeto
 ```
 
-## 📢 Novidades da Versão (v1.6.1-beta.1)
+## 📢 Novidades da Versão (v1.6.1-beta.2)
 
-A versão beta traz diagnósticos de saúde da instalação e remoção da estrutura:
+A versão beta traz inteligência na criação de subpastas e relatórios de conclusão:
 
-- **Fase 39 — Comandos doctor e destroy no CLI**: 
-  - Adicionado o comando `doctor` para diagnóstico completo de saúde dos componentes da metodologia, detecção de arquivos faltantes e progresso de features locais.
-  - Adicionado o comando `destroy` para remover com segurança e de forma interativa a estrutura inteira e configurações de agentes do repositório (com suporte a `--dry-run` e `--yes`).
-- **Ajustes de UI de Update**: O prompt de atualização de agentes agora exibe os agentes existentes desmarcados com o sufixo `(Já instalado)`, evitando sobrescritas acidentais e permitindo a seleção seletiva.
+- **Fase 40 — Refinamento do Comando `init` no CLI:**
+  - `forge-sdd init meu-projeto` cria a subpasta `./meu-projeto` física e instala a metodologia lá dentro.
+  - `forge-sdd init` (sem argumentos) cria uma subpasta correspondente ao nome do projeto informado no formulário interativo.
+  - `forge-sdd init .` instala diretamente na pasta atual, detectando automaticamente o nome do projeto pelo diretório físico.
+- **Relatórios de Fechamento:** Ao finalizar `init` ou `update`, exibe um resumo visual consolidado de todas as escolhas ativadas no terminal.
 
 ---
 

@@ -47,7 +47,7 @@ func TestDoctorAndDestroyCommands(t *testing.T) {
 
 	err = os.WriteFile(filepath.Join(sddDir, ".sddrc"), []byte(`{
 		"project": "test-proj",
-		"version": "1.6.1-beta.1",
+		"version": "1.6.1-beta.2",
 		"agents": ["gemini"],
 		"stack": "go",
 		"db": "postgres",
@@ -55,7 +55,7 @@ func TestDoctorAndDestroyCommands(t *testing.T) {
 	}`), 0644)
 	require.NoError(t, err)
 
-	err = os.WriteFile(filepath.Join(sddDir, ".sdd-version"), []byte("1.6.1-beta.1"), 0644)
+	err = os.WriteFile(filepath.Join(sddDir, ".sdd-version"), []byte("1.6.1-beta.2"), 0644)
 	require.NoError(t, err)
 
 	err = os.WriteFile(filepath.Join(sddDir, "memory", "progress.md"), []byte("# Progress"), 0644)
@@ -137,4 +137,46 @@ func TestDoctorAndDestroyCommands(t *testing.T) {
 	assert.NoDirExists(t, sddDir)
 	assert.NoFileExists(t, filepath.Join(tempDir, "GEMINI.md"))
 	assert.NoDirExists(t, filepath.Join(tempDir, ".gemini"))
+}
+
+func TestInitCommand(t *testing.T) {
+	// Cenário 1: Init com argumento de pasta (Caso A)
+	tempDirA := t.TempDir()
+	
+	_ = initCmd.Flags().Set("yes", "true")
+	_ = initCmd.Flags().Set("name", "")
+	_ = initCmd.Flags().Set("stack", "go")
+	_ = initCmd.Flags().Set("db", "postgres")
+	rootCmd.SetArgs([]string{"init", tempDirA})
+	
+	err := rootCmd.Execute()
+	require.NoError(t, err)
+
+	// Valida que os arquivos foram gerados na raiz da pasta e não em uma subpasta
+	assert.FileExists(t, filepath.Join(tempDirA, "sdd", ".sddrc"))
+	assert.FileExists(t, filepath.Join(tempDirA, "sdd", ".sdd-version"))
+
+	// Cenário 2: Init sem argumentos (Caso B)
+	tempDirB := t.TempDir()
+	
+	oldWd, err := os.Getwd()
+	require.NoError(t, err)
+	defer func() { _ = os.Chdir(oldWd) }()
+	
+	err = os.Chdir(tempDirB)
+	require.NoError(t, err)
+	
+	_ = initCmd.Flags().Set("yes", "true")
+	_ = initCmd.Flags().Set("name", "sub-proj")
+	_ = initCmd.Flags().Set("stack", "node")
+	_ = initCmd.Flags().Set("db", "postgres")
+	rootCmd.SetArgs([]string{"init"})
+	
+	err = rootCmd.Execute()
+	require.NoError(t, err)
+
+	// Valida que a subpasta "sub-proj" foi criada
+	subProjDir := filepath.Join(tempDirB, "sub-proj")
+	assert.DirExists(t, subProjDir)
+	assert.FileExists(t, filepath.Join(subProjDir, "sdd", ".sddrc"))
 }

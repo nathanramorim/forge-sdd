@@ -9,8 +9,11 @@ import (
 )
 
 // Run apresenta o formulário interativo e retorna a Config preenchida.
-func Run() (config.Config, error) {
+func Run(defaultProject string) (config.Config, error) {
 	cfg := config.Defaults()
+	if defaultProject != "" {
+		cfg.Project = defaultProject
+	}
 
 	form := huh.NewForm(
 		huh.NewGroup(
