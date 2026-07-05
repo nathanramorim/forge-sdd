@@ -195,4 +195,15 @@ func RunSmartUpgradePrompt(currentVersion, latestVersion, betaVersion string) (s
 	}
 }
 
+// RunConfirm apresenta um prompt de confirmação simples de Sim/Não.
+func RunConfirm(title, description string, defaultVal bool) (bool, error) {
+	var result bool = defaultVal
+	err := huh.NewConfirm().
+		Title(title).
+		Description(description).
+		Value(&result).
+		Run()
+	return result, err
+}
+
 

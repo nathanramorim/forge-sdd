@@ -269,6 +269,8 @@ func init() {
 	rootCmd.AddCommand(updateCmd)
 
 	rootCmd.AddCommand(versionCmd)
+	rootCmd.AddCommand(doctorCmd)
+	rootCmd.AddCommand(destroyCmd)
 }
 
 func main() {

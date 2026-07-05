@@ -29,6 +29,7 @@ Fase 35 — Remove install skill         [x] done
 Fase 36 — Structured documentation      [x] done
 Fase 37 — Publish stable 1.6.0          [x] done
 Fase 38 — CLI smart upgrade/beta        [x] done
+Fase 39 — CLI doctor and destroy cmd       [ ] todo
 ```
 
 ## Features ativas
@@ -62,6 +63,7 @@ Fase 38 — CLI smart upgrade/beta        [x] done
 | feat-36-structured-documentation | feat/structured-documentation | done |
 | feat-37-publish-1.6.0 | feat/publish-1.6.0 | done |
 | feat-38-cli-detect-existing | feat/cli-detect-existing | done |
+| feat-39-cli-doctor-destroy | feat/cli-doctor-destroy | todo |
 
 ## Próximo passo
 **Iniciar:** —
