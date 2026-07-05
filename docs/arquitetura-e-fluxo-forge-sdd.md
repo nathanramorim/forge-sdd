@@ -254,6 +254,8 @@ O framework disponibiliza comandos divididos em duas categorias: Comandos de Cha
     * `--dry-run`: Exibe a árvore de arquivos sem de fato alterá-los.
     * `--stack`, `--db`, `--agent`, `--lang`: Flags para customização da inicialização do repositório.
 * **`forge-sdd update`**: Atualiza regras estruturais de agentes, preservando estritamente os diretórios de domínio do projeto (`sdd/`).
+* **`forge-sdd doctor`**: Realiza diagnóstico de saúde e integridade da estrutura física do framework no repositório.
+* **`forge-sdd destroy`**: Desinstala e remove completamente toda a metodologia e configurações de agentes locais (com suporte a `--dry-run` e `--yes`).
 * **`forge-sdd version`**: Exibe a versão instalada da CLI do framework.
 
 ---
@@ -263,6 +265,6 @@ O framework disponibiliza comandos divididos em duas categorias: Comandos de Cha
 Para garantir que as regras da constituição e os guardrails de qualidade não sejam ignorados, o framework emprega mecanismos de automação:
 
 1. **Bootstrap de Contexto (IDE Hooks)**: Ao iniciar qualquer interação, as ferramentas de IDE compatíveis leem a memória e o glossário em `sdd/memory/` para injetar terminologias do projeto nas mensagens de sistema do agente.
-2. **Process Guard**: Trava de segurança que impede novas tarefas se houver modificações pendentes não revisadas ou testes quebrados no repositório local.
-3. **Session & Metrics Tracker**: Telemetria automática que registra o tempo decorrido, commits gerados e consumo de tokens para fins de auditoria de produtividade.
+2. **Process Guard (Lifecycle Guardrails)**: Regras imutáveis de pré-condições embutidas nas mensagens de sistema dos agentes que os impedem de iniciar novas tarefas se houver especificações pendentes de revisão ou testes locais quebrados no repositório.
+3. **Session & Metrics Tracker (Telemetria)**: Coleta local de dados anônimos de uso do CLI e registro de métricas de produtividade das sessões de desenvolvimento (como tempos decorridos e contagem de modificações) salvos localmente em `sdd/.metrics/`.
 4. **Portabilidade (Fallbacks)**: Em ambientes sem suporte nativo a hooks de lifecycle (como Copilot ou Cursor), as regras de verificação de pré-condições são embutidas nos prompts do kit de instruções do agente, induzindo a verificação manual por parte da IA.
