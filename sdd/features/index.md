@@ -43,6 +43,7 @@ main
                                                                          └─ feat/publish-1.6.0
                                                                              └─ feat/cli-detect-existing
                                                                                  └─ feat/cli-doctor-destroy
+                                                                                     └─ feat/cli-init-refinement
             ```
 
                                        ## Janelas de paralelismo
@@ -91,3 +92,4 @@ main
 | 37 | feat-37-publish-1.6.0.md | feat/publish-1.6.0 | 37 | done |
 | 38 | feat-38-cli-detect-existing.md | feat/cli-detect-existing | 38 | done |
 | 39 | feat-39-cli-doctor-destroy.md | feat/cli-doctor-destroy | 39 | todo |
+| 40 | feat-40-cli-init-refinement.md | feat/cli-init-refinement | 40 | todo |

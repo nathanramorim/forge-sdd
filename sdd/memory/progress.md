@@ -29,7 +29,8 @@ Fase 35 — Remove install skill         [x] done
 Fase 36 — Structured documentation      [x] done
 Fase 37 — Publish stable 1.6.0          [x] done
 Fase 38 — CLI smart upgrade/beta        [x] done
-Fase 39 — CLI doctor and destroy cmd       [ ] todo
+Fase 39 — CLI doctor and destroy cmd       [x] done
+Fase 40 — CLI init directory refinement     [ ] todo
 ```
 
 ## Features ativas
@@ -63,16 +64,18 @@ Fase 39 — CLI doctor and destroy cmd       [ ] todo
 | feat-36-structured-documentation | feat/structured-documentation | done |
 | feat-37-publish-1.6.0 | feat/publish-1.6.0 | done |
 | feat-38-cli-detect-existing | feat/cli-detect-existing | done |
-| feat-39-cli-doctor-destroy | feat/cli-doctor-destroy | todo |
+| feat-39-cli-doctor-destroy | feat/cli-doctor-destroy | done |
+| feat-40-cli-init-refinement | feat/cli-init-refinement | todo |
 
 ## Próximo passo
-**Iniciar:** —
+**Iniciar:** Implementar refinamento de criação de diretórios no comando init (Fase 40).
 **Bloqueios:** —
 
 ## Handoff da última sessão
-- Feature 38 concluída (CLI agora detecta contextual de forma inteligente projetos existentes e sugere upgrades estáveis/betas consumidos via NPM, publicada tag pre-release beta v1.6.1-beta.0).
+- Feature 39 concluída (comandos doctor e destroy implementados, testados, e empacotados na tag de testes v1.6.1-beta.1 no canal beta do NPM, com PR #21 aberto para testes).
 
 ## Última sessão
+- 2026-07-05 — feat: concluída a Fase 39 (implementação de comandos doctor/destroy e lançamento da v1.6.1-beta.1).
 - 2026-07-04 — feat: concluída a Fase 38 (detecção inteligente de projeto e lançamento da v1.6.1-beta.0).
 - 2026-07-03 — feat: concluída a Fase 37 (publicação oficial da versão estável v1.6.0).
 - 2026-06-30 — feat: concluída a Fase 36 (criação da documentação estruturada com diagramas conceituais Mermaid detalhados).
