@@ -120,41 +120,28 @@ Uma nova funcionalidade passa por um pipeline operacional sequencial com **Guard
 
 Os diagramas abaixo ilustram o comportamento, ciclo de vida e a arquitetura operacional do framework.
 
-### Diagrama 1: Modo Tradicional vs. Forge-SDD
-Demonstra o contraste entre o desenvolvimento assistido por IA convencional e o fluxo estruturado do Forge-SDD.
+### Diagrama 1: Modo Tradicional (Vibe Coding)
+Demonstra a ausência de especificação e controle de contexto no desenvolvimento convencional assistido por IA.
 
 ```mermaid
 graph TD
-    subgraph Tradicional["Modo Tradicional (Vibe Coding)"]
-        T1["Ideia Vaga no Chat de IA"] --> T2["IA gera código direto sem spec"]
-        T2 --> T3["Desenvolvedor copia e cola no projeto"]
-        T3 --> T4["Bugs complexos e regressões"]
-        T4 --> T5["Chat longo reexplicando tudo (perda de contexto)"]
-        T5 --> T1
-        style Tradicional fill:#ffe6e6,stroke:#ff8080,stroke-width:2px
-    end
-    subgraph Forge["Forge-SDD (Fluxo Estruturado)"]
-        F1["Discovery estruturado (/discovery)"] --> F2["Especificação BDD (/nova-feature)"]
-        F2 --> F3["Blueprint de Arquitetura & ADR"]
-        F3 --> F4["Desenvolvimento (Testes -> Código -> Refatoração)"]
-        F4 --> F5["Auditoria de Segurança & Qualidade (/revisar)"]
-        F5 --> F6["Handoff Automatizado e PR via CLI"]
-        style Forge fill:#e6ffe6,stroke:#80ff80,stroke-width:2px
-    end
+    T1["Ideia Vaga no Chat de IA"] --> T2["IA gera código direto sem spec"]
+    T2 --> T3["Desenvolvedor copia e cola no projeto"]
+    T3 --> T4["Bugs complexos e regressões"]
+    T4 --> T5["Chat longo reexplicando tudo (perda de contexto)"]
+    T5 --> T1
 ```
 
-### Diagrama 2: Ciclo de Construção — Princípio por Fase
-Ilustra como os princípios de engenharia de software (KISS, SOLID, DRY) são acoplados a cada etapa do desenvolvimento e refatoração do agente.
+### Diagrama 2: Forge-SDD (Fluxo Estruturado)
+Demonstra o fluxo sequencial com preservação de contexto, especificações claras e handoff controlado pelo framework.
 
 ```mermaid
-graph LR
-    Test["Test-First (Definição de Critérios)"] -->|"KISS (Keep It Simple, Stupid)"| Code["Código Objetivo (Executar Código)"]
-    Code -->|"SOLID + DRY (Polimento)"| Refactor["Refatoração e Design (Refinar)"]
-    Refactor -->|"Próxima tarefa"| Test
-    
-    style Test fill:#ffe6e6,stroke:#ff8080,stroke-dasharray: 5 5,stroke-width:2px
-    style Code fill:#e6ffe6,stroke:#80ff80,stroke-width:2px
-    style Refactor fill:#e6f2ff,stroke:#80b3ff,stroke-width:2px
+graph TD
+    F1["Discovery estruturado (/discovery)"] --> F2["Especificação BDD (/nova-feature)"]
+    F2 --> F3["Blueprint de Arquitetura & ADR"]
+    F3 --> F4["Desenvolvimento (Testes -> Código -> Refatoração)"]
+    F4 --> F5["Auditoria de Segurança & Qualidade (/revisar)"]
+    F5 --> F6["Handoff Automatizado e PR via CLI"]
 ```
 
 ### Diagrama 3: Feature Pipeline — Discovery First
@@ -184,30 +171,9 @@ graph LR
     Review -->|"Validação / Status"| Spec
     CI["Validação em Pipeline (Testes/Vetting)"] -->|"Alinhamento Contínuo"| Spec
     CI -->|"Alinhamento Contínuo"| Code
-    
-    style CI fill:#fff2cc,stroke:#d6b656,stroke-width:2px
 ```
 
-### Diagrama 5: Segurança — Dimensão Transversal
-A segurança é tratada como um elemento transversal contínuo por meio da verificação de regras da constituição e linters estáticos.
-
-```mermaid
-graph TD
-    subgraph VerificacoesEstaticas["Verificações Estáticas (Locais / Pre-commit)"]
-        C1["Secret Detection (Segurança de chaves)"]
-        C2["Linter Estático & go vet (Qualidade do Código)"]
-    end
-    
-    subgraph AnaliseDoAgente["Análise do Agente (Comando /revisar)"]
-        I1["Validação de Critério Executável (Comprovação empírica)"]
-        I2["Auditoria de Regras Imutáveis (Validação contra constitution.md)"]
-    end
-    
-    Code["Código Implementado"] --> VerificacoesEstaticas
-    Code --> AnaliseDoAgente
-```
-
-### Diagrama 6: Arquitetura do Framework e Suporte Multi-IDE
+### Diagrama 5: Arquitetura do Framework e Suporte Multi-IDE
 Mostra como o Forge-SDD mantém a independência de IDE por meio de adaptadores específicos que consomem as regras centrais estruturadas em `sdd/`.
 
 ```mermaid
