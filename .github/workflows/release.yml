@@ -83,6 +83,7 @@ jobs:
           cp ../docs/introducao.md wiki/content/
           cp ../docs/comandos.md wiki/content/
           cp ../docs/skills.md wiki/content/
+          cp ../docs/telemetria.md wiki/content/
           cp ../sdd/releases/history.md wiki/content/releases.md
           
           echo "Updating structure.json..."

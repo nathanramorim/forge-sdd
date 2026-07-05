@@ -68,5 +68,6 @@ A versão estável v1.6.0 trouxe grandes evoluções de arquitetura e consistên
 
 - [Landing Page](https://forge-sdd.vercel.app)
 - [Metodologia SDD](docs/metodologia-sdd.md)
+- [Telemetria e Métricas](docs/telemetria.md)
 - [Guia de Contribuição](CONTRIBUTING.md)
 - [Licença MIT](LICENSE)

@@ -69,4 +69,5 @@ A versão estável v1.6.0 trouxe grandes evoluções de arquitetura e consistên
 - [GitHub Repository](https://github.com/nathanramorim/forge-sdd)
 - [Landing Page](https://forge-sdd.vercel.app)
 - [Metodologia SDD](https://github.com/nathanramorim/forge-sdd/blob/main/docs/metodologia-sdd.md)
+- [Telemetria e Métricas](https://github.com/nathanramorim/forge-sdd/blob/main/docs/telemetria.md)
 - [Licença MIT](https://github.com/nathanramorim/forge-sdd/blob/main/LICENSE)
