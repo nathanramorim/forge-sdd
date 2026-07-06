@@ -47,7 +47,7 @@ func TestDoctorAndDestroyCommands(t *testing.T) {
 
 	err = os.WriteFile(filepath.Join(sddDir, ".sddrc"), []byte(`{
 		"project": "test-proj",
-		"version": "1.6.1-beta.2",
+		"version": "1.6.1-beta.3",
 		"agents": ["gemini"],
 		"stack": "go",
 		"db": "postgres",
@@ -55,7 +55,7 @@ func TestDoctorAndDestroyCommands(t *testing.T) {
 	}`), 0644)
 	require.NoError(t, err)
 
-	err = os.WriteFile(filepath.Join(sddDir, ".sdd-version"), []byte("1.6.1-beta.2"), 0644)
+	err = os.WriteFile(filepath.Join(sddDir, ".sdd-version"), []byte("1.6.1-beta.3"), 0644)
 	require.NoError(t, err)
 
 	err = os.WriteFile(filepath.Join(sddDir, "memory", "progress.md"), []byte("# Progress"), 0644)
@@ -66,6 +66,18 @@ func TestDoctorAndDestroyCommands(t *testing.T) {
 	err = os.WriteFile(filepath.Join(tempDir, "GEMINI.md"), []byte("# Gemini"), 0644)
 	require.NoError(t, err)
 	err = os.MkdirAll(filepath.Join(tempDir, ".gemini"), 0755)
+	require.NoError(t, err)
+
+	// Cria estrutura de features aninhadas
+	featuresDir := filepath.Join(sddDir, "features")
+	err = os.MkdirAll(filepath.Join(featuresDir, "feat-02-checkout"), 0755)
+	require.NoError(t, err)
+
+	err = os.WriteFile(filepath.Join(featuresDir, "feat-01-auth.md"), []byte("# Auth"), 0644)
+	require.NoError(t, err)
+	err = os.WriteFile(filepath.Join(featuresDir, "feat-02-checkout", "feat-02-01-api.md"), []byte("# API Checkout"), 0644)
+	require.NoError(t, err)
+	err = os.WriteFile(filepath.Join(featuresDir, "feat-02-checkout", "task-01-database.md"), []byte("# DB Checkout"), 0644)
 	require.NoError(t, err)
 
 	// 2. Executa o doctor e valida a saída positiva
@@ -88,6 +100,10 @@ func TestDoctorAndDestroyCommands(t *testing.T) {
 	assert.Contains(t, output, "Projeto: test-proj")
 	assert.Contains(t, output, "Gemini (Google): Configurado e integrado (GEMINI.md + .gemini/)")
 	assert.Contains(t, output, "Constituição (sdd/memory/constitution.md) ativa.")
+	assert.Contains(t, output, "Features Registradas: 3 cadastrada(s)")
+	assert.Contains(t, output, "sdd/features/feat-01-auth.md")
+	assert.Contains(t, output, "sdd/features/feat-02-checkout/feat-02-01-api.md")
+	assert.Contains(t, output, "sdd/features/feat-02-checkout/task-01-database.md")
 
 	// 3. Executa o destroy com --dry-run
 	r, w, _ = os.Pipe()

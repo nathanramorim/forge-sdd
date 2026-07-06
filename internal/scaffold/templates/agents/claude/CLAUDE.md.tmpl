@@ -13,7 +13,7 @@
 ## Arquivos críticos
 - `sdd/memory/progress.md` — estado ativo (leia primeiro a cada sessão)
 - `sdd/memory/constitution.md` — regras imutáveis
-- `sdd/features/feat-XX-*.md` — tarefa atual
+- `sdd/features/feat-XX-*.md` (ou aninhados em subpastas) — tarefa atual
 
 ## MCPs
 O Claude Desktop utiliza a configuração global em `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) ou `%APPDATA%\Claude\claude_desktop_config.json` (Windows).
@@ -30,6 +30,7 @@ Recomenda-se configurar os seguintes MCPs:
 - Consulte `sdd/memory/constitution.md` antes de decisões arquiteturais
 - Use ferramentas de leitura antes de editar qualquer arquivo
 - Siga rigorosamente a responsabilidade única por artefato (Specifier escreve specs, Builder escreve código, etc.)
+- Ao quebrar features em tasks ou discovery em features, agrupar arquivos em subpastas sob `sdd/features/` (a pasta da feature gerada pelo discovery deve refletir o nome do discovery).
 
 ## Comandos Customizados
 Este projeto define comandos em `.claude/commands/`. Use-os para tarefas recorrentes:

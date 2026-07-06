@@ -13,7 +13,7 @@ demo — stack principal: go.
 ## Arquivos críticos
 - `sdd/memory/progress.md` — estado ativo
 - `sdd/memory/constitution.md` — regras imutáveis
-- `sdd/features/feat-XX-*.md` — tarefa atual
+- `sdd/features/feat-XX-*.md` (ou aninhados em subpastas) — tarefa atual
 
 ## MCPs
 - **context7** — obrigatório antes de lib externa
@@ -22,3 +22,6 @@ demo — stack principal: go.
 ## Orçamentos
 - `progress.md` ≤ 1 KB → exceder dispara `/archive`
 - `chatmode` ≤ 500 tokens → detalhe vai para `skills/`
+
+## Regras
+- Ao quebrar features em tasks ou discovery em features, agrupar arquivos em subpastas sob `sdd/features/` (a pasta da feature gerada pelo discovery deve refletir o nome do discovery).

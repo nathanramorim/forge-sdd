@@ -144,16 +144,26 @@ inconsistências de configuração dos agentes de IA e progresso das features.`,
 
 		// 5. Varredura de features
 		featuresDir := filepath.Join(targetDir, "sdd", "features")
-		if entries, err := os.ReadDir(featuresDir); err == nil {
-			featureCount := 0
-			var activeFeatures []string
-			for _, entry := range entries {
-				if !entry.IsDir() && strings.HasPrefix(entry.Name(), "feat-") && strings.HasSuffix(entry.Name(), ".md") {
-					featureCount++
-					activeFeatures = append(activeFeatures, entry.Name())
+		var activeFeatures []string
+		err = filepath.WalkDir(featuresDir, func(path string, d os.DirEntry, err error) error {
+			if err != nil {
+				return err
+			}
+			if !d.IsDir() && strings.HasSuffix(d.Name(), ".md") {
+				if strings.HasPrefix(d.Name(), "feat-") || strings.HasPrefix(d.Name(), "task-") {
+					relPath, err := filepath.Rel(featuresDir, path)
+					if err == nil {
+						activeFeatures = append(activeFeatures, relPath)
+					} else {
+						activeFeatures = append(activeFeatures, d.Name())
+					}
 				}
 			}
-			fmt.Printf("\n📋 Features Registradas: %d cadastrada(s)\n", featureCount)
+			return nil
+		})
+
+		if err == nil {
+			fmt.Printf("\n📋 Features Registradas: %d cadastrada(s)\n", len(activeFeatures))
 			if len(activeFeatures) > 0 {
 				fmt.Println("  Caminhos:")
 				for _, feat := range activeFeatures {
