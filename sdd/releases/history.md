@@ -4,7 +4,7 @@ Este arquivo registra o histórico de entregas de produto deste projeto.
 
 ## Entregas
 
-### Versão 1.7.1-beta.0 (Beta)
+### Versão 1.7.1-beta.1 (Beta)
 
 Esta release beta traz a flexibilização do padrão de nomenclatura de especificações no SDD, permitindo o desenvolvimento assíncrono e paralelo sem colisões.
 

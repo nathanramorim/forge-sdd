@@ -30,7 +30,7 @@ npx @nathanramorim/forge-sdd@latest init
 npx @nathanramorim/forge-sdd@latest init . --agent copilot,gemini --name meu-projeto
 ```
 
-## 📢 Novidades da Versão (v1.7.1-beta.0)
+## 📢 Novidades da Versão (v1.7.1-beta.1)
 
 Esta versão de testes beta traz a flexibilização do padrão de nomenclatura de especificações no SDD:
 

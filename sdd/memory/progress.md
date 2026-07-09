@@ -78,7 +78,7 @@ Fase 43a1 — Nomenclatura com Workitem e Hash Hexadecimal [x] done
 **Bloqueios:** —
 
 ## Handoff da última sessão
-- Fase 43a1 concluída (flexibilização da nomenclatura para Workitem de referência ou hash hexadecimal aleatório de 4 dígitos nos agentes, atualização de templates e golden tests, bump de versão para 1.7.1-beta.0).
+- Fase 43a1 concluída (flexibilização da nomenclatura para Workitem de referência ou hash hexadecimal aleatório de 4 dígitos nos agentes, atualização de templates e golden tests, bump de versão para 1.7.1-beta.1).
 
 ## Última sessão
 - 2026-07-09 — feat: concluída a Fase 43a1 (nomenclatura com Workitem e hash hexadecimal aleatório).
