@@ -65,16 +65,17 @@ Fase 40 — CLI init directory refinement     [ ] todo
 | feat-37-publish-1.6.0 | feat/publish-1.6.0 | done |
 | feat-38-cli-detect-existing | feat/cli-detect-existing | done |
 | feat-39-cli-doctor-destroy | feat/cli-doctor-destroy | done |
-| feat-40-cli-init-refinement | feat/cli-init-refinement | todo |
+| feat-40-cli-init-refinement | feat/cli-init-refinement | done |
 
 ## Próximo passo
-**Iniciar:** Implementar refinamento de criação de diretórios no comando init (Fase 40).
+**Iniciar:** Nenhuma feature pendente de planejamento.
 **Bloqueios:** —
 
 ## Handoff da última sessão
-- Feature 39 concluída (comandos doctor e destroy implementados, testados, e empacotados na tag de testes v1.6.1-beta.1 no canal beta do NPM, com PR #21 aberto para testes).
+- Feature 40 concluída (refinamento do init, criação de subpastas, relatórios e lançamento da v1.6.1-beta.2 no canal beta do NPM, com PR #22 aberto para testes).
 
 ## Última sessão
+- 2026-07-05 — feat: concluída a Fase 40 (refinamento do init, criação de subpastas, relatórios e lançamento da v1.6.1-beta.2).
 - 2026-07-05 — feat: concluída a Fase 39 (implementação de comandos doctor/destroy e lançamento da v1.6.1-beta.1).
 - 2026-07-04 — feat: concluída a Fase 38 (detecção inteligente de projeto e lançamento da v1.6.1-beta.0).
 - 2026-07-03 — feat: concluída a Fase 37 (publicação oficial da versão estável v1.6.0).

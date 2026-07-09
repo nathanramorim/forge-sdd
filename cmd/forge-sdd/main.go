@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/forge-sdd/cli/internal/config"
@@ -11,8 +12,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// version é injetada via ldflags: -X main.version=1.6.1-beta.1
-var version = "1.6.1-beta.1"
+// version é injetada via ldflags: -X main.version=1.6.1-beta.2
+var version = "1.6.1-beta.2"
 
 var rootCmd = &cobra.Command{
 	Use:   "forge-sdd",
@@ -46,11 +47,11 @@ var initCmd = &cobra.Command{
 Preenche os templates com as informações do projeto coletadas interativamente ou via flags.`,
 	Args: cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		targetDir := "."
+		var dirArg string
 		if len(args) == 1 {
-			targetDir = args[0]
+			dirArg = args[0]
 		}
-		return runInitFlow(cmd, targetDir)
+		return runInitFlow(cmd, dirArg)
 	},
 }
 
@@ -73,14 +74,31 @@ A estrutura de domínio em sdd/ (features, spec, memory) nunca é alterada.`,
 	},
 }
 
-func runInitFlow(cmd *cobra.Command, targetDir string) error {
-	if config.DetectProject(targetDir) {
-		fmt.Printf("\n→ Estrutura Forge-SDD já detectada em %s. Redirecionando para atualização...\n", targetDir)
-		return runUpdateFlow(cmd, targetDir)
-	}
-
+func runInitFlow(cmd *cobra.Command, dirArg string) error {
 	yes, _ := cmd.Flags().GetBool("yes")
 	dryRun, _ := cmd.Flags().GetBool("dry-run")
+	nameFlag, _ := cmd.Flags().GetString("name")
+
+	var targetDir string
+	var defaultProjectName string
+
+	// CASO A: Usuário especificou diretório (ex: init . ou init meu-projeto)
+	if dirArg != "" {
+		targetDir = dirArg
+		// Se a pasta física já tiver Forge-SDD, redireciona para update
+		if config.DetectProject(targetDir) {
+			fmt.Printf("\n→ Estrutura Forge-SDD já detectada em %s. Redirecionando para atualização...\n", targetDir)
+			return runUpdateFlow(cmd, targetDir)
+		}
+
+		// Extrair nome do projeto padrão a partir do caminho físico
+		absPath, err := filepath.Abs(targetDir)
+		if err == nil {
+			defaultProjectName = filepath.Base(absPath)
+		} else {
+			defaultProjectName = filepath.Base(targetDir)
+		}
+	}
 
 	var cfg config.Config
 	if yes {
@@ -93,17 +111,49 @@ func runInitFlow(cmd *cobra.Command, targetDir string) error {
 			cfg.Agents = agents
 		}
 		cfg.DryRun = dryRun
-	} else {
-		var err error
-		cfg, err = survey.Run()
-		if err != nil {
-			return fmt.Errorf("formulário cancelado: %w", err)
+
+		// Se o usuário passou um diretório (Caso A), usa esse diretório e ajusta o nome se nameFlag estiver vazia
+		if dirArg != "" {
+			if nameFlag == "" {
+				cfg.Project = defaultProjectName
+			}
+		} else {
+			// CASO B: Sem argumentos (automático via flags)
+			// Usa o nome do projeto para criar a subpasta correspondente
+			targetDir = "./" + cfg.Project
 		}
-		cfg.DryRun = dryRun
+	} else {
+		// Modo interativo
+		if dirArg != "" {
+			// Caso A (interativo): passa o nome padrão obtido do diretório
+			var err error
+			cfg, err = survey.Run(defaultProjectName)
+			if err != nil {
+				return fmt.Errorf("formulário cancelado: %w", err)
+			}
+			cfg.DryRun = dryRun
+		} else {
+			// Caso B (interativo): sem argumentos, coleta o nome do projeto
+			var err error
+			cfg, err = survey.Run("")
+			if err != nil {
+				return fmt.Errorf("formulário cancelado: %w", err)
+			}
+			cfg.DryRun = dryRun
+			// O diretório alvo será a subpasta com o nome do projeto
+			targetDir = "./" + cfg.Project
+		}
 	}
 
 	if cfg.SddVersion == config.Defaults().SddVersion && version != "dev" {
 		cfg.SddVersion = version
+	}
+
+	// Criar a pasta se ela não for o diretório atual e se não for dry-run
+	if targetDir != "." && !cfg.DryRun {
+		if err := os.MkdirAll(targetDir, 0755); err != nil {
+			return fmt.Errorf("falha ao criar diretório %s: %w", targetDir, err)
+		}
 	}
 
 	created, err := scaffold.Run(cfg, targetDir)
@@ -111,11 +161,7 @@ func runInitFlow(cmd *cobra.Command, targetDir string) error {
 		return fmt.Errorf("scaffold falhou: %w", err)
 	}
 
-	fmt.Printf("\n✓ Estrutura Forge-SDD criada em %s (%d arquivos)\n\n", targetDir, len(created))
-	fmt.Println("Próximos passos:")
-	fmt.Println("  1. Abra o projeto no VS Code")
-	fmt.Println("  2. Aceite as extensões recomendadas (Copilot, MCP)")
-	fmt.Println("  3. Leia sdd/memory/progress.md para começar")
+	printSummaryReport(cfg, targetDir, len(created))
 	return nil
 }
 
@@ -222,32 +268,52 @@ func runUpdateFlow(cmd *cobra.Command, targetDir string) error {
 		}
 	}
 
-	fmt.Printf("\n✓ Atualização concluída (%d arquivos)\n\n", len(created))
-
+	// Recria a config base atualizada com as escolhas finais
+	finalCfg := baseCfg
 	if targetVersion != "" {
-		fmt.Printf("  Versão: v%s → v%s\n", projectVersion, targetVersion)
-	}
-	if len(toAdd) > 0 {
-		fmt.Printf("  Agentes adicionados: %s\n", strings.Join(toAdd, ", "))
+		finalCfg.SddVersion = targetVersion
 	}
 
-	fmt.Println("\nPróximos passos:")
-	for _, a := range toAdd {
-		switch a {
-		case config.AgentClaude:
-			fmt.Println("  • Claude: leia CLAUDE.md e abra o projeto no Claude Code")
-		case config.AgentGemini:
-			fmt.Println("  • Gemini: leia GEMINI.md e abra o projeto no Gemini")
-		case config.AgentOpenAI:
-			fmt.Println("  • OpenAI: leia OPENAI.md e configure sua chave de API")
-		case config.AgentCopilot:
-			fmt.Println("  • Copilot: aceite as extensões recomendadas no VS Code")
+	printSummaryReport(finalCfg, targetDir, len(created))
+
+	// Próximos passos adicionais específicos para agentes recém-adicionados
+	if len(toAdd) > 0 {
+		fmt.Println("\nInstruções dos Agentes Adicionados:")
+		for _, a := range toAdd {
+			switch a {
+			case config.AgentClaude:
+				fmt.Println("  • Claude: leia CLAUDE.md e abra o projeto no Claude Code")
+			case config.AgentGemini:
+				fmt.Println("  • Gemini: leia GEMINI.md e abra o projeto no Gemini")
+			case config.AgentOpenAI:
+				fmt.Println("  • OpenAI: leia OPENAI.md e configure sua chave de API")
+			case config.AgentCopilot:
+				fmt.Println("  • Copilot: aceite as extensões recomendadas no VS Code")
+			}
 		}
 	}
-	if targetVersion != "" {
-		fmt.Println("  • Estrutura atualizada: revise sdd/memory/progress.md para retomar o trabalho")
-	}
 	return nil
+}
+
+func printSummaryReport(cfg config.Config, targetDir string, fileCount int) {
+	telemetryStatus := "Ativo (Local)"
+	if !cfg.Telemetry {
+		telemetryStatus = "Desativado"
+	}
+
+	fmt.Printf("\n✓ Estrutura Forge-SDD inicializada/atualizada com sucesso! (%d arquivos)\n\n", fileCount)
+	fmt.Println("Resumo do Projeto:")
+	fmt.Printf("  • Nome:           %s\n", cfg.Project)
+	fmt.Printf("  • Diretório:      %s\n", targetDir)
+	fmt.Printf("  • Stack:          %s\n", cfg.Stack)
+	fmt.Printf("  • Banco de Dados: %s\n", cfg.DB)
+	fmt.Printf("  • Idioma:         %s\n", cfg.Lang)
+	fmt.Printf("  • Agentes:        %s\n", strings.Join(cfg.Agents, ", "))
+	fmt.Printf("  • Telemetria:     %s\n", telemetryStatus)
+	fmt.Println("\nPróximos passos:")
+	fmt.Println("  1. Abra o projeto no VS Code ou sua IDE de preferência")
+	fmt.Println("  2. Aceite as extensões recomendadas (Copilot, MCP, etc.)")
+	fmt.Println("  3. Leia sdd/memory/progress.md para começar a codificar!")
 }
 
 func init() {
@@ -257,7 +323,7 @@ func init() {
 	initCmd.Flags().String("stack", "", "Stack principal: go, node, python, rust, other")
 	initCmd.Flags().String("db", "", "Banco de dados: postgres, sqlite, mongo, none")
 	initCmd.Flags().String("lang", "", "Idioma: pt-BR, en")
-	initCmd.Flags().String("version", "", "Versão Forge-SDD (default: 1.6.1-beta.1)")
+	initCmd.Flags().String("version", "", "Versão Forge-SDD (default: 1.6.1-beta.2)")
 	initCmd.Flags().Bool("no-telemetry", false, "Desabilitar telemetria local")
 	initCmd.Flags().String("agent", "", "Agente(s) de IA: copilot, claude, gemini (csv, default: copilot)")
 	rootCmd.AddCommand(initCmd)
@@ -265,7 +331,7 @@ func init() {
 	updateCmd.Flags().Bool("yes", false, "Pular prompts e usar flags")
 	updateCmd.Flags().String("agent", "", "Agente(s) a adicionar: copilot, claude, gemini, openai (csv)")
 	updateCmd.Flags().Bool("upgrade", false, "Atualizar estrutura para a versão mais recente do binário")
-	updateCmd.Flags().String("version", "", "Atualizar estrutura para uma versão específica (ex: 1.6.1-beta.1)")
+	updateCmd.Flags().String("version", "", "Atualizar estrutura para uma versão específica (ex: 1.6.1-beta.2)")
 	rootCmd.AddCommand(updateCmd)
 
 	rootCmd.AddCommand(versionCmd)
