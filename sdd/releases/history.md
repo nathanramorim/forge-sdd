@@ -4,6 +4,15 @@ Este arquivo registra o histórico de entregas de produto deste projeto.
 
 ## Entregas
 
+### Versão 1.7.0 (Estável)
+
+Esta release oficial e estável consolida o ciclo de desenvolvimento de diagnósticos, refinamento e agrupamento físico de especificações.
+
+*   **Comandos `doctor` e `destroy`:** Novo utilitário CLI para diagnóstico de saúde da estrutura SDD do projeto (`doctor`) e purga segura e interativa dos scaffolds (`destroy`).
+*   **Refinamento do Comando `init`:** Criação automática e isolamento de pastas de projetos com base nos parâmetros ou formulários interativos, além de sumário de fechamento visual das stacks configuradas.
+*   **Agrupamento de Features/Discoveries:** Suporte completo para agrupar fisicamente tarefas e subfeatures complexas em pastas nomeadas para organizar o escopo de entregas e planos de discovery (Regra 13 da Constituição).
+*   **Prompts de IA Atualizados:** Templates de comandos (`/split-features`, `/nova-feature`, `/discovery`) e instruções de sistema atualizados para todos os 4 agentes de IA suportados (Gemini, Claude, Copilot, OpenAI).
+
 ### Versão 1.6.1-beta.3 (Beta)
 
 - **Fase 41 — Agrupamento de Features e Discovery**:

@@ -3,7 +3,7 @@
 [![NPM Version](https://img.shields.io/npm/v/@nathanramorim/forge-sdd)](https://www.npmjs.com/package/@nathanramorim/forge-sdd)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-> CLI open source que instala em qualquer projeto a **Metodologia Forge-SDD** v1.6.1-beta.3 — um framework de desenvolvimento guiado por IA que elimina a repetição de instruções, garante padrões arquiteturais e traz a expertise de um engenheiro sênior para o seu fluxo diário.
+> CLI open source que instala em qualquer projeto a **Metodologia Forge-SDD** v1.7.0 — um framework de desenvolvimento guiado por IA que elimina a repetição de instruções, garante padrões arquiteturais e traz a expertise de um engenheiro sênior para o seu fluxo diário.
 
 🚀 **Landing Page Oficial:** [forge-sdd.vercel.app](https://forge-sdd.vercel.app)
 📖 **Wiki & Documentação Completa:** [Wiki do Forge-SDD](https://forge-sdd.vercel.app/wiki#introducao)
@@ -30,15 +30,14 @@ npx @nathanramorim/forge-sdd@latest init
 npx @nathanramorim/forge-sdd@latest init . --agent copilot,gemini --name meu-projeto
 ```
 
-## 📢 Novidades da Versão (v1.6.1-beta.3)
+## 📢 Novidades da Versão (v1.7.0)
 
-A versão beta traz agrupamento de features e discoveries complexos em subpastas:
+Esta versão estável consolida o ciclo de funcionalidades beta de diagnóstico, refinamento e agrupamento físico de especificações:
 
-- **Fase 41 — Agrupamento de Features e Discovery:**
-  - **Agrupamento Físico de Features/Tasks:** As subfeatures e tarefas geradas por quebra de plano ou features complexas agora são agrupadas em subpastas com o nome da feature (ex: `sdd/features/feat-XX-nome-feature/task-YY.md`).
-  - **Agrupamento pelo Discovery:** Ao quebrar um plano de discovery, a subpasta de feature criada sob `sdd/features/` reflete exatamente o nome do discovery original (ex: `sdd/features/feat-XX-nome-discovery/`).
-  - **Varredura Recursiva no CLI:** O comando CLI `doctor` foi refatorado para varrer recursivamente todas as subpastas em busca de arquivos de feature (`feat-`) e task (`task-`).
-  - **Prompts Atualizados:** Prompts de sistema e chat (`/split-features`, `/nova-feature`, `/discovery`) nos 4 agentes suportados (Gemini, Claude, Copilot e OpenAI) atualizados.
+*   **Comandos `doctor` e `destroy`:** Novo utilitário CLI para diagnóstico de saúde da estrutura SDD do projeto (`doctor`) e purga segura e interativa dos scaffolds (`destroy`).
+*   **Refinamento do Comando `init`:** Criação automática e isolamento de pastas de projetos com base nos parâmetros ou formulários interativos, além de sumário de fechamento visual das stacks configuradas.
+*   **Agrupamento de Features/Discoveries:** Suporte completo para agrupar fisicamente tarefas e subfeatures complexas em pastas nomeadas para organizar o escopo de entregas e planos de discovery.
+*   **Prompts de IA Atualizados:** Templates atualizados para todos os 4 agentes de IA suportados (Gemini, Claude, Copilot, OpenAI), orientando as IAs a utilizar as novas regras físicas e manter a organização.
 
 ---
 

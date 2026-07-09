@@ -169,7 +169,7 @@ func Defaults() Config {
 		DB:         "none",
 		Telemetry:  true,
 		Lang:       "pt-BR",
-		SddVersion: "1.6.1-beta.3",
+		SddVersion: "1.7.0",
 		DryRun:     false,
 		Agents:     []string{AgentCopilot},
 	}
