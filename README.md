@@ -30,11 +30,20 @@ npx @nathanramorim/forge-sdd@latest init
 npx @nathanramorim/forge-sdd@latest init . --agent copilot,gemini --name meu-projeto
 ```
 
+## 📢 Novidades da Versão (v1.6.1-beta.1)
+
+A versão beta traz diagnósticos de saúde da instalação e remoção da estrutura:
+
+- **Fase 39 — Comandos doctor e destroy no CLI**: 
+  - Adicionado o comando `doctor` para diagnóstico completo de saúde dos componentes da metodologia, detecção de arquivos faltantes e progresso de features locais.
+  - Adicionado o comando `destroy` para remover com segurança e de forma interativa a estrutura inteira e configurações de agentes do repositório (com suporte a `--dry-run` e `--yes`).
+- **Ajustes de UI de Update**: O prompt de atualização de agentes agora exibe os agentes existentes desmarcados com o sufixo `(Já instalado)`, evitando sobrescritas acidentais e permitindo a seleção seletiva.
+
 ---
 
-## 📢 Novidades da Versão (v1.6.1-beta.0)
+## 📢 Novidades da Versão Anterior (v1.6.1-beta.0)
 
-A versão beta traz detecção inteligente de projetos existentes e upgrade aprimorado:
+A versão beta trouxe detecção inteligente de projetos existentes e upgrade aprimorado:
 
 - **Fase 38 — Detecção Inteligente e Upgrade no CLI**: O CLI agora detecta automaticamente se o diretório já possui a metodologia estruturada e redireciona para a interface de upgrade.
 - **Integração NPM Registry**: O CLI consulta dinamicamente as versões oficiais (`latest`) e de teste (`beta`) publicadas no NPM Registry para que o usuário escolha para qual deseja atualizar.
@@ -59,5 +68,6 @@ A versão estável v1.6.0 trouxe grandes evoluções de arquitetura e consistên
 
 - [Landing Page](https://forge-sdd.vercel.app)
 - [Metodologia SDD](docs/metodologia-sdd.md)
+- [Telemetria e Métricas](docs/telemetria.md)
 - [Guia de Contribuição](CONTRIBUTING.md)
 - [Licença MIT](LICENSE)

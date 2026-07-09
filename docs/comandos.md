@@ -48,6 +48,29 @@ Executados diretamente no terminal do desenvolvedor, normalmente utilizando o wr
   npx @nathanramorim/forge-sdd version
   ```
 
+### `npx @nathanramorim/forge-sdd doctor [diretório]`
+- **O que faz:** Diagnostica a saúde e a integridade da metodologia instalada no repositório. Verifica a existência de arquivos estruturais, valida se as pastas e integrações físicas dos agentes de IA estão de acordo com o `.sddrc` e lista as features em andamento.
+- **Como usar:**
+  ```bash
+  npx @nathanramorim/forge-sdd doctor
+  ```
+
+### `npx @nathanramorim/forge-sdd destroy [diretório]`
+- **O que faz:** Desinstala e remove completamente toda a estrutura do Forge-SDD e integrações de agentes de IA locais (como a pasta `sdd/`, `.claude/`, `.gemini/`, `CLAUDE.md`, etc.). Requer confirmação interativa de segurança, a menos que a flag `--yes` esteja presente.
+- **Como usar:**
+  - **Confirmando interativamente:**
+    ```bash
+    npx @nathanramorim/forge-sdd destroy
+    ```
+  - **Remoção Direta:**
+    ```bash
+    npx @nathanramorim/forge-sdd destroy --yes
+    ```
+  - **Simulação (Dry-run):**
+    ```bash
+    npx @nathanramorim/forge-sdd destroy --dry-run
+    ```
+
 ---
 
 ## 🤖 2. Comandos de Chat (Agentes de IA / Chatmode)

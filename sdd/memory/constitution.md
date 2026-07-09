@@ -34,3 +34,4 @@ CLI Go de comando único (`forge-sdd init`) que scaffolda estruturas Forge-SDD e
 9. `--dry-run` nunca cria arquivos — apenas imprime árvore
 10. CLI expõe os comandos públicos `init` e `update`
 11. Versões Beta (`-beta`) não podem ser mescladas na `main`; a tag é criada diretamente na branch de feature e o PR correspondente deve ser mantido aberto no GitHub para testes de estabilização antes de promover para oficial.
+12. Documentação de Comandos e Release Notes: Ao introduzir novos comandos, eles devem ser atualizados nos documentos do repositório. Os Release Notes devem conter prévias dos comandos CLI (ex: `forge-sdd doctor`) e identificar explicitamente o agente/tipo no caso de prompts de chat de IA (ex: `/status para Claude`).

@@ -76,53 +76,64 @@ jobs:
           cd lp-repo
           git checkout -b "${BRANCH_NAME}"
           
-          echo "Creating wiki/content directory in target repo if it does not exist..."
-          mkdir -p wiki/content
+          echo "Creating target subdirectories in pt-BR and en-US..."
+          mkdir -p wiki/content/pt-BR/arquiteto wiki/content/pt-BR/engenheiro wiki/content/pt-BR/produto wiki/content/pt-BR/qa
+          mkdir -p wiki/content/en-US/arquiteto wiki/content/en-US/engenheiro wiki/content/en-US/produto wiki/content/en-US/qa
           
-          echo "Copying documentation..."
-          cp ../docs/introducao.md wiki/content/
-          cp ../docs/comandos.md wiki/content/
-          cp ../docs/skills.md wiki/content/
-          cp ../sdd/releases/history.md wiki/content/releases.md
+          echo "Copying documentation to target locales..."
+          # pt-BR
+          cp ../docs/introducao.md wiki/content/pt-BR/
+          cp ../docs/comandos.md wiki/content/pt-BR/engenheiro/comandos.md
+          cp ../docs/skills.md wiki/content/pt-BR/engenheiro/skills.md
+          cp ../docs/telemetria.md wiki/content/pt-BR/engenheiro/telemetria.md
+          cp ../docs/arquitetura-e-fluxo-forge-sdd.md wiki/content/pt-BR/arquiteto/arquitetura.md
+          cp ../sdd/releases/history.md wiki/content/pt-BR/releases.md
           
-          echo "Updating structure.json..."
+          # en-US
+          cp ../docs/introducao.md wiki/content/en-US/
+          cp ../docs/comandos.md wiki/content/en-US/engenheiro/comandos.md
+          cp ../docs/skills.md wiki/content/en-US/engenheiro/skills.md
+          cp ../docs/telemetria.md wiki/content/en-US/engenheiro/telemetria.md
+          cp ../docs/arquitetura-e-fluxo-forge-sdd.md wiki/content/en-US/arquiteto/arquitetura.md
+          cp ../sdd/releases/history.md wiki/content/en-US/releases.md
+          
+          echo "Updating structure JSONs..."
           node -e "
             const fs = require('fs');
             const path = require('path');
             const wikiDir = 'wiki';
-            const contentDir = path.join(wikiDir, 'content');
-            const structPath = path.join(wikiDir, 'structure.json');
-            if (fs.existsSync(structPath)) {
-              const struct = JSON.parse(fs.readFileSync(structPath, 'utf8'));
-              struct.pages = struct.pages || [];
-              let updated = false;
-              if (!struct.pages.some(p => p.file === 'releases.md')) {
-                struct.pages.push({
-                  id: 'releases',
-                  title: 'Histórico de Releases',
-                  file: 'releases.md'
-                });
-                updated = true;
-                console.log('Added releases.md to structure.json');
+            const ptPath = path.join(wikiDir, 'structure.pt-BR.json');
+            const enPath = path.join(wikiDir, 'structure.en-US.json');
+
+            function updateStruct(structPath, isPT) {
+              if (!fs.existsSync(structPath)) {
+                console.log('Struct path not found: ' + structPath);
+                return;
               }
-              const files = fs.readdirSync(contentDir).filter(f => f.endsWith('.md') && f !== 'HOME.md');
-              for (const file of files) {
-                if (!struct.pages.some(p => p.file === file)) {
-                  const content = fs.readFileSync(path.join(contentDir, file), 'utf8');
-                  const match = content.match(/^#\s+(.+)$/m);
-                  const title = match ? match[1].trim() : path.basename(file, '.md').replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-                  const id = path.basename(file, '.md');
-                  struct.pages.push({ id, title, file });
-                  updated = true;
-                  console.log('Added ' + file + ' as \"' + title + '\" to structure.json');
+              const struct = JSON.parse(fs.readFileSync(structPath, 'utf8'));
+              let updated = false;
+              if (struct.sections) {
+                const engSection = struct.sections.find(s => s.section_id === 'engenharia');
+                if (engSection) {
+                  engSection.pages = engSection.pages || [];
+                  if (!engSection.pages.some(p => p.id === 'telemetria')) {
+                    engSection.pages.push({
+                      id: 'telemetria',
+                      title: isPT ? 'Telemetria & Métricas' : 'Telemetry & Metrics',
+                      file: 'engenheiro/telemetria.md'
+                    });
+                    updated = true;
+                    console.log('Added telemetria page to ' + structPath);
+                  }
                 }
               }
               if (updated) {
                 fs.writeFileSync(structPath, JSON.stringify(struct, null, 2) + '\n');
               }
-            } else {
-              console.log('structure.json not found, skipping update');
             }
+
+            updateStruct(ptPath, true);
+            updateStruct(enPath, false);
           "
           
           echo "Configuring git user..."
