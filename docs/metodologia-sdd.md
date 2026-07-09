@@ -98,7 +98,10 @@ Documento substituto e consolidado da v1.0. Principais mudanças:
     ├── features/
     │   ├── index.md
     │   ├── feat-00-foundation.md
-    │   └── feat-XX-*.md
+    │   ├── feat-XX-*.md
+    │   └── feat-XX-nome-feature/    # Subpasta opcional para agrupamento de features/tasks
+    │       ├── feat-XX-YY-*.md      # Subfeatures aninhadas
+    │       └── task-YY-*.md         # Tasks aninhadas
     ├── skills/
     │   ├── index.md                 # NOVO — obrigatório
     │   └── *.md
@@ -120,7 +123,7 @@ Documento substituto e consolidado da v1.0. Principais mudanças:
 | `spec/*.md` | Specifier + humano | Builder, Revisor |
 | `plan.md` | humano | Orquestrador, Specifier |
 | `features/index.md` | Specifier + Orquestrador | todos |
-| `features/feat-XX.md` | Specifier (cria), Builder (tasks), Revisor (status final) | todos |
+| `features/feat-XX.md` (ou aninhados) | Specifier (cria), Builder (tasks), Revisor (status final) | todos |
 | `skills/*.md` | humano | Builder |
 | `skills/index.md` | humano + Specifier | Builder |
 | `.metrics/session-*.json` | Orquestrador | benchmark externo |

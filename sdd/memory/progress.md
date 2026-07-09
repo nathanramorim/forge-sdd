@@ -30,7 +30,8 @@ Fase 36 — Structured documentation      [x] done
 Fase 37 — Publish stable 1.6.0          [x] done
 Fase 38 — CLI smart upgrade/beta        [x] done
 Fase 39 — CLI doctor and destroy cmd       [x] done
-Fase 40 — CLI init directory refinement     [ ] todo
+Fase 40 — CLI init directory refinement     [x] done
+Fase 41 — Nested features/discovery grouping [x] done
 ```
 
 ## Features ativas
@@ -66,15 +67,17 @@ Fase 40 — CLI init directory refinement     [ ] todo
 | feat-38-cli-detect-existing | feat/cli-detect-existing | done |
 | feat-39-cli-doctor-destroy | feat/cli-doctor-destroy | done |
 | feat-40-cli-init-refinement | feat/cli-init-refinement | done |
+| feat-41-nested-features-discovery | feat/cli-nested-features-discovery | done |
 
 ## Próximo passo
 **Iniciar:** Nenhuma feature pendente de planejamento.
 **Bloqueios:** —
 
 ## Handoff da última sessão
-- Feature 40 concluída (refinamento do init, criação de subpastas, relatórios e lançamento da v1.6.1-beta.2 no canal beta do NPM, com PR #22 aberto para testes).
+- Feature 41 concluída (agrupamento de features/tasks em subpastas, vinculação de discovery, varredura recursiva no CLI doctor e lançamento da v1.6.1-beta.3 no canal beta do NPM, com PR #23 aberto para testes).
 
 ## Última sessão
+- 2026-07-06 — feat: concluída a Fase 41 (agrupamento em subpastas, CLI doctor recursivo e lançamento da v1.6.1-beta.3).
 - 2026-07-05 — feat: concluída a Fase 40 (refinamento do init, criação de subpastas, relatórios e lançamento da v1.6.1-beta.2).
 - 2026-07-05 — feat: concluída a Fase 39 (implementação de comandos doctor/destroy e lançamento da v1.6.1-beta.1).
 - 2026-07-04 — feat: concluída a Fase 38 (detecção inteligente de projeto e lançamento da v1.6.1-beta.0).

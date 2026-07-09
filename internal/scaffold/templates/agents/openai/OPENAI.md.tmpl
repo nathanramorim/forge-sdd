@@ -13,7 +13,7 @@
 ## Arquivos críticos
 - `sdd/memory/progress.md` — estado ativo (leia primeiro a cada sessão)
 - `sdd/memory/constitution.md` — regras imutáveis
-- `sdd/features/feat-XX-*.md` — tarefa atual
+- `sdd/features/feat-XX-*.md` (ou aninhados em subpastas) — tarefa atual
 
 ## Orçamentos
 - `progress.md` ≤ 1 KB
@@ -24,6 +24,7 @@
 - Consulte `sdd/memory/constitution.md` antes de decisões arquiteturais
 - Use ferramentas de leitura antes de editar qualquer arquivo
 - Siga rigorosamente a responsabilidade única por artefato (Specifier escreve specs, Builder escreve código, etc.)
+- Ao quebrar features em tasks ou discovery em features, agrupar arquivos em subpastas sob `sdd/features/` (a pasta da feature gerada pelo discovery deve refletir o nome do discovery).
 
 ## Skills & Papéis
 Este projeto define papéis específicos em `.openai/skills/`. Carregue a instrução correspondente ao iniciar uma fase:

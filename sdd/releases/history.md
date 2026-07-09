@@ -4,6 +4,14 @@ Este arquivo registra o histórico de entregas de produto deste projeto.
 
 ## Entregas
 
+### Versão 1.6.1-beta.3 (Beta)
+
+- **Fase 41 — Agrupamento de Features e Discovery**:
+  - **Agrupamento Físico de Features/Tasks:** As subfeatures e tarefas geradas por quebra de plano ou features complexas agora são agrupadas em subpastas com o nome da feature (ex: `sdd/features/feat-XX-nome-feature/task-YY.md`).
+  - **Agrupamento pelo Discovery:** Ao quebrar um plano de discovery, a subpasta de feature criada sob `sdd/features/` reflete exatamente o nome do discovery original (ex: `sdd/features/feat-XX-nome-discovery/`).
+  - **Varredura Recursiva no CLI:** O comando CLI `doctor` foi refatorado para varrer recursivamente todas as subpastas em busca de arquivos de feature (`feat-`) e task (`task-`).
+  - **Instruções e Prompts Atualizados:** Ajustados os prompts de sistema e chat (`/split-features`, `/nova-feature`, `/discovery`) nos 4 agentes suportados (Gemini, Claude, Copilot e OpenAI) para impor a nova regra física.
+
 ### Versão 1.6.1-beta.2 (Beta)
 
 - **Fase 40 — Refinamento do Comando `init` e Relatórios**:
