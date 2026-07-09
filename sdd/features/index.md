@@ -38,12 +38,12 @@ main
                                                      └─ feat/product-release-notes
                                                          └─ feat/sync-wiki-documentation
                                                              └─ feat/update-agent-prompts
-                                                                 └─ feat/remove-install-skill
-                                                                     └─ feat/structured-documentation
-                                                                         └─ feat/publish-1.6.0
-                                                                             └─ feat/cli-detect-existing
-                                                                                 └─ feat/cli-doctor-destroy
-                                                                                     └─ feat/cli-init-refinement
+                                                                 └─ feat/publish-1.6.0
+                                                                     └─ feat/cli-detect-existing
+                                                                         └─ feat/cli-doctor-destroy
+                                                                             └─ feat/cli-init-refinement
+                                                                                 └─ feat/cli-nested-features-discovery
+                                                                                     └─ feat/release-v1.7.0
             ```
 
                                        ## Janelas de paralelismo
@@ -91,5 +91,7 @@ main
 | 36 | feat-36-structured-documentation.md | feat/structured-documentation | 36 | done |
 | 37 | feat-37-publish-1.6.0.md | feat/publish-1.6.0 | 37 | done |
 | 38 | feat-38-cli-detect-existing.md | feat/cli-detect-existing | 38 | done |
-| 39 | feat-39-cli-doctor-destroy.md | feat/cli-doctor-destroy | 39 | todo |
-| 40 | feat-40-cli-init-refinement.md | feat/cli-init-refinement | 40 | todo |
+| 39 | feat-39-cli-doctor-destroy.md | feat/cli-doctor-destroy | 39 | done |
+| 40 | feat-40-cli-init-refinement.md | feat/cli-init-refinement | 40 | done |
+| 41 | feat-41-nested-features-discovery.md | feat/cli-nested-features-discovery | 41 | done |
+| 42 | feat-42-release-v1.7.0.md | feat/release-v1.7.0 | 42 | doing |
