@@ -4,8 +4,8 @@
 
 **Ação:**
 1. Acione a lógica de **Specifier**.
-2. **PASSO 1 IMPERATIVO:** Crie a branch da feature localmente (`git checkout -b feat/<nome>`) no terminal **antes** de criar qualquer arquivo de especificação ou atualizar logs.
-3. **Criação e Agrupamento:** Se a feature for complexa e requerer quebra em subfeatures/tasks, crie uma subpasta com o nome da feature (ex: `sdd/features/feat-XX-<nome-da-feature>/`) e armazene as tasks lá dentro (ex: `sdd/features/feat-XX-<nome-da-feature>/task-YY-<nome-da-task>.md`). Caso contrário, crie o arquivo diretamente na raiz como `sdd/features/feat-XX-<nome-da-feature>.md`.
+2. **PASSO 1 IMPERATIVO:** Solicite ao usuário o ID do Workitem de referência (ex: Jira, ClickUp, etc.). Se omitido ou inexistente, gere um hash hexadecimal de 4 dígitos aleatórios (ex: `3ec4`). Crie a branch da feature localmente (`git checkout -b feat/<workitem-ou-hash>-<nome-da-feature>`) no terminal **antes** de criar qualquer arquivo de especificação ou atualizar logs.
+3. **Criação e Agrupamento:** Se a feature for complexa e requerer quebra em subfeatures/tasks, crie uma subpasta com o nome da feature (ex: `sdd/features/feat-<workitem-ou-hash>-<nome-da-feature>/`) e armazene as tasks lá dentro (ex: `sdd/features/feat-<workitem-ou-hash>-<nome-da-feature>/task-YY-<nome-da-task>.md`). Caso contrário, crie o arquivo diretamente na raiz como `sdd/features/feat-<workitem-ou-hash>-<nome-da-feature>.md`.
 4. **Atualização de Logs:** Atualize o índice de features e o progresso.
 
 **Handoff Final:**

@@ -1,5 +1,5 @@
 **Ação:**
-1. **PASSO 1 MANDATÓRIO:** Crie a branch `feat/*` localmente no terminal (`git checkout -b feat/<nome>`) **antes** de criar qualquer especificação ou logs.
-2. Invoque o agente para criar o arquivo de especificação `sdd/features/feat-XX-<nome>.md` e atualizar o progresso e índice. Se a feature for complexa e requerer quebra em subfeatures/tasks, crie uma subpasta com o nome da feature (ex: `sdd/features/feat-XX-<nome-da-feature>/`) e salve as tasks lá dentro (ex: `sdd/features/feat-XX-<nome-da-feature>/task-YY-<nome-da-task>.md`).
+1. **PASSO 1 MANDATÓRIO:** Solicite ao usuário o ID do Workitem de referência (ex: Jira, ClickUp, etc.). Se omitido ou inexistente, gere um hash hexadecimal de 4 dígitos aleatórios (ex: `3ec4`). Crie a branch `feat/*` localmente no terminal (`git checkout -b feat/<workitem-ou-hash>-<nome-da-feature>`) **antes** de criar qualquer especificação ou logs.
+2. Invoque o agente para criar o arquivo de especificação `sdd/features/feat-<workitem-ou-hash>-<nome-da-feature>.md` e atualizar o progresso e índice. Se a feature for complexa e requerer quebra em subfeatures/tasks, crie uma subpasta com o nome da feature (ex: `sdd/features/feat-<workitem-ou-hash>-<nome-da-feature>/`) e salve as tasks lá dentro (ex: `sdd/features/feat-<workitem-ou-hash>-<nome-da-feature>/task-YY-<nome-da-task>.md`).
 
 **Handoff:** Gere um resumo para o comando `proxima-feature`.

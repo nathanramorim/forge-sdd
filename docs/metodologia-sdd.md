@@ -102,6 +102,7 @@ Documento substituto e consolidado da v1.0. Principais mudanças:
     │   └── feat-XX-nome-feature/    # Subpasta opcional para agrupamento de features/tasks
     │       ├── feat-XX-YY-*.md      # Subfeatures aninhadas
     │       └── task-YY-*.md         # Tasks aninhadas
+    # *Nota:* As numerações sequenciais rígidas (XX/YY) de features e discoveries podem ser substituídas por IDs de Workitem físicos (ex: `feat-1234-*.md`) ou hashes hexadecimais aleatórios de 4 caracteres (ex: `feat-3ec4-*.md`) para evitar colisões e bloqueios de desenvolvimento paralelo.
     ├── skills/
     │   ├── index.md                 # NOVO — obrigatório
     │   └── *.md

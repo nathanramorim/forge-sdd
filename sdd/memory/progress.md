@@ -33,6 +33,7 @@ Fase 39 — CLI doctor and destroy cmd       [x] done
 Fase 40 — CLI init directory refinement     [x] done
 Fase 41 — Nested features/discovery grouping [x] done
 Fase 42 — Consolidação e Lançamento v1.7.0 [x] done
+Fase 43a1 — Nomenclatura com Workitem e Hash Hexadecimal [x] done
 ```
 
 ## Features ativas
@@ -70,15 +71,17 @@ Fase 42 — Consolidação e Lançamento v1.7.0 [x] done
 | feat-40-cli-init-refinement | feat/cli-init-refinement | done |
 | feat-41-nested-features-discovery | feat/cli-nested-features-discovery | done |
 | feat-42-release-v1.7.0 | feat/release-v1.7.0 | done |
+| feat-43a1-workitem-nomenclature | feat/cli-workitem-nomenclatures | done |
 
 ## Próximo passo
 **Iniciar:** Nenhuma feature pendente de planejamento.
 **Bloqueios:** —
 
 ## Handoff da última sessão
-- Feature 42 concluída (consolidação de todas as versões beta na main, bump de versão para 1.7.0, atualização de golden files e publicação estável v1.7.0 no NPM).
+- Fase 43a1 concluída (flexibilização da nomenclatura para Workitem de referência ou hash hexadecimal aleatório de 4 dígitos nos agentes, atualização de templates e golden tests, bump de versão para 1.7.1-beta.0).
 
 ## Última sessão
+- 2026-07-09 — feat: concluída a Fase 43a1 (nomenclatura com Workitem e hash hexadecimal aleatório).
 - 2026-07-09 — feat: concluída a Fase 42 (consolidação e publicação oficial da versão estável v1.7.0).
 - 2026-07-06 — feat: concluída a Fase 41 (agrupamento em subpastas, CLI doctor recursivo e lançamento da v1.6.1-beta.3).
 - 2026-07-05 — feat: concluída a Fase 40 (refinamento do init, criação de subpastas, relatórios e lançamento da v1.6.1-beta.2).

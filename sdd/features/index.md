@@ -42,8 +42,9 @@ main
                                                                      └─ feat/cli-detect-existing
                                                                          └─ feat/cli-doctor-destroy
                                                                              └─ feat/cli-init-refinement
-                                                                                 └─ feat/cli-nested-features-discovery
-                                                                                     └─ feat/release-v1.7.0
+                                                                                  └─ feat/cli-nested-features-discovery
+                                                                                      └─ feat/release-v1.7.0
+                                                                                          └─ feat/cli-workitem-nomenclatures
             ```
 
                                        ## Janelas de paralelismo
@@ -94,4 +95,5 @@ main
 | 39 | feat-39-cli-doctor-destroy.md | feat/cli-doctor-destroy | 39 | done |
 | 40 | feat-40-cli-init-refinement.md | feat/cli-init-refinement | 40 | done |
 | 41 | feat-41-nested-features-discovery.md | feat/cli-nested-features-discovery | 41 | done |
-| 42 | feat-42-release-v1.7.0.md | feat/release-v1.7.0 | 42 | doing |
+| 42 | feat-42-release-v1.7.0.md | feat/release-v1.7.0 | 42 | done |
+| 43a1 | feat-43a1-workitem-nomenclature.md | feat/cli-workitem-nomenclatures | 43a1 | doing |
