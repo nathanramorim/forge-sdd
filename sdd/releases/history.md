@@ -4,6 +4,13 @@ Este arquivo registra o histórico de entregas de produto deste projeto.
 
 ## Entregas
 
+### Versão 1.7.1-beta.0 (Beta)
+
+Esta release beta traz a flexibilização do padrão de nomenclatura de especificações no SDD, permitindo o desenvolvimento assíncrono e paralelo sem colisões.
+
+*   **Identificação com Workitems:** Os prompts de IA (`/nova-feature` e `/discovery`) agora solicitam ativamente o ID do Workitem de referência (como Jira ou ClickUp) para usar no prefixo do nome de arquivos e branches.
+*   **Geração de Hash Hexadecimal:** Caso o ID do Workitem de referência seja omitido, o agente gera um hash de 4 casas (ex: `3ec4`) em substituição à numeração sequencial rígida (`01`, `02`, etc.), eliminando gargalos de concorrência.
+
 ### Versão 1.7.0 (Estável)
 
 Esta release oficial e estável consolida o ciclo de desenvolvimento de diagnósticos, refinamento e agrupamento físico de especificações.
