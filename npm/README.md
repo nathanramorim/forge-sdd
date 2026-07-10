@@ -3,7 +3,7 @@
 [![NPM Version](https://img.shields.io/npm/v/@nathanramorim/forge-sdd)](https://www.npmjs.com/package/@nathanramorim/forge-sdd)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-> CLI open source que instala em qualquer projeto a **Metodologia Forge-SDD** v1.7.0 — um framework de desenvolvimento guiado por IA que elimina a repetição de instruções, garante padrões arquiteturais e traz a expertise de um engenheiro sênior para o seu fluxo diário.
+> CLI open source que instala em qualquer projeto a **Metodologia Forge-SDD** v1.7.1-beta.2 — um framework de desenvolvimento guiado por IA que elimina a repetição de instruções, garante padrões arquiteturais e traz a expertise de um engenheiro sênior para o seu fluxo diário.
 
 🚀 **Landing Page Oficial:** [forge-sdd.vercel.app](https://forge-sdd.vercel.app)
 📖 **Wiki & Documentação Completa:** [Wiki do Forge-SDD](https://forge-sdd.vercel.app/wiki#introducao)
@@ -30,14 +30,12 @@ npx @nathanramorim/forge-sdd@latest init
 npx @nathanramorim/forge-sdd@latest init . --agent copilot,gemini --name meu-projeto
 ```
 
-## 📢 Novidades da Versão (v1.7.0)
+## 📢 Novidades da Versão (v1.7.1-beta.2)
 
-Esta versão estável consolida o ciclo de funcionalidades beta de diagnóstico, refinamento e agrupamento físico de especificações:
+Esta versão de testes beta traz correções importantes na persistência de telemetria local:
 
-*   **Comandos `doctor` e `destroy`:** Novo utilitário CLI para diagnóstico de saúde da estrutura SDD do projeto (`doctor`) e purga segura e interativa dos scaffolds (`destroy`).
-*   **Refinamento do Comando `init`:** Criação automática e isolamento de pastas de projetos com base nos parâmetros ou formulários interativos, além de sumário de fechamento visual das stacks configuradas.
-*   **Agrupamento de Features/Discoveries:** Suporte completo para agrupar fisicamente tarefas e subfeatures complexas em pastas nomeadas para organizar o escopo de entregas e planos de discovery.
-*   **Prompts de IA Atualizados:** Templates atualizados para todos os 4 agentes de IA suportados (Gemini, Claude, Copilot, OpenAI), orientando as IAs a utilizar as novas regras físicas e manter a organização.
+*   **Métricas Granulares e Robustas:** O Orquestrador agora mapeia corretamente o campo `"feature"` apontando para caminhos de especificações ou subtasks aninhadas em subpastas e garante o registro obrigatório de telemetria a cada encerramento de sessão, cobrindo timeouts, inatividade ou abandono.
+*   **Prompt do Orquestrador Refatorado:** Instruções do Orquestrador atualizadas para impor os novos guardrails de close em todos os agentes suportados.
 
 ---
 

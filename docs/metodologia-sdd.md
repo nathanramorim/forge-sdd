@@ -326,6 +326,10 @@ Arquivo `.metrics/schema.json` — contrato versionado:
 
 Telemetria desabilitada (`.sddrc.telemetry.enabled = false`) → fase CLOSE pula a escrita.
 
+*Nota sobre Gravação de Métricas:*
+1. **Identificação com Subpastas:** O campo `"feature"` deve conter o caminho relativo completo da especificação ou subtask correspondente (ex: `sdd/features/feat-1234-auth/task-01.md`).
+2. **Sessões Incompletas/Timeout:** As métricas devem ser gravadas obrigatoriamente a cada fim de sessão (fase `Close`), mesmo que a sessão seja interrompida, cancelada ou sem progresso (`criterio_atendido: false`), anotando `outcome: blocked` ou `outcome: rejected` para rastreamento de esforço e timeouts.
+
 ### Hipóteses verificáveis (benchmark)
 
 - **H1:** Forge-SDD reduz tokens em ≥30% vs readme-only em tasks ≥4h

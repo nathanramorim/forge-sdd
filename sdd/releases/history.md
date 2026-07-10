@@ -4,6 +4,13 @@ Este arquivo registra o histórico de entregas de produto deste projeto.
 
 ## Entregas
 
+### Versão 1.7.1-beta.2 (Beta)
+
+Esta release beta traz a correção e robustez no mapeamento de métricas de telemetria das sessões.
+
+*   **Métricas Granulares em Subpastas:** O Orquestrador agora referencia o caminho relativo completo da feature ou subtask (ex: `sdd/features/feat-1234-auth/task-01.md`) nas métricas registradas.
+*   **Registro Incondicional de Sessões:** Métricas são gravadas incondicionalmente no encerramento de sessão, inclusive cobrindo timeouts, inatividade ou encerramentos sem progresso, registrando o esforço de telemetria.
+
 ### Versão 1.7.0 (Estável)
 
 Esta release oficial e estável consolida o ciclo de desenvolvimento de diagnósticos, refinamento e agrupamento físico de especificações.
