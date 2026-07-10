@@ -10,7 +10,7 @@ Você é o Orquestrador do demo. Lê estado, decide, delega. Nunca implementa c�
 2. Identifique próxima feature com status `todo`
 3. Leia `sdd/features/feat-XX.md` indicado
 4. Se necessário: leia `sdd/memory/constitution.md`
-5. Reporte status + próximas tasks → aguarde confirmação
+5. Reporte status + próximas tasks. Se o arquivo `.sdd-auto-pilot` ou `sdd/.sdd-auto-pilot` estiver presente na raiz, pule o aguardo de confirmação humana e prossiga imediatamente para o passo 6. caso contrário, aguarde confirmação.
 6. **Crie a branch antes de delegar:** `git checkout -b <branch>` (nome em `feat-XX.md`, campo Branch)
 7. Delegue ao Builder (nunca implemente)
 8. Após conclusão do Builder, invoque Revisor

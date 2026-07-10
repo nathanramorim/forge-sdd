@@ -30,14 +30,14 @@ npx @nathanramorim/forge-sdd@latest init
 npx @nathanramorim/forge-sdd@latest init . --agent copilot,gemini --name meu-projeto
 ```
 
-## 📢 Novidades da Versão (v1.7.0)
+## 📢 Novidades da Versão (v1.8.0-beta)
 
-Esta versão estável consolida o ciclo de funcionalidades beta de diagnóstico, refinamento e agrupamento físico de especificações:
+Esta versão de testes beta traz a automação contínua de sessões e a nova convenção de nomenclatura de tags:
 
-*   **Comandos `doctor` e `destroy`:** Novo utilitário CLI para diagnóstico de saúde da estrutura SDD do projeto (`doctor`) e purga segura e interativa dos scaffolds (`destroy`).
-*   **Refinamento do Comando `init`:** Criação automática e isolamento de pastas de projetos com base nos parâmetros ou formulários interativos, além de sumário de fechamento visual das stacks configuradas.
-*   **Agrupamento de Features/Discoveries:** Suporte completo para agrupar fisicamente tarefas e subfeatures complexas em pastas nomeadas para organizar o escopo de entregas e planos de discovery.
-*   **Prompts de IA Atualizados:** Templates atualizados para todos os 4 agentes de IA suportados (Gemini, Claude, Copilot, OpenAI), orientando as IAs a utilizar as novas regras físicas e manter a organização.
+*   **Modo Piloto Automático (Auto-Pilot):** Os prompts e chatmodes do Orquestrador foram atualizados para ler o arquivo flag `.sdd-auto-pilot` e ignorar a confirmação humana do `PLAN`. O CLI agora também scaffolda o script daemon padrão `sdd/scripts/sdd-daemon.sh` e o guia técnico de automação `sdd/docs/autonomia-autopilot.md`.
+*   **Convenção de Versionamento Simplificada:** Tags do canal de homologação passam a usar apenas o sufixo simples `-beta` (ex: `1.8.0-beta`), permitindo o acúmulo de múltiplos fixes ou features antes de lançar a estável oficial `1.8.0` correspondente (Regra 15).
+*   **Métricas Granulares e Robustas:** Mapeamento incondicional de telemetria mesmo para sessões parciais, abortadas ou com timeouts.
+*   **Diagnóstico de Nome Padrão:** O comando `doctor` alerta caso o projeto use o nome padrão `"meu-projeto"` no `.sddrc` ou nos cabeçalhos dos arquivos de agentes.
 
 ---
 

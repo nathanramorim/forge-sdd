@@ -33,6 +33,7 @@ Fase 39 — CLI doctor and destroy cmd       [x] done
 Fase 40 — CLI init directory refinement     [x] done
 Fase 41 — Nested features/discovery grouping [x] done
 Fase 42 — Consolidação e Lançamento v1.7.0 [x] done
+Fase 1.8.0-beta — Piloto Automático e Nova Convenção Beta [x] done
 ```
 
 ## Features ativas
@@ -70,15 +71,17 @@ Fase 42 — Consolidação e Lançamento v1.7.0 [x] done
 | feat-40-cli-init-refinement | feat/cli-init-refinement | done |
 | feat-41-nested-features-discovery | feat/cli-nested-features-discovery | done |
 | feat-42-release-v1.7.0 | feat/release-v1.7.0 | done |
+| feat-1.8.0-beta-autopilot-autonomy | feat/cli-autopilot-autonomy | done |
 
 ## Próximo passo
 **Iniciar:** Nenhuma feature pendente de planejamento.
 **Bloqueios:** —
 
 ## Handoff da última sessão
-- Feature 42 concluída (consolidação de todas as versões beta na main, bump de versão para 1.7.0, atualização de golden files e publicação estável v1.7.0 no NPM).
+- Feature 1.8.0-beta concluída (implementação do modo Auto-Pilot e nova política simplificada de versionamento beta v1.8.0-beta).
 
 ## Última sessão
+- 2026-07-10 — feat: concluída a Fase 1.8.0-beta (piloto automático e nova nomenclatura de tags beta).
 - 2026-07-09 — feat: concluída a Fase 42 (consolidação e publicação oficial da versão estável v1.7.0).
 - 2026-07-06 — feat: concluída a Fase 41 (agrupamento em subpastas, CLI doctor recursivo e lançamento da v1.6.1-beta.3).
 - 2026-07-05 — feat: concluída a Fase 40 (refinamento do init, criação de subpastas, relatórios e lançamento da v1.6.1-beta.2).

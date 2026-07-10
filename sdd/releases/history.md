@@ -4,6 +4,15 @@ Este arquivo registra o histórico de entregas de produto deste projeto.
 
 ## Entregas
 
+### Versão 1.8.0-beta (Beta)
+
+Esta release beta traz a automação contínua de sessões e a nova convenção de nomenclatura de tags.
+
+*   **Modo Piloto Automático (Auto-Pilot):** Os prompts e chatmodes do Orquestrador foram atualizados para ler o arquivo flag `.sdd-auto-pilot` e ignorar a confirmação humana do `PLAN`. O CLI agora também scaffolda o script daemon padrão `sdd/scripts/sdd-daemon.sh` e o guia técnico de automação `sdd/docs/autonomia-autopilot.md`.
+*   **Convenção de Versionamento Simplificada:** Tags do canal de homologação passam a usar apenas o sufixo simples `-beta` (ex: `1.8.0-beta`), permitindo o acúmulo de múltiplos fixes ou features antes de lançar a estável oficial `1.8.0` correspondente (Regra 15).
+*   **Métricas Granulares e Robustas:** Mapeamento incondicional de telemetria mesmo para sessões parciais, abortadas ou com timeouts.
+*   **Diagnóstico de Nome Padrão:** O comando `doctor` alerta caso o projeto use o nome padrão `"meu-projeto"` no `.sddrc` ou nos cabeçalhos dos arquivos de agentes.
+
 ### Versão 1.7.0 (Estável)
 
 Esta release oficial e estável consolida o ciclo de desenvolvimento de diagnósticos, refinamento e agrupamento físico de especificações.
