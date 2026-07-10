@@ -86,6 +86,7 @@ jobs:
           cp ../docs/comandos.md wiki/content/pt-BR/engenheiro/comandos.md
           cp ../docs/skills.md wiki/content/pt-BR/engenheiro/skills.md
           cp ../docs/telemetria.md wiki/content/pt-BR/engenheiro/telemetria.md
+          cp ../docs/autonomia-autopilot.md wiki/content/pt-BR/engenheiro/autonomia.md
           cp ../docs/arquitetura-e-fluxo-forge-sdd.md wiki/content/pt-BR/arquiteto/arquitetura.md
           cp ../sdd/releases/history.md wiki/content/pt-BR/releases.md
           
@@ -94,6 +95,7 @@ jobs:
           cp ../docs/comandos.md wiki/content/en-US/engenheiro/comandos.md
           cp ../docs/skills.md wiki/content/en-US/engenheiro/skills.md
           cp ../docs/telemetria.md wiki/content/en-US/engenheiro/telemetria.md
+          cp ../docs/autonomia-autopilot.md wiki/content/en-US/engenheiro/autonomia.md
           cp ../docs/arquitetura-e-fluxo-forge-sdd.md wiki/content/en-US/arquiteto/arquitetura.md
           cp ../sdd/releases/history.md wiki/content/en-US/releases.md
           
@@ -104,7 +106,7 @@ jobs:
             const wikiDir = 'wiki';
             const ptPath = path.join(wikiDir, 'structure.pt-BR.json');
             const enPath = path.join(wikiDir, 'structure.en-US.json');
-
+ 
             function updateStruct(structPath, isPT) {
               if (!fs.existsSync(structPath)) {
                 console.log('Struct path not found: ' + structPath);
@@ -125,13 +127,22 @@ jobs:
                     updated = true;
                     console.log('Added telemetria page to ' + structPath);
                   }
+                  if (!engSection.pages.some(p => p.id === 'autonomia')) {
+                    engSection.pages.push({
+                      id: 'autonomia',
+                      title: isPT ? 'Piloto Automático (Beta)' : 'Autopilot (Beta)',
+                      file: 'engenheiro/autonomia.md'
+                    });
+                    updated = true;
+                    console.log('Added autonomia page to ' + structPath);
+                  }
                 }
               }
               if (updated) {
                 fs.writeFileSync(structPath, JSON.stringify(struct, null, 2) + '\n');
               }
             }
-
+ 
             updateStruct(ptPath, true);
             updateStruct(enPath, false);
           "
