@@ -1,4 +1,4 @@
-# Forge-SDD — Metodologia v1.6.1-beta.2
+# Forge-SDD — Metodologia v1.7.1-beta.3
 
 Documento substituto e consolidado da v1.0. Principais mudanças:
 
@@ -12,8 +12,8 @@ Documento substituto e consolidado da v1.0. Principais mudanças:
 - Protocolos de paralelismo e rollback definidos.
 - Templates revisados (fechamento de blocos, regras duplicadas removidas).
 
-**Versão:** 1.6.1-beta.2
-**Última atualização:** 5 de julho de 2026
+**Versão:** 1.7.1-beta.3
+**Última atualização:** 10 de julho de 2026
 
 ---
 
@@ -395,7 +395,7 @@ forge-sdd init
   --db    postgres|sqlite|mongo|none
   --telemetry on|off
   --lang  pt-BR|en
-  --version 1.6.1-beta.2
+  --version 1.7.1-beta.3
   --yes       # não-interativo, usa defaults
   --dry-run   # mostra árvore sem criar
 ```
@@ -735,7 +735,7 @@ Cada uma com critério executável (ex.: `forge-sdd init demo --yes && diff -r d
 
 ## 19. Versionamento
 
-`sdd/.sdd-version = 1.6.1-beta.2` para projetos criados com este documento.
+`sdd/.sdd-version = 1.7.1-beta.3` para projetos criados com este documento.
 
 Mudanças seguem semver:
 
@@ -750,15 +750,15 @@ Mudanças seguem semver:
 3. Criar `skills/index.md` (vazio com cabeçalho)
 4. Criar `.metrics/schema.json`
 5. Atualizar `copilot-instructions.md` com seção Lifecycle
-6. Atualizar `.sdd-version` para `1.6.1-beta.2`
+6. Atualizar `.sdd-version` para `1.7.1-beta.3`
 
 Nenhum conteúdo de domínio é tocado.
 
 ### Releases Beta vs Estáveis
 
 Para garantir a estabilidade do fluxo principal:
-- **Lançamentos Beta (`-beta`):** A tag correspondente (ex: `v1.6.1-beta.2`) é criada e enviada diretamente a partir de sua branch de feature. O Pull Request (PR) correspondente deve ser mantido **aberto** no GitHub para testes e validações em ambiente real por um período.
-- **Lançamentos Estáveis/Oficiais:** Apenas após a consolidação dos testes no canal beta, o PR da feature é mergeado na branch `main` e a tag estável (ex: `v1.6.1`) é publicada como oficial.
+- **Lançamentos Beta (`-beta`):** A tag correspondente (ex: `v1.7.1-beta.3`) é criada e enviada diretamente a partir de sua branch de feature. O Pull Request (PR) correspondente deve ser mantido **aberto** no GitHub para testes e validações em ambiente real por um período. Opcionalmente, múltiplos fixes e features podem ser agrupados e acumulados na mesma branch e versão beta antes de realizar um novo bump ou tag.
+- **Lançamentos Estáveis/Oficiais:** Apenas após a consolidação dos testes no canal beta, o PR da feature é mergeado na branch `main` e a tag estável (ex: `v1.7.1`) é publicada como oficial.
 
 ---
 
@@ -776,4 +776,4 @@ Para garantir a estabilidade do fluxo principal:
 
 ---
 
-**Forge-SDD v1.6.1-beta.2** — Última atualização: 5 de julho de 2026
+**Forge-SDD v1.7.1-beta.3** — Última atualização: 10 de julho de 2026
