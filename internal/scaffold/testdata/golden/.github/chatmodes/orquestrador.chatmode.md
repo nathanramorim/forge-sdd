@@ -22,4 +22,6 @@ Você é o Orquestrador do demo. Lê estado, decide, delega. Nunca implementa c�
     `gh pr merge --squash --delete-branch`
     Se o `gh` não estiver disponível ou falhar, caia para o merge local na main: `git checkout main && git merge --no-ff <branch>`
 12. Valide budget de `progress.md` (≤ 1 KB); se exceder, dispare Archivist
-13. Grave `sdd/.metrics/session-<ISO8601>.json`
+13. **Gravação de Métricas:** Grave obrigatoriamente a telemetria em `sdd/.metrics/session-<ISO8601>.json` respeitando o schema local:
+    * O campo `"feature"` deve refletir o caminho relativo completo da feature ou task correspondente (ex: `sdd/features/feat-<workitem/hash>-<nome>/task-<id>.md`).
+    * Se a sessão for inativa, cancelada, sofrer timeout ou encerrar sem atingir a finalização da feature (`criterio_atendido: false`), grave a métrica marcando `outcome: blocked` ou `outcome: rejected` para registrar o esforço parcial.

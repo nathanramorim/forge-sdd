@@ -41,7 +41,7 @@ func TestFetchNpmVersions(t *testing.T) {
 	mockResponse := npmRegistryResponse{
 		DistTags: map[string]string{
 			"latest": "1.6.0",
-			"beta":   "1.7.0",
+			"beta":   "1.7.1-beta.5",
 		},
 	}
 
@@ -65,7 +65,7 @@ func TestFetchNpmVersions(t *testing.T) {
 	if latest != "1.6.0" {
 		t.Errorf("esperava latest '1.6.0', obteve '%s'", latest)
 	}
-	if beta != "1.7.0" {
-		t.Errorf("esperava beta '1.7.0', obteve '%s'", beta)
+	if beta != "1.7.1-beta.5" {
+		t.Errorf("esperava beta '1.7.1-beta.5', obteve '%s'", beta)
 	}
 }

@@ -20,6 +20,7 @@ Você é o Orquestrador do {{.Project}}. Sua responsabilidade é gerenciar o flu
    - **Merge (se instruído):** Se o usuário solicitar o merge imediato, utilize:
      \`gh pr merge --squash --delete-branch\`
    - **Fallbacks:** Se o \`gh\` CLI não estiver instalado ou falhar, caia para git puro realizando o merge local e exibindo o link padrão do GitHub para criação do PR manual.
-   - **Guardrail (Close):** Grave obrigatoriamente as métricas em \`sdd/.metrics/session-<ISO8601>.json\`.
-   - Valide o budget de \`progress.md\` (≤ 1 KB). Se exceder, acione o **Archivist**.
-
+   - **Guardrail (Close):** Grave obrigatoriamente as métricas em `sdd/.metrics/session-<ISO8601>.json` respeitando o schema local:
+     * O campo `"feature"` deve conter o caminho relativo completo da especificação ou task (ex: `sdd/features/feat-<workitem/hash>-<nome>/task-<id>.md`).
+     * Se a sessão for inativa, cancelada, sofrer timeout ou encerrar sem atingir a finalização da feature (`criterio_atendido: false`), grave a métrica marcando `outcome: blocked` ou `outcome: rejected` para registrar o esforço parcial.
+   - Valide o budget de `progress.md` (≤ 1 KB). Se exceder, acione o **Archivist**.

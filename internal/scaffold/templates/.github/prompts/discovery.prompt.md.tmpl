@@ -15,6 +15,7 @@ Invoque o processo de discovery para a demanda: ${input:descrição da demanda}
 Crie os arquivos na pasta `sdd/discovery/`:
 - `discovery-XX-<nome>.md` (Estrutura do Produto)
 - `criteria-XX-<nome>.md` (Critérios de Aceite Técnicos)
+- `plan-XX-<nome>.md` (Roadmap preliminar e estimativa de quebra de tarefas/features)
 
 Se precisar de mais detalhes, peça ao usuário antes de criar os arquivos.
 

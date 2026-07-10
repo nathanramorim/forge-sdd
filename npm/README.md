@@ -3,7 +3,7 @@
 [![NPM Version](https://img.shields.io/npm/v/@nathanramorim/forge-sdd)](https://www.npmjs.com/package/@nathanramorim/forge-sdd)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-> CLI open source que instala em qualquer projeto a **Metodologia Forge-SDD** v1.7.0 — um framework de desenvolvimento guiado por IA que elimina a repetição de instruções, garante padrões arquiteturais e traz a expertise de um engenheiro sênior para o seu fluxo diário.
+> CLI open source que instala em qualquer projeto a **Metodologia Forge-SDD** v1.7.1-beta.5 — um framework de desenvolvimento guiado por IA que elimina a repetição de instruções, garante padrões arquiteturais e traz a expertise de um engenheiro sênior para o seu fluxo diário.
 
 🚀 **Landing Page Oficial:** [forge-sdd.vercel.app](https://forge-sdd.vercel.app)
 📖 **Wiki & Documentação Completa:** [Wiki do Forge-SDD](https://forge-sdd.vercel.app/wiki#introducao)
@@ -30,14 +30,15 @@ npx @nathanramorim/forge-sdd@latest init
 npx @nathanramorim/forge-sdd@latest init . --agent copilot,gemini --name meu-projeto
 ```
 
-## 📢 Novidades da Versão (v1.7.0)
+## 📢 Novidades da Versão (v1.7.1-beta.5)
 
-Esta versão estável consolida o ciclo de funcionalidades beta de diagnóstico, refinamento e agrupamento físico de especificações:
+Esta versão de testes beta traz correções e alinhamento no fluxo de descobertas (discovery):
 
-*   **Comandos `doctor` e `destroy`:** Novo utilitário CLI para diagnóstico de saúde da estrutura SDD do projeto (`doctor`) e purga segura e interativa dos scaffolds (`destroy`).
-*   **Refinamento do Comando `init`:** Criação automática e isolamento de pastas de projetos com base nos parâmetros ou formulários interativos, além de sumário de fechamento visual das stacks configuradas.
-*   **Agrupamento de Features/Discoveries:** Suporte completo para agrupar fisicamente tarefas e subfeatures complexas em pastas nomeadas para organizar o escopo de entregas e planos de discovery.
-*   **Prompts de IA Atualizados:** Templates atualizados para todos os 4 agentes de IA suportados (Gemini, Claude, Copilot, OpenAI), orientando as IAs a utilizar as novas regras físicas e manter a organização.
+*   **Plano de Discovery Padronizado:** O prompt de `/discovery` de todos os agentes (Copilot, Claude e Gemini) foi atualizado e alinhado para gerar obrigatoriamente o arquivo `plan-XX-*.md` na pasta `sdd/discovery/` contendo o roadmap e sugestão de quebra de tarefas/features.
+*   **Agrupamento Opcional de Releases Beta:** A política de releases beta (Regra 11 da Constituição) foi atualizada para explicitar que a publicação e geração de tags beta pode, opcionalmente, agrupar e acumular múltiplos fixes ou features antes de lançar novas tags ou bumps de versão, otimizando o fluxo.
+*   **Diagnóstico de Nome Padrão:** O comando `doctor` e os prompts `/doctor` dos agentes passam a verificar se o projeto ainda utiliza o nome genérico `"meu-projeto"`, listando as correções e os cabeçalhos de agentes recomendados a serem renomeados.
+*   **Métricas Granulares e Robustas:** Implementado mapeamento e telemetria incondicional para caminhos aninhados de subpastas de features e discoveries.
+*   **Prompt do Orquestrador Refatorado:** Instruções do Orquestrador atualizadas para impor os novos guardrails de close em todos os agentes suportados.
 
 ---
 
