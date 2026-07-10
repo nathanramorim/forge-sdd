@@ -4,6 +4,12 @@ Este arquivo registra o histórico de entregas de produto deste projeto.
 
 ## Entregas
 
+### Versão 1.7.1-beta.4 (Beta)
+
+Esta release beta traz atualizações na governança de releases de teste.
+
+*   **Agrupamento Opcional de Releases Beta:** Flexibilizada a Regra 11 da Constituição para permitir, de forma opcional, agrupar e acumular múltiplos fixes ou features na mesma branch ou versão beta antes de gerar um novo bump ou tag, otimizando o fluxo.
+
 ### Versão 1.7.1-beta.3 (Beta)
 
 Esta release beta traz melhorias de diagnósticos da integridade do projeto.
