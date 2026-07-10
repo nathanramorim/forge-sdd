@@ -4,6 +4,12 @@ Este arquivo registra o histórico de entregas de produto deste projeto.
 
 ## Entregas
 
+### Versão 1.7.1-beta.5 (Beta)
+
+Esta release beta traz correções e alinhamento no fluxo de descobertas (discovery).
+
+*   **Plano de Discovery Padronizado:** O prompt de `/discovery` de todos os agentes (Copilot, Claude e Gemini) foi atualizado para gerar obrigatoriamente o arquivo `plan-XX-*.md` na pasta `sdd/discovery/` contendo o roadmap e sugestão de quebra de tarefas/features.
+
 ### Versão 1.7.1-beta.4 (Beta)
 
 Esta release beta traz atualizações na governança de releases de teste.

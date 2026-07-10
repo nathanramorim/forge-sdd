@@ -47,7 +47,7 @@ func TestDoctorAndDestroyCommands(t *testing.T) {
 
 	err = os.WriteFile(filepath.Join(sddDir, ".sddrc"), []byte(`{
 		"project": "test-proj",
-		"version": "1.7.1-beta.4",
+		"version": "1.7.1-beta.5",
 		"agents": ["gemini"],
 		"stack": "go",
 		"db": "postgres",
@@ -55,7 +55,7 @@ func TestDoctorAndDestroyCommands(t *testing.T) {
 	}`), 0644)
 	require.NoError(t, err)
 
-	err = os.WriteFile(filepath.Join(sddDir, ".sdd-version"), []byte("1.7.1-beta.4"), 0644)
+	err = os.WriteFile(filepath.Join(sddDir, ".sdd-version"), []byte("1.7.1-beta.5"), 0644)
 	require.NoError(t, err)
 
 	err = os.WriteFile(filepath.Join(sddDir, "memory", "progress.md"), []byte("# Progress"), 0644)

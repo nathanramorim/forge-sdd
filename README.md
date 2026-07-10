@@ -30,10 +30,11 @@ npx @nathanramorim/forge-sdd@latest init
 npx @nathanramorim/forge-sdd@latest init . --agent copilot,gemini --name meu-projeto
 ```
 
-## 📢 Novidades da Versão (v1.7.1-beta.4)
+## 📢 Novidades da Versão (v1.7.1-beta.5)
 
-Esta versão de testes beta traz atualizações de governança da metodologia:
+Esta versão de testes beta traz correções e alinhamento no fluxo de descobertas (discovery):
 
+*   **Plano de Discovery Padronizado:** O prompt de `/discovery` de todos os agentes (Copilot, Claude e Gemini) foi atualizado e alinhado para gerar obrigatoriamente o arquivo `plan-XX-*.md` na pasta `sdd/discovery/` contendo o roadmap e sugestão de quebra de tarefas/features.
 *   **Agrupamento Opcional de Releases Beta:** A política de releases beta (Regra 11 da Constituição) foi atualizada para explicitar que a publicação e geração de tags beta pode, opcionalmente, agrupar e acumular múltiplos fixes ou features antes de lançar novas tags ou bumps de versão, otimizando o fluxo.
 *   **Diagnóstico de Nome Padrão:** O comando `doctor` e os prompts `/doctor` dos agentes passam a verificar se o projeto ainda utiliza o nome genérico `"meu-projeto"`, listando as correções e os cabeçalhos de agentes recomendados a serem renomeados.
 *   **Métricas Granulares e Robustas:** Implementado mapeamento e telemetria incondicional para caminhos aninhados de subpastas de features e discoveries.
