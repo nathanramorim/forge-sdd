@@ -10,5 +10,6 @@ Verifique a saúde da estrutura Forge-SDD deste projeto:
 4. `.vscode/mcp.json` com context7 + git?
 5. Alguma feature `in-progress` sem branch no git?
 6. `.metrics/schema.json` presente?
+7. O nome do projeto no `.sddrc` ainda está como o padrão ('meu-projeto')? Se sim, sugira renomear onde estiver como default (ex: .sddrc, cabeçalhos dos arquivos de agente e progress.md).
 
 Reporte verde ✓ ou vermelho ✗ por item. Não execute correções.

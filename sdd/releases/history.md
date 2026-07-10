@@ -4,6 +4,12 @@ Este arquivo registra o histórico de entregas de produto deste projeto.
 
 ## Entregas
 
+### Versão 1.7.1-beta.3 (Beta)
+
+Esta release beta traz melhorias de diagnósticos da integridade do projeto.
+
+*   **Diagnóstico de Nome Padrão do Projeto:** O comando `doctor` e os prompts `/doctor` dos agentes passam a verificar se o projeto ainda utiliza o nome genérico `"meu-projeto"`, listando as correções e os cabeçalhos de agentes recomendados a serem renomeados.
+
 ### Versão 1.7.1-beta.2 (Beta)
 
 Esta release beta traz a correção e robustez no mapeamento de métricas de telemetria das sessões.

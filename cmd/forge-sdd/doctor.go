@@ -174,6 +174,24 @@ inconsistências de configuração dos agentes de IA e progresso das features.`,
 			fmt.Println("\n⚠️  Diretório sdd/features não encontrado ou inacessível.")
 		}
 
+		// 6. Validação do nome padrão do projeto
+		if rc.Project == "meu-projeto" {
+			fmt.Println("\n⚠️  O nome do projeto no sdd/.sddrc ainda está configurado como o padrão ('meu-projeto').")
+			fmt.Println("   Sugerimos alterá-lo para refletir o nome real do seu projeto em:")
+			fmt.Println("   - Chave \"project\" no arquivo sdd/.sddrc")
+			for _, agent := range rc.Agents {
+				switch agent {
+				case config.AgentClaude:
+					fmt.Println("   - Cabeçalho do arquivo CLAUDE.md (onde diz: # CLAUDE.md — meu-projeto)")
+				case config.AgentGemini:
+					fmt.Println("   - Cabeçalho do arquivo GEMINI.md (onde diz: # GEMINI.md — meu-projeto)")
+				case config.AgentOpenAI:
+					fmt.Println("   - Cabeçalho do arquivo OPENAI.md (onde diz: # OPENAI.md — meu-projeto)")
+				}
+			}
+			fmt.Println("   - Cabeçalho do arquivo sdd/memory/progress.md")
+		}
+
 		fmt.Println("\n🩺 Diagnóstico finalizado.")
 		return nil
 	},

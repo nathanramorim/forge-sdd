@@ -3,7 +3,7 @@
 [![NPM Version](https://img.shields.io/npm/v/@nathanramorim/forge-sdd)](https://www.npmjs.com/package/@nathanramorim/forge-sdd)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-> CLI open source que instala em qualquer projeto a **Metodologia Forge-SDD** v1.7.1-beta.2 — um framework de desenvolvimento guiado por IA que elimina a repetição de instruções, garante padrões arquiteturais e traz a expertise de um engenheiro sênior para o seu fluxo diário.
+> CLI open source que instala em qualquer projeto a **Metodologia Forge-SDD** v1.7.1-beta.3 — um framework de desenvolvimento guiado por IA que elimina a repetição de instruções, garante padrões arquiteturais e traz a expertise de um engenheiro sênior para o seu fluxo diário.
 
 🚀 **Landing Page Oficial:** [forge-sdd.vercel.app](https://forge-sdd.vercel.app)
 📖 **Wiki & Documentação Completa:** [Wiki do Forge-SDD](https://forge-sdd.vercel.app/wiki#introducao)
@@ -30,11 +30,12 @@ npx @nathanramorim/forge-sdd@latest init
 npx @nathanramorim/forge-sdd@latest init . --agent copilot,gemini --name meu-projeto
 ```
 
-## 📢 Novidades da Versão (v1.7.1-beta.2)
+## 📢 Novidades da Versão (v1.7.1-beta.3)
 
-Esta versão de testes beta traz correções importantes na persistência de telemetria local:
+Esta versão de testes beta traz melhorias no utilitário de diagnóstico:
 
-*   **Métricas Granulares e Robustas:** O Orquestrador agora mapeia corretamente o campo `"feature"` apontando para caminhos de especificações ou subtasks aninhadas em subpastas e garante o registro obrigatório de telemetria a cada encerramento de sessão, cobrindo timeouts, inatividade ou abandono.
+*   **Diagnóstico de Nome Padrão:** O comando `doctor` e os prompts `/doctor` dos agentes passam a verificar se o projeto ainda utiliza o nome genérico `"meu-projeto"`, listando as correções e os cabeçalhos de agentes recomendados a serem renomeados.
+*   **Métricas Granulares e Robustas:** Implementado mapeamento e telemetria incondicional para caminhos aninhados de subpastas de features e discoveries.
 *   **Prompt do Orquestrador Refatorado:** Instruções do Orquestrador atualizadas para impor os novos guardrails de close em todos os agentes suportados.
 
 ---
