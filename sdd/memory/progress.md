@@ -34,6 +34,7 @@ Fase 40 — CLI init directory refinement     [x] done
 Fase 41 — Nested features/discovery grouping [x] done
 Fase 42 — Consolidação e Lançamento v1.7.0 [x] done
 Fase 1.8.0-beta — Piloto Automático e Nova Convenção Beta [x] done
+Fase 1.8.1-beta — Backup de Upgrade no CLI      [ ] doing
 ```
 
 ## Features ativas
@@ -72,15 +73,17 @@ Fase 1.8.0-beta — Piloto Automático e Nova Convenção Beta [x] done
 | feat-41-nested-features-discovery | feat/cli-nested-features-discovery | done |
 | feat-42-release-v1.7.0 | feat/release-v1.7.0 | done |
 | feat-1.8.0-beta-autopilot-autonomy | feat/cli-autopilot-autonomy | done |
+| feat-1.8.1-beta-upgrade-backup | feat/cli-upgrade-backup | doing |
 
 ## Próximo passo
-**Iniciar:** Nenhuma feature pendente de planejamento.
+**Iniciar:** Conclusão da Fase 1.8.1-beta de Backups no CLI.
 **Bloqueios:** —
 
 ## Handoff da última sessão
-- Feature 1.8.0-beta concluída (implementação do modo Auto-Pilot e nova política simplificada de versionamento beta v1.8.0-beta).
+- Implementada a cópia automática de segurança (backup) antes de sobrescrever arquivos locais no update/upgrade.
 
 ## Última sessão
+- 2026-07-11 — fix: iniciada a Fase 1.8.1-beta (backup automático de agentes no upgrade).
 - 2026-07-10 — feat: concluída a Fase 1.8.0-beta (piloto automático e nova nomenclatura de tags beta).
 - 2026-07-09 — feat: concluída a Fase 42 (consolidação e publicação oficial da versão estável v1.7.0).
 - 2026-07-06 — feat: concluída a Fase 41 (agrupamento em subpastas, CLI doctor recursivo e lançamento da v1.6.1-beta.3).

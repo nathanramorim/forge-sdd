@@ -60,7 +60,7 @@ func TestDryRunNoFiles(t *testing.T) {
 	dir := t.TempDir()
 	cfg := config.Config{
 		Project: "demo", Stack: "go", DB: "none",
-		Telemetry: false, Lang: "pt-BR", SddVersion: "1.8.0-beta",
+		Telemetry: false, Lang: "pt-BR", SddVersion: "1.8.1-beta",
 		Agents: []string{config.AgentCopilot},
 		DryRun: true,
 	}
@@ -81,7 +81,7 @@ func TestAgentClaude(t *testing.T) {
 	dir := t.TempDir()
 	cfg := config.Config{
 		Project: "demo", Stack: "go", DB: "none",
-		Telemetry: false, Lang: "pt-BR", SddVersion: "1.8.0-beta",
+		Telemetry: false, Lang: "pt-BR", SddVersion: "1.8.1-beta",
 		Agents: []string{config.AgentClaude},
 	}
 
@@ -110,7 +110,7 @@ func TestAgentGemini(t *testing.T) {
 	dir := t.TempDir()
 	cfg := config.Config{
 		Project: "demo", Stack: "node", DB: "postgres",
-		Telemetry: false, Lang: "pt-BR", SddVersion: "1.8.0-beta",
+		Telemetry: false, Lang: "pt-BR", SddVersion: "1.8.1-beta",
 		Agents: []string{config.AgentGemini},
 	}
 
@@ -135,7 +135,7 @@ func TestAgentMultiple(t *testing.T) {
 	dir := t.TempDir()
 	cfg := config.Config{
 		Project: "demo", Stack: "go", DB: "none",
-		Telemetry: false, Lang: "pt-BR", SddVersion: "1.8.0-beta",
+		Telemetry: false, Lang: "pt-BR", SddVersion: "1.8.1-beta",
 		Agents: []string{config.AgentCopilot, config.AgentClaude},
 	}
 
@@ -177,14 +177,14 @@ func TestUpgradePreservesDomain(t *testing.T) {
 	err = os.WriteFile(geminiFile, []byte("conteudo customizado do agente"), 0644)
 	require.NoError(t, err)
 
-	// 2. Segunda execução (simula upgrade para v1.8.0-beta com novos templates)
+	// 2. Segunda execução (simula upgrade para v1.8.1-beta com novos templates)
 	cfgUpgrade := config.Config{
 		Project:    "demo",
 		Stack:      "go",
 		DB:         "none",
 		Telemetry:  false,
 		Lang:       "pt-BR",
-		SddVersion: "1.8.0-beta", // nova versão
+		SddVersion: "1.8.1-beta", // nova versão
 		Agents:     []string{config.AgentGemini},
 	}
 	_, err = Run(cfgUpgrade, dir)
@@ -196,14 +196,28 @@ func TestUpgradePreservesDomain(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, "conteudo customizado do progresso", string(progressData))
 
-	// b. .sdd-version DEVE ter sido atualizado para 1.8.0-beta
+	// b. .sdd-version DEVE ter sido atualizado para 1.8.1-beta
 	versionData, err := os.ReadFile(versionFile)
 	require.NoError(t, err)
-	assert.Contains(t, string(versionData), "1.8.0-beta")
+	assert.Contains(t, string(versionData), "1.8.1-beta")
 
 	// c. GEMINI.md DEVE ter sido atualizado (sobrescrito com o template da nova versão)
 	geminiData, err := os.ReadFile(geminiFile)
 	require.NoError(t, err)
 	assert.NotEqual(t, "conteudo customizado do agente", string(geminiData))
+
+	// d. Um backup de GEMINI.md deve ter sido criado em sdd/backups/upgrade-<timestamp>/GEMINI.md
+	backupBase := filepath.Join(dir, "sdd", "backups")
+	backupEntries, err := os.ReadDir(backupBase)
+	require.NoError(t, err)
+	require.Len(t, backupEntries, 1, "deve ter criado exatamente uma pasta de backup")
+	
+	backupFolder := filepath.Join(backupBase, backupEntries[0].Name())
+	backupGemini := filepath.Join(backupFolder, "GEMINI.md")
+	assert.FileExists(t, backupGemini)
+	
+	backupData, err := os.ReadFile(backupGemini)
+	require.NoError(t, err)
+	assert.Equal(t, "conteudo customizado do agente", string(backupData))
 }
 

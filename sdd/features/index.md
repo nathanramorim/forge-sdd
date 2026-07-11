@@ -43,8 +43,8 @@ main
                                                                          └─ feat/cli-doctor-destroy
                                                                              └─ feat/cli-init-refinement
                                                                                   └─ feat/cli-nested-features-discovery
-                                                                                      └─ feat/release-v1.7.0
-                                                                                          └─ feat/cli-autopilot-autonomy
+                                                                                           └─ feat/cli-autopilot-autonomy
+                                                                                               └─ feat/cli-upgrade-backup
             ```
 
                                        ## Janelas de paralelismo
@@ -96,4 +96,5 @@ main
 | 40 | feat-40-cli-init-refinement.md | feat/cli-init-refinement | 40 | done |
 | 41 | feat-41-nested-features-discovery.md | feat/cli-nested-features-discovery | 41 | done |
 | 42 | feat-42-release-v1.7.0.md | feat/release-v1.7.0 | 42 | done |
-| 1.8.0-beta | feat-1.8.0-beta-autopilot-autonomy.md | feat/cli-autopilot-autonomy | 1.8.0-beta | doing |
+| 1.8.0-beta | feat-1.8.0-beta-autopilot-autonomy.md | feat/cli-autopilot-autonomy | 1.8.0-beta | done |
+| 1.8.1-beta | feat-1.8.1-beta-upgrade-backup.md | feat/cli-upgrade-backup | 1.8.1-beta | doing |

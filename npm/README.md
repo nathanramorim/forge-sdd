@@ -3,7 +3,7 @@
 [![NPM Version](https://img.shields.io/npm/v/@nathanramorim/forge-sdd)](https://www.npmjs.com/package/@nathanramorim/forge-sdd)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-> CLI open source que instala em qualquer projeto a **Metodologia Forge-SDD** v1.8.0-beta — um framework de desenvolvimento guiado por IA que elimina a repetição de instruções, garante padrões arquiteturais e traz a expertise de um engenheiro sênior para o seu fluxo diário.
+> CLI open source que instala em qualquer projeto a **Metodologia Forge-SDD** v1.8.1-beta — um framework de desenvolvimento guiado por IA que elimina a repetição de instruções, garante padrões arquiteturais e traz a expertise de um engenheiro sênior para o seu fluxo diário.
 
 🚀 **Landing Page Oficial:** [forge-sdd.vercel.app](https://forge-sdd.vercel.app)
 📖 **Wiki & Documentação Completa:** [Wiki do Forge-SDD](https://forge-sdd.vercel.app/wiki#introducao)
@@ -30,12 +30,13 @@ npx @nathanramorim/forge-sdd@latest init
 npx @nathanramorim/forge-sdd@latest init . --agent copilot,gemini --name meu-projeto
 ```
 
-## 📢 Novidades da Versão (v1.8.0-beta)
+## 📢 Novidades da Versão (v1.8.1-beta)
 
-Esta versão de testes beta traz a automação contínua de sessões e a nova convenção de nomenclatura de tags:
+Esta versão de testes beta traz a proteção de customizações locais durante upgrades e a automação contínua de sessões:
 
+*   **Backup Automático no Upgrade:** Toda vez que você rodar um upgrade ou update via CLI, um backup físico de arquivos de configuração e prompts de agentes customizados no seu projeto (como `.github/copilot-instructions.md`, `CLAUDE.md`, prompts e skills) será salvo automaticamente em `sdd/backups/upgrade-<timestamp>/` antes de qualquer sobrescrita, eliminando o risco de perda de lógica do projeto.
 *   **Modo Piloto Automático (Auto-Pilot):** Os prompts e chatmodes do Orquestrador foram atualizados para ler o arquivo flag `.sdd-auto-pilot` e ignorar a confirmação humana do `PLAN`. O CLI agora também scaffolda o script daemon padrão `sdd/scripts/sdd-daemon.sh` e o guia técnico de automação `sdd/docs/autonomia-autopilot.md`.
-*   **Convenção de Versionamento Simplificada:** Tags do canal de homologação passam a usar apenas o sufixo simples `-beta` (ex: `1.8.0-beta`), permitindo o acúmulo de múltiplos fixes ou features antes de lançar a estável oficial `1.8.0` correspondente (Regra 15).
+*   **Convenção de Versionamento Simplificada:** Tags do canal de homologação passam a usar apenas o sufixo simples `-beta` (ex: `1.8.1-beta`), permitindo o acúmulo de múltiplos fixes ou features antes de lançar a estável oficial `1.8.0` correspondente (Regra 15).
 *   **Métricas Granulares e Robustas:** Mapeamento incondicional de telemetria mesmo para sessões parciais, abortadas ou com timeouts.
 *   **Diagnóstico de Nome Padrão:** O comando `doctor` alerta caso o projeto use o nome padrão `"meu-projeto"` no `.sddrc` ou nos cabeçalhos dos arquivos de agentes.organização.
 

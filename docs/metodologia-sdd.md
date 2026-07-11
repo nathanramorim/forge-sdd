@@ -1,4 +1,4 @@
-# Forge-SDD — Metodologia v1.8.0-beta
+# Forge-SDD — Metodologia v1.8.1-beta
 
 Documento substituto e consolidado da v1.0. Principais mudanças:
 
@@ -12,7 +12,7 @@ Documento substituto e consolidado da v1.0. Principais mudanças:
 - Protocolos de paralelismo e rollback definidos.
 - Templates revisados (fechamento de blocos, regras duplicadas removidas).
 
-**Versão:** 1.8.0-beta
+**Versão:** 1.8.1-beta
 **Última atualização:** 10 de julho de 2026
 
 ---
@@ -391,7 +391,7 @@ forge-sdd init
   --db    postgres|sqlite|mongo|none
   --telemetry on|off
   --lang  pt-BR|en
-  --version 1.8.0-beta
+  --version 1.8.1-beta
   --yes       # não-interativo, usa defaults
   --dry-run   # mostra árvore sem criar
 ```
@@ -731,7 +731,7 @@ Cada uma com critério executável (ex.: `forge-sdd init demo --yes && diff -r d
 
 ## 19. Versionamento
 
-`sdd/.sdd-version = 1.8.0-beta` para projetos criados com este documento.
+`sdd/.sdd-version = 1.8.1-beta` para projetos criados com este documento.
 
 Mudanças seguem semver:
 
@@ -746,7 +746,7 @@ Mudanças seguem semver:
 3. Criar `skills/index.md` (vazio com cabeçalho)
 4. Criar `.metrics/schema.json`
 5. Atualizar `copilot-instructions.md` com seção Lifecycle
-6. Atualizar `.sdd-version` para `1.8.0-beta`
+6. Atualizar `.sdd-version` para `1.8.1-beta`
 
 Nenhum conteúdo de domínio é tocado.
 
@@ -772,4 +772,4 @@ Para garantir a estabilidade do fluxo principal:
 
 ---
 
-**Forge-SDD v1.8.0-beta** — Última atualização: 10 de julho de 2026
+**Forge-SDD v1.8.1-beta** — Última atualização: 11 de julho de 2026

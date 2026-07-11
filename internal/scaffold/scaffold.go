@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"strings"
 	"text/template"
+	"time"
 
 	"github.com/forge-sdd/cli/internal/config"
 )
@@ -48,6 +49,8 @@ func agentTemplateRoot(agent string) string {
 // Retorna a lista de arquivos criados.
 func Run(cfg config.Config, targetDir string) ([]string, error) {
 	var created []string
+	backupTimestamp := time.Now().Format("20060102-150405")
+	backupDir := filepath.Join(targetDir, "sdd", "backups", "upgrade-"+backupTimestamp)
 
 	// Garante ao menos um agente
 	agents := cfg.Agents
@@ -74,7 +77,7 @@ func Run(cfg config.Config, targetDir string) ([]string, error) {
 	for _, root := range globalRoots {
 		// stripPrefix = "templates" para preservar o nome do subdiretório no destino
 		// ex: templates/.github/foo.tmpl → .github/foo
-		files, err := renderDir(templatesFS, root, "templates", cfg, targetDir)
+		files, err := renderDir(templatesFS, root, "templates", cfg, targetDir, backupDir)
 		if err != nil {
 			return nil, err
 		}
@@ -89,7 +92,7 @@ func Run(cfg config.Config, targetDir string) ([]string, error) {
 		}
 		// stripPrefix = root do agente para que CLAUDE.md fique na raiz do projeto
 		// ex: templates/agents/claude/CLAUDE.md.tmpl → CLAUDE.md
-		files, err := renderDir(templatesFS, root, root, cfg, targetDir)
+		files, err := renderDir(templatesFS, root, root, cfg, targetDir, backupDir)
 		if err != nil {
 			return nil, err
 		}
@@ -102,7 +105,7 @@ func Run(cfg config.Config, targetDir string) ([]string, error) {
 
 // renderDir percorre fsys a partir de root, renderiza cada template e escreve em targetDir.
 // stripPrefix é o prefixo a remover do path para calcular o destino.
-func renderDir(fsys embed.FS, root, stripPrefix string, cfg config.Config, targetDir string) ([]string, error) {
+func renderDir(fsys embed.FS, root, stripPrefix string, cfg config.Config, targetDir string, backupDir string) ([]string, error) {
 	var created []string
 
 	err := fs.WalkDir(fsys, root, func(path string, d fs.DirEntry, err error) error {
@@ -125,6 +128,16 @@ func renderDir(fsys embed.FS, root, stripPrefix string, cfg config.Config, targe
 		if shouldPreserve(dest, targetDir) {
 			created = append(created, dest)
 			return nil
+		}
+
+		// ANTES de escrever fisicamente, se o arquivo já existir no destino,
+		// fazemos um backup dele para sdd/backups/upgrade-<timestamp>/
+		if _, err := os.Stat(dest); err == nil {
+			if err := backupFile(dest, targetDir, backupDir); err != nil {
+				fmt.Printf("erro ao fazer backup de %s: %v\n", dest, err)
+			} else {
+				fmt.Printf("[BACKUP] %s -> %s\n", dest, filepath.Join(backupDir, rel))
+			}
 		}
 
 		if err := os.MkdirAll(filepath.Dir(dest), 0755); err != nil {
@@ -161,10 +174,13 @@ func renderDir(fsys embed.FS, root, stripPrefix string, cfg config.Config, targe
 // Útil para o comando update, que adiciona novos agentes a um projeto existente.
 func RunAgents(cfg config.Config, agents []string, targetDir string) ([]string, error) {
 	var created []string
+	backupTimestamp := time.Now().Format("20060102-150405")
+	backupDir := filepath.Join(targetDir, "sdd", "backups", "upgrade-"+backupTimestamp)
+
 	for _, agent := range agents {
 		if agent == config.AgentCopilot {
 			for _, root := range []string{"templates/.vscode", "templates/.github"} {
-				files, err := renderDir(templatesFS, root, "templates", cfg, targetDir)
+				files, err := renderDir(templatesFS, root, "templates", cfg, targetDir, backupDir)
 				if err != nil {
 					return nil, err
 				}
@@ -176,7 +192,7 @@ func RunAgents(cfg config.Config, agents []string, targetDir string) ([]string, 
 		if root == "" {
 			continue
 		}
-		files, err := renderDir(templatesFS, root, root, cfg, targetDir)
+		files, err := renderDir(templatesFS, root, root, cfg, targetDir, backupDir)
 		if err != nil {
 			return nil, err
 		}
@@ -247,5 +263,33 @@ func cleanObsoleteFiles(targetDir string) {
 			_ = os.Remove(path)
 		}
 	}
+}
+
+// backupFile salva uma cópia de segurança do arquivo original antes de sobrescrevê-lo.
+func backupFile(dest string, targetDir string, backupDir string) error {
+	// Se o arquivo de destino não existe, não há o que fazer backup
+	if _, err := os.Stat(dest); os.IsNotExist(err) {
+		return nil
+	}
+
+	// Calcula o caminho relativo do arquivo em relação a targetDir
+	rel, err := filepath.Rel(targetDir, dest)
+	if err != nil {
+		return err
+	}
+
+	backupDest := filepath.Join(backupDir, rel)
+	if err := os.MkdirAll(filepath.Dir(backupDest), 0755); err != nil {
+		return err
+	}
+
+	// Lê o arquivo original
+	content, err := os.ReadFile(dest)
+	if err != nil {
+		return err
+	}
+
+	// Grava o backup
+	return os.WriteFile(backupDest, content, 0644)
 }
 

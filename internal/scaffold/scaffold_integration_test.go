@@ -18,7 +18,7 @@ func TestScaffoldIntegration_Gemini(t *testing.T) {
 		DB:         "none",
 		Telemetry:  true,
 		Lang:       "pt-BR",
-		SddVersion: "1.8.0-beta",
+		SddVersion: "1.8.1-beta",
 		Agents:     []string{config.AgentGemini},
 	}
 
