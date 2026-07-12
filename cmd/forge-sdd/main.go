@@ -77,6 +77,7 @@ A estrutura de domínio em sdd/ (features, spec, memory) nunca é alterada.`,
 func runInitFlow(cmd *cobra.Command, dirArg string) error {
 	yes, _ := cmd.Flags().GetBool("yes")
 	dryRun, _ := cmd.Flags().GetBool("dry-run")
+	tutorial, _ := cmd.Flags().GetBool("tutorial")
 	nameFlag, _ := cmd.Flags().GetString("name")
 
 	var targetDir string
@@ -164,6 +165,9 @@ func runInitFlow(cmd *cobra.Command, dirArg string) error {
 	printSummaryReport(cfg, targetDir, len(created))
 	if !cfg.DryRun {
 		printCheatSheet(cfg)
+		if tutorial {
+			printTutorialHint()
+		}
 	}
 	return nil
 }
@@ -319,6 +323,10 @@ func printSummaryReport(cfg config.Config, targetDir string, fileCount int) {
 	fmt.Println("  3. Leia sdd/memory/progress.md para começar a codificar!")
 }
 
+func printTutorialHint() {
+	fmt.Println("\n🎓 Modo tutorial ativado: abra seu agente de IA e peça \"/tutorial\" para aprender o ciclo SDD com um exemplo guiado e descartável antes de começar sua demanda real.")
+}
+
 func printCheatSheet(cfg config.Config) {
 	commands := scaffold.CommandCheatSheet(cfg)
 	if len(commands) == 0 {
@@ -333,6 +341,7 @@ func printCheatSheet(cfg config.Config) {
 func init() {
 	initCmd.Flags().Bool("yes", false, "Pular prompts e usar flags/defaults")
 	initCmd.Flags().Bool("dry-run", false, "Listar arquivos que seriam criados sem gravar no disco")
+	initCmd.Flags().Bool("tutorial", false, "Ao final, sugerir rodar /tutorial para aprender o ciclo SDD com um exemplo guiado")
 	initCmd.Flags().String("name", "", "Nome do projeto")
 	initCmd.Flags().String("stack", "", "Stack principal: go, node, python, rust, other")
 	initCmd.Flags().String("db", "", "Banco de dados: postgres, sqlite, mongo, none")
