@@ -49,11 +49,21 @@ Executados diretamente no terminal do desenvolvedor, normalmente utilizando o wr
   ```
 
 ### `npx @nathanramorim/forge-sdd doctor [diretório]`
-- **O que faz:** Diagnostica a saúde e a integridade da metodologia instalada no repositório. Verifica a existência de arquivos estruturais, valida se as pastas e integrações físicas dos agentes de IA estão de acordo com o `.sddrc` e lista as features em andamento.
+- **O que faz:** Diagnostica a saúde e a integridade da metodologia instalada no repositório. Verifica a existência de arquivos estruturais, valida se as pastas e integrações físicas dos agentes de IA estão de acordo com o `.sddrc`, lista as features em andamento e detecta deriva de convenção de nomenclatura (mistura de `feat-NN` sequencial com `feat-xxxx` por hash em `sdd/features/` e `sdd/discovery/`).
 - **Como usar:**
   ```bash
   npx @nathanramorim/forge-sdd doctor
   ```
+
+### `npx @nathanramorim/forge-sdd autopilot [diretório]`
+- **O que faz:** Ativa o modo autopilot criando `sdd/.sdd-auto-pilot`, mas só libera a criação depois que o projeto acumular um número mínimo de ciclos completos (`outcome: approved`) registrados em `sdd/.metrics/` — preservando a função didática da metodologia para quem ainda está aprendendo. Idempotente se o arquivo já existir.
+- **Como usar:**
+  ```bash
+  npx @nathanramorim/forge-sdd autopilot
+  ```
+  - **Flags Disponíveis:**
+    - `--min-cycles <N>`: Número mínimo de ciclos completos exigidos (default: `3`).
+    - `--skip-graduation`: Bypass consciente — ativa o autopilot mesmo sem os ciclos mínimos completos.
 
 ### `npx @nathanramorim/forge-sdd destroy [diretório]`
 - **O que faz:** Desinstala e remove completamente toda a estrutura do Forge-SDD e integrações de agentes de IA locais (como a pasta `sdd/`, `.claude/`, `.gemini/`, `CLAUDE.md`, etc.). Requer confirmação interativa de segurança, a menos que a flag `--yes` esteja presente.
@@ -78,9 +88,15 @@ Digitados na interface de chat do agente de IA configurado no projeto (ex: Gemin
 
 ### `/status` ou `"qual o progresso?"`
 - **Quando usar:** No início de qualquer sessão de trabalho para que o agente entenda o contexto atual (comando obrigatório de inicialização).
-- **O que faz:** Lê o arquivo `sdd/memory/progress.md` e resume o status das features ativas, próximos passos, bloqueios e percentual de conclusão do projeto.
+- **O que faz:** Lê o arquivo `sdd/memory/progress.md` e resume o status das features ativas, próximos passos, bloqueios e percentual de conclusão do projeto. Sempre encerra com a linha `Próximo comando sugerido: <comando>`, calculada a partir do estado real do projeto — elimina a necessidade de memorizar a ordem dos comandos.
 - **Exemplo de uso:** 
   > `/status`
+
+### `/tutorial` ou `"me ensine o ciclo SDD"`
+- **Quando usar:** Na primeira vez que for usar a metodologia, antes de rodar `/discovery` com uma demanda real.
+- **O que faz:** Guia um ciclo SDD completo e fictício (discovery → features → PLAN/ACT/CLOSE), isolado em `sdd/discovery/_tutorial/` e `sdd/features/_tutorial/`, sem tocar `sdd/features/index.md`, `sdd/memory/progress.md` ou telemetria.
+- **Exemplo de uso:** 
+  > `/tutorial`
 
 ### `/discovery <ideia>` ou `"fazer discovery de..."`
 - **Quando usar:** Quando você tem uma ideia ou demanda vaga e precisa debater arquitetura, especificações técnicas e viabilidade.
@@ -114,7 +130,7 @@ Digitados na interface de chat do agente de IA configurado no projeto (ex: Gemin
 
 ### `/constitution` ou `"alinhar arquitetura"`
 - **Quando usar:** No início do projeto ou após mudanças drásticas de arquitetura/dependências.
-- **O que faz:** Faz uma varredura completa do repositório para mapear as dependências e tecnologias usadas, alinhando a constituição (`sdd/memory/constitution.md`) do projeto.
+- **O que faz:** Faz uma varredura completa do repositório para mapear as dependências e tecnologias usadas, alinhando a constituição (`sdd/memory/constitution.md`) do projeto. Também pergunta (opcionalmente) o idioma de interação e o nível de linguagem desejado — `padrão` (jargão técnico) ou `iniciante` (linguagem simplificada, com exemplos concretos) — persistindo a escolha para todos os comandos seguintes.
 - **Exemplo de uso:** 
   > `/constitution`
 
@@ -126,7 +142,7 @@ Digitados na interface de chat do agente de IA configurado no projeto (ex: Gemin
 
 ### `/doctor` ou `"check-up do projeto"`
 - **Quando usar:** Se notar falhas de carregamento, conflito de MCP ou arquivos corrompidos.
-- **O que faz:** Verifica a integridade estrutural e a compatibilidade dos arquivos e pastas do Forge-SDD no repositório.
+- **O que faz:** Verifica a integridade estrutural e a compatibilidade dos arquivos e pastas do Forge-SDD no repositório. Equivalente em chat do `forge-sdd doctor` do CLI, incluindo a detecção de deriva de convenção de nomenclatura.
 - **Exemplo de uso:** 
   > `/doctor`
 
