@@ -162,9 +162,6 @@ func runInitFlow(cmd *cobra.Command, dirArg string) error {
 	}
 
 	printSummaryReport(cfg, targetDir, len(created))
-	if !cfg.DryRun {
-		printCheatSheet(cfg)
-	}
 	return nil
 }
 
@@ -317,17 +314,6 @@ func printSummaryReport(cfg config.Config, targetDir string, fileCount int) {
 	fmt.Println("  1. Abra o projeto no VS Code ou sua IDE de preferência")
 	fmt.Println("  2. Aceite as extensões recomendadas (Copilot, MCP, etc.)")
 	fmt.Println("  3. Leia sdd/memory/progress.md para começar a codificar!")
-}
-
-func printCheatSheet(cfg config.Config) {
-	commands := scaffold.CommandCheatSheet(cfg)
-	if len(commands) == 0 {
-		return
-	}
-	fmt.Println("\nComandos SDD disponíveis:")
-	for _, c := range commands {
-		fmt.Printf("  %-18s %s\n", c.Command, c.Description)
-	}
 }
 
 func init() {
