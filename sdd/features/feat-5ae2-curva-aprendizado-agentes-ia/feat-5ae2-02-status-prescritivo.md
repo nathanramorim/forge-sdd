@@ -11,7 +11,3 @@ Elimina a necessidade de o usuário memorizar a ordem dos comandos: `/status` pa
    - Features com status `todo` → sugerir `/proxima-feature`.
    - Todas as features `done` → sugerir `/archive` ou `/discovery` (novo ciclo).
 3. Os três arquivos de prompt (`.claude/commands/status.prompt.md.tmpl`, `.gemini/prompts/status.prompt.md.tmpl`, `.github/prompts/status.prompt.md.tmpl`) devem ser atualizados de forma equivalente.
-
-## Status: done
-
-Atualizados os três templates (`internal/scaffold/templates/agents/claude/.claude/commands/status.prompt.md.tmpl`, `.../gemini/.gemini/prompts/status.prompt.md.tmpl`, `internal/scaffold/templates/.github/prompts/status.prompt.md.tmpl`) com a regra de "Comando sugerido" e a árvore de decisão baseada no estado de `sdd/discovery/`, `sdd/features/` e status `todo`/`done`. Golden fixture (`testdata/golden/.github/prompts/status.prompt.md`) regenerado via `go test ./internal/scaffold/... -run TestGoldenInit -update`.
