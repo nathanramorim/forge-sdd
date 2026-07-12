@@ -110,4 +110,4 @@ main
 | 5ae2-04 | feat-5ae2-curva-aprendizado-agentes-ia/feat-5ae2-04-tutorial-guiado.md | feat/5ae2-tutorial-guiado | 5ae2-04 | done |
 | 5ae2-05 | feat-5ae2-curva-aprendizado-agentes-ia/feat-5ae2-05-gate-graduacao-autopilot.md | feat/5ae2-gate-graduacao-autopilot | 5ae2-05 | done |
 | 5ae2-06 | feat-5ae2-curva-aprendizado-agentes-ia/feat-5ae2-06-spike-subagentes-nativos.md | feat/5ae2-spike-subagentes-nativos | 5ae2-06 | done |
-| 5ae2-07 | feat-5ae2-curva-aprendizado-agentes-ia/feat-5ae2-07-modo-iniciante.md | feat/5ae2-modo-iniciante | 5ae2-07 | done |
+| 5ae2-07 | feat-5ae2-curva-aprendizado-agentes-ia/feat-5ae2-07-modo-iniciante.md | feat/5ae2-modo-iniciante | 5ae2-07 | todo |
