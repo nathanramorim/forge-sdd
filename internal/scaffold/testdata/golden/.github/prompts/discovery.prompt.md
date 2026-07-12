@@ -19,5 +19,7 @@ Crie os arquivos na pasta `sdd/discovery/`:
 
 Se precisar de mais detalhes, peça ao usuário antes de criar os arquivos.
 
+Verifique `Nível de Linguagem` em `sdd/memory/constitution.md`: se `iniciante`, explique conceitos como "C4 Model" ou "critério de aceite" com exemplos concretos e linguagem simples, sem alterar os critérios de aceite em si.
+
 **Handoff:**
 Ao finalizar, gere um resumo estruturado para o próximo passo (`/split-features`), listando os arquivos criados e instruindo a quebrar as features geradas organizando-as dentro de uma subpasta de feature com o nome deste discovery (`sdd/features/feat-XX-<nome-do-discovery>/`).

@@ -77,13 +77,14 @@ Fase 42 — Consolidação e Lançamento v1.7.0 [x] done
 | feat-5ae2-04-tutorial-guiado | feat/5ae2-tutorial-guiado | done |
 | feat-5ae2-05-gate-graduacao-autopilot | feat/5ae2-gate-graduacao-autopilot | done |
 | feat-5ae2-06-spike-subagentes-nativos | feat/5ae2-spike-subagentes-nativos | done |
-| feat-5ae2-07-modo-iniciante | feat/5ae2-modo-iniciante | todo |
+| feat-5ae2-07-modo-iniciante | feat/5ae2-modo-iniciante | done |
 
 ## Próximo passo
-**Iniciar:** feat-5ae2-07-modo-iniciante (próxima feature da Discovery 5ae2, alvo do pacote v1.9.0).
+**Iniciar:** Nenhuma feature pendente — Discovery 5ae2 (v1.9.0) concluída (7/7 features). Próximo ciclo natural: novo `/discovery` ou consolidação/release das 7 PRs empilhadas (#29-#35).
 **Bloqueios:** —
 
 ## Handoff da última sessão
+- feat-5ae2-07-modo-iniciante concluída: prompts `/constitution` (3 agentes) ganharam a pergunta opcional de nível de linguagem (`padrão`/`iniciante`), persistida em `constitution.md`; `/discovery` ganhou instrução para simplificar jargão quando `iniciante`. Discovery 5ae2 100% implementada (7/7), alvo do pacote v1.9.0.
 - feat-5ae2-06-spike-subagentes-nativos concluída (spike, sem código): mapeado suporte nativo a subagentes com contexto isolado por agente — Claude tem primitivo maduro (`.claude/agents/*.md`), Gemini/Copilot não confirmados/ausentes hoje. Recomendação: piloto restrito ao Claude, sem migrar os três agentes de uma vez (quebraria paridade de comportamento).
 - feat-5ae2-05-gate-graduacao-autopilot concluída: novo comando `forge-sdd autopilot` bloqueia a criação de `sdd/.sdd-auto-pilot` até N ciclos completos (`outcome: approved`) em telemetria, com bypass consciente via `--skip-graduation`. Independente do autopilot em si (que segue só na branch `feat/cli-autopilot-autonomy`, ainda em teste).
 - feat-5ae2-04-tutorial-guiado concluída: novo prompt `/tutorial` (Claude, Gemini, Copilot) guia um ciclo SDD fictício isolado; `forge-sdd init --tutorial` sugere rodá-lo ao final do scaffold.
