@@ -73,17 +73,18 @@ Fase 42 — Consolidação e Lançamento v1.7.0 [x] done
 | feat-43a2-telemetry-metrics-nested | fix/telemetry-metrics-nested | done |
 | feat-5ae2-01-cheat-sheet-init | feat/5ae2-cheat-sheet-init | done |
 | feat-5ae2-02-status-prescritivo | feat/5ae2-status-prescritivo | done |
-| feat-5ae2-03-doctor-deriva-convencao | feat/5ae2-doctor-deriva-convencao | todo |
+| feat-5ae2-03-doctor-deriva-convencao | feat/5ae2-doctor-deriva-convencao | done |
 | feat-5ae2-04-tutorial-guiado | feat/5ae2-tutorial-guiado | todo |
 | feat-5ae2-05-gate-graduacao-autopilot | feat/5ae2-gate-graduacao-autopilot | todo |
 | feat-5ae2-06-spike-subagentes-nativos | feat/5ae2-spike-subagentes-nativos | todo |
 | feat-5ae2-07-modo-iniciante | feat/5ae2-modo-iniciante | todo |
 
 ## Próximo passo
-**Iniciar:** feat-5ae2-03-doctor-deriva-convencao (próxima feature da Discovery 5ae2, alvo do pacote v1.9.0).
+**Iniciar:** feat-5ae2-04-tutorial-guiado (próxima feature da Discovery 5ae2, alvo do pacote v1.9.0).
 **Bloqueios:** —
 
 ## Handoff da última sessão
+- feat-5ae2-03-doctor-deriva-convencao concluída: `forge-sdd doctor` agora detecta e avisa quando convenções sequencial (`feat-NN`) e hash (`feat-xxxx`) coexistem em `sdd/features/` e `sdd/discovery/` — confirmado usando o próprio repositório do Forge-SDD como caso real.
 - feat-5ae2-02-status-prescritivo concluída: os três prompts `/status` (Claude, Gemini, Copilot) agora encerram sempre com "Próximo comando sugerido: <comando>", calculado a partir do estado de `sdd/discovery/` e `sdd/features/`.
 - feat-5ae2-01-cheat-sheet-init concluída: `forge-sdd init` agora imprime a lista dos comandos SDD disponíveis para os agentes selecionados ao final de uma execução bem-sucedida (fora de `--dry-run`).
 - Discovery 5ae2 (curva de aprendizado do Forge-SDD na era dos agentes de IA) quebrada em 7 features via `/split-features`, agrupadas em `sdd/features/feat-5ae2-curva-aprendizado-agentes-ia/`, alvo do pacote v1.9.0.
