@@ -1,4 +1,6 @@
-# Forge-SDD — Metodologia v1.7.1-beta.3
+# Forge-SDD — Metodologia v1.9.0-beta
+
+> **Nota:** Este documento descreve o design original da metodologia v1.1. Algumas decisões (ex: "CLI = só `init`", §13) foram posteriormente revisadas — `doctor`, `destroy` e `autopilot` hoje são comandos reais do CLI Go, não apenas chatmodes/prompts. Para a referência completa e atualizada de comandos, veja [`docs/comandos.md`](comandos.md).
 
 Documento substituto e consolidado da v1.0. Principais mudanças:
 
@@ -12,8 +14,8 @@ Documento substituto e consolidado da v1.0. Principais mudanças:
 - Protocolos de paralelismo e rollback definidos.
 - Templates revisados (fechamento de blocos, regras duplicadas removidas).
 
-**Versão:** 1.7.1-beta.3
-**Última atualização:** 10 de julho de 2026
+**Versão:** 1.9.0-beta
+**Última atualização:** 12 de julho de 2026
 
 ---
 
@@ -236,7 +238,8 @@ Aciona-se via `/upgrade-sdd <versão>`.
 | `/proxima-feature` | agent | Orquestrador | Continuar trabalho |
 | `/nova-feature` | agent | Specifier | Criar feat a partir de descrição |
 | `/revisar` | agent | Revisor | Validar feature ativa |
-| `/status` | ask | Orquestrador (read-only) | Diagnóstico sem ação |
+| `/status` | ask | Orquestrador (read-only) | Diagnóstico sem ação; sempre sugere o próximo comando |
+| `/tutorial` | agent | Orquestrador | Ciclo SDD fictício e isolado, para onboarding |
 | `/archive` | agent | Archivist | Compactar progress.md |
 | `/doctor` | ask | Orquestrador | Health check (budgets, refs, MCPs) |
 | `/upgrade-sdd` | agent | Migrator | Migrar versão |
@@ -395,7 +398,7 @@ forge-sdd init
   --db    postgres|sqlite|mongo|none
   --telemetry on|off
   --lang  pt-BR|en
-  --version 1.7.1-beta.3
+  --version 1.9.0-beta
   --yes       # não-interativo, usa defaults
   --dry-run   # mostra árvore sem criar
 ```
@@ -405,11 +408,12 @@ forge-sdd init
 | Operação | Onde fica |
 |----------|-----------|
 | Upgrade de versão | `/upgrade-sdd` (Migrator) |
-| Health check | `/doctor` (Orquestrador) |
+| Health check | `/doctor` (Orquestrador) — também disponível como `forge-sdd doctor` no CLI |
 | Adicionar feature | `/nova-feature` (Specifier) |
 | Compactar progress | `/archive` (Archivist) |
 | Validar estrutura | `/doctor` |
-| Reset/wipe | manual (humano) |
+| Ativar autopilot | `forge-sdd autopilot` (CLI, com gate de graduação) |
+| Reset/wipe | `forge-sdd destroy` (CLI) |
 
 **Justificativa:** manter o CLI minúsculo, sem dependência de runtime, sem manutenção de features que evoluem rápido. Toda evolução vive em chatmodes versionados junto com a metodologia.
 
@@ -776,4 +780,4 @@ Para garantir a estabilidade do fluxo principal:
 
 ---
 
-**Forge-SDD v1.7.1-beta.3** — Última atualização: 10 de julho de 2026
+**Forge-SDD v1.9.0-beta** — Última atualização: 12 de julho de 2026
