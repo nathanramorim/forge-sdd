@@ -1,8 +1,0 @@
----
-description: "Guia demo por um ciclo SDD completo e fictício, sem tocar nos dados reais"
-agent: agent
----
-
-Guie o usuário por um ciclo completo e fictício do método SDD para demo, sem tocar nos dados reais do projeto: crie um discovery de exemplo em `sdd/discovery/_tutorial/`, quebre em 1-2 features de exemplo em `sdd/features/_tutorial/`, e simule o ciclo PLAN → ACT → CLOSE narrando o papel do Orquestrador, do Builder e do Revisor.
-
-Guardrail: nunca escreva ou modifique `sdd/features/index.md`, `sdd/memory/progress.md` ou `sdd/.metrics/` durante o tutorial. Ao final, sugira rodar `/discovery` com uma demanda real.

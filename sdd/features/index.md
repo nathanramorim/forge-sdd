@@ -107,7 +107,7 @@ main
 | 5ae2-01 | feat-5ae2-curva-aprendizado-agentes-ia/feat-5ae2-01-cheat-sheet-init.md | feat/5ae2-cheat-sheet-init | 5ae2-01 | done |
 | 5ae2-02 | feat-5ae2-curva-aprendizado-agentes-ia/feat-5ae2-02-status-prescritivo.md | feat/5ae2-status-prescritivo | 5ae2-02 | done |
 | 5ae2-03 | feat-5ae2-curva-aprendizado-agentes-ia/feat-5ae2-03-doctor-deriva-convencao.md | feat/5ae2-doctor-deriva-convencao | 5ae2-03 | done |
-| 5ae2-04 | feat-5ae2-curva-aprendizado-agentes-ia/feat-5ae2-04-tutorial-guiado.md | feat/5ae2-tutorial-guiado | 5ae2-04 | done |
+| 5ae2-04 | feat-5ae2-curva-aprendizado-agentes-ia/feat-5ae2-04-tutorial-guiado.md | feat/5ae2-tutorial-guiado | 5ae2-04 | todo |
 | 5ae2-05 | feat-5ae2-curva-aprendizado-agentes-ia/feat-5ae2-05-gate-graduacao-autopilot.md | feat/5ae2-gate-graduacao-autopilot | 5ae2-05 | todo |
 | 5ae2-06 | feat-5ae2-curva-aprendizado-agentes-ia/feat-5ae2-06-spike-subagentes-nativos.md | feat/5ae2-spike-subagentes-nativos | 5ae2-06 | todo |
 | 5ae2-07 | feat-5ae2-curva-aprendizado-agentes-ia/feat-5ae2-07-modo-iniciante.md | feat/5ae2-modo-iniciante | 5ae2-07 | todo |

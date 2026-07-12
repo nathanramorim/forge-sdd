@@ -13,7 +13,6 @@ import (
 // da configuração inicial até o uso ad-hoc de utilitários.
 var commandOrder = []string{
 	"constitution",
-	"tutorial",
 	"discovery",
 	"split-features",
 	"nova-feature",
