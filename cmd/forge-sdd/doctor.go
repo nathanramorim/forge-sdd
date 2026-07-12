@@ -5,28 +5,11 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"regexp"
 	"strings"
 
 	"github.com/forge-sdd/cli/internal/config"
 	"github.com/spf13/cobra"
 )
-
-var sequentialIDRe = regexp.MustCompile(`^(?:feat|discovery|criteria|plan)-(\d{2})(?:[-.]|$)`)
-var hashIDRe = regexp.MustCompile(`^(?:feat|discovery|criteria|plan)-([0-9a-f]{4})(?:[-.]|$)`)
-
-// classifyNamingConvention identifica se o nome de um arquivo de feature/discovery
-// segue a convenção sequencial (feat-NN) ou por hash de 4 dígitos (feat-xxxx).
-// Retorna "" quando o nome não se encaixa em nenhuma das duas (ex: index.md).
-func classifyNamingConvention(name string) string {
-	if sequentialIDRe.MatchString(name) {
-		return "sequencial"
-	}
-	if hashIDRe.MatchString(name) {
-		return "hash"
-	}
-	return ""
-}
 
 var doctorCmd = &cobra.Command{
 	Use:   "doctor [diretório]",
@@ -191,45 +174,7 @@ inconsistências de configuração dos agentes de IA e progresso das features.`,
 			fmt.Println("\n⚠️  Diretório sdd/features não encontrado ou inacessível.")
 		}
 
-		// 6. Detecção de deriva de convenção de nomenclatura (sequencial feat-NN vs hash feat-xxxx)
-		fmt.Println("\n🔤 Convenção de Nomenclatura:")
-		var sequentialFiles, hashFiles []string
-		scanConventionDir := func(dir string) {
-			_ = filepath.WalkDir(dir, func(path string, d os.DirEntry, err error) error {
-				if err != nil || d.IsDir() || !strings.HasSuffix(d.Name(), ".md") {
-					return nil
-				}
-				rel, relErr := filepath.Rel(targetDir, path)
-				if relErr != nil {
-					rel = path
-				}
-				switch classifyNamingConvention(d.Name()) {
-				case "sequencial":
-					sequentialFiles = append(sequentialFiles, rel)
-				case "hash":
-					hashFiles = append(hashFiles, rel)
-				}
-				return nil
-			})
-		}
-		scanConventionDir(featuresDir)
-		scanConventionDir(filepath.Join(targetDir, "sdd", "discovery"))
-
-		if len(sequentialFiles) > 0 && len(hashFiles) > 0 {
-			fmt.Println("  ⚠️  Deriva de convenção detectada: nomenclatura sequencial (feat-NN) e por hash (feat-xxxx) coexistem no projeto.")
-			fmt.Println("     Sequencial:")
-			for _, f := range sequentialFiles {
-				fmt.Printf("      - %s\n", f)
-			}
-			fmt.Println("     Hash:")
-			for _, f := range hashFiles {
-				fmt.Printf("      - %s\n", f)
-			}
-		} else if len(sequentialFiles)+len(hashFiles) > 0 {
-			fmt.Println("  ✓ Convenção de nomenclatura consistente.")
-		}
-
-		// 7. Validação do nome padrão do projeto
+		// 6. Validação do nome padrão do projeto
 		if rc.Project == "meu-projeto" {
 			fmt.Println("\n⚠️  O nome do projeto no sdd/.sddrc ainda está configurado como o padrão ('meu-projeto').")
 			fmt.Println("   Sugerimos alterá-lo para refletir o nome real do seu projeto em:")

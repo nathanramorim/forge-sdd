@@ -155,65 +155,6 @@ func TestDoctorAndDestroyCommands(t *testing.T) {
 	assert.NoDirExists(t, filepath.Join(tempDir, ".gemini"))
 }
 
-func TestDoctorCommand_NamingConventionConsistent(t *testing.T) {
-	tempDir := t.TempDir()
-	sddDir := filepath.Join(tempDir, "sdd")
-	require.NoError(t, os.MkdirAll(filepath.Join(sddDir, "memory"), 0755))
-	require.NoError(t, os.MkdirAll(filepath.Join(sddDir, "features"), 0755))
-
-	require.NoError(t, os.WriteFile(filepath.Join(sddDir, ".sddrc"), []byte(`{"project":"test-proj","version":"1.7.1-beta.5","agents":[],"stack":"go","db":"none","lang":"pt-BR"}`), 0644))
-	require.NoError(t, os.WriteFile(filepath.Join(sddDir, "memory", "progress.md"), []byte("# Progress"), 0644))
-	require.NoError(t, os.WriteFile(filepath.Join(sddDir, "memory", "constitution.md"), []byte("# Constitution"), 0644))
-	require.NoError(t, os.WriteFile(filepath.Join(sddDir, "features", "feat-00-foundation.md"), []byte("# Foundation"), 0644))
-	require.NoError(t, os.WriteFile(filepath.Join(sddDir, "features", "feat-01-auth.md"), []byte("# Auth"), 0644))
-
-	output := runDoctorCapturingStdout(t, tempDir)
-
-	assert.Contains(t, output, "Convenção de Nomenclatura:")
-	assert.Contains(t, output, "Convenção de nomenclatura consistente.")
-	assert.NotContains(t, output, "Deriva de convenção detectada")
-}
-
-func TestDoctorCommand_NamingConventionDriftDetected(t *testing.T) {
-	tempDir := t.TempDir()
-	sddDir := filepath.Join(tempDir, "sdd")
-	require.NoError(t, os.MkdirAll(filepath.Join(sddDir, "memory"), 0755))
-	require.NoError(t, os.MkdirAll(filepath.Join(sddDir, "features"), 0755))
-	require.NoError(t, os.MkdirAll(filepath.Join(sddDir, "discovery"), 0755))
-
-	require.NoError(t, os.WriteFile(filepath.Join(sddDir, ".sddrc"), []byte(`{"project":"test-proj","version":"1.7.1-beta.5","agents":[],"stack":"go","db":"none","lang":"pt-BR"}`), 0644))
-	require.NoError(t, os.WriteFile(filepath.Join(sddDir, "memory", "progress.md"), []byte("# Progress"), 0644))
-	require.NoError(t, os.WriteFile(filepath.Join(sddDir, "memory", "constitution.md"), []byte("# Constitution"), 0644))
-	require.NoError(t, os.WriteFile(filepath.Join(sddDir, "features", "feat-00-foundation.md"), []byte("# Foundation"), 0644))
-	require.NoError(t, os.WriteFile(filepath.Join(sddDir, "features", "feat-43a2-fix.md"), []byte("# Fix"), 0644))
-	require.NoError(t, os.WriteFile(filepath.Join(sddDir, "discovery", "discovery-9b2f-tema.md"), []byte("# Discovery"), 0644))
-
-	output := runDoctorCapturingStdout(t, tempDir)
-
-	assert.Contains(t, output, "Deriva de convenção detectada")
-	assert.Contains(t, output, "sdd/features/feat-00-foundation.md")
-	assert.Contains(t, output, "sdd/features/feat-43a2-fix.md")
-	assert.Contains(t, output, "sdd/discovery/discovery-9b2f-tema.md")
-}
-
-func runDoctorCapturingStdout(t *testing.T, targetDir string) string {
-	t.Helper()
-	oldStdout := os.Stdout
-	r, w, _ := os.Pipe()
-	os.Stdout = w
-
-	rootCmd.SetArgs([]string{"doctor", targetDir})
-	err := rootCmd.Execute()
-	require.NoError(t, err)
-
-	w.Close()
-	os.Stdout = oldStdout
-
-	var buf bytes.Buffer
-	_, _ = io.Copy(&buf, r)
-	return buf.String()
-}
-
 func TestInitCommand(t *testing.T) {
 	// Cenário 1: Init com argumento de pasta (Caso A)
 	tempDirA := t.TempDir()
