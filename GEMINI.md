@@ -1,7 +1,7 @@
 # GEMINI.md — forge-sdd
 
 ## Contexto do projeto
-forge-sdd — CLI Go para scaffolding de estruturas SDD (Software Design Doc) v1.7.1-beta.5.
+forge-sdd — CLI Go para scaffolding de estruturas SDD (Software Design Doc) v1.9.0-beta.
 
 ## Lifecycle (todo agente)
 1. **READ-MIN:** ler `sdd/memory/progress.md`

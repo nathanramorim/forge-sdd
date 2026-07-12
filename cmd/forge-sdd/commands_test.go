@@ -47,7 +47,7 @@ func TestDoctorAndDestroyCommands(t *testing.T) {
 
 	err = os.WriteFile(filepath.Join(sddDir, ".sddrc"), []byte(`{
 		"project": "test-proj",
-		"version": "1.7.1-beta.5",
+		"version": "1.9.0-beta",
 		"agents": ["gemini"],
 		"stack": "go",
 		"db": "postgres",
@@ -55,7 +55,7 @@ func TestDoctorAndDestroyCommands(t *testing.T) {
 	}`), 0644)
 	require.NoError(t, err)
 
-	err = os.WriteFile(filepath.Join(sddDir, ".sdd-version"), []byte("1.7.1-beta.5"), 0644)
+	err = os.WriteFile(filepath.Join(sddDir, ".sdd-version"), []byte("1.9.0-beta"), 0644)
 	require.NoError(t, err)
 
 	err = os.WriteFile(filepath.Join(sddDir, "memory", "progress.md"), []byte("# Progress"), 0644)
@@ -161,7 +161,7 @@ func TestDoctorCommand_NamingConventionConsistent(t *testing.T) {
 	require.NoError(t, os.MkdirAll(filepath.Join(sddDir, "memory"), 0755))
 	require.NoError(t, os.MkdirAll(filepath.Join(sddDir, "features"), 0755))
 
-	require.NoError(t, os.WriteFile(filepath.Join(sddDir, ".sddrc"), []byte(`{"project":"test-proj","version":"1.7.1-beta.5","agents":[],"stack":"go","db":"none","lang":"pt-BR"}`), 0644))
+	require.NoError(t, os.WriteFile(filepath.Join(sddDir, ".sddrc"), []byte(`{"project":"test-proj","version":"1.9.0-beta","agents":[],"stack":"go","db":"none","lang":"pt-BR"}`), 0644))
 	require.NoError(t, os.WriteFile(filepath.Join(sddDir, "memory", "progress.md"), []byte("# Progress"), 0644))
 	require.NoError(t, os.WriteFile(filepath.Join(sddDir, "memory", "constitution.md"), []byte("# Constitution"), 0644))
 	require.NoError(t, os.WriteFile(filepath.Join(sddDir, "features", "feat-00-foundation.md"), []byte("# Foundation"), 0644))
@@ -181,7 +181,7 @@ func TestDoctorCommand_NamingConventionDriftDetected(t *testing.T) {
 	require.NoError(t, os.MkdirAll(filepath.Join(sddDir, "features"), 0755))
 	require.NoError(t, os.MkdirAll(filepath.Join(sddDir, "discovery"), 0755))
 
-	require.NoError(t, os.WriteFile(filepath.Join(sddDir, ".sddrc"), []byte(`{"project":"test-proj","version":"1.7.1-beta.5","agents":[],"stack":"go","db":"none","lang":"pt-BR"}`), 0644))
+	require.NoError(t, os.WriteFile(filepath.Join(sddDir, ".sddrc"), []byte(`{"project":"test-proj","version":"1.9.0-beta","agents":[],"stack":"go","db":"none","lang":"pt-BR"}`), 0644))
 	require.NoError(t, os.WriteFile(filepath.Join(sddDir, "memory", "progress.md"), []byte("# Progress"), 0644))
 	require.NoError(t, os.WriteFile(filepath.Join(sddDir, "memory", "constitution.md"), []byte("# Constitution"), 0644))
 	require.NoError(t, os.WriteFile(filepath.Join(sddDir, "features", "feat-00-foundation.md"), []byte("# Foundation"), 0644))
