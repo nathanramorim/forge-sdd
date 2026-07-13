@@ -9,12 +9,17 @@
   },
   "license": "MIT",
   "bin": {
-    "forge-sdd": "bin/run.js"
+    "forge-sdd": "bin/run.js",
+    "forge": "bin/run.js"
   },
   "files": [
     "bin/run.js",
+    "bin/postinstall.js",
     "README.md"
   ],
+  "scripts": {
+    "postinstall": "node bin/postinstall.js"
+  },
   "engines": {
     "node": ">=18"
   },

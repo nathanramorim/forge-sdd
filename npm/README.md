@@ -20,8 +20,18 @@ Para conhecer todos os comandos disponíveis (`/status`, `/discovery`, `/nova-fe
 
 ## 💻 Instalação & Inicialização Rápida
 
-Inicialize a estrutura em segundos. O instalador gerará as pastas de memória, especificações e configurações específicas para a sua IA preferida (Copilot, Gemini ou Claude):
+Você pode rodar diretamente via `npx` ou instalar globalmente para ter o comando simplificado `forge` à disposição:
 
+### Via Instalação Global (Recomendado)
+```bash
+# Instale globalmente no seu sistema
+npm install -g @nathanramorim/forge-sdd
+
+# Inicialize de forma simples em qualquer projeto
+forge init
+```
+
+### Via Execução Direta (npx)
 ```bash
 # Inicialização interativa (escolha os agentes no menu)
 npx @nathanramorim/forge-sdd@latest init
@@ -32,13 +42,14 @@ npx @nathanramorim/forge-sdd@latest init . --agent copilot,gemini --name meu-pro
 
 ## 📢 Novidades da Versão (v1.9.0-beta)
 
-Esta versão de testes beta é focada em reduzir a curva de aprendizado do Forge-SDD para quem está começando, na era dos agentes de IA autônomos:
+Esta versão de testes beta traz o atalho global de execução `forge`, uma interface de onboarding pós-instalação e melhorias focadas em reduzir a curva de aprendizado do Forge-SDD:
 
-*   **Cheat-Sheet de Comandos:** O `forge-sdd init` agora imprime a lista completa dos comandos SDD disponíveis para os agentes escolhidos ao final da inicialização.
+*   **Atalho Global (`forge`) e Onboarding Pós-Instalação:** Agora você pode acionar todos os comandos da CLI simplesmente usando `forge` (ex: `forge init`, `forge doctor`). Ao instalar o pacote globalmente, uma tela de boas-vindas interativa e instrutiva é exibida com o guia dos comandos.
+*   **Cheat-Sheet de Comandos:** O `forge init` agora imprime a lista completa dos comandos SDD disponíveis para os agentes escolhidos ao final da inicialização.
 *   **`/status` Prescritivo:** O comando `/status` (Copilot, Claude e Gemini) agora sempre sugere o próximo comando a ser executado, com base no estado real do progresso do projeto.
-*   **Diagnóstico de Deriva de Nomenclatura:** O comando `forge-sdd doctor` passa a detectar quando um projeto mistura a nomenclatura sequencial (`feat-NN`) com a nomenclatura por hash (`feat-xxxx`), alertando o usuário sobre a inconsistência.
+*   **Diagnóstico de Deriva de Nomenclatura:** O comando `doctor` passa a detectar quando um projeto mistura a nomenclatura sequencial (`feat-NN`) com a nomenclatura por hash (`feat-xxxx`), alertando o usuário sobre a inconsistência.
 *   **Onboarding Guiado:** Novo comando `/tutorial` (Copilot, Claude e Gemini) guia o usuário por um ciclo SDD completo e fictício, isolado dos dados reais do projeto.
-*   **Comando `forge-sdd autopilot`:** Novo comando CLI que ativa o modo autopilot somente após um número mínimo de ciclos completos registrados em telemetria, com bypass consciente disponível via flag.
+*   **Comando `autopilot`:** Novo comando CLI que ativa o modo autopilot somente após um número mínimo de ciclos completos registrados em telemetria, com bypass consciente disponível via flag.
 *   **Modo Iniciante:** O comando `/constitution` (Copilot, Claude e Gemini) passa a perguntar, opcionalmente, se o usuário prefere explicações em linguagem simplificada, com exemplos concretos no lugar de jargão técnico.
 
 ---

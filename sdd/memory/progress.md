@@ -33,6 +33,7 @@ Fase 39 — CLI doctor and destroy cmd       [x] done
 Fase 40 — CLI init directory refinement     [x] done
 Fase 41 — Nested features/discovery grouping [x] done
 Fase 42 — Consolidação e Lançamento v1.7.0 [x] done
+Fase 1.9.0-beta — Atalho forge e Boas-vindas    [x] done
 ```
 
 ## Features ativas
@@ -70,6 +71,7 @@ Fase 42 — Consolidação e Lançamento v1.7.0 [x] done
 | feat-40-cli-init-refinement | feat/cli-init-refinement | done |
 | feat-41-nested-features-discovery | feat/cli-nested-features-discovery | done |
 | feat-42-release-v1.7.0 | feat/release-v1.7.0 | done |
+| feat-43-cli-shortcut-and-welcome | feat/cli-shortcut-and-welcome | done |
 | feat-43a2-telemetry-metrics-nested | fix/telemetry-metrics-nested | done |
 | feat-5ae2-01-cheat-sheet-init | feat/5ae2-cheat-sheet-init | done |
 | feat-5ae2-02-status-prescritivo | feat/5ae2-status-prescritivo | done |
