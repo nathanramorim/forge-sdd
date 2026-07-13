@@ -8,9 +8,9 @@ Esta especificação define os requisitos para simplificar o uso do CLI, permiti
    * O pacote NPM do `forge-sdd` deve expor tanto o binário `forge-sdd` quanto o alias `forge` sob a chave `"bin"` em `package.json`.
    * Quando o pacote for instalado globalmente (`npm i -g @nathanramorim/forge-sdd`), ambos os comandos `forge` e `forge-sdd` devem estar disponíveis no PATH e apontar para o wrapper JavaScript do CLI (`npm/bin/run.js`).
 
-2. **Interface Visual Pós-Instalação (`postinstall`):**
-   * Adicionar um script de `postinstall` no `package.json`.
-   * O script deve executar `npm/bin/postinstall.js`.
+2. **Interface Visual no Primeiro Uso (Onboarding):**
+   * A interface de boas-vindas deve ser exibida dinamicamente no primeiro acionamento do CLI, após o download inicial do binário pelo wrapper `npm/bin/run.js`. Isso evita o uso de scripts de instalação pós-instalação no `package.json`, eliminando alertas e bloqueios de segurança (`allow-scripts`).
+   * O wrapper executará o script `npm/bin/postinstall.js` apenas na primeira vez em que baixar e extrair o binário.
    * O design no terminal deve ser limpo, moderno, comunicativo e visualmente atraente (utilizando estilos de caixa, cores ANSI e emojis) para causar uma ótima primeira impressão.
    * O conteúdo exibido deve incluir:
      * Uma mensagem calorosa de boas-vindas ao ecossistema Forge-SDD.

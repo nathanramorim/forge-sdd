@@ -71,6 +71,16 @@ func Run(defaultProject string) (config.Config, error) {
 				Value(&cfg.Telemetry),
 
 			huh.NewSelect[string]().
+				Title("Convenção de nomenclatura").
+				Description("Como identificar features, fixes e discoveries").
+				Options(
+					huh.NewOption("Sequencial (ex: feat-01, fix-02)", "sequencial"),
+					huh.NewOption("Hash de 4 caracteres (ex: feat-5ae2, fix-3a2b)", "hash"),
+					huh.NewOption("ID do Workitem (definido a cada criação)", "workitem"),
+				).
+				Value(&cfg.NamingConvention),
+
+			huh.NewSelect[string]().
 				Title("Idioma dos templates").
 				Options(
 					huh.NewOption("Português (pt-BR)", "pt-BR"),

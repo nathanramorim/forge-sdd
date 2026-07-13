@@ -308,3 +308,25 @@ func runInitCapturingStdout(t *testing.T, targetDir string) string {
 	_, _ = io.Copy(&buf, r)
 	return buf.String()
 }
+
+func TestDoctorCommand_AutoHealNamingConvention(t *testing.T) {
+	tempDir := t.TempDir()
+	sddDir := filepath.Join(tempDir, "sdd")
+	require.NoError(t, os.MkdirAll(filepath.Join(sddDir, "memory"), 0755))
+	require.NoError(t, os.MkdirAll(filepath.Join(sddDir, "features"), 0755))
+
+	// sddrc sem naming_convention
+	require.NoError(t, os.WriteFile(filepath.Join(sddDir, ".sddrc"), []byte(`{"project":"test-proj","version":"1.9.0-beta","agents":[],"stack":"go","db":"none","lang":"pt-BR"}`), 0644))
+	require.NoError(t, os.WriteFile(filepath.Join(sddDir, "memory", "progress.md"), []byte("# Progress"), 0644))
+	require.NoError(t, os.WriteFile(filepath.Join(sddDir, "features", "feat-43a2-telemetry.md"), []byte("# Telemetry"), 0644))
+
+	output := runDoctorCapturingStdout(t, tempDir)
+
+	assert.Contains(t, output, "Convenção de nomenclatura ausente corrigida automaticamente para: hash")
+
+	// verifica se o .sddrc agora contem a convention
+	data, err := os.ReadFile(filepath.Join(sddDir, ".sddrc"))
+	require.NoError(t, err)
+	assert.Contains(t, string(data), `"naming_convention": "hash"`)
+}
+

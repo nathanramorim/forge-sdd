@@ -34,6 +34,7 @@ Fase 40 — CLI init directory refinement     [x] done
 Fase 41 — Nested features/discovery grouping [x] done
 Fase 42 — Consolidação e Lançamento v1.7.0 [x] done
 Fase 1.9.0-beta — Atalho forge e Boas-vindas    [x] done
+Fase 5ae2-08 — Nomenclatura, Telemetria e Tokens [ ] doing
 ```
 
 ## Features ativas
@@ -80,6 +81,7 @@ Fase 1.9.0-beta — Atalho forge e Boas-vindas    [x] done
 | feat-5ae2-05-gate-graduacao-autopilot | feat/5ae2-gate-graduacao-autopilot | done |
 | feat-5ae2-06-spike-subagentes-nativos | feat/5ae2-spike-subagentes-nativos | done |
 | feat-5ae2-07-modo-iniciante | feat/5ae2-modo-iniciante | done |
+| fix-5ae2-08-naming-telemetry-tokens | fix/naming-telemetry-tokens | doing |
 
 ## Próximo passo
 **Iniciar:** Nenhuma feature pendente — Discovery 5ae2 (v1.9.0) concluída (7/7 features). Próximo ciclo natural: novo `/discovery` ou consolidação/release das 7 PRs empilhadas (#29-#35).

@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"time"
 
@@ -30,23 +31,25 @@ var validAgents = map[string]bool{
 
 // Sddrc representa o conteúdo persistido em sdd/.sddrc.
 type Sddrc struct {
-	Project   string   `json:"project"`
-	Version   string   `json:"version"`
-	Lang      string   `json:"lang"`
-	Agents    []string `json:"agents"`
-	Telemetry struct {
+	Project          string   `json:"project"`
+	Version          string   `json:"version"`
+	Lang             string   `json:"lang"`
+	Agents           []string `json:"agents"`
+	Telemetry        struct {
 		Enabled bool `json:"enabled"`
 	} `json:"telemetry"`
+	NamingConvention string   `json:"naming_convention"`
 }
 
 // ToConfig converte Sddrc em Config para reuso nos comandos de scaffold.
 func (r Sddrc) ToConfig() Config {
 	return Config{
-		Project:    r.Project,
-		SddVersion: r.Version,
-		Lang:       r.Lang,
-		Telemetry:  r.Telemetry.Enabled,
-		Agents:     r.Agents,
+		Project:          r.Project,
+		SddVersion:       r.Version,
+		Lang:             r.Lang,
+		Telemetry:        r.Telemetry.Enabled,
+		Agents:           r.Agents,
+		NamingConvention: r.NamingConvention,
 	}
 }
 
@@ -151,27 +154,29 @@ func ParseAgents(csv string) ([]string, error) {
 
 // Config contém todas as configurações coletadas durante o init.
 type Config struct {
-	Project    string   // nome do projeto
-	Stack      string   // runtime principal: go, node, python, rust, other
-	DB         string   // banco de dados: postgres, sqlite, mongo, none
-	Telemetry  bool     // habilitar telemetria local
-	Lang       string   // idioma dos templates: pt-BR, en
-	SddVersion string   // versão Forge-SDD a usar
-	DryRun     bool     // exibir árvore sem criar arquivos
-	Agents     []string // agentes de IA: copilot, claude, gemini
+	Project          string   // nome do projeto
+	Stack            string   // runtime principal: go, node, python, rust, other
+	DB               string   // banco de dados: postgres, sqlite, mongo, none
+	Telemetry        bool     // habilitar telemetria local
+	Lang             string   // idioma dos templates: pt-BR, en
+	SddVersion       string   // versão Forge-SDD a usar
+	DryRun           bool     // exibir árvore sem criar arquivos
+	Agents           []string // agentes de IA: copilot, claude, gemini
+	NamingConvention string   // Convenção de nomenclatura: sequencial, hash, workitem
 }
 
 // Defaults retorna uma Config com valores padrão.
 func Defaults() Config {
 	return Config{
-		Project:    "meu-projeto",
-		Stack:      "go",
-		DB:         "none",
-		Telemetry:  true,
-		Lang:       "pt-BR",
-		SddVersion: "1.9.0-beta",
-		DryRun:     false,
-		Agents:     []string{AgentCopilot},
+		Project:          "meu-projeto",
+		Stack:            "go",
+		DB:               "none",
+		Telemetry:        true,
+		Lang:             "pt-BR",
+		SddVersion:       "1.9.0-beta",
+		DryRun:           false,
+		Agents:           []string{AgentCopilot},
+		NamingConvention: "sequencial",
 	}
 }
 
@@ -206,6 +211,9 @@ func FromFlags(cmd *cobra.Command) Config {
 		} else {
 			cfg.Agents = agents
 		}
+	}
+	if f := cmd.Flags().Lookup("naming-convention"); f != nil && f.Changed {
+		cfg.NamingConvention = f.Value.String()
 	}
 	return cfg
 }
@@ -251,5 +259,57 @@ func FetchNpmVersions() (latest string, beta string, err error) {
 	latest = data.DistTags["latest"]
 	beta = data.DistTags["beta"]
 	return latest, beta, nil
+}
+
+var sequentialIDRe = regexp.MustCompile(`^(?:feat|fix|discovery|criteria|plan)-(\d{2})(?:[-.]|$)`)
+var hashIDRe = regexp.MustCompile(`^(?:feat|fix|discovery|criteria|plan)-([0-9a-f]{4})(?:[-.]|$)`)
+
+// ClassifyNamingConvention identifica se o nome de um arquivo de feature/discovery/fix
+// segue a convenção sequencial (feat-NN/fix-NN) ou por hash de 4 dígitos (feat-xxxx/fix-xxxx).
+// Retorna "" quando o nome não se encaixa em nenhuma das duas (ex: index.md).
+func ClassifyNamingConvention(name string) string {
+	if sequentialIDRe.MatchString(name) {
+		return "sequencial"
+	}
+	if hashIDRe.MatchString(name) {
+		return "hash"
+	}
+	return ""
+}
+
+// DetectNamingConvention varre o diretório e tenta inferir a convenção com base nos arquivos.
+func DetectNamingConvention(targetDir string) string {
+	featuresDir := filepath.Join(targetDir, "sdd", "features")
+	discoveryDir := filepath.Join(targetDir, "sdd", "discovery")
+
+	var seqCount, hashCount int
+	scanDir := func(dir string) {
+		_ = filepath.WalkDir(dir, func(path string, d os.DirEntry, err error) error {
+			if err != nil || d.IsDir() || !strings.HasSuffix(d.Name(), ".md") {
+				return nil
+			}
+			switch ClassifyNamingConvention(d.Name()) {
+			case "sequencial":
+				seqCount++
+			case "hash":
+				hashCount++
+			}
+			return nil
+		})
+	}
+	scanDir(featuresDir)
+	scanDir(discoveryDir)
+
+	if hashCount > 0 && seqCount == 0 {
+		return "hash"
+	}
+	if seqCount > 0 && hashCount == 0 {
+		return "sequencial"
+	}
+	if hashCount > seqCount {
+		return "hash"
+	}
+	// default padrão
+	return "sequencial"
 }
 

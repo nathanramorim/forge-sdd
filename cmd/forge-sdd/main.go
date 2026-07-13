@@ -249,6 +249,9 @@ func runUpdateFlow(cmd *cobra.Command, targetDir string) error {
 	mergedAgents := config.MergeAgents(rc.Agents, toAdd)
 	baseCfg := rc.ToConfig()
 	baseCfg.Agents = mergedAgents
+	if baseCfg.NamingConvention == "" {
+		baseCfg.NamingConvention = config.DetectNamingConvention(targetDir)
+	}
 
 	var created []string
 
@@ -349,6 +352,7 @@ func init() {
 	initCmd.Flags().String("version", "", "Versão Forge-SDD (default: 1.9.0-beta)")
 	initCmd.Flags().Bool("no-telemetry", false, "Desabilitar telemetria local")
 	initCmd.Flags().String("agent", "", "Agente(s) de IA: copilot, claude, gemini (csv, default: copilot)")
+	initCmd.Flags().String("naming-convention", "", "Convenção de nomenclatura: sequencial, hash, workitem")
 	rootCmd.AddCommand(initCmd)
 
 	updateCmd.Flags().Bool("yes", false, "Pular prompts e usar flags")

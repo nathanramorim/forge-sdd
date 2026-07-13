@@ -5,27 +5,17 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"regexp"
 	"strings"
 
 	"github.com/forge-sdd/cli/internal/config"
+	"github.com/forge-sdd/cli/internal/scaffold"
 	"github.com/spf13/cobra"
 )
 
-var sequentialIDRe = regexp.MustCompile(`^(?:feat|discovery|criteria|plan)-(\d{2})(?:[-.]|$)`)
-var hashIDRe = regexp.MustCompile(`^(?:feat|discovery|criteria|plan)-([0-9a-f]{4})(?:[-.]|$)`)
-
-// classifyNamingConvention identifica se o nome de um arquivo de feature/discovery
-// segue a convenção sequencial (feat-NN) ou por hash de 4 dígitos (feat-xxxx).
-// Retorna "" quando o nome não se encaixa em nenhuma das duas (ex: index.md).
+// classifyNamingConvention identifica se o nome de um arquivo de feature/discovery/fix
+// segue a convenção sequencial ou por hash de 4 dígitos.
 func classifyNamingConvention(name string) string {
-	if sequentialIDRe.MatchString(name) {
-		return "sequencial"
-	}
-	if hashIDRe.MatchString(name) {
-		return "hash"
-	}
-	return ""
+	return config.ClassifyNamingConvention(name)
 }
 
 var doctorCmd = &cobra.Command{
@@ -69,6 +59,7 @@ inconsistências de configuração dos agentes de IA e progresso das features.`,
 				Anonymous bool   `json:"anonymous"`
 				Endpoint  string `json:"endpoint"`
 			} `json:"telemetry"`
+			NamingConvention string `json:"naming_convention"`
 		}
 
 		rcData, err := os.ReadFile(sddrcPath)
@@ -86,6 +77,9 @@ inconsistências de configuração dos agentes de IA e progresso das features.`,
 		fmt.Println("   - Stack:", rc.Stack)
 		fmt.Println("   - Idioma:", rc.Lang)
 		fmt.Println("   - Agentes no .sddrc:", strings.Join(rc.Agents, ", "))
+		if rc.NamingConvention != "" {
+			fmt.Println("   - Convenção de Nomenclatura:", rc.NamingConvention)
+		}
 
 		// 2. Valida sdd/.sdd-version
 		if hasVersion {
@@ -216,7 +210,7 @@ inconsistências de configuração dos agentes de IA e progresso das features.`,
 		scanConventionDir(filepath.Join(targetDir, "sdd", "discovery"))
 
 		if len(sequentialFiles) > 0 && len(hashFiles) > 0 {
-			fmt.Println("  ⚠️  Deriva de convenção detectada: nomenclatura sequencial (feat-NN) e por hash (feat-xxxx) coexistem no projeto.")
+			fmt.Println("  ⚠️  Deriva de convenção detectada: nomenclatura sequencial (feat-NN/fix-NN) e por hash (feat-xxxx/fix-xxxx) coexistem no projeto.")
 			fmt.Println("     Sequencial:")
 			for _, f := range sequentialFiles {
 				fmt.Printf("      - %s\n", f)
@@ -227,6 +221,25 @@ inconsistências de configuração dos agentes de IA e progresso das features.`,
 			}
 		} else if len(sequentialFiles)+len(hashFiles) > 0 {
 			fmt.Println("  ✓ Convenção de nomenclatura consistente.")
+		}
+
+		if rc.NamingConvention == "" {
+			detected := config.DetectNamingConvention(targetDir)
+			rc.NamingConvention = detected
+			cfg := config.Config{
+				Project:          rc.Project,
+				SddVersion:       rc.Version,
+				Lang:             rc.Lang,
+				Telemetry:        rc.Telemetry.Enabled,
+				Agents:           rc.Agents,
+				NamingConvention: detected,
+			}
+			err = scaffold.UpdateSddrc(cfg, targetDir)
+			if err != nil {
+				fmt.Printf("  ⚠️  Falha ao atualizar sdd/.sddrc com a convenção detectada: %v\n", err)
+			} else {
+				fmt.Printf("  ✓ Convenção de nomenclatura ausente corrigida automaticamente para: %s\n", detected)
+			}
 		}
 
 		// 7. Validação do nome padrão do projeto
