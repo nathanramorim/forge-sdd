@@ -4,6 +4,14 @@ Este arquivo registra o histórico de entregas de produto deste projeto.
 
 ## Entregas
 
+### Versão 1.9.1-beta (Beta)
+
+Esta release beta adiciona convenção de nomenclatura configurável, auto-healing no doctor e melhorias na telemetria.
+
+*   **Convenção de Nomenclatura Configurável:** Configuração de nomenclatura (`sequencial`, `hash` ou `workitem`) no `init` e preservação/auto-healing nos comandos do `doctor`.
+*   **Melhorias na Telemetria:** Estimativa real do input/output de tokens e ativação/desativação dinâmica de telemetria baseada no `.sddrc`.
+*   **Comando `/novo-fix`:** Adicionado o comando `/novo-fix` e melhor suporte a branches e arquivos `fix-` no fluxo SDD.
+
 ### Versão 1.9.0-beta (Beta)
 
 Esta release beta reduz a curva de aprendizado do Forge-SDD para quem está começando, na era dos agentes de IA autônomos (Discovery 5ae2).

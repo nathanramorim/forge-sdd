@@ -1,6 +1,6 @@
 {
   "project": "demo",
-  "version": "1.9.0-beta",
+  "version": "1.9.1-beta",
   "agents": [],
   "telemetry": {
     "enabled": true,
