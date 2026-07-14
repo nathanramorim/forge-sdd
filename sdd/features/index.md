@@ -53,10 +53,17 @@ main
                                                                                                      └─ feat/5ae2-gate-graduacao-autopilot (paralela)
                                                                                                      └─ feat/5ae2-spike-subagentes-nativos (paralela)
                                                                                                      └─ feat/5ae2-modo-iniciante (paralela)
+                                                                                                 └─ fix/naming-telemetry-tokens
+                                                                                                     └─ feat/release-44-fluxo-sdd
+                                                                                                        └─ feat/44-01-sabatina-interativa
+                                                                                                           └─ feat/44-03-active-release-branch
+                                                                                                        └─ feat/44-02-worktree-script (paralela)
+                                                                                                        └─ feat/44-04-status-git-audit (paralela)
             ```
 
                                        ## Janelas de paralelismo
                                        feat-5ae2-04, feat-5ae2-05, feat-5ae2-06 e feat-5ae2-07 podem ser desenvolvidas em paralelo entre si após feat-5ae2-03 (não têm dependência direta entre elas).
+                                       feat-44-02 e feat-44-04 podem ser desenvolvidas em paralelo entre si e em relação a feat-44-01/feat-44-03 (sem overlap de arquivos); feat-44-01 e feat-44-03 são sequenciais entre si. Todos os PRs desta entrega miram `feat/release-44-fluxo-sdd` (ver `active_release_branch` em `sdd/.sddrc`), não `main`.
 
                                        ## Índice
 
@@ -114,3 +121,7 @@ main
 | 5ae2-06 | feat-5ae2-curva-aprendizado-agentes-ia/feat-5ae2-06-spike-subagentes-nativos.md | feat/5ae2-spike-subagentes-nativos | 5ae2-06 | done |
 | 5ae2-07 | feat-5ae2-curva-aprendizado-agentes-ia/feat-5ae2-07-modo-iniciante.md | feat/5ae2-modo-iniciante | 5ae2-07 | done |
 | 5ae2-08 | feat-5ae2-curva-aprendizado-agentes-ia/fix-5ae2-08-naming-telemetry-tokens.md | fix/naming-telemetry-tokens | 5ae2-08 | done |
+| 44-01 | feat-44-aprimoramento-fluxo-sdd/feat-44-01-sabatina-interativa.md | feat/44-01-sabatina-interativa | 44-01 | todo |
+| 44-02 | feat-44-aprimoramento-fluxo-sdd/feat-44-02-worktree-script.md | feat/44-02-worktree-script | 44-02 | todo |
+| 44-03 | feat-44-aprimoramento-fluxo-sdd/feat-44-03-active-release-branch.md | feat/44-03-active-release-branch | 44-03 | todo |
+| 44-04 | feat-44-aprimoramento-fluxo-sdd/feat-44-04-status-git-audit.md | feat/44-04-status-git-audit | 44-04 | todo |
