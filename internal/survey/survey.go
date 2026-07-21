@@ -170,8 +170,18 @@ func RunUpdate(existing []string, currentVersion, binaryVersion string) (UpdateC
 }
 
 // RunSmartUpgradePrompt pergunta de forma interativa para qual versão o usuário quer atualizar se um projeto existente for detectado.
-func RunSmartUpgradePrompt(currentVersion, latestVersion, betaVersion string) (string, error) {
-	var targetOption string
+// preselectUpgrade pré-seleciona a opção de upgrade mais recente disponível (beta, senão latest) em vez de
+// "manter versão atual" — usado para honrar a intenção de flags como --upgrade mesmo fora do modo --yes.
+func RunSmartUpgradePrompt(currentVersion, latestVersion, betaVersion string, preselectUpgrade bool) (string, error) {
+	targetOption := "keep"
+	if preselectUpgrade {
+		switch {
+		case betaVersion != "":
+			targetOption = "beta"
+		case latestVersion != "":
+			targetOption = "latest"
+		}
+	}
 
 	options := []huh.Option[string]{
 		huh.NewOption(fmt.Sprintf("Não atualizar (manter na v%s)", currentVersion), "keep"),

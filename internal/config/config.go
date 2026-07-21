@@ -225,7 +225,12 @@ func DetectProject(dir string) bool {
 	return err == nil
 }
 
-var npmRegistryURL = "https://registry.npmjs.org/@nathanramorim/forge-sdd"
+var NpmRegistryURL = "https://registry.npmjs.org/@nathanramorim/forge-sdd"
+
+// npmFetchTimeout é o timeout do client HTTP usado por FetchNpmVersions.
+// 2s se mostrou curto demais em redes mais lentas, causando fallback silencioso
+// para a ausência da versão beta (ver fix-45-update-beta-version-detection).
+var npmFetchTimeout = 8 * time.Second
 
 type npmRegistryResponse struct {
 	DistTags map[string]string `json:"dist-tags"`
@@ -234,9 +239,9 @@ type npmRegistryResponse struct {
 // FetchNpmVersions busca as últimas versões publicadas (latest e beta) no NPM Registry.
 func FetchNpmVersions() (latest string, beta string, err error) {
 	client := &http.Client{
-		Timeout: 2 * time.Second,
+		Timeout: npmFetchTimeout,
 	}
-	resp, err := client.Get(npmRegistryURL)
+	resp, err := client.Get(NpmRegistryURL)
 	if err != nil {
 		return "", "", fmt.Errorf("erro na requisição do NPM Registry: %w", err)
 	}
@@ -311,5 +316,21 @@ func DetectNamingConvention(targetDir string) string {
 	}
 	// default padrão
 	return "sequencial"
+}
+
+// ResolveUpgradeTarget escolhe a versão mais recente aplicável entre latest e beta
+// (comparando via CompareVersions), usada para resolver --upgrade sem depender
+// da versão compilada localmente no binário.
+func ResolveUpgradeTarget(latest, beta string) string {
+	switch {
+	case latest == "":
+		return beta
+	case beta == "":
+		return latest
+	case CompareVersions(beta, latest) > 0:
+		return beta
+	default:
+		return latest
+	}
 }
 

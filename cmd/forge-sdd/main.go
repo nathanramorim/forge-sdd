@@ -184,14 +184,14 @@ func runUpdateFlow(cmd *cobra.Command, targetDir string) error {
 	}
 
 	yes, _ := cmd.Flags().GetBool("yes")
+	upgradeFlag, _ := cmd.Flags().GetBool("upgrade")
+	versionFlag, _ := cmd.Flags().GetString("version")
 
 	var toAdd []string
 	var targetVersion string
 
 	if yes {
 		agentFlag, _ := cmd.Flags().GetString("agent")
-		upgradeFlag, _ := cmd.Flags().GetBool("upgrade")
-		versionFlag, _ := cmd.Flags().GetString("version")
 
 		if agentFlag != "" {
 			parsed, err := config.ParseAgents(agentFlag)
@@ -205,7 +205,14 @@ func runUpdateFlow(cmd *cobra.Command, targetDir string) error {
 		case versionFlag != "":
 			targetVersion = versionFlag
 		case upgradeFlag:
-			targetVersion = version
+			latest, beta, fetchErr := config.FetchNpmVersions()
+			if fetchErr != nil {
+				return fmt.Errorf("--upgrade: falha ao consultar o NPM Registry: %w", fetchErr)
+			}
+			targetVersion = config.ResolveUpgradeTarget(latest, beta)
+			if targetVersion == "" {
+				return fmt.Errorf("--upgrade: NPM Registry não retornou nenhuma versão (latest/beta) publicada")
+			}
 		}
 
 		if len(toAdd) == 0 && targetVersion == "" {
@@ -221,20 +228,24 @@ func runUpdateFlow(cmd *cobra.Command, targetDir string) error {
 	} else {
 		// Modo interativo: busca versões remoto no NPM Registry
 		fmt.Print("Buscando versões disponíveis no NPM Registry...")
-		latest, beta, err := config.FetchNpmVersions()
-		if err != nil {
-			fmt.Printf(" [falhou: %v] usando local v%s\n", err, version)
+		latest, beta, fetchErr := config.FetchNpmVersions()
+		if fetchErr != nil {
+			fmt.Fprintf(os.Stderr, "\n⚠ Falha ao consultar o NPM Registry (%v).\n  A versão beta mais recente pode não estar disponível nesta execução — usando apenas a versão local do binário (v%s).\n", fetchErr, version)
 			latest = version
 			beta = ""
 		} else {
 			fmt.Println(" [ok]")
 		}
 
-		chosenVersion, err := survey.RunSmartUpgradePrompt(projectVersion, latest, beta)
-		if err != nil {
-			return fmt.Errorf("formulário cancelado: %w", err)
+		if versionFlag != "" {
+			targetVersion = versionFlag
+		} else {
+			chosenVersion, err := survey.RunSmartUpgradePrompt(projectVersion, latest, beta, upgradeFlag)
+			if err != nil {
+				return fmt.Errorf("formulário cancelado: %w", err)
+			}
+			targetVersion = chosenVersion
 		}
-		targetVersion = chosenVersion
 
 		choice, err := survey.RunUpdate(rc.Agents, projectVersion, version)
 		if err != nil {

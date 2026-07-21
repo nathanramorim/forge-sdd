@@ -81,13 +81,15 @@ Fase 5ae2-08 — Nomenclatura, Telemetria e Tokens [ ] doing
 | feat-5ae2-05-gate-graduacao-autopilot | feat/5ae2-gate-graduacao-autopilot | done |
 | feat-5ae2-06-spike-subagentes-nativos | feat/5ae2-spike-subagentes-nativos | done |
 | feat-5ae2-07-modo-iniciante | feat/5ae2-modo-iniciante | done |
-| fix-5ae2-08-naming-telemetry-tokens | fix/naming-telemetry-tokens | doing |
+| fix-5ae2-08-naming-telemetry-tokens | fix/naming-telemetry-tokens | done |
+| fix-45-update-beta-version-detection | fix/update-beta-version-detection | done |
 
 ## Próximo passo
-**Iniciar:** Nenhuma feature pendente — Discovery 5ae2 (v1.9.0) concluída (7/7 features). Próximo ciclo natural: novo `/discovery` ou consolidação/release das 7 PRs empilhadas (#29-#35).
+**Iniciar:** Nenhuma feature `todo` pendente. Discovery 5ae2 (v1.9.0) e fix-45 consolidadas na promoção para v1.9.1 estável.
 **Bloqueios:** —
 
 ## Handoff da última sessão
+- v1.9.1-beta promovida a estável (v1.9.1): fix-45-update-beta-version-detection incorporada via cherry-pick — `--upgrade --yes` agora resolve a versão via `config.ResolveUpgradeTarget` (consultando `FetchNpmVersions`) em vez da constante `version` do binário; `--upgrade` sem `--yes` pré-seleciona a opção de upgrade no prompt interativo; falha de rede reporta erro/aviso explícito em vez de fallback silencioso; timeout de `FetchNpmVersions` elevado de 2s para 8s. Testes novos em `internal/config/config_test.go` e `cmd/forge-sdd/commands_test.go`.
 - feat-5ae2-07-modo-iniciante concluída: prompts `/constitution` (3 agentes) ganharam a pergunta opcional de nível de linguagem (`padrão`/`iniciante`), persistida em `constitution.md`; `/discovery` ganhou instrução para simplificar jargão quando `iniciante`. Discovery 5ae2 100% implementada (7/7), alvo do pacote v1.9.0.
 - feat-5ae2-06-spike-subagentes-nativos concluída (spike, sem código): mapeado suporte nativo a subagentes com contexto isolado por agente — Claude tem primitivo maduro (`.claude/agents/*.md`), Gemini/Copilot não confirmados/ausentes hoje. Recomendação: piloto restrito ao Claude, sem migrar os três agentes de uma vez (quebraria paridade de comportamento).
 - feat-5ae2-05-gate-graduacao-autopilot concluída: novo comando `forge-sdd autopilot` bloqueia a criação de `sdd/.sdd-auto-pilot` até N ciclos completos (`outcome: approved`) em telemetria, com bypass consciente via `--skip-graduation`. Independente do autopilot em si (que segue só na branch `feat/cli-autopilot-autonomy`, ainda em teste).
@@ -99,6 +101,7 @@ Fase 5ae2-08 — Nomenclatura, Telemetria e Tokens [ ] doing
 - Feature 42 concluída (consolidação de todas as versões beta na main, bump de versão para 1.7.0, atualização de golden files e publicação estável v1.7.0 no NPM).
 
 ## Última sessão
+- 2026-07-20 — fix: implementada, testada e validada a fix-45 (detecção de versão beta no comando `update --upgrade`).
 - 2026-07-09 — feat: concluída a Fase 42 (consolidação e publicação oficial da versão estável v1.7.0).
 - 2026-07-06 — feat: concluída a Fase 41 (agrupamento em subpastas, CLI doctor recursivo e lançamento da v1.6.1-beta.3).
 - 2026-07-05 — feat: concluída a Fase 40 (refinamento do init, criação de subpastas, relatórios e lançamento da v1.6.1-beta.2).

@@ -6,7 +6,7 @@ Este arquivo registra o histórico de entregas de produto deste projeto.
 
 ### Versão 1.9.1 (Estável)
 
-Esta release estável consolida todo o ciclo de betas desde a v1.7.0: nomenclatura configurável, redução da curva de aprendizado para quem está começando e correções de robustez na telemetria e no diagnóstico do projeto.
+Esta release estável consolida todo o ciclo de betas desde a v1.7.0: nomenclatura configurável, redução da curva de aprendizado para quem está começando, correções de robustez na telemetria e no diagnóstico do projeto, e correções no comando `update`.
 
 *   **Convenção de Nomenclatura Configurável:** Escolha entre nomenclatura `sequencial`, `hash` ou `workitem` no `init`, com auto-healing e detecção de deriva de convenção no `doctor` para projetos existentes.
 *   **Onboarding Mais Simples:** `init` agora imprime um cheat-sheet dos comandos disponíveis, `/status` sempre sugere o próximo passo, e um novo comando `/tutorial` guia um ciclo SDD completo fictício para quem está começando.
@@ -14,7 +14,8 @@ Esta release estável consolida todo o ciclo de betas desde a v1.7.0: nomenclatu
 *   **Comando `forge-sdd autopilot`:** Ativa o modo autopilot somente após um número mínimo de ciclos completos registrados em telemetria, com bypass consciente via flag.
 *   **Comando `/novo-fix`:** Fluxo dedicado para criar branches e especificações de correção (`fix-`).
 *   **Telemetria Mais Confiável:** Estimativa real de tokens de entrada/saída e ativação/desativação dinâmica baseada no `.sddrc`.
-*   **Diagnósticos Adicionais no `doctor`:** Detecção de nome padrão de projeto não alterado (`"meu-projeto"`) e de métricas granulares corretamente referenciadas em subpastas.
+*   **Diagnósticos Adicionais no `doctor`:** Detecção de nome padrão de projeto não alterado (`"meu-projeto"`), de métricas granulares corretamente referenciadas em subpastas, e verificação do arquivo de métricas no local correto do projeto.
+*   **Atualização Confiável para Versões Beta:** Agora é possível atualizar o CLI diretamente para a última versão beta publicada usando `update --upgrade`, sem precisar informar o número da versão manualmente. Falhas de conexão ao verificar novas versões passam a ser avisadas claramente, em vez de serem ignoradas silenciosamente.
 
 ### Versão 1.9.1-beta (Beta)
 
@@ -34,6 +35,11 @@ Esta release beta reduz a curva de aprendizado do Forge-SDD para quem está come
 *   **Onboarding Guiado:** Novo comando `/tutorial` (Copilot, Claude e Gemini) guia o usuário por um ciclo SDD completo e fictício, isolado dos dados reais do projeto.
 *   **Comando `forge-sdd autopilot`:** Novo comando CLI que ativa o modo autopilot somente após um número mínimo de ciclos completos registrados em telemetria, com bypass consciente disponível via flag (independente do loop de autopilot em si, que segue em teste na branch `feat/cli-autopilot-autonomy`).
 *   **Modo Iniciante:** O comando `/constitution` (Copilot, Claude e Gemini) passa a perguntar, opcionalmente, se o usuário prefere explicações em linguagem simplificada, com exemplos concretos no lugar de jargão técnico.
+=======
+### Não lançada
+
+*   **Atualização confiável para versões beta:** Agora é possível atualizar o CLI diretamente para a última versão beta publicada usando `update --upgrade`, sem precisar informar o número da versão manualmente. Falhas de conexão ao verificar novas versões passam a ser avisadas claramente, em vez de serem ignoradas silenciosamente.
+>>>>>>> 055efe6 (fix(update): resolve --upgrade target from NPM registry instead of local binary version)
 
 ### Versão 1.7.1-beta.5 (Beta)
 
