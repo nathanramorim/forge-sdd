@@ -4,6 +4,18 @@ Este arquivo registra o histórico de entregas de produto deste projeto.
 
 ## Entregas
 
+### Versão 1.9.1 (Estável)
+
+Esta release estável consolida todo o ciclo de betas desde a v1.7.0: nomenclatura configurável, redução da curva de aprendizado para quem está começando e correções de robustez na telemetria e no diagnóstico do projeto.
+
+*   **Convenção de Nomenclatura Configurável:** Escolha entre nomenclatura `sequencial`, `hash` ou `workitem` no `init`, com auto-healing e detecção de deriva de convenção no `doctor` para projetos existentes.
+*   **Onboarding Mais Simples:** `init` agora imprime um cheat-sheet dos comandos disponíveis, `/status` sempre sugere o próximo passo, e um novo comando `/tutorial` guia um ciclo SDD completo fictício para quem está começando.
+*   **Modo Iniciante:** `/constitution` pode gerar explicações em linguagem simplificada, com exemplos no lugar de jargão técnico.
+*   **Comando `forge-sdd autopilot`:** Ativa o modo autopilot somente após um número mínimo de ciclos completos registrados em telemetria, com bypass consciente via flag.
+*   **Comando `/novo-fix`:** Fluxo dedicado para criar branches e especificações de correção (`fix-`).
+*   **Telemetria Mais Confiável:** Estimativa real de tokens de entrada/saída e ativação/desativação dinâmica baseada no `.sddrc`.
+*   **Diagnósticos Adicionais no `doctor`:** Detecção de nome padrão de projeto não alterado (`"meu-projeto"`) e de métricas granulares corretamente referenciadas em subpastas.
+
 ### Versão 1.9.1-beta (Beta)
 
 Esta release beta adiciona convenção de nomenclatura configurável, auto-healing no doctor e melhorias na telemetria.
