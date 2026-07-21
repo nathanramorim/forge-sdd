@@ -98,3 +98,4 @@ main
 | 42 | feat-42-release-v1.7.0.md | feat/release-v1.7.0 | 42 | done |
 | 43a2 | feat-43a2-telemetry-metrics-nested.md | fix/telemetry-metrics-nested | 43a2 | doing |
 | 45 | fix-45-update-beta-version-detection.md | fix/update-beta-version-detection | 45 | done |
+| 46 | fix-46-doctor-metrics-path.md | fix/update-beta-version-detection | 46 | done |

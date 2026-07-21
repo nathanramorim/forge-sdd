@@ -77,9 +77,10 @@ Fase 42 — Consolidação e Lançamento v1.7.0 [x] done
 
 ## Handoff da última sessão
 - fix-45-update-beta-version-detection concluída e validada: `--upgrade --yes` agora resolve a versão via `config.ResolveUpgradeTarget` (consultando `FetchNpmVersions`) em vez da constante `version` do binário; `--upgrade` sem `--yes` pré-seleciona a opção de upgrade no prompt interativo; falha de rede reporta erro/aviso explícito em vez de fallback silencioso; timeout de `FetchNpmVersions` elevado de 2s para 8s. Verificação manual confirmou resolução para a beta real publicada (`1.9.1-beta`). Testes novos em `internal/config/config_test.go` e `cmd/forge-sdd/commands_test.go`.
+- fix-46-doctor-metrics-path agrupada na mesma branch/PR (`fix/update-beta-version-detection`): os prompts `/doctor` (Copilot, Claude, Gemini) verificavam `.metrics/schema.json` na raiz do projeto, mas o arquivo é sempre escaffoldado em `sdd/.metrics/schema.json` — corrigido nos 3 templates + cópia dogfooded + golden fixture regenerado.
 
 ## Última sessão
-- 2026-07-20 — fix: implementada, testada e validada a fix-45 (detecção de versão beta no comando `update --upgrade`).
+- 2026-07-20 — fix: implementadas, testadas e validadas as fix-45 (detecção de versão beta no `update --upgrade`) e fix-46 (caminho incorreto de `.metrics/schema.json` nos prompts `/doctor`), agrupadas na mesma branch/PR.
 - 2026-07-09 — feat: concluída a Fase 42 (consolidação e publicação oficial da versão estável v1.7.0).
 - 2026-07-06 — feat: concluída a Fase 41 (agrupamento em subpastas, CLI doctor recursivo e lançamento da v1.6.1-beta.3).
 - 2026-07-05 — feat: concluída a Fase 40 (refinamento do init, criação de subpastas, relatórios e lançamento da v1.6.1-beta.2).

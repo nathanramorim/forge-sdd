@@ -7,6 +7,7 @@ Este arquivo registra o histórico de entregas de produto deste projeto.
 ### Não lançada
 
 *   **Atualização confiável para versões beta:** Agora é possível atualizar o CLI diretamente para a última versão beta publicada usando `update --upgrade`, sem precisar informar o número da versão manualmente. Falhas de conexão ao verificar novas versões passam a ser avisadas claramente, em vez de serem ignoradas silenciosamente.
+*   **Diagnóstico de métricas corrigido:** O comando `/doctor` agora verifica o arquivo de métricas no local correto do projeto, eliminando um falso alerta que aparecia mesmo em projetos configurados corretamente.
 
 ### Versão 1.7.1-beta.5 (Beta)
 
