@@ -12,8 +12,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// version é injetada via ldflags: -X main.version=1.7.1-beta.5
-var version = "1.7.1-beta.5"
+// version é injetada via ldflags: -X main.version=1.9.1-beta
+var version = "1.9.1-beta"
 
 var rootCmd = &cobra.Command{
 	Use:   "forge-sdd",
@@ -77,6 +77,7 @@ A estrutura de domínio em sdd/ (features, spec, memory) nunca é alterada.`,
 func runInitFlow(cmd *cobra.Command, dirArg string) error {
 	yes, _ := cmd.Flags().GetBool("yes")
 	dryRun, _ := cmd.Flags().GetBool("dry-run")
+	tutorial, _ := cmd.Flags().GetBool("tutorial")
 	nameFlag, _ := cmd.Flags().GetString("name")
 
 	var targetDir string
@@ -162,6 +163,12 @@ func runInitFlow(cmd *cobra.Command, dirArg string) error {
 	}
 
 	printSummaryReport(cfg, targetDir, len(created))
+	if !cfg.DryRun {
+		printCheatSheet(cfg)
+		if tutorial {
+			printTutorialHint()
+		}
+	}
 	return nil
 }
 
@@ -177,14 +184,14 @@ func runUpdateFlow(cmd *cobra.Command, targetDir string) error {
 	}
 
 	yes, _ := cmd.Flags().GetBool("yes")
+	upgradeFlag, _ := cmd.Flags().GetBool("upgrade")
+	versionFlag, _ := cmd.Flags().GetString("version")
 
 	var toAdd []string
 	var targetVersion string
 
 	if yes {
 		agentFlag, _ := cmd.Flags().GetString("agent")
-		upgradeFlag, _ := cmd.Flags().GetBool("upgrade")
-		versionFlag, _ := cmd.Flags().GetString("version")
 
 		if agentFlag != "" {
 			parsed, err := config.ParseAgents(agentFlag)
@@ -198,7 +205,14 @@ func runUpdateFlow(cmd *cobra.Command, targetDir string) error {
 		case versionFlag != "":
 			targetVersion = versionFlag
 		case upgradeFlag:
-			targetVersion = version
+			latest, beta, fetchErr := config.FetchNpmVersions()
+			if fetchErr != nil {
+				return fmt.Errorf("--upgrade: falha ao consultar o NPM Registry: %w", fetchErr)
+			}
+			targetVersion = config.ResolveUpgradeTarget(latest, beta)
+			if targetVersion == "" {
+				return fmt.Errorf("--upgrade: NPM Registry não retornou nenhuma versão (latest/beta) publicada")
+			}
 		}
 
 		if len(toAdd) == 0 && targetVersion == "" {
@@ -214,20 +228,24 @@ func runUpdateFlow(cmd *cobra.Command, targetDir string) error {
 	} else {
 		// Modo interativo: busca versões remoto no NPM Registry
 		fmt.Print("Buscando versões disponíveis no NPM Registry...")
-		latest, beta, err := config.FetchNpmVersions()
-		if err != nil {
-			fmt.Printf(" [falhou: %v] usando local v%s\n", err, version)
+		latest, beta, fetchErr := config.FetchNpmVersions()
+		if fetchErr != nil {
+			fmt.Fprintf(os.Stderr, "\n⚠ Falha ao consultar o NPM Registry (%v).\n  A versão beta mais recente pode não estar disponível nesta execução — usando apenas a versão local do binário (v%s).\n", fetchErr, version)
 			latest = version
 			beta = ""
 		} else {
 			fmt.Println(" [ok]")
 		}
 
-		chosenVersion, err := survey.RunSmartUpgradePrompt(projectVersion, latest, beta)
-		if err != nil {
-			return fmt.Errorf("formulário cancelado: %w", err)
+		if versionFlag != "" {
+			targetVersion = versionFlag
+		} else {
+			chosenVersion, err := survey.RunSmartUpgradePrompt(projectVersion, latest, beta, upgradeFlag)
+			if err != nil {
+				return fmt.Errorf("formulário cancelado: %w", err)
+			}
+			targetVersion = chosenVersion
 		}
-		targetVersion = chosenVersion
 
 		choice, err := survey.RunUpdate(rc.Agents, projectVersion, version)
 		if err != nil {
@@ -242,6 +260,9 @@ func runUpdateFlow(cmd *cobra.Command, targetDir string) error {
 	mergedAgents := config.MergeAgents(rc.Agents, toAdd)
 	baseCfg := rc.ToConfig()
 	baseCfg.Agents = mergedAgents
+	if baseCfg.NamingConvention == "" {
+		baseCfg.NamingConvention = config.DetectNamingConvention(targetDir)
+	}
 
 	var created []string
 
@@ -316,22 +337,39 @@ func printSummaryReport(cfg config.Config, targetDir string, fileCount int) {
 	fmt.Println("  3. Leia sdd/memory/progress.md para começar a codificar!")
 }
 
+func printTutorialHint() {
+	fmt.Println("\n🎓 Modo tutorial ativado: abra seu agente de IA e peça \"/tutorial\" para aprender o ciclo SDD com um exemplo guiado e descartável antes de começar sua demanda real.")
+}
+
+func printCheatSheet(cfg config.Config) {
+	commands := scaffold.CommandCheatSheet(cfg)
+	if len(commands) == 0 {
+		return
+	}
+	fmt.Println("\nComandos SDD disponíveis:")
+	for _, c := range commands {
+		fmt.Printf("  %-18s %s\n", c.Command, c.Description)
+	}
+}
+
 func init() {
 	initCmd.Flags().Bool("yes", false, "Pular prompts e usar flags/defaults")
 	initCmd.Flags().Bool("dry-run", false, "Listar arquivos que seriam criados sem gravar no disco")
+	initCmd.Flags().Bool("tutorial", false, "Ao final, sugerir rodar /tutorial para aprender o ciclo SDD com um exemplo guiado")
 	initCmd.Flags().String("name", "", "Nome do projeto")
 	initCmd.Flags().String("stack", "", "Stack principal: go, node, python, rust, other")
 	initCmd.Flags().String("db", "", "Banco de dados: postgres, sqlite, mongo, none")
 	initCmd.Flags().String("lang", "", "Idioma: pt-BR, en")
-	initCmd.Flags().String("version", "", "Versão Forge-SDD (default: 1.7.1-beta.5)")
+	initCmd.Flags().String("version", "", "Versão Forge-SDD (default: 1.9.1-beta)")
 	initCmd.Flags().Bool("no-telemetry", false, "Desabilitar telemetria local")
 	initCmd.Flags().String("agent", "", "Agente(s) de IA: copilot, claude, gemini (csv, default: copilot)")
+	initCmd.Flags().String("naming-convention", "", "Convenção de nomenclatura: sequencial, hash, workitem")
 	rootCmd.AddCommand(initCmd)
 
 	updateCmd.Flags().Bool("yes", false, "Pular prompts e usar flags")
 	updateCmd.Flags().String("agent", "", "Agente(s) a adicionar: copilot, claude, gemini, openai (csv)")
 	updateCmd.Flags().Bool("upgrade", false, "Atualizar estrutura para a versão mais recente do binário")
-	updateCmd.Flags().String("version", "", "Atualizar estrutura para uma versão específica (ex: 1.7.1-beta.5)")
+	updateCmd.Flags().String("version", "", "Atualizar estrutura para uma versão específica (ex: 1.9.1-beta)")
 	rootCmd.AddCommand(updateCmd)
 
 	rootCmd.AddCommand(versionCmd)

@@ -201,15 +201,16 @@ O framework disponibiliza comandos divididos em duas categorias: Comandos de Cha
 
 ### Comandos de Chat (IDE / Agente)
 
-* **`/status`**: Analisa e resume o progresso ativo de `sdd/memory/progress.md`.
+* **`/status`**: Analisa e resume o progresso ativo de `sdd/memory/progress.md`. Sempre encerra sugerindo o próximo comando a ser executado, calculado a partir do estado real do projeto.
+* **`/tutorial`**: Guia um ciclo SDD completo e fictício (discovery → features → PLAN/ACT/CLOSE), isolado em `sdd/discovery/_tutorial/` e `sdd/features/_tutorial/`, para quem está aprendendo a metodologia.
 * **`/discovery <ideia>`**: Abre debate de design de produto e gera o escopo inicial e critérios técnicos em `sdd/discovery/` (`discovery-XX-*.md` e `criteria-XX-*.md`).
 * **`/nova-feature <nome>`**: Cria branch do git e gera scaffold inicial da funcionalidade em `sdd/features/feat-XX.md`.
 * **`/split-features`**: Quebra especificações que ficaram grandes ou complexas em pequenas tarefas independentes.
 * **`/proxima-feature`**: Coloca o Builder para atuar na próxima feature da fila (`status: todo`), configurando a branch local.
 * **`/revisar`**: Roda os testes, executa `go vet`/linter e valida o código contra as regras imutáveis da constituição.
-* **`/constitution`**: Executa escaneamento da base de código para garantir o alinhamento de tecnologias listadas na constituição.
+* **`/constitution`**: Executa escaneamento da base de código para garantir o alinhamento de tecnologias listadas na constituição. Também pergunta, opcionalmente, o nível de linguagem desejado (`padrão` ou `iniciante`).
 * **`/c4-architecture`**: Atualiza ou desenha diagramas Mermaid de alto nível de Contexto e Container (C4 Model).
-* **`/doctor`**: Health check da integridade dos arquivos e diretórios da estrutura local.
+* **`/doctor`**: Health check da integridade dos arquivos e diretórios da estrutura local, incluindo detecção de deriva de convenção de nomenclatura (`feat-NN` sequencial vs. `feat-xxxx` por hash).
 * **`/archive`**: Compacta e arquiva sessões finalizadas de `progress.md` em `progress-log.md` (limite de 1 KB).
 * **`/upgrade-sdd <versao>`**: Aciona o Migrator para alinhar a estrutura física local para a versão do framework desejada.
 
@@ -219,8 +220,10 @@ O framework disponibiliza comandos divididos em duas categorias: Comandos de Cha
     * `--yes`: Não-interativo (usa valores default).
     * `--dry-run`: Exibe a árvore de arquivos sem de fato alterá-los.
     * `--stack`, `--db`, `--agent`, `--lang`: Flags para customização da inicialização do repositório.
+    * `--tutorial`: Sugere rodar `/tutorial` ao final do scaffold.
 * **`forge-sdd update`**: Atualiza regras estruturais de agentes, preservando estritamente os diretórios de domínio do projeto (`sdd/`).
-* **`forge-sdd doctor`**: Realiza diagnóstico de saúde e integridade da estrutura física do framework no repositório.
+* **`forge-sdd doctor`**: Realiza diagnóstico de saúde e integridade da estrutura física do framework no repositório, incluindo deriva de convenção de nomenclatura.
+* **`forge-sdd autopilot`**: Ativa o modo autopilot (`sdd/.sdd-auto-pilot`) somente após um número mínimo de ciclos completos registrados em telemetria (`--min-cycles`, default 3), com bypass consciente via `--skip-graduation`.
 * **`forge-sdd destroy`**: Desinstala e remove completamente toda a metodologia e configurações de agentes locais (com suporte a `--dry-run` e `--yes`).
 * **`forge-sdd version`**: Exibe a versão instalada da CLI do framework.
 

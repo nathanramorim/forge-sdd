@@ -33,6 +33,8 @@ Fase 39 — CLI doctor and destroy cmd       [x] done
 Fase 40 — CLI init directory refinement     [x] done
 Fase 41 — Nested features/discovery grouping [x] done
 Fase 42 — Consolidação e Lançamento v1.7.0 [x] done
+Fase 1.9.0-beta — Atalho forge e Boas-vindas    [x] done
+Fase 5ae2-08 — Nomenclatura, Telemetria e Tokens [ ] doing
 ```
 
 ## Features ativas
@@ -70,15 +72,37 @@ Fase 42 — Consolidação e Lançamento v1.7.0 [x] done
 | feat-40-cli-init-refinement | feat/cli-init-refinement | done |
 | feat-41-nested-features-discovery | feat/cli-nested-features-discovery | done |
 | feat-42-release-v1.7.0 | feat/release-v1.7.0 | done |
+| feat-43-cli-shortcut-and-welcome | feat/cli-shortcut-and-welcome | done |
+| feat-43a2-telemetry-metrics-nested | fix/telemetry-metrics-nested | done |
+| feat-5ae2-01-cheat-sheet-init | feat/5ae2-cheat-sheet-init | done |
+| feat-5ae2-02-status-prescritivo | feat/5ae2-status-prescritivo | done |
+| feat-5ae2-03-doctor-deriva-convencao | feat/5ae2-doctor-deriva-convencao | done |
+| feat-5ae2-04-tutorial-guiado | feat/5ae2-tutorial-guiado | done |
+| feat-5ae2-05-gate-graduacao-autopilot | feat/5ae2-gate-graduacao-autopilot | done |
+| feat-5ae2-06-spike-subagentes-nativos | feat/5ae2-spike-subagentes-nativos | done |
+| feat-5ae2-07-modo-iniciante | feat/5ae2-modo-iniciante | done |
+| fix-5ae2-08-naming-telemetry-tokens | fix/naming-telemetry-tokens | done |
+| fix-45-update-beta-version-detection | fix/update-beta-version-detection | done |
+| fix-46-doctor-metrics-path | fix/update-beta-version-detection | done |
 
 ## Próximo passo
-**Iniciar:** Nenhuma feature pendente de planejamento.
+**Iniciar:** Nenhuma feature `todo` pendente. Discovery 5ae2 (v1.9.0), fix-45 e fix-46 consolidadas na promoção para v1.9.1 estável.
 **Bloqueios:** —
 
 ## Handoff da última sessão
+- v1.9.1-beta promovida a estável (v1.9.1): fix-45-update-beta-version-detection e fix-46-doctor-metrics-path incorporadas via cherry-pick — `--upgrade --yes` agora resolve a versão via `config.ResolveUpgradeTarget` (consultando `FetchNpmVersions`) em vez da constante `version` do binário; `--upgrade` sem `--yes` pré-seleciona a opção de upgrade no prompt interativo; falha de rede reporta erro/aviso explícito em vez de fallback silencioso; timeout de `FetchNpmVersions` elevado de 2s para 8s; prompts `/doctor` corrigidos para verificar `sdd/.metrics/schema.json` em vez da raiz. Testes novos em `internal/config/config_test.go` e `cmd/forge-sdd/commands_test.go`.
+- feat-5ae2-07-modo-iniciante concluída: prompts `/constitution` (3 agentes) ganharam a pergunta opcional de nível de linguagem (`padrão`/`iniciante`), persistida em `constitution.md`; `/discovery` ganhou instrução para simplificar jargão quando `iniciante`. Discovery 5ae2 100% implementada (7/7), alvo do pacote v1.9.0.
+- feat-5ae2-06-spike-subagentes-nativos concluída (spike, sem código): mapeado suporte nativo a subagentes com contexto isolado por agente — Claude tem primitivo maduro (`.claude/agents/*.md`), Gemini/Copilot não confirmados/ausentes hoje. Recomendação: piloto restrito ao Claude, sem migrar os três agentes de uma vez (quebraria paridade de comportamento).
+- feat-5ae2-05-gate-graduacao-autopilot concluída: novo comando `forge-sdd autopilot` bloqueia a criação de `sdd/.sdd-auto-pilot` até N ciclos completos (`outcome: approved`) em telemetria, com bypass consciente via `--skip-graduation`. Independente do autopilot em si (que segue só na branch `feat/cli-autopilot-autonomy`, ainda em teste).
+- feat-5ae2-04-tutorial-guiado concluída: novo prompt `/tutorial` (Claude, Gemini, Copilot) guia um ciclo SDD fictício isolado; `forge-sdd init --tutorial` sugere rodá-lo ao final do scaffold.
+- feat-5ae2-03-doctor-deriva-convencao concluída: `forge-sdd doctor` agora detecta e avisa quando convenções sequencial (`feat-NN`) e hash (`feat-xxxx`) coexistem em `sdd/features/` e `sdd/discovery/` — confirmado usando o próprio repositório do Forge-SDD como caso real.
+- feat-5ae2-02-status-prescritivo concluída: os três prompts `/status` (Claude, Gemini, Copilot) agora encerram sempre com "Próximo comando sugerido: <comando>", calculado a partir do estado de `sdd/discovery/` e `sdd/features/`.
+- feat-5ae2-01-cheat-sheet-init concluída: `forge-sdd init` agora imprime a lista dos comandos SDD disponíveis para os agentes selecionados ao final de uma execução bem-sucedida (fora de `--dry-run`).
+- Discovery 5ae2 (curva de aprendizado do Forge-SDD na era dos agentes de IA) quebrada em 7 features via `/split-features`, agrupadas em `sdd/features/feat-5ae2-curva-aprendizado-agentes-ia/`, alvo do pacote v1.9.0.
 - Feature 42 concluída (consolidação de todas as versões beta na main, bump de versão para 1.7.0, atualização de golden files e publicação estável v1.7.0 no NPM).
 
 ## Última sessão
+- 2026-07-20 — fix: implementadas, testadas e validadas as fix-45 (detecção de versão beta no `update --upgrade`) e fix-46 (caminho incorreto de `.metrics/schema.json` nos prompts `/doctor`), agrupadas na mesma branch/PR.
 - 2026-07-09 — feat: concluída a Fase 42 (consolidação e publicação oficial da versão estável v1.7.0).
 - 2026-07-06 — feat: concluída a Fase 41 (agrupamento em subpastas, CLI doctor recursivo e lançamento da v1.6.1-beta.3).
 - 2026-07-05 — feat: concluída a Fase 40 (refinamento do init, criação de subpastas, relatórios e lançamento da v1.6.1-beta.2).

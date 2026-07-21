@@ -1,0 +1,22 @@
+{
+  "$schema": "forge-sdd/metrics/1.0",
+  "feature": "sdd/features/feat-43-cli-shortcut-and-welcome.md",
+  "phase": "1.9.0-beta",
+  "agent_path": ["orquestrador", "builder"],
+  "tokens_input": 0,
+  "tokens_output": 0,
+  "turns": 3,
+  "duration_seconds": 600,
+  "criterio_atendido": true,
+  "model": "Gemini 3.5 Flash (Medium)",
+  "rework_lines": 0,
+  "context7_calls": 0,
+  "git_calls": 8,
+  "files_touched": [
+    "npm/package.json",
+    "npm/bin/run.js",
+    "sdd/features/feat-43-cli-shortcut-and-welcome.md"
+  ],
+  "outcome": "approved",
+  "sdd_version": "1.9.0-beta"
+}

@@ -157,6 +157,16 @@ async function ensureBinary() {
     fs.chmodSync(bin, 0o755);
   }
 
+  // Executa a tela de boas-vindas pós-instalação no primeiro download
+  try {
+    const postinstallPath = path.join(__dirname, 'postinstall.js');
+    if (fs.existsSync(postinstallPath)) {
+      execFileSync(process.execPath, [postinstallPath], { stdio: 'inherit' });
+    }
+  } catch (err) {
+    // Silencia qualquer erro de renderização para não bloquear o fluxo do CLI
+  }
+
   return bin;
 }
 

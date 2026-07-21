@@ -20,7 +20,7 @@ func TestGoldenInit(t *testing.T) {
 		DB:         "postgres",
 		Telemetry:  true,
 		Lang:       "pt-BR",
-		SddVersion: "1.7.1-beta.5",
+		SddVersion: "1.9.1-beta",
 	}
 
 	goldenDir := filepath.Join("testdata", "golden")

@@ -1,6 +1,6 @@
 {
   "name": "@nathanramorim/forge-sdd",
-  "version": "1.7.1-beta.5",
+  "version": "1.9.1-beta",
   "description": "CLI que scaffolda estruturas Forge-SDD em segundos",
   "homepage": "https://github.com/nathanramorim/forge-sdd",
   "repository": {
@@ -9,10 +9,12 @@
   },
   "license": "MIT",
   "bin": {
-    "forge-sdd": "bin/run.js"
+    "forge-sdd": "bin/run.js",
+    "forge": "bin/run.js"
   },
   "files": [
     "bin/run.js",
+    "bin/postinstall.js",
     "README.md"
   ],
   "engines": {

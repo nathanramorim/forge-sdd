@@ -1,7 +1,7 @@
 # GEMINI.md — forge-sdd
 
 ## Contexto do projeto
-forge-sdd — CLI Go para scaffolding de estruturas SDD (Software Design Doc) v1.7.1-beta.5.
+forge-sdd — stack principal: .
 
 ## Lifecycle (todo agente)
 1. **READ-MIN:** ler `sdd/memory/progress.md`
@@ -14,6 +14,11 @@ forge-sdd — CLI Go para scaffolding de estruturas SDD (Software Design Doc) v1
 - `sdd/memory/progress.md` — estado ativo (leia primeiro a cada sessão)
 - `sdd/memory/constitution.md` — regras imutáveis
 - `sdd/features/feat-XX-*.md` — tarefa atual
+
+## MCPs
+- O Gemini utiliza as configurações de MCP em `.gemini/mcp.json`.
+- **context7** — obrigatório antes de qualquer `go get` ou uso de lib externa.
+- **git** — consultar status antes de iniciar/encerrar feature.
 
 ## Orçamentos
 - `progress.md` ≤ 1 KB
@@ -45,6 +50,7 @@ Para executar uma tarefa, peça pelo nome do comando ou utilize uma das frases d
 - **Discovery:** "discovery [ideia]", "fazer discovery de..." → `discovery.prompt.md`
 - **Constitution:** "alinhar arquitetura", "rodar constitution" → `constitution.prompt.md`
 - **C4 Architecture:** "gerar diagrama C4", "desenhar arquitetura" → `c4-architecture.prompt.md`
+- **Split Features:** "quebrar plano em features", "split-features" → `split-features.prompt.md`
 - **Doctor:** "check-up do projeto", "rodar doctor" → `doctor.prompt.md`
 - **Archive:** "limpar progresso", "rodar archive" → `archive.prompt.md`
 - **Upgrade:** "atualizar sdd para vX", "upgrade-sdd" → `upgrade-sdd.prompt.md`

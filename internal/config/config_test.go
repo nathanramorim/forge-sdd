@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
 )
 
 func TestDetectProject(t *testing.T) {
@@ -41,7 +42,7 @@ func TestFetchNpmVersions(t *testing.T) {
 	mockResponse := npmRegistryResponse{
 		DistTags: map[string]string{
 			"latest": "1.6.0",
-			"beta":   "1.7.1-beta.5",
+			"beta":   "1.9.1-beta",
 		},
 	}
 
@@ -53,9 +54,9 @@ func TestFetchNpmVersions(t *testing.T) {
 	defer server.Close()
 
 	// Override URL
-	oldURL := npmRegistryURL
-	npmRegistryURL = server.URL
-	defer func() { npmRegistryURL = oldURL }()
+	oldURL := NpmRegistryURL
+	NpmRegistryURL = server.URL
+	defer func() { NpmRegistryURL = oldURL }()
 
 	latest, beta, err := FetchNpmVersions()
 	if err != nil {
@@ -65,7 +66,47 @@ func TestFetchNpmVersions(t *testing.T) {
 	if latest != "1.6.0" {
 		t.Errorf("esperava latest '1.6.0', obteve '%s'", latest)
 	}
-	if beta != "1.7.1-beta.5" {
-		t.Errorf("esperava beta '1.7.1-beta.5', obteve '%s'", beta)
+	if beta != "1.9.1-beta" {
+		t.Errorf("esperava beta '1.9.1-beta', obteve '%s'", beta)
+	}
+}
+
+func TestFetchNpmVersions_NetworkFailureReturnsExplicitError(t *testing.T) {
+	oldURL := NpmRegistryURL
+	oldTimeout := npmFetchTimeout
+	NpmRegistryURL = "http://127.0.0.1:1" // porta inválida: falha de conexão imediata
+	npmFetchTimeout = 500 * time.Millisecond
+	defer func() {
+		NpmRegistryURL = oldURL
+		npmFetchTimeout = oldTimeout
+	}()
+
+	latest, beta, err := FetchNpmVersions()
+	if err == nil {
+		t.Fatal("esperava erro explícito quando o NPM Registry está inacessível, obteve nil")
+	}
+	if latest != "" || beta != "" {
+		t.Errorf("esperava latest/beta vazios em caso de erro, obteve latest=%q beta=%q", latest, beta)
+	}
+}
+
+func TestResolveUpgradeTarget(t *testing.T) {
+	cases := []struct {
+		name, latest, beta, want string
+	}{
+		{"beta mais recente que latest", "1.9.0", "1.9.1-beta", "1.9.1-beta"},
+		{"latest mais recente que beta", "1.9.2", "1.9.1-beta", "1.9.2"},
+		{"apenas latest disponível", "1.9.0", "", "1.9.0"},
+		{"apenas beta disponível", "", "1.9.1-beta", "1.9.1-beta"},
+		{"nenhuma versão disponível", "", "", ""},
+	}
+
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			got := ResolveUpgradeTarget(c.latest, c.beta)
+			if got != c.want {
+				t.Errorf("ResolveUpgradeTarget(%q, %q) = %q, esperava %q", c.latest, c.beta, got, c.want)
+			}
+		})
 	}
 }

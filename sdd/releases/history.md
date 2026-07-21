@@ -4,6 +4,38 @@ Este arquivo registra o histórico de entregas de produto deste projeto.
 
 ## Entregas
 
+### Versão 1.9.1 (Estável)
+
+Esta release estável consolida todo o ciclo de betas desde a v1.7.0: nomenclatura configurável, redução da curva de aprendizado para quem está começando, correções de robustez na telemetria e no diagnóstico do projeto, e correções no comando `update`.
+
+*   **Convenção de Nomenclatura Configurável:** Escolha entre nomenclatura `sequencial`, `hash` ou `workitem` no `init`, com auto-healing e detecção de deriva de convenção no `doctor` para projetos existentes.
+*   **Onboarding Mais Simples:** `init` agora imprime um cheat-sheet dos comandos disponíveis, `/status` sempre sugere o próximo passo, e um novo comando `/tutorial` guia um ciclo SDD completo fictício para quem está começando.
+*   **Modo Iniciante:** `/constitution` pode gerar explicações em linguagem simplificada, com exemplos no lugar de jargão técnico.
+*   **Comando `forge-sdd autopilot`:** Ativa o modo autopilot somente após um número mínimo de ciclos completos registrados em telemetria, com bypass consciente via flag.
+*   **Comando `/novo-fix`:** Fluxo dedicado para criar branches e especificações de correção (`fix-`).
+*   **Telemetria Mais Confiável:** Estimativa real de tokens de entrada/saída e ativação/desativação dinâmica baseada no `.sddrc`.
+*   **Diagnósticos Adicionais no `doctor`:** Detecção de nome padrão de projeto não alterado (`"meu-projeto"`), de métricas granulares corretamente referenciadas em subpastas, e verificação do arquivo de métricas no local correto do projeto.
+*   **Atualização Confiável para Versões Beta:** Agora é possível atualizar o CLI diretamente para a última versão beta publicada usando `update --upgrade`, sem precisar informar o número da versão manualmente. Falhas de conexão ao verificar novas versões passam a ser avisadas claramente, em vez de serem ignoradas silenciosamente.
+
+### Versão 1.9.1-beta (Beta)
+
+Esta release beta adiciona convenção de nomenclatura configurável, auto-healing no doctor e melhorias na telemetria.
+
+*   **Convenção de Nomenclatura Configurável:** Configuração de nomenclatura (`sequencial`, `hash` ou `workitem`) no `init` e preservação/auto-healing nos comandos do `doctor`.
+*   **Melhorias na Telemetria:** Estimativa real do input/output de tokens e ativação/desativação dinâmica de telemetria baseada no `.sddrc`.
+*   **Comando `/novo-fix`:** Adicionado o comando `/novo-fix` e melhor suporte a branches e arquivos `fix-` no fluxo SDD.
+
+### Versão 1.9.0-beta (Beta)
+
+Esta release beta reduz a curva de aprendizado do Forge-SDD para quem está começando, na era dos agentes de IA autônomos (Discovery 5ae2).
+
+*   **Cheat-Sheet de Comandos:** O `forge-sdd init` agora imprime a lista completa dos comandos SDD disponíveis para os agentes escolhidos ao final da inicialização.
+*   **`/status` Prescritivo:** O comando `/status` (Copilot, Claude e Gemini) agora sempre sugere o próximo comando a ser executado, com base no estado real do progresso do projeto.
+*   **Diagnóstico de Deriva de Nomenclatura:** O comando `forge-sdd doctor` passa a detectar quando um projeto mistura a nomenclatura sequencial (`feat-NN`) com a nomenclatura por hash (`feat-xxxx`), alertando o usuário sobre a inconsistência.
+*   **Onboarding Guiado:** Novo comando `/tutorial` (Copilot, Claude e Gemini) guia o usuário por um ciclo SDD completo e fictício, isolado dos dados reais do projeto.
+*   **Comando `forge-sdd autopilot`:** Novo comando CLI que ativa o modo autopilot somente após um número mínimo de ciclos completos registrados em telemetria, com bypass consciente disponível via flag (independente do loop de autopilot em si, que segue em teste na branch `feat/cli-autopilot-autonomy`).
+*   **Modo Iniciante:** O comando `/constitution` (Copilot, Claude e Gemini) passa a perguntar, opcionalmente, se o usuário prefere explicações em linguagem simplificada, com exemplos concretos no lugar de jargão técnico.
+
 ### Versão 1.7.1-beta.5 (Beta)
 
 Esta release beta traz correções e alinhamento no fluxo de descobertas (discovery).

@@ -4,4 +4,4 @@
 
 **Ação:**
 1. Acione a lógica de **Migrator**.
-2. Siga o protocolo de migração para a versão solicitada.
+2. Atualize a estrutura do projeto para a nova versão da metodologia.

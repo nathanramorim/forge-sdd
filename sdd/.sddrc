@@ -1,11 +1,12 @@
 {
   "project": "forge-sdd",
-  "version": "1.6.0",
-  "agents": [],
+  "version": "1.9.1",
+  "agents": ["claude", "gemini"],
   "telemetry": {
     "enabled": true,
     "anonymous": true,
     "endpoint": "local"
   },
-  "lang": "pt-BR"
+  "lang": "pt-BR",
+  "naming_convention": "sequencial"
 }

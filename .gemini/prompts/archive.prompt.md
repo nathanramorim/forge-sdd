@@ -4,4 +4,4 @@
 
 **Ação:**
 1. Acione a lógica de **Archivist**.
-2. Limpe o histórico antigo de `progress.md` movendo para `progress-log.md`.
+2. Limpe o histórico antigo de `progress.md`.

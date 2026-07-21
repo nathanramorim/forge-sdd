@@ -71,6 +71,16 @@ func Run(defaultProject string) (config.Config, error) {
 				Value(&cfg.Telemetry),
 
 			huh.NewSelect[string]().
+				Title("Convenção de nomenclatura").
+				Description("Como identificar features, fixes e discoveries").
+				Options(
+					huh.NewOption("Sequencial (ex: feat-01, fix-02)", "sequencial"),
+					huh.NewOption("Hash de 4 caracteres (ex: feat-5ae2, fix-3a2b)", "hash"),
+					huh.NewOption("ID do Workitem (definido a cada criação)", "workitem"),
+				).
+				Value(&cfg.NamingConvention),
+
+			huh.NewSelect[string]().
 				Title("Idioma dos templates").
 				Options(
 					huh.NewOption("Português (pt-BR)", "pt-BR"),
@@ -160,8 +170,18 @@ func RunUpdate(existing []string, currentVersion, binaryVersion string) (UpdateC
 }
 
 // RunSmartUpgradePrompt pergunta de forma interativa para qual versão o usuário quer atualizar se um projeto existente for detectado.
-func RunSmartUpgradePrompt(currentVersion, latestVersion, betaVersion string) (string, error) {
-	var targetOption string
+// preselectUpgrade pré-seleciona a opção de upgrade mais recente disponível (beta, senão latest) em vez de
+// "manter versão atual" — usado para honrar a intenção de flags como --upgrade mesmo fora do modo --yes.
+func RunSmartUpgradePrompt(currentVersion, latestVersion, betaVersion string, preselectUpgrade bool) (string, error) {
+	targetOption := "keep"
+	if preselectUpgrade {
+		switch {
+		case betaVersion != "":
+			targetOption = "beta"
+		case latestVersion != "":
+			targetOption = "latest"
+		}
+	}
 
 	options := []huh.Option[string]{
 		huh.NewOption(fmt.Sprintf("Não atualizar (manter na v%s)", currentVersion), "keep"),

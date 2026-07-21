@@ -6,5 +6,5 @@
 - Features ativas (e branches)
 - Próximo passo
 - Bloqueios
-- Percentual de fases concluídas (ex: X de Y fases [x] done)
+- Percentual de fases concluídas
 - NÃO execute nenhuma ação de código ou alteração de arquivo.
