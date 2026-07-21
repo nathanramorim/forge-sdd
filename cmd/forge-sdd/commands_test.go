@@ -2,11 +2,16 @@ package main
 
 import (
 	"bytes"
+	"encoding/json"
 	"io"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
+	"github.com/forge-sdd/cli/internal/config"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -195,4 +200,81 @@ func TestInitCommand(t *testing.T) {
 	subProjDir := filepath.Join(tempDirB, "sub-proj")
 	assert.DirExists(t, subProjDir)
 	assert.FileExists(t, filepath.Join(subProjDir, "sdd", ".sddrc"))
+}
+
+func TestUpdateCommand_UpgradeYesResolvesFromNpmRegistry(t *testing.T) {
+	// Mock do NPM Registry com uma beta mais recente do que a versão local compilada no binário de teste.
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		_ = json.NewEncoder(w).Encode(map[string]any{
+			"dist-tags": map[string]string{
+				"latest": "9.0.0",
+				"beta":   "9.9.9-beta",
+			},
+		})
+	}))
+	defer server.Close()
+
+	oldURL := config.NpmRegistryURL
+	config.NpmRegistryURL = server.URL
+	defer func() { config.NpmRegistryURL = oldURL }()
+
+	tempDir := t.TempDir()
+	sddDir := filepath.Join(tempDir, "sdd")
+	require.NoError(t, os.MkdirAll(sddDir, 0755))
+	require.NoError(t, os.WriteFile(filepath.Join(sddDir, ".sddrc"), []byte(`{
+		"project": "test-proj",
+		"version": "1.0.0",
+		"agents": ["gemini"],
+		"lang": "pt-BR"
+	}`), 0644))
+	require.NoError(t, os.WriteFile(filepath.Join(sddDir, ".sdd-version"), []byte("1.0.0"), 0644))
+
+	_ = updateCmd.Flags().Set("yes", "true")
+	_ = updateCmd.Flags().Set("upgrade", "true")
+	defer func() {
+		_ = updateCmd.Flags().Set("yes", "false")
+		_ = updateCmd.Flags().Set("upgrade", "false")
+	}()
+
+	rootCmd.SetArgs([]string{"update", tempDir})
+	err := rootCmd.Execute()
+	require.NoError(t, err)
+
+	// A versão gravada deve vir do registry mockado (a beta, por ser mais recente que o latest mockado),
+	// nunca da constante `version` compilada localmente no binário de teste (1.7.1-beta.5).
+	gotVersion, err := os.ReadFile(filepath.Join(sddDir, ".sdd-version"))
+	require.NoError(t, err)
+	assert.Equal(t, "9.9.9-beta", strings.TrimSpace(string(gotVersion)))
+}
+
+func TestUpdateCommand_UpgradeYesNpmFailureReturnsExplicitError(t *testing.T) {
+	oldURL := config.NpmRegistryURL
+	config.NpmRegistryURL = "http://127.0.0.1:1" // porta inválida: falha de conexão imediata
+	defer func() { config.NpmRegistryURL = oldURL }()
+
+	tempDir := t.TempDir()
+	sddDir := filepath.Join(tempDir, "sdd")
+	require.NoError(t, os.MkdirAll(sddDir, 0755))
+	require.NoError(t, os.WriteFile(filepath.Join(sddDir, ".sddrc"), []byte(`{
+		"project": "test-proj",
+		"version": "1.0.0",
+		"agents": ["gemini"],
+		"lang": "pt-BR"
+	}`), 0644))
+	require.NoError(t, os.WriteFile(filepath.Join(sddDir, ".sdd-version"), []byte("1.0.0"), 0644))
+
+	_ = updateCmd.Flags().Set("yes", "true")
+	_ = updateCmd.Flags().Set("upgrade", "true")
+	defer func() {
+		_ = updateCmd.Flags().Set("yes", "false")
+		_ = updateCmd.Flags().Set("upgrade", "false")
+	}()
+
+	rootCmd.SetArgs([]string{"update", tempDir})
+	err := rootCmd.Execute()
+
+	require.Error(t, err, "esperava erro explícito quando o NPM Registry está inacessível durante --upgrade --yes")
+	assert.Contains(t, err.Error(), "NPM Registry")
 }

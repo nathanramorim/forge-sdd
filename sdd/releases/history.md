@@ -4,6 +4,10 @@ Este arquivo registra o histórico de entregas de produto deste projeto.
 
 ## Entregas
 
+### Não lançada
+
+*   **Atualização confiável para versões beta:** Agora é possível atualizar o CLI diretamente para a última versão beta publicada usando `update --upgrade`, sem precisar informar o número da versão manualmente. Falhas de conexão ao verificar novas versões passam a ser avisadas claramente, em vez de serem ignoradas silenciosamente.
+
 ### Versão 1.7.1-beta.5 (Beta)
 
 Esta release beta traz correções e alinhamento no fluxo de descobertas (discovery).
