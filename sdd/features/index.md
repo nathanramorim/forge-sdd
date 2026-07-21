@@ -115,3 +115,4 @@ main
 | 5ae2-07 | feat-5ae2-curva-aprendizado-agentes-ia/feat-5ae2-07-modo-iniciante.md | feat/5ae2-modo-iniciante | 5ae2-07 | done |
 | 5ae2-08 | feat-5ae2-curva-aprendizado-agentes-ia/fix-5ae2-08-naming-telemetry-tokens.md | fix/naming-telemetry-tokens | 5ae2-08 | done |
 | 45 | fix-45-update-beta-version-detection.md | fix/update-beta-version-detection | 45 | done |
+| 46 | fix-46-doctor-metrics-path.md | fix/update-beta-version-detection | 46 | done |

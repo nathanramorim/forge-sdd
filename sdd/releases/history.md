@@ -35,11 +35,6 @@ Esta release beta reduz a curva de aprendizado do Forge-SDD para quem está come
 *   **Onboarding Guiado:** Novo comando `/tutorial` (Copilot, Claude e Gemini) guia o usuário por um ciclo SDD completo e fictício, isolado dos dados reais do projeto.
 *   **Comando `forge-sdd autopilot`:** Novo comando CLI que ativa o modo autopilot somente após um número mínimo de ciclos completos registrados em telemetria, com bypass consciente disponível via flag (independente do loop de autopilot em si, que segue em teste na branch `feat/cli-autopilot-autonomy`).
 *   **Modo Iniciante:** O comando `/constitution` (Copilot, Claude e Gemini) passa a perguntar, opcionalmente, se o usuário prefere explicações em linguagem simplificada, com exemplos concretos no lugar de jargão técnico.
-=======
-### Não lançada
-
-*   **Atualização confiável para versões beta:** Agora é possível atualizar o CLI diretamente para a última versão beta publicada usando `update --upgrade`, sem precisar informar o número da versão manualmente. Falhas de conexão ao verificar novas versões passam a ser avisadas claramente, em vez de serem ignoradas silenciosamente.
->>>>>>> 055efe6 (fix(update): resolve --upgrade target from NPM registry instead of local binary version)
 
 ### Versão 1.7.1-beta.5 (Beta)
 
