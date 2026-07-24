@@ -74,15 +74,11 @@ main
                                        | 09 | feat-09-multi-agent.md | feat/multi-agent | 9 | done |
                                        | 10 | feat-10-landing-page.md | feat/landing-page | 10 | done |
                                        | 11 | feat-11-unify-agent-structures.md | feat/unify-agent-structures | 11 | done |
-                                       | 12 | feat-12-deploy-landing-page.md | feat/npm-release-and-deploy | 12 | done |
-                                       | 13 | feat-13-update-readmes-multiagent.md | feat/update-readmes-multiagent | 13 | done |
                                        | 14 | feat-14-discovery-command.md | feat/discovery-command | 14 | done |
-                                       | 15 | feat-15-sdd-guardrails.md | feat/sdd-guardrails | 15 | done |
                                        | 16 | feat-16-constitution-command.md | feat/constitution-command | 16 | done |
                                        | 17 | feat-17-unified-onboarding-docs.md | feat/unified-onboarding-docs | 17 | done |
                                        | 18 | feat-18-sdd-handoffs.md | feat/sdd-handoffs | 18 | done |
                                        | 19 | feat-19-c4-model-mermaid.md | feat/c4-model-mermaid | 19 | done |
-                                       | 20 | feat-20-advanced-discovery-and-c4-refinement.md | feat/advanced-discovery-and-c4-refinement | 20 | done |
                                        | 21 | feat-21-install-skill-from-url.md | feat/install-skill-from-url | 21 | done |
                                        | 22 | feat-22-smart-upgrade-detection.md | feat/smart-upgrade-detection | 22 | done |
                                        | 23 | feat-23-agent-specific-mcp-config.md | feat/agent-specific-mcp-config | 23 | done |
