@@ -34,7 +34,7 @@ Fase 40 — CLI init directory refinement     [x] done
 Fase 41 — Nested features/discovery grouping [x] done
 Fase 42 — Consolidação e Lançamento v1.7.0 [x] done
 Fase 1.9.0-beta — Atalho forge e Boas-vindas    [x] done
-Fase 5ae2-08 — Nomenclatura, Telemetria e Tokens [ ] doing
+Fase 5ae2-08 — Nomenclatura, Telemetria e Tokens [x] done
 ```
 
 ## Features ativas
