@@ -35,6 +35,7 @@ Fase 41 — Nested features/discovery grouping [x] done
 Fase 42 — Consolidação e Lançamento v1.7.0 [x] done
 Fase 1.9.0-beta — Atalho forge e Boas-vindas    [x] done
 Fase 5ae2-08 — Nomenclatura, Telemetria e Tokens [x] done
+Fase 47 — Fix flag naming-convention no update  [x] done
 ```
 
 ## Features ativas
@@ -84,12 +85,14 @@ Fase 5ae2-08 — Nomenclatura, Telemetria e Tokens [x] done
 | fix-5ae2-08-naming-telemetry-tokens | fix/naming-telemetry-tokens | done |
 | fix-45-update-beta-version-detection | fix/update-beta-version-detection | done |
 | fix-46-doctor-metrics-path | fix/update-beta-version-detection | done |
+| fix-47-naming-convention-update-flag | fix/naming-convention-not-applied-on-update | done |
 
 ## Próximo passo
-**Iniciar:** Nenhuma feature `todo` pendente. Discovery 5ae2 (v1.9.0), fix-45 e fix-46 consolidadas na promoção para v1.9.1 estável.
+**Iniciar:** Nenhuma feature `todo` pendente. Discovery 5ae2 (v1.9.0), fix-45, fix-46 e fix-47 consolidadas na promoção para v1.9.1 estável.
 **Bloqueios:** —
 
 ## Handoff da última sessão
+- fix-47-naming-convention-update-flag concluída: `forge-sdd update`/`init` (redirecionado para update em projeto existente) ignorava completamente a flag `--naming-convention` — `updateCmd` nem registrava a flag, e `runUpdateFlow` tinha dois early-returns que abortavam antes de persistir a mudança quando nenhuma outra flag (`--agent`/`--upgrade`/`--version`) era combinada. Corrigido em `cmd/forge-sdd/main.go`: flag registrada em `updateCmd`, lida e aplicada em `rc.NamingConvention` logo após `ReadSddrc`, com os early-returns ajustados para não descartar a mudança. Validado manualmente com `forge-sdd update --yes --naming-convention workitem`.
 - v1.9.1-beta promovida a estável (v1.9.1): fix-45-update-beta-version-detection e fix-46-doctor-metrics-path incorporadas via cherry-pick — `--upgrade --yes` agora resolve a versão via `config.ResolveUpgradeTarget` (consultando `FetchNpmVersions`) em vez da constante `version` do binário; `--upgrade` sem `--yes` pré-seleciona a opção de upgrade no prompt interativo; falha de rede reporta erro/aviso explícito em vez de fallback silencioso; timeout de `FetchNpmVersions` elevado de 2s para 8s; prompts `/doctor` corrigidos para verificar `sdd/.metrics/schema.json` em vez da raiz. Testes novos em `internal/config/config_test.go` e `cmd/forge-sdd/commands_test.go`.
 - feat-5ae2-07-modo-iniciante concluída: prompts `/constitution` (3 agentes) ganharam a pergunta opcional de nível de linguagem (`padrão`/`iniciante`), persistida em `constitution.md`; `/discovery` ganhou instrução para simplificar jargão quando `iniciante`. Discovery 5ae2 100% implementada (7/7), alvo do pacote v1.9.0.
 - feat-5ae2-06-spike-subagentes-nativos concluída (spike, sem código): mapeado suporte nativo a subagentes com contexto isolado por agente — Claude tem primitivo maduro (`.claude/agents/*.md`), Gemini/Copilot não confirmados/ausentes hoje. Recomendação: piloto restrito ao Claude, sem migrar os três agentes de uma vez (quebraria paridade de comportamento).
