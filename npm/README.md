@@ -40,7 +40,7 @@ npx @nathanramorim/forge-sdd@latest init
 npx @nathanramorim/forge-sdd@latest init . --agent copilot,gemini --name meu-projeto
 ```
 
-## 📢 Novidades da Versão (v1.9.2)
+## 📢 Novidades da Versão (v1.9.3)
 
 Esta release traz duas correções pontuais no comando `update`/scaffold:
 

@@ -4,6 +4,10 @@ Este arquivo registra o histórico de entregas de produto deste projeto.
 
 ## Entregas
 
+### Versão 1.9.3 (Estável)
+
+Release apenas de documentação: sincroniza a seção "Novidades" do `README.md`/`npm/README.md` (que estava travada na v1.9.0-beta) com o estado real do projeto, para que a página do pacote no NPM reflita as últimas mudanças. Sem alteração de código/comportamento.
+
 ### Versão 1.9.2 (Estável)
 
 Esta release traz duas correções pontuais no comando `update`/scaffold.
