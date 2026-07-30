@@ -7,6 +7,7 @@ Este arquivo registra o histórico de entregas de produto deste projeto.
 ### Próxima versão (não publicada)
 
 *   **Correção na Troca de Convenção de Nomenclatura:** Agora é possível trocar a convenção de nomenclatura (`sequencial`, `hash` ou `workitem`) de um projeto já inicializado usando `forge-sdd update --naming-convention <valor>` — antes essa opção era aceita mas silenciosamente ignorada em projetos existentes.
+*   **Comando `/novo-fix` disponível para Copilot:** O comando `/novo-fix`, disponível desde a v1.9.1 para Claude e Gemini, também passa a existir para o agente Copilot (o default do CLI) — antes o arquivo nunca era gerado para esse agente.
 
 ### Versão 1.9.1 (Estável)
 

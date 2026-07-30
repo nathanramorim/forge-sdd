@@ -113,3 +113,4 @@ main
 | 45 | fix-45-update-beta-version-detection.md | fix/update-beta-version-detection | 45 | done |
 | 46 | fix-46-doctor-metrics-path.md | fix/update-beta-version-detection | 46 | done |
 | 47 | fix-47-naming-convention-update-flag.md | fix/naming-convention-not-applied-on-update | 47 | done |
+| 48 | fix-48-novo-fix-missing-copilot-agent.md | fix/novo-fix-missing-copilot-agent | 48 | done |

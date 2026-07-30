@@ -46,6 +46,7 @@ Para executar uma tarefa, peça pelo nome do comando ou utilize uma das frases d
 - **Status:** "rodar o status", "qual o progresso?" → `status.prompt.md`
 - **Próxima Feature:** "iniciar próxima tarefa", "proxima-feature" → `proxima-feature.prompt.md`
 - **Nova Feature:** "criar nova feature [descrição]", "nova-feature" → `nova-feature.prompt.md`
+- **Novo Fix:** "criar fix para [descrição do bug]", "novo-fix" → `novo-fix.prompt.md`
 - **Revisar:** "validar feature", "rodar o revisar" → `revisar.prompt.md`
 - **Discovery:** "discovery [ideia]", "fazer discovery de..." → `discovery.prompt.md`
 - **Constitution:** "alinhar arquitetura", "rodar constitution" → `constitution.prompt.md`

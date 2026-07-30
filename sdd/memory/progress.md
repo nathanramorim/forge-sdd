@@ -36,6 +36,7 @@ Fase 42 — Consolidação e Lançamento v1.7.0 [x] done
 Fase 1.9.0-beta — Atalho forge e Boas-vindas    [x] done
 Fase 5ae2-08 — Nomenclatura, Telemetria e Tokens [x] done
 Fase 47 — Fix flag naming-convention no update  [x] done
+Fase 48 — Fix /novo-fix ausente no Copilot      [x] done
 ```
 
 ## Features ativas
@@ -86,12 +87,14 @@ Fase 47 — Fix flag naming-convention no update  [x] done
 | fix-45-update-beta-version-detection | fix/update-beta-version-detection | done |
 | fix-46-doctor-metrics-path | fix/update-beta-version-detection | done |
 | fix-47-naming-convention-update-flag | fix/naming-convention-not-applied-on-update | done |
+| fix-48-novo-fix-missing-copilot-agent | fix/novo-fix-missing-copilot-agent | done |
 
 ## Próximo passo
-**Iniciar:** Nenhuma feature `todo` pendente. Discovery 5ae2 (v1.9.0), fix-45, fix-46 e fix-47 consolidadas na promoção para v1.9.1 estável.
+**Iniciar:** Nenhuma feature `todo` pendente. fix-47 e fix-48 agrupadas na v1.9.2.
 **Bloqueios:** —
 
 ## Handoff da última sessão
+- fix-48-novo-fix-missing-copilot-agent concluída: `/novo-fix` nunca existiu para o agente Copilot (só Claude/Gemini tinham o template) — corrigido criando `internal/scaffold/templates/.github/prompts/novo-fix.prompt.md.tmpl`, adicionando `"novo-fix"` a `commandOrder` (`cheatsheet.go`) e citando o comando em `CLAUDE.md.tmpl`/`GEMINI.md.tmpl`. OpenAI ficou de fora — gap pré-existente maior (nenhum prompt implementado), não específico do `novo-fix`. Golden fixtures regeneradas.
 - fix-47-naming-convention-update-flag concluída: `forge-sdd update`/`init` (redirecionado para update em projeto existente) ignorava completamente a flag `--naming-convention` — `updateCmd` nem registrava a flag, e `runUpdateFlow` tinha dois early-returns que abortavam antes de persistir a mudança quando nenhuma outra flag (`--agent`/`--upgrade`/`--version`) era combinada. Corrigido em `cmd/forge-sdd/main.go`: flag registrada em `updateCmd`, lida e aplicada em `rc.NamingConvention` logo após `ReadSddrc`, com os early-returns ajustados para não descartar a mudança. Validado manualmente com `forge-sdd update --yes --naming-convention workitem`.
 - v1.9.1-beta promovida a estável (v1.9.1): fix-45-update-beta-version-detection e fix-46-doctor-metrics-path incorporadas via cherry-pick — `--upgrade --yes` agora resolve a versão via `config.ResolveUpgradeTarget` (consultando `FetchNpmVersions`) em vez da constante `version` do binário; `--upgrade` sem `--yes` pré-seleciona a opção de upgrade no prompt interativo; falha de rede reporta erro/aviso explícito em vez de fallback silencioso; timeout de `FetchNpmVersions` elevado de 2s para 8s; prompts `/doctor` corrigidos para verificar `sdd/.metrics/schema.json` em vez da raiz. Testes novos em `internal/config/config_test.go` e `cmd/forge-sdd/commands_test.go`.
 - feat-5ae2-07-modo-iniciante concluída: prompts `/constitution` (3 agentes) ganharam a pergunta opcional de nível de linguagem (`padrão`/`iniciante`), persistida em `constitution.md`; `/discovery` ganhou instrução para simplificar jargão quando `iniciante`. Discovery 5ae2 100% implementada (7/7), alvo do pacote v1.9.0.

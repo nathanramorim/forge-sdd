@@ -17,6 +17,7 @@ var commandOrder = []string{
 	"discovery",
 	"split-features",
 	"nova-feature",
+	"novo-fix",
 	"proxima-feature",
 	"revisar",
 	"status",

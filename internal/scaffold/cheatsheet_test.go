@@ -38,7 +38,7 @@ func TestTruncateDescription_BreaksAtWordBoundary(t *testing.T) {
 	assert.False(t, strings.HasSuffix(strings.TrimSuffix(got, "…"), " "))
 }
 
-func TestCommandCheatSheet_ClaudeHasAllElevenCommandsInOrder(t *testing.T) {
+func TestCommandCheatSheet_ClaudeHasAllCommandsInOrder(t *testing.T) {
 	cfg := config.Config{Project: "acme", Agents: []string{config.AgentClaude}}
 	commands := CommandCheatSheet(cfg)
 

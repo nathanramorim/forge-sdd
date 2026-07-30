@@ -37,6 +37,7 @@ Este projeto define comandos em `.claude/commands/`. Use-os para tarefas recorre
 - `/status` -> `.claude/commands/status.prompt.md`
 - `/proxima-feature` -> `.claude/commands/proxima-feature.prompt.md`
 - `/nova-feature` -> `.claude/commands/nova-feature.prompt.md`
+- `/novo-fix` -> `.claude/commands/novo-fix.prompt.md`
 - `/revisar` -> `.claude/commands/revisar.prompt.md`
 - `/archive` -> `.claude/commands/archive.prompt.md`
 - `/doctor` -> `.claude/commands/doctor.prompt.md`
