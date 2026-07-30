@@ -178,6 +178,12 @@ func runUpdateFlow(cmd *cobra.Command, targetDir string) error {
 		return err
 	}
 
+	namingConventionChanged := false
+	if f := cmd.Flags().Lookup("naming-convention"); f != nil && f.Changed {
+		rc.NamingConvention = f.Value.String()
+		namingConventionChanged = true
+	}
+
 	projectVersion, err := config.ReadProjectVersion(targetDir)
 	if err != nil {
 		projectVersion = rc.Version
@@ -215,7 +221,7 @@ func runUpdateFlow(cmd *cobra.Command, targetDir string) error {
 			}
 		}
 
-		if len(toAdd) == 0 && targetVersion == "" {
+		if len(toAdd) == 0 && targetVersion == "" && !namingConventionChanged {
 			versionOutdated := config.CompareVersions(projectVersion, version) < 0
 			if versionOutdated {
 				fmt.Printf("Versão desatualizada: projeto v%s → CLI v%s\n", projectVersion, version)
@@ -272,21 +278,24 @@ func runUpdateFlow(cmd *cobra.Command, targetDir string) error {
 		if err != nil {
 			return fmt.Errorf("upgrade falhou: %w", err)
 		}
-	} else {
-		if len(toAdd) > 0 {
-			baseCfg.Agents = toAdd
-			created, err = scaffold.RunAgents(baseCfg, toAdd, targetDir)
-			if err != nil {
-				return fmt.Errorf("scaffold falhou: %w", err)
-			}
-			baseCfg.Agents = mergedAgents
-			if err := scaffold.UpdateSddrc(baseCfg, targetDir); err != nil {
-				return fmt.Errorf("atualizar sdd/.sddrc: %w", err)
-			}
-		} else {
-			fmt.Println("Nenhuma modificação realizada.")
-			return nil
+	} else if len(toAdd) > 0 {
+		baseCfg.Agents = toAdd
+		created, err = scaffold.RunAgents(baseCfg, toAdd, targetDir)
+		if err != nil {
+			return fmt.Errorf("scaffold falhou: %w", err)
 		}
+		baseCfg.Agents = mergedAgents
+		if err := scaffold.UpdateSddrc(baseCfg, targetDir); err != nil {
+			return fmt.Errorf("atualizar sdd/.sddrc: %w", err)
+		}
+	} else if namingConventionChanged {
+		if err := scaffold.UpdateSddrc(baseCfg, targetDir); err != nil {
+			return fmt.Errorf("atualizar sdd/.sddrc: %w", err)
+		}
+		fmt.Printf("✓ Convenção de nomenclatura atualizada para: %s\n", baseCfg.NamingConvention)
+	} else {
+		fmt.Println("Nenhuma modificação realizada.")
+		return nil
 	}
 
 	// Recria a config base atualizada com as escolhas finais
@@ -370,6 +379,7 @@ func init() {
 	updateCmd.Flags().String("agent", "", "Agente(s) a adicionar: copilot, claude, gemini, openai (csv)")
 	updateCmd.Flags().Bool("upgrade", false, "Atualizar estrutura para a versão mais recente do binário")
 	updateCmd.Flags().String("version", "", "Atualizar estrutura para uma versão específica (ex: 1.9.1-beta)")
+	updateCmd.Flags().String("naming-convention", "", "Convenção de nomenclatura: sequencial, hash, workitem")
 	rootCmd.AddCommand(updateCmd)
 
 	rootCmd.AddCommand(versionCmd)

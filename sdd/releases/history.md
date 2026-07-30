@@ -4,6 +4,10 @@ Este arquivo registra o histórico de entregas de produto deste projeto.
 
 ## Entregas
 
+### Próxima versão (não publicada)
+
+*   **Correção na Troca de Convenção de Nomenclatura:** Agora é possível trocar a convenção de nomenclatura (`sequencial`, `hash` ou `workitem`) de um projeto já inicializado usando `forge-sdd update --naming-convention <valor>` — antes essa opção era aceita mas silenciosamente ignorada em projetos existentes.
+
 ### Versão 1.9.1 (Estável)
 
 Esta release estável consolida todo o ciclo de betas desde a v1.7.0: nomenclatura configurável, redução da curva de aprendizado para quem está começando, correções de robustez na telemetria e no diagnóstico do projeto, e correções no comando `update`.

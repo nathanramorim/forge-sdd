@@ -411,3 +411,33 @@ func TestUpdateCommand_UpgradeYesNpmFailureReturnsExplicitError(t *testing.T) {
 	require.Error(t, err, "esperava erro explícito quando o NPM Registry está inacessível durante --upgrade --yes")
 	assert.Contains(t, err.Error(), "NPM Registry")
 }
+
+func TestUpdateCommand_NamingConventionFlagPersisted(t *testing.T) {
+	tempDir := t.TempDir()
+	sddDir := filepath.Join(tempDir, "sdd")
+	require.NoError(t, os.MkdirAll(sddDir, 0755))
+	require.NoError(t, os.WriteFile(filepath.Join(sddDir, ".sddrc"), []byte(`{
+		"project": "test-proj",
+		"version": "1.9.1",
+		"agents": ["gemini"],
+		"lang": "pt-BR",
+		"naming_convention": "sequencial"
+	}`), 0644))
+	require.NoError(t, os.WriteFile(filepath.Join(sddDir, ".sdd-version"), []byte("1.9.1"), 0644))
+
+	_ = updateCmd.Flags().Set("yes", "true")
+	_ = updateCmd.Flags().Set("naming-convention", "workitem")
+	defer func() {
+		_ = updateCmd.Flags().Set("yes", "false")
+		_ = updateCmd.Flags().Set("naming-convention", "")
+	}()
+
+	rootCmd.SetArgs([]string{"update", tempDir})
+	err := rootCmd.Execute()
+	require.NoError(t, err)
+
+	data, err := os.ReadFile(filepath.Join(sddDir, ".sddrc"))
+	require.NoError(t, err)
+	assert.Contains(t, string(data), `"naming_convention": "workitem"`,
+		"a flag --naming-convention deve ser persistida em sdd/.sddrc mesmo sem --agent/--upgrade/--version")
+}
