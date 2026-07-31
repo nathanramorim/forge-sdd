@@ -40,12 +40,15 @@ npx @nathanramorim/forge-sdd@latest init
 npx @nathanramorim/forge-sdd@latest init . --agent copilot,gemini --name meu-projeto
 ```
 
-## 📢 Novidades da Versão (v1.9.3)
+## 📢 Novidades da Versão (v1.9.4)
 
-Esta release traz duas correções pontuais no comando `update`/scaffold:
+*   **Telemetria funcionando para todos os agentes:** Antes, a gravação de métricas de uso ao final de uma sessão só acontecia de fato ao usar o agente Gemini — Claude e Copilot silenciosamente deixavam de registrar telemetria mesmo com a opção ativada no projeto. Agora os três agentes gravam a telemetria corretamente ao concluir uma feature ou correção.
 
-*   **Correção na Troca de Convenção de Nomenclatura:** Agora é possível trocar a convenção de nomenclatura (`sequencial`, `hash` ou `workitem`) de um projeto já inicializado usando `forge-sdd update --naming-convention <valor>` — antes essa opção era aceita mas silenciosamente ignorada em projetos existentes.
-*   **Comando `/novo-fix` disponível para Copilot:** O comando `/novo-fix`, disponível desde a v1.9.1 para Claude e Gemini, também passa a existir para o agente Copilot (o default do CLI) — antes o arquivo nunca era gerado para esse agente.
+---
+
+## 📢 Novidades da Versão Anterior (v1.9.3)
+
+Release apenas de documentação: sincroniza a seção "Novidades" com o estado real do projeto, sem alteração de código/comportamento.
 
 ---
 

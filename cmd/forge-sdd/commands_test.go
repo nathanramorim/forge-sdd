@@ -52,7 +52,7 @@ func TestDoctorAndDestroyCommands(t *testing.T) {
 
 	err = os.WriteFile(filepath.Join(sddDir, ".sddrc"), []byte(`{
 		"project": "test-proj",
-		"version": "1.9.3",
+		"version": "1.9.4",
 		"agents": ["gemini"],
 		"stack": "go",
 		"db": "postgres",
@@ -60,7 +60,7 @@ func TestDoctorAndDestroyCommands(t *testing.T) {
 	}`), 0644)
 	require.NoError(t, err)
 
-	err = os.WriteFile(filepath.Join(sddDir, ".sdd-version"), []byte("1.9.3"), 0644)
+	err = os.WriteFile(filepath.Join(sddDir, ".sdd-version"), []byte("1.9.4"), 0644)
 	require.NoError(t, err)
 
 	err = os.WriteFile(filepath.Join(sddDir, "memory", "progress.md"), []byte("# Progress"), 0644)
@@ -166,7 +166,7 @@ func TestDoctorCommand_NamingConventionConsistent(t *testing.T) {
 	require.NoError(t, os.MkdirAll(filepath.Join(sddDir, "memory"), 0755))
 	require.NoError(t, os.MkdirAll(filepath.Join(sddDir, "features"), 0755))
 
-	require.NoError(t, os.WriteFile(filepath.Join(sddDir, ".sddrc"), []byte(`{"project":"test-proj","version":"1.9.3","agents":[],"stack":"go","db":"none","lang":"pt-BR"}`), 0644))
+	require.NoError(t, os.WriteFile(filepath.Join(sddDir, ".sddrc"), []byte(`{"project":"test-proj","version":"1.9.4","agents":[],"stack":"go","db":"none","lang":"pt-BR"}`), 0644))
 	require.NoError(t, os.WriteFile(filepath.Join(sddDir, "memory", "progress.md"), []byte("# Progress"), 0644))
 	require.NoError(t, os.WriteFile(filepath.Join(sddDir, "memory", "constitution.md"), []byte("# Constitution"), 0644))
 	require.NoError(t, os.WriteFile(filepath.Join(sddDir, "features", "feat-00-foundation.md"), []byte("# Foundation"), 0644))
@@ -186,7 +186,7 @@ func TestDoctorCommand_NamingConventionDriftDetected(t *testing.T) {
 	require.NoError(t, os.MkdirAll(filepath.Join(sddDir, "features"), 0755))
 	require.NoError(t, os.MkdirAll(filepath.Join(sddDir, "discovery"), 0755))
 
-	require.NoError(t, os.WriteFile(filepath.Join(sddDir, ".sddrc"), []byte(`{"project":"test-proj","version":"1.9.3","agents":[],"stack":"go","db":"none","lang":"pt-BR"}`), 0644))
+	require.NoError(t, os.WriteFile(filepath.Join(sddDir, ".sddrc"), []byte(`{"project":"test-proj","version":"1.9.4","agents":[],"stack":"go","db":"none","lang":"pt-BR"}`), 0644))
 	require.NoError(t, os.WriteFile(filepath.Join(sddDir, "memory", "progress.md"), []byte("# Progress"), 0644))
 	require.NoError(t, os.WriteFile(filepath.Join(sddDir, "memory", "constitution.md"), []byte("# Constitution"), 0644))
 	require.NoError(t, os.WriteFile(filepath.Join(sddDir, "features", "feat-00-foundation.md"), []byte("# Foundation"), 0644))
@@ -321,7 +321,7 @@ func TestDoctorCommand_AutoHealNamingConvention(t *testing.T) {
 	require.NoError(t, os.MkdirAll(filepath.Join(sddDir, "features"), 0755))
 
 	// sddrc sem naming_convention
-	require.NoError(t, os.WriteFile(filepath.Join(sddDir, ".sddrc"), []byte(`{"project":"test-proj","version":"1.9.3","agents":[],"stack":"go","db":"none","lang":"pt-BR"}`), 0644))
+	require.NoError(t, os.WriteFile(filepath.Join(sddDir, ".sddrc"), []byte(`{"project":"test-proj","version":"1.9.4","agents":[],"stack":"go","db":"none","lang":"pt-BR"}`), 0644))
 	require.NoError(t, os.WriteFile(filepath.Join(sddDir, "memory", "progress.md"), []byte("# Progress"), 0644))
 	require.NoError(t, os.WriteFile(filepath.Join(sddDir, "features", "feat-43a2-telemetry.md"), []byte("# Telemetry"), 0644))
 
@@ -418,7 +418,7 @@ func TestUpdateCommand_NamingConventionFlagPersisted(t *testing.T) {
 	require.NoError(t, os.MkdirAll(sddDir, 0755))
 	require.NoError(t, os.WriteFile(filepath.Join(sddDir, ".sddrc"), []byte(`{
 		"project": "test-proj",
-		"version": "1.9.3",
+		"version": "1.9.4",
 		"agents": ["gemini"],
 		"lang": "pt-BR",
 		"naming_convention": "sequencial"

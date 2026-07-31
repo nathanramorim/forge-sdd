@@ -93,7 +93,7 @@ Fase 50 — Fix telemetria só grava no Gemini     [x] done
 | fix-50-telemetry-recording-gemini-only | fix/telemetry-recording-gemini-only | done |
 
 ## Próximo passo
-**Iniciar:** Nenhuma feature `todo` pendente. Pendente: bump de versão para 1.9.4 e publicação no NPM incorporando a fix-50 (aguardando confirmação do usuário — 1.9.3 já publicada é imutável).
+**Iniciar:** Nenhuma feature `todo` pendente. v1.9.4 publicada (fix-50 — telemetria em todos os agentes).
 **Bloqueios:** —
 
 ## Handoff da última sessão
