@@ -8,7 +8,7 @@ forge-sdd — stack principal: .
 2. **PLAN:** reportar intenção, aguardar confirmação
 3. **ACT:** executar no escopo do papel
 4. **WRITE:** editar apenas arquivos do escopo
-5. **CLOSE** (Orquestrador): atualizar progress, métricas, archive se necessário
+5. **CLOSE** (Orquestrador): atualizar progress, gravar telemetria em `sdd/.metrics/session-<ISO8601>.json` (se `telemetry.enabled`), archive se necessário
 
 ## Arquivos críticos
 - `sdd/memory/progress.md` — estado ativo (leia primeiro a cada sessão)

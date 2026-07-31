@@ -4,6 +4,10 @@ Este arquivo registra o histórico de entregas de produto deste projeto.
 
 ## Entregas
 
+### Versão 1.9.4 (Estável)
+
+**Telemetria funcionando para todos os agentes:** Antes, a gravação de métricas de uso ao final de uma sessão só acontecia de fato ao usar o agente Gemini — Claude e Copilot silenciosamente deixavam de registrar telemetria mesmo com a opção ativada no projeto. Agora os três agentes gravam a telemetria corretamente ao concluir uma feature ou correção.
+
 ### Versão 1.9.3 (Estável)
 
 Release apenas de documentação: sincroniza a seção "Novidades" do `README.md`/`npm/README.md` (que estava travada na v1.9.0-beta) com o estado real do projeto, para que a página do pacote no NPM reflita as últimas mudanças. Sem alteração de código/comportamento.
