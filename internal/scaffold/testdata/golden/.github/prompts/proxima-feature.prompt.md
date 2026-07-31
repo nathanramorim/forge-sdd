@@ -3,10 +3,4 @@ description: "Inicia sessão na próxima feature pendente de demo"
 agent: agent
 ---
 
-Leia `sdd/memory/progress.md`, identifique a próxima feature com status `todo`, reporte as tasks e aguarde confirmação.
-
-Quando confirmado:
-1. Execute `git checkout -b <branch>` usando o nome de branch definido no arquivo `sdd/features/feat-XX.md` (campo **Branch**)
-2. Delegue as tasks ao Builder
-3. Ao concluir, gere um **Handoff** para o comando `/revisar`
-4. Após aprovação, execute `git checkout main && git merge --no-ff <branch>`
+Invoque o Orquestrador para conduzir a sessão completa a partir da próxima feature ou fix com status `todo` em `sdd/memory/progress.md`: guardrail de budget de `progress.md`, leitura das tasks e confirmação do plano, criação da branch, delegação ao Builder, revisão, atualização de `progress.md`/`index.md`, release note em `sdd/releases/history.md`, PR automático (`gh pr create --fill`) e gravação de métricas de telemetria (se `telemetry.enabled` em `sdd/.sddrc`).

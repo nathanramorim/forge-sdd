@@ -38,6 +38,7 @@ Fase 5ae2-08 — Nomenclatura, Telemetria e Tokens [x] done
 Fase 47 — Fix flag naming-convention no update  [x] done
 Fase 48 — Fix /novo-fix ausente no Copilot      [x] done
 Fase 49 — Sync README Novidades com NPM         [x] done
+Fase 50 — Fix telemetria só grava no Gemini     [x] done
 ```
 
 ## Features ativas
@@ -89,12 +90,14 @@ Fase 49 — Sync README Novidades com NPM         [x] done
 | fix-46-doctor-metrics-path | fix/update-beta-version-detection | done |
 | fix-47-naming-convention-update-flag | fix/naming-convention-not-applied-on-update | done |
 | fix-48-novo-fix-missing-copilot-agent | fix/novo-fix-missing-copilot-agent | done |
+| fix-50-telemetry-recording-gemini-only | fix/telemetry-recording-gemini-only | done |
 
 ## Próximo passo
-**Iniciar:** Nenhuma feature `todo` pendente. v1.9.3 publicada (docs-only, sync do README com NPM).
+**Iniciar:** Nenhuma feature `todo` pendente. Pendente: bump de versão para 1.9.4 e publicação no NPM incorporando a fix-50 (aguardando confirmação do usuário — 1.9.3 já publicada é imutável).
 **Bloqueios:** —
 
 ## Handoff da última sessão
+- Fase 50 concluída: telemetria (`sdd/.metrics/session-<ISO8601>.json`) só era gravada de fato pelo agente Gemini. Causa raiz: a instrução concreta de gravação só existia no chatmode Orquestrador; só o `/proxima-feature` do Gemini delegava para ele ("Acione a lógica de Orquestrador") — o do Copilot inlinava passos próprios sem delegar (quebrando o padrão de `revisar`/`archive`) e o do Claude nunca teve papel Orquestrador, com `CLAUDE.md.tmpl` só citando "métricas" de forma vaga. Corrigido: `proxima-feature.prompt.md.tmpl` do Claude ganhou o passo explícito de gravação (schema, campo `feature`, `outcome: blocked/rejected`, estimativa de tokens); o do Copilot passou a delegar ao Orquestrador; `CLAUDE.md.tmpl` passo 5 agora cita o caminho concreto do schema. Dogfood (`CLAUDE.md`, `.claude/commands/`, `.github/prompts/`) e golden fixtures atualizados. Ver `sdd/features/fix-50-telemetry-recording-gemini-only.md`.
 - Fase 49 concluída: a seção "📢 Novidades da Versão" de `README.md`/`npm/README.md` estava travada em v1.9.0-beta havia 3 releases (pulou v1.9.1-beta, v1.9.1, v1.9.2) — página do pacote no NPM mostrava changelog desatualizado. Corrigido em v1.9.2 (PR #44), mas como pacotes NPM são imutáveis, a página da v1.9.2 já publicada ficou congelada no README antigo. v1.9.3 foi publicada só para propagar a correção (sem mudança de código/comportamento).
 - fix-48-novo-fix-missing-copilot-agent concluída: `/novo-fix` nunca existiu para o agente Copilot (só Claude/Gemini tinham o template) — corrigido criando `internal/scaffold/templates/.github/prompts/novo-fix.prompt.md.tmpl`, adicionando `"novo-fix"` a `commandOrder` (`cheatsheet.go`) e citando o comando em `CLAUDE.md.tmpl`/`GEMINI.md.tmpl`. OpenAI ficou de fora — gap pré-existente maior (nenhum prompt implementado), não específico do `novo-fix`. Golden fixtures regeneradas.
 - fix-47-naming-convention-update-flag concluída: `forge-sdd update`/`init` (redirecionado para update em projeto existente) ignorava completamente a flag `--naming-convention` — `updateCmd` nem registrava a flag, e `runUpdateFlow` tinha dois early-returns que abortavam antes de persistir a mudança quando nenhuma outra flag (`--agent`/`--upgrade`/`--version`) era combinada. Corrigido em `cmd/forge-sdd/main.go`: flag registrada em `updateCmd`, lida e aplicada em `rc.NamingConvention` logo após `ReadSddrc`, com os early-returns ajustados para não descartar a mudança. Validado manualmente com `forge-sdd update --yes --naming-convention workitem`.
