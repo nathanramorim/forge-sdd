@@ -8,4 +8,6 @@ Introduz o mecanismo de os agentes aprenderem com os próprios fixes: hoje nenhu
 2. Atualizado de forma determinística (mesmo mecanismo de feat-01-01) ao final de `/revisar` ou `/novo-fix` quando o outcome é `approved` e a causa raiz é significativa/recorrente.
 3. Não exige leitura de todo o histórico de fixes — apenas o resumo curto persistido.
 
-## Status: todo
+## Status: done
+
+Implementado `forge-sdd lessons add --pattern --fix --ref` (`cmd/forge-sdd/lessons.go`), que grava `sdd/memory/lessons.md` de forma determinística: entradas mais recentes no topo, aparadas automaticamente para respeitar o orçamento de 2 KB (`AppendLesson`, testado em `lessons_test.go`). Template inicial (`sdd/memory/lessons.md.tmpl`) adicionado ao scaffold. O próprio repositório foi semeado com 2 lições retroativas reais (duplicação de lógica entre prompts; telemetria não determinística) via dogfooding.

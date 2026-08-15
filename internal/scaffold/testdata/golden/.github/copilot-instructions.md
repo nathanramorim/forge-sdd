@@ -4,7 +4,7 @@
 demo — stack principal: go.
 
 ## Lifecycle (todo agente)
-1. **READ-MIN:** ler `sdd/memory/progress.md`
+1. **READ-MIN:** ler `sdd/memory/progress.md` (Builder e Revisor também leem `sdd/memory/lessons.md` — padrões de erro já corrigidos, antes de implementar/revisar)
 2. **PLAN:** reportar intenção, aguardar confirmação
 3. **ACT:** executar no escopo do papel
 4. **WRITE:** editar apenas arquivos do escopo

@@ -8,4 +8,6 @@ Fecha o ciclo de aprendizado contínuo: de nada adianta persistir lições (feat
 2. A leitura acontece antes de iniciar qualquer implementação ou revisão de código.
 3. Replicado nos três agentes mantendo paridade de comportamento; sem aumentar o orçamento de leitura além do já definido para `lessons.md` (≤ 2 KB).
 
-## Status: todo
+## Status: done
+
+`CLAUDE.md`, `GEMINI.md` e `.github/copilot-instructions.md` (dogfood + templates) tiveram o passo READ-MIN atualizado citando que Builder e Revisor também leem `sdd/memory/lessons.md`. Os chatmodes Builder e Revisor de Gemini e Copilot (dogfood + templates) ganharam um passo `0. READ-MIN` explícito no início de suas respectivas seções, antes de qualquer implementação/validação. Golden fixtures regeneradas.
