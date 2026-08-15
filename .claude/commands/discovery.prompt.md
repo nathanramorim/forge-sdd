@@ -8,11 +8,7 @@ Assuma o papel de **Analista de Produto Sênior** e **Engenheiro de Software Sê
 1. **Discovery de Produto:** Identifique o "porquê", o "para quem" e o "como" macro.
 2. **Discovery Técnico:** Identifique restrições, integridade e critérios de aceitação. Utilize o **C4 Model (Mermaid)** para visualizar a solução técnica.
 
-**Nomenclatura e ID do Discovery:**
-1. Leia a configuração `naming_convention` em `sdd/.sddrc`.
-2. Se `naming_convention` for `workitem`, **pergunte obrigatoriamente ao usuário** qual é o ID do Workitem a usar (ex: prefixo `1024` gerando `discovery-1024-<nome>.md`).
-3. Se `naming_convention` for `hash`, gere um hash de 4 dígitos hexadecimais únicos (ex: `5ae2`).
-4. Se `naming_convention` for `sequencial` ou ausente, use o próximo número sequencial (XX) incremental com base no histórico de arquivos.
+**Nomenclatura e ID do Discovery:** Siga a lógica única descrita em `sdd/memory/naming-convention.md` (aplicada ao prefixo `discovery-`).
 
 **Entrega:**
 Gere três arquivos em `sdd/discovery/`:

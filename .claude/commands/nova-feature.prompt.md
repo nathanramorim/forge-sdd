@@ -4,7 +4,7 @@
 
 **Ação:**
 1. **PASSO 1 MANDATÓRIO:** Defina o prefixo de branch (`feat/` ou `fix/` se for correção/bugfix) e de arquivo (`feat-` ou `fix-`). Crie a branch localmente no terminal (`git checkout -b <prefixo-branch>/<nome>`) **antes** de criar qualquer especificação ou logs.
-2. **Nomenclatura:** Leia a configuração `naming_convention` em `sdd/.sddrc`. Se for `workitem`, **pergunte obrigatoriamente ao usuário** qual é o ID do Workitem a usar. Se for `hash`, gere um hash de 4 dígitos hexadecimais únicos (ex: `5ae2`). Se for `sequencial` ou ausente, use o próximo número sequencial (XX).
+2. **Nomenclatura:** Siga a lógica única descrita em `sdd/memory/naming-convention.md`.
 3. **Criação:** Crie o arquivo `sdd/features/<prefixo-arquivo>-ID-<nome>.md`. Se a feature for complexa, use uma subpasta `sdd/features/<prefixo-arquivo>-ID-<nome>/` e organize as subtasks (ex: `task-YY-<nome>.md`) lá dentro. Atualize o progresso e índice.
 
 **Handoff:** Gere um resumo para o comando `proxima-feature`.
