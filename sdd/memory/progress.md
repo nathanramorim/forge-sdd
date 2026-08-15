@@ -93,7 +93,7 @@ Fase 50 — Fix telemetria só grava no Gemini     [x] done
 | fix-50-telemetry-recording-gemini-only | fix/telemetry-recording-gemini-only | done |
 
 ## Próximo passo
-**Iniciar:** feat-01-01-telemetria-code-enforced (pré-requisito das demais features do pacote 01 — ver `sdd/features/feat-01-simplificacao-e-aprendizado-continuo/`). Discovery 01 quebrada em 8 features via `/split-features`.
+**Iniciar:** Nenhuma feature `todo` pendente. Pacote feat-01 (8/8 features) completo na branch `feat/01-simplificacao-e-aprendizado-continuo` (PR #47, draft). v2.0.0-beta.0 "Forge-SDD Slim" pronta para publicação — aguardando decisão do usuário sobre promover a estável.
 **Bloqueios:** —
 
 ## Handoff da última sessão

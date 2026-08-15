@@ -131,4 +131,4 @@ main
 | 01-05 | feat-01-simplificacao-e-aprendizado-continuo/feat-01-05-ferramentas-configuraveis-constitution.md | feat/01-ferramentas-configuraveis-constitution | 01-05 | done |
 | 01-06 | feat-01-simplificacao-e-aprendizado-continuo/feat-01-06-lifecycle-unico.md | feat/01-lifecycle-unico | 01-06 | done |
 | 01-07 | feat-01-simplificacao-e-aprendizado-continuo/feat-01-07-reducao-duplicacao-naming.md | feat/01-reducao-duplicacao-naming | 01-07 | done |
-| 01-08 | feat-01-simplificacao-e-aprendizado-continuo/feat-01-08-auditoria-comandos-sobrepostos.md | feat/01-auditoria-comandos-sobrepostos | 01-08 | todo |
+| 01-08 | feat-01-simplificacao-e-aprendizado-continuo/feat-01-08-auditoria-comandos-sobrepostos.md | feat/01-auditoria-comandos-sobrepostos | 01-08 | done |
