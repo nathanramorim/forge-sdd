@@ -40,7 +40,21 @@ npx @nathanramorim/forge-sdd@latest init
 npx @nathanramorim/forge-sdd@latest init . --agent copilot,gemini --name meu-projeto
 ```
 
-## 📢 Novidades da Versão (v1.9.4)
+## ✨ Forge-SDD Slim (v2.0.0-beta) — mais simples, e os agentes agora aprendem com os próprios erros
+
+A metodologia continua completa — só ficou mais fácil de confiar nela.
+
+*   **Telemetria que não falha mais em silêncio:** a gravação de métricas de sessão deixou de depender de um passo tardio de um prompt longo — agora é um comando determinístico do próprio binário, disparado em todos os pontos onde uma sessão pode terminar.
+*   **Os agentes aprendem com os próprios fixes:** novo `sdd/memory/lessons.md` registra automaticamente padrões de erro já corrigidos e é consultado por Builder/Revisor antes de implementar ou revisar.
+*   **MCPs e VCS configuráveis por projeto:** declare na Constituição se o seu projeto usa GitHub, Azure DevOps ou nenhum VCS automatizado, e quais MCPs realmente respondem — sem mais suposições incondicionais.
+*   **Um fluxo, uma fonte da verdade:** o pipeline por feature agora vive em um único lugar (`sdd/FLOW.md`), não em três descrições que podiam divergir.
+*   **Menos duplicação nos bastidores:** a lógica de nomenclatura, antes copiada em ~14 lugares, agora vive em um único arquivo — mesma capacidade, menos superfície para manter.
+
+📢 [Ver todas as entregas desta versão](https://github.com/nathanramorim/forge-sdd/blob/main/sdd/releases/history.md)
+
+---
+
+## 📢 Novidades da Versão Anterior (v1.9.4)
 
 *   **Telemetria funcionando para todos os agentes:** Antes, a gravação de métricas de uso ao final de uma sessão só acontecia de fato ao usar o agente Gemini — Claude e Copilot silenciosamente deixavam de registrar telemetria mesmo com a opção ativada no projeto. Agora os três agentes gravam a telemetria corretamente ao concluir uma feature ou correção.
 

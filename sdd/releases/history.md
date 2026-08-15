@@ -4,6 +4,18 @@ Este arquivo registra o histórico de entregas de produto deste projeto.
 
 ## Entregas
 
+### Versão 2.0.0-beta.0 — Forge-SDD Slim (Beta)
+
+Pacote completo de simplificação e aprendizado contínuo, resultado da discovery-01 (análise como Eng. de Software Sênior + UX Sênior). **Breaking change controlado** — publicado como beta antes de promover a versão estável.
+
+*   **Telemetria que não falha mais em silêncio:** a gravação de `sdd/.metrics/session-*.json` deixou de depender de um passo tardio de um prompt longo — agora é feita por um comando determinístico do próprio binário (`forge-sdd session record`), disparado em `/proxima-feature`, `/revisar` e `/novo-fix`. Quem já tinha "telemetria ativada" mas via o arquivo não aparecer vai notar a diferença.
+*   **`forge-sdd doctor` agora lê a telemetria, não só grava:** novo resumo agregado (sessões aprovadas/reprovadas/bloqueadas) direto no diagnóstico do projeto.
+*   **Os agentes aprendem com os próprios fixes:** novo `sdd/memory/lessons.md`, atualizado automaticamente a cada correção aprovada (`forge-sdd lessons add`) e consultado por Builder/Revisor antes de implementar ou revisar — o mesmo tipo de erro não precisa ser redescoberto duas vezes.
+*   **MCPs e VCS configuráveis por projeto:** a Constituição agora tem um campo para declarar se o projeto usa GitHub, Azure DevOps ou nenhum VCS automatizado, e se MCPs como `context7`/`git` estão de fato respondendo — sem mais assumir `gh pr create` e MCPs sempre disponíveis.
+*   **Um fluxo, uma fonte da verdade:** `sdd/FLOW.md` passa a ser a referência única do pipeline por feature (Discovery → Split → Branch → Especificação → Build → Revisão → PR), citado por `CLAUDE.md`/`GEMINI.md`/`copilot-instructions.md` em vez de reescrito em três lugares divergentes.
+*   **Menos duplicação, mesma capacidade:** a lógica de nomenclatura (sequencial/hash/workitem), antes copiada em ~14 lugares, agora vive em um único arquivo referenciado pelos três agentes.
+*   **Auditoria de comandos publicada:** mapeamento dos 12 comandos de chat com recomendações de simplificação para uma próxima rodada (sem remoção nesta versão).
+
 ### Versão 1.9.4 (Estável)
 
 **Telemetria funcionando para todos os agentes:** Antes, a gravação de métricas de uso ao final de uma sessão só acontecia de fato ao usar o agente Gemini — Claude e Copilot silenciosamente deixavam de registrar telemetria mesmo com a opção ativada no projeto. Agora os três agentes gravam a telemetria corretamente ao concluir uma feature ou correção.
