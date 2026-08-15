@@ -53,10 +53,19 @@ main
                                                                                                      └─ feat/5ae2-gate-graduacao-autopilot (paralela)
                                                                                                      └─ feat/5ae2-spike-subagentes-nativos (paralela)
                                                                                                      └─ feat/5ae2-modo-iniciante (paralela)
+                                                                                                         └─ feat/01-telemetria-code-enforced
+                                                                                                             └─ feat/01-agregador-telemetria
+                                                                                                             └─ feat/01-lessons-artefato
+                                                                                                                 └─ feat/01-consulta-lessons-builder-revisor
+                                                                                                             └─ feat/01-ferramentas-configuraveis-constitution (paralela)
+                                                                                                             └─ feat/01-lifecycle-unico
+                                                                                                             └─ feat/01-reducao-duplicacao-naming
+                                                                                                             └─ feat/01-auditoria-comandos-sobrepostos
             ```
 
                                        ## Janelas de paralelismo
                                        feat-5ae2-04, feat-5ae2-05, feat-5ae2-06 e feat-5ae2-07 podem ser desenvolvidas em paralelo entre si após feat-5ae2-03 (não têm dependência direta entre elas).
+                                       feat-01-05 (ferramentas configuráveis) é independente da cadeia de telemetria e pode ser desenvolvida em paralelo a feat-01-01..04. feat-01-06, feat-01-07 e feat-01-08 não dependem entre si e podem ser paralelas, mas são priorizadas por último (maior superfície de revisão).
 
                                        ## Índice
 
@@ -115,3 +124,11 @@ main
 | 47 | fix-47-naming-convention-update-flag.md | fix/naming-convention-not-applied-on-update | 47 | done |
 | 48 | fix-48-novo-fix-missing-copilot-agent.md | fix/novo-fix-missing-copilot-agent | 48 | done |
 | 50 | fix-50-telemetry-recording-gemini-only.md | fix/telemetry-recording-gemini-only | 50 | done |
+| 01-01 | feat-01-simplificacao-e-aprendizado-continuo/feat-01-01-telemetria-code-enforced.md | feat/01-telemetria-code-enforced | 01-01 | todo |
+| 01-02 | feat-01-simplificacao-e-aprendizado-continuo/feat-01-02-agregador-telemetria.md | feat/01-agregador-telemetria | 01-02 | todo |
+| 01-03 | feat-01-simplificacao-e-aprendizado-continuo/feat-01-03-lessons-artefato.md | feat/01-lessons-artefato | 01-03 | todo |
+| 01-04 | feat-01-simplificacao-e-aprendizado-continuo/feat-01-04-consulta-lessons-builder-revisor.md | feat/01-consulta-lessons-builder-revisor | 01-04 | todo |
+| 01-05 | feat-01-simplificacao-e-aprendizado-continuo/feat-01-05-ferramentas-configuraveis-constitution.md | feat/01-ferramentas-configuraveis-constitution | 01-05 | todo |
+| 01-06 | feat-01-simplificacao-e-aprendizado-continuo/feat-01-06-lifecycle-unico.md | feat/01-lifecycle-unico | 01-06 | todo |
+| 01-07 | feat-01-simplificacao-e-aprendizado-continuo/feat-01-07-reducao-duplicacao-naming.md | feat/01-reducao-duplicacao-naming | 01-07 | todo |
+| 01-08 | feat-01-simplificacao-e-aprendizado-continuo/feat-01-08-auditoria-comandos-sobrepostos.md | feat/01-auditoria-comandos-sobrepostos | 01-08 | todo |
