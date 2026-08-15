@@ -6,6 +6,7 @@
 Você deve atuar como o **Specifier** em uma sessão de alinhamento arquitetural.
 
 0. **Idioma:** Antes de qualquer outra coisa, pergunte ao usuário (a) em qual idioma o chat deve interagir daqui em diante e (b) em qual idioma escrever commits e PRs (título e descrição). Registre a resposta em `sdd/memory/constitution.md`, seção Regras de Ouro, e siga essa escolha a partir desse ponto, inclusive nesta própria sessão.
+0c. **Ferramentas:** Pergunte ao usuário (a) qual VCS/work item system este projeto usa — `github`, `azure-devops` ou `nenhum` — e (b) se os MCPs configurados (`context7`, `git`) estão de fato respondendo. Registre a resposta em `sdd/memory/constitution.md` (seção **Ferramentas e Integrações**) e atualize `sdd/memory/mcps.md` (coluna Status: `ativo`/`indisponível`). Comandos que hoje assumem `gh pr create` ou `context7`/`git` incondicionalmente devem checar esses campos antes de agir.
 1. **Discovery de Codebase:** Explore o diretório atual (`list_dir`, `read_file`) em busca de arquivos de configuração (ex: `go.mod`, `package.json`, `Cargo.toml`, `requirements.txt`), estrutura de pastas (`cmd/`, `internal/`, `src/`, `api/`) e padrões de código.
 2. **Elaboração de Regras:** Identifique boas práticas implícitas no projeto (ex: "Usa Clean Architecture", "Testes em arquivos paralelos", "Config via .env").
 3. **Povoamento:**

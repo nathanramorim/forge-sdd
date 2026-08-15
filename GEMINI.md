@@ -17,7 +17,7 @@ forge-sdd — stack principal: .
 
 ## MCPs
 - O Gemini utiliza as configurações de MCP em `.gemini/mcp.json`.
-- **context7** — obrigatório antes de qualquer `go get` ou uso de lib externa.
+- **context7** — obrigatório antes de qualquer `go get` ou uso de lib externa, desde que `sdd/memory/mcps.md` o liste como `ativo`; se `indisponível`, use a documentação oficial da lib em vez de assumir resposta do MCP.
 - **git** — consultar status antes de iniciar/encerrar feature.
 
 ## Orçamentos

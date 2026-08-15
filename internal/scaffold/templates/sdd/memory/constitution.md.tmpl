@@ -15,10 +15,17 @@
 | Decisão | Resolução |
 |---------|-----------|
 
+## Ferramentas e Integrações
+| Campo | Valor |
+|-------|-------|
+| VCS / Work Item System | github |
+
+Consulte `sdd/memory/mcps.md` para o status real de cada MCP configurado (`ativo`/`indisponível`) antes de assumir que ele responde. Se "VCS / Work Item System" for `azure-devops`, use `az repos pr create` (ou instrução equivalente documentada) em vez de `gh pr create`. Se `nenhum`, deixe a branch pronta e informe o usuário, sem tentar nenhum comando de VCS.
+
 ## Regras (máx. 10)
 1. Sem commits diretos em main
 2. Branch por feature
 3. Config centralizado em <arquivo>
 4. Secrets em .env (nunca commit)
-5. Antes de usar lib externa, consultar context7 com versão exata
+5. Antes de usar lib externa, consultar context7 com versão exata — desde que `sdd/memory/mcps.md` o liste como `ativo`; se `indisponível`, usar a documentação oficial da lib
 6. Toda feature tem critério executável
