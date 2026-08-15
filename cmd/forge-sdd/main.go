@@ -385,6 +385,7 @@ func init() {
 	rootCmd.AddCommand(versionCmd)
 	rootCmd.AddCommand(doctorCmd)
 	rootCmd.AddCommand(destroyCmd)
+	rootCmd.AddCommand(sessionCmd)
 }
 
 func main() {

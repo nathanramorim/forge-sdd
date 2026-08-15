@@ -124,7 +124,7 @@ main
 | 47 | fix-47-naming-convention-update-flag.md | fix/naming-convention-not-applied-on-update | 47 | done |
 | 48 | fix-48-novo-fix-missing-copilot-agent.md | fix/novo-fix-missing-copilot-agent | 48 | done |
 | 50 | fix-50-telemetry-recording-gemini-only.md | fix/telemetry-recording-gemini-only | 50 | done |
-| 01-01 | feat-01-simplificacao-e-aprendizado-continuo/feat-01-01-telemetria-code-enforced.md | feat/01-telemetria-code-enforced | 01-01 | todo |
+| 01-01 | feat-01-simplificacao-e-aprendizado-continuo/feat-01-01-telemetria-code-enforced.md | feat/01-telemetria-code-enforced | 01-01 | done |
 | 01-02 | feat-01-simplificacao-e-aprendizado-continuo/feat-01-02-agregador-telemetria.md | feat/01-agregador-telemetria | 01-02 | todo |
 | 01-03 | feat-01-simplificacao-e-aprendizado-continuo/feat-01-03-lessons-artefato.md | feat/01-lessons-artefato | 01-03 | todo |
 | 01-04 | feat-01-simplificacao-e-aprendizado-continuo/feat-01-04-consulta-lessons-builder-revisor.md | feat/01-consulta-lessons-builder-revisor | 01-04 | todo |
