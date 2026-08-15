@@ -10,4 +10,12 @@ Pré-requisito das demais features desta discovery. Substitui a gravação de `s
 4. `go build` e `go vet ./...` passam; teste cobrindo o novo mecanismo de gravação.
 5. Não quebra o contrato atual dos comandos públicos do CLI (Regra 10 da Constituição) — se novo subcomando, é aditivo.
 
-## Status: todo
+## Status: done
+
+Implementado o subcomando `forge-sdd session record` (`cmd/forge-sdd/session.go`), que lê `sdd/.sddrc` e grava `sdd/.metrics/session-<ISO8601>.json` respeitando o schema (`WriteSessionMetrics`, testável e coberto por `session_test.go`). Se `telemetry.enabled=false`, não grava nada (silencioso, por design). `--outcome` é validado (`approved`/`rejected`/`blocked`).
+
+Os três agentes (Claude, Gemini, Copilot) foram atualizados para chamar esse comando em vez de montar o JSON manualmente:
+- `proxima-feature` (dogfood + template) e os chatmodes Orquestrador (Gemini/Copilot) substituíram a instrução de escrita manual por `forge-sdd session record`.
+- `revisar` (dogfood + template, incluindo `revisor.chatmode.md` do Copilot) e `novo-fix` (dogfood + template) ganharam um novo passo final de gravação de telemetria — antes esses dois comandos nunca gravavam nada.
+
+Golden fixtures regeneradas (`go test ./internal/scaffold/... -run TestGoldenInit -update`). `go build`, `go vet ./...` e `go test ./...` passam.

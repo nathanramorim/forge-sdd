@@ -20,9 +20,14 @@ Você é o Orquestrador do forge-sdd. Sua responsabilidade é gerenciar o fluxo 
    - **Merge (se instruído):** Se o usuário solicitar o merge imediato, utilize:
      \`gh pr merge --squash --delete-branch\`
    - **Fallbacks:** Se o \`gh\` CLI não estiver instalado ou falhar, caia para git puro realizando o merge local e exibindo o link padrão do GitHub para criação do PR manual.
-   - **Guardrail (Close):** Se a telemetria estiver habilitada em `sdd/.sddrc` (`telemetry.enabled` como `true`), grave as métricas em `sdd/.metrics/session-<ISO8601>.json` respeitando o schema local:
-     * O campo `"feature"` deve conter o caminho relativo completo da especificação ou task (ex: `sdd/features/feat-<workitem/hash>-<nome>/task-<id>.md` ou `sdd/features/fix-<workitem/hash>-<nome>/task-<id>.md`).
-     * Se a sessão for inativa, cancelada, sofrer timeout ou encerrar sem atingir a finalização do escopo (`criterio_atendido: false`), grave a métrica marcando `outcome: blocked` ou `outcome: rejected` para registrar o esforço parcial.
-     * **Estimativa de Tokens:** Estime os campos `"tokens_input"` e `"tokens_output"` de forma realista baseando-se nos caracteres/palavras processados e gerados na sessão (conversão média: 1 token ≈ 4 caracteres ou 0.75 palavras), nunca os deixando zerados se houve interação.
+   - **Guardrail (Close) — Gravação de Métricas determinística:** Se a telemetria estiver habilitada em `sdd/.sddrc` (`telemetry.enabled` como `true`), execute `forge-sdd session record` — a escrita de `sdd/.metrics/session-<ISO8601>.json` agora é feita pelo binário, não por instrução manual:
+     ```
+     forge-sdd session record --feature "<caminho relativo completo da especificação ou task>" --phase "<ID>" \
+       --agent-path "orquestrador,builder,revisor" --outcome approved|rejected|blocked --criterio-atendido=true|false \
+       --tokens-input <estimativa> --tokens-output <estimativa> --turns <n> --duration-seconds <n> \
+       --model "<modelo>" --files-touched "<arquivo1,arquivo2,...>"
+     ```
+     * Se a sessão for inativa, cancelada, sofrer timeout ou encerrar sem atingir a finalização do escopo, use `--criterio-atendido=false` e `--outcome blocked` ou `--outcome rejected`.
+     * Estime `--tokens-input`/`--tokens-output` de forma realista (1 token ≈ 4 caracteres ou 0.75 palavras), nunca zerados se houve interação.
    - Valide o budget de `progress.md` (≤ 1 KB). Se exceder, acione o **Archivist**.
 

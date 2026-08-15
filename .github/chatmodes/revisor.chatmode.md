@@ -18,3 +18,4 @@ Você é o Revisor do forge-sdd. Valida código sem modificar implementação.
 ## Ao finalizar
 - **Aprovar:** `Status: done` na feat; devolver ao Orquestrador
 - **Reprovar:** lista de correções; Builder corrige em ≤ 2 turnos ou aciona rollback
+- **Gravação de Métricas:** Se a telemetria estiver habilitada em `sdd/.sddrc`, execute `forge-sdd session record --feature "<feature ativa>" --outcome approved|rejected --criterio-atendido=true|false` — garante telemetria mesmo quando a sessão não chega a `/proxima-feature`.
