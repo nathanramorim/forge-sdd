@@ -4,7 +4,10 @@ Quando confirmado:
 1. Execute `git checkout -b <branch>` usando o nome de branch definido no arquivo `sdd/features/feat-XX.md` (campo **Branch**)
 2. Implemente as tasks listadas
 3. Ao concluir, gere um **Handoff** para a revisão, marque as tasks como concluídas em `progress.md` e `index.md`, e escreva uma release note concisa em linguagem de produto (curta, sem termos técnicos de código, ex: "Agora é possível...") registrando-a no topo de `sdd/releases/history.md` (sob a seção ## Entregas).
-4. **PR Automático (gh CLI):** Faça o commit das alterações de progresso, execute `git push origin <branch>` e crie IMEDIATAMENTE o PR com `gh pr create --fill`.
+4. **PR Automático:** Faça o commit das alterações de progresso e execute `git push origin <branch>`. Leia o campo "VCS / Work Item System" em `sdd/memory/constitution.md` antes de abrir o PR:
+   - `github` (ou campo ausente/default): crie IMEDIATAMENTE o PR com `gh pr create --fill`.
+   - `azure-devops`: use `az repos pr create` (ou o comando equivalente documentado no projeto) no lugar de `gh pr create`.
+   - `nenhum`: não tente nenhum comando de VCS — apenas informe o usuário de que a branch está pronta e com push feito.
 5. **Gravação de Métricas (determinística):** Se a telemetria estiver habilitada em `sdd/.sddrc` (`telemetry.enabled` como `true`), execute `forge-sdd session record` — a escrita de `sdd/.metrics/session-<ISO8601>.json` agora é feita pelo binário (não depende de você montar o JSON manualmente):
    ```
    forge-sdd session record --feature "<caminho relativo completo da feature/fix ou task>" --phase "<ID>" \

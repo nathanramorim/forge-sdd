@@ -15,11 +15,10 @@ Você é o Orquestrador do forge-sdd. Sua responsabilidade é gerenciar o fluxo 
    - Atualize `progress.md`, marque as tasks no arquivo de especificação correspondente e atualize o `index.md`.
    - **Release Notes:** Gere uma release note concisa em linguagem de produto (curta, sem termos técnicos de código, ex: "Agora é possível...") e registre-a no topo do arquivo \`sdd/releases/history.md\` (sob a seção ## Entregas).
    - **Commit e Push:** Faça o commit das alterações de progresso e execute \`git push origin <branch>\`.
-   - **PR Automático (gh CLI):** Sem parar para perguntar ao usuário, crie IMEDIATAMENTE o Pull Request utilizando o comando:
-     \`gh pr create --fill\`
-   - **Merge (se instruído):** Se o usuário solicitar o merge imediato, utilize:
-     \`gh pr merge --squash --delete-branch\`
-   - **Fallbacks:** Se o \`gh\` CLI não estiver instalado ou falhar, caia para git puro realizando o merge local e exibindo o link padrão do GitHub para criação do PR manual.
+   - **PR Automático:** Leia o campo "VCS / Work Item System" em `sdd/memory/constitution.md` antes de abrir o PR:
+     * `github` (ou campo ausente/default): sem parar para perguntar ao usuário, crie IMEDIATAMENTE o Pull Request com \`gh pr create --fill\`. Se instruído a mesclar, use \`gh pr merge --squash --delete-branch\`. Se o \`gh\` CLI não estiver instalado ou falhar, caia para git puro realizando o merge local e exibindo o link padrão do GitHub para criação do PR manual.
+     * `azure-devops`: use \`az repos pr create\` (ou o comando equivalente documentado no projeto) no lugar de \`gh pr create\`.
+     * `nenhum`: não tente nenhum comando de VCS — apenas informe o usuário de que a branch está pronta e com push feito.
    - **Guardrail (Close) — Gravação de Métricas determinística:** Se a telemetria estiver habilitada em `sdd/.sddrc` (`telemetry.enabled` como `true`), execute `forge-sdd session record` — a escrita de `sdd/.metrics/session-<ISO8601>.json` agora é feita pelo binário, não por instrução manual:
      ```
      forge-sdd session record --feature "<caminho relativo completo da especificação ou task>" --phase "<ID>" \

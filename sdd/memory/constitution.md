@@ -22,12 +22,19 @@ CLI Go de comando único (`forge-sdd init`) que scaffolda estruturas Forge-SDD e
 | Embed de templates | `embed.FS` — binário único, sem assets externos |
 | Não sobrescrever arquivos | Erro com lista de conflitos — evitar perda de dados |
 
+## Ferramentas e Integrações
+| Campo | Valor |
+|-------|-------|
+| VCS / Work Item System | github |
+
+Consulte `sdd/memory/mcps.md` para o status real de cada MCP configurado (`ativo`/`indisponível`) antes de assumir que ele responde. Se "VCS / Work Item System" for `azure-devops`, use `az repos pr create` (ou instrução equivalente documentada) em vez de `gh pr create`. Se `nenhum`, deixe a branch pronta e informe o usuário, sem tentar nenhum comando de VCS.
+
 ## Regras (máx. 12)
 1. Sem commits diretos em main
 2. Branch por feature (`feat/*`)
 3. Templates embutidos via `embed.FS` (nunca arquivo externo em runtime)
 4. Secrets nunca no binário ou repositório
-5. Antes de qualquer `go get`, consultar context7 com versão exata
+5. Antes de qualquer `go get`, consultar context7 com versão exata — desde que `sdd/memory/mcps.md` o liste como `ativo`; se `indisponível`, usar a documentação oficial da lib
 6. Toda feature tem critério executável (`go build` ou `go test`)
 7. `go vet ./...` deve passar após cada task
 8. Binário final sem dependências de runtime além da stdlib

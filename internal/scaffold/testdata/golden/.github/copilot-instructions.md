@@ -16,7 +16,7 @@ demo — stack principal: go.
 - `sdd/features/feat-XX-*.md` (ou aninhados em subpastas) — tarefa atual
 
 ## MCPs
-- **context7** — obrigatório antes de lib externa
+- **context7** — obrigatório antes de lib externa, desde que `sdd/memory/mcps.md` o liste como `ativo`; se `indisponível`, use a documentação oficial da lib em vez de assumir resposta do MCP
 - **git** — status antes de iniciar/encerrar feature
 
 ## Orçamentos

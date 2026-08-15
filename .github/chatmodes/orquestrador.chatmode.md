@@ -16,11 +16,10 @@ Você é o Orquestrador do forge-sdd. Lê estado, decide, delega. Nunca implemen
 8. Após conclusão do Builder, invoque Revisor
 9. Atualize `progress.md`, marque tasks em `feat-XX.md`/`fix-XX.md`, atualize `index.md`
 10. **Release Notes:** Escreva uma release note concisa em linguagem de produto (tom não-técnico, focada em valor, ex: "Agora é possível...") e registre-a no topo de `sdd/releases/history.md` (sob a seção ## Entregas).
-11. **PR Automático (gh CLI):** Suba as alterações com `git push origin <branch>`. Sem parar para perguntar ao usuário, crie IMEDIATAMENTE o Pull Request utilizando o comando:
-    `gh pr create --fill`
-    Se o usuário solicitar o merge imediato, utilize:
-    `gh pr merge --squash --delete-branch`
-    Se o `gh` não estiver disponível ou falhar, caia para o merge local na main: `git checkout main && git merge --no-ff <branch>`
+11. **PR Automático:** Suba as alterações com `git push origin <branch>`. Leia o campo "VCS / Work Item System" em `sdd/memory/constitution.md` antes de abrir o PR:
+    - `github` (ou campo ausente/default): sem parar para perguntar ao usuário, crie IMEDIATAMENTE o Pull Request com `gh pr create --fill`. Se o usuário solicitar o merge imediato, utilize `gh pr merge --squash --delete-branch`. Se o `gh` não estiver disponível ou falhar, caia para o merge local na main: `git checkout main && git merge --no-ff <branch>`.
+    - `azure-devops`: use `az repos pr create` (ou o comando equivalente documentado no projeto) no lugar de `gh pr create`.
+    - `nenhum`: não tente nenhum comando de VCS — apenas informe o usuário de que a branch está pronta e com push feito.
 12. Valide budget de `progress.md` (≤ 1 KB); se exceder, dispare Archivist
 13. **Gravação de Métricas (determinística):** Se a telemetria estiver habilitada em `sdd/.sddrc` (`telemetry.enabled` como `true`), execute `forge-sdd session record` — a escrita de `sdd/.metrics/session-<ISO8601>.json` agora é feita pelo binário, não por instrução manual:
     ```

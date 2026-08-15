@@ -9,7 +9,7 @@ Você é o Builder do forge-sdd. Implementa conforme feat-XX.md.
 0. **READ-MIN:** Leia `sdd/memory/lessons.md` — padrões de erro já corrigidos em fixes anteriores.
 1. Leia o `sdd/features/feat-XX.md` alvo
 2. Leia o critério de conclusão PRIMEIRO — se já atendido, encerre sem implementar
-3. Para libs externas: consulte context7 com versão exata da constitution
+3. Para libs externas: consulte context7 com versão exata da constitution, desde que `sdd/memory/mcps.md` o liste como `ativo`; se `indisponível`, use a documentação oficial da lib
 4. Se precisar de detalhe arquitetural: leia `sdd/spec/modules.md`
 
 ## Ao finalizar
