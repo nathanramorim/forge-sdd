@@ -137,6 +137,59 @@ func WriteSessionMetrics(targetDir string, metrics sessionMetrics, at time.Time)
 	return path, nil
 }
 
+// SessionMetricsSummary agrega os arquivos sdd/.metrics/session-*.json para
+// fechar o gap "grava mas nunca lê" (feat-01-02).
+type SessionMetricsSummary struct {
+	Total     int
+	Approved  int
+	Rejected  int
+	Blocked   int
+	ByFeature map[string]int
+}
+
+// AggregateSessionMetrics lê todos os session-*.json em sdd/.metrics (ignorando
+// schema.json e arquivos inválidos) e retorna um resumo agregado.
+func AggregateSessionMetrics(targetDir string) (SessionMetricsSummary, error) {
+	summary := SessionMetricsSummary{ByFeature: map[string]int{}}
+	metricsDir := filepath.Join(targetDir, "sdd", ".metrics")
+
+	entries, err := os.ReadDir(metricsDir)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return summary, nil
+		}
+		return summary, fmt.Errorf("falha ao ler %s: %w", metricsDir, err)
+	}
+
+	for _, e := range entries {
+		name := e.Name()
+		if e.IsDir() || !strings.HasPrefix(name, "session-") || !strings.HasSuffix(name, ".json") {
+			continue
+		}
+		data, err := os.ReadFile(filepath.Join(metricsDir, name))
+		if err != nil {
+			continue
+		}
+		var m sessionMetrics
+		if err := json.Unmarshal(data, &m); err != nil {
+			continue
+		}
+		summary.Total++
+		switch m.Outcome {
+		case "approved":
+			summary.Approved++
+		case "rejected":
+			summary.Rejected++
+		case "blocked":
+			summary.Blocked++
+		}
+		if m.Feature != "" {
+			summary.ByFeature[m.Feature]++
+		}
+	}
+	return summary, nil
+}
+
 func splitCsv(csv string) []string {
 	if csv == "" {
 		return nil

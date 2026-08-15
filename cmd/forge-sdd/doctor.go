@@ -260,6 +260,18 @@ inconsistências de configuração dos agentes de IA e progresso das features.`,
 			fmt.Println("   - Cabeçalho do arquivo sdd/memory/progress.md")
 		}
 
+		// 8. Agregador de telemetria (feat-01-02) — fecha o gap "grava mas nunca lê"
+		fmt.Println("\n📊 Telemetria de Sessão:")
+		summary, err := AggregateSessionMetrics(targetDir)
+		if err != nil {
+			fmt.Printf("  ⚠️  Falha ao agregar sdd/.metrics: %v\n", err)
+		} else if summary.Total == 0 {
+			fmt.Println("  — Nenhuma sessão registrada ainda em sdd/.metrics/.")
+		} else {
+			fmt.Printf("  %d sessão(ões) registrada(s): %d approved, %d rejected, %d blocked\n",
+				summary.Total, summary.Approved, summary.Rejected, summary.Blocked)
+		}
+
 		fmt.Println("\n🩺 Diagnóstico finalizado.")
 		return nil
 	},

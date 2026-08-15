@@ -8,5 +8,6 @@
 3. Verifique se a configuração do Claude Desktop possui `context7` e `git` configurados (conforme orientações em `CLAUDE.md`).
 4. Verifique se há alguma feature `in-progress` sem branch ativa no git.
 5. Verifique se `.metrics/schema.json` está presente.
+6. Execute `forge-sdd doctor` no terminal e inclua o resumo agregado de telemetria (sessões approved/rejected/blocked) que ele imprime.
 
 Reporte verde ✓ ou vermelho ✗ para cada item. Não execute correções.

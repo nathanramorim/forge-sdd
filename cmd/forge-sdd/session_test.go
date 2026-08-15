@@ -89,6 +89,33 @@ func TestSessionRecordCmd_WritesWhenTelemetryEnabled(t *testing.T) {
 	require.Len(t, entries, 1)
 }
 
+func TestAggregateSessionMetrics(t *testing.T) {
+	dir := t.TempDir()
+
+	at := time.Date(2026, 8, 15, 12, 0, 0, 0, time.UTC)
+	_, err := WriteSessionMetrics(dir, sessionMetrics{Feature: "feat-a.md", Outcome: "approved"}, at)
+	require.NoError(t, err)
+	_, err = WriteSessionMetrics(dir, sessionMetrics{Feature: "feat-b.md", Outcome: "blocked"}, at.Add(time.Minute))
+	require.NoError(t, err)
+	_, err = WriteSessionMetrics(dir, sessionMetrics{Feature: "feat-a.md", Outcome: "rejected"}, at.Add(2*time.Minute))
+	require.NoError(t, err)
+
+	summary, err := AggregateSessionMetrics(dir)
+	require.NoError(t, err)
+	assert.Equal(t, 3, summary.Total)
+	assert.Equal(t, 1, summary.Approved)
+	assert.Equal(t, 1, summary.Rejected)
+	assert.Equal(t, 1, summary.Blocked)
+	assert.Equal(t, 2, summary.ByFeature["feat-a.md"])
+}
+
+func TestAggregateSessionMetrics_NoMetricsDir(t *testing.T) {
+	dir := t.TempDir()
+	summary, err := AggregateSessionMetrics(dir)
+	require.NoError(t, err)
+	assert.Equal(t, 0, summary.Total)
+}
+
 func TestSessionRecordCmd_RequiresValidOutcome(t *testing.T) {
 	dir := t.TempDir()
 	writeTestSddrc(t, dir, true)

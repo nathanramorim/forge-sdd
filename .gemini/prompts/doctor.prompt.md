@@ -9,5 +9,6 @@
 4. Verifique se o arquivo `.gemini/mcp.json` existe e possui `context7` e `git` configurados.
 5. Verifique se há alguma feature `in-progress` sem branch ativa no git.
 6. Verifique se `.metrics/schema.json` está presente.
+7. Execute `forge-sdd doctor` no terminal e inclua o resumo agregado de telemetria (sessões approved/rejected/blocked) que ele imprime.
 
 Reporte verde ✓ ou vermelho ✗ para cada item. Não execute correções.
