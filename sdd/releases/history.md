@@ -4,7 +4,7 @@ Este arquivo registra o histórico de entregas de produto deste projeto.
 
 ## Entregas
 
-### Versão 2.0.0-beta.0 — Forge-SDD Slim (Beta)
+### Versão 2.0.0-beta — Forge-SDD Slim (Beta)
 
 Pacote completo de simplificação e aprendizado contínuo, resultado da discovery-01 (análise como Eng. de Software Sênior + UX Sênior). **Breaking change controlado** — publicado como beta antes de promover a versão estável.
 
