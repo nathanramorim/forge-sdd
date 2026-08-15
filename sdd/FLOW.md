@@ -21,6 +21,22 @@ flowchart TD
 
 ---
 
+## 🗺️ Este é o documento fonte da verdade do fluxo (feat-01-06)
+
+Este arquivo é a **única fonte da verdade** para a sequência macro de comandos do Forge-SDD. `CLAUDE.md`/`GEMINI.md`/`copilot-instructions.md` e os chatmodes Orquestrador **citam** os estágios abaixo — não reescrevem a sequência completa. Mapeamento entre a narrativa de produto (Problema → Proposta → Refinamento → Execução → Entrega) e os 7 passos técnicos deste documento:
+
+| Estágio (narrativa) | Passo(s) técnico(s) | Comando |
+|---|---|---|
+| Problema | 1. Discovery | `/discovery` |
+| Proposta | 2. Split (opcional) | `/split-features` |
+| Refinamento | 3. Branch + Especificação | `/nova-feature` |
+| Execução | 4. Implementação | `/proxima-feature` |
+| Entrega | 5. Revisão + 6. PR/Handoff | `/revisar` → `gh pr create` |
+
+O ciclo `READ-MIN → PLAN → ACT → WRITE → CLOSE` descrito em `CLAUDE.md` é o protocolo **por comando** (o que qualquer agente faz dentro de uma única invocação); a tabela acima é o pipeline **por feature** (a sequência de comandos ao longo de uma sessão completa). São dois eixos complementares, não descrições concorrentes do mesmo fluxo.
+
+---
+
 ## 🔎 1. Discovery (`/discovery`)
 
 **Quando usar:**
