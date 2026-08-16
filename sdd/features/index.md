@@ -61,11 +61,19 @@ main
                                                                                                              └─ feat/01-lifecycle-unico
                                                                                                              └─ feat/01-reducao-duplicacao-naming
                                                                                                              └─ feat/01-auditoria-comandos-sobrepostos
+                                                                                                                 └─ feat/02-agent-rules-scaffold
+                                                                                                                     └─ feat/02-agent-rules-referencia-nos-agentes
+                                                                                                                     └─ feat/02-agent-commands-fonte-unica
+                                                                                                                         └─ feat/02-migracao-update-agent
+                                                                                                                         └─ feat/02-branch-unica-por-pasta-feature
+                                                                                                                             └─ feat/02-pergunta-branch-partida-retomada
+                                                                                                                                 └─ feat/02-release-v2.2.0-beta
             ```
 
                                        ## Janelas de paralelismo
                                        feat-5ae2-04, feat-5ae2-05, feat-5ae2-06 e feat-5ae2-07 podem ser desenvolvidas em paralelo entre si após feat-5ae2-03 (não têm dependência direta entre elas).
                                        feat-01-05 (ferramentas configuráveis) é independente da cadeia de telemetria e pode ser desenvolvida em paralelo a feat-01-01..04. feat-01-06, feat-01-07 e feat-01-08 não dependem entre si e podem ser paralelas, mas são priorizadas por último (maior superfície de revisão).
+                                       feat-02-01 e feat-02-02 são de baixo risco (pasta nova, sem migração) e podem entrar na mesma branch/PR. feat-02-03 (maior superfície: 12 comandos × 3 agentes) depende só de feat-02-01/02 e deve isolar um comando piloto (`/discovery`) antes de converter os demais. feat-02-04 depende de feat-02-01 e feat-02-03. feat-02-05 e feat-02-06 dependem de feat-02-03 (corpo canônico) e podem ser uma feature só ou duas, a critério do revisor. feat-02-07 fecha o pacote e depende de todas as anteriores.
 
                                        ## Índice
 
@@ -132,3 +140,10 @@ main
 | 01-06 | feat-01-simplificacao-e-aprendizado-continuo/feat-01-06-lifecycle-unico.md | feat/01-lifecycle-unico | 01-06 | done |
 | 01-07 | feat-01-simplificacao-e-aprendizado-continuo/feat-01-07-reducao-duplicacao-naming.md | feat/01-reducao-duplicacao-naming | 01-07 | done |
 | 01-08 | feat-01-simplificacao-e-aprendizado-continuo/feat-01-08-auditoria-comandos-sobrepostos.md | feat/01-auditoria-comandos-sobrepostos | 01-08 | done |
+| 02-01 | feat-02-agent-rules-e-branch-por-feature/feat-02-01-agent-rules-scaffold.md | feat/02-agent-rules-scaffold | 02-01 | done |
+| 02-02 | feat-02-agent-rules-e-branch-por-feature/feat-02-02-agent-rules-referencia-nos-agentes.md | feat/02-agent-rules-referencia-nos-agentes | 02-02 | done |
+| 02-03 | feat-02-agent-rules-e-branch-por-feature/feat-02-03-agent-commands-fonte-unica.md | feat/02-agent-commands-fonte-unica | 02-03 | done |
+| 02-04 | feat-02-agent-rules-e-branch-por-feature/feat-02-04-migracao-update-agent.md | feat/02-migracao-update-agent | 02-04 | done |
+| 02-05 | feat-02-agent-rules-e-branch-por-feature/feat-02-05-branch-unica-por-pasta-feature.md | feat/02-branch-unica-por-pasta-feature | 02-05 | done |
+| 02-06 | feat-02-agent-rules-e-branch-por-feature/feat-02-06-pergunta-branch-partida-retomada.md | feat/02-pergunta-branch-partida-retomada | 02-06 | done |
+| 02-07 | feat-02-agent-rules-e-branch-por-feature/feat-02-07-release-v2.2.0-beta.md | feat/02-release-v2.2.0-beta | 02-07 | done |

@@ -9,7 +9,7 @@ _Implementa o pipeline canônico definido em `sdd/FLOW.md` (fonte única da verd
 2. **Identificar:** Encontre a próxima feature ou fix com status `todo`.
 3. **Detalhar:** Leia o arquivo de especificação correspondente (ex: `sdd/features/feat-XX.md`, `sdd/features/fix-XX.md` ou dentro de subpastas dedicadas).
 4. **Contextualizar:** Se necessário, leia `sdd/memory/constitution.md`.
-5. **PLAN:** Reporte o status atual e as próximas tarefas. Se o arquivo `.sdd-auto-pilot` ou `sdd/.sdd-auto-pilot` estiver presente na raiz, pule o passo de aguardar confirmação humana e prossiga imediatamente para o passo 6 (Branch). caso contrário, aguarde confirmação.
+5. **PLAN:** Reporte o status atual e as próximas tarefas. Aguarde confirmação humana.
 6. **Branch:** Antes de qualquer ação de código, verifique ou crie a branch correspondente: `git checkout -b <branch>`.
 7. **Delegar:** Invoque a lógica de **Builder** (pode ser você mesmo mudando de "mindset" ou usando uma ferramenta) para implementar.
 8. **Revisar:** Após a implementação, invoque a lógica de **Revisor**.
@@ -31,4 +31,3 @@ _Implementa o pipeline canônico definido em `sdd/FLOW.md` (fonte única da verd
      * Se a sessão for inativa, cancelada, sofrer timeout ou encerrar sem atingir a finalização do escopo, use `--criterio-atendido=false` e `--outcome blocked` ou `--outcome rejected`.
      * Estime `--tokens-input`/`--tokens-output` de forma realista (1 token ≈ 4 caracteres ou 0.75 palavras), nunca zerados se houve interação.
    - Valide o budget de `progress.md` (≤ 1 KB). Se exceder, acione o **Archivist**.
-

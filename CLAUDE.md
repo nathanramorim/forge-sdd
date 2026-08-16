@@ -16,6 +16,7 @@ _Protocolo por comando. O pipeline por feature (Discovery → ... → PR) está 
 - `sdd/memory/progress.md` — estado ativo (leia primeiro a cada sessão)
 - `sdd/memory/constitution.md` — regras imutáveis
 - `sdd/features/feat-XX-*.md` (ou aninhados em subpastas) — tarefa atual
+- `.agent/rules/*.md` — regras de domínio do projeto (design system, arquitetura, acessibilidade, ...). Antes de agir sobre código ou design, consulte os arquivos relevantes à tarefa corrente.
 
 ## MCPs
 O Claude Desktop utiliza a configuração global em `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) ou `%APPDATA%\Claude\claude_desktop_config.json` (Windows).

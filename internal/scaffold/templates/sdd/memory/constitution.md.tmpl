@@ -29,3 +29,4 @@ Consulte `sdd/memory/mcps.md` para o status real de cada MCP configurado (`ativo
 4. Secrets em .env (nunca commit)
 5. Antes de usar lib externa, consultar context7 com versão exata — desde que `sdd/memory/mcps.md` o liste como `ativo`; se `indisponível`, usar a documentação oficial da lib
 6. Toda feature tem critério executável
+7. Feature quebrada em subpasta (`sdd/features/<prefixo>-ID-<nome>/`) usa uma única branch agrupando todas as subtarefas — nunca uma branch por subtarefa. Antes de criar a branch, pergunte a branch de partida (default `main`) e verifique (`git branch --list <prefixo>/ID-*`) se já existe uma branch da mesma feature/fix a retomar.
