@@ -3,9 +3,4 @@ description: "Cria nova feature para demo a partir de uma descrição"
 agent: agent
 ---
 
-Invoque o Specifier para criar uma feat-XX a partir desta descrição: ${input:descrição da feature}
-
-**Handoff:**
-Ao finalizar, gere um resumo para o comando `/proxima-feature`.
-
-> Crie a branch `feat/*` localmente (`git checkout -b feat/<nome>`) **antes** de criar o arquivo de especificação `sdd/features/feat-XX.md`. Se a feature for complexa e requerer quebra em subfeatures/tasks, crie uma subpasta com o nome da feature (ex: `sdd/features/feat-XX-<nome-da-feature>/`) e salve as tasks lá dentro (ex: `sdd/features/feat-XX-<nome-da-feature>/task-YY-<nome-da-task>.md`).
+Consulte `.agent/commands/nova-feature.md` e siga as instruções descritas nesse arquivo.

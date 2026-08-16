@@ -39,6 +39,7 @@ Fase 47 — Fix flag naming-convention no update  [x] done
 Fase 48 — Fix /novo-fix ausente no Copilot      [x] done
 Fase 49 — Sync README Novidades com NPM         [x] done
 Fase 50 — Fix telemetria só grava no Gemini     [x] done
+Fase 02 — Agent Rules e Branch por Feature (v2.2.0-beta) [x] done
 ```
 
 ## Features ativas
@@ -91,12 +92,20 @@ Fase 50 — Fix telemetria só grava no Gemini     [x] done
 | fix-47-naming-convention-update-flag | fix/naming-convention-not-applied-on-update | done |
 | fix-48-novo-fix-missing-copilot-agent | fix/novo-fix-missing-copilot-agent | done |
 | fix-50-telemetry-recording-gemini-only | fix/telemetry-recording-gemini-only | done |
+| feat-02-01-agent-rules-scaffold | feat/02-agent-rules-scaffold | done |
+| feat-02-02-agent-rules-referencia-nos-agentes | feat/02-agent-rules-referencia-nos-agentes | done |
+| feat-02-03-agent-commands-fonte-unica | feat/02-agent-commands-fonte-unica | done |
+| feat-02-04-migracao-update-agent | feat/02-migracao-update-agent | done |
+| feat-02-05-branch-unica-por-pasta-feature | feat/02-branch-unica-por-pasta-feature | done |
+| feat-02-06-pergunta-branch-partida-retomada | feat/02-pergunta-branch-partida-retomada | done |
+| feat-02-07-release-v2.2.0-beta | feat/02-release-v2.2.0-beta | done |
 
 ## Próximo passo
-**Iniciar:** Nenhuma feature `todo` pendente. Pacote feat-01 (8/8 features) completo na branch `feat/01-simplificacao-e-aprendizado-continuo` (PR #47, draft). v2.0.0-beta.0 "Forge-SDD Slim" pronta para publicação — aguardando decisão do usuário sobre promover a estável.
+**Iniciar:** Nenhuma feature `todo` pendente. Pacote feat-02 (7/7 features) completo na branch `feat/02-agent-rules-e-branch-por-feature`. v2.2.0-beta pronta para publicação — push + PR pendentes; v2.0.0-beta.0 "Forge-SDD Slim" também segue aguardando decisão do usuário sobre promover a estável.
 **Bloqueios:** —
 
 ## Handoff da última sessão
+- Pacote feat-02 (discovery-02, escopo expandido a pedido do usuário de "só rules" para fonte única de agente) concluído nesta sessão: `.agent/rules/` (regras de domínio compartilhadas, preservadas em update) e `.agent/commands/` (corpo canônico dos 13 comandos SDD, gerado/regenerado a cada update) substituem a duplicação manual entre `.claude/`, `.gemini/`, `.github/` — essas pastas continuam existindo (mecanismo de descoberta de cada ferramenta) mas viram adaptadores finos apontando para o corpo compartilhado. `forge-sdd update` migra projetos existentes reaproveitando o mecanismo já existente de `shouldPreserve` (feat-31), sem detecção de diff manual. Nova Regra 15 na Constituição: branch única por pasta de feature quebrada, com pergunta obrigatória de branch de partida/retomada, implementada nos corpos canônicos de `/nova-feature`, `/proxima-feature`, `/novo-fix`. Versão publicada como `v2.2.0-beta` (pedido explícito do usuário, pulando `2.1.0-beta`). Dogfood deste repositório atualizado via `forge-sdd update --yes --version 2.2.0-beta`. Ver `sdd/discovery/discovery-02-...md` e `sdd/features/feat-02-agent-rules-e-branch-por-feature/`.
 - Discovery 01 (simplificação da experiência Forge-SDD + aprendizado contínuo dos agentes) gerada e quebrada via `/split-features` em 8 features dentro de `sdd/features/feat-01-simplificacao-e-aprendizado-continuo/`: telemetria code-enforced (pré-requisito, causa raiz confirmada da falha silenciosa de telemetria relatada pelo usuário — gravação hoje depende de instrução LLM no último passo de `/proxima-feature`, sem cobrir `/revisar`/`/novo-fix`), agregador de telemetria, artefato `lessons.md`, consulta de `lessons.md` no READ-MIN de Builder/Revisor, ferramentas/VCS configuráveis na Constituição (MCPs hoje assumidos sempre disponíveis, `gh pr create` hardcoded sem suporte a Azure DevOps), unificação do lifecycle (hoje 3 descrições divergentes), redução de duplicação de nomenclatura, e auditoria de comandos sobrepostos (recomendação). Ver `sdd/discovery/discovery-01-simplificacao-e-aprendizado-continuo.md`, `criteria-01-...md`, `plan-01-...md`.
 - Fase 50 concluída: telemetria (`sdd/.metrics/session-<ISO8601>.json`) só era gravada de fato pelo agente Gemini. Causa raiz: a instrução concreta de gravação só existia no chatmode Orquestrador; só o `/proxima-feature` do Gemini delegava para ele ("Acione a lógica de Orquestrador") — o do Copilot inlinava passos próprios sem delegar (quebrando o padrão de `revisar`/`archive`) e o do Claude nunca teve papel Orquestrador, com `CLAUDE.md.tmpl` só citando "métricas" de forma vaga. Corrigido: `proxima-feature.prompt.md.tmpl` do Claude ganhou o passo explícito de gravação (schema, campo `feature`, `outcome: blocked/rejected`, estimativa de tokens); o do Copilot passou a delegar ao Orquestrador; `CLAUDE.md.tmpl` passo 5 agora cita o caminho concreto do schema. Dogfood (`CLAUDE.md`, `.claude/commands/`, `.github/prompts/`) e golden fixtures atualizados. Ver `sdd/features/fix-50-telemetry-recording-gemini-only.md`.
 - Fase 49 concluída: a seção "📢 Novidades da Versão" de `README.md`/`npm/README.md` estava travada em v1.9.0-beta havia 3 releases (pulou v1.9.1-beta, v1.9.1, v1.9.2) — página do pacote no NPM mostrava changelog desatualizado. Corrigido em v1.9.2 (PR #44), mas como pacotes NPM são imutáveis, a página da v1.9.2 já publicada ficou congelada no README antigo. v1.9.3 foi publicada só para propagar a correção (sem mudança de código/comportamento).
@@ -114,6 +123,7 @@ Fase 50 — Fix telemetria só grava no Gemini     [x] done
 - Feature 42 concluída (consolidação de todas as versões beta na main, bump de versão para 1.7.0, atualização de golden files e publicação estável v1.7.0 no NPM).
 
 ## Última sessão
+- 2026-08-16 — feat: pacote feat-02 completo (`.agent/rules/`, `.agent/commands/`, migração em `update`, branch única por pasta de feature, pergunta de branch de partida/retomada) — publicado como v2.2.0-beta.
 - 2026-07-20 — fix: implementadas, testadas e validadas as fix-45 (detecção de versão beta no `update --upgrade`) e fix-46 (caminho incorreto de `.metrics/schema.json` nos prompts `/doctor`), agrupadas na mesma branch/PR.
 - 2026-07-09 — feat: concluída a Fase 42 (consolidação e publicação oficial da versão estável v1.7.0).
 - 2026-07-06 — feat: concluída a Fase 41 (agrupamento em subpastas, CLI doctor recursivo e lançamento da v1.6.1-beta.3).
