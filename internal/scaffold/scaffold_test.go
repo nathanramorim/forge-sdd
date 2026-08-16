@@ -25,6 +25,9 @@ func TestWalkTemplates(t *testing.T) {
 		"templates/.github/chatmodes/migrator.chatmode.md.tmpl",
 		"templates/.github/prompts/proxima-feature.prompt.md.tmpl",
 		"templates/.vscode/mcp.json.tmpl",
+		"templates/.agent/rules/README.md.tmpl",
+		"templates/.agent/commands/discovery.md.tmpl",
+		"templates/.agent/commands/proxima-feature.md.tmpl",
 		"templates/agents/gemini/.gemini/mcp.json.tmpl",
 		"templates/sdd/.sdd-version.tmpl",
 		"templates/sdd/.sddrc.tmpl",
@@ -205,5 +208,65 @@ func TestUpgradePreservesDomain(t *testing.T) {
 	geminiData, err := os.ReadFile(geminiFile)
 	require.NoError(t, err)
 	assert.NotEqual(t, "conteudo customizado do agente", string(geminiData))
+}
+
+func TestUpgradePreservesAgentRulesButRegeneratesCommands(t *testing.T) {
+	dir := t.TempDir()
+
+	cfg := config.Config{
+		Project:    "demo",
+		Stack:      "go",
+		DB:         "none",
+		Telemetry:  false,
+		Lang:       "pt-BR",
+		SddVersion: "2.0.0-beta",
+		Agents:     []string{config.AgentClaude},
+	}
+	_, err := Run(cfg, dir)
+	require.NoError(t, err)
+
+	rulesReadme := filepath.Join(dir, ".agent", "rules", "README.md")
+	commandsDiscovery := filepath.Join(dir, ".agent", "commands", "discovery.md")
+	claudeAdapter := filepath.Join(dir, ".claude", "commands", "discovery.prompt.md")
+
+	require.FileExists(t, rulesReadme)
+	require.FileExists(t, commandsDiscovery)
+	require.FileExists(t, claudeAdapter)
+
+	// Usuário cria/edita uma regra própria — deve sobreviver a qualquer update futuro.
+	customRule := filepath.Join(dir, ".agent", "rules", "design-system.md")
+	require.NoError(t, os.WriteFile(customRule, []byte("regra customizada do usuário"), 0644))
+	require.NoError(t, os.WriteFile(rulesReadme, []byte("README customizado pelo usuário"), 0644))
+
+	// Simula edição manual do corpo canônico de um comando — não deve sobreviver ao update
+	// (corpo canônico é gerado pelo forge-sdd, não é domínio do usuário).
+	require.NoError(t, os.WriteFile(commandsDiscovery, []byte("corpo alterado manualmente"), 0644))
+
+	cfgUpgrade := cfg
+	cfgUpgrade.SddVersion = "2.2.0-beta"
+	_, err = Run(cfgUpgrade, dir)
+	require.NoError(t, err)
+
+	// a. Regra customizada do usuário permanece intacta.
+	data, err := os.ReadFile(customRule)
+	require.NoError(t, err)
+	assert.Equal(t, "regra customizada do usuário", string(data))
+
+	// b. README de .agent/rules/ também é preservado (mesma regra de domínio de sdd/).
+	data, err = os.ReadFile(rulesReadme)
+	require.NoError(t, err)
+	assert.Equal(t, "README customizado pelo usuário", string(data))
+
+	// c. Corpo canônico do comando é regenerado a partir do template (não é domínio do usuário).
+	data, err = os.ReadFile(commandsDiscovery)
+	require.NoError(t, err)
+	assert.NotEqual(t, "corpo alterado manualmente", string(data))
+
+	// d. Idempotência: rodar novamente com a mesma versão não falha nem duplica.
+	_, err = Run(cfgUpgrade, dir)
+	require.NoError(t, err)
+	data, err = os.ReadFile(customRule)
+	require.NoError(t, err)
+	assert.Equal(t, "regra customizada do usuário", string(data))
 }
 

@@ -4,6 +4,15 @@ Este arquivo registra o histórico de entregas de produto deste projeto.
 
 ## Entregas
 
+### Versão 2.2.0-beta — Agent Rules e Branch por Feature (Beta)
+
+Pacote da discovery-02: elimina a duplicação de conteúdo de comandos entre agentes e formaliza a estratégia de branch para features quebradas em subpastas. Publicado como beta (Regra 11) sobre a `v2.0.0-beta`, ainda não promovida.
+
+*   **`.agent/rules/*.md`:** pasta neutra na raiz do projeto para regras de domínio (design system, arquitetura, acessibilidade, ...) — qualquer agente configurado (Claude, Gemini, Copilot, OpenAI) consulta os mesmos arquivos, sem duplicar conteúdo entre `.claude/`, `.gemini/`, `.github/`. `forge-sdd update` cria a pasta se ausente e nunca sobrescreve regra já existente.
+*   **`.agent/commands/*.md`:** os 13 comandos SDD passam a ter um corpo de instrução canônico único. `.claude/commands/`, `.gemini/prompts/` e `.github/prompts/` continuam existindo — é o mecanismo de descoberta de cada ferramenta (`/comando` no autocomplete de cada agente não muda) — mas agora contêm só o frontmatter/sintaxe específicos e uma referência ao corpo compartilhado. Uma mudança de comportamento de comando passa a ser feita uma vez, não três.
+*   **Branch única por pasta de feature quebrada:** `/nova-feature`, `/proxima-feature` e `/novo-fix` agora tratam `sdd/features/<prefixo>-ID-<nome>/` como uma única unidade de branch, agrupando todas as subtarefas — nova Regra 15 da Constituição.
+*   **Pergunta obrigatória de branch de partida e retomada:** antes de criar uma branch, os três comandos acima perguntam de onde partir (default `main`) e checam (`git branch --list <prefixo>/*`) se já existe uma branch da mesma feature/fix de sessão anterior a retomar.
+
 ### Versão 2.0.0-beta — Forge-SDD Slim (Beta)
 
 Pacote completo de simplificação e aprendizado contínuo, resultado da discovery-01 (análise como Eng. de Software Sênior + UX Sênior). **Breaking change controlado** — publicado como beta antes de promover a versão estável.

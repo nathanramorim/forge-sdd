@@ -57,7 +57,7 @@ func Run(cfg config.Config, targetDir string) ([]string, error) {
 
 	// 1. Templates globais (sdd/, .vscode/, e .github/ do copilot)
 	//    Sempre renderizados — são agnósticos ao agente de IA.
-	globalRoots := []string{"templates/sdd"}
+	globalRoots := []string{"templates/sdd", "templates/.agent"}
 
 	// .vscode/ e .github/ só são incluídos quando copilot está selecionado
 	copilotSelected := false
@@ -227,6 +227,15 @@ func shouldPreserve(dest string, targetDir string) bool {
 			return false
 		}
 		// Todo o restante do domínio (memory, spec, features, releases, README, HOWTO, plan) é preservado
+		return true
+	}
+
+	// .agent/rules/ é conteúdo do usuário (regras de domínio livres) — nunca sobrescrito
+	// uma vez criado, mesmo espírito de preservação de domínio usado em sdd/.
+	// .agent/commands/ (corpo canônico dos comandos) NÃO entra aqui: é gerado pelo
+	// forge-sdd e deve continuar sendo atualizado a cada init/update, como qualquer
+	// outro arquivo de configuração de agente.
+	if strings.HasPrefix(rel, ".agent/rules/") {
 		return true
 	}
 

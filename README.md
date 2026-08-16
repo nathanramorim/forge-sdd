@@ -40,7 +40,19 @@ npx @nathanramorim/forge-sdd@latest init
 npx @nathanramorim/forge-sdd@latest init . --agent copilot,gemini --name meu-projeto
 ```
 
-## ✨ Forge-SDD Slim (v2.0.0-beta) — mais simples, e os agentes agora aprendem com os próprios erros
+## ✨ Agent Rules e Branch por Feature (v2.2.0-beta) — uma fonte, três agentes, sem duplicar
+
+*   **`.agent/rules/` — regras de domínio compartilhadas:** declare design system, arquitetura, acessibilidade e outras convenções do seu projeto em `.agent/rules/*.md`, uma pasta neutra fora de `.claude/`/`.gemini/`/`.github/`. Qualquer agente configurado consulta o mesmo arquivo — nada para copiar entre eles.
+*   **`.agent/commands/` — comandos com corpo único, não mais triplicado:** os 13 comandos SDD (`/discovery`, `/proxima-feature`, etc.) agora têm um corpo de instrução canônico em `.agent/commands/`. `.claude/commands/`, `.gemini/prompts/` e `.github/prompts/` continuam existindo (é assim que cada ferramenta descobre o comando), mas viram adaptadores finos que apontam para o corpo compartilhado — uma mudança de comportamento passa a ser editada uma vez, não três.
+*   **`forge-sdd update` migra sem perder nada:** projetos existentes ganham `.agent/rules/` e `.agent/commands/` automaticamente ao atualizar, sem tocar em `sdd/features/`, `sdd/discovery/`, `sdd/fix/*` ou `progress.md`. Regras já criadas em `.agent/rules/` nunca são sobrescritas.
+*   **Branch única por feature quebrada em subpastas:** ao trabalhar em uma feature dividida em subtarefas (`sdd/features/feat-XX-nome/`), os agentes (`/nova-feature`, `/proxima-feature`, `/novo-fix`) agora tratam a pasta inteira como uma única branch — em vez de uma por subtarefa.
+*   **Pergunta obrigatória de branch de partida e retomada:** antes de criar uma branch, os agentes perguntam de onde partir (default `main`) e verificam se já existe uma branch da mesma feature/fix para continuar, em vez de recriar do zero.
+
+📢 [Ver todas as entregas desta versão](https://github.com/nathanramorim/forge-sdd/blob/main/sdd/releases/history.md)
+
+---
+
+## 📢 Novidades da Versão Anterior (v2.0.0-beta — Forge-SDD Slim)
 
 A metodologia continua completa — só ficou mais fácil de confiar nela.
 
@@ -49,8 +61,6 @@ A metodologia continua completa — só ficou mais fácil de confiar nela.
 *   **MCPs e VCS configuráveis por projeto:** declare na Constituição se o seu projeto usa GitHub, Azure DevOps ou nenhum VCS automatizado, e quais MCPs realmente respondem — sem mais suposições incondicionais.
 *   **Um fluxo, uma fonte da verdade:** o pipeline por feature agora vive em um único lugar (`sdd/FLOW.md`), não em três descrições que podiam divergir.
 *   **Menos duplicação nos bastidores:** a lógica de nomenclatura, antes copiada em ~14 lugares, agora vive em um único arquivo — mesma capacidade, menos superfície para manter.
-
-📢 [Ver todas as entregas desta versão](https://github.com/nathanramorim/forge-sdd/blob/main/sdd/releases/history.md)
 
 ---
 

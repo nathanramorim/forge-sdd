@@ -1,21 +1,3 @@
 # Prompt: constitution
 
-**Uso:** Peça "/constitution" ou "alinhar arquitetura"
-
-**Ação:**
-Você deve atuar como o **Specifier** em uma sessão de alinhamento arquitetural.
-
-0. **Idioma:** Antes de qualquer outra coisa, pergunte ao usuário (a) em qual idioma o chat deve interagir daqui em diante e (b) em qual idioma escrever commits e PRs (título e descrição). Registre a resposta em `sdd/memory/constitution.md`, seção Regras de Ouro, e siga essa escolha a partir desse ponto, inclusive nesta própria sessão.
-0b. **Nível de Linguagem (opcional):** Pergunte também se o usuário prefere o nível `padrão` (jargão técnico normal) ou `iniciante` (linguagem simplificada, com exemplos concretos no lugar de termos como "C4 Model" ou "critério de aceitação executável"). Registre a resposta em `sdd/memory/constitution.md`, seção Regras de Ouro, como `Nível de Linguagem: <padrão|iniciante>`. A partir daqui, e em toda futura invocação de qualquer comando SDD, respeite essa escolha ao explicar conceitos — sem nunca alterar os critérios de aceitação executáveis em si, apenas a forma como são comunicados.
-0c. **Ferramentas:** Pergunte ao usuário (a) qual VCS/work item system este projeto usa — `github`, `azure-devops` ou `nenhum` — e (b) se os MCPs configurados (`context7`, `git`) estão de fato respondendo. Registre a resposta em `sdd/memory/constitution.md` (seção **Ferramentas e Integrações**) e atualize `sdd/memory/mcps.md` (coluna Status: `ativo`/`indisponível`). Comandos que hoje assumem `gh pr create` ou `context7`/`git` incondicionalmente devem checar esses campos antes de agir.
-1. **Discovery de Codebase:** Explore o diretório atual (`list_dir`, `read_file`) em busca de arquivos de configuração (ex: `go.mod`, `package.json`, `Cargo.toml`, `requirements.txt`), estrutura de pastas (`cmd/`, `internal/`, `src/`, `api/`) e padrões de código.
-2. **Elaboração de Regras:** Identifique boas práticas implícitas no projeto (ex: "Usa Clean Architecture", "Testes em arquivos paralelos", "Config via .env").
-3. **Povoamento:**
-   - Preencha `sdd/memory/constitution.md` com a Missão, Stack Real e Regras de Ouro.
-   - Preencha `sdd/spec/stack.md` com as dependências detectadas e o Layout do projeto.
-   - Atualize `sdd/spec/overview.md` com diagramas **C4 Model (Mermaid)** refletindo a arquitetura detectada.
-
-**Protocolo:**
-- Se o projeto for novo (vazio), pergunte ao usuário sobre a visão arquitetural desejada.
-- Garanta que as regras não conflitem com as diretrizes globais do Forge-SDD.
-- Sempre reporte um resumo do que foi detectado antes de escrever nos arquivos.
+Consulte `.agent/commands/constitution.md` e siga as instruções descritas nesse arquivo.

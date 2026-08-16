@@ -1,20 +1,3 @@
-Leia `sdd/memory/progress.md`, identifique a próxima feature com status `todo`, reporte as tasks e aguarde confirmação.
+# Prompt: proxima-feature
 
-Quando confirmado:
-1. Execute `git checkout -b <branch>` usando o nome de branch definido no arquivo `sdd/features/feat-XX.md` (campo **Branch**)
-2. Implemente as tasks listadas
-3. Ao concluir, gere um **Handoff** para a revisão, marque as tasks como concluídas em `progress.md` e `index.md`, e escreva uma release note concisa em linguagem de produto (curta, sem termos técnicos de código, ex: "Agora é possível...") registrando-a no topo de `sdd/releases/history.md` (sob a seção ## Entregas).
-4. **PR Automático:** Faça o commit das alterações de progresso e execute `git push origin <branch>`. Leia o campo "VCS / Work Item System" em `sdd/memory/constitution.md` antes de abrir o PR:
-   - `github` (ou campo ausente/default): crie IMEDIATAMENTE o PR com `gh pr create --fill`.
-   - `azure-devops`: use `az repos pr create` (ou o comando equivalente documentado no projeto) no lugar de `gh pr create`.
-   - `nenhum`: não tente nenhum comando de VCS — apenas informe o usuário de que a branch está pronta e com push feito.
-5. **Gravação de Métricas (determinística):** Se a telemetria estiver habilitada em `sdd/.sddrc` (`telemetry.enabled` como `true`), execute `forge-sdd session record` — a escrita de `sdd/.metrics/session-<ISO8601>.json` agora é feita pelo binário (não depende de você montar o JSON manualmente):
-   ```
-   forge-sdd session record --feature "<caminho relativo completo da feature/fix ou task>" --phase "<ID>" \
-     --agent-path "orquestrador,builder" --outcome approved|rejected|blocked --criterio-atendido=true|false \
-     --tokens-input <estimativa> --tokens-output <estimativa> --turns <n> --duration-seconds <n> \
-     --model "<modelo>" --files-touched "<arquivo1,arquivo2,...>"
-   ```
-   - Se a sessão for inativa, cancelada, sofrer timeout ou encerrar sem atingir a finalização da feature/fix, use `--criterio-atendido=false` e `--outcome blocked` ou `--outcome rejected` para registrar o esforço parcial.
-   - Estime `--tokens-input`/`--tokens-output` de forma realista (1 token ≈ 4 caracteres ou 0.75 palavras), nunca zerados se houve interação.
-6. **Fallbacks:** Se o `gh` não estiver disponível, faça o merge local na main: `git checkout main && git merge --no-ff <branch>` e informe o usuário.
+Consulte `.agent/commands/proxima-feature.md` e siga as instruções descritas nesse arquivo.

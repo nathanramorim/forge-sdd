@@ -29,7 +29,7 @@ CLI Go de comando único (`forge-sdd init`) que scaffolda estruturas Forge-SDD e
 
 Consulte `sdd/memory/mcps.md` para o status real de cada MCP configurado (`ativo`/`indisponível`) antes de assumir que ele responde. Se "VCS / Work Item System" for `azure-devops`, use `az repos pr create` (ou instrução equivalente documentada) em vez de `gh pr create`. Se `nenhum`, deixe a branch pronta e informe o usuário, sem tentar nenhum comando de VCS.
 
-## Regras (máx. 12)
+## Regras (máx. 15)
 1. Sem commits diretos em main
 2. Branch por feature (`feat/*`)
 3. Templates embutidos via `embed.FS` (nunca arquivo externo em runtime)
@@ -44,3 +44,4 @@ Consulte `sdd/memory/mcps.md` para o status real de cada MCP configurado (`ativo
 12. Documentação de Comandos e Release Notes: Ao introduzir novos comandos, eles devem ser atualizados nos documentos do repositório. Os Release Notes devem conter prévias dos comandos CLI (ex: `forge-sdd doctor`) e identificar explicitamente o agente/tipo no caso de prompts de chat de IA (ex: `/status para Claude`).
 13. Agrupamento em Subpastas: Quando houver quebra de features grandes em subfeatures/tasks, os arquivos individuais de tasks devem ser agrupados dentro de uma subpasta com o nome da feature (ex: `sdd/features/feat-XX-nome/task-YY.md`). Se a quebra decorrer de um plano de discovery, a subpasta de feature gerada deve refletir o nome do discovery original (ex: `sdd/features/feat-XX-nome-discovery/`).
 14. Telemetria Incondicional de Sessão: As métricas de sessão devem ser obrigatoriamente gravadas na fase `Close` do Orquestrador (ex: `sdd/.metrics/session-<ISO8601>.json`), mesmo que a sessão seja inativa, cancelada ou interrompida (timeouts). A propriedade `"feature"` deve conter o caminho relativo completo da feature/task aninhada em subpasta para precisão do rastreamento.
+15. Branch Única por Pasta de Feature Quebrada: Quando uma feature/fix é quebrada em subtarefas dentro de uma subpasta (`sdd/features/<prefixo>-ID-<nome>/`), a pasta inteira é a unidade de execução — uma única branch (`<prefixo>/ID-<nome>`) agrupa todas as subtarefas, nunca uma branch por subtarefa. Antes de criar/usar a branch, pergunte obrigatoriamente (a) qual branch usar como ponto de partida (default `main`) e (b) verifique (`git branch --list <prefixo>/ID-*`) se já existe uma branch da mesma feature/fix de sessão anterior a retomar, em vez de recriar do zero.
