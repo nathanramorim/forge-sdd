@@ -2,6 +2,36 @@
 
 <!-- Histórico arquivado pelo Archivist. Não editar manualmente. -->
 
+- 2026-08-16 — feat-02-agent-rules-e-branch-por-feature concluída (discovery-02, escopo expandido de "só rules" para fonte única de agente): `.agent/rules/` (regras de domínio compartilhadas, preservadas em update) e `.agent/commands/` (corpo canônico dos 13 comandos SDD) substituem a duplicação manual entre `.claude/`, `.gemini/`, `.github/`; `forge-sdd update` migra projetos existentes reaproveitando `shouldPreserve` (feat-31); nova Regra 15 da Constituição (branch única por pasta de feature quebrada, com pergunta obrigatória de branch de partida/retomada). Publicado como v2.2.0-beta.
+- 2026-08-16 — Discovery 01 (simplificação e aprendizado contínuo) gerada e quebrada via `/split-features` em 8 features (`sdd/features/feat-01-simplificacao-e-aprendizado-continuo/`): telemetria code-enforced, agregador de telemetria, `lessons.md`, consulta de lessons no READ-MIN de Builder/Revisor, ferramentas/VCS configuráveis na Constituição, unificação do lifecycle, redução de duplicação de nomenclatura, auditoria de comandos sobrepostos.
+- 2026-07-31 — Fase 50 concluída: corrigida a gravação de telemetria que só funcionava de fato no agente Gemini (Claude/Copilot não delegavam para o Orquestrador, que era o único lugar com a instrução concreta de gravação) — `proxima-feature.prompt.md.tmpl` do Claude e Copilot corrigidos, `CLAUDE.md.tmpl` referenciando o schema concreto.
+- 2026-07-30 — Fase 49 concluída: seção "Novidades" do README/npm README travada em v1.9.0-beta havia 3 releases, sincronizada em v1.9.3 (sem mudança de código).
+- 2026-07-30 — fix-48-novo-fix-missing-copilot-agent concluída: `/novo-fix` nunca existiu para o agente Copilot — criado o template e citado nos docs.
+- 2026-07-30 — fix-47-naming-convention-update-flag concluída: `forge-sdd update --naming-convention` era ignorada silenciosamente — flag registrada e aplicada corretamente.
+- 2026-07-21 — v1.9.1-beta promovida a estável (v1.9.1): fix-45 (detecção de versão beta no `update --upgrade`) e fix-46 (caminho de `.metrics/schema.json` no `/doctor`) incorporadas via cherry-pick.
+- 2026-07-13 — Fase 5ae2-08 concluída: correções de nomenclatura, telemetria e estimativa de tokens consolidadas do pacote 5ae2.
+- 2026-07-13 — feat-5ae2-07-modo-iniciante concluída: `/constitution` ganhou pergunta opcional de nível de linguagem (padrão/iniciante); `/discovery` simplifica jargão quando iniciante.
+- 2026-07-11 — feat-5ae2-06-spike-subagentes-nativos concluída (spike): mapeado suporte nativo a subagentes por agente — piloto restrito ao Claude recomendado.
+- 2026-07-10 — feat-5ae2-05-gate-graduacao-autopilot concluída: `forge-sdd autopilot` bloqueia `sdd/.sdd-auto-pilot` até N ciclos `approved` em telemetria, com bypass via `--skip-graduation`.
+- 2026-07-10 — feat-5ae2-04-tutorial-guiado concluída: novo prompt `/tutorial` guia um ciclo SDD fictício; `init --tutorial` sugere rodá-lo.
+- 2026-07-09 — feat-5ae2-03-doctor-deriva-convencao concluída: `forge-sdd doctor` detecta convenções sequencial/hash coexistindo.
+- 2026-07-09 — feat-5ae2-02-status-prescritivo concluída: `/status` sempre sugere o próximo comando.
+- 2026-07-09 — feat-5ae2-01-cheat-sheet-init concluída: `forge-sdd init` imprime a lista de comandos SDD disponíveis ao final do scaffold.
+- 2026-07-13 — feat-43-cli-shortcut-and-welcome concluída (v1.9.0-beta): atalho `forge` e mensagem de boas-vindas.
+- 2026-07-09 — Fase 42 concluída: consolidação de todas as versões beta na main, bump para 1.7.0, golden files atualizados, publicação estável v1.7.0 no NPM.
+- 2026-07-06 — Fase 41 concluída: agrupamento em subpastas, CLI doctor recursivo, lançamento da v1.6.1-beta.3.
+- 2026-07-05 — Fase 40 concluída: refinamento do init, criação de subpastas, relatórios, lançamento da v1.6.1-beta.2.
+- 2026-07-05 — Fase 39 concluída: comandos doctor/destroy implementados, lançamento da v1.6.1-beta.1.
+- 2026-07-04 — Fase 38 concluída: detecção inteligente de projeto existente, lançamento da v1.6.1-beta.0.
+- 2026-07-03 — Fase 37 concluída: publicação oficial da versão estável v1.6.0.
+- 2026-06-30 — Fase 36 concluída: documentação estruturada com diagramas conceituais Mermaid.
+- 2026-06-29 — Fase 35 concluída: remoção da funcionalidade /install-skill nos três agentes e documentação.
+- 2026-06-29 — Fase 34 concluída: migração dos prompts do Copilot para nova especificação.
+- 2026-06-28 — Fase 33 concluída: sincronização automática da wiki no GitHub Actions.
+- 2026-06-28 — Fase 32-product-release-notes concluída: `sdd/releases/history.md` criado; Orquestrador passa a registrar release notes em linguagem de produto ao final de cada feature.
+- 2026-06-27 — Fase 31-upgrade-preserves-domain concluída: `update`/`init` em projeto existente preservam arquivos de domínio do usuário (progress.md, constitution.md, features/*), atualizando só arquivos estruturais/de agentes e versão.
+- 2026-06-27 — Fase 30-fix-branch-pr-flow concluída: Specifier passa a criar a branch como Passo 1 mandatório; Orquestrador automatiza `gh pr create` no fechamento de features.
+- 2026-06-28 — Fase 23 concluída: MCP e Habilidades Específicas por Agente, roadmap inicial do forge-sdd finalizado.
 - 2026-06-26 — feat-27-upgrade-node-ci concluída: Atualizado o setup-node de v20 para v24 no workflow npm-publish.yml para contornar avisos de obsolescência do Node 20.
 - 2026-06-26 — feat-26-open-source-readme concluída: Atualizado o README.md do projeto para declarar o status de Open Source e documentar o propósito de facilitação e controle do desenvolvimento orientado a IA.
 - 2026-06-12 — feat-18-sdd-handoffs concluída: Formalizado o Protocolo de Handoff entre fases (Discovery, Spec, Act, Review). Campo Handoff Context adicionado ao progress.md para persistência de memória.
