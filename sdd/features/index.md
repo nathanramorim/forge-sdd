@@ -117,7 +117,7 @@ main
 | 40 | feat-40-cli-init-refinement.md | feat/cli-init-refinement | 40 | done |
 | 41 | feat-41-nested-features-discovery.md | feat/cli-nested-features-discovery | 41 | done |
 | 42 | feat-42-release-v1.7.0.md | feat/release-v1.7.0 | 42 | done |
-| 43a2 | feat-43a2-telemetry-metrics-nested.md | fix/telemetry-metrics-nested | 43a2 | doing |
+| 43a2 | feat-43a2-telemetry-metrics-nested.md | fix/telemetry-metrics-nested | 43a2 | done |
 | 43 | feat-43-cli-shortcut-and-welcome.md | feat/cli-shortcut-and-welcome | 1.9.0-beta | done |
 | 5ae2-01 | feat-5ae2-curva-aprendizado-agentes-ia/feat-5ae2-01-cheat-sheet-init.md | feat/5ae2-cheat-sheet-init | 5ae2-01 | done |
 | 5ae2-02 | feat-5ae2-curva-aprendizado-agentes-ia/feat-5ae2-02-status-prescritivo.md | feat/5ae2-status-prescritivo | 5ae2-02 | done |
