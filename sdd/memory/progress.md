@@ -14,7 +14,7 @@ Nenhuma feature `todo`/`doing` pendente. Lista completa (status + branch) em `sd
 
 ## Handoff da última sessão
 - feat-51 concluída e mesclada (PR #49): retenção de releases/branches (`prerelease: auto`, poda pós-release, trava de destaque em betas). Limpeza pontual do GitHub feita. Ver `sdd/features/feat-51-politica-releases-branches.md`.
-- `/doctor` achou `sdd/features/index.md` desatualizado (feat-43a2 = `doing`, já é `done`) — corrigir na próxima sessão.
+- Corrigido `sdd/features/index.md`: feat-43a2 estava `doing`, já era `done` (achado do `/doctor`).
 
 ## Última sessão
 - 2026-08-25 — feat-51 concluída e mesclada (retenção de releases/branches).
