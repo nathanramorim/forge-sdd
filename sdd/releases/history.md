@@ -4,6 +4,14 @@ Este arquivo registra o histórico de entregas de produto deste projeto.
 
 ## Entregas
 
+### Próxima versão — Política de Retenção de Releases e Branches
+
+Ainda sem tag/versão publicada — aguardando decisão de bump na próxima publicação.
+
+*   **Menos ruído nas Releases do GitHub:** agora só ficam visíveis as 3 versões estáveis mais recentes, mais qualquer versão beta ativa publicada depois delas — a limpeza acontece automaticamente a cada nova release. Antes, o histórico acumulava dezenas de releases e rascunhos antigos sem nenhuma limpeza.
+*   **Betas com destaque de verdade:** toda versão beta publicada agora exibe o selo "Pre-release" no GitHub e é obrigada a trazer uma lista real do que foi melhorado — a publicação é bloqueada se a versão beta não tiver esse destaque escrito.
+*   **Faxina pontual:** removidas nesta sessão 20 releases antigas, 21 rascunhos duplicados e 13 branches já mescladas que estavam acumuladas no repositório.
+
 ### Versão 2.2.0-beta — Agent Rules e Branch por Feature (Beta)
 
 Pacote da discovery-02: elimina a duplicação de conteúdo de comandos entre agentes e formaliza a estratégia de branch para features quebradas em subpastas. Publicado como beta (Regra 11) sobre a `v2.0.0-beta`, ainda não promovida.

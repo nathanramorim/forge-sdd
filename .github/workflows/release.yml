@@ -49,6 +49,16 @@ jobs:
           
           echo "Release notes written to /tmp/RELEASE_NOTES.md"
 
+      - name: Enforce Beta Release Highlights
+        run: |
+          TAG_NAME="${GITHUB_REF_NAME}"
+          if echo "${TAG_NAME}" | grep -qE -- '-(beta|rc|alpha)'; then
+            if grep -q "Release notes para a versão" /tmp/RELEASE_NOTES.md; then
+              echo "::error::A tag ${TAG_NAME} é uma pre-release e não tem uma seção com destaques reais em sdd/releases/history.md (caiu no texto genérico de fallback). Adicione uma entrada '### Versão <versão> (Beta)' com bullets descrevendo o que foi melhorado antes de publicar."
+              exit 1
+            fi
+          fi
+
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v6
         with:
@@ -57,6 +67,53 @@ jobs:
           args: release --clean --release-notes=/tmp/RELEASE_NOTES.md
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Enforce Release Retention Policy
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          node -e '
+            const { execSync } = require("child_process");
+            const repo = process.env.GITHUB_REPOSITORY;
+            const releases = JSON.parse(execSync(`gh api repos/${repo}/releases --paginate`).toString());
+
+            const isBeta = r => r.prerelease || /-(beta|rc|alpha)(\.|$)/i.test(r.tag_name);
+
+            const drafts = releases.filter(r => r.draft);
+            const published = releases.filter(r => !r.draft);
+            published.sort((a, b) => new Date(b.published_at) - new Date(a.published_at));
+
+            // Mantém as 3 releases estáveis mais recentes, mais qualquer
+            // pre-release publicada depois da mais antiga dessas 3 (betas
+            // ativas à frente da última estável retida). Usa o nome da tag
+            // além do campo `prerelease` da API pois releases antigas (antes
+            // de `prerelease: auto` no goreleaser) não têm o campo setado.
+            const stables = published.filter(r => !isBeta(r));
+            const keepStables = stables.slice(0, 3);
+            const cutoff = keepStables.length
+              ? new Date(keepStables[keepStables.length - 1].published_at)
+              : new Date(0);
+
+            const keepIds = new Set(keepStables.map(r => r.id));
+            for (const r of published) {
+              if (isBeta(r) && new Date(r.published_at) > cutoff) keepIds.add(r.id);
+            }
+            const keptTagNames = new Set(published.filter(r => keepIds.has(r.id)).map(r => r.tag_name));
+
+            const toDelete = [...drafts, ...published.filter(r => !keepIds.has(r.id))];
+            for (const r of toDelete) {
+              console.log(`Deleting release id=${r.id} tag=${r.tag_name} draft=${r.draft}`);
+              execSync(`gh api -X DELETE repos/${repo}/releases/${r.id}`, { stdio: "inherit" });
+              if (!keptTagNames.has(r.tag_name)) {
+                try {
+                  execSync(`git push origin :refs/tags/${r.tag_name}`, { stdio: "inherit" });
+                } catch (e) {
+                  console.log(`Tag ${r.tag_name} não removida (provavelmente já ausente): ${e.message}`);
+                }
+              }
+            }
+            if (!toDelete.length) console.log("Nada para podar — política de retenção já satisfeita.");
+          '
 
       - name: Sync Wiki to lp-forge-sdd
         env:

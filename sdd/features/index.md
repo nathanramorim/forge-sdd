@@ -147,3 +147,4 @@ main
 | 02-05 | feat-02-agent-rules-e-branch-por-feature/feat-02-05-branch-unica-por-pasta-feature.md | feat/02-branch-unica-por-pasta-feature | 02-05 | done |
 | 02-06 | feat-02-agent-rules-e-branch-por-feature/feat-02-06-pergunta-branch-partida-retomada.md | feat/02-pergunta-branch-partida-retomada | 02-06 | done |
 | 02-07 | feat-02-agent-rules-e-branch-por-feature/feat-02-07-release-v2.2.0-beta.md | feat/02-release-v2.2.0-beta | 02-07 | done |
+| 51 | feat-51-politica-releases-branches.md | feat/51-politica-releases-branches | 51 | done |
