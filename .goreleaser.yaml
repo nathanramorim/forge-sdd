@@ -45,6 +45,7 @@ snapshot:
 release:
   draft: false
   replace_existing_artifacts: true
+  prerelease: auto
   github:
     owner: nathanramorim
     name: forge-sdd
