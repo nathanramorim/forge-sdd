@@ -103,7 +103,12 @@ jobs:
             const toDelete = [...drafts, ...published.filter(r => !keepIds.has(r.id))];
             for (const r of toDelete) {
               console.log(`Deleting release id=${r.id} tag=${r.tag_name} draft=${r.draft}`);
-              execSync(`gh api -X DELETE repos/${repo}/releases/${r.id}`, { stdio: "inherit" });
+              try {
+                execSync(`gh api -X DELETE repos/${repo}/releases/${r.id}`, { stdio: "inherit" });
+              } catch (e) {
+                console.log(`Release id=${r.id} não removida (seguindo para as próximas): ${e.message}`);
+                continue;
+              }
               if (!keptTagNames.has(r.tag_name)) {
                 try {
                   execSync(`git push origin :refs/tags/${r.tag_name}`, { stdio: "inherit" });
