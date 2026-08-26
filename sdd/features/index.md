@@ -68,12 +68,14 @@ main
                                                                                                                          └─ feat/02-branch-unica-por-pasta-feature
                                                                                                                              └─ feat/02-pergunta-branch-partida-retomada
                                                                                                                                  └─ feat/02-release-v2.2.0-beta
+                                                                                     └─ feat/03-ergonomia-de-comandos-e-sincronizacao
             ```
 
                                        ## Janelas de paralelismo
                                        feat-5ae2-04, feat-5ae2-05, feat-5ae2-06 e feat-5ae2-07 podem ser desenvolvidas em paralelo entre si após feat-5ae2-03 (não têm dependência direta entre elas).
                                        feat-01-05 (ferramentas configuráveis) é independente da cadeia de telemetria e pode ser desenvolvida em paralelo a feat-01-01..04. feat-01-06, feat-01-07 e feat-01-08 não dependem entre si e podem ser paralelas, mas são priorizadas por último (maior superfície de revisão).
                                        feat-02-01 e feat-02-02 são de baixo risco (pasta nova, sem migração) e podem entrar na mesma branch/PR. feat-02-03 (maior superfície: 12 comandos × 3 agentes) depende só de feat-02-01/02 e deve isolar um comando piloto (`/discovery`) antes de converter os demais. feat-02-04 depende de feat-02-01 e feat-02-03. feat-02-05 e feat-02-06 dependem de feat-02-03 (corpo canônico) e podem ser uma feature só ou duas, a critério do revisor. feat-02-07 fecha o pacote e depende de todas as anteriores.
+                                       feat-03-01 (correção de nome do adaptador Claude) é pré-requisito de feat-03-02 (migração em `update`); ambas podem entrar na mesma branch/PR (baixo risco combinado). feat-03-03 (sincronização remota em `/status`), feat-03-04 (clarify) e feat-03-05 (confirmação de subagente) são independentes entre si e de feat-03-01/02 — podem ser paralelas. feat-03-04 e feat-03-05 compartilham a mesma preocupação ("quando interromper o usuário com uma pergunta") e podem ser unificadas a critério do revisor. feat-03-06 fecha o pacote e depende de todas as anteriores.
 
                                        ## Índice
 
@@ -148,4 +150,10 @@ main
 | 02-06 | feat-02-agent-rules-e-branch-por-feature/feat-02-06-pergunta-branch-partida-retomada.md | feat/02-pergunta-branch-partida-retomada | 02-06 | done |
 | 02-07 | feat-02-agent-rules-e-branch-por-feature/feat-02-07-release-v2.2.0-beta.md | feat/02-release-v2.2.0-beta | 02-07 | done |
 | 51 | feat-51-politica-releases-branches.md | feat/51-politica-releases-branches | 51 | done |
+| 03-01 | feat-03-ergonomia-de-comandos-e-sincronizacao/feat-03-01-correcao-nome-adaptador-claude.md | feat/03-ergonomia-de-comandos-e-sincronizacao | 03-01 | todo |
+| 03-02 | feat-03-ergonomia-de-comandos-e-sincronizacao/feat-03-02-migracao-update-adaptador-claude.md | feat/03-ergonomia-de-comandos-e-sincronizacao | 03-02 | todo |
+| 03-03 | feat-03-ergonomia-de-comandos-e-sincronizacao/feat-03-03-sincronizacao-remota-status.md | feat/03-ergonomia-de-comandos-e-sincronizacao | 03-03 | todo |
+| 03-04 | feat-03-ergonomia-de-comandos-e-sincronizacao/feat-03-04-clarify-nova-feature-novo-fix-discovery.md | feat/03-ergonomia-de-comandos-e-sincronizacao | 03-04 | todo |
+| 03-05 | feat-03-ergonomia-de-comandos-e-sincronizacao/feat-03-05-confirmacao-delegacao-subagente.md | feat/03-ergonomia-de-comandos-e-sincronizacao | 03-05 | todo |
+| 03-06 | feat-03-ergonomia-de-comandos-e-sincronizacao/feat-03-06-documentacao-e-release.md | feat/03-ergonomia-de-comandos-e-sincronizacao | 03-06 | todo |
 | 52 | fix-52-rename-agent-dir-para-agents.md | claude/agent-folder-rename-forge-ww8abl | 52 | done |
