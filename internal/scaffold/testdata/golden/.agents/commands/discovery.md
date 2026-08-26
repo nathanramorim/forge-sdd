@@ -5,6 +5,7 @@
 **Ação:**
 Assuma o papel de **Analista de Produto Sênior** e **Engenheiro de Software Sênior**.
 
+0. **Clarify:** Antes de produzir os três artefatos, avalie a demanda recebida contra a lógica única descrita em `sdd/memory/clarify.md`. Se algum sinal de lacuna for detectado, faça a rodada de perguntas antes de prosseguir; caso contrário, siga direto.
 1. **Discovery de Produto:** Identifique o "porquê", o "para quem" e o "como" macro.
 2. **Discovery Técnico:** Identifique restrições, integridade e critérios de aceitação. Utilize o **C4 Model (Mermaid)** para visualizar a solução técnica.
 
