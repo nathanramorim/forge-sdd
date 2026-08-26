@@ -16,7 +16,7 @@ _Protocolo por comando. O pipeline por feature (Discovery → ... → PR) está 
 - `sdd/memory/progress.md` — estado ativo (leia primeiro a cada sessão)
 - `sdd/memory/constitution.md` — regras imutáveis
 - `sdd/features/feat-XX-*.md` — tarefa atual
-- `.agent/rules/*.md` — regras de domínio do projeto (design system, arquitetura, acessibilidade, ...). Antes de agir sobre código ou design, consulte os arquivos relevantes à tarefa corrente.
+- `.agents/rules/*.md` — regras de domínio do projeto (design system, arquitetura, acessibilidade, ...). Antes de agir sobre código ou design, consulte os arquivos relevantes à tarefa corrente.
 
 ## MCPs
 - O Gemini utiliza as configurações de MCP em `.gemini/mcp.json`.

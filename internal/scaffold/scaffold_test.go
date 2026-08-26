@@ -25,9 +25,9 @@ func TestWalkTemplates(t *testing.T) {
 		"templates/.github/chatmodes/migrator.chatmode.md.tmpl",
 		"templates/.github/prompts/proxima-feature.prompt.md.tmpl",
 		"templates/.vscode/mcp.json.tmpl",
-		"templates/.agent/rules/README.md.tmpl",
-		"templates/.agent/commands/discovery.md.tmpl",
-		"templates/.agent/commands/proxima-feature.md.tmpl",
+		"templates/.agents/rules/README.md.tmpl",
+		"templates/.agents/commands/discovery.md.tmpl",
+		"templates/.agents/commands/proxima-feature.md.tmpl",
 		"templates/agents/gemini/.gemini/mcp.json.tmpl",
 		"templates/sdd/.sdd-version.tmpl",
 		"templates/sdd/.sddrc.tmpl",
@@ -225,8 +225,8 @@ func TestUpgradePreservesAgentRulesButRegeneratesCommands(t *testing.T) {
 	_, err := Run(cfg, dir)
 	require.NoError(t, err)
 
-	rulesReadme := filepath.Join(dir, ".agent", "rules", "README.md")
-	commandsDiscovery := filepath.Join(dir, ".agent", "commands", "discovery.md")
+	rulesReadme := filepath.Join(dir, ".agents", "rules", "README.md")
+	commandsDiscovery := filepath.Join(dir, ".agents", "commands", "discovery.md")
 	claudeAdapter := filepath.Join(dir, ".claude", "commands", "discovery.prompt.md")
 
 	require.FileExists(t, rulesReadme)
@@ -234,7 +234,7 @@ func TestUpgradePreservesAgentRulesButRegeneratesCommands(t *testing.T) {
 	require.FileExists(t, claudeAdapter)
 
 	// Usuário cria/edita uma regra própria — deve sobreviver a qualquer update futuro.
-	customRule := filepath.Join(dir, ".agent", "rules", "design-system.md")
+	customRule := filepath.Join(dir, ".agents", "rules", "design-system.md")
 	require.NoError(t, os.WriteFile(customRule, []byte("regra customizada do usuário"), 0644))
 	require.NoError(t, os.WriteFile(rulesReadme, []byte("README customizado pelo usuário"), 0644))
 
@@ -252,7 +252,7 @@ func TestUpgradePreservesAgentRulesButRegeneratesCommands(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, "regra customizada do usuário", string(data))
 
-	// b. README de .agent/rules/ também é preservado (mesma regra de domínio de sdd/).
+	// b. README de .agents/rules/ também é preservado (mesma regra de domínio de sdd/).
 	data, err = os.ReadFile(rulesReadme)
 	require.NoError(t, err)
 	assert.Equal(t, "README customizado pelo usuário", string(data))
@@ -268,5 +268,52 @@ func TestUpgradePreservesAgentRulesButRegeneratesCommands(t *testing.T) {
 	data, err = os.ReadFile(customRule)
 	require.NoError(t, err)
 	assert.Equal(t, "regra customizada do usuário", string(data))
+}
+
+func TestUpdateMigratesLegacyAgentDirToAgents(t *testing.T) {
+	dir := t.TempDir()
+
+	// Simula um projeto escaffoldado antes da renomeação .agent/ -> .agents/.
+	legacyRules := filepath.Join(dir, ".agent", "rules")
+	legacyCommands := filepath.Join(dir, ".agent", "commands")
+	require.NoError(t, os.MkdirAll(legacyRules, 0755))
+	require.NoError(t, os.MkdirAll(legacyCommands, 0755))
+	require.NoError(t, os.WriteFile(filepath.Join(legacyRules, "custom.md"), []byte("regra antiga do usuário"), 0644))
+	require.NoError(t, os.WriteFile(filepath.Join(legacyCommands, "discovery.md"), []byte("corpo antigo"), 0644))
+
+	cfg := config.Config{
+		Project:    "demo",
+		Stack:      "go",
+		DB:         "none",
+		Telemetry:  false,
+		Lang:       "pt-BR",
+		SddVersion: "2.2.0-beta",
+		Agents:     []string{config.AgentClaude},
+	}
+	_, err := Run(cfg, dir)
+	require.NoError(t, err)
+
+	// a. A pasta legada não existe mais — foi migrada, não duplicada.
+	_, err = os.Stat(filepath.Join(dir, ".agent"))
+	assert.True(t, os.IsNotExist(err), "diretório legado .agent/ deveria ter sido removido após a migração")
+
+	// b. A regra customizada do usuário sobreviveu à migração, com o conteúdo original.
+	migratedRule := filepath.Join(dir, ".agents", "rules", "custom.md")
+	data, err := os.ReadFile(migratedRule)
+	require.NoError(t, err)
+	assert.Equal(t, "regra antiga do usuário", string(data))
+
+	// c. O corpo do comando foi regenerado a partir do template atual (não é domínio do usuário).
+	migratedCommand := filepath.Join(dir, ".agents", "commands", "discovery.md")
+	data, err = os.ReadFile(migratedCommand)
+	require.NoError(t, err)
+	assert.NotEqual(t, "corpo antigo", string(data))
+
+	// d. Idempotência: rodar novamente não falha nem perde a regra migrada.
+	_, err = Run(cfg, dir)
+	require.NoError(t, err)
+	data, err = os.ReadFile(migratedRule)
+	require.NoError(t, err)
+	assert.Equal(t, "regra antiga do usuário", string(data))
 }
 

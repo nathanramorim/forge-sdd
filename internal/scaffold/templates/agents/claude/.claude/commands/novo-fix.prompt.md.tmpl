@@ -1,3 +1,3 @@
 # Prompt: novo-fix
 
-Consulte `.agent/commands/novo-fix.md` e siga as instruções descritas nesse arquivo.
+Consulte `.agents/commands/novo-fix.md` e siga as instruções descritas nesse arquivo.

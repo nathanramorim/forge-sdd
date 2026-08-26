@@ -4,7 +4,7 @@
 
 **Ação:**
 1. Verifique se os budgets de tokens estão sendo respeitados (`sdd/memory/progress.md` ≤ 1 KB?).
-2. Verifique se todos os comandos personalizados do agente existem (adaptadores em `.claude/commands/`, `.gemini/prompts/` ou `.github/prompts/`, conforme o agente) e se `.agent/commands/` correspondente existe para cada um.
+2. Verifique se todos os comandos personalizados do agente existem (adaptadores em `.claude/commands/`, `.gemini/prompts/` ou `.github/prompts/`, conforme o agente) e se `.agents/commands/` correspondente existe para cada um.
 3. Verifique se a configuração do agente possui `context7` e `git` configurados (conforme orientações no arquivo de instruções do agente).
 4. Verifique se há alguma feature `in-progress` sem branch ativa no git.
 5. Verifique se `sdd/.metrics/schema.json` está presente.
