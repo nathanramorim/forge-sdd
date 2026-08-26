@@ -97,10 +97,10 @@ func TestAgentClaude(t *testing.T) {
 	assert.FileExists(t, claudeMD, "CLAUDE.md deve ser criado para agente claude")
 
 	// deve ter commands
-	assert.FileExists(t, filepath.Join(dir, ".claude", "commands", "proxima-feature.prompt.md"))
-	assert.FileExists(t, filepath.Join(dir, ".claude", "commands", "nova-feature.prompt.md"))
-	assert.FileExists(t, filepath.Join(dir, ".claude", "commands", "status.prompt.md"))
-	assert.FileExists(t, filepath.Join(dir, ".claude", "commands", "revisar.prompt.md"))
+	assert.FileExists(t, filepath.Join(dir, ".claude", "commands", "proxima-feature.md"))
+	assert.FileExists(t, filepath.Join(dir, ".claude", "commands", "nova-feature.md"))
+	assert.FileExists(t, filepath.Join(dir, ".claude", "commands", "status.md"))
+	assert.FileExists(t, filepath.Join(dir, ".claude", "commands", "revisar.md"))
 
 	// NÃO deve ter copilot-instructions (copilot não foi selecionado)
 	assert.NoFileExists(t, filepath.Join(dir, ".github", "copilot-instructions.md"))
@@ -227,7 +227,7 @@ func TestUpgradePreservesAgentRulesButRegeneratesCommands(t *testing.T) {
 
 	rulesReadme := filepath.Join(dir, ".agents", "rules", "README.md")
 	commandsDiscovery := filepath.Join(dir, ".agents", "commands", "discovery.md")
-	claudeAdapter := filepath.Join(dir, ".claude", "commands", "discovery.prompt.md")
+	claudeAdapter := filepath.Join(dir, ".claude", "commands", "discovery.md")
 
 	require.FileExists(t, rulesReadme)
 	require.FileExists(t, commandsDiscovery)
