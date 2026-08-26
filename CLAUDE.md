@@ -7,7 +7,7 @@ forge-sdd — stack principal: .
 _Protocolo por comando. O pipeline por feature (Discovery → ... → PR) está em `sdd/FLOW.md` — fonte única da verdade._
 
 1. **READ-MIN:** ler `sdd/memory/progress.md` (Builder e Revisor também leem `sdd/memory/lessons.md` — padrões de erro já corrigidos, antes de implementar/revisar)
-2. **PLAN:** reportar intenção, aguardar confirmação
+2. **PLAN:** reportar intenção, aguardar confirmação — e perguntar objetivamente se a atividade deve ser delegada a um subagente (varredura/pesquisa extensa tende a "sim"; edição pontual e pequena tende a "não"; decisão final é sempre do usuário). Em ferramentas sem esse conceito, item não aplicável.
 3. **ACT:** executar no escopo do papel
 4. **WRITE:** editar apenas arquivos do escopo
 5. **CLOSE** (Orquestrador): atualizar progress, gravar telemetria em `sdd/.metrics/session-<ISO8601>.json` (se `telemetry.enabled`), archive se necessário
