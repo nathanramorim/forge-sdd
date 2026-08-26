@@ -102,7 +102,9 @@ func Run(cfg config.Config, targetDir string) ([]string, error) {
 		created = append(created, files...)
 	}
 
-	cleanObsoleteFiles(targetDir)
+	if !cfg.DryRun {
+		cleanObsoleteFiles(targetDir)
+	}
 	return created, nil
 }
 
@@ -195,7 +197,9 @@ func RunAgents(cfg config.Config, agents []string, targetDir string) ([]string, 
 		}
 		created = append(created, files...)
 	}
-	cleanObsoleteFiles(targetDir)
+	if !cfg.DryRun {
+		cleanObsoleteFiles(targetDir)
+	}
 	return created, nil
 }
 
@@ -262,6 +266,15 @@ func cleanObsoleteFiles(targetDir string) {
 		filepath.Join(".github", "prompts", "install-skill.prompt.md"),
 		filepath.Join(".gemini", "prompts", "install-skill.prompt.md"),
 		filepath.Join(".claude", "commands", "install-skill.prompt.md"),
+	}
+	// feat-03-01/02: .claude/commands/*.prompt.md foi renomeado para *.md (o
+	// Claude Code descobre slash commands pelo nome do arquivo sem ".md" — o
+	// infixo ".prompt" quebrava a descoberta). .claude/commands/ nunca é
+	// preservado por shouldPreserve (é sempre regenerado a cada init/update),
+	// então o arquivo antigo só é removido explicitamente aqui — mesmo padrão
+	// já usado acima para install-skill.prompt.md.
+	for _, cmd := range commandOrder {
+		obsolete = append(obsolete, filepath.Join(".claude", "commands", cmd+".prompt.md"))
 	}
 	for _, rel := range obsolete {
 		path := filepath.Join(targetDir, rel)
