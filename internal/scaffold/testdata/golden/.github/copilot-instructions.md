@@ -16,7 +16,7 @@ _Protocolo por comando. O pipeline por feature (Discovery → ... → PR) está 
 - `sdd/memory/progress.md` — estado ativo
 - `sdd/memory/constitution.md` — regras imutáveis
 - `sdd/features/feat-XX-*.md` (ou aninhados em subpastas) — tarefa atual
-- `.agent/rules/*.md` — regras de domínio do projeto (design system, arquitetura, acessibilidade, ...). Antes de agir sobre código ou design, consulte os arquivos relevantes à tarefa corrente.
+- `.agents/rules/*.md` — regras de domínio do projeto (design system, arquitetura, acessibilidade, ...). Antes de agir sobre código ou design, consulte os arquivos relevantes à tarefa corrente.
 
 ## MCPs
 - **context7** — obrigatório antes de lib externa, desde que `sdd/memory/mcps.md` o liste como `ativo`; se `indisponível`, use a documentação oficial da lib em vez de assumir resposta do MCP

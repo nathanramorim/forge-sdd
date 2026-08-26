@@ -2,21 +2,20 @@
 
 ## Status
 ```
-Fase 51 — Política de retenção de releases/branches [x] done
+Fix 52 — Renomear .agent/ -> .agents/ (com migração em update) [x] done
 ```
 
 ## Features ativas
 Nenhuma feature `todo`/`doing` pendente. Lista completa (status + branch) em `sdd/features/index.md`.
 
 ## Próximo passo
-**Iniciar:** Nenhuma feature `todo`. `feat-02` (com feat-51) e `v2.0.0-beta.0` aguardam push/PR/decisão de promoção a estável.
+**Iniciar:** Nenhuma feature `todo`. `feat-02`+`fix-52` (branch `claude/agent-folder-rename-forge-ww8abl`) e `v2.0.0-beta.0` aguardam push/PR/decisão de promoção a estável.
 **Bloqueios:** —
 
 ## Handoff da última sessão
-- feat-51 concluída e mesclada (PR #49): retenção de releases/branches (`prerelease: auto`, poda pós-release, trava de destaque em betas). Limpeza pontual do GitHub feita. Ver `sdd/features/feat-51-politica-releases-branches.md`.
-- Corrigido `sdd/features/index.md`: feat-43a2 estava `doing`, já era `done` (achado do `/doctor`).
+- fix-52 concluída: `.agent/` renomeada para `.agents/` (templates, dogfood, golden fixtures, adaptadores, docs). Nova `migrateLegacyAgentDir` em `scaffold.go` migra projetos com `.agent/` legado em `update`, preservando `rules/` do usuário. Ver `sdd/features/fix-52-rename-agent-dir-para-agents.md`.
 
 ## Última sessão
-- 2026-08-25 — feat-51 concluída e mesclada (retenção de releases/branches).
+- 2026-08-26 — fix-52 concluída (rename `.agent/` -> `.agents/` + migração em update).
 
 > Histórico completo em `progress-log.md`

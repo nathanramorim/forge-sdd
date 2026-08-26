@@ -1,3 +1,3 @@
 # Prompt: nova-feature
 
-Consulte `.agent/commands/nova-feature.md` e siga as instruções descritas nesse arquivo.
+Consulte `.agents/commands/nova-feature.md` e siga as instruções descritas nesse arquivo.

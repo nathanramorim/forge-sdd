@@ -3,4 +3,4 @@ description: "Guia demo por um ciclo SDD completo e fictício, sem tocar nos dad
 agent: agent
 ---
 
-Consulte `.agent/commands/tutorial.md` e siga as instruções descritas nesse arquivo.
+Consulte `.agents/commands/tutorial.md` e siga as instruções descritas nesse arquivo.

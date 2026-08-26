@@ -49,6 +49,12 @@ func agentTemplateRoot(agent string) string {
 func Run(cfg config.Config, targetDir string) ([]string, error) {
 	var created []string
 
+	if !cfg.DryRun {
+		if err := migrateLegacyAgentDir(targetDir); err != nil {
+			return nil, err
+		}
+	}
+
 	// Garante ao menos um agente
 	agents := cfg.Agents
 	if len(agents) == 0 {
@@ -57,7 +63,7 @@ func Run(cfg config.Config, targetDir string) ([]string, error) {
 
 	// 1. Templates globais (sdd/, .vscode/, e .github/ do copilot)
 	//    Sempre renderizados — são agnósticos ao agente de IA.
-	globalRoots := []string{"templates/sdd", "templates/.agent"}
+	globalRoots := []string{"templates/sdd", "templates/.agents"}
 
 	// .vscode/ e .github/ só são incluídos quando copilot está selecionado
 	copilotSelected := false
@@ -161,6 +167,13 @@ func renderDir(fsys embed.FS, root, stripPrefix string, cfg config.Config, targe
 // Útil para o comando update, que adiciona novos agentes a um projeto existente.
 func RunAgents(cfg config.Config, agents []string, targetDir string) ([]string, error) {
 	var created []string
+
+	if !cfg.DryRun {
+		if err := migrateLegacyAgentDir(targetDir); err != nil {
+			return nil, err
+		}
+	}
+
 	for _, agent := range agents {
 		if agent == config.AgentCopilot {
 			for _, root := range []string{"templates/.vscode", "templates/.github"} {
@@ -230,12 +243,12 @@ func shouldPreserve(dest string, targetDir string) bool {
 		return true
 	}
 
-	// .agent/rules/ é conteúdo do usuário (regras de domínio livres) — nunca sobrescrito
+	// .agents/rules/ é conteúdo do usuário (regras de domínio livres) — nunca sobrescrito
 	// uma vez criado, mesmo espírito de preservação de domínio usado em sdd/.
-	// .agent/commands/ (corpo canônico dos comandos) NÃO entra aqui: é gerado pelo
+	// .agents/commands/ (corpo canônico dos comandos) NÃO entra aqui: é gerado pelo
 	// forge-sdd e deve continuar sendo atualizado a cada init/update, como qualquer
 	// outro arquivo de configuração de agente.
-	if strings.HasPrefix(rel, ".agent/rules/") {
+	if strings.HasPrefix(rel, ".agents/rules/") {
 		return true
 	}
 
@@ -258,3 +271,58 @@ func cleanObsoleteFiles(targetDir string) {
 	}
 }
 
+// migrateLegacyAgentDir migra o antigo diretório ".agent" (fonte única de agente,
+// pré-renomeação) para ".agents" em projetos que já tinham sido escaffoldados com
+// o nome anterior. É um no-op se ".agent" não existir. Nunca perde conteúdo do
+// usuário: quando ".agents" ainda não existe, faz um rename atômico (preserva
+// rules/ e commands/ como estavam); quando ".agents" já existe (update rodado
+// mais de uma vez), mescla arquivo a arquivo sem nunca sobrescrever um arquivo
+// já presente no destino, e só então remove o diretório legado.
+func migrateLegacyAgentDir(targetDir string) error {
+	legacy := filepath.Join(targetDir, ".agent")
+	current := filepath.Join(targetDir, ".agents")
+
+	if _, err := os.Stat(legacy); os.IsNotExist(err) {
+		return nil
+	} else if err != nil {
+		return fmt.Errorf("stat %s: %w", legacy, err)
+	}
+
+	if _, err := os.Stat(current); os.IsNotExist(err) {
+		if err := os.Rename(legacy, current); err != nil {
+			return fmt.Errorf("migrar %s para %s: %w", legacy, current, err)
+		}
+		return nil
+	}
+
+	err := filepath.WalkDir(legacy, func(path string, d fs.DirEntry, err error) error {
+		if err != nil || d.IsDir() {
+			return err
+		}
+		rel, err := filepath.Rel(legacy, path)
+		if err != nil {
+			return err
+		}
+		dest := filepath.Join(current, rel)
+		if _, err := os.Stat(dest); err == nil {
+			// já existe no destino migrado — nunca sobrescreve.
+			return nil
+		}
+		if err := os.MkdirAll(filepath.Dir(dest), 0755); err != nil {
+			return fmt.Errorf("mkdir %s: %w", filepath.Dir(dest), err)
+		}
+		data, err := os.ReadFile(path)
+		if err != nil {
+			return fmt.Errorf("read %s: %w", path, err)
+		}
+		return os.WriteFile(dest, data, 0644)
+	})
+	if err != nil {
+		return fmt.Errorf("migrar conteúdo de %s para %s: %w", legacy, current, err)
+	}
+
+	if err := os.RemoveAll(legacy); err != nil {
+		return fmt.Errorf("remover diretório legado %s: %w", legacy, err)
+	}
+	return nil
+}
