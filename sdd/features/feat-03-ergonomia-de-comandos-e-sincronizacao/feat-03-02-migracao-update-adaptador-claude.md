@@ -3,7 +3,7 @@
 **Branch:** `feat/03-ergonomia-de-comandos-e-sincronizacao`
 **Fase:** 03-02
 **Depende de:** feat-03-01 (novo template `.claude/commands/*.md` precisa existir)
-**Status:** `todo`
+**Status:** `done`
 
 ## Objetivo
 
@@ -20,4 +20,6 @@ Estender `forge-sdd update` para migrar projetos já escaffoldados com o nome an
 
 ## Handoff
 
-Fecha a correção de nome do adaptador Claude (03-01 + 03-02). Próxima etapa do pacote: 03-03 (sincronização remota em `/status`), sem dependência técnica com esta.
+**Desvio consciente do critério 1/2 original, registrado aqui:** a análise de código (`shouldPreserve` em `scaffold.go`) mostrou que `.claude/commands/` **nunca** foi preservado como domínio do usuário — só `sdd/` e `.agents/rules/` são. Ou seja, `.claude/commands/*.prompt.md` já era 100% regenerado/sobrescrito a cada `init`/`update` antes desta feature; não havia detecção de customização a fazer porque o comportamento atual do repositório nunca ofereceu esse contrato para esse caminho. Implementar "detecção de customização" ali teria sido uma garantia nova e não solicitada, inconsistente com o resto do código. O gap real era outro, mais simples: `renderDir` escreve o novo nome (`*.md`) mas nunca apaga o antigo (`*.prompt.md`), deixando lixo duplicado.
+
+Implementado: `cleanObsoleteFiles()` em `scaffold.go` ganhou os 12 nomes antigos de `.claude/commands/*.prompt.md` (reaproveitando `commandOrder` de `cheatsheet.go`, sem duplicar a lista). Durante o teste, encontrado e corrigido um bug pré-existente: `cleanObsoleteFiles()` rodava incondicionalmente, inclusive em `--dry-run`, apagando arquivos reais — corrigido com guarda `!cfg.DryRun` em `Run()`/`RunAgents()` (cumpre Regra 9 da Constituição, que este código já deveria cumprir antes). Novo teste `TestUpdateCleansObsoleteClaudePromptSuffix` cobre remoção do arquivo antigo, idempotência e `--dry-run` sem efeito colateral. `go build/vet/test` passam. Commit `577c28b`.

@@ -40,15 +40,25 @@ npx @nathanramorim/forge-sdd@latest init
 npx @nathanramorim/forge-sdd@latest init . --agent copilot,gemini --name meu-projeto
 ```
 
-## ✨ Agent Rules e Branch por Feature (v2.2.0-beta) — uma fonte, três agentes, sem duplicar
+## ✨ Ergonomia de Comandos e Sincronização (v2.3.0-beta)
+
+*   **Comando do Claude corrigido:** `.claude/commands/*.md` (sem o sufixo `.prompt`) — o Claude Code descobre slash commands pelo nome do arquivo sem `.md`, então `nova-feature.prompt.md` registrava `/nova-feature.prompt`, não `/nova-feature`, quebrando o comando recomendado por todo handoff. Gemini/Copilot não mudam — mantêm `.prompt.md`, que é a convenção correta de cada um. `forge-sdd update` limpa o nome antigo automaticamente.
+*   **`.agent/` renomeada para `.agents/`:** ajuste de nome da fonte única de agente antes de qualquer publicação estável; `forge-sdd update` migra projetos que já tinham `.agent/`, preservando `rules/` do usuário.
+*   **`/status` agora sincroniza com o remoto:** roda `git fetch` e compara ahead/behind antes do relatório; se o VCS configurado for GitHub, cruza `gh pr list` com `sdd/features/index.md` e aponta branches órfãs ou PRs não referenciados numa nova seção "Divergência Remota" — evita decisões tomadas com base em estado desatualizado.
+*   **Clarify em `/nova-feature`, `/novo-fix` e `/discovery`:** os três comandos agora avaliam a descrição recebida contra sinais objetivos de ambiguidade (critério de aceitação ausente, escopo com mais de uma leitura, dependência externa não citada) e só perguntam ao usuário quando detectam lacuna real — pedidos já claros seguem direto, sem fricção.
+*   **Confirmação de delegação a subagente:** o passo `PLAN` do lifecycle (todo agente, todo comando) agora pergunta objetivamente se a próxima atividade deve ser delegada a um subagente, com critério documentado — decisão deixa de ser implícita.
+
+📢 [Ver todas as entregas desta versão](https://github.com/nathanramorim/forge-sdd/blob/main/sdd/releases/history.md)
+
+---
+
+## 📢 Novidades da Versão Anterior (v2.2.0-beta) — uma fonte, três agentes, sem duplicar
 
 *   **`.agents/rules/` — regras de domínio compartilhadas:** declare design system, arquitetura, acessibilidade e outras convenções do seu projeto em `.agents/rules/*.md`, uma pasta neutra fora de `.claude/`/`.gemini/`/`.github/`. Qualquer agente configurado consulta o mesmo arquivo — nada para copiar entre eles.
 *   **`.agents/commands/` — comandos com corpo único, não mais triplicado:** os 13 comandos SDD (`/discovery`, `/proxima-feature`, etc.) agora têm um corpo de instrução canônico em `.agents/commands/`. `.claude/commands/`, `.gemini/prompts/` e `.github/prompts/` continuam existindo (é assim que cada ferramenta descobre o comando), mas viram adaptadores finos que apontam para o corpo compartilhado — uma mudança de comportamento passa a ser editada uma vez, não três.
 *   **`forge-sdd update` migra sem perder nada:** projetos existentes ganham `.agents/rules/` e `.agents/commands/` automaticamente ao atualizar, sem tocar em `sdd/features/`, `sdd/discovery/`, `sdd/fix/*` ou `progress.md`. Regras já criadas em `.agents/rules/` nunca são sobrescritas.
 *   **Branch única por feature quebrada em subpastas:** ao trabalhar em uma feature dividida em subtarefas (`sdd/features/feat-XX-nome/`), os agentes (`/nova-feature`, `/proxima-feature`, `/novo-fix`) agora tratam a pasta inteira como uma única branch — em vez de uma por subtarefa.
 *   **Pergunta obrigatória de branch de partida e retomada:** antes de criar uma branch, os agentes perguntam de onde partir (default `main`) e verificam se já existe uma branch da mesma feature/fix para continuar, em vez de recriar do zero.
-
-📢 [Ver todas as entregas desta versão](https://github.com/nathanramorim/forge-sdd/blob/main/sdd/releases/history.md)
 
 ---
 

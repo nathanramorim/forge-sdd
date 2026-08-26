@@ -3,7 +3,7 @@
 **Branch:** `feat/03-ergonomia-de-comandos-e-sincronizacao`
 **Fase:** 03-01
 **Depende de:** — (sem dependência; menor risco do pacote)
-**Status:** `todo`
+**Status:** `done`
 
 ## Objetivo
 
@@ -19,4 +19,4 @@ Corrigir o nome dos 12 arquivos de comando do adaptador Claude: `.claude/command
 
 ## Handoff
 
-Pré-requisito da feature 03-02 (migração em `forge-sdd update` depende do novo template já existir).
+Implementado: `git mv` dos 12 arquivos em `.claude/commands/` (dogfood) e do template-fonte `internal/scaffold/templates/agents/claude/.claude/commands/*.prompt.md.tmpl` → `*.md.tmpl`; `CLAUDE.md`/`CLAUDE.md.tmpl` (tabela de comandos) atualizados sem o sufixo `.prompt`; nova `agentPromptSuffix()` em `internal/scaffold/cheatsheet.go` (Claude usa `.md.tmpl`, demais mantêm `.prompt.md.tmpl` — `CommandCheatSheet()` lia sufixo fixo para todos os agentes, quebrava para Claude); `scaffold_test.go` ajustado (Gemini permanece `.prompt.md`). `.claude/` não entra em golden fixtures (só `AgentCopilot` é testado via golden) — cobertura real são as assertions diretas de `TestAgentClaude`. `go build/vet/test` passam. Commit `2f94534`.

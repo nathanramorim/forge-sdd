@@ -3,7 +3,7 @@
 **Branch:** `feat/03-ergonomia-de-comandos-e-sincronizacao`
 **Fase:** 03-06
 **Depende de:** feat-03-01, feat-03-02, feat-03-03, feat-03-04, feat-03-05 (todas `done`)
-**Status:** `todo`
+**Status:** `done`
 
 ## Objetivo
 
@@ -18,4 +18,4 @@ Fechar o pacote: atualizar documentação e (se aplicável) release notes citand
 
 ## Handoff
 
-Última etapa do pacote — só inicia depois de 03-01 a 03-05 estarem `done`.
+Implementado: `README.md`/`npm/README.md` ganharam a seção "Ergonomia de Comandos e Sincronização (v2.3.0-beta)" com os 4 destaques de feat-03; `sdd/releases/history.md` ganhou a seção "Versão 2.3.0-beta" com bullets reais cobrindo fix-52 + as 5 entregas técnicas de feat-03, identificando agente/comando explicitamente (Regra 12). Bump de versão em `sdd/.sddrc`, `sdd/.sdd-version`, `npm/package.json`, `internal/config/config.go` e `cmd/forge-sdd/main.go` (`2.2.0-beta` → `2.3.0-beta`). `sdd/features/index.md` e `sdd/memory/progress.md` atualizados refletindo `done` em 03-01 a 03-06. Tag `v2.3.0-beta` criada na própria branch (Regra 11 — beta não mescla em `main`), acumulando feat-02 + fix-52 + feat-03. `go build/vet/test` passam.

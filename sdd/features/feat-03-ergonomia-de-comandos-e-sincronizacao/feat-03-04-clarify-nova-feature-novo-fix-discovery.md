@@ -3,7 +3,7 @@
 **Branch:** `feat/03-ergonomia-de-comandos-e-sincronizacao`
 **Fase:** 03-04
 **Depende de:** — (independente das demais features deste pacote)
-**Status:** `todo`
+**Status:** `done`
 
 ## Objetivo
 
@@ -20,4 +20,4 @@
 
 ## Handoff
 
-Independente de 03-01/03-02/03-03/03-05 — pode ser feita em paralelo. Compartilha a mesma preocupação de "quando interromper o usuário com uma pergunta" da feature 03-05 (subagente); revisor decide se vale unificar ou manter separadas.
+Implementado: novo `sdd/memory/clarify.md` (fonte única, mesmo padrão de `naming-convention.md`) com a heurística de 3 sinais objetivos; `.agents/commands/nova-feature.md`, `novo-fix.md` e `discovery.md` referenciam o arquivo num passo 0, antes do PASSO 1 (branch) ou da produção dos artefatos; `sdd/FLOW.md` menciona o novo passo nas seções de Discovery e de Registro/Criação de Branch. Novo template `sdd/memory/clarify.md.tmpl` (escaffoldado uma vez, depois preservado como domínio — mesmo contrato de `naming-convention.md`). Golden fixtures regeneradas. `go build/vet/test` passam. Commit `bbc7457`. Não unificada com 03-05 — mantidas como features separadas (superfícies de mudança distintas: comandos de criação vs. protocolo de lifecycle).
