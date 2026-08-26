@@ -3,7 +3,7 @@
 **Branch:** `feat/03-ergonomia-de-comandos-e-sincronizacao`
 **Fase:** 03-03
 **Depende de:** — (independente das demais features deste pacote)
-**Status:** `todo`
+**Status:** `done`
 
 ## Objetivo
 
@@ -20,4 +20,4 @@
 
 ## Handoff
 
-Independente de 03-01/03-02/03-04/03-05 — pode ser feita em paralelo.
+Implementado: `.agents/commands/status.md` (corpo canônico) ganhou etapa de sincronização remota (`git fetch`, ahead/behind, `gh pr list` condicionado a VCS=`github`, fallback de aviso se indisponível) e nova seção "Divergência Remota" no formato de saída; "Próximo comando sugerido" passa a considerar a divergência. Claude/Gemini/Copilot já apontavam para o corpo canônico — nenhum adaptador precisou de edição própria. Template-fonte e golden fixture sincronizados (`go test ./internal/scaffold/... -run TestGolden -update`). `go build/vet/test` passam. Commit `a62bbcd`.

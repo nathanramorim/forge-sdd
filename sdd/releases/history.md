@@ -12,6 +12,16 @@ Ainda sem tag/versão publicada — aguardando decisão de bump na próxima publ
 *   **Betas com destaque de verdade:** toda versão beta publicada agora exibe o selo "Pre-release" no GitHub e é obrigada a trazer uma lista real do que foi melhorado — a publicação é bloqueada se a versão beta não tiver esse destaque escrito.
 *   **Faxina pontual:** removidas nesta sessão 20 releases antigas, 21 rascunhos duplicados e 13 branches já mescladas que estavam acumuladas no repositório.
 
+### Versão 2.3.0-beta — Ergonomia de Comandos e Sincronização (Beta)
+
+Acumula, na mesma branch/linhagem beta (Regra 11), fix-52 (rename `.agent/` -> `.agents/`) e o pacote da discovery-03 (feat-03, 6 entregas): comando do Claude quebrado, `/status` sem sincronização remota, clarify ausente, e confirmação de delegação a subagente. Publicado sobre a `v2.2.0-beta`, ainda não promovida.
+
+*   **`.agent/` renomeada para `.agents/` (fix-52):** ajuste de nome pedido antes de qualquer publicação estável — a fonte única de agente (`v2.2.0-beta`) nunca chegou a ser publicada com o nome antigo. `forge-sdd update` migra automaticamente projetos que já tinham `.agent/`, preservando `rules/` do usuário sem perda de conteúdo.
+*   **`/nova-feature` para Claude:** `.claude/commands/*.md` (sem `.prompt`) — o Claude Code descobre slash commands pelo nome do arquivo sem `.md`, então `.claude/commands/nova-feature.prompt.md` registrava `/nova-feature.prompt`, não `/nova-feature`, quebrando o comando recomendado por todo handoff (`/nova-feature`, `/status`, etc.). Gemini (`.gemini/prompts/*.prompt.md`) e Copilot (`.github/prompts/*.prompt.md`) não mudam — mantêm a extensão correta de cada ferramenta. `forge-sdd update` remove o nome antigo automaticamente.
+*   **`/status` para Claude/Gemini/Copilot:** roda `git fetch` e compara ahead/behind da branch atual e de `main` contra `origin` antes do relatório; se o VCS configurado for GitHub, cruza `gh pr list` com `sdd/features/index.md` e reporta em uma nova seção "Divergência Remota" branches órfãs ou PRs abertos não referenciados no índice — achado real desta sessão: uma branch remota com uma correção completa ficou sem PR nem entrada no índice.
+*   **Clarify em `/nova-feature`, `/novo-fix` e `/discovery` (Claude/Gemini/Copilot):** os três comandos avaliam a descrição recebida contra sinais objetivos (critério de aceitação ausente, escopo com mais de uma leitura plausível, dependência externa não mencionada) e só perguntam ao usuário quando detectam lacuna real — heurística única em `sdd/memory/clarify.md`, referenciada pelos três, nunca copiada.
+*   **Confirmação de delegação a subagente (Claude/Gemini/Copilot/OpenAI):** o passo `PLAN` do lifecycle (`CLAUDE.md`/`GEMINI.md`/`OPENAI.md`/`copilot-instructions.md`) passa a perguntar objetivamente, antes de cada próxima atividade/comando, se deve ser delegada a um subagente — decisão deixa de ser implícita, com critério documentado e fallback "não aplicável" para ferramentas sem esse conceito.
+
 ### Versão 2.2.0-beta — Agent Rules e Branch por Feature (Beta)
 
 Pacote da discovery-02: elimina a duplicação de conteúdo de comandos entre agentes e formaliza a estratégia de branch para features quebradas em subpastas. Publicado como beta (Regra 11) sobre a `v2.0.0-beta`, ainda não promovida.

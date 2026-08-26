@@ -3,7 +3,7 @@
 **Branch:** `feat/03-ergonomia-de-comandos-e-sincronizacao`
 **Fase:** 03-05
 **Depende de:** — (independente das demais features deste pacote)
-**Status:** `todo`
+**Status:** `done`
 
 ## Objetivo
 
@@ -18,4 +18,6 @@ O protocolo de lifecycle (`CLAUDE.md`/`GEMINI.md`/chatmode Copilot ou ponto úni
 
 ## Handoff
 
-Independente de 03-01/03-02/03-03/03-04 — pode ser feita em paralelo. Maior superfície de comportamento do pacote (afeta todo comando, não um ponto isolado); validar com mais cuidado antes de fechar `done`.
+Implementado: passo `PLAN` do lifecycle ganhou a pergunta de delegação a subagente em `CLAUDE.md`, `GEMINI.md`, `OPENAI.md` e `copilot-instructions.md` (dogfood + templates-fonte correspondentes), com o critério documentado e a nota de "não aplicável" para ferramentas sem esse conceito. Golden fixture de `copilot-instructions.md` regenerada. `go build/vet/test` passam. Commit `af2e820`.
+
+**Nota sobre o critério 4 (validação em uso real):** esta implementação rodou de forma autônoma (sem usuário interativo na sessão), então não foi possível validar em uma sessão real se a pergunta aparece "no momento certo" sem virar fricção — isso só é observável em uso subsequente por um humano. Registrado como acompanhamento: a primeira sessão real após esta mudança deve avaliar se o critério 4 se sustenta na prática (frequência da pergunta, se atrapalha tarefas triviais) e ajustar o critério documentado se necessário.

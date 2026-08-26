@@ -150,10 +150,10 @@ main
 | 02-06 | feat-02-agent-rules-e-branch-por-feature/feat-02-06-pergunta-branch-partida-retomada.md | feat/02-pergunta-branch-partida-retomada | 02-06 | done |
 | 02-07 | feat-02-agent-rules-e-branch-por-feature/feat-02-07-release-v2.2.0-beta.md | feat/02-release-v2.2.0-beta | 02-07 | done |
 | 51 | feat-51-politica-releases-branches.md | feat/51-politica-releases-branches | 51 | done |
-| 03-01 | feat-03-ergonomia-de-comandos-e-sincronizacao/feat-03-01-correcao-nome-adaptador-claude.md | feat/03-ergonomia-de-comandos-e-sincronizacao | 03-01 | todo |
-| 03-02 | feat-03-ergonomia-de-comandos-e-sincronizacao/feat-03-02-migracao-update-adaptador-claude.md | feat/03-ergonomia-de-comandos-e-sincronizacao | 03-02 | todo |
-| 03-03 | feat-03-ergonomia-de-comandos-e-sincronizacao/feat-03-03-sincronizacao-remota-status.md | feat/03-ergonomia-de-comandos-e-sincronizacao | 03-03 | todo |
-| 03-04 | feat-03-ergonomia-de-comandos-e-sincronizacao/feat-03-04-clarify-nova-feature-novo-fix-discovery.md | feat/03-ergonomia-de-comandos-e-sincronizacao | 03-04 | todo |
-| 03-05 | feat-03-ergonomia-de-comandos-e-sincronizacao/feat-03-05-confirmacao-delegacao-subagente.md | feat/03-ergonomia-de-comandos-e-sincronizacao | 03-05 | todo |
-| 03-06 | feat-03-ergonomia-de-comandos-e-sincronizacao/feat-03-06-documentacao-e-release.md | feat/03-ergonomia-de-comandos-e-sincronizacao | 03-06 | todo |
+| 03-01 | feat-03-ergonomia-de-comandos-e-sincronizacao/feat-03-01-correcao-nome-adaptador-claude.md | feat/03-ergonomia-de-comandos-e-sincronizacao | 03-01 | done |
+| 03-02 | feat-03-ergonomia-de-comandos-e-sincronizacao/feat-03-02-migracao-update-adaptador-claude.md | feat/03-ergonomia-de-comandos-e-sincronizacao | 03-02 | done |
+| 03-03 | feat-03-ergonomia-de-comandos-e-sincronizacao/feat-03-03-sincronizacao-remota-status.md | feat/03-ergonomia-de-comandos-e-sincronizacao | 03-03 | done |
+| 03-04 | feat-03-ergonomia-de-comandos-e-sincronizacao/feat-03-04-clarify-nova-feature-novo-fix-discovery.md | feat/03-ergonomia-de-comandos-e-sincronizacao | 03-04 | done |
+| 03-05 | feat-03-ergonomia-de-comandos-e-sincronizacao/feat-03-05-confirmacao-delegacao-subagente.md | feat/03-ergonomia-de-comandos-e-sincronizacao | 03-05 | done |
+| 03-06 | feat-03-ergonomia-de-comandos-e-sincronizacao/feat-03-06-documentacao-e-release.md | feat/03-ergonomia-de-comandos-e-sincronizacao | 03-06 | done |
 | 52 | fix-52-rename-agent-dir-para-agents.md | claude/agent-folder-rename-forge-ww8abl | 52 | done |
