@@ -1,4 +1,4 @@
-# `.agent/rules/` — Regras de Domínio Compartilhadas
+# `.agents/rules/` — Regras de Domínio Compartilhadas
 
 Pasta neutra, fora de `.claude/`, `.gemini/`, `.github/` ou `.openai/` — qualquer agente de IA configurado neste projeto consulta os arquivos aqui antes de agir, sem depender de sintaxe específica de nenhuma ferramenta.
 

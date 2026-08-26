@@ -1,3 +1,3 @@
 # Prompt: tutorial
 
-Consulte `.agent/commands/tutorial.md` e siga as instruções descritas nesse arquivo.
+Consulte `.agents/commands/tutorial.md` e siga as instruções descritas nesse arquivo.
