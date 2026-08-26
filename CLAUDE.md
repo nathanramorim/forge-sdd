@@ -37,15 +37,15 @@ Recomenda-se configurar os seguintes MCPs:
 
 ## Comandos Customizados
 Este projeto define comandos em `.claude/commands/`. Use-os para tarefas recorrentes:
-- `/status` -> `.claude/commands/status.prompt.md`
-- `/proxima-feature` -> `.claude/commands/proxima-feature.prompt.md`
-- `/nova-feature` -> `.claude/commands/nova-feature.prompt.md`
-- `/novo-fix` -> `.claude/commands/novo-fix.prompt.md`
-- `/revisar` -> `.claude/commands/revisar.prompt.md`
-- `/archive` -> `.claude/commands/archive.prompt.md`
-- `/doctor` -> `.claude/commands/doctor.prompt.md`
-- `/upgrade-sdd` -> `.claude/commands/upgrade-sdd.prompt.md`
-- `/discovery` -> `.claude/commands/discovery.prompt.md`
-- `/constitution` -> `.claude/commands/constitution.prompt.md`
-- `/c4-architecture` -> `.claude/commands/c4-architecture.prompt.md`
-- `/split-features` -> `.claude/commands/split-features.prompt.md`
+- `/status` -> `.claude/commands/status.md`
+- `/proxima-feature` -> `.claude/commands/proxima-feature.md`
+- `/nova-feature` -> `.claude/commands/nova-feature.md`
+- `/novo-fix` -> `.claude/commands/novo-fix.md`
+- `/revisar` -> `.claude/commands/revisar.md`
+- `/archive` -> `.claude/commands/archive.md`
+- `/doctor` -> `.claude/commands/doctor.md`
+- `/upgrade-sdd` -> `.claude/commands/upgrade-sdd.md`
+- `/discovery` -> `.claude/commands/discovery.md`
+- `/constitution` -> `.claude/commands/constitution.md`
+- `/c4-architecture` -> `.claude/commands/c4-architecture.md`
+- `/split-features` -> `.claude/commands/split-features.md`

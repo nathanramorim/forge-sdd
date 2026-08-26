@@ -50,6 +50,17 @@ func agentPromptDir(agent string) string {
 	}
 }
 
+// agentPromptSuffix retorna o sufixo de nome de arquivo usado pelos templates de
+// slash-command de um agente. O Claude Code descobre comandos pelo nome do
+// arquivo sem ".md" — por isso usa só ".md.tmpl", sem o infixo ".prompt" que os
+// demais agentes mantêm por convenção própria (Copilot exige ".prompt.md").
+func agentPromptSuffix(agent string) string {
+	if agent == config.AgentClaude {
+		return ".md.tmpl"
+	}
+	return ".prompt.md.tmpl"
+}
+
 var frontMatterDescRe = regexp.MustCompile(`(?m)^description:\s*"?([^"\n]+)"?\s*$`)
 var usoLineRe = regexp.MustCompile(`^\*\*Uso:\*\*\s*(.+)$`)
 var labelOnlyLineRe = regexp.MustCompile(`^\*\*[^*:]+:\*\*\s*$`)
@@ -131,7 +142,7 @@ func CommandCheatSheet(cfg config.Config) []CommandInfo {
 			if dir == "" {
 				continue
 			}
-			data, err := templatesFS.ReadFile(dir + "/" + cmdName + ".prompt.md.tmpl")
+			data, err := templatesFS.ReadFile(dir + "/" + cmdName + agentPromptSuffix(agent))
 			if err != nil {
 				continue
 			}
