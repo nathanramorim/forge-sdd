@@ -317,3 +317,58 @@ func TestUpdateMigratesLegacyAgentDirToAgents(t *testing.T) {
 	assert.Equal(t, "regra antiga do usuário", string(data))
 }
 
+// TestUpdateCleansObsoleteClaudePromptSuffix cobre feat-03-02: projetos
+// escaffoldados antes da correção de nome do adaptador Claude (feat-03-01)
+// tinham .claude/commands/<comando>.prompt.md no disco. Rodar Run/update de
+// novo deve criar o arquivo novo (<comando>.md, sempre regenerado — .claude/
+// nunca é preservado por shouldPreserve) e remover o antigo, sem exigir
+// nenhuma detecção de customização: .claude/commands/ já é 100% regenerado a
+// cada init/update hoje, então o conteúdo do arquivo antigo nunca era
+// domínio do usuário para começo de conversa.
+func TestUpdateCleansObsoleteClaudePromptSuffix(t *testing.T) {
+	dir := t.TempDir()
+
+	// Simula um projeto escaffoldado antes da renomeação *.prompt.md -> *.md.
+	legacyCommands := filepath.Join(dir, ".claude", "commands")
+	require.NoError(t, os.MkdirAll(legacyCommands, 0755))
+	require.NoError(t, os.WriteFile(filepath.Join(legacyCommands, "discovery.prompt.md"), []byte("corpo antigo"), 0644))
+	require.NoError(t, os.WriteFile(filepath.Join(legacyCommands, "status.prompt.md"), []byte("corpo antigo status"), 0644))
+
+	cfg := config.Config{
+		Project:    "demo",
+		Stack:      "go",
+		DB:         "none",
+		Telemetry:  false,
+		Lang:       "pt-BR",
+		SddVersion: "2.3.0-beta",
+		Agents:     []string{config.AgentClaude},
+	}
+	_, err := Run(cfg, dir)
+	require.NoError(t, err)
+
+	// a. Arquivo novo existe.
+	assert.FileExists(t, filepath.Join(dir, ".claude", "commands", "discovery.md"))
+	assert.FileExists(t, filepath.Join(dir, ".claude", "commands", "status.md"))
+
+	// b. Arquivo antigo (.prompt.md) foi removido — não fica lixo duplicado.
+	assert.NoFileExists(t, filepath.Join(dir, ".claude", "commands", "discovery.prompt.md"))
+	assert.NoFileExists(t, filepath.Join(dir, ".claude", "commands", "status.prompt.md"))
+
+	// c. Idempotência: rodar de novo não falha nem recria o arquivo antigo.
+	_, err = Run(cfg, dir)
+	require.NoError(t, err)
+	assert.NoFileExists(t, filepath.Join(dir, ".claude", "commands", "discovery.prompt.md"))
+
+	// d. --dry-run não escreve nem remove nada.
+	dryDir := t.TempDir()
+	legacyDry := filepath.Join(dryDir, ".claude", "commands")
+	require.NoError(t, os.MkdirAll(legacyDry, 0755))
+	require.NoError(t, os.WriteFile(filepath.Join(legacyDry, "discovery.prompt.md"), []byte("corpo antigo"), 0644))
+	dryCfg := cfg
+	dryCfg.DryRun = true
+	_, err = Run(dryCfg, dryDir)
+	require.NoError(t, err)
+	assert.FileExists(t, filepath.Join(dryDir, ".claude", "commands", "discovery.prompt.md"))
+	assert.NoFileExists(t, filepath.Join(dryDir, ".claude", "commands", "discovery.md"))
+}
+
