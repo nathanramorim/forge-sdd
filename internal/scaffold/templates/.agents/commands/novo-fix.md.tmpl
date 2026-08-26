@@ -3,6 +3,7 @@
 **Uso:** Peça "/novo-fix <descrição do bug>"
 
 **Ação:**
+0. **Clarify:** Antes do PASSO 1, avalie a descrição recebida contra a lógica única descrita em `sdd/memory/clarify.md`. Se algum sinal de lacuna for detectado, faça a rodada de perguntas antes de prosseguir; caso contrário, siga direto.
 1. **PASSO 1 MANDATÓRIO — Branch:**
    - **Branch de partida:** Pergunte ao usuário qual branch usar como ponto de partida (default `main`). Só prossiga sem perguntar se o usuário já indicou explicitamente nesta mesma solicitação.
    - **Retomada:** Rode `git branch --list fix/*` para esse fix. Se já existir uma branch correspondente de uma sessão anterior, pergunte se deve continuar a partir dela em vez de criar uma nova.

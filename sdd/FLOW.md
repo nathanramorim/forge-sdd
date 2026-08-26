@@ -45,6 +45,7 @@ O ciclo `READ-MIN → PLAN → ACT → WRITE → CLOSE` descrito em `CLAUDE.md` 
 
 **Comportamento:**
 * O agente assume papéis sênior (Product Manager e Lead Architect) para questionar o escopo, definir restrições técnicas, sugerir arquitetura e gerar um plano preliminar.
+* **Clarify:** antes de produzir os três artefatos, o agente avalia a demanda recebida contra a heurística em `sdd/memory/clarify.md`. Só pergunta ao usuário se detectar lacuna real (critério de aceitação ausente, escopo ambíguo, dependência externa não mencionada) — descrições já claras seguem direto.
 
 ---
 
@@ -64,6 +65,8 @@ O ciclo `READ-MIN → PLAN → ACT → WRITE → CLOSE` descrito em `CLAUDE.md` 
 ---
 
 ## 🌿 3. Registro e Criação de Branch (`/nova-feature`)
+
+**Clarify:** antes do passo de branch abaixo, o agente avalia a descrição recebida (de `/nova-feature` ou `/novo-fix`) contra a heurística em `sdd/memory/clarify.md`. Só pergunta ao usuário se detectar lacuna real — caso contrário, segue direto para o passo 1.
 
 **Regra Crítica de Sequência:**
 > [!IMPORTANT]
