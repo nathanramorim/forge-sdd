@@ -5,7 +5,7 @@
 | Camada | Lib | Versão | Import path |
 |--------|-----|--------|-------------|
 | Runtime | Go | 1.22+ | `GOTOOLCHAIN=local` |
-| CLI | cobra | v1.8.x | `github.com/spf13/cobra` |
+| CLI | cobra | v1.9.x | `github.com/spf13/cobra` |
 | Prompts | huh | v0.3.x | `github.com/charmbracelet/huh` |
 | Templates | embed.FS | stdlib | `//go:embed templates/**` |
 | Render | text/template | stdlib | `text/template` |
