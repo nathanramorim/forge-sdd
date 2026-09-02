@@ -1,0 +1,29 @@
+{
+  "$schema": "forge-sdd/metrics/1.0",
+  "feature": "sdd/features/feat-51-politica-releases-branches.md",
+  "phase": "51",
+  "agent_path": [
+    "orquestrador",
+    "builder"
+  ],
+  "tokens_input": 24000,
+  "tokens_output": 6500,
+  "turns": 14,
+  "duration_seconds": 1500,
+  "criterio_atendido": true,
+  "model": "claude-sonnet-5",
+  "rework_lines": 0,
+  "context7_calls": 0,
+  "git_calls": 0,
+  "files_touched": [
+    ".goreleaser.yaml",
+    ".github/workflows/release.yml",
+    "sdd/memory/constitution.md",
+    "sdd/memory/progress.md",
+    "sdd/features/index.md",
+    "sdd/features/feat-51-politica-releases-branches.md",
+    "sdd/releases/history.md"
+  ],
+  "outcome": "approved",
+  "sdd_version": "2.2.0-beta"
+}

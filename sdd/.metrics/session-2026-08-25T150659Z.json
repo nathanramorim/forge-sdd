@@ -1,0 +1,22 @@
+{
+  "$schema": "forge-sdd/metrics/1.0",
+  "feature": "sdd/features/feat-51-politica-releases-branches.md",
+  "phase": "51-revisao",
+  "agent_path": [
+    "revisor"
+  ],
+  "tokens_input": 9000,
+  "tokens_output": 2200,
+  "turns": 6,
+  "duration_seconds": 420,
+  "criterio_atendido": true,
+  "model": "claude-sonnet-5",
+  "rework_lines": 0,
+  "context7_calls": 0,
+  "git_calls": 0,
+  "files_touched": [
+    ".github/workflows/release.yml"
+  ],
+  "outcome": "approved",
+  "sdd_version": "2.2.0-beta"
+}
