@@ -7,7 +7,7 @@ CLI Go de comando único (`forge-sdd init`) que scaffolda estruturas Forge-SDD e
 | Camada | Escolha | Motivo |
 |--------|---------|--------|
 | Runtime | Go 1.22+ | Binário estático, cross-platform, sem runtime externo |
-| CLI framework | cobra v1.8 | Padrão Go, flags + help automático |
+| CLI framework | cobra v1.9 | Padrão Go, flags + help automático |
 | Prompts interativos | huh v0.3 | Sem CGO, TUI moderno |
 | Templates | embed.FS (stdlib) | Zero dependência para templates |
 | Render | text/template (stdlib) | Suficiente, zero deps |
@@ -30,6 +30,7 @@ CLI Go de comando único (`forge-sdd init`) que scaffolda estruturas Forge-SDD e
 Consulte `sdd/memory/mcps.md` para o status real de cada MCP configurado (`ativo`/`indisponível`) antes de assumir que ele responde. Se "VCS / Work Item System" for `azure-devops`, use `az repos pr create` (ou instrução equivalente documentada) em vez de `gh pr create`. Se `nenhum`, deixe a branch pronta e informe o usuário, sem tentar nenhum comando de VCS.
 
 ## Regras (máx. 15)
+0. Idioma: pt-BR (chat, commits e PRs). Nível de Linguagem: padrão.
 1. Sem commits diretos em main
 2. Branch por feature (`feat/*`)
 3. Templates embutidos via `embed.FS` (nunca arquivo externo em runtime)
