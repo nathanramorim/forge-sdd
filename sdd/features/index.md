@@ -69,6 +69,7 @@ main
                                                                                                                              └─ feat/02-pergunta-branch-partida-retomada
                                                                                                                                  └─ feat/02-release-v2.2.0-beta
                                                                                      └─ feat/03-ergonomia-de-comandos-e-sincronizacao
+                                                                                         └─ feat/55-telemetria-cobertura-total-e-relatorio
             ```
 
                                        ## Janelas de paralelismo
@@ -76,6 +77,7 @@ main
                                        feat-01-05 (ferramentas configuráveis) é independente da cadeia de telemetria e pode ser desenvolvida em paralelo a feat-01-01..04. feat-01-06, feat-01-07 e feat-01-08 não dependem entre si e podem ser paralelas, mas são priorizadas por último (maior superfície de revisão).
                                        feat-02-01 e feat-02-02 são de baixo risco (pasta nova, sem migração) e podem entrar na mesma branch/PR. feat-02-03 (maior superfície: 12 comandos × 3 agentes) depende só de feat-02-01/02 e deve isolar um comando piloto (`/discovery`) antes de converter os demais. feat-02-04 depende de feat-02-01 e feat-02-03. feat-02-05 e feat-02-06 dependem de feat-02-03 (corpo canônico) e podem ser uma feature só ou duas, a critério do revisor. feat-02-07 fecha o pacote e depende de todas as anteriores.
                                        feat-03-01 (correção de nome do adaptador Claude) é pré-requisito de feat-03-02 (migração em `update`); ambas podem entrar na mesma branch/PR (baixo risco combinado). feat-03-03 (sincronização remota em `/status`), feat-03-04 (clarify) e feat-03-05 (confirmação de subagente) são independentes entre si e de feat-03-01/02 — podem ser paralelas. feat-03-04 e feat-03-05 compartilham a mesma preocupação ("quando interromper o usuário com uma pergunta") e podem ser unificadas a critério do revisor. feat-03-06 fecha o pacote e depende de todas as anteriores.
+                                       feat-55-01 (classificação de tipo de sessão) é pré-requisito de feat-55-02 (comando `report`, que agrupa por tipo). feat-55-03/04/05/06 (cobertura de telemetria em `/discovery`, `/split-features`, `/nova-feature`, `/archive`) são independentes entre si e de feat-55-01/02 — mesmo padrão de "um comando por task" de feat-02-03/feat-03, podem ser todas paralelas. feat-55-07 fecha o pacote e depende de todas as anteriores.
 
                                        ## Índice
 
@@ -158,3 +160,10 @@ main
 | 03-06 | feat-03-ergonomia-de-comandos-e-sincronizacao/feat-03-06-documentacao-e-release.md | feat/03-ergonomia-de-comandos-e-sincronizacao | 03-06 | done |
 | 52 | fix-52-rename-agent-dir-para-agents.md | claude/agent-folder-rename-forge-ww8abl | 52 | done |
 | 54 | fix-54-npm-publish-latest-tag-404.md | fix/54-npm-publish-latest-tag-404 | 54 | done |
+| 55-01 | feat-55-telemetria-cobertura-total-e-relatorio/feat-55-01-classificacao-tipo-sessao.md | feat/55-telemetria-cobertura-total-e-relatorio | 55-01 | todo |
+| 55-02 | feat-55-telemetria-cobertura-total-e-relatorio/feat-55-02-comando-report.md | feat/55-telemetria-cobertura-total-e-relatorio | 55-02 | todo |
+| 55-03 | feat-55-telemetria-cobertura-total-e-relatorio/feat-55-03-telemetria-discovery.md | feat/55-telemetria-cobertura-total-e-relatorio | 55-03 | todo |
+| 55-04 | feat-55-telemetria-cobertura-total-e-relatorio/feat-55-04-telemetria-split-features.md | feat/55-telemetria-cobertura-total-e-relatorio | 55-04 | todo |
+| 55-05 | feat-55-telemetria-cobertura-total-e-relatorio/feat-55-05-telemetria-nova-feature.md | feat/55-telemetria-cobertura-total-e-relatorio | 55-05 | todo |
+| 55-06 | feat-55-telemetria-cobertura-total-e-relatorio/feat-55-06-telemetria-archive.md | feat/55-telemetria-cobertura-total-e-relatorio | 55-06 | todo |
+| 55-07 | feat-55-telemetria-cobertura-total-e-relatorio/feat-55-07-documentacao-report.md | feat/55-telemetria-cobertura-total-e-relatorio | 55-07 | todo |
