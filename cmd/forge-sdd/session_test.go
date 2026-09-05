@@ -118,10 +118,11 @@ func TestAggregateSessionMetrics_NoMetricsDir(t *testing.T) {
 
 func TestClassifySessionType(t *testing.T) {
 	cases := map[string]string{
-		"sdd/discovery/discovery-55-telemetria.md":                                             "discovery",
-		"sdd/features/fix-54-npm-publish-latest-tag-404.md":                                     "fix",
-		"sdd/features/feat-55-telemetria-cobertura-total-e-relatorio/fix-99-algum-fix.md":        "fix",
+		"sdd/discovery/discovery-55-telemetria.md":                                                "discovery",
+		"sdd/features/fix-54-npm-publish-latest-tag-404.md":                                       "fix",
+		"sdd/features/feat-55-telemetria-cobertura-total-e-relatorio/fix-99-algum-fix.md":         "fix",
 		"sdd/features/feat-55-telemetria-cobertura-total-e-relatorio/feat-55-01-classificacao.md": "feature",
+		"sdd/features/feat-42-fix-race-condition.md":                                              "feature",
 		"README.md": "outro",
 	}
 	for feature, want := range cases {

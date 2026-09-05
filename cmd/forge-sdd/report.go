@@ -40,8 +40,9 @@ Determinístico: não depende de o agente de IA montar a tabela manualmente.`,
 		if err != nil {
 			return err
 		}
+		out := cmd.OutOrStdout()
 		if len(records) == 0 {
-			fmt.Println("Nenhuma métrica encontrada em sdd/.metrics — nada para relatar.")
+			fmt.Fprintln(out, "Nenhuma métrica encontrada em sdd/.metrics — nada para relatar.")
 			return nil
 		}
 
@@ -87,7 +88,7 @@ Determinístico: não depende de o agente de IA montar a tabela manualmente.`,
 			return a.Feature < b.Feature
 		})
 
-		w := tabwriter.NewWriter(cmd.OutOrStdout(), 0, 2, 2, ' ', 0)
+		w := tabwriter.NewWriter(out, 0, 2, 2, ' ', 0)
 		fmt.Fprintln(w, "TIPO\tITEM\tSESSOES\tTOKENS(IN+OUT)\tMODELOS\tDURACAO")
 		for _, key := range order {
 			it := items[key]
@@ -107,7 +108,7 @@ Determinístico: não depende de o agente de IA montar a tabela manualmente.`,
 		w.Flush()
 
 		if !oldest.IsZero() && !newest.IsZero() {
-			fmt.Printf("\nIdade medida do projeto (1ª → última métrica registrada): %s\n",
+			fmt.Fprintf(out, "\nIdade medida do projeto (1ª → última métrica registrada): %s\n",
 				formatDuration(int(newest.Sub(oldest).Seconds())))
 		}
 		return nil
