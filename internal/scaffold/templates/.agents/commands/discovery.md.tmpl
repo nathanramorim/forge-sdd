@@ -21,4 +21,6 @@ Mantenha o padrão Forge-SDD de escrita limpa e objetiva.
 
 Verifique `Nível de Linguagem` em `sdd/memory/constitution.md`: se `iniciante`, explique conceitos como "C4 Model" ou "critério de aceitação" com exemplos concretos e linguagem simples, sem alterar os critérios de aceitação em si.
 
+**Gravação de Métricas (determinística):** Se a telemetria estiver habilitada em `sdd/.sddrc`, execute `forge-sdd session record --feature "<discovery-ID-nome.md gerado>" --outcome approved --criterio-atendido=true` — garante telemetria mesmo quando a sessão não avança para `/split-features`.
+
 **Handoff:** Gere um resumo para o próximo passo (`/split-features`), listando os arquivos criados e instruindo a quebrar as features geradas organizando-as dentro de uma subpasta de feature com o nome deste discovery (`sdd/features/feat-ID-<nome-do-discovery>/`).

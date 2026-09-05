@@ -160,10 +160,10 @@ main
 | 03-06 | feat-03-ergonomia-de-comandos-e-sincronizacao/feat-03-06-documentacao-e-release.md | feat/03-ergonomia-de-comandos-e-sincronizacao | 03-06 | done |
 | 52 | fix-52-rename-agent-dir-para-agents.md | claude/agent-folder-rename-forge-ww8abl | 52 | done |
 | 54 | fix-54-npm-publish-latest-tag-404.md | fix/54-npm-publish-latest-tag-404 | 54 | done |
-| 55-01 | feat-55-telemetria-cobertura-total-e-relatorio/feat-55-01-classificacao-tipo-sessao.md | feat/55-telemetria-cobertura-total-e-relatorio | 55-01 | todo |
-| 55-02 | feat-55-telemetria-cobertura-total-e-relatorio/feat-55-02-comando-report.md | feat/55-telemetria-cobertura-total-e-relatorio | 55-02 | todo |
-| 55-03 | feat-55-telemetria-cobertura-total-e-relatorio/feat-55-03-telemetria-discovery.md | feat/55-telemetria-cobertura-total-e-relatorio | 55-03 | todo |
-| 55-04 | feat-55-telemetria-cobertura-total-e-relatorio/feat-55-04-telemetria-split-features.md | feat/55-telemetria-cobertura-total-e-relatorio | 55-04 | todo |
-| 55-05 | feat-55-telemetria-cobertura-total-e-relatorio/feat-55-05-telemetria-nova-feature.md | feat/55-telemetria-cobertura-total-e-relatorio | 55-05 | todo |
-| 55-06 | feat-55-telemetria-cobertura-total-e-relatorio/feat-55-06-telemetria-archive.md | feat/55-telemetria-cobertura-total-e-relatorio | 55-06 | todo |
-| 55-07 | feat-55-telemetria-cobertura-total-e-relatorio/feat-55-07-documentacao-report.md | feat/55-telemetria-cobertura-total-e-relatorio | 55-07 | todo |
+| 55-01 | feat-55-telemetria-cobertura-total-e-relatorio/feat-55-01-classificacao-tipo-sessao.md | feat/55-telemetria-cobertura-total-e-relatorio | 55-01 | done |
+| 55-02 | feat-55-telemetria-cobertura-total-e-relatorio/feat-55-02-comando-report.md | feat/55-telemetria-cobertura-total-e-relatorio | 55-02 | done |
+| 55-03 | feat-55-telemetria-cobertura-total-e-relatorio/feat-55-03-telemetria-discovery.md | feat/55-telemetria-cobertura-total-e-relatorio | 55-03 | done |
+| 55-04 | feat-55-telemetria-cobertura-total-e-relatorio/feat-55-04-telemetria-split-features.md | feat/55-telemetria-cobertura-total-e-relatorio | 55-04 | done |
+| 55-05 | feat-55-telemetria-cobertura-total-e-relatorio/feat-55-05-telemetria-nova-feature.md | feat/55-telemetria-cobertura-total-e-relatorio | 55-05 | done |
+| 55-06 | feat-55-telemetria-cobertura-total-e-relatorio/feat-55-06-telemetria-archive.md | feat/55-telemetria-cobertura-total-e-relatorio | 55-06 | done |
+| 55-07 | feat-55-telemetria-cobertura-total-e-relatorio/feat-55-07-documentacao-report.md | feat/55-telemetria-cobertura-total-e-relatorio | 55-07 | done |

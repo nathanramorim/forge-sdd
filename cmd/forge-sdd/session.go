@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"time"
 
@@ -155,20 +156,31 @@ type SessionMetricsSummary struct {
 	ByFeature map[string]int
 }
 
-// AggregateSessionMetrics lê todos os session-*.json em sdd/.metrics (ignorando
-// schema.json e arquivos inválidos) e retorna um resumo agregado.
-func AggregateSessionMetrics(targetDir string) (SessionMetricsSummary, error) {
-	summary := SessionMetricsSummary{ByFeature: map[string]int{}}
+// sessionFileEntry é um session-*.json já lido e com o timestamp extraído do
+// próprio nome do arquivo (sem depender de um campo de data no schema).
+type sessionFileEntry struct {
+	Metrics   sessionMetrics
+	Timestamp time.Time
+}
+
+var sessionFilenameRe = regexp.MustCompile(`^session-(\d{4}-\d{2}-\d{2}T\d{6}Z)(?:-\d+)?\.json$`)
+
+// readSessionFiles lê todos os session-*.json em sdd/.metrics (ignorando
+// schema.json e arquivos inválidos). Base compartilhada por
+// AggregateSessionMetrics e pelo comando `report` (feat-55-02) — evita
+// duplicar o parsing de arquivo.
+func readSessionFiles(targetDir string) ([]sessionFileEntry, error) {
 	metricsDir := filepath.Join(targetDir, "sdd", ".metrics")
 
 	entries, err := os.ReadDir(metricsDir)
 	if err != nil {
 		if os.IsNotExist(err) {
-			return summary, nil
+			return nil, nil
 		}
-		return summary, fmt.Errorf("falha ao ler %s: %w", metricsDir, err)
+		return nil, fmt.Errorf("falha ao ler %s: %w", metricsDir, err)
 	}
 
+	var result []sessionFileEntry
 	for _, e := range entries {
 		name := e.Name()
 		if e.IsDir() || !strings.HasPrefix(name, "session-") || !strings.HasSuffix(name, ".json") {
@@ -182,6 +194,28 @@ func AggregateSessionMetrics(targetDir string) (SessionMetricsSummary, error) {
 		if err := json.Unmarshal(data, &m); err != nil {
 			continue
 		}
+		var ts time.Time
+		if match := sessionFilenameRe.FindStringSubmatch(name); match != nil {
+			if parsed, err := time.Parse("2006-01-02T150405Z", match[1]); err == nil {
+				ts = parsed
+			}
+		}
+		result = append(result, sessionFileEntry{Metrics: m, Timestamp: ts})
+	}
+	return result, nil
+}
+
+// AggregateSessionMetrics lê todos os session-*.json em sdd/.metrics e
+// retorna um resumo agregado.
+func AggregateSessionMetrics(targetDir string) (SessionMetricsSummary, error) {
+	summary := SessionMetricsSummary{ByFeature: map[string]int{}}
+	records, err := readSessionFiles(targetDir)
+	if err != nil {
+		return summary, err
+	}
+
+	for _, r := range records {
+		m := r.Metrics
 		summary.Total++
 		switch m.Outcome {
 		case "approved":
@@ -196,6 +230,23 @@ func AggregateSessionMetrics(targetDir string) (SessionMetricsSummary, error) {
 		}
 	}
 	return summary, nil
+}
+
+// ClassifySessionType infere o tipo de item (discovery/feature/fix) a partir
+// do caminho relativo gravado em sessionMetrics.Feature — sem exigir um campo
+// novo no schema nem migração das métricas já gravadas (feat-55-01).
+func ClassifySessionType(feature string) string {
+	feature = filepath.ToSlash(feature)
+	switch {
+	case strings.Contains(feature, "sdd/discovery/"):
+		return "discovery"
+	case strings.Contains(feature, "sdd/features/") && strings.Contains(filepath.Base(feature), "fix-"):
+		return "fix"
+	case strings.Contains(feature, "sdd/features/"):
+		return "feature"
+	default:
+		return "outro"
+	}
 }
 
 func splitCsv(csv string) []string {

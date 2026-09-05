@@ -3,7 +3,7 @@
 **Branch:** `feat/55-telemetria-cobertura-total-e-relatorio`
 **Fase:** 55-07
 **Depende de:** feat-55-02, feat-55-03, feat-55-04, feat-55-05, feat-55-06
-**Status:** `todo`
+**Status:** `done`
 
 ## Objetivo
 
