@@ -61,6 +61,14 @@ func agentPromptSuffix(agent string) string {
 	return ".prompt.md.tmpl"
 }
 
+// canonicalCommandDir/canonicalCommandSuffix apontam para a fonte única dos
+// comandos (.agents/commands/), onde a descrição real ("**Uso:**") vive. Os
+// templates por agente em agentPromptDir viraram adaptadores de uma linha que
+// só redirecionam para cá — extrair a descrição deles pegaria o texto do
+// redirect em vez do uso real do comando.
+const canonicalCommandDir = "templates/.agents/commands"
+const canonicalCommandSuffix = ".md.tmpl"
+
 var frontMatterDescRe = regexp.MustCompile(`(?m)^description:\s*"?([^"\n]+)"?\s*$`)
 var usoLineRe = regexp.MustCompile(`^\*\*Uso:\*\*\s*(.+)$`)
 var labelOnlyLineRe = regexp.MustCompile(`^\*\*[^*:]+:\*\*\s*$`)
@@ -142,7 +150,10 @@ func CommandCheatSheet(cfg config.Config) []CommandInfo {
 			if dir == "" {
 				continue
 			}
-			data, err := templatesFS.ReadFile(dir + "/" + cmdName + agentPromptSuffix(agent))
+			if _, err := templatesFS.ReadFile(dir + "/" + cmdName + agentPromptSuffix(agent)); err != nil {
+				continue
+			}
+			data, err := templatesFS.ReadFile(canonicalCommandDir + "/" + cmdName + canonicalCommandSuffix)
 			if err != nil {
 				continue
 			}
