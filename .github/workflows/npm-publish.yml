@@ -43,7 +43,21 @@ jobs:
 
       - name: Publish to npm
         working-directory: npm
-        continue-on-error: true
         run: npm publish --access public --tag ${{ steps.npm-tag.outputs.NPM_TAG }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Verify dist-tag published
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          NPM_TAG="${{ steps.npm-tag.outputs.NPM_TAG }}"
+          for i in $(seq 1 6); do
+            PUBLISHED=$(npm view @nathanramorim/forge-sdd dist-tags."$NPM_TAG" 2>/dev/null || echo "")
+            if [ "$PUBLISHED" = "$TAG" ]; then
+              echo "dist-tag $NPM_TAG confirmado em $TAG"
+              exit 0
+            fi
+            sleep 20
+          done
+          echo "::error::dist-tag $NPM_TAG aponta para '$PUBLISHED', esperado '$TAG'"
+          exit 1
