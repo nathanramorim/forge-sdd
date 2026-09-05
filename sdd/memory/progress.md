@@ -8,11 +8,11 @@ Release v2.3.0 (estável) — PRs #47/#48/#50 promovidos a main [x] publicada
 ```
 
 ## Features ativas
-Nenhuma feature `todo`/`doing` pendente. Lista completa (status + branch) em `sdd/features/index.md`.
+Fix 54 — npm publish falha (404) na tag `latest` (`todo`). Lista completa em `sdd/features/index.md`.
 
 ## Próximo passo
-**Iniciar:** Nenhuma feature `todo`. Aguardando `.goreleaser.yaml`/workflow gerar a tag `v2.3.0` a partir de `main`.
-**Bloqueios:** —
+**Iniciar:** Fix 54 requer acesso à conta npmjs.com (fora do alcance de agente) para checar escopo do `NPM_TOKEN`.
+**Bloqueios:** `npm view @nathanramorim/forge-sdd dist-tags` ainda mostra `latest: 1.9.4`.
 
 ## Handoff da última sessão
 - v2.3.0 promovida a estável: `/code-review` pré-merge corrigiu 3 achados (cheatsheet, orçamento lessons.md, colisão telemetria); PRs rebase-merged com `--admin` (bypass autorizado pelo usuário).
