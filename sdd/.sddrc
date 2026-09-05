@@ -1,6 +1,6 @@
 {
   "project": "forge-sdd",
-  "version": "2.3.0-beta",
+  "version": "2.3.0",
   "agents": ["claude", "gemini"],
   "telemetry": {
     "enabled": true,

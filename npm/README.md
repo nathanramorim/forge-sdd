@@ -40,13 +40,16 @@ npx @nathanramorim/forge-sdd@latest init
 npx @nathanramorim/forge-sdd@latest init . --agent copilot,gemini --name meu-projeto
 ```
 
-## ✨ Ergonomia de Comandos e Sincronização (v2.3.0-beta)
+## ✨ Ergonomia de Comandos e Sincronização (v2.3.0)
+
+Primeira versão estável desde a v1.9.4 — acumula e promove para `main` todo o ciclo beta v2.0.0 → v2.2.0 → v2.3.0 (Forge-SDD Slim, Agent Rules e esta entrega).
 
 *   **Comando do Claude corrigido:** `.claude/commands/*.md` (sem o sufixo `.prompt`) — o Claude Code descobre slash commands pelo nome do arquivo sem `.md`, então `nova-feature.prompt.md` registrava `/nova-feature.prompt`, não `/nova-feature`, quebrando o comando recomendado por todo handoff. Gemini/Copilot não mudam — mantêm `.prompt.md`, que é a convenção correta de cada um. `forge-sdd update` limpa o nome antigo automaticamente.
 *   **`.agent/` renomeada para `.agents/`:** ajuste de nome da fonte única de agente antes de qualquer publicação estável; `forge-sdd update` migra projetos que já tinham `.agent/`, preservando `rules/` do usuário.
 *   **`/status` agora sincroniza com o remoto:** roda `git fetch` e compara ahead/behind antes do relatório; se o VCS configurado for GitHub, cruza `gh pr list` com `sdd/features/index.md` e aponta branches órfãs ou PRs não referenciados numa nova seção "Divergência Remota" — evita decisões tomadas com base em estado desatualizado.
 *   **Clarify em `/nova-feature`, `/novo-fix` e `/discovery`:** os três comandos agora avaliam a descrição recebida contra sinais objetivos de ambiguidade (critério de aceitação ausente, escopo com mais de uma leitura, dependência externa não citada) e só perguntam ao usuário quando detectam lacuna real — pedidos já claros seguem direto, sem fricção.
 *   **Confirmação de delegação a subagente:** o passo `PLAN` do lifecycle (todo agente, todo comando) agora pergunta objetivamente se a próxima atividade deve ser delegada a um subagente, com critério documentado — decisão deixa de ser implícita.
+*   **Cheat-sheet do `init` corrigido:** a descrição de cada comando no resumo impresso ao final do `init`/`update` volta a mostrar o uso real (ex: `Peça "/archive"...`) em vez da frase de redirect interno introduzida pelos adaptadores `.claude/`/`.gemini/`.
 
 📢 [Ver todas as entregas desta versão](https://github.com/nathanramorim/forge-sdd/blob/main/sdd/releases/history.md)
 
