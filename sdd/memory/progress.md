@@ -3,19 +3,19 @@
 ## Status
 ```
 Fix 52 — Renomear .agent/ -> .agents/ (com migração em update) [x] done
-Feature 03 — Ergonomia de comandos e sincronização (6 subtarefas) [x] done
 Release v2.3.0 (estável) — PRs #47/#48/#50 promovidos a main [x] publicada
+Fix 54 — npm publish 404 na tag latest (token NPM expirado) [x] done
 ```
 
 ## Features ativas
-Fix 54 — npm publish falha (404) na tag `latest` (`todo`). Lista completa em `sdd/features/index.md`.
+Nenhuma feature `todo`/`doing` pendente. Lista completa em `sdd/features/index.md`.
 
 ## Próximo passo
-**Iniciar:** Fix 54 requer acesso à conta npmjs.com (fora do alcance de agente) para checar escopo do `NPM_TOKEN`.
-**Bloqueios:** `npm view @nathanramorim/forge-sdd dist-tags` ainda mostra `latest: 1.9.4`.
+**Iniciar:** Nenhuma feature `todo`.
+**Bloqueios:** —
 
 ## Handoff da última sessão
-- v2.3.0 promovida a estável: `/code-review` pré-merge corrigiu 3 achados (cheatsheet, orçamento lessons.md, colisão telemetria); PRs rebase-merged com `--admin` (bypass autorizado pelo usuário).
-- Discovery-53 incorporado de branch órfã; `/split-features` pendente de decisão sobre paridade Gemini/Copilot.
+- Fix 54: `NPM_TOKEN` expirado (90 dias) causava 404 silencioso (`continue-on-error`) só em `--tag latest`. Usuário renovou token via terminal local; `npm-publish.yml` ganhou verificação pós-publish que falha explicitamente em vez de mascarar erro.
+- v2.3.0 promovida a estável via PRs #47/#48/#50 (rebase-merge com `--admin`, autorizado pelo usuário); `/code-review` pré-merge corrigiu 3 achados.
 
 > Histórico completo em `progress-log.md`

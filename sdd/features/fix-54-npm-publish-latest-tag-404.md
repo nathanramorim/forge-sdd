@@ -3,7 +3,7 @@
 **Branch:** `fix/54-npm-publish-latest-tag-404`
 **Fase:** 54
 **Depende de:** —
-**Status:** `todo`
+**Status:** `done`
 
 ## Objetivo
 
@@ -30,13 +30,11 @@ pre-release).
 - A mesma pipeline, com o mesmo `NPM_TOKEN`, publicou `2.3.0-beta` com
   `--tag beta` com sucesso em 2026-08-26 (run 32978841454). A falha é
   específica de publicar com `--tag latest`.
-- Hipótese mais provável: `NPM_TOKEN` é um *granular access token* do
-  npm restrito a publicar apenas versões pre-release (padrão comum de
-  segurança para bloquear publicação acidental de `latest` via CI) — o
-  registry retorna 404 em vez de 403 nesse cenário. Não confirmado; requer
-  checagem manual em npmjs.com por quem tem acesso à conta/token (fora do
-  alcance desta sessão — nenhuma ferramenta disponível acessa o painel do
-  npmjs.com).
+- **Causa raiz confirmada pelo usuário:** o `NPM_TOKEN` tem validade de 90
+  dias; foi criado em 2026-06-01, então já estava expirado quando a
+  promoção da v2.3.0 tentou publicar em 2026-09-05 (~96 dias depois). O
+  registry retorna 404 (em vez de 401/403) para token expirado/inválido
+  nesse fluxo, por isso o erro não deixava óbvio que era expiração.
 
 ## Critérios de Aceitação Executáveis
 
@@ -56,6 +54,23 @@ pre-release).
 
 ## Handoff
 
-Aberto nesta sessão a partir do achado durante a promoção da v2.3.0 a
-estável (ver `sdd/releases/history.md`). Ainda não implementado — bloqueado
-em acesso à conta npmjs.com, que nenhuma ferramenta desta sessão alcança.
+Causa raiz: `NPM_TOKEN` expirado (validade de 90 dias, criado 2026-06-01).
+Usuário gerou um novo token via `npm login` (fluxo de navegador, sem
+expor senha) + `npm token create --read-only=false` no terminal local, e
+atualizou o secret via `gh secret set NPM_TOKEN`. Re-disparado o job
+"Publish npm" da tag `v2.3.0` existente (`gh run rerun`) — publish
+confirmado no log (`+ @nathanramorim/forge-sdd@2.3.0`) e `npm view
+@nathanramorim/forge-sdd dist-tags` retornou `latest: '2.3.0'`.
+
+Item 4 do critério de aceitação implementado: removido
+`continue-on-error: true` do step "Publish to npm" e adicionado um step
+"Verify dist-tag published" (com retry de até 2 min para tolerar o delay
+de propagação do registry) que falha o workflow explicitamente se o
+dist-tag não apontar para a versão da tag publicada — essa falha não deve
+mais passar despercebida como "success".
+
+**Nota de segurança da sessão:** durante o diagnóstico, uma senha foi
+digitada por engano via `!` (passthrough de terminal do assistente) e
+ficou exposta em texto puro no histórico da conversa antes de ser
+corrigido o fluxo (uso de terminal local real para credenciais). Usuário
+foi orientado a trocar essa senha.

@@ -157,4 +157,4 @@ main
 | 03-05 | feat-03-ergonomia-de-comandos-e-sincronizacao/feat-03-05-confirmacao-delegacao-subagente.md | feat/03-ergonomia-de-comandos-e-sincronizacao | 03-05 | done |
 | 03-06 | feat-03-ergonomia-de-comandos-e-sincronizacao/feat-03-06-documentacao-e-release.md | feat/03-ergonomia-de-comandos-e-sincronizacao | 03-06 | done |
 | 52 | fix-52-rename-agent-dir-para-agents.md | claude/agent-folder-rename-forge-ww8abl | 52 | done |
-| 54 | fix-54-npm-publish-latest-tag-404.md | fix/54-npm-publish-latest-tag-404 | 54 | todo |
+| 54 | fix-54-npm-publish-latest-tag-404.md | fix/54-npm-publish-latest-tag-404 | 54 | done |
