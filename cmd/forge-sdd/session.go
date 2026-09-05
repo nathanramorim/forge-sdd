@@ -240,7 +240,7 @@ func ClassifySessionType(feature string) string {
 	switch {
 	case strings.Contains(feature, "sdd/discovery/"):
 		return "discovery"
-	case strings.Contains(feature, "sdd/features/") && strings.Contains(filepath.Base(feature), "fix-"):
+	case strings.Contains(feature, "sdd/features/") && strings.HasPrefix(filepath.Base(feature), "fix-"):
 		return "fix"
 	case strings.Contains(feature, "sdd/features/"):
 		return "feature"
