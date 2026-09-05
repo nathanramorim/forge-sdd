@@ -4,13 +4,12 @@ Este arquivo registra o histórico de entregas de produto deste projeto.
 
 ## Entregas
 
-### Próxima versão — Política de Retenção de Releases e Branches
+### Próxima versão — Telemetria com Cobertura Total e Relatório de Métricas
 
 Ainda sem tag/versão publicada — aguardando decisão de bump na próxima publicação.
 
-*   **Menos ruído nas Releases do GitHub:** agora só ficam visíveis as 3 versões estáveis mais recentes, mais qualquer versão beta ativa publicada depois delas — a limpeza acontece automaticamente a cada nova release. Antes, o histórico acumulava dezenas de releases e rascunhos antigos sem nenhuma limpeza.
-*   **Betas com destaque de verdade:** toda versão beta publicada agora exibe o selo "Pre-release" no GitHub e é obrigada a trazer uma lista real do que foi melhorado — a publicação é bloqueada se a versão beta não tiver esse destaque escrito.
-*   **Faxina pontual:** removidas nesta sessão 20 releases antigas, 21 rascunhos duplicados e 13 branches já mescladas que estavam acumuladas no repositório.
+*   **Nenhuma sessão perdida:** `/discovery`, `/split-features`, `/nova-feature` e `/archive` agora gravam telemetria automaticamente (junto de `/proxima-feature`, `/revisar` e `/novo-fix`, que já gravavam) — antes, qualquer sessão que passasse só por esses quatro comandos não deixava rastro nenhum em `sdd/.metrics/`.
+*   **Novo comando `forge-sdd report`:** mostra, por feature/fix/discovery, quantos tokens foram gastos, quais modelos de IA foram usados, quanto durou cada sessão, e há quanto tempo (medido pela telemetria) o projeto está ativo — sem precisar abrir cada arquivo de métrica manualmente.
 
 ### Versão 2.3.0 (Estável) — Ergonomia de Comandos e Sincronização
 
@@ -21,6 +20,7 @@ Promove para `main` (2026-09-05) todo o ciclo beta acumulado desde a v1.9.4: v2.
 *   **`/status` para Claude/Gemini/Copilot:** roda `git fetch` e compara ahead/behind da branch atual e de `main` contra `origin` antes do relatório; se o VCS configurado for GitHub, cruza `gh pr list` com `sdd/features/index.md` e reporta em uma nova seção "Divergência Remota" branches órfãs ou PRs abertos não referenciados no índice — achado real desta sessão: uma branch remota com uma correção completa ficou sem PR nem entrada no índice.
 *   **Clarify em `/nova-feature`, `/novo-fix` e `/discovery` (Claude/Gemini/Copilot):** os três comandos avaliam a descrição recebida contra sinais objetivos (critério de aceitação ausente, escopo com mais de uma leitura plausível, dependência externa não mencionada) e só perguntam ao usuário quando detectam lacuna real — heurística única em `sdd/memory/clarify.md`, referenciada pelos três, nunca copiada.
 *   **Confirmação de delegação a subagente (Claude/Gemini/Copilot/OpenAI):** o passo `PLAN` do lifecycle (`CLAUDE.md`/`GEMINI.md`/`OPENAI.md`/`copilot-instructions.md`) passa a perguntar objetivamente, antes de cada próxima atividade/comando, se deve ser delegada a um subagente — decisão deixa de ser implícita, com critério documentado e fallback "não aplicável" para ferramentas sem esse conceito.
+*   **Política de retenção de releases (feat-51):** só as 3 versões estáveis mais recentes ficam visíveis nas Releases do GitHub (mais qualquer beta ativa publicada depois delas) — limpeza automática a cada nova release. Toda versão beta passa a exibir o selo "Pre-release" e é obrigada a trazer uma lista real do que foi melhorado.
 
 ### Versão 2.2.0-beta — Agent Rules e Branch por Feature (Beta)
 

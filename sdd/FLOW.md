@@ -119,3 +119,23 @@ Sempre que a tarefa envolver interação com o repositório remoto (GitHub) para
   gh pr merge --squash --delete-branch
   ```
 * Caso a ferramenta `gh` não esteja instalada no ambiente, caia para o git puro e instrua o usuário a abrir o PR de forma amigável através do link gerado no terminal.
+
+---
+
+## 📊 7. Observabilidade (`forge-sdd report`)
+
+Os comandos que mudam estado do ciclo SDD (`/discovery`, `/split-features`,
+`/nova-feature`, `/novo-fix`, `/proxima-feature`, `/revisar`, `/archive`)
+gravam telemetria determinística (`forge-sdd session record`) sempre que
+`telemetry.enabled` está ativo em `sdd/.sddrc`. A qualquer momento, rode:
+
+```bash
+forge-sdd report
+```
+
+para ver, por feature/fix/discovery: tokens de entrada+saída, modelos
+usados, número de sessões, duração total, e a idade medida do projeto
+(da métrica mais antiga à mais recente). Comandos de leitura/diagnóstico
+(`/status`, `/doctor`, `/constitution`, `/c4-architecture`,
+`/upgrade-sdd`, `/tutorial`) não gravam telemetria — não produzem
+entrega, ficariam fora do escopo do relatório.

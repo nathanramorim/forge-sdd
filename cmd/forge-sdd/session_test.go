@@ -116,6 +116,19 @@ func TestAggregateSessionMetrics_NoMetricsDir(t *testing.T) {
 	assert.Equal(t, 0, summary.Total)
 }
 
+func TestClassifySessionType(t *testing.T) {
+	cases := map[string]string{
+		"sdd/discovery/discovery-55-telemetria.md":                                             "discovery",
+		"sdd/features/fix-54-npm-publish-latest-tag-404.md":                                     "fix",
+		"sdd/features/feat-55-telemetria-cobertura-total-e-relatorio/fix-99-algum-fix.md":        "fix",
+		"sdd/features/feat-55-telemetria-cobertura-total-e-relatorio/feat-55-01-classificacao.md": "feature",
+		"README.md": "outro",
+	}
+	for feature, want := range cases {
+		assert.Equal(t, want, ClassifySessionType(feature), feature)
+	}
+}
+
 func TestSessionRecordCmd_RequiresValidOutcome(t *testing.T) {
 	dir := t.TempDir()
 	writeTestSddrc(t, dir, true)

@@ -1,0 +1,31 @@
+{
+  "$schema": "forge-sdd/metrics/1.0",
+  "feature": "sdd/features/feat-55-telemetria-cobertura-total-e-relatorio",
+  "phase": "55",
+  "agent_path": [
+    "orquestrador",
+    "builder"
+  ],
+  "tokens_input": 0,
+  "tokens_output": 0,
+  "turns": 0,
+  "duration_seconds": 0,
+  "criterio_atendido": true,
+  "model": "claude-sonnet-5",
+  "rework_lines": 0,
+  "context7_calls": 0,
+  "git_calls": 0,
+  "files_touched": [
+    "cmd/forge-sdd/session.go",
+    "cmd/forge-sdd/report.go",
+    "cmd/forge-sdd/report_test.go",
+    "cmd/forge-sdd/session_test.go",
+    "cmd/forge-sdd/main.go",
+    ".agents/commands/discovery.md",
+    ".agents/commands/split-features.md",
+    ".agents/commands/nova-feature.md",
+    ".agents/commands/archive.md"
+  ],
+  "outcome": "approved",
+  "sdd_version": "2.3.0"
+}

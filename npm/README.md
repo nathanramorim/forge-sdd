@@ -40,7 +40,16 @@ npx @nathanramorim/forge-sdd@latest init
 npx @nathanramorim/forge-sdd@latest init . --agent copilot,gemini --name meu-projeto
 ```
 
-## ✨ Ergonomia de Comandos e Sincronização (v2.3.0)
+## ✨ Telemetria com Cobertura Total e Relatório de Métricas
+
+*   **Nenhuma sessão perdida:** `/discovery`, `/split-features`, `/nova-feature` e `/archive` agora gravam telemetria automaticamente, junto dos comandos que já gravavam (`/proxima-feature`, `/revisar`, `/novo-fix`) — antes, uma sessão que passasse só por esses quatro comandos não deixava rastro nenhum em `sdd/.metrics/`.
+*   **Novo comando `forge-sdd report`:** mostra, por feature/fix/discovery, tokens gastos, modelos de IA usados, duração de cada sessão, e há quanto tempo (medido pela telemetria) o projeto está ativo.
+
+📢 [Ver todas as entregas desta versão](https://github.com/nathanramorim/forge-sdd/blob/main/sdd/releases/history.md)
+
+---
+
+## 📢 Novidades da Versão Anterior (v2.3.0) — Ergonomia de Comandos e Sincronização
 
 Primeira versão estável desde a v1.9.4 — acumula e promove para `main` todo o ciclo beta v2.0.0 → v2.2.0 → v2.3.0 (Forge-SDD Slim, Agent Rules e esta entrega).
 
