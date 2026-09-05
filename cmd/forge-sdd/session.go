@@ -116,14 +116,22 @@ e retorna sucesso (silencioso, por design).`,
 
 // WriteSessionMetrics grava o arquivo de telemetria em sdd/.metrics/session-<ISO8601>.json.
 // Extraída como função exportada (não apenas RunE) para ser testável e reaproveitável.
+// O nome do arquivo tem resolução de segundo; se duas gravações caírem no mesmo
+// segundo, um sufixo numérico (-2, -3, ...) é anexado para nunca sobrescrever
+// silenciosamente uma telemetria já gravada.
 func WriteSessionMetrics(targetDir string, metrics sessionMetrics, at time.Time) (string, error) {
 	metricsDir := filepath.Join(targetDir, "sdd", ".metrics")
 	if err := os.MkdirAll(metricsDir, 0o755); err != nil {
 		return "", fmt.Errorf("falha ao criar sdd/.metrics: %w", err)
 	}
 
-	filename := fmt.Sprintf("session-%s.json", at.Format("2006-01-02T150405Z"))
+	base := fmt.Sprintf("session-%s", at.Format("2006-01-02T150405Z"))
+	filename := base + ".json"
 	path := filepath.Join(metricsDir, filename)
+	for i := 2; fileExists(path); i++ {
+		filename = fmt.Sprintf("%s-%d.json", base, i)
+		path = filepath.Join(metricsDir, filename)
+	}
 
 	data, err := json.MarshalIndent(metrics, "", "  ")
 	if err != nil {

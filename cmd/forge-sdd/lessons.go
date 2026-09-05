@@ -72,11 +72,26 @@ func AppendLesson(targetDir, pattern, fix, ref string) (string, error) {
 		entries = entries[:len(entries)-1]
 		content = renderLessons(entries)
 	}
+	if len(content) > lessonsBudgetBytes {
+		maxEntryLen := lessonsBudgetBytes - len(lessonsHeader) - 1
+		entries[0] = truncateLessonEntry(entries[0], maxEntryLen)
+		content = renderLessons(entries)
+	}
 
 	if err := os.WriteFile(path, []byte(content), 0o644); err != nil {
 		return "", fmt.Errorf("falha ao gravar %s: %w", path, err)
 	}
 	return path, nil
+}
+
+// truncateLessonEntry corta uma entrada que sozinha excede o orçamento do
+// arquivo, garantindo que lessons.md nunca ultrapasse lessonsBudgetBytes
+// mesmo quando um único pattern/fix/ref é maior que o limite.
+func truncateLessonEntry(entry string, maxLen int) string {
+	if maxLen <= 1 || len(entry) <= maxLen {
+		return entry
+	}
+	return entry[:maxLen-1] + "…"
 }
 
 func formatLessonEntry(pattern, fix, ref string) string {
