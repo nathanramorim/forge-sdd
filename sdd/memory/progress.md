@@ -2,19 +2,19 @@
 
 ## Status
 ```
-Fix 54 — npm publish 404 na tag latest (token NPM expirado) [x] done
 Feature 55 — Telemetria cobertura total + /report (7 subtarefas) [x] done
+Release v2.4.0 (estável) — PR #53 promovido a main [x] publicada
 ```
 
 ## Features ativas
 Nenhuma feature `todo`/`doing` pendente. Lista completa em `sdd/features/index.md`.
 
 ## Próximo passo
-**Iniciar:** Nenhuma feature `todo`. Branch `feat/55-telemetria-cobertura-total-e-relatorio` pronta para `/revisar` + PR.
+**Iniciar:** Nenhuma feature `todo`.
 **Bloqueios:** —
 
 ## Handoff da última sessão
-- Feature 55 done: `session record` cobre `/discovery`, `/split-features`, `/nova-feature`, `/archive`; novo `forge-sdd report` (tokens/modelo/duração por item + idade do projeto), reaproveitando `AggregateSessionMetrics`.
-- Fix 54: `NPM_TOKEN` expirado causava 404 silencioso em `--tag latest`; corrigido e `npm-publish.yml` agora falha explícito.
+- v2.4.0 promovida direto a estável (desvio pontual da Regra 11, autorizado pelo usuário); `/code-review` pré-merge corrigiu 4 achados (prompts Copilot desatualizados, writer do `report`, `ClassifySessionType` por substring, gofmt).
+- Feature 55: telemetria cobre `/discovery`, `/split-features`, `/nova-feature`, `/archive`; novo `forge-sdd report` (tokens/modelo/duração + idade do projeto).
 
 > Histórico completo em `progress-log.md`

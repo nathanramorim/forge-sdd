@@ -4,9 +4,9 @@ Este arquivo registra o histórico de entregas de produto deste projeto.
 
 ## Entregas
 
-### Próxima versão — Telemetria com Cobertura Total e Relatório de Métricas
+### Versão 2.4.0 (Estável) — Telemetria com Cobertura Total e Relatório de Métricas
 
-Ainda sem tag/versão publicada — aguardando decisão de bump na próxima publicação.
+Promovida direto a estável (2026-09-05), sem passar por tag beta — desvio pontual da Regra 11, autorizado explicitamente pelo usuário; PR #53 mergeado em `main` via rebase com bypass de review (`--admin`). Revisão de código (`/code-review`) no diff antes do merge encontrou e corrigiu 4 achados: 4 prompts do Copilot (`discovery`/`archive`/`nova-feature`/`split-features`) estavam com conteúdo antigo duplicado (nunca migrado para o padrão de adaptador fino, faltando o passo de telemetria), `forge-sdd report` escrevia parte da saída fora do writer configurável do comando, `ClassifySessionType` classificava por substring em vez de prefixo (risco de falso positivo tipo `feat-42-fix-race-condition.md`), e um teste sem `gofmt`.
 
 *   **Nenhuma sessão perdida:** `/discovery`, `/split-features`, `/nova-feature` e `/archive` agora gravam telemetria automaticamente (junto de `/proxima-feature`, `/revisar` e `/novo-fix`, que já gravavam) — antes, qualquer sessão que passasse só por esses quatro comandos não deixava rastro nenhum em `sdd/.metrics/`.
 *   **Novo comando `forge-sdd report`:** mostra, por feature/fix/discovery, quantos tokens foram gastos, quais modelos de IA foram usados, quanto durou cada sessão, e há quanto tempo (medido pela telemetria) o projeto está ativo — sem precisar abrir cada arquivo de métrica manualmente.

@@ -40,7 +40,7 @@ npx @nathanramorim/forge-sdd@latest init
 npx @nathanramorim/forge-sdd@latest init . --agent copilot,gemini --name meu-projeto
 ```
 
-## ✨ Telemetria com Cobertura Total e Relatório de Métricas
+## ✨ Telemetria com Cobertura Total e Relatório de Métricas (v2.4.0)
 
 *   **Nenhuma sessão perdida:** `/discovery`, `/split-features`, `/nova-feature` e `/archive` agora gravam telemetria automaticamente, junto dos comandos que já gravavam (`/proxima-feature`, `/revisar`, `/novo-fix`) — antes, uma sessão que passasse só por esses quatro comandos não deixava rastro nenhum em `sdd/.metrics/`.
 *   **Novo comando `forge-sdd report`:** mostra, por feature/fix/discovery, tokens gastos, modelos de IA usados, duração de cada sessão, e há quanto tempo (medido pela telemetria) o projeto está ativo.
