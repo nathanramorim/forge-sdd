@@ -167,3 +167,4 @@ main
 | 55-05 | feat-55-telemetria-cobertura-total-e-relatorio/feat-55-05-telemetria-nova-feature.md | feat/55-telemetria-cobertura-total-e-relatorio | 55-05 | done |
 | 55-06 | feat-55-telemetria-cobertura-total-e-relatorio/feat-55-06-telemetria-archive.md | feat/55-telemetria-cobertura-total-e-relatorio | 55-06 | done |
 | 55-07 | feat-55-telemetria-cobertura-total-e-relatorio/feat-55-07-documentacao-report.md | feat/55-telemetria-cobertura-total-e-relatorio | 55-07 | done |
+| 56 | feat-56-lp-uso-forge-sdd.md | feat/56-lp-uso-forge-sdd | 56 | ready for handoff |
