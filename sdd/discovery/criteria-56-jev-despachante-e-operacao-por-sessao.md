@@ -123,6 +123,168 @@ Valores iniciais são hipótese; devem ser revistos com `forge-sdd report`.
 
 **Relatório por papel:** `forge-sdd report --by-role` agrega `tokens_input`/`tokens_output`/`model`/duração a partir de `agent_path` nos `session-*.json`.
 
+## 2.3 Arquitetura do `dispatch` orientada a eventos (revisão 4)
+
+**Ideia central:** cada mudança de estado da esteira é um **evento** gravado num log append-only; o estado (ledger) é uma **projeção** do log; o **dispatch** é a função que, dado o estado, decide o próximo evento. Não há daemon: o `dispatch` roda sob demanda (comando ou hook), então segue a Regra 8 (stdlib, sem runtime extra) e não gasta token enquanto nada acontece.
+
+### 2.3.1 Componentes
+
+```mermaid
+flowchart TB
+    subgraph Produtores["Produtores de eventos"]
+        CMD["Comandos /discovery /nova-feature /proxima-feature /revisar"]
+        HK["Hooks Claude TaskCompleted, TeammateIdle"]
+        HUM["Humano: aprova ou nega gate"]
+        GIT["git: branch, diff, commits"]
+    end
+
+    EMIT["forge-sdd run emit"]
+    LOG[("Log de eventos sdd/.runs/FEATURE/events.jsonl")]
+    PROJ["Projetor: log vira estado"]
+    LED[("Ledger projetado: estações, leases, handoffs")]
+
+    subgraph DISP["forge-sdd dispatch"]
+        RULES["1. Motor de regras determinístico"]
+        JEV["2. Jev OPCIONAL via OpenRouter"]
+        GATE["3. Política de gates e autonomia L0 L1 L2"]
+    end
+
+    DEC[("Decisões sdd/.decisions/")]
+
+    subgraph Exec["Executores por agente"]
+        CL["Claude: subagent padrão ou teammate opt-in"]
+        GE["Gemini: instrução ao usuário"]
+        CO["Copilot: instrução ao usuário"]
+    end
+
+    TEL["Telemetria sdd/.metrics/"]
+
+    CMD --> EMIT
+    HK --> EMIT
+    HUM --> EMIT
+    GIT --> RULES
+    EMIT --> LOG
+    LOG --> PROJ
+    PROJ --> LED
+    LED --> RULES
+    RULES -->|"resolveu"| GATE
+    RULES -->|"ambíguo e Jev ligado"| JEV
+    JEV --> GATE
+    RULES -->|"ambíguo e Jev desligado"| HUM
+    GATE -->|"aprovado"| CL
+    GATE -->|"aprovado"| GE
+    GATE -->|"aprovado"| CO
+    GATE -->|"exige humano"| HUM
+    GATE --> DEC
+    CL --> EMIT
+    GE --> EMIT
+    CO --> EMIT
+    LOG --> TEL
+```
+
+### 2.3.2 Catálogo de eventos
+
+Todo evento: `id`, `ts`, `feature` (caminho completo, Regra 14), `station`, `role`, `agent`, `session_id`, `source` (`rules` | `jev` | `human` | `hook`), `payload`.
+
+| Evento | Quem emite | Efeito na projeção |
+|---|---|---|
+| `feature.opened` | `/nova-feature`, `/split-features` | cria a esteira; estação `spec` = pending |
+| `dispatch.decided` | `dispatch` | registra decisão (etapa, papel, ação, confiança, fonte) |
+| `gate.requested` | `dispatch` | estação = waiting_human |
+| `gate.resolved` | humano | libera ou cancela a estação |
+| `station.requested` | `dispatch` | estação = requested; papel e agente escolhidos |
+| `station.started` | executor | estação = running; lease e `session_id` |
+| `station.heartbeat` | executor/hook | renova o lease |
+| `station.handoff` | executor | handoff entregue (formato do discovery-53) |
+| `station.completed` | executor/hook | estação = done com `outcome` |
+| `station.failed` | executor | estação = blocked |
+| `lease.expired` | `dispatch` | estação running sem heartbeat vira blocked |
+| `conflict.detected` | `dispatch` | feature = conflicted; exige gate |
+| `review.approved` / `review.rejected` | Revisor | aprova ou devolve ao Builder |
+| `feature.completed` | `dispatch` | todas as tasks `[x]`, critério passando, revisão aprovada |
+| `pr.opened` | Orquestrador | fim da esteira |
+
+### 2.3.3 Máquina de estados da estação
+
+```mermaid
+stateDiagram-v2
+    [*] --> pending
+    pending --> requested: station.requested
+    requested --> waiting_human: gate.requested
+    waiting_human --> requested: gate.resolved aprovado
+    waiting_human --> pending: gate.resolved negado
+    requested --> running: station.started
+    running --> running: station.heartbeat
+    running --> done: station.completed approved
+    running --> blocked: station.failed ou lease.expired
+    blocked --> requested: retomada pelo dispatch ou humano
+    done --> [*]
+```
+
+### 2.3.4 Fluxo da feature (Spec, Act, Revisor)
+
+```mermaid
+stateDiagram-v2
+    [*] --> Spec
+    Spec --> Act: handoff Spec para Act entregue
+    Act --> Revisor: handoff Act para Revisor entregue
+    Revisor --> Act: review.rejected
+    Revisor --> PR: review.approved
+    PR --> Concluida: pr.opened e feature.completed
+    Concluida --> [*]
+    Spec --> Conflito: conflict.detected
+    Act --> Conflito: conflict.detected
+    Conflito --> Spec: gate.resolved
+    Conflito --> Act: gate.resolved
+```
+
+### 2.3.5 Sequência: caminho feliz com Jev desligado e com Jev ligado
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor U as Usuário
+    participant L as Lead (Claude)
+    participant D as forge-sdd dispatch
+    participant R as Motor de regras
+    participant J as Jev (opcional)
+    participant E as Executor (papel)
+    participant G as Log de eventos
+
+    U->>L: /proxima-feature
+    L->>D: dispatch next FEATURE
+    D->>G: lê estado projetado
+    D->>R: avalia ocupação, entregas, conflito, conclusão
+    alt regras resolvem
+        R-->>D: delegar builder
+    else ambíguo e Jev ligado
+        R-->>J: snapshot sem código
+        J-->>D: decisão JSON validada
+    else ambíguo e Jev desligado
+        D-->>U: gate: escolher próximo passo
+    end
+    D->>G: dispatch.decided
+    opt autonomia L1 ou gate obrigatório
+        D-->>U: pedir confirmação
+        U-->>D: gate.resolved
+    end
+    D->>G: station.requested
+    D-->>L: delegar ao papel builder
+    L->>E: subagent ou teammate builder
+    E->>G: station.started e heartbeats
+    E->>G: station.handoff e station.completed
+    L->>D: dispatch next FEATURE
+    D-->>L: delegar revisor
+```
+
+### 2.3.6 Princípios e invariantes
+- **Projeção reconstruível:** apagar o ledger e refazê-lo a partir do log produz o mesmo estado (teste). O log é a fonte de verdade entre sessões; teams é efêmero.
+- **Escrita segura:** `O_APPEND` com lock de arquivo; eventos idempotentes por `id`; evento inválido é rejeitado e registrado, nunca aplicado.
+- **Quem decide e quem executa são separados:** `dispatch` nunca executa trabalho; o executor nunca decide a próxima estação.
+- **Ordem de decisão fixa:** regras → (Jev, se ligado e necessário) → gates. O Jev nunca contorna um gate.
+- **Mesmo log para os 3 agentes:** Claude emite por hook ou pelo lead; Gemini e Copilot emitem via `forge-sdd run emit` indicado no prompt do comando, o mesmo padrão já usado por `forge-sdd session record`.
+- **Uma branch por feature (Regra 15):** todas as estações e teammates da feature usam a mesma branch; o evento `station.started` falha se a branch for diferente.
+
 ## 3. Contratos
 
 **Entrada do Jev (snapshot, sem conteúdo de código):** `feature`, `stage`, estado das estações, leases/heartbeats, `files_touched` por feature ativa, tasks `[ ]/[x]`, `outcome` da última revisão, agentes habilitados.
@@ -179,6 +341,13 @@ Valores iniciais são hipótese; devem ser revistos com `forge-sdd report`.
 18. `forge-sdd agents sync` gera um especialista por arquivo `.md` de `.agents/rules/`, não gera para `.example`, e o diff de `.agents/rules/` após o comando é vazio.
 19. Regra removida → especialista marcado órfão e mantido; `doctor` avisa especialistas em excesso ou com `description` duplicada.
 20. `forge-sdd report --by-role` soma tokens por papel de forma consistente com o total por feature.
+
+21. Reconstruir o ledger a partir de `events.jsonl` produz estado idêntico ao ledger anterior (teste de projeção determinística).
+22. Dois `run emit` concorrentes na mesma feature não corrompem o log nem duplicam eventos com o mesmo `id` (teste com goroutines).
+23. Transições inválidas (ex.: `station.completed` sem `station.started`) são rejeitadas e geram evento de erro, sem alterar o estado.
+24. `station.heartbeat` ausente além de `lease_seconds` faz o `dispatch` emitir `lease.expired` e marcar a estação `blocked`.
+25. `dispatch` nunca emite `station.requested` enquanto houver `gate.requested` sem `gate.resolved`, nem com o Jev decidindo.
+26. `station.started` em branch diferente da branch da feature é rejeitado (Regra 15).
 
 ## 6. Dependências
 

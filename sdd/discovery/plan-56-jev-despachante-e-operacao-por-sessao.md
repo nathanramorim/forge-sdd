@@ -11,9 +11,9 @@ Roadmap preliminar (revisão 3). Ordem do menor risco ao maior. **O Jev é opcio
 - [ ] **A4:** Atualizar `CLAUDE.md`/`FLOW.md` (papéis como definições reais; subagents por padrão).
 
 ### B — Base determinística e economia de tokens (sem Jev)
-- [ ] **B1:** Ledger por feature (`sdd/.runs/`) com estado por estação, lease/heartbeat e `forge-sdd run status`.
+- [ ] **B1:** Log de eventos por feature (`sdd/.runs/<feature>/events.jsonl`, append-only), catálogo de eventos, projetor que reconstrói o ledger (estado por estação, lease/heartbeat) e `forge-sdd run emit` / `run status`.
 - [ ] **B2:** Motor de regras (conflito por `files_touched`, Regra 15, tasks pendentes, conclusão) e `forge-sdd run verify` (exit 2 se o critério falhar).
-- [ ] **B3:** `forge-sdd dispatch` **sem modelo**: devolve etapa, papel, ocupação, conflito e conclusão só com regras.
+- [ ] **B3:** `forge-sdd dispatch` **sem modelo**: lê o estado projetado e emite `dispatch.decided`/`station.requested` (etapa, papel, ocupação, conflito, conclusão) só com regras, sob demanda e sem daemon; política de gates `L0`/`L1`.
 - [ ] **B4:** Modelo por papel (`roles.<papel>.model` no `.sddrc`, padrões econômicos nos mecânicos) e `forge-sdd report --by-role` para ajustar com dados.
 - [ ] **B5:** Registro de decisões em `sdd/.decisions/` e telemetria correlacionada por `feature` (N sessões/teammates → N `session-*.json`).
 
