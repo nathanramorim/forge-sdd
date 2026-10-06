@@ -1,4 +1,4 @@
-# Critérios Técnicos 56 — Jev como Despachante/Decisor e Operação por Sessão
+# Critérios Técnicos 56 — Papéis Comuns, Agent Teams e Jev como Despachante
 
 Visão de engenharia do `discovery-56`. Linguagem: padrão (Constituição, regra 0).
 
@@ -12,6 +12,8 @@ Visão de engenharia do `discovery-56`. Linguagem: padrão (Constituição, regr
 | 14 | Toda decisão e sessão do Jev gera telemetria na fase Close, mesmo se cancelada/timeout |
 | 15 | Todas as estações de uma feature usam a **mesma** branch; o Jev nunca cria branch por estação |
 | 1/11 | Merge e release nunca são autônomos: sempre gate humano |
+| 3 (papéis) | Papéis canônicos e adaptadores `.claude/agents/*` embutidos via `embed.FS` |
+| 15 | Teammates e subagents da mesma feature trabalham na mesma branch; arquivos de escrita disjuntos entre teammates |
 
 ## 2. Arquitetura (C4 Model — Mermaid)
 
@@ -40,6 +42,8 @@ C4Container
     Person(dev, "Mantenedor")
     Container(cli, "forge-sdd CLI (Go)", "Go, stdlib", "dispatch, run status, session record")
     Container(rules, "Motor de regras", "Go", "Lease, conflito de arquivos, tasks pendentes, conclusão")
+    Container(roles, "Papéis canônicos", "Markdown em .agents/roles/", "Fonte única dos 7 papéis")
+    Container(adapters, "Adaptadores por agente", "Markdown gerado", ".claude/agents, .gemini/skills, .github/chatmodes")
     Container(client, "Cliente Jev", "Go net/http", "Monta snapshot, chama OpenRouter, valida JSON")
     ContainerDb(ledger, "Ledger de execução", "JSON em sdd/.runs/", "Estado por estação, lease, handoff")
     ContainerDb(decisions, "Registro de decisões", "JSON em sdd/.decisions/", "Entrada, decisão, confiança")
@@ -50,6 +54,9 @@ C4Container
     Rel(cli, rules, "1. avalia determinístico")
     Rel(rules, client, "2. só se exigir julgamento")
     Rel(client, jev, "HTTPS")
+    Rel(cli, roles, "gera (init/update)")
+    Rel(roles, adapters, "ponteiro")
+    Rel(adapters, agents, "papel como subagent ou teammate")
     Rel(cli, ledger, "lê/escreve")
     Rel(cli, decisions, "grava")
     Rel(cli, metrics, "grava (Regra 14)")
@@ -74,6 +81,34 @@ flowchart TD
     D --> LOG["Gravar decisão + telemetria"]
 ```
 
+## 2.1 Papéis comuns e adaptadores (revisão 2)
+
+**Fonte canônica:** `.agents/roles/<papel>.md` (gerado pelo scaffold; análogo a `.agents/commands/`). Adaptadores:
+
+| Agente | Arquivo gerado | Conteúdo |
+|---|---|---|
+| Claude | `.claude/agents/<papel>.md` | frontmatter (`name`, `description`, `tools`, `model`) + ponteiro para o papel canônico |
+| Gemini | `.gemini/skills/<papel>.chatmode.md` | ponteiro para o papel canônico (hoje: corpo duplicado) |
+| Copilot | `.github/chatmodes/<papel>.chatmode.md` | ponteiro para o papel canônico (hoje: corpo duplicado) |
+
+**Papéis e ferramentas no Claude** (`tools`; `model: inherit` por padrão, sobrescrevível por `.sddrc`):
+
+| Papel | Escreve | `tools` | Observação |
+|---|---|---|---|
+| orquestrador | `progress.md`, telemetria | Read, Grep, Glob, Edit, Bash, Agent | é o **lead**; definição também gerada |
+| specifier | specs em `sdd/` | Read, Grep, Glob, Edit, Write, Bash | escopo `sdd/` reforçado por hook |
+| builder | código | Read, Grep, Glob, Edit, Write, Bash | |
+| revisor | nada | Read, Grep, Glob, Bash | sem Edit/Write; `Bash` é barreira parcial |
+| archivist | `progress.md`/`progress-log.md` | Read, Edit | |
+| migrator | arquivos do scaffold | Read, Grep, Glob, Edit, Write, Bash | |
+| c4-architecture | `sdd/spec/` | Read, Grep, Glob, Write | |
+
+**Regras de geração:** `update` sobrescreve só os arquivos gerados pelo Forge e **preserva** agentes criados pelo usuário em `.claude/agents/`; `doctor` aponta papel ausente/divergente.
+
+**Teams (opt-in):** `forge-sdd init --claude-teams` grava `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` em `.claude/settings.json` (`env`), com aviso de custo, de recurso experimental, da indisponibilidade em `-p` e de que subagents nomeados passam a abrir como teammates. Sem a flag, nada é ligado. Nenhum arquivo em `.claude/teams/` é gerado (não é reconhecido).
+
+**Hooks (opt-in com teams):** `TaskCompleted` → `forge-sdd run verify <feature>` (roda o critério executável; exit 2 bloqueia); `TeammateIdle` → checa handoff entregue no ledger.
+
 ## 3. Contratos
 
 **Entrada do Jev (snapshot, sem conteúdo de código):** `feature`, `stage`, estado das estações, leases/heartbeats, `files_touched` por feature ativa, tasks `[ ]/[x]`, `outcome` da última revisão, agentes habilitados.
@@ -96,7 +131,7 @@ flowchart TD
 
 **Config em `sdd/.sddrc`:** `dispatcher: {enabled, provider: "openrouter", model, autonomy: "L0|L1|L2", min_confidence, timeout_seconds, lease_seconds}`. Padrão: `enabled=false`, `autonomy=L1`.
 
-**Ledger (`sdd/.runs/<feature>.json`):** `branch`, `stations[{name, state, session_id, agent, heartbeat, handoff_ok}]`.
+**Ledger (`sdd/.runs/<feature>.json`)** — fonte de verdade entre sessões, pois teams é efêmero e não retoma teammates: `branch`, `stations[{name, state, session_id, agent, heartbeat, handoff_ok}]`.
 
 ## 4. Integridade
 
@@ -117,8 +152,17 @@ flowchart TD
 7. Telemetria: toda decisão grava `session-*.json` com `feature` em caminho completo (Regra 14), inclusive em timeout.
 8. Com `dispatcher.enabled=false`, a saída dos comandos atuais é idêntica (teste de regressão).
 
+9. Scaffold para `claude` gera `.claude/agents/{orquestrador,specifier,builder,revisor,archivist,migrator,c4-architecture}.md` com frontmatter válido; o do `revisor` **não** lista `Edit`/`Write` (teste de golden file).
+10. Teste de que os três adaptadores (Claude, Gemini, Copilot) apontam para o **mesmo** `.agents/roles/<papel>.md` e que não restou corpo duplicado nos chatmodes.
+11. `update` preserva um agente de usuário em `.claude/agents/` e `doctor` reporta papel ausente.
+12. `init` sem `--claude-teams` não escreve a variável experimental; com a flag, escreve em `.claude/settings.json` e **não** cria `.claude/teams/`.
+13. Teste de que `forge-sdd run verify` retorna exit 2 quando o critério executável falha e 0 quando passa (base do hook `TaskCompleted`).
+14. Com a telemetria ligada, uma execução com N teammates gera N `session-*.json` com o mesmo `feature` (Regra 14).
+
 ## 6. Dependências
 
+- Spike `feat-5ae2-06` (recomendou piloto só no Claude) e decisão do usuário sobre assimetria: esta revisão **resolve** o risco ao manter uma definição única de papel para os três agentes; só o isolamento (subagent/teammate) é específico do Claude.
+- Versão do Claude Code com agent teams habilitável (recurso experimental; validar `claude --version` no `doctor`).
 - Handoff estruturado Act → Revisor e telemetria correlacionada por `feature` (discovery-53, Tarefas 1-3).
 - Decisão de produto sobre assimetria entre agentes (discovery-53, Tarefa 4).
 - Confirmação do modelo/ID do Jev no OpenRouter e de condições de privacidade/custo antes de qualquer piloto real.
