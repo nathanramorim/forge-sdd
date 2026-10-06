@@ -1,4 +1,4 @@
-# Critérios Técnicos 56 — Papéis Comuns, Agent Teams e Jev como Despachante
+# Critérios Técnicos 56 — Papéis Especialistas, Agent Teams e Jev (opcional)
 
 Visão de engenharia do `discovery-56`. Linguagem: padrão (Constituição, regra 0).
 
@@ -109,6 +109,20 @@ flowchart TD
 
 **Hooks (opt-in com teams):** `TaskCompleted` → `forge-sdd run verify <feature>` (roda o critério executável; exit 2 bloqueia); `TeammateIdle` → checa handoff entregue no ledger.
 
+## 2.2 Economia de tokens e especialistas (revisão 3)
+
+**Jev opcional:** o despacho funciona só com o motor determinístico (`forge-sdd dispatch` sem chamada externa). O pacote do cliente OpenRouter não é importado por nenhum outro pacote do projeto.
+
+**Modelo por papel** (`.sddrc`, bloco opcional; sem ele valem os padrões do frontmatter):
+```json
+"roles": { "builder": {"model": "sonnet"}, "archivist": {"model": "haiku"}, "revisor": {"model": "inherit"} }
+```
+Valores iniciais são hipótese; devem ser revistos com `forge-sdd report`.
+
+**Especialistas:** `forge-sdd agents sync` lê `.agents/rules/*.md` (ignora `*.example`) e gera `.claude/agents/esp-<dominio>.md` (frontmatter com `name`, `description` curta derivada do título da regra, `tools` restritas, `model`; corpo apontando para a regra). Nunca grava em `.agents/rules/`. Especialista cuja regra sumiu é reportado como órfão, sem ser apagado.
+
+**Relatório por papel:** `forge-sdd report --by-role` agrega `tokens_input`/`tokens_output`/`model`/duração a partir de `agent_path` nos `session-*.json`.
+
 ## 3. Contratos
 
 **Entrada do Jev (snapshot, sem conteúdo de código):** `feature`, `stage`, estado das estações, leases/heartbeats, `files_touched` por feature ativa, tasks `[ ]/[x]`, `outcome` da última revisão, agentes habilitados.
@@ -158,6 +172,13 @@ flowchart TD
 12. `init` sem `--claude-teams` não escreve a variável experimental; com a flag, escreve em `.claude/settings.json` e **não** cria `.claude/teams/`.
 13. Teste de que `forge-sdd run verify` retorna exit 2 quando o critério executável falha e 0 quando passa (base do hook `TaskCompleted`).
 14. Com a telemetria ligada, uma execução com N teammates gera N `session-*.json` com o mesmo `feature` (Regra 14).
+
+15. Sem `OPENROUTER_API_KEY` e com `dispatcher.enabled=false`, `forge-sdd dispatch` responde etapa/papel/ocupação/conflito/conclusão **sem nenhuma requisição de rede** (teste com cliente HTTP que falha se chamado).
+16. Teste de arquitetura: nenhum pacote fora de `internal/jev` (nome ilustrativo) importa o cliente OpenRouter.
+17. Cada papel gerado tem `model` definido; `roles.<papel>.model` no `.sddrc` sobrescreve o padrão (golden file).
+18. `forge-sdd agents sync` gera um especialista por arquivo `.md` de `.agents/rules/`, não gera para `.example`, e o diff de `.agents/rules/` após o comando é vazio.
+19. Regra removida → especialista marcado órfão e mantido; `doctor` avisa especialistas em excesso ou com `description` duplicada.
+20. `forge-sdd report --by-role` soma tokens por papel de forma consistente com o total por feature.
 
 ## 6. Dependências
 

@@ -1,8 +1,10 @@
-# Discovery 56 — Papéis Comuns, Agent Teams do Claude e Jev como Despachante/Decisor
+# Discovery 56 — Papéis Especialistas, Agent Teams do Claude e Jev (opcional) como Despachante
 
 Responde à pergunta: *como tornar o Forge mais independente em seus agentes e operar por sessão, incluindo o Jev como tomador de decisões?* Complementa o **discovery-53** (esteira Spec → Act → Revisor em 3 sessões), que definiu as estações e o handoff, mas **não definiu quem decide qual estação roda, quando e com qual agente**. Este discovery preenche essa lacuna.
 
 > **Revisão 2 (agent teams):** o usuário pediu para assimilar a responsabilidade de *agent teams* do Claude Code no CLI e gerar os papéis do Forge-SDD também para o Claude. Ver seção 6; a seção 7 reavalia o desenho do Jev e da esteira à luz dos teams.
+
+> **Revisão 3 (Jev opcional, economia de tokens, um agente por especialidade):** o usuário definiu que o Jev é **opcional**, que reduzir consumo de tokens é prioridade e que cada especialidade deve ter seu próprio agente. Ver seção 8.
 
 > **Premissas registradas (Clarify, `sdd/memory/clarify.md`):** o usuário respondeu só à pergunta 1 (quem é o Jev). As demais foram assumidas com padrões conservadores e **precisam de confirmação no `/split-features`**: (a) este é um discovery novo que referencia o 53, não o substitui; (b) o Jev **recomenda e delega**, mas ações irreversíveis (merge, release, escopo ambíguo) continuam com o humano; (c) a decisão é assíncrona — a esteira registra a decisão e segue ou aguarda conforme o nível de autonomia.
 
@@ -86,4 +88,26 @@ Antes de **cada delegação**, o Jev recebe um snapshot do estado e devolve uma 
 - **Gates por hook:** `TaskCompleted` pode rodar o critério executável da feature (Regra 6) e bloquear a conclusão; `TeammateIdle` pode checar se o handoff foi entregue. É a forma nativa de materializar o "entregou?" que o Jev avalia.
 - **Telemetria:** cada teammate é uma sessão separada, então vira vários `session-*.json` amarrados pelo mesmo `feature` (já previsto no discovery-53, Tarefa 3).
 
-**Handoff:** próximo passo é `/split-features`, quebrando em `sdd/features/feat-56-jev-despachante-e-operacao-por-sessao/` (sugestão de 4 subfeatures no `plan-56`, começando pelos **papéis comuns**, que não dependem do Jev nem de teams). Antes de codar o piloto de autonomia (L2), confirmar com o usuário as premissas (a)-(c) acima e o nível de autonomia inicial. Depende do handoff estruturado do discovery-53 (Tarefas 1-3).
+## 8. Revisão 3: Jev opcional, economia de tokens e um agente por especialidade
+
+### 8.1 Jev opcional (desacoplado)
+- **Sem o Jev, o Forge despacha igual**, só que por regras determinísticas: o motor lê o ledger e responde etapa, papel, ocupação, conflito e conclusão sem nenhuma chamada de modelo. O Jev só entra, quando habilitado, nos casos que as regras não resolvem (conflito semântico, prioridade, ambiguidade).
+- **Fronteira de módulo:** as subfeatures A (papéis), B (base determinística) e D (teams) **não importam nada do Jev**. O cliente OpenRouter vive isolado na subfeature C e pode ser removido sem quebrar o resto. Padrão `dispatcher.enabled=false`; sem `OPENROUTER_API_KEY`, o Forge funciona normalmente, sem erro.
+- Consequência: o ganho de "independência de agentes" não depende de um modelo novo e de terceiros.
+
+### 8.2 Reduzir consumo de tokens (princípios de projeto)
+1. **Determinístico antes de modelo:** estado, ocupação, conflito e conclusão saem do ledger e do `git`, não de um LLM. O Jev, quando ligado, recebe só metadados (nomes de arquivo, status), nunca código.
+2. **Modelo certo por papel:** cada papel declara `model` no frontmatter, com padrão econômico para os mecânicos. Proposta inicial (sobrescrevível em `.sddrc`): Archivist e Migrator em modelo leve; Builder e Specifier em modelo intermediário; Revisor e Orquestrador herdando o modelo da sessão (`inherit`) ou um modelo mais forte, pois é onde o erro custa mais. Os valores finais devem sair da telemetria, não de suposição.
+3. **Contexto mínimo por especialista:** cada agente carrega só o que sua especialidade exige (READ-MIN já existente) e consulta `.agents/rules/<dominio>.md` sob demanda, em vez de o lead carregar tudo.
+4. **Subagent por padrão, teams só quando paga:** a documentação oficial indica que subagents devolvem resultado resumido ao contexto principal (custo menor), enquanto cada teammate é uma instância separada (custo proporcional ao número de teammates). Teams fica opt-in, limitado a 3-5 teammates e a tarefas que justificam o paralelismo.
+5. **Medir:** estender `forge-sdd report` (que já agrega tokens, modelo e duração) para quebrar por **papel/agente**, permitindo ver onde o gasto está e ajustar o modelo de cada papel com dados.
+6. **Orçamentos:** respostas de planejamento e `progress.md` já têm limite; acrescentar limite de resumo de handoff por papel.
+
+### 8.3 Um agente por especialidade
+- **Núcleo (processo SDD):** os 7 papéis atuais (orquestrador, specifier, builder, revisor, archivist, migrator, c4-architecture), cada um com responsabilidade única e ferramentas restritas.
+- **Especialistas de domínio (novo):** o projeto já declara conhecimento de domínio em `.agents/rules/*.md` (design system, frontend, arquitetura, acessibilidade...). Proposta: cada regra de domínio pode virar um **agente especialista** (`.claude/agents/esp-<dominio>.md`) com o corpo apontando para a regra correspondente, e o Orquestrador/Builder delegar a ele o trabalho daquela especialidade. Assim o conhecimento fica no arquivo de regra (fonte única) e o agente só o carrega quando acionado.
+- **Geração explícita, não automática:** `.agents/rules/` é conteúdo do usuário e o `update` nunca o toca. Os especialistas são gerados por comando próprio (`forge-sdd agents sync`), que lê os arquivos de regra e **nunca modifica as regras**. Remover ou renomear uma regra marca o especialista como órfão, sem apagar.
+- **Delegação por especialidade:** o lead escolhe o agente pelo `description` do frontmatter (mecanismo nativo de delegação). Descrições curtas e específicas evitam acionar o agente errado e gastar contexto à toa.
+- **Limite saudável:** poucos especialistas bem definidos; muitos agentes com descrições parecidas pioram a delegação e aumentam custo. O `doctor` avisa quando há mais especialistas que o recomendado ou descrições sobrepostas.
+
+**Handoff:** próximo passo é `/split-features`, quebrando em `sdd/features/feat-56-jev-despachante-e-operacao-por-sessao/` (sugestão de 5 subfeatures no `plan-56`, começando pelos **papéis comuns**, que não dependem do Jev nem de teams; o Jev é a última e opcional). Antes de codar o piloto de autonomia (L2), confirmar com o usuário as premissas (a)-(c) acima e o nível de autonomia inicial. Depende do handoff estruturado do discovery-53 (Tarefas 1-3).
