@@ -4,6 +4,16 @@ Este arquivo registra o histórico de entregas de produto deste projeto.
 
 ## Entregas
 
+### Versão 3.0.1-beta.1 — Site Estático Oficial (Astro 5 SSG), Vídeo Player e Correções Visuais (Beta)
+
+Segunda entrega beta da linha v3.0 baseada na branch `release/v3.0.1` (Feature 60 e Fixes 61 e 62). Entrega a aplicação estática oficial em `/site` para `https://forge-sdd.org`, com zero impacto sobre o binário Go (`ARQ-04`).
+
+*   **Aplicação Estática Astro 5 SSG em `/site` (`https://forge-sdd.org`):** Arquitetura pré-renderizada no build com Core Web Vitals otimizados (`LCP < 1.2s`, `CLS = 0`), eliminação de scripts CDN externos bloqueantes e hidratação progressiva (`interactions.ts` e `mascot-3d.ts` com tree-shaking ESM e pausa via `IntersectionObserver`).
+*   **SEO Técnico Completo & Schemas JSON-LD:** Canonical tags, OpenGraph, Twitter Cards, `robots.txt`, `sitemap-index.xml`, `llms.txt` e schemas Schema.org (`SoftwareApplication`, `WebSite`, `FAQPage`).
+*   **Player de Vídeo Nativo Oficial:** Nova seção 06 com demonstração em vídeo (1080p Full HD, áudio stereo e controles nativos) e atalho de navegação no Header com ScrollSpy.
+*   **Fix 61 & Fix 62 (Handoff Responsivo & Limpeza):** Barra viva de handoff reformulada com empilhamento fluido (`max-width: 1180px`), eliminando qualquer sobreposição horizontal entre a rota dos agentes e os artefatos; link oficial do Instagram atualizado para `@nathan.ramorim` e player de vídeo limpo sem metadados redundantes.
+*   **Borda Cloudflare Workers:** Configuração declarativa em `site/wrangler.jsonc` com Static Assets e cabeçalhos de segurança HTTP com cache imutável de 1 ano para bundles em `/_astro/*`.
+
 ### Versão 3.0.0-beta — Agentes Independentes, Fila do Builder, Portão de Governança (A/B/C), Constituição por IDs e Auto-Skills (Beta)
 
 Inaugura o ciclo major **v3.0.0-beta** (Discovery 58, 7 entregas: `feat-58-01` a `feat-58-07`), consolidando e substituindo os discoveries 53 e 56 sem dependência de modelos externos e incorporando ao core do Forge-SDD os mecanismos universais validados em `busize-solutions/planning-brain-governanca`. Publicada como Beta diretamente na branch `feat/58-orquestracao-autonoma-governanca-skills` com Pull Request mantido aberto para estabilização (Regra 11).
