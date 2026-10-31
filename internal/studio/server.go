@@ -38,9 +38,7 @@ func NewServer(cfg Config) (*Server, error) {
 	if cfg.Host == "" {
 		cfg.Host = "127.0.0.1"
 	}
-	if cfg.Port == 0 {
-		cfg.Port = 4321
-	}
+	// Se cfg.Port for 0, net.Listen alocará dinamicamente uma porta efêmera livre (ideal para testes).
 
 	agg := NewAggregator(cfg.Dir)
 	hub := NewSSEHub(agg)

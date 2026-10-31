@@ -18,15 +18,24 @@ type StationDTO struct {
 	Name           string              `json:"name"`
 	Role           string              `json:"role"`
 	Color          string              `json:"color"`
-	Mark           string              `json:"mark"` // ring, diamond, bar, wave, tri
+	Mark           string              `json:"mark"`        // ring, diamond, bar, wave, tri
 	MascotState    string              `json:"mascot_state"` // idle, working, thinking, searching, approval, finished, error
 	CurrentFocus   string              `json:"current_focus"`
+	ExecutingTask  *ActiveTaskDTO      `json:"executing_task,omitempty"`
 	InputContract  string              `json:"input_contract"`
 	OutputContract string              `json:"output_contract"`
 	Version        int64               `json:"version"`
 	ActiveItems    int                 `json:"active_items"`
 	TotalItems     int                 `json:"total_items"`
 	Items          []queue.StationItem `json:"items"`
+}
+
+// ActiveTaskDTO descreve com precisão a tarefa em processamento por um agente.
+type ActiveTaskDTO struct {
+	ID        string `json:"id"`
+	Title     string `json:"title"`
+	Status    string `json:"status"`
+	Operation string `json:"operation,omitempty"`
 }
 
 // StudioSnapshot representa o estado consolidado determinístico do projeto.
@@ -140,8 +149,21 @@ func (a *Aggregator) GetSnapshot() (*StudioSnapshot, error) {
 					activeStation = st.ID
 					activeIdx = i
 					stations[i].CurrentFocus = it.Title
+					stations[i].ExecutingTask = &ActiveTaskDTO{
+						ID:        it.ID,
+						Title:     it.Title,
+						Status:    it.Status,
+						Operation: it.Operation,
+					}
 				} else if it.Status == queue.StatusChangesRequested {
 					stations[i].MascotState = "error"
+					stations[i].CurrentFocus = "Retrabalho Solicitado: " + it.Title
+					stations[i].ExecutingTask = &ActiveTaskDTO{
+						ID:        it.ID,
+						Title:     it.Title,
+						Status:    it.Status,
+						Operation: it.Operation,
+					}
 				}
 				if it.Status != queue.StatusApproved {
 					activeCount++
@@ -151,15 +173,42 @@ func (a *Aggregator) GetSnapshot() (*StudioSnapshot, error) {
 		}
 	}
 
-	// Carrega legado se existir
+	// Carrega legado se existir e vincula à estação ativa correspondente
 	legacyQ, _ := queue.Load(a.Dir)
-
-	// Inspeciona governança
 	var lastVerdict *queue.Verdict
 	if legacyQ != nil {
 		for _, it := range legacyQ.Items {
 			if it.GovernanceVerdict != nil {
 				lastVerdict = it.GovernanceVerdict
+			}
+			if it.Status == queue.StatusBuilding {
+				for bIdx, s := range stations {
+					if s.ID == queue.StationBuilder && stations[bIdx].ExecutingTask == nil {
+						stations[bIdx].MascotState = "working"
+						stations[bIdx].CurrentFocus = it.Title
+						stations[bIdx].ExecutingTask = &ActiveTaskDTO{
+							ID:     it.TaskID,
+							Title:  it.Title,
+							Status: it.Status,
+						}
+						activeStation = queue.StationBuilder
+						activeIdx = bIdx
+					}
+				}
+			} else if it.Status == queue.StatusReviewPending {
+				for gIdx, s := range stations {
+					if s.ID == queue.StationGovernance && stations[gIdx].ExecutingTask == nil {
+						stations[gIdx].MascotState = "approval"
+						stations[gIdx].CurrentFocus = "Auditando Conformidade: " + it.Title
+						stations[gIdx].ExecutingTask = &ActiveTaskDTO{
+							ID:     it.TaskID,
+							Title:  it.Title,
+							Status: "review_pending",
+						}
+						activeStation = queue.StationGovernance
+						activeIdx = gIdx
+					}
+				}
 			}
 		}
 	}

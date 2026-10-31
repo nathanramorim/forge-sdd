@@ -13,6 +13,7 @@ func TestAssetsEmbedding(t *testing.T) {
 		"assets/index.html",
 		"assets/studio.css",
 		"assets/studio.js",
+		"assets/three.min.js",
 	}
 
 	for _, file := range requiredFiles {
@@ -48,6 +49,7 @@ func TestIndexHTMLContract(t *testing.T) {
 		"id=\"lastUpdate\"",
 		"studio.css",
 		"studio.js",
+		"three.min.js",
 	}
 
 	for _, elem := range requiredElements {
