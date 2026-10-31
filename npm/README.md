@@ -42,7 +42,53 @@ npx @nathanramorim/forge-sdd@latest init . --agent copilot,gemini --name meu-pro
 
 ## ✨ Orquestração Independente, Portão de Governança (A/B/C), Constituição por IDs e Auto-Skills (v3.0.0-beta)
 
-*   **5 Estações Coordenadas (`.agents/roles/`):** o **Líder** orquestra o fluxo junto ao **PM + Arquiteto** (`discovery` + `criteria` com Gate de Revisão de Spec), **Planejador** (`plan` mapeando rules por task), **Builder** (execução isolada via fila) e **Analista de Governança** (auditoria read-only semântica e determinística), devolvendo ao humano o Painel Executivo (*o que já foi feito, como está cada etapa e o que falta*).
+> **De um assistente fazendo tudo sozinho para uma equipe de 5 especialistas trabalhando em paralelo por você.**
+> Na versão 3.0, você alinha a ideia com o **Líder**, aprova a planta do projeto e deixa a esteira trabalhar: planejadores, construtores em paralelo e um auditor independente entregam o software pronto e verificado em um **Painel Executivo** simples para sua decisão final.
+
+```mermaid
+flowchart LR
+    subgraph Voce["👤 VOCÊ (No Controle)"]
+        V1["1. Conta sua ideia"]
+        V2["2. Aprova a planta do projeto"]
+        V3["3. Recebe o Painel Pronto"]
+    end
+
+    subgraph Equipe["🤖 SUA FÁBRICA AUTÔNOMA (Forge SDD 3.0)"]
+        direction TB
+        E1["🎯 1. O Líder (Maestro)<br/>Coordena a equipe e fala com você"]
+        E2["📐 2. Produto & Arquiteto<br/>Transformam sua ideia em um projeto claro"]
+        E3["🗺️ 3. O Planejador<br/>Divide o projeto em tarefas pequenas e seguras"]
+
+        subgraph Paralelo["⚡ Execução simultânea (Fila Inteligente)"]
+            B1["🔨 4. Construtor A<br/>Cria a Parte 1"]
+            B2["🔨 4. Construtor B<br/>Cria a Parte 2"]
+        end
+
+        E5["🛡️ 5. Auditor de Qualidade e Segurança<br/>(Não mexe no código — só fiscaliza se tudo<br/>seguiu as regras e não tem falhas)"]
+        SK["🧠 Memória que Aprende Sozinha<br/>O que dá certo vira habilidade automática<br/>para os próximos projetos"]
+    end
+
+    V1 --> E1
+    E1 --> E2
+    E2 -->|"Pede seu OK"| V2
+    V2 -->|"Aprovado!"| E3
+    E3 --> B1 & B2
+    B1 & B2 --> E5
+    E5 -->|"Aprovado na auditoria"| E1
+    E5 -.->|"Ensina novos padrões"| SK
+    E1 -->|"Resumo claro: o que foi feito,<br/>status de cada etapa e o que falta"| V3
+```
+
+| Estação | Papel na Vida Real | O que ele faz por você |
+| :--- | :--- | :--- |
+| **1. O Líder** 🎯 | *Gerente de Operações* | Seu único ponto de contato. Aciona os especialistas certos e devolve um **Painel Executivo** (*o que foi feito, status de cada etapa e o que falta*). |
+| **2. Produto & Arquiteto** 📐 | *Arquiteto da Obra* | Desenha o que será feito e verifica o que já pode ser reaproveitado (`Reuse Check`). **Nada começa sem o seu "De Acordo" na planta.** |
+| **3. O Planejador** 🗺️ | *Engenheiro de Produção* | Fatia a planta aprovada em tarefas pequenas e indica quais regras de qualidade e segurança cada tarefa deve seguir. |
+| **4. Os Construtores** 🔨 | *Equipe de Execução* | Consomem tarefas de uma **fila inteligente** (`forge-sdd queue`): o que é independente roda **em paralelo**; o que tem dependência aguarda sua vez. |
+| **5. O Auditor de Governança** 🛡️ | *Fiscal Independente* | **Proibido de alterar código.** Inspeciona se a entrega respeitou arquitetura, boas práticas e segurança antes de liberar para o Líder. |
+
+### Destaques Técnicos da `v3.0.0-beta`
+*   **5 Estações Coordenadas (`.agents/roles/`):** fonte canônica única dos papéis com adaptadores finos para Claude Code, Gemini e GitHub Copilot.
 *   **Constituição por IDs Estáveis + Rules Modulares (`.agents/rules/sdd-*.md`):** `sdd/memory/constitution.md` mantém "o quê e por quê" enxuto com IDs (`ARQ`, `SEG`, `DUP`, `COD`, `TST`, `FLX`, `GOV`), enquanto as rules detalham "como cumprir" sob demanda sem duplicar texto (`GOV-04`).
 *   **Fila do Builder (`forge-sdd queue`) e Portão em 3 Camadas (`forge-sdd gate`):** exige seção `"O que já existe"` (Reuse Check `DUP-02`) na Spec, roda checks determinísticos `P-xx` (Camada A) e valida o parecer JSON baseado em evidências do Analista de Governança (Camada B) antes da aprovação humana no Líder (Camada C).
 *   **Auto-Skills (`forge-sdd skills`) e Pacotes de Governança (`forge-sdd governance`):** atividades padronizadas repetidas viram skills reutilizáveis em `.agents/skills/` sincronizadas para `.claude/skills/` e `.gemini/skills/`.
