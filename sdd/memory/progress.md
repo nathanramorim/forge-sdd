@@ -12,11 +12,11 @@ Feature 60 — Site Estático Oficial (forge-sdd.org) Astro + SEO [x] 4/4 approv
 ```
 
 ## Features ativas
-- `feat/60-site-estatico-seo-performance` concluída (4 tasks aprovadas).
-- Base: `release/v3.0.1`.
+- PR #59 aberto para `release/v3.0.1` (Feature 60: 4 tasks aprovadas).
+- Deploy ativo em `https://lp-forgesdd.nathan-amorim.workers.dev`.
 
 ## Próximo passo
-**Iniciar:** Concluir sessão, commitar e mergear em `release/v3.0.1`.
+**Iniciar:** Merge do PR #59 em `release/v3.0.1` e preparação do próximo discovery.
 **Bloqueios:** —
 
 > Histórico completo em `progress-log.md`
