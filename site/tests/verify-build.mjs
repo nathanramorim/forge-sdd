@@ -19,6 +19,8 @@ assert(existsSync(join(DIST_DIR, 'llms.txt')), 'dist/llms.txt deve existir');
 assert(existsSync(join(DIST_DIR, 'favicon.svg')), 'dist/favicon.svg deve existir');
 assert(existsSync(join(DIST_DIR, 'og-image.svg')), 'dist/og-image.svg deve existir');
 assert(existsSync(join(DIST_DIR, '_headers')), 'dist/_headers deve existir');
+assert(existsSync(join(DIST_DIR, 'video/forge-sdd-v3.mp4')), 'dist/video/forge-sdd-v3.mp4 deve existir');
+assert(existsSync(join(DIST_DIR, 'video/forge-sdd-v3-poster.jpg')), 'dist/video/forge-sdd-v3-poster.jpg deve existir');
 
 const html = readFileSync(HTML_FILE, 'utf-8');
 
@@ -42,6 +44,8 @@ assert(html.includes('id="emulador"'), 'Seção #emulador ausente');
 assert(html.includes('id="instalacao"'), 'Seção #instalacao ausente');
 assert(html.includes('id="governanca"'), 'Seção #governanca ausente');
 assert(html.includes('id="evolucao"'), 'Seção #evolucao ausente');
+assert(html.includes('id="video"'), 'Seção #video ausente');
+assert(html.includes('src="/video/forge-sdd-v3.mp4"'), 'Vídeo /video/forge-sdd-v3.mp4 ausente');
 
 // 4. Invariantes de Design System e Fix 61 (CA-05)
 console.log('4. Verificando invariantes de UI, links oficiais e Fix 61...');

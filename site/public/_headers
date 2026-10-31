@@ -19,3 +19,6 @@
 
 /llms.txt
   Cache-Control: public, max-age=86400
+
+/video/*
+  Cache-Control: public, max-age=604800

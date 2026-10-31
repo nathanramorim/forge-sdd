@@ -1047,6 +1047,54 @@ footer {
   stroke-linecap: round;
   stroke-linejoin: round;
 }
+
+/* Seção de Demonstração em Vídeo */
+.video-container {
+  margin-top: 14px;
+}
+.video-card {
+  position: relative;
+  background: var(--bg2);
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  overflow: hidden;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+  transition: border-color var(--t);
+}
+.video-card:hover {
+  border-color: var(--line2);
+}
+.video-player {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: #000;
+  outline: none;
+}
+.video-meta-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 18px;
+  background: var(--bg3);
+  border-top: 1px solid var(--line);
+  font: 500 12px var(--f-mono);
+  color: var(--muted);
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.video-meta-left {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.video-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 10px var(--accent);
+}
 </style>
 </head>
 <body>
@@ -1086,6 +1134,7 @@ footer {
       <a href="#instalacao" class="nav-sec">Instalação &amp; Comandos</a>
       <a href="#governanca" class="nav-sec">Governança IA</a>
       <a href="#evolucao" class="nav-sec">Evolução</a>
+      <a href="#video" class="nav-sec">Vídeo</a>
       <span class="nav-socials">
         <a href="https://www.npmjs.com/package/@nathanramorim/forge-sdd" target="_blank" rel="noopener noreferrer" class="ds-link" title="Pacote Oficial no NPM">
           <svg aria-hidden="true"><use href="#ico-npm"/></svg>
@@ -1480,6 +1529,53 @@ footer {
               Atividades padronizadas que se repetem 3 vezes viram Skills reutilizáveis automaticamente sincronizadas entre os agentes.
             </li>
           </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- SEÇÃO 6: DEMONSTRAÇÃO OFICIAL EM VÍDEO -->
+    <section id="video">
+      <div class="sec-h">
+        <div>
+          <p class="eyebrow" style="color:var(--accent)">06 · Demonstração Oficial em Vídeo</p>
+          <h2>Veja o Forge-SDD 3.0 em ação em 60 segundos.</h2>
+          <p>Assista ao vídeo explicativo gerado pelo BRAG apresentando a esteira autônoma em 5 estações, o portão determinístico Camada A e a governança somente-leitura na prática.</p>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <span class="chip"><i style="--o:var(--accent)"></i>Vídeo Oficial</span>
+          <span class="chip"><i style="--o:var(--ok)"></i>1080p Full HD</span>
+        </div>
+      </div>
+
+      <div class="video-container">
+        <div class="video-card">
+          <video
+            controls
+            preload="metadata"
+            poster="video/forge-sdd-v3-poster.jpg"
+            playsinline
+            class="video-player"
+          >
+            <source src="video/forge-sdd-v3.mp4" type="video/mp4" />
+            Seu navegador não suporta a reprodução de vídeo HTML5.
+          </video>
+          <div class="video-meta-bar">
+            <div class="video-meta-left">
+              <span class="video-status-dot"></span>
+              <span class="mono">forge-sdd-v3-demo.mp4 · 1080p Full HD · Áudio Stereo</span>
+            </div>
+            <div class="video-meta-right">
+              <a
+                href="https://github.com/nathanramorim/brag"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="ds-link"
+                style="color: var(--muted); font-size: 11px;"
+              >
+                Apresentação gerada com BRAG
+              </a>
+            </div>
+          </div>
         </div>
       </div>
     </section>

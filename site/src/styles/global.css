@@ -1036,3 +1036,51 @@ footer {
   stroke-linecap: round;
   stroke-linejoin: round;
 }
+
+/* Seção de Demonstração em Vídeo */
+.video-container {
+  margin-top: 14px;
+}
+.video-card {
+  position: relative;
+  background: var(--bg2);
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  overflow: hidden;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+  transition: border-color var(--t);
+}
+.video-card:hover {
+  border-color: var(--line2);
+}
+.video-player {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: #000;
+  outline: none;
+}
+.video-meta-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 18px;
+  background: var(--bg3);
+  border-top: 1px solid var(--line);
+  font: 500 12px var(--f-mono);
+  color: var(--muted);
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.video-meta-left {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.video-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 10px var(--accent);
+}
