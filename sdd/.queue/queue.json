@@ -1,182 +1,104 @@
 {
-  "feature_id": "feat-58-orquestracao-autonoma-governanca-skills",
-  "branch": "feat/58-orquestracao-autonoma-governanca-skills",
+  "feature_id": "feat-60-site-estatico-seo-performance",
+  "branch": "feat/60-site-estatico-seo-performance",
   "spec_status": "reviewed",
-  "updated_at": "2026-10-31T14:47:17Z",
+  "updated_at": "2026-10-31T17:53:28Z",
   "items": [
     {
-      "task_id": "feat-58-01-constituicao-ids-rules-e-templates-governanca",
-      "title": "feat-58-01 — Constituição por IDs Estáveis, Rules Modulares (`.agents/rules/`) e Templates de Governança",
-      "spec_path": "sdd/features/feat-58-orquestracao-autonoma-governanca-skills/feat-58-01-constituicao-ids-rules-e-templates-governanca.md",
+      "task_id": "feat-60-01-scaffold-astro-seo-dados-tipados",
+      "title": "feat-60-01 — Scaffold Astro 5 SSG em `/site`, SEO Técnico (`SeoHead`, JSON-LD, Sitemap, `llms.txt`) e Extração de Dados Tipados",
+      "spec_path": "sdd/features/feat-60-site-estatico-seo-performance/feat-60-01-scaffold-astro-seo-dados-tipados.md",
       "status": "approved",
       "rules": [
         "sdd-arquitetura.md",
         "sdd-seguranca.md",
         "sdd-reuso-e-duplicacao.md",
-        "sdd-codigo-e-testes.md",
-        "sdd-fluxo-e-portao.md"
+        "ARQ-04",
+        "ARQ-11",
+        "SEG-04",
+        "SEG-07",
+        "DUP-01",
+        "DUP-02",
+        "DUP-04",
+        "COD-05"
       ],
       "skills_used": [],
       "attempts": 1,
       "governance_verdict": {
         "veredito": "conforme",
         "achados": [],
-        "candidate_skill": {
-          "name": "novo-subcomando-cli-sdd",
-          "reason": "Quatro subcomandos CLI seguem o mesmo procedimento estrutural (DUP-05 Regra de Três / GOV-03 Fim de Onda)",
-          "proposed_path": ".agents/skills/novo-subcomando-cli-sdd/SKILL.md"
-        },
-        "resumo": "Auditoria semântica Camada B (Read-Only) concluída com veredito CONFORME (S-01 a S-07 atendidos)."
+        "resumo": "Scaffold Astro 5 SSG, dados tipados e SEO implementados com sucesso."
       }
     },
     {
-      "task_id": "feat-58-02-papeis-canonicos-5-estacoes-e-adaptadores",
-      "title": "feat-58-02 — Papéis Canônicos das 5 Estações (`.agents/roles/`) e Adaptadores Multi-Agente",
-      "spec_path": "sdd/features/feat-58-orquestracao-autonoma-governanca-skills/feat-58-02-papeis-canonicos-5-estacoes-e-adaptadores.md",
+      "task_id": "feat-60-02-componentes-ssg-pre-renderizados-fallback-svg",
+      "title": "feat-60-02 — Componentes Astro 1:1 Pré-Renderizados no Build (Header, Hero, 5 Estações, Emulador, Instalação, Governança, Evolução e Footer) com Fallback SVG",
+      "spec_path": "sdd/features/feat-60-site-estatico-seo-performance/feat-60-02-componentes-ssg-pre-renderizados-fallback-svg.md",
       "status": "approved",
       "rules": [
-        "sdd-arquitetura.md",
-        "sdd-seguranca.md",
         "sdd-reuso-e-duplicacao.md",
-        "sdd-codigo-e-testes.md",
-        "sdd-fluxo-e-portao.md"
+        "sdd-seguranca.md",
+        "DUP-02",
+        "DUP-04",
+        "SEG-04",
+        "COD-01",
+        "COD-04",
+        "COD-05"
       ],
       "skills_used": [],
       "attempts": 1,
       "governance_verdict": {
         "veredito": "conforme",
         "achados": [],
-        "candidate_skill": {
-          "name": "novo-subcomando-cli-sdd",
-          "reason": "Quatro subcomandos CLI seguem o mesmo procedimento estrutural (DUP-05 Regra de Três / GOV-03 Fim de Onda)",
-          "proposed_path": ".agents/skills/novo-subcomando-cli-sdd/SKILL.md"
-        },
-        "resumo": "Auditoria semântica Camada B (Read-Only) concluída com veredito CONFORME (S-01 a S-07 atendidos)."
+        "resumo": "Componentes 1:1 pré-renderizados no build com Fallback SVG e CLS=0."
       }
     },
     {
-      "task_id": "feat-58-03-fluxo-concepcao-reuse-check-e-planejador",
-      "title": "feat-58-03 — Fluxo Líder + PM/Arquiteto + Planejador com Reuse Check (`DUP-02`) e Gate de Spec (`FLX-01`)",
-      "spec_path": "sdd/features/feat-58-orquestracao-autonoma-governanca-skills/feat-58-03-fluxo-concepcao-reuse-check-e-planejador.md",
+      "task_id": "feat-60-03-hidratacao-interacoes-motor-3d-otimizado",
+      "title": "feat-60-03 — Hidratação Progressiva de Interações (`interactions.ts`) e Motor WebGL Otimizado (`mascot-3d.ts`) com Tree-Shaking e Pausa fora da Viewport",
+      "spec_path": "sdd/features/feat-60-site-estatico-seo-performance/feat-60-03-hidratacao-interacoes-motor-3d-otimizado.md",
       "status": "approved",
       "rules": [
         "sdd-arquitetura.md",
-        "sdd-seguranca.md",
-        "sdd-reuso-e-duplicacao.md",
         "sdd-codigo-e-testes.md",
-        "sdd-fluxo-e-portao.md"
+        "sdd-seguranca.md",
+        "ARQ-04",
+        "SEG-04",
+        "COD-01",
+        "COD-04",
+        "COD-05",
+        "TST-01"
       ],
       "skills_used": [],
       "attempts": 1,
       "governance_verdict": {
         "veredito": "conforme",
         "achados": [],
-        "candidate_skill": {
-          "name": "novo-subcomando-cli-sdd",
-          "reason": "Quatro subcomandos CLI seguem o mesmo procedimento estrutural (DUP-05 Regra de Três / GOV-03 Fim de Onda)",
-          "proposed_path": ".agents/skills/novo-subcomando-cli-sdd/SKILL.md"
-        },
-        "resumo": "Auditoria semântica Camada B (Read-Only) concluída com veredito CONFORME (S-01 a S-07 atendidos)."
+        "resumo": "Módulos interactions.ts e mascot-3d.ts implementados com tree-shaking ESM, requestIdleCallback, IntersectionObserver para WebGL, transição de fallback SVG sem CLS e ciclo interativo completo."
       }
     },
     {
-      "task_id": "feat-58-04-motor-fila-builder-e-portao-camada-a",
-      "title": "feat-58-04 — Motor Determinístico da Fila (`forge-sdd queue`) e Camada A do Portão (`forge-sdd gate`)",
-      "spec_path": "sdd/features/feat-58-orquestracao-autonoma-governanca-skills/feat-58-04-motor-fila-builder-e-portao-camada-a.md",
+      "task_id": "feat-60-04-cloudflare-workers-testes-seo-fidelidade",
+      "title": "feat-60-04 — Configuração Cloudflare Workers (`wrangler.jsonc` + `_headers`), Suite de Testes de Fidelidade/SEO (`npm test`) e Documentação",
+      "spec_path": "sdd/features/feat-60-site-estatico-seo-performance/feat-60-04-cloudflare-workers-testes-seo-fidelidade.md",
       "status": "approved",
       "rules": [
-        "sdd-arquitetura.md",
         "sdd-seguranca.md",
-        "sdd-reuso-e-duplicacao.md",
         "sdd-codigo-e-testes.md",
-        "sdd-fluxo-e-portao.md"
+        "sdd-fluxo-e-portao.md",
+        "SEG-04",
+        "DUP-01",
+        "TST-01",
+        "TST-04",
+        "TST-05",
+        "FLX-01..06"
       ],
       "skills_used": [],
       "attempts": 1,
       "governance_verdict": {
         "veredito": "conforme",
         "achados": [],
-        "candidate_skill": {
-          "name": "novo-subcomando-cli-sdd",
-          "reason": "Quatro subcomandos CLI seguem o mesmo procedimento estrutural (DUP-05 Regra de Três / GOV-03 Fim de Onda)",
-          "proposed_path": ".agents/skills/novo-subcomando-cli-sdd/SKILL.md"
-        },
-        "resumo": "Auditoria semântica Camada B (Read-Only) concluída com veredito CONFORME (S-01 a S-07 atendidos)."
-      }
-    },
-    {
-      "task_id": "feat-58-05-analista-governanca-camada-b-e-painel-lider",
-      "title": "feat-58-05 — Estação do Analista de Governança (Camada B JSON) e Painel Executivo do Líder (Camada C)",
-      "spec_path": "sdd/features/feat-58-orquestracao-autonoma-governanca-skills/feat-58-05-analista-governanca-camada-b-e-painel-lider.md",
-      "status": "approved",
-      "rules": [
-        "sdd-arquitetura.md",
-        "sdd-seguranca.md",
-        "sdd-reuso-e-duplicacao.md",
-        "sdd-codigo-e-testes.md",
-        "sdd-fluxo-e-portao.md"
-      ],
-      "skills_used": [],
-      "attempts": 1,
-      "governance_verdict": {
-        "veredito": "conforme",
-        "achados": [],
-        "candidate_skill": {
-          "name": "novo-subcomando-cli-sdd",
-          "reason": "Quatro subcomandos CLI seguem o mesmo procedimento estrutural (DUP-05 Regra de Três / GOV-03 Fim de Onda)",
-          "proposed_path": ".agents/skills/novo-subcomando-cli-sdd/SKILL.md"
-        },
-        "resumo": "Auditoria semântica Camada B (Read-Only) concluída com veredito CONFORME (S-01 a S-07 atendidos)."
-      }
-    },
-    {
-      "task_id": "feat-58-06-motor-auto-skills-regra-de-tres",
-      "title": "feat-58-06 — Motor de Auto-Skills (`forge-sdd skills`) via Regra de Três (`DUP-05`) e Fim de Onda (`GOV-03`)",
-      "spec_path": "sdd/features/feat-58-orquestracao-autonoma-governanca-skills/feat-58-06-motor-auto-skills-regra-de-tres.md",
-      "status": "approved",
-      "rules": [
-        "sdd-arquitetura.md",
-        "sdd-seguranca.md",
-        "sdd-reuso-e-duplicacao.md",
-        "sdd-codigo-e-testes.md",
-        "sdd-fluxo-e-portao.md"
-      ],
-      "skills_used": [],
-      "attempts": 1,
-      "governance_verdict": {
-        "veredito": "conforme",
-        "achados": [],
-        "candidate_skill": {
-          "name": "novo-subcomando-cli-sdd",
-          "reason": "Quatro subcomandos CLI seguem o mesmo procedimento estrutural (DUP-05 Regra de Três / GOV-03 Fim de Onda)",
-          "proposed_path": ".agents/skills/novo-subcomando-cli-sdd/SKILL.md"
-        },
-        "resumo": "Auditoria semântica Camada B (Read-Only) concluída com veredito CONFORME (S-01 a S-07 atendidos)."
-      }
-    },
-    {
-      "task_id": "feat-58-07-importador-governanca-update-docs-e-release-v3-beta",
-      "title": "feat-58-07 — Importador de Pacotes de Governança (`manifest.yaml`), Migração (`update`), Documentação e Release `v3.0.0-beta`",
-      "spec_path": "sdd/features/feat-58-orquestracao-autonoma-governanca-skills/feat-58-07-importador-governanca-update-docs-e-release-v3-beta.md",
-      "status": "approved",
-      "rules": [
-        "sdd-arquitetura.md",
-        "sdd-seguranca.md",
-        "sdd-reuso-e-duplicacao.md",
-        "sdd-codigo-e-testes.md",
-        "sdd-fluxo-e-portao.md"
-      ],
-      "skills_used": [],
-      "attempts": 1,
-      "governance_verdict": {
-        "veredito": "conforme",
-        "achados": [],
-        "candidate_skill": {
-          "name": "novo-subcomando-cli-sdd",
-          "reason": "Quatro subcomandos CLI seguem o mesmo procedimento estrutural (DUP-05 Regra de Três / GOV-03 Fim de Onda)",
-          "proposed_path": ".agents/skills/novo-subcomando-cli-sdd/SKILL.md"
-        },
-        "resumo": "Auditoria semântica Camada B (Read-Only) concluída com veredito CONFORME (S-01 a S-07 atendidos)."
+        "resumo": "Configuração Cloudflare Workers Static Assets wrangler.jsonc, headers de cache imutavel e seguranca, suite de verificacao verify-build.mjs cobrindo CA-01 a CA-10 e documentacao atualizadas com sucesso."
       }
     }
   ]

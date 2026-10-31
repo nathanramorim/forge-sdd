@@ -1,0 +1,83 @@
+---
+import { EMU_STEPS } from '../data/emulator';
+import MascotFallbackSvg from './MascotFallbackSvg.astro';
+
+const step0 = EMU_STEPS[0];
+---
+
+<section id="emulador">
+  <div class="sec-h">
+    <div>
+      <p class="eyebrow" style="color:var(--warn)">02 · Emulador Interativo Fiel</p>
+      <h2>Veja como uma feature real nasce, roda em paralelo e passa na auditoria.</h2>
+      <p>Clique nos 5 comandos abaixo na ordem em que você usa no dia a dia. À esquerda você vê o terminal/chat real; à direita, a estação ativa e os arquivos gerados em <span class="mono">sdd/</span>.</p>
+    </div>
+    <div>
+      <button class="btn solid sm" id="emuNextStepBtn" type="button">Executar próximo passo &rarr;</button>
+    </div>
+  </div>
+
+  <div class="emu-shell">
+    <div class="emu-topbar">
+      <div class="emu-dots"><i></i><i></i><i></i><span class="mono" style="margin-left:6px">meu-projeto — forge-sdd v3.0.0-beta</span></div>
+      <div class="emu-cmd-tabs" id="emuTabs">
+        {EMU_STEPS.map((step, idx) => (
+          <button
+            type="button"
+            class={`emu-cmd-btn ${idx === 0 ? 'active' : ''}`}
+            data-emu={idx}
+          >
+            {idx === 0 ? '1. $ forge init' :
+             idx === 1 ? '2. /discovery' :
+             idx === 2 ? '3. /split-features' :
+             idx === 3 ? '4. /proxima-feature' : '5. /revisar'}
+          </button>
+        ))}
+      </div>
+    </div>
+
+    <div class="emu-body">
+      <!-- Terminal / Chat Output -->
+      <div class="emu-term-pane">
+        <div class="emu-log" id="emuLog" set:html={step0.logHtml} />
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding-top:12px;border-top:1px solid var(--line);flex-wrap:wrap">
+          <div id="emuActionSlot" style="display:flex;gap:8px;flex-wrap:wrap">
+            <button type="button" class="btn ok sm" id="emuDynamicBtn">{step0.actionBtn.label}</button>
+          </div>
+          <span class="mono" id="emuStepCounter">Passo 1 de 5</span>
+        </div>
+      </div>
+
+      <!-- Estado Vivo do Repositório + Agente Ativo -->
+      <div class="emu-state-pane">
+        <div class="emu-agent-header">
+          <div class="emu-avatar-mount" id="emuAvatarMount">
+            <MascotFallbackSvg color="#f2a65a" mark="ring" state="finished" width={70} height={78} />
+          </div>
+          <div style="flex:1;min-width:0">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:4px">
+              <span class="eyebrow" id="emuStationLabel" style="font-size:10px">{step0.stationLabel}</span>
+              <span class="chip" id="emuStateChip"><i style={`--o:${step0.chipColor}`}></i>{step0.chipText}</span>
+            </div>
+            <h3 id="emuAgentName" style="font:700 15px var(--f-body)">{step0.agentName}</h3>
+            <p id="emuAgentSpeech" style="font:500 12px/1.45 var(--f-body);color:var(--muted);margin-top:3px">
+              {step0.speech}
+            </p>
+          </div>
+        </div>
+
+        <div class="emu-files-box">
+          <h4>Arquivos &amp; Fila Atualizados no Repositório</h4>
+          <div class="emu-file-list" id="emuFileList">
+            {step0.files.map(([name, badge, color]) => (
+              <div class="emu-file-item">
+                <span>{name}</span>
+                <span class="chip" style="padding:2px 8px;font-size:10px"><i style={`--o:${color}`}></i>{badge}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

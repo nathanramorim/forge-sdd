@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
+  <defs>
+    <linearGradient id="forge-hex-gradient" x1="2" y1="4" x2="30" y2="28" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#4f8ef7"/>
+      <stop offset="0.5" stop-color="#8aa4ff"/>
+      <stop offset="1" stop-color="#3ecf8e"/>
+    </linearGradient>
+    <linearGradient id="forge-cube-top" x1="16" y1="9" x2="16" y2="17" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#e2e8f0"/>
+    </linearGradient>
+    <linearGradient id="forge-cube-left" x1="9.5" y1="13" x2="9.5" y2="24" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#e2e8f0"/>
+      <stop offset="1" stop-color="#c7cedb"/>
+    </linearGradient>
+    <linearGradient id="forge-cube-right" x1="22.5" y1="13" x2="22.5" y2="24" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#cbd2df"/>
+      <stop offset="1" stop-color="#aab2c2"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Moldura hexagonal -->
+  <path d="M16 2.2 L28.4 9.1 V22.9 L16 29.8 L3.6 22.9 V9.1 Z"
+        stroke="url(#forge-hex-gradient)" stroke-width="1.8" stroke-linejoin="round"/>
+
+  <!-- Cubo isometrico -->
+  <path d="M16 9 L22.5 12.6 V13.4 L16 17 L9.5 13.4 V12.6 Z" fill="url(#forge-cube-top)"/>
+  <path d="M9.5 13.4 L16 17 V23.8 L9.5 20.2 Z" fill="url(#forge-cube-left)"/>
+  <path d="M22.5 13.4 L16 17 V23.8 L22.5 20.2 Z" fill="url(#forge-cube-right)"/>
+</svg>

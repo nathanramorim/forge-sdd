@@ -1,0 +1,137 @@
+---
+import { STATIONS, STATE_DEFS } from '../data/stations';
+import MascotFallbackSvg from './MascotFallbackSvg.astro';
+
+const initialStation = STATIONS[0];
+const initialHandoffTo = STATIONS[1];
+---
+
+<section id="estacoes">
+  <div class="sec-h">
+    <div>
+      <p class="eyebrow">01 · Visão Processual entre os Agentes</p>
+      <h2>Como o bastão passa de uma estação para a outra.</h2>
+      <p>Clique em qualquer etapa da esteira processual abaixo (ou aguarde a transição automática) para inspecionar o que cada agente recebe, o que ele produz e qual portão valida a passagem.</p>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <button class="btn ghost sm" id="prevStepBtn" type="button">&larr; Anterior</button>
+      <button class="btn ghost sm" id="nextStepBtn" type="button">Próxima etapa &rarr;</button>
+      <button class="btn ghost sm" id="toggleCycleBtn" type="button">Pausar fluxo</button>
+    </div>
+  </div>
+
+  <!-- ESTEIRA PROCESSUAL INTERATIVA (PASSO 1 → 2 → 3 → 4 → 5 ↺ 1) -->
+  <div class="process-rail-box">
+    <div class="stepper-track" id="stepperTrack">
+      {STATIONS.map((st, idx) => {
+        const nextNum = idx === 4 ? '01 / 04' : `0${idx + 2}`;
+        const arrowText = idx === 4 ? `↺ ${nextNum}` : `→ ${nextNum}`;
+        return (
+          <button
+            type="button"
+            id={`step-node-${idx}`}
+            class={`step-node ${idx === 0 ? 'active' : ''}`}
+            style={`--c: ${st.color}`}
+            data-idx={idx}
+          >
+            <div class="step-node-top">
+              <span class="step-badge">{idx + 1}</span>
+              <span class="step-arrow">{arrowText}</span>
+            </div>
+            <div class="step-node-title">{st.name.split(' (')[0]}</div>
+            <div class="step-node-artifact">{st.outputArtifact}</div>
+          </button>
+        );
+      })}
+    </div>
+
+    <!-- Barra Viva de Handoff (com responsividade Fix 61) -->
+    <div class="handoff-bar" id="handoffBar">
+      <div class="handoff-route">
+        <span class="handoff-pill" id="hoFrom">{initialStation.shortName}</span>
+        <div class="handoff-pipe"><div class="handoff-packet" id="hoPacket" style={`background: ${initialStation.color}`}></div></div>
+        <span class="handoff-pill" id="hoTo">{initialHandoffTo.shortName}</span>
+      </div>
+
+      <div class="handoff-payload">
+        <b>Artefato em trânsito (Handoff)</b>
+        <span id="hoPayload">{initialStation.handoffPayload}</span>
+      </div>
+
+      <div class="handoff-gate">
+        <span class="chip" id="hoGateChip"><i style={`--o:${initialStation.color}`}></i>{initialStation.handoffGate}</span>
+        <span class="mono" id="hoLoopNote">{initialStation.handoffNote}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- CARDS DOS 5 ESPECIALISTAS COM PALCO E CONTROLES EMBUTIDOS -->
+  <div class="agents-grid" id="agentsGrid">
+    {STATIONS.map((st, idx) => {
+      const activeState = st.defaultState;
+      const stDef = STATE_DEFS[activeState];
+      const phrase = st.states[activeState] || '';
+      return (
+        <article
+          id={`agent-card-${idx}`}
+          class={`agent-card ${idx === 0 ? 'active' : ''}`}
+          style={`--c: ${st.color}`}
+          data-idx={idx}
+        >
+          <div class="agent-progress"></div>
+
+          <div class="agent-top">
+            <div class="avatar-stage" data-idx={idx} title={`Clique para interagir com ${st.name}`}>
+              <MascotFallbackSvg color={st.color} mark={st.mark} state={activeState} width={78} height={86} />
+            </div>
+
+            <div class="agent-meta">
+              <div class="agent-role-row">
+                <span class="agent-step">{st.step}</span>
+                <span class="chip agent-chip"><i style={`--o:${stDef.cssOrb}`}></i>{stDef.label}</span>
+              </div>
+              <h3>{st.name}</h3>
+              <p class="trait">{st.trait}</p>
+            </div>
+          </div>
+
+          <div class="io-strip">
+            <div class="io-box">
+              <span>RECEBE (ENTRADA)</span>
+              <b>{st.inputArtifact}</b>
+            </div>
+            <div class="io-box">
+              <span>ENTREGA (SAÍDA)</span>
+              <b>{st.outputArtifact}</b>
+            </div>
+          </div>
+
+          <div class="agent-live-box">
+            <p class="agent-phrase">{phrase}</p>
+            <p class="agent-desc">{st.desc}</p>
+          </div>
+
+          <div class="agent-controls">
+            <div class="state-pills">
+              {Object.keys(st.states).map((sKey) => {
+                const sDef = STATE_DEFS[sKey as keyof typeof STATE_DEFS];
+                const isOn = sKey === activeState;
+                return (
+                  <button
+                    type="button"
+                    class={`state-pill ${isOn ? 'on' : ''}`}
+                    data-state={sKey}
+                    data-agent={idx}
+                  >
+                    {sDef.label}
+                  </button>
+                );
+              })}
+            </div>
+            <span class="mono">Interação viva</span>
+          </div>
+        </article>
+      );
+    })}
+  </div>
+</section>

@@ -1,0 +1,46 @@
+<section id="evolucao">
+  <div class="sec-h">
+    <div>
+      <p class="eyebrow">05 · Evolução de Arquitetura</p>
+      <h2>O que muda da geração v2.x para o Forge-SDD 3.0.</h2>
+    </div>
+  </div>
+
+  <div class="comp-grid">
+    <div class="comp-card">
+      <span class="chip"><i style="--o:var(--faint)"></i>Antes (v2.x) · Agente Solitário</span>
+      <ul class="comp-list" style="--dot:var(--faint)">
+        <li>
+          <strong>Um único agente acumulando todas as funções</strong>
+          A mesma sessão que escrevia o código fazia a própria revisão, sem isolamento entre execução e auditoria.
+        </li>
+        <li>
+          <strong>Constituição monolítica carregada inteira</strong>
+          Todas as regras eram lidas do zero a cada comando, consumindo contexto com temas fora do escopo da tarefa.
+        </li>
+        <li>
+          <strong>Execução sequencial manual</strong>
+          Tarefas independentes esperavam em uma única lista de texto, sem fila determinística nem paralelismo.
+        </li>
+      </ul>
+    </div>
+
+    <div class="comp-card v3">
+      <span class="chip"><i style="--o:var(--accent)"></i>Agora (v3.0-beta) · 5 Estações em Esteira</span>
+      <ul class="comp-list" style="--dot:var(--accent)">
+        <li>
+          <strong>Handoff explícito entre 5 especialistas</strong>
+          Líder recebe a demanda &rarr; PM/Arquiteto especifica com seu aval &rarr; Planejador fatia &rarr; Builders constroem em paralelo &rarr; Governança audita em modo Read-Only.
+        </li>
+        <li>
+          <strong>Constituição por IDs + Regras sob demanda</strong>
+          Princípios fixos ficam enxutos com IDs estáveis; o "como cumprir" é carregado de <span class="mono">.agents/rules/sdd-*.md</span> apenas quando a tarefa exige.
+        </li>
+        <li>
+          <strong>Motor de Auto-Skills (Regra de Três)</strong>
+          Atividades padronizadas que se repetem 3 vezes viram Skills reutilizáveis automaticamente sincronizadas entre os agentes.
+        </li>
+      </ul>
+    </div>
+  </div>
+</section>
