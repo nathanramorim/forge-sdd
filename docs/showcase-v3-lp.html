@@ -153,7 +153,7 @@ nav a:hover { color: #ffffff; background: #1d2230; }
 /* Hero */
 .hero {
   text-align: center;
-  padding: 56px 0 40px;
+  padding: 52px 0 32px;
 }
 .hero h1 {
   font: 800 clamp(28px, 4.8vw, 48px)/1.1 var(--f-body);
@@ -170,27 +170,200 @@ nav a:hover { color: #ffffff; background: #1d2230; }
   text-wrap: pretty;
 }
 
-/*Seções*/
-section { padding: 48px 0; }
+/* Seções */
+section { padding: 44px 0; }
 .sec-h {
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 16px;
-  margin-bottom: 24px;
+  margin-bottom: 22px;
 }
 .sec-h h2 {
   font: 800 clamp(22px, 3.2vw, 32px)/1.15 var(--f-body);
   letter-spacing: -.02em;
   margin-top: 6px;
-  max-width: 28ch;
+  max-width: 30ch;
 }
 .sec-h p {
   color: var(--muted);
   margin-top: 8px;
-  max-width: 58ch;
+  max-width: 60ch;
   font-size: 13.5px;
+}
+
+/* ==========================================================================
+   VISÃO PROCESSUAL ENTRE OS AGENTES (STEPPER CONECTADO + HANDOFF VIVO)
+   ========================================================================== */
+.process-rail-box {
+  background: var(--bg2);
+  border: 1px solid var(--line);
+  border-radius: var(--r-panel);
+  padding: 20px;
+  margin-bottom: 18px;
+}
+
+/* Trilho horizontal de etapas (1 → 2 → 3 → 4 → 5 ↺ 1) */
+.stepper-track {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
+  position: relative;
+}
+@media (max-width: 860px) {
+  .stepper-track { grid-template-columns: 1fr; }
+}
+
+.step-node {
+  position: relative;
+  background: var(--s-dock);
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  padding: 12px;
+  text-align: left;
+  transition: border-color .25s, background .25s, transform .2s;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.step-node:hover { border-color: var(--line2); }
+.step-node.active {
+  border-color: color-mix(in srgb, var(--c) 70%, transparent);
+  background: radial-gradient(120% 150% at 0 0, color-mix(in srgb, var(--c) 16%, var(--s-dock)), var(--s-dock));
+}
+.step-node.done {
+  border-color: color-mix(in srgb, var(--ok) 35%, var(--line));
+}
+
+.step-node-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+.step-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  font: 700 11px var(--f-body);
+  background: var(--bg3);
+  color: var(--muted);
+  border: 1px solid var(--line2);
+  transition: background .25s, color .25s;
+}
+.step-node.active .step-badge {
+  background: var(--c);
+  color: #0b0d12;
+  border-color: transparent;
+}
+.step-node.done .step-badge {
+  background: rgba(62, 207, 142, .18);
+  color: var(--ok);
+  border-color: rgba(62, 207, 142, .45);
+}
+
+.step-arrow {
+  font: 600 10.5px var(--f-mono);
+  color: var(--faint);
+}
+.step-node.active .step-arrow {
+  color: var(--c);
+}
+
+.step-node-title {
+  font: 700 12.5px/1.25 var(--f-body);
+  color: var(--fg);
+}
+.step-node-artifact {
+  font: 500 11px/1.35 var(--f-mono);
+  color: var(--muted);
+  padding: 5px 8px;
+  border-radius: 8px;
+  background: var(--s-terminal);
+  border: 1px solid var(--line);
+}
+
+/* Barra viva de Handoff (mostra a transição exata De → Para e o artefato trafegando) */
+.handoff-bar {
+  margin-top: 14px;
+  padding: 14px 16px;
+  border-radius: var(--r-card);
+  background: var(--s-focus);
+  border: 1px solid var(--line2);
+  display: grid;
+  grid-template-columns: 1.1fr 1.3fr 1fr;
+  gap: 14px;
+  align-items: center;
+}
+@media (max-width: 860px) {
+  .handoff-bar { grid-template-columns: 1fr; }
+}
+
+.handoff-route {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.handoff-pill {
+  padding: 5px 11px;
+  border-radius: var(--r-capsule);
+  background: var(--bg3);
+  border: 1px solid var(--line2);
+  font: 700 11.5px var(--f-body);
+  color: var(--fg);
+}
+
+/* Linha animada com pacote fluindo entre Origem e Destino */
+.handoff-pipe {
+  position: relative;
+  flex: 1;
+  min-width: 48px;
+  height: 6px;
+  border-radius: 999px;
+  background: #1a1e29;
+  overflow: hidden;
+}
+.handoff-packet {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 36%;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--c, var(--accent));
+  animation: packet-flow 1.4s ease-in-out infinite;
+}
+@keyframes packet-flow {
+  0% { left: -36%; }
+  100% { left: 100%; }
+}
+
+.handoff-payload {
+  font: 500 12px/1.45 var(--f-body);
+  color: #d3d9e8;
+}
+.handoff-payload b {
+  display: block;
+  font: 700 11px var(--f-body);
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--muted);
+  margin-bottom: 2px;
+}
+
+.handoff-gate {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+@media (max-width: 860px) {
+  .handoff-gate { align-items: flex-start; }
 }
 
 /* Grid de Agentes com Navegação e Interação Embutida */
@@ -241,7 +414,7 @@ section { padding: 48px 0; }
   gap: 14px;
 }
 
-/* Palco 3D compacto embutido dentro do card (estilo dock-ia: sem ocupar tela toda) */
+/* Palco 3D compacto embutido dentro do card */
 .avatar-stage {
   position: relative;
   width: 78px;
@@ -286,6 +459,33 @@ section { padding: 48px 0; }
   font: 500 12px var(--f-body);
   color: var(--muted);
   margin-top: 2px;
+}
+
+/* Mini-fluxo de Entrada → Saída dentro de cada card */
+.io-strip {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 10px;
+}
+.io-box {
+  padding: 7px 9px;
+  border-radius: 10px;
+  background: var(--s-dock);
+  border: 1px solid var(--line);
+  font-size: 11px;
+}
+.io-box span {
+  display: block;
+  font: 700 9.5px var(--f-body);
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--faint);
+  margin-bottom: 2px;
+}
+.io-box b {
+  font: 500 11px var(--f-mono);
+  color: var(--fg);
 }
 
 /* Caixa viva de status e interação dentro de cada card */
@@ -533,7 +733,7 @@ footer {
       <span class="chip"><i style="--o:var(--accent)"></i>v3.0.0-beta</span>
     </div>
     <nav aria-label="Navegação Principal">
-      <a href="#estacoes">5 Estações</a>
+      <a href="#estacoes">Fluxo Processual</a>
       <a href="#governanca" class="keep">Governança IA</a>
       <a href="#evolucao">Antes vs. Agora</a>
       <a href="#painel">Painel do Líder</a>
@@ -544,25 +744,54 @@ footer {
     <!-- HERO ENXUTO -->
     <div class="hero">
       <p class="eyebrow">Orquestração Independente · Padrão Dock iA</p>
-      <h1>De um agente fazendo tudo sozinho para 5 especialistas coordenados.</h1>
+      <h1>De um agente fazendo tudo sozinho para 5 especialistas em esteira.</h1>
       <p class="lead">
-        Cada estação tem seu próprio agente, estado visual e limite de atuação. A esteira avança sozinha entre concepção, planejamento, construção paralela e auditoria — ou você interage direto dentro de cada card.
+        Cada estação recebe um artefato validado, executa apenas sua especialidade e passa o bastão adiante. Veja abaixo como o trabalho flui entre os agentes e interaja dentro de cada etapa.
       </p>
     </div>
 
-    <!-- SEÇÃO 1: OS 5 AGENTES COM MINI-PALCO 3D E NAVEGAÇÃO INTERNA AUTOMÁTICA -->
+    <!-- SEÇÃO 1: VISÃO PROCESSUAL CONECTADA + CARDS DOS 5 AGENTES COM 3D EMBUTIDO -->
     <section id="estacoes">
       <div class="sec-h">
         <div>
-          <p class="eyebrow">01 · Esteira Autônoma</p>
-          <h2>Acompanhe e interaja dentro de cada estação.</h2>
-          <p>O foco percorre automaticamente as estações demonstrando o ciclo real de uma entrega. Passe o mouse ou clique nos botões internos de qualquer agente para assumir o controle.</p>
+          <p class="eyebrow">01 · Visão Processual entre os Agentes</p>
+          <h2>Como o bastão passa de uma estação para a outra.</h2>
+          <p>Clique em qualquer etapa da esteira processual abaixo (ou aguarde a transição automática) para inspecionar o que cada agente recebe, o que ele produz e qual portão valida a passagem.</p>
         </div>
         <div style="display:flex;gap:8px;align-items:center">
-          <button class="btn ghost sm" id="toggleCycleBtn" type="button">Pausar rotação automática</button>
+          <button class="btn ghost sm" id="prevStepBtn" type="button">← Anterior</button>
+          <button class="btn ghost sm" id="nextStepBtn" type="button">Próxima etapa →</button>
+          <button class="btn ghost sm" id="toggleCycleBtn" type="button">Pausar fluxo</button>
         </div>
       </div>
 
+      <!-- ESTEIRA PROCESSUAL INTERATIVA (PASSO 1 → 2 → 3 → 4 → 5 ↺ 1) -->
+      <div class="process-rail-box">
+        <div class="stepper-track" id="stepperTrack">
+          <!-- Nós do fluxo processual injetados via JS -->
+        </div>
+
+        <!-- Barra Viva de Handoff (Mostra Origem ──► Destino + Artefato em Trânsito + Portão) -->
+        <div class="handoff-bar" id="handoffBar">
+          <div class="handoff-route">
+            <span class="handoff-pill" id="hoFrom">01. O Líder</span>
+            <div class="handoff-pipe"><div class="handoff-packet" id="hoPacket"></div></div>
+            <span class="handoff-pill" id="hoTo">02. PM & Arquiteto</span>
+          </div>
+
+          <div class="handoff-payload">
+            <b>Artefato em trânsito (Handoff)</b>
+            <span id="hoPayload">Demanda contextualizada + acionamento do Reuse Check (DUP-01)</span>
+          </div>
+
+          <div class="handoff-gate">
+            <span class="chip" id="hoGateChip"><i style="--o:var(--accent)"></i>Transição 1 → 2</span>
+            <span class="mono" id="hoLoopNote">Fluxo avança somente com contrato cumprido</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARDS DOS 5 ESPECIALISTAS COM MINI-PALCO 3D E CONTROLES EMBUTIDOS -->
       <div class="agents-grid" id="agentsGrid">
         <!-- Cards injetados e animados com Three.js compacto -->
       </div>
@@ -589,7 +818,7 @@ footer {
           <button class="gov-tab active" data-gov="0" style="--k:var(--bad)" type="button">
             <div class="gov-tab-top">
               <span class="chip"><i style="--o:var(--bad)"></i>Segurança · SEG-01 / P-13</span>
-              <span class="mono">Camada A (Bloqueio)</span>
+              <span class="mono">Retorna 05 ↺ 04</span>
             </div>
             <h4>1. Vazamento de chave de API ou commit direto na main</h4>
             <p>O binário determinístico intercepta segredos expostos ou tentativa de alterar a branch principal antes do código sair da máquina.</p>
@@ -598,7 +827,7 @@ footer {
           <button class="gov-tab" data-gov="1" style="--k:var(--warn)" type="button">
             <div class="gov-tab-top">
               <span class="chip"><i style="--o:var(--warn)"></i>Reuso · DUP-01 / DUP-02</span>
-              <span class="mono">Camada B (Ressalva)</span>
+              <span class="mono">Retorna 05 ↺ 04</span>
             </div>
             <h4>2. Código duplicado que ignora o que já existe no projeto</h4>
             <p>O Analista de Governança compara a entrega com a seção "O que já existe" da Spec e barra funções recriadas do zero.</p>
@@ -607,7 +836,7 @@ footer {
           <button class="gov-tab" data-gov="2" style="--k:var(--bad)" type="button">
             <div class="gov-tab-top">
               <span class="chip"><i style="--o:var(--bad)"></i>Arquitetura · ARQ-01 / TST-01</span>
-              <span class="mono">Camada B (Bloqueio)</span>
+              <span class="mono">Retorna 05 ↺ 04</span>
             </div>
             <h4>3. Regra de negócio na camada errada e sem testes</h4>
             <p>Por ser estritamente somente leitura, o auditor não faz remendos silenciosos: ele reprova com evidência e exige testes verdes.</p>
@@ -616,7 +845,7 @@ footer {
           <button class="gov-tab" data-gov="3" style="--k:var(--ok)" type="button">
             <div class="gov-tab-top">
               <span class="chip"><i style="--o:var(--ok)"></i>Entrega Limpa · DUP-05</span>
-              <span class="mono">Camada C + Auto-Skill</span>
+              <span class="mono">Avança 05 → 01 (Você)</span>
             </div>
             <h4>4. Entrega validada e transformada em habilidade automática</h4>
             <p>Passando pelas Camadas A e B, o Líder atualiza seu Painel Executivo e cataloga padrões repetidos 3 vezes como Auto-Skill.</p>
@@ -685,11 +914,11 @@ footer {
         </div>
 
         <div class="comp-card v3">
-          <span class="chip"><i style="--o:var(--accent)"></i>Agora (v3.0-beta) · 5 Estações Independentes</span>
+          <span class="chip"><i style="--o:var(--accent)"></i>Agora (v3.0-beta) · 5 Estações em Esteira</span>
           <ul class="comp-list" style="--dot:var(--accent)">
             <li>
-              <strong>Responsabilidade única por estação</strong>
-              Líder orquestra, PM/Arquiteto especifica com seu aval, Planejador fatia, Builders constroem em paralelo e Governança audita em modo somente leitura.
+              <strong>Handoff explícito entre 5 especialistas</strong>
+              Líder recebe a demanda → PM/Arquiteto especifica com seu aval → Planejador fatia → Builders constroem em paralelo → Governança audita em modo Read-Only.
             </li>
             <li>
               <strong>Constituição por IDs + Regras sob demanda</strong>
@@ -718,36 +947,36 @@ footer {
         <table>
           <thead>
             <tr>
-              <th>Etapa / Estação</th>
-              <th>Agente Responsável</th>
-              <th>Modo de Execução</th>
+              <th>Etapa Processual</th>
+              <th>Transição entre Agentes</th>
+              <th>Artefato / Contrato</th>
               <th>Veredito Governança</th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td><b>1. Especificação & Reuse Check</b></td>
-              <td>PM & Arquiteto</td>
-              <td><span class="mono">Portão Humano FLX-01</span></td>
-              <td><span class="chip"><i style="--o:var(--ok)"></i>Aprovada por você</span></td>
+              <td><b>Passo 1 → 2 · Concepção</b></td>
+              <td>Líder → PM & Arquiteto (+ Você)</td>
+              <td><span class="mono">discovery.md + criteria.md (FLX-01)</span></td>
+              <td><span class="chip"><i style="--o:var(--ok)"></i>Spec Aprovada</span></td>
             </tr>
             <tr>
-              <td><b>2. Constituição IDs & Regras Modulares</b></td>
-              <td>Builder A</td>
-              <td><span class="mono">Onda Paralela 01</span></td>
+              <td><b>Passo 2 → 3 · Planejamento</b></td>
+              <td>PM & Arquiteto → Planejador</td>
+              <td><span class="mono">plan.md + IDs + .agents/rules/</span></td>
+              <td><span class="chip"><i style="--o:var(--ok)"></i>Escopo Mapeado</span></td>
+            </tr>
+            <tr>
+              <td><b>Passo 3 → 4 · Fila & Paralelismo</b></td>
+              <td>Planejador → Builders A & B</td>
+              <td><span class="mono">sdd/.queue/queue.json (Onda 01)</span></td>
+              <td><span class="chip"><i style="--o:var(--ok)"></i>Portão A (PASS)</span></td>
+            </tr>
+            <tr>
+              <td><b>Passo 4 → 5 ↺ 1 · Auditoria & Fecho</b></td>
+              <td>Builders → Governança → Líder</td>
+              <td><span class="mono">Laudo JSON + Auto-Skill (DUP-05)</span></td>
               <td><span class="chip"><i style="--o:var(--ok)"></i>Conforme (0 bloqueios)</span></td>
-            </tr>
-            <tr>
-              <td><b>3. Motor de Fila, Portão A & Auto-Skills</b></td>
-              <td>Builder B</td>
-              <td><span class="mono">Onda Paralela 01</span></td>
-              <td><span class="chip"><i style="--o:var(--ok)"></i>Conforme (0 bloqueios)</span></td>
-            </tr>
-            <tr>
-              <td><b>4. Auditoria de Segurança & Arquitetura</b></td>
-              <td>Analista Read-Only</td>
-              <td><span class="mono">Camada B Imparcial</span></td>
-              <td><span class="chip"><i style="--o:var(--ok)"></i>Laudo Aprovado</span></td>
             </tr>
           </tbody>
         </table>
@@ -757,16 +986,13 @@ footer {
 
   <footer>
     <span>Forge-SDD v3.0.0-beta · Design System alinhado ao padrão Dock iA</span>
-    <span>Interação embutida por agente · Three.js 3D compacto</span>
+    <span>Fluxo processual interativo · Three.js 3D compacto</span>
   </footer>
 </div>
 
 <script>
 /* ==========================================================================
-   MOTOR 3D COMPACTO (PADRÃO DOCK-IA):
-   Cria o mascote arredondado sem pernas, com visor escuro, olhos que mudam
-   por estado (cap, round, happy, x), marca no peito (ring, diamond, bar, wave, tri)
-   e antena com orbe luminoso que pulsa e segue o cursor.
+   MOTOR 3D COMPACTO (PADRÃO DOCK-IA)
    ========================================================================== */
 const STATE_DEFS = {
   working:  { label: 'Trabalhando',  orb: 0x4f8ef7, cssOrb: '#4f8ef7', eyes: 'cap' },
@@ -800,7 +1026,6 @@ function createCompactDockMascot3D(mountEl, agentHex, initialState, markType) {
   const botGroup = new THREE.Group();
   scene.add(botGroup);
 
-  // Sombra elíptica no chão (igual ao <ellipse class="shadow"> do dock-ia)
   const shadowMesh = new THREE.Mesh(
     new THREE.CircleGeometry(0.55, 24),
     new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.35 })
@@ -810,7 +1035,6 @@ function createCompactDockMascot3D(mountEl, agentHex, initialState, markType) {
   shadowMesh.position.y = -0.82;
   scene.add(shadowMesh);
 
-  // Corpo único em gota/cápsula arredondada (sem pernas, fiel ao path .bd do dock-ia)
   const bodyMat = new THREE.MeshStandardMaterial({
     color: agentHex,
     roughness: 0.28,
@@ -821,7 +1045,6 @@ function createCompactDockMascot3D(mountEl, agentHex, initialState, markType) {
   body.position.y = -0.04;
   botGroup.add(body);
 
-  // Brilho especular superior esquerdo (igual ao <ellipse class="spc"> do dock-ia)
   const spec = new THREE.Mesh(
     new THREE.CircleGeometry(0.16, 20),
     new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.32 })
@@ -831,7 +1054,6 @@ function createCompactDockMascot3D(mountEl, agentHex, initialState, markType) {
   spec.rotation.z = 0.45;
   botGroup.add(spec);
 
-  // Braços laterais flutuantes compactos (<ellipse class="arm">)
   const armGeo = new THREE.SphereGeometry(0.11, 16, 16);
   const armL = new THREE.Mesh(armGeo, bodyMat);
   armL.scale.set(0.75, 1.35, 0.8);
@@ -843,7 +1065,6 @@ function createCompactDockMascot3D(mountEl, agentHex, initialState, markType) {
   armR.position.set(0.78, -0.1, 0);
   botGroup.add(armR);
 
-  // Marca de identidade na testa/peito superior (ring, diamond, bar, wave, tri)
   const markMat = new THREE.MeshBasicMaterial({ color: 0x10131a, transparent: true, opacity: 0.55 });
   let markMesh;
   if (markType === 'ring') {
@@ -862,7 +1083,6 @@ function createCompactDockMascot3D(mountEl, agentHex, initialState, markType) {
   markMesh.position.set(0, 0.31, 0.59);
   botGroup.add(markMesh);
 
-  // Antena superior + Orbe de estado (<g class="ant">)
   const antGroup = new THREE.Group();
   antGroup.position.set(0, 0.68, 0);
   botGroup.add(antGroup);
@@ -879,7 +1099,6 @@ function createCompactDockMascot3D(mountEl, agentHex, initialState, markType) {
   orb.position.y = 0.24;
   antGroup.add(orb);
 
-  // Visor escuro em formato pílula (<rect class="vz">)
   const visor = new THREE.Mesh(
     new THREE.SphereGeometry(0.52, 28, 28),
     new THREE.MeshStandardMaterial({ color: 0x10131a, roughness: 0.15, metalness: 0.3 })
@@ -888,14 +1107,12 @@ function createCompactDockMascot3D(mountEl, agentHex, initialState, markType) {
   visor.position.set(0, -0.1, 0.46);
   botGroup.add(visor);
 
-  // Grupo de Olhos que seguem o cursor e mudam conforme o estado
   const eyesRoot = new THREE.Group();
   eyesRoot.position.set(0, -0.1, 0.66);
   botGroup.add(eyesRoot);
 
   const eyeColorMat = new THREE.MeshBasicMaterial({ color: 0xcfe3ff });
 
-  // Conjunto 1: Olhos em cápsula (cap)
   const capGroup = new THREE.Group();
   const capGeo = new THREE.BoxGeometry(0.095, 0.21, 0.02);
   const capL = new THREE.Mesh(capGeo, eyeColorMat);
@@ -905,7 +1122,6 @@ function createCompactDockMascot3D(mountEl, agentHex, initialState, markType) {
   capGroup.add(capL, capR);
   eyesRoot.add(capGroup);
 
-  // Conjunto 2: Olhos redondos de atenção/aprovação (round)
   const roundGroup = new THREE.Group();
   const roundGeo = new THREE.CircleGeometry(0.09, 20);
   const roundL = new THREE.Mesh(roundGeo, eyeColorMat);
@@ -915,7 +1131,6 @@ function createCompactDockMascot3D(mountEl, agentHex, initialState, markType) {
   roundGroup.add(roundL, roundR);
   eyesRoot.add(roundGroup);
 
-  // Conjunto 3: Olhos felizes de concluído (happy arcs)
   const happyGroup = new THREE.Group();
   const arcGeo = new THREE.TorusGeometry(0.08, 0.024, 10, 20, Math.PI);
   const arcL = new THREE.Mesh(arcGeo, eyeColorMat);
@@ -925,7 +1140,6 @@ function createCompactDockMascot3D(mountEl, agentHex, initialState, markType) {
   happyGroup.add(arcL, arcR);
   eyesRoot.add(happyGroup);
 
-  // Conjunto 4: Olhos X de bloqueio/erro (x)
   const xGroup = new THREE.Group();
   const barGeo = new THREE.BoxGeometry(0.16, 0.032, 0.02);
   [-0.21, 0.21].forEach((xPos) => {
@@ -956,20 +1170,9 @@ function createCompactDockMascot3D(mountEl, agentHex, initialState, markType) {
   setState(currentState);
 
   return {
-    renderer,
-    scene,
-    camera,
-    botGroup,
-    antGroup,
-    orb,
-    eyesRoot,
-    armL,
-    armR,
-    shadowMesh,
     setState,
     triggerHop: () => { hopTimer = 0.55; },
     update: (t, lookX, lookY) => {
-      // Flutuação suave (bot-bob)
       let bobY = Math.sin(t * 2.4) * 0.055;
       if (hopTimer > 0) {
         hopTimer = Math.max(0, hopTimer - 0.016);
@@ -978,7 +1181,6 @@ function createCompactDockMascot3D(mountEl, agentHex, initialState, markType) {
       botGroup.position.y = bobY;
       shadowMesh.scale.x = 1 - bobY * 0.6;
 
-      // Olhar acompanha o cursor + varredura quando trabalhando
       let scanX = 0;
       if (currentState === 'working' || currentState === 'searching') {
         scanX = Math.sin(t * 2.6) * 0.045;
@@ -987,18 +1189,15 @@ function createCompactDockMascot3D(mountEl, agentHex, initialState, markType) {
       eyesRoot.position.y = -0.1 + THREE.MathUtils.clamp(-lookY * 0.06, -0.06, 0.06);
       botGroup.rotation.y = THREE.MathUtils.clamp(lookX * 0.18, -0.25, 0.25);
 
-      // Piscar natural (bot-blink)
       const blink = (t % 4.5) > 4.36 ? 0.08 : 1;
       eyesRoot.scale.y = blink;
 
-      // Balanço da antena quando ativo ou aguardando aval
       if (currentState === 'approval' || currentState === 'working') {
         antGroup.rotation.z = Math.sin(t * 4.2) * 0.12;
       } else {
         antGroup.rotation.z = Math.sin(t * 1.5) * 0.04;
       }
 
-      // Tremor sutil quando em bloqueio (error)
       if (currentState === 'error') {
         botGroup.position.x = Math.sin(t * 28) * 0.025;
       } else {
@@ -1011,93 +1210,153 @@ function createCompactDockMascot3D(mountEl, agentHex, initialState, markType) {
 }
 
 /* ==========================================================================
-   DADOS DAS 5 ESTAÇÕES COM INTERAÇÃO EMBUTIDA E ROTAÇÃO AUTOMÁTICA
+   DADOS DAS 5 ESTAÇÕES E TRANSIÇÕES PROCESSUAIS (ENTRADA → SAÍDA → PRÓXIMO)
    ========================================================================== */
 const STATIONS = [
   {
     step: 'Estação 01',
+    shortName: '01. O Líder',
     name: 'O Líder (Orquestrador)',
     trait: 'Maestro da operação · Seu ponto de contato',
     color: '#f2a65a',
     hex: 0xf2a65a,
     mark: 'ring',
     defaultState: 'working',
-    desc: 'Recebe sua demanda, coordena os especialistas e te entrega o Painel Executivo consolidado.',
+    inputArtifact: 'Pedido do Humano / Laudo Camada B',
+    outputArtifact: 'Demanda estruturada → Estação 02',
+    handoffTo: '02. PM & Arquiteto',
+    handoffPayload: 'Contexto do projeto (progress.md) + abertura de Discovery & Reuse Check',
+    handoffGate: 'Passo 1 → 2 · Início da Esteira',
+    handoffNote: 'O Líder nunca implementa código direto: delega à estação certa',
+    desc: 'Recebe sua demanda, coordena os especialistas em sequência ou paralelo e consolida o Painel Executivo.',
     states: {
-      working:  'Orquestrando a onda de entregas e distribuindo tarefas na fila…',
-      approval: 'Painel Executivo pronto: aguardando sua revisão final da entrega.',
-      finished: 'Onda concluída! Todas as 7 subtarefas aprovadas na governança.'
+      working:  'Recebendo sua demanda e acionando o PM + Arquiteto para concepção…',
+      approval: 'Painel Executivo (Camada C) pronto: aguardando sua validação final.',
+      finished: 'Ciclo completo! Entrega validada e progresso atualizado.'
     }
   },
   {
     step: 'Estação 02',
+    shortName: '02. PM & Arquiteto',
     name: 'Produto & Arquiteto',
     trait: 'Concepção da Spec · Reuse Check (DUP-01)',
     color: '#8aa4ff',
     hex: 0x8aa4ff,
     mark: 'diamond',
     defaultState: 'approval',
-    desc: 'Mapeia o que já existe no projeto e escreve a especificação. Nada avança sem seu OK na planta.',
+    inputArtifact: 'Demanda do Líder + Código atual',
+    outputArtifact: 'discovery.md + criteria.md',
+    handoffTo: '03. O Planejador',
+    handoffPayload: 'discovery.md + criteria.md (com seção "O que já existe" validada por você)',
+    handoffGate: 'Portão FLX-01 · Aprovação Humana da Spec',
+    handoffNote: 'Bloqueio estrito: o Planejador só recebe a Spec após o seu "De Acordo"',
+    desc: 'Mapeia o que já existe para evitar duplicação e estrutura os critérios de aceite antes de qualquer código.',
     states: {
-      working:  'Inspecionando módulos existentes para evitar duplicação (Reuse Check)…',
-      approval: 'Portão FLX-01: a especificação e os critérios pedem o seu "De Acordo".',
-      finished: 'Especificação aprovada! Liberando escopo fechado para o Planejador.'
+      working:  'Mapeando ativos existentes no repositório (Reuse Check DUP-01)…',
+      approval: 'Portão FLX-01 aberto: aguardando seu "De Acordo" na especificação.',
+      finished: 'Spec aprovada por você! Passando bastão para o Planejador.'
     }
   },
   {
     step: 'Estação 03',
+    shortName: '03. O Planejador',
     name: 'O Planejador',
     trait: 'Fatiamento P/M/G · Regras sob demanda',
     color: '#c9a7ff',
     hex: 0xc9a7ff,
     mark: 'bar',
     defaultState: 'thinking',
-    desc: 'Quebra a Spec em tarefas atômicas e anexa apenas as regras (.agents/rules/) que cada tarefa exige.',
+    inputArtifact: 'Spec aprovada (FLX-01)',
+    outputArtifact: 'plan.md + sdd/.queue/queue.json',
+    handoffTo: '04. Fila de Builders',
+    handoffPayload: 'Tarefas P/M/G enfileiradas em queue.json + seleção de .agents/rules/sdd-*.md',
+    handoffGate: 'Regra GOV-04 · Contexto Seletivo',
+    handoffNote: 'Separa tarefas independentes (paralelo) das que têm depends_on (fila)',
+    desc: 'Quebra a Spec em tarefas atômicas e anexa apenas os módulos de regras necessários para cada Builder.',
     states: {
-      thinking: 'Vinculando IDs da Constituição (ARQ, SEG, TST) a cada subtarefa…',
-      working:  'Calculando grafo de dependências para separar o que roda em paralelo…',
-      finished: 'Plano pronto e enfileirado em sdd/.queue/queue.json sem colisão!'
+      thinking: 'Mapeando IDs da Constituição (ARQ, SEG, TST) por subtarefa…',
+      working:  'Verificando colisão de arquivos para liberar execução em paralelo…',
+      finished: 'Fila gravada em sdd/.queue/queue.json! Despachando para os Builders.'
     }
   },
   {
     step: 'Estação 04',
+    shortName: '04. Builders',
     name: 'Fila de Builders',
     trait: 'Execução isolada · Paralelismo seguro',
     color: '#4fd1b5',
     hex: 0x4fd1b5,
     mark: 'wave',
     defaultState: 'working',
-    desc: 'Consome a fila: tarefas sem conflito de arquivos rodam em paralelo; dependências aguardam vez.',
+    inputArtifact: 'Tarefa da fila + Rules do escopo',
+    outputArtifact: 'Código + Testes + Portão A (PASS)',
+    handoffTo: '05. Governança Read-Only',
+    handoffPayload: 'Diff completo da implementação + relatório determinístico forge-sdd gate (P-01..P-23)',
+    handoffGate: 'Portão Camada A · Testes & Segredos',
+    handoffNote: 'Só avança para o Analista de Governança quando go test e P-13 passam',
+    desc: 'Consome a fila determinística: tarefas sem conflito rodam em paralelo; dependências aguardam liberação.',
     states: {
-      working:  'Executando Onda 01 em paralelo (4 Builders ativos sem conflito)…',
-      approval: 'Portão Camada A: rodando go test ./... e verificando limites P-01..P-23.',
-      finished: 'Código e testes concluídos! Enviando diff para o Auditor Read-Only.'
+      working:  'Construindo em paralelo tarefas sem conflito de arquivos…',
+      approval: 'Executando Portão A (forge-sdd gate): validando testes e limites…',
+      finished: 'Portão A aprovado! Entregando pacote para auditoria da Governança.'
     }
   },
   {
     step: 'Estação 05',
+    shortName: '05. Governança',
     name: 'Analista de Governança',
     trait: 'Auditoria Somente Leitura · Camada B',
     color: '#ff8a5c',
     hex: 0xff8a5c,
     mark: 'tri',
     defaultState: 'searching',
+    inputArtifact: 'Diff + Spec + IDs Constituição',
+    outputArtifact: 'Laudo JSON → Líder (ou ↺ Builder)',
+    handoffTo: '01. O Líder (Painel Camada C)',
+    handoffPayload: 'Veredito JSON ("conforme") + proposta de Auto-Skill (DUP-05) → Painel do Líder',
+    handoffGate: 'Portão Camada B → Camada C',
+    handoffNote: 'Se reprovar, devolve direto ao Builder (05 ↺ 04); se aprovar, fecha no Líder',
     desc: 'Proibido de editar código. Audita arquitetura, segurança e reuso antes de devolver o laudo ao Líder.',
     states: {
-      searching:'Auditando diff contra os IDs da Constituição e critérios da Spec…',
-      error:    'Bloqueio detectado: devolvendo evidência exata para correção do Builder.',
-      finished: 'Veredito: CONFORME. Padrão recorrente promovido a Auto-Skill!'
+      searching:'Inspecionando conformidade com ARQ-*, SEG-*, DUP-* e TST-*…',
+      error:    'Não-conformidade detectada: devolvendo tarefa para a fila do Builder (05 ↺ 04).',
+      finished: 'Veredito CONFORME! Retornando resumo executivo e Auto-Skill para o Líder.'
     }
   }
 ];
 
+const stepperTrackEl = document.getElementById('stepperTrack');
 const gridEl = document.getElementById('agentsGrid');
 const mascotControllers = [];
 let activeStationIdx = 0;
 let autoCycleEnabled = true;
 let cycleProgress = 0;
 
-// Renderiza os 5 cards com navegação e controles internos
+// 1. Renderiza os 5 nós da Esteira Processual Conectada no topo
+STATIONS.forEach((st, idx) => {
+  const node = document.createElement('button');
+  node.type = 'button';
+  node.className = 'step-node' + (idx === 0 ? ' active' : '');
+  node.style.setProperty('--c', st.color);
+  node.id = `step-node-${idx}`;
+  const nextLabel = idx < 4 ? `──► 0${idx + 2}` : '↺ 01 / 04';
+
+  node.innerHTML = `
+    <div class="step-node-top">
+      <span class="step-badge">${idx + 1}</span>
+      <span class="step-arrow">${nextLabel}</span>
+    </div>
+    <div class="step-node-title">${st.shortName.slice(4)}</div>
+    <div class="step-node-artifact">${st.outputArtifact}</div>
+  `;
+
+  node.addEventListener('click', () => {
+    setActiveStation(idx, true);
+  });
+  stepperTrackEl.appendChild(node);
+});
+
+// 2. Renderiza os 5 cards detalhados com Mascote 3D compacto e Entrada/Saída processual
 STATIONS.forEach((st, idx) => {
   const stateKeys = Object.keys(st.states);
   const initialKey = st.defaultState;
@@ -1112,7 +1371,7 @@ STATIONS.forEach((st, idx) => {
     <div class="agent-progress" id="prog-${idx}"></div>
     <div>
       <div class="agent-top">
-        <div class="avatar-stage" id="avatar-${idx}" title="Clique para interagir com ${st.name}"></div>
+        <div class="avatar-stage" id="avatar-${idx}" title="Clique para alternar estado de ${st.name}"></div>
         <div class="agent-meta">
           <div class="agent-role-row">
             <span class="agent-step">${st.step}</span>
@@ -1123,7 +1382,18 @@ STATIONS.forEach((st, idx) => {
         </div>
       </div>
 
-      <p class="agent-desc" style="margin-top:12px">${st.desc}</p>
+      <p class="agent-desc" style="margin-top:10px">${st.desc}</p>
+
+      <div class="io-strip">
+        <div class="io-box">
+          <span>Recebe (Entrada)</span>
+          <b>${st.inputArtifact}</b>
+        </div>
+        <div class="io-box">
+          <span>Entrega (Saída)</span>
+          <b>${st.outputArtifact}</b>
+        </div>
+      </div>
     </div>
 
     <div class="agent-live-box">
@@ -1136,7 +1406,7 @@ STATIONS.forEach((st, idx) => {
             </button>
           `).join('')}
         </div>
-        <span class="mono" style="font-size:10.5px">3D interativo</span>
+        <span class="mono" style="font-size:10.5px">Passa p/ ${st.handoffTo}</span>
       </div>
     </div>
   `;
@@ -1147,7 +1417,6 @@ STATIONS.forEach((st, idx) => {
   const ctrl = createCompactDockMascot3D(mount, st.hex, initialKey, st.mark);
   mascotControllers.push({ ctrl, card, st, currentKey: initialKey, stateKeys });
 
-  // Interação nos botões internos de estado de cada card
   card.querySelectorAll('.state-pill').forEach((btn) => {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -1157,7 +1426,6 @@ STATIONS.forEach((st, idx) => {
     });
   });
 
-  // Clicar no mascote 3D ou no card foca a estação e alterna o estado
   mount.addEventListener('click', () => {
     const item = mascotControllers[idx];
     const nextIdx = (item.stateKeys.indexOf(item.currentKey) + 1) % item.stateKeys.length;
@@ -1166,8 +1434,8 @@ STATIONS.forEach((st, idx) => {
     setActiveStation(idx, true);
   });
 
-  card.addEventListener('mouseenter', () => {
-    setActiveStation(idx, false);
+  card.addEventListener('click', () => {
+    setActiveStation(idx, true);
   });
 });
 
@@ -1190,26 +1458,59 @@ function setCardState(idx, stateKey) {
   pills.forEach((p) => p.classList.toggle('on', p.dataset.state === stateKey));
 }
 
-function setActiveStation(idx, pauseAuto) {
-  activeStationIdx = idx;
-  cycleProgress = 0;
-  document.querySelectorAll('.agent-card').forEach((c, i) => {
-    c.classList.toggle('active', i === idx);
-    const prog = document.getElementById(`prog-${i}`);
-    if (prog) prog.style.width = i === idx ? '0%' : '0%';
+function updateProcessHandoffBar(idx) {
+  const st = STATIONS[idx];
+  const bar = document.getElementById('handoffBar');
+  bar.style.setProperty('--c', st.color);
+
+  document.getElementById('hoFrom').textContent = st.shortName;
+  document.getElementById('hoTo').textContent = st.handoffTo;
+  document.getElementById('hoPayload').textContent = st.handoffPayload;
+  document.getElementById('hoGateChip').innerHTML = `<i style="--o:${st.color}"></i>${st.handoffGate}`;
+  document.getElementById('hoLoopNote').textContent = st.handoffNote;
+
+  // Atualiza os nós do stepper horizontal (done para anteriores, active para o atual)
+  STATIONS.forEach((_, i) => {
+    const node = document.getElementById(`step-node-${i}`);
+    if (!node) return;
+    node.classList.toggle('active', i === idx);
+    node.classList.toggle('done', i < idx);
   });
+}
+
+function setActiveStation(idx, pauseAuto) {
+  activeStationIdx = (idx + STATIONS.length) % STATIONS.length;
+  cycleProgress = 0;
+
+  document.querySelectorAll('.agent-card').forEach((c, i) => {
+    c.classList.toggle('active', i === activeStationIdx);
+    const prog = document.getElementById(`prog-${i}`);
+    if (prog) prog.style.width = '0%';
+  });
+
+  updateProcessHandoffBar(activeStationIdx);
+  mascotControllers[activeStationIdx].ctrl.triggerHop();
+
   if (pauseAuto) {
     autoCycleEnabled = false;
-    document.getElementById('toggleCycleBtn').textContent = 'Retomar rotação automática';
+    document.getElementById('toggleCycleBtn').textContent = 'Retomar fluxo';
   }
 }
 
+document.getElementById('prevStepBtn').addEventListener('click', () => {
+  setActiveStation(activeStationIdx - 1, true);
+});
+document.getElementById('nextStepBtn').addEventListener('click', () => {
+  setActiveStation(activeStationIdx + 1, true);
+});
 document.getElementById('toggleCycleBtn').addEventListener('click', () => {
   autoCycleEnabled = !autoCycleEnabled;
   document.getElementById('toggleCycleBtn').textContent = autoCycleEnabled
-    ? 'Pausar rotação automática'
-    : 'Retomar rotação automática';
+    ? 'Pausar fluxo'
+    : 'Retomar fluxo';
 });
+
+updateProcessHandoffBar(0);
 
 /* ==========================================================================
    SIMULADOR COMPACTO DE GOVERNANÇA (MASCOTE 3D EMBUTIDO + CICLO AUTOMÁTICO)
@@ -1222,17 +1523,17 @@ const GOV_SCENARIOS = [
     chipColor: 'var(--bad)',
     ruleCode: 'SEG-01 · P-13',
     title: 'Chave privada detectada no diff da tarefa',
-    sub: 'O Analista de Governança opera sem permissão de escrita: ele bloqueia a passagem e devolve a evidência exata para o Builder corrigir.',
+    sub: 'O Analista de Governança opera sem permissão de escrita: ele bloqueia a passagem e devolve a evidência exata para o Builder corrigir (05 ↺ 04).',
     termHtml: `
       <div>$ forge-sdd gate --mode bloqueio</div>
       <span class="bad-line">- [P-13 FALHOU] Credencial exposta detectada em internal/auth/client.go:42</span>
-      <span class="bad-line">- Veredito Camada B: "bloqueado" (violação SEG-01 — chave hardcoded)</span>
+      <span class="bad-line">- Veredito Camada B: "bloqueado" (violação SEG-01 — retorna à Estação 04)</span>
     `,
-    fixTitle: 'Segredo removido pelo Builder · Reinspeção aprovada!',
+    fixTitle: 'Segredo removido pelo Builder · Reinspeção aprovada (05 → 01)!',
     fixTerm: `
       <div>$ forge-sdd gate --mode bloqueio</div>
       <span class="ok-line">+ [P-13 PASS] Zero segredos expostos (lendo via variável de ambiente)</span>
-      <span class="ok-line">+ Veredito Camada B: "conforme" (SEG-01 cumprida)</span>
+      <span class="ok-line">+ Veredito Camada B: "conforme" (liberado para o Painel do Líder)</span>
     `
   },
   {
@@ -1246,7 +1547,7 @@ const GOV_SCENARIOS = [
     termHtml: `
       <div>$ forge-sdd governance audit --feature feat-58</div>
       <span class="bad-line">- [DUP-01 RESSALVA] Novo helper criado em internal/util/hash.go duplica internal/gate</span>
-      <span class="bad-line">- Ação exigida: reutilizar função canônica mapeada na Spec</span>
+      <span class="bad-line">- Ação exigida: reutilizar função canônica mapeada na Spec (retorna 05 ↺ 04)</span>
     `,
     fixTitle: 'Código refatorado reaproveitando o módulo existente!',
     fixTerm: `
@@ -1361,7 +1662,7 @@ govMount.addEventListener('click', () => {
 });
 
 /* ==========================================================================
-   LOOP GLOBAL DE ANIMAÇÃO (Rastreio do Cursor + Ciclo Automático Suave)
+   LOOP GLOBAL DE ANIMAÇÃO (Rastreio do Cursor + Ciclo Processual Automático)
    ========================================================================== */
 let pointerX = 0;
 let pointerY = 0;
@@ -1379,15 +1680,12 @@ function animateAll() {
   const dt = elapsed - lastTime;
   lastTime = elapsed;
 
-  // Atualiza todos os 5 mascotes compactos nos cards
   mascotControllers.forEach((item) => {
     item.ctrl.update(elapsed, pointerX, pointerY);
   });
 
-  // Atualiza o mascote de Governança
   govMascot.update(elapsed, pointerX, pointerY);
 
-  // Ciclo automático das 5 Estações (a cada 4.8s avança a estação e alterna estado)
   if (autoCycleEnabled && !document.hidden) {
     cycleProgress += dt / 4.8;
     const progBar = document.getElementById(`prog-${activeStationIdx}`);
@@ -1397,15 +1695,12 @@ function animateAll() {
     if (cycleProgress >= 1) {
       const nextStation = (activeStationIdx + 1) % STATIONS.length;
       setActiveStation(nextStation, false);
-      // Também avança o estado interno da estação ativada para mostrar dinamismo
       const item = mascotControllers[nextStation];
       const nextStateIdx = (item.stateKeys.indexOf(item.currentKey) + 1) % item.stateKeys.length;
       setCardState(nextStation, item.stateKeys[nextStateIdx]);
-      item.ctrl.triggerHop();
     }
   }
 
-  // Ciclo automático do Simulador de Governança (a cada 6.5s)
   if (govAutoCycle && !document.hidden) {
     govTimer += dt;
     if (govTimer >= 6.5) {
