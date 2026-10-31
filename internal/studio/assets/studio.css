@@ -274,8 +274,10 @@ main.studio-wrap {
   font-family: var(--f-mono);
   font-size: 10px;
   font-weight: 700;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
+  overflow: hidden;
+  white-space: nowrap;
 }
 .pulse-dot {
   width: 7px;
@@ -284,6 +286,7 @@ main.studio-wrap {
   background: var(--c, var(--ok));
   box-shadow: 0 0 8px var(--c, var(--ok));
   animation: pulse-dot-anim 1.5s infinite;
+  flex-shrink: 0;
 }
 @keyframes pulse-dot-anim {
   0% { transform: scale(0.9); opacity: 0.8; }
@@ -295,17 +298,25 @@ main.studio-wrap {
   height: 6px;
   border-radius: 50%;
   background: var(--muted);
+  flex-shrink: 0;
 }
 .executing-label {
   color: var(--fg);
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 .executing-id {
   color: var(--c, var(--accent));
   font-weight: 700;
   margin-left: auto;
+  max-width: 95px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex-shrink: 1;
 }
 .executing-title {
-  font-size: 11.5px;
+  font-size: 11px;
   font-weight: 600;
   line-height: 1.35;
   color: #e2e8f5;
@@ -314,6 +325,7 @@ main.studio-wrap {
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
+  word-break: break-word;
 }
 .executing-title.muted {
   color: var(--muted);

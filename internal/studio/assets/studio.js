@@ -1530,21 +1530,28 @@ function applySnapshot(snap) {
       `;
     }
 
-    // O QUE ESTÁ EXECUTANDO POR AGENTE (Destaque Principal)
+    // O QUE ESTÁ EXECUTANDO POR AGENTE (Destaque Principal Padronizado em Todos os Agentes)
     const execTask = st.executing_task;
     let execHtml = '';
     if (execTask && (execTask.status === 'building' || execTask.status === 'in_progress' || execTask.status === 'review_pending' || execTask.status === 'changes_requested' || execTask.status === 'queued' || execTask.status === 'pending_review' || execTask.status === 'approval' || execTask.status === 'working')) {
       const isRetrying = execTask.status === 'changes_requested';
-      const statusInfo = formatTaskStatus(execTask.status);
-      const label = statusInfo.text;
+      let shortLabel = 'EM EXECUÇÃO';
+      if (execTask.status === 'queued') {
+        shortLabel = 'NA FILA';
+      } else if (execTask.status === 'review_pending' || execTask.status === 'pending_review' || execTask.status === 'approval') {
+        shortLabel = 'AUDITORIA';
+      } else if (execTask.status === 'changes_requested') {
+        shortLabel = 'RETRABALHO';
+      }
+
       execHtml = `
         <div class="executing-box active" style="--c:${isRetrying ? 'var(--err)' : st.color}">
           <div class="executing-header">
             <span class="pulse-dot"></span>
-            <span class="executing-label">${escapeHtml(label)}</span>
-            <span class="executing-id">${execTask.id}</span>
+            <span class="executing-label">${shortLabel}</span>
+            <span class="executing-id" title="${escapeHtml(execTask.id)}">${escapeHtml(execTask.id)}</span>
           </div>
-          <div class="executing-title">${escapeHtml(execTask.title || st.current_focus)}</div>
+          <div class="executing-title" title="${escapeHtml(execTask.title || st.current_focus)}">${escapeHtml(execTask.title || st.current_focus)}</div>
           ${actionRowHtml}
           ${toolStripHtml}
         </div>
@@ -1556,7 +1563,7 @@ function applySnapshot(snap) {
             <span class="pulse-dot"></span>
             <span class="executing-label">ATIVIDADE VIVA</span>
           </div>
-          <div class="executing-title">${escapeHtml(st.current_focus || 'Processando etapa do ciclo')}</div>
+          <div class="executing-title" title="${escapeHtml(st.current_focus || 'Processando etapa do ciclo')}">${escapeHtml(st.current_focus || 'Processando etapa do ciclo')}</div>
           ${actionRowHtml}
           ${toolStripHtml}
         </div>
@@ -1569,7 +1576,7 @@ function applySnapshot(snap) {
             <span class="executing-label">STATUS</span>
             <span class="executing-id" style="color:var(--muted);font-size:9.5px;">STANDBY</span>
           </div>
-          <div class="executing-title muted">${escapeHtml(st.current_focus || 'Fila ociosa — Pronto para novo handoff')}</div>
+          <div class="executing-title muted" title="${escapeHtml(st.current_focus || 'Fila ociosa — Pronto para novo handoff')}">${escapeHtml(st.current_focus || 'Fila ociosa — Pronto para novo handoff')}</div>
           ${actionRowHtml}
           ${toolStripHtml}
         </div>
