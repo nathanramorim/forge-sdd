@@ -6,27 +6,27 @@ O **Forge Studio** é o módulo visual plugável do Forge-SDD que projeta no nav
 
 ## ⚡ 1. Como Iniciar o Modo Visual
 
-Você pode iniciar o Forge Studio diretamente via binário Go compilado ou através do `npx`:
+Você pode iniciar o Forge Studio diretamente via comando global `forge` ou através do `npx`:
 
 ### 🚀 Inicialização Rápida (Abre direto no navegador padrão)
 ```bash
-# Se o forge-sdd já estiver instalado globalmente ou no PATH:
-forge-sdd studio --open
+# Comando global oficial (após npm install -g @nathanramorim/forge-sdd@beta):
+forge studio --open
 
-# Ou via npx (sem necessidade de instalar nada previamente):
+# Ou via npx (execução direta sem instalar globalmente):
 npx @nathanramorim/forge-sdd@beta studio --open
 ```
 
 ### ⚙️ Opções e Flags Disponíveis
 ```bash
 # Especificar porta personalizada (padrão: 4321)
-forge-sdd studio --port 8080
+forge studio --port 8080
 
 # Especificar host de bind (padrão: 127.0.0.1 por segurança)
-forge-sdd studio --host 127.0.0.1 --port 4321
+forge studio --host 127.0.0.1 --port 4321
 
 # Apontar para outro diretório de projeto Forge-SDD
-forge-sdd studio --dir ./meu-projeto --open
+forge studio --dir ./meu-projeto --open
 ```
 
 O servidor iniciará em `http://127.0.0.1:4321` exibindo no terminal:
@@ -133,14 +133,14 @@ Com o Studio aberto em modo `LIVE`, abra outro terminal e execute transições n
 
 ```bash
 # Enviar pacote do Builder para Governança
-forge-sdd queue handoff \
+forge queue handoff \
   --from builder \
   --to governance \
   --task feat-01-exemplo \
   --gate "Testes Locais Conforme"
 
 # Simular um loop de retrabalho da Governança de volta para o Builder
-forge-sdd queue handoff \
+forge queue handoff \
   --from governance \
   --to builder \
   --task feat-01-exemplo \
@@ -148,7 +148,7 @@ forge-sdd queue handoff \
   --loop
 
 # Inspecionar o estado de todas as estações pelo terminal
-forge-sdd queue stations
+forge queue stations
 ```
 
 A interface no navegador atualizará instantaneamente via Server-Sent Events, refletindo a nova rota e movimentação do pacote.
