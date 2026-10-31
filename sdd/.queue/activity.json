@@ -1,5 +1,13 @@
 [
   {
+    "timestamp": "2026-10-31T23:18:45Z",
+    "station": "builder",
+    "tool": "handoff",
+    "action": "planner -\u003e builder",
+    "details": "Handoff concluído: feat-63-spec-aprovada transferido para builder",
+    "status": "success"
+  },
+  {
     "timestamp": "2026-10-31T22:47:43Z",
     "station": "pm-architect",
     "tool": "human_gate",

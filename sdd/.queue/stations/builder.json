@@ -1,7 +1,7 @@
 {
   "station": "builder",
-  "version": 29,
-  "updated_at": "2026-10-31T22:47:43Z",
+  "version": 30,
+  "updated_at": "2026-10-31T23:18:45Z",
   "processed_keys": [
     "04dd6a4a482341b00be27e785371421d",
     "33d97bb9e86c646a0e20326c4747115e",
@@ -13,7 +13,8 @@
     "03b73f4b171862db159ea3b237214565",
     "70f337bb9809011de85a3726a19b2790",
     "9891050b015ddf7235513ac7ed302c26",
-    "27568114bf39dd36d87032c43c6aa5a2"
+    "27568114bf39dd36d87032c43c6aa5a2",
+    "da69e339128ff3d22024142fe807afe9"
   ],
   "items": [
     {
@@ -202,6 +203,18 @@
         "achados": [],
         "resumo": "Reavaliação da task feat-63-03 concluída com êxito. COD-01 sanado, ARQ, SEG, TST 100% conformes."
       }
+    },
+    {
+      "id": "feat-63-spec-aprovada",
+      "title": "Planejamento da Feature 63",
+      "station": "builder",
+      "operation": "handoff",
+      "status": "queued",
+      "artifact_path": "sdd/discovery/discovery-63-studio-navegavel-aprovacao-spec.md",
+      "idempotency_key": "da69e339128ff3d22024142fe807afe9",
+      "attempt": 1,
+      "created_at": "2026-10-31T23:18:45Z",
+      "updated_at": "2026-10-31T23:18:45Z"
     }
   ]
 }

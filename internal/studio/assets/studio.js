@@ -421,6 +421,16 @@ function getIdeFilePath(artifactPath) {
   return '/' + artifactPath;
 }
 
+function sortItemsNewestFirst(list) {
+  if (!list || !Array.isArray(list) || list.length === 0) return [];
+  return [...list].sort((a, b) => {
+    const timeA = new Date(a.updated_at || a.created_at || 0).getTime();
+    const timeB = new Date(b.updated_at || b.created_at || 0).getTime();
+    if (timeB !== timeA) return timeB - timeA;
+    return (b.id || '').localeCompare(a.id || '');
+  });
+}
+
 function fallbackCopy(text) {
   const ta = document.createElement('textarea');
   ta.value = text;
@@ -986,8 +996,8 @@ function renderStationDrawerContent(st) {
   const items = st.items || [];
   const selectedTaskId = selectedTaskIdByStation[st.id] || (items.length > 0 ? items[0].id : null);
 
-  const activeItems = items.filter(it => it.status !== 'approved' && it.status !== 'done');
-  const completedItems = items.filter(it => it.status === 'approved' || it.status === 'done');
+  const activeItems = sortItemsNewestFirst(items.filter(it => it.status !== 'approved' && it.status !== 'done'));
+  const completedItems = sortItemsNewestFirst(items.filter(it => it.status === 'approved' || it.status === 'done'));
 
   // --- Painel Tarefas ---
   let activeCardsHtml = '';
@@ -1429,15 +1439,33 @@ function applySnapshot(snap) {
       `;
     }
 
-    // Itens na Fila
+    // Itens na Fila (ordenados: tarefas ativas primeiro, depois histórico das mais recentes para as mais antigas)
     let itemsHtml = '';
-    if (st.items && st.items.length > 0) {
-      itemsHtml = st.items.map(it => `
-        <div class="queue-task-row">
-          <span style="color:var(--fg);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:140px;" title="${escapeHtml(it.title || it.id)}">${escapeHtml(it.id)}</span>
-          <span class="chip" style="font-size:9.5px;padding:1px 6px;">${escapeHtml(it.status)}</span>
-        </div>
-      `).join('');
+    const rawItems = st.items || [];
+    const activeTasks = sortItemsNewestFirst(rawItems.filter(it => it.status !== 'approved' && it.status !== 'done'));
+    const completedTasks = sortItemsNewestFirst(rawItems.filter(it => it.status === 'approved' || it.status === 'done'));
+    const orderedTasks = [...activeTasks, ...completedTasks];
+
+    if (orderedTasks.length > 0) {
+      const allApprovedNotice = (activeTasks.length === 0 && completedTasks.length > 0)
+        ? `<div style="font-size:10.5px;color:var(--ok);font-weight:600;margin-bottom:6px;display:flex;align-items:center;gap:4px;">
+             <span>✓</span> Todas as ${completedTasks.length} tarefas concluídas
+           </div>`
+        : '';
+
+      itemsHtml = allApprovedNotice + orderedTasks.map(it => {
+        const isCompleted = it.status === 'approved' || it.status === 'done';
+        const chipColor = isCompleted ? 'var(--ok)' : (it.status === 'building' ? 'var(--warn)' : 'var(--fg)');
+        const chipBg = isCompleted ? 'rgba(62,207,142,0.08)' : 'transparent';
+        const chipBorder = isCompleted ? 'rgba(62,207,142,0.3)' : 'var(--line)';
+
+        return `
+          <div class="queue-task-row">
+            <span style="color:var(--fg);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:140px;" title="${escapeHtml(it.title || it.id)}">${escapeHtml(it.id)}</span>
+            <span class="chip" style="font-size:9px;padding:1px 6px;color:${chipColor};background:${chipBg};border-color:${chipBorder};">${isCompleted ? '✓ ' : ''}${escapeHtml(it.status)}</span>
+          </div>
+        `;
+      }).join('');
     } else {
       itemsHtml = `<div style="color:var(--muted);font-style:italic;">Nenhum item pendente</div>`;
     }
