@@ -63,8 +63,9 @@ Respeita a **Rule of 7** (4 subtarefas ordenadas de baixo para cima), incorpora 
        - Os contratos explícitos **`Recebe (Entrada)`** e **`Entrega (Saída)`**.
     4. Conectar o cliente `EventSource('/api/events')` e fallback `/api/state` para atualização em tempo real (`LIVE`), além de manter o seletor de **Modo Simulação (`DEMO`)** para demonstração interativa quando o repositório estiver parado.
     5. Renderizar o **Inspetor de Governança (Camadas A, B e C)** exibindo os achados semânticos (`S-01..S-07`), evidências e Auto-Skills propostas.
+    6. Garantir **responsividade e boa navegação (`CA-10`)**: cabeçalho fixo (`sticky`) com navegação fluida, grids adaptativos por breakpoint (desktop, tablet/split-screen e mobile) e proteção `white-space: nowrap; flex-shrink: 0` em todas as cápsulas (`.chip`, `.btn`, `.ds-link`) para evitar quebra interna ou deformação de badges.
   - **Skills Reutilizadas:** —
-  - **Critério Executável:** `go test ./internal/studio/... && go vet ./...` validando presença de todos os 5 personagens, marcas (`ring`, `diamond`, `bar`, `wave`, `tri`), contratos de entrada/saída, conexão `/api/events` e ativos embutidos via `embed.FS` (`CA-05`, `CA-06`, `CA-08`).
+  - **Critério Executável:** `go test ./internal/studio/... && go vet ./...` validando presença de todos os 5 personagens, marcas (`ring`, `diamond`, `bar`, `wave`, `tri`), contratos de entrada/saída, responsividade (`CA-10`), conexão `/api/events` e ativos embutidos via `embed.FS` (`CA-05`, `CA-06`, `CA-08`, `CA-10`).
 
 ---
 
