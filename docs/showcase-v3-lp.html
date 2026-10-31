@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Forge-SDD 3.0 — Orquestração Autônoma em 5 Estações & Governança IA</title>
+<title>Forge-SDD 3.0 — Orquestração Autônoma em 5 Estações & Governança IA (Open Source · MIT)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Montserrat:wght@500;600;700;800&display=swap" rel="stylesheet">
@@ -78,8 +78,8 @@ button { font: inherit; color: inherit; cursor: pointer; border: 0; background: 
   justify-content: center;
   gap: 8px;
   border-radius: var(--r-capsule);
-  padding: 9px 16px;
-  font: 700 12px var(--f-body);
+  padding: 10px 18px;
+  font: 700 12.5px var(--f-body);
   background: #ffffff;
   color: #0b0d12;
   transition: transform .15s, filter .15s, opacity .15s;
@@ -139,7 +139,7 @@ header {
   background: var(--accent);
   box-shadow: 0 0 10px var(--accent);
 }
-nav { display: flex; gap: 6px; align-items: center; }
+nav { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
 nav a {
   padding: 6px 12px;
   border-radius: var(--r-capsule);
@@ -148,12 +148,12 @@ nav a {
   transition: color .2s, background .2s;
 }
 nav a:hover { color: #ffffff; background: #1d2230; }
-@media (max-width: 680px) { nav a:not(.keep) { display: none; } }
+@media (max-width: 760px) { nav a:not(.keep) { display: none; } }
 
 /* Hero */
 .hero {
   text-align: center;
-  padding: 52px 0 32px;
+  padding: 52px 0 36px;
 }
 .hero h1 {
   font: 800 clamp(28px, 4.8vw, 48px)/1.1 var(--f-body);
@@ -169,6 +169,37 @@ nav a:hover { color: #ffffff; background: #1d2230; }
   font-size: 15px;
   text-wrap: pretty;
 }
+.hero-cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 24px;
+}
+
+/* Barra rápida de instalação no Hero */
+.install-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 18px;
+  padding: 8px 10px 8px 16px;
+  border-radius: var(--r-capsule);
+  background: var(--s-terminal);
+  border: 1px solid var(--line2);
+  font: 500 12.5px var(--f-mono);
+  color: #dbe8ff;
+}
+.install-pill button {
+  padding: 5px 12px;
+  border-radius: var(--r-capsule);
+  background: var(--bg3);
+  border: 1px solid var(--line2);
+  font: 600 11px var(--f-body);
+  color: var(--fg);
+}
+.install-pill button:hover { background: var(--accent); color: #fff; border-color: transparent; }
 
 /* Seções */
 section { padding: 44px 0; }
@@ -204,7 +235,6 @@ section { padding: 44px 0; }
   margin-bottom: 18px;
 }
 
-/* Trilho horizontal de etapas (1 → 2 → 3 → 4 → 5 ↺ 1) */
 .stepper-track {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
@@ -270,9 +300,7 @@ section { padding: 44px 0; }
   font: 600 10.5px var(--f-mono);
   color: var(--faint);
 }
-.step-node.active .step-arrow {
-  color: var(--c);
-}
+.step-node.active .step-arrow { color: var(--c); }
 
 .step-node-title {
   font: 700 12.5px/1.25 var(--f-body);
@@ -287,7 +315,6 @@ section { padding: 44px 0; }
   border: 1px solid var(--line);
 }
 
-/* Barra viva de Handoff (mostra a transição exata De → Para e o artefato trafegando) */
 .handoff-bar {
   margin-top: 14px;
   padding: 14px 16px;
@@ -318,7 +345,6 @@ section { padding: 44px 0; }
   color: var(--fg);
 }
 
-/* Linha animada com pacote fluindo entre Origem e Destino */
 .handoff-pipe {
   position: relative;
   flex: 1;
@@ -393,7 +419,6 @@ section { padding: 44px 0; }
   box-shadow: 0 20px 44px -16px rgba(0, 0, 0, .75);
 }
 
-/* Barra de progresso do ciclo automático dentro do card ativo */
 .agent-progress {
   position: absolute;
   top: 0;
@@ -404,9 +429,7 @@ section { padding: 44px 0; }
   opacity: 0;
   transition: opacity .2s;
 }
-.agent-card.active .agent-progress {
-  opacity: 1;
-}
+.agent-card.active .agent-progress { opacity: 1; }
 
 .agent-top {
   display: flex;
@@ -414,7 +437,6 @@ section { padding: 44px 0; }
   gap: 14px;
 }
 
-/* Palco 3D compacto embutido dentro do card */
 .avatar-stage {
   position: relative;
   width: 78px;
@@ -434,10 +456,7 @@ section { padding: 44px 0; }
   display: block;
 }
 
-.agent-meta {
-  flex: 1;
-  min-width: 0;
-}
+.agent-meta { flex: 1; min-width: 0; }
 .agent-role-row {
   display: flex;
   align-items: center;
@@ -461,7 +480,6 @@ section { padding: 44px 0; }
   margin-top: 2px;
 }
 
-/* Mini-fluxo de Entrada → Saída dentro de cada card */
 .io-strip {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -488,7 +506,6 @@ section { padding: 44px 0; }
   color: var(--fg);
 }
 
-/* Caixa viva de status e interação dentro de cada card */
 .agent-live-box {
   background: var(--s-focus);
   border: 1px solid var(--line);
@@ -508,7 +525,6 @@ section { padding: 44px 0; }
   color: var(--muted);
 }
 
-/* Navegação interna de estados dentro do próprio card */
 .agent-controls {
   display: flex;
   align-items: center;
@@ -518,11 +534,7 @@ section { padding: 44px 0; }
   padding-top: 4px;
   border-top: 1px solid var(--line);
 }
-.state-pills {
-  display: flex;
-  gap: 4px;
-  flex-wrap: wrap;
-}
+.state-pills { display: flex; gap: 4px; flex-wrap: wrap; }
 .state-pill {
   padding: 4px 9px;
   border-radius: var(--r-capsule);
@@ -532,17 +544,195 @@ section { padding: 44px 0; }
   border: 1px solid transparent;
   transition: all .15s;
 }
-.state-pill:hover {
-  color: var(--fg);
-  background: var(--bg3);
-}
+.state-pill:hover { color: var(--fg); background: var(--bg3); }
 .state-pill.on {
   color: #ffffff;
   background: var(--bg3);
   border-color: var(--line2);
 }
 
-/* Seção dedicada de Governança (Simulador Compacto no padrão dock-ia) */
+/* ==========================================================================
+   EMULADOR INTERATIVO REALISTA (COMO FUNCIONA NA PRÁTICA)
+   ========================================================================== */
+.emu-shell {
+  background: var(--bg2);
+  border: 1px solid var(--line2);
+  border-radius: var(--r-panel);
+  overflow: hidden;
+  box-shadow: 0 26px 60px -18px rgba(0, 0, 0, .75);
+}
+
+.emu-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  background: var(--s-dock);
+  border-bottom: 1px solid var(--line);
+  flex-wrap: wrap;
+}
+.emu-dots {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.emu-dots i {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #363e52;
+}
+.emu-cmd-tabs {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.emu-cmd-btn {
+  padding: 6px 12px;
+  border-radius: var(--r-capsule);
+  background: var(--bg2);
+  border: 1px solid var(--line);
+  font: 600 11.5px var(--f-mono);
+  color: var(--muted);
+  transition: all .2s;
+}
+.emu-cmd-btn:hover { color: #fff; border-color: var(--line2); }
+.emu-cmd-btn.active {
+  background: var(--accent);
+  color: #ffffff;
+  border-color: transparent;
+}
+
+.emu-body {
+  display: grid;
+  grid-template-columns: 1.25fr 1fr;
+  min-height: 360px;
+}
+@media (max-width: 860px) { .emu-body { grid-template-columns: 1fr; } }
+
+/* Lado Esquerdo do Emulador: Terminal / Chat Real */
+.emu-term-pane {
+  padding: 18px;
+  background: var(--s-terminal);
+  border-right: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 14px;
+}
+.emu-log {
+  font: 500 12px/1.65 var(--f-mono);
+  color: #d3d9e8;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.emu-log .cmd-input {
+  color: #ffffff;
+  font-weight: 600;
+}
+.emu-log .dim { color: var(--faint); }
+.emu-log .ok { color: var(--ok); }
+.emu-log .warn { color: var(--warn); }
+.emu-log .accent { color: var(--accent); }
+
+/* Lado Direito do Emulador: Agente Ativo 3D + Estado de sdd/.queue/queue.json e Arquivos */
+.emu-state-pane {
+  padding: 18px;
+  background: var(--bg2);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 14px;
+}
+.emu-agent-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px;
+  border-radius: var(--r-card);
+  background: var(--s-dock);
+  border: 1px solid var(--line);
+}
+.emu-avatar-mount {
+  width: 70px;
+  height: 78px;
+  flex: none;
+  border-radius: 14px;
+  background: var(--bg2);
+  border: 1px solid var(--line2);
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+.emu-avatar-mount canvas {
+  width: 70px !important;
+  height: 78px !important;
+}
+
+.emu-files-box {
+  background: var(--s-focus);
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  padding: 12px 14px;
+}
+.emu-files-box h4 {
+  font: 700 11px var(--f-body);
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+.emu-file-list {
+  display: grid;
+  gap: 6px;
+  font: 500 11.5px var(--f-mono);
+}
+.emu-file-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 5px 8px;
+  border-radius: 8px;
+  background: var(--s-dock);
+  border: 1px solid var(--line);
+}
+
+/* Instalação e Comandos */
+.install-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+@media (max-width: 820px) { .install-grid { grid-template-columns: 1fr; } }
+
+.cmd-ref-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 10px;
+}
+.cmd-item {
+  padding: 14px 16px;
+  border-radius: var(--r-card);
+  background: var(--bg2);
+  border: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.cmd-item code {
+  font: 600 12.5px var(--f-mono);
+  color: var(--fg);
+}
+.cmd-item span {
+  font: 500 12.5px/1.45 var(--f-body);
+  color: var(--muted);
+}
+
+/* Seção dedicada de Governança */
 .gov-layout {
   display: grid;
   grid-template-columns: 1fr 1.15fr;
@@ -551,11 +741,7 @@ section { padding: 44px 0; }
 }
 @media (max-width: 880px) { .gov-layout { grid-template-columns: 1fr; } }
 
-.gov-tabs {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
+.gov-tabs { display: flex; flex-direction: column; gap: 10px; }
 .gov-tab {
   text-align: left;
   background: var(--bg2);
@@ -579,7 +765,6 @@ section { padding: 44px 0; }
 .gov-tab h4 { font: 700 13.5px var(--f-body); color: var(--fg); }
 .gov-tab p { font: 500 12.5px/1.5 var(--f-body); color: var(--muted); margin-top: 4px; }
 
-/* Card Inspetor de Governança (Estilo Banner/Dock do dock-ia) */
 .gov-inspector {
   background: var(--bg2);
   border: 1px solid color-mix(in srgb, var(--k, var(--bad)) 45%, var(--line));
@@ -593,11 +778,7 @@ section { padding: 44px 0; }
   transition: border-color .3s, background .3s;
 }
 
-.gov-head {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
+.gov-head { display: flex; align-items: center; gap: 16px; }
 .gov-avatar-wrap {
   width: 86px;
   height: 94px;
@@ -689,7 +870,6 @@ section { padding: 44px 0; }
   background: var(--dot, var(--faint));
 }
 
-/* Tabela / Painel do Líder */
 .panel {
   border: 1px solid var(--line);
   border-radius: var(--r-panel);
@@ -716,6 +896,7 @@ footer {
   font: 500 12px var(--f-body);
   display: flex;
   justify-content: space-between;
+  align-items: center;
   gap: 12px;
   flex-wrap: wrap;
   border-top: 1px solid var(--line);
@@ -731,23 +912,42 @@ footer {
       <span class="brand-dot"></span>
       <span>Forge-SDD</span>
       <span class="chip"><i style="--o:var(--accent)"></i>v3.0.0-beta</span>
+      <span class="chip" title="Licença MIT Open Source"><i style="--o:var(--ok)"></i>MIT License</span>
     </div>
     <nav aria-label="Navegação Principal">
       <a href="#estacoes">Fluxo Processual</a>
-      <a href="#governanca" class="keep">Governança IA</a>
-      <a href="#evolucao">Antes vs. Agora</a>
-      <a href="#painel">Painel do Líder</a>
+      <a href="#emulador" class="keep">Emulador Real</a>
+      <a href="#instalacao">Instalação & Comandos</a>
+      <a href="#governanca">Governança IA</a>
+      <a href="https://github.com/nathanramorim/forge-sdd" target="_blank" rel="noopener noreferrer" class="btn ghost sm keep">
+        GitHub · Open Source ↗
+      </a>
     </nav>
   </header>
 
   <main>
-    <!-- HERO ENXUTO -->
+    <!-- HERO COM CTAs OPEN SOURCE + COMANDO RÁPIDO -->
     <div class="hero">
-      <p class="eyebrow">Orquestração Independente · Padrão Dock iA</p>
+      <p class="eyebrow">Framework Open Source (MIT) · Orquestração em 5 Estações</p>
       <h1>De um agente fazendo tudo sozinho para 5 especialistas em esteira.</h1>
       <p class="lead">
-        Cada estação recebe um artefato validado, executa apenas sua especialidade e passa o bastão adiante. Veja abaixo como o trabalho flui entre os agentes e interaja dentro de cada etapa.
+        Instale em qualquer repositório com um comando. Cada estação recebe um artefato validado, executa sua especialidade em fila ou em paralelo e passa pela auditoria de Governança Read-Only antes de voltar para você.
       </p>
+
+      <div class="hero-cta">
+        <a class="btn" href="#emulador">Testar no Emulador Real</a>
+        <a class="btn solid" href="#instalacao">Como Instalar & Usar</a>
+        <a class="btn ghost" href="https://github.com/nathanramorim/forge-sdd" target="_blank" rel="noopener noreferrer">
+          Repositório GitHub (MIT) ↗
+        </a>
+      </div>
+
+      <div>
+        <div class="install-pill">
+          <span>$ npx @nathanramorim/forge-sdd@latest init</span>
+          <button type="button" id="copyHeroBtn">Copiar</button>
+        </div>
+      </div>
     </div>
 
     <!-- SEÇÃO 1: VISÃO PROCESSUAL CONECTADA + CARDS DOS 5 AGENTES COM 3D EMBUTIDO -->
@@ -767,11 +967,9 @@ footer {
 
       <!-- ESTEIRA PROCESSUAL INTERATIVA (PASSO 1 → 2 → 3 → 4 → 5 ↺ 1) -->
       <div class="process-rail-box">
-        <div class="stepper-track" id="stepperTrack">
-          <!-- Nós do fluxo processual injetados via JS -->
-        </div>
+        <div class="stepper-track" id="stepperTrack"></div>
 
-        <!-- Barra Viva de Handoff (Mostra Origem ──► Destino + Artefato em Trânsito + Portão) -->
+        <!-- Barra Viva de Handoff -->
         <div class="handoff-bar" id="handoffBar">
           <div class="handoff-route">
             <span class="handoff-pill" id="hoFrom">01. O Líder</span>
@@ -792,16 +990,189 @@ footer {
       </div>
 
       <!-- CARDS DOS 5 ESPECIALISTAS COM MINI-PALCO 3D E CONTROLES EMBUTIDOS -->
-      <div class="agents-grid" id="agentsGrid">
-        <!-- Cards injetados e animados com Three.js compacto -->
+      <div class="agents-grid" id="agentsGrid"></div>
+    </section>
+
+    <!-- SEÇÃO 2: EMULADOR INTERATIVO REALISTA (COMO O FORGE-SDD FUNCIONA NO TERMINAL E CHAT) -->
+    <section id="emulador">
+      <div class="sec-h">
+        <div>
+          <p class="eyebrow" style="color:var(--warn)">02 · Emulador Interativo Fiel</p>
+          <h2>Veja como uma feature real nasce, roda em paralelo e passa na auditoria.</h2>
+          <p>Clique nos 5 comandos abaixo na ordem em que você usa no dia a dia. À esquerda você vê o terminal/chat real; à direita, o agente ativo em 3D e os arquivos gerados em <span class="mono">sdd/</span>.</p>
+        </div>
+        <div>
+          <button class="btn solid sm" id="emuNextStepBtn" type="button">Executar próximo passo →</button>
+        </div>
+      </div>
+
+      <div class="emu-shell">
+        <div class="emu-topbar">
+          <div class="emu-dots"><i></i><i></i><i></i><span class="mono" style="margin-left:6px">meu-projeto — forge-sdd v3.0.0-beta</span></div>
+          <div class="emu-cmd-tabs" id="emuTabs">
+            <button type="button" class="emu-cmd-btn active" data-emu="0">1. $ forge init</button>
+            <button type="button" class="emu-cmd-btn" data-emu="1">2. /discovery</button>
+            <button type="button" class="emu-cmd-btn" data-emu="2">3. /split-features</button>
+            <button type="button" class="emu-cmd-btn" data-emu="3">4. /proxima-feature</button>
+            <button type="button" class="emu-cmd-btn" data-emu="4">5. /revisar</button>
+          </div>
+        </div>
+
+        <div class="emu-body">
+          <!-- Terminal / Chat Output -->
+          <div class="emu-term-pane">
+            <div class="emu-log" id="emuLog"></div>
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding-top:12px;border-top:1px solid var(--line);flex-wrap:wrap">
+              <div id="emuActionSlot" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+              <span class="mono" id="emuStepCounter">Passo 1 de 5</span>
+            </div>
+          </div>
+
+          <!-- Estado Vivo do Repositório + Agente 3D Ativo -->
+          <div class="emu-state-pane">
+            <div class="emu-agent-header">
+              <div class="emu-avatar-mount" id="emuAvatarMount"></div>
+              <div style="flex:1;min-width:0">
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:4px">
+                  <span class="eyebrow" id="emuStationLabel" style="font-size:10px">Estação Ativa</span>
+                  <span class="chip" id="emuStateChip"><i style="--o:var(--accent)"></i>Trabalhando</span>
+                </div>
+                <h3 id="emuAgentName" style="font:700 15px var(--f-body)">01. O Líder (Orquestrador)</h3>
+                <p id="emuAgentSpeech" style="font:500 12px/1.45 var(--f-body);color:var(--muted);margin-top:3px">
+                  Estrutura SDD instalada e pronta para iniciar o ciclo.
+                </p>
+              </div>
+            </div>
+
+            <div class="emu-files-box">
+              <h4>Arquivos & Fila Atualizados no Repositório</h4>
+              <div class="emu-file-list" id="emuFileList"></div>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
 
-    <!-- SEÇÃO 2: GOVERNANÇA ATIVA (INTERAÇÃO SEPARADA SOBRE OS RISCOS DE IA NA MÍDIA) -->
+    <!-- SEÇÃO 3: INSTALAÇÃO SIMPLES & PRINCIPAIS COMANDOS -->
+    <section id="instalacao">
+      <div class="sec-h">
+        <div>
+          <p class="eyebrow">03 · Instalação & Guia Rápido</p>
+          <h2>Simples de instalar. Funciona com os agentes que você já usa.</h2>
+          <p>Compatível com <strong>Claude Code</strong>, <strong>Google Gemini / Antigravity</strong> e <strong>GitHub Copilot</strong>. Código 100% aberto sob licença MIT.</p>
+        </div>
+      </div>
+
+      <div class="install-grid">
+        <div class="panel">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+            <span class="chip"><i style="--o:var(--ok)"></i>Opção 1 · Instalação Global (Recomendado)</span>
+            <span class="mono">npm / npx</span>
+          </div>
+          <h3 style="font:700 15px var(--f-body);margin-bottom:6px">Instale uma vez e use o comando curto <span class="mono" style="color:#fff">forge</span></h3>
+          <div class="term" style="margin-top:10px">
+            <div># 1. Instale globalmente via NPM</div>
+            <div style="color:#fff;font-weight:600">npm install -g @nathanramorim/forge-sdd</div>
+            <div style="margin-top:8px"># 2. Inicialize dentro do seu projeto</div>
+            <div style="color:#fff;font-weight:600">forge init</div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+            <span class="chip"><i style="--o:var(--accent)"></i>Opção 2 · Uso Direto sem Instalar</span>
+            <span class="mono">Zero Config</span>
+          </div>
+          <h3 style="font:700 15px var(--f-body);margin-bottom:6px">Rode direto via <span class="mono" style="color:#fff">npx</span> ou atualize projetos existentes</h3>
+          <div class="term" style="margin-top:10px">
+            <div># Inicialização interativa (escolha Claude, Gemini, Copilot)</div>
+            <div style="color:#fff;font-weight:600">npx @nathanramorim/forge-sdd@latest init</div>
+            <div style="margin-top:8px"># Atualizar para v3.0 preservando seu histórico</div>
+            <div style="color:#fff;font-weight:600">forge update</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Principais Comandos no Chat e no Terminal -->
+      <div class="sec-h" style="margin-top:28px;margin-bottom:14px">
+        <div>
+          <h3 style="font:700 18px var(--f-body)">Principais comandos do dia a dia</h3>
+          <p style="margin-top:4px">Você conversa com o time por comandos de barra (<span class="mono">/comando</span>) no chat da IDE, enquanto o binário <span class="mono">forge-sdd</span> garante fila, portões e skills no terminal.</p>
+        </div>
+      </div>
+
+      <div class="cmd-ref-grid">
+        <div class="cmd-item">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <code>/discovery [ideia]</code>
+            <span class="chip"><i style="--o:#8aa4ff"></i>Estação 02</span>
+          </div>
+          <span>Faz o Reuse Check ("O que já existe"), gera a Spec e os critérios e aguarda seu OK no Portão FLX-01.</span>
+        </div>
+
+        <div class="cmd-item">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <code>/split-features</code>
+            <span class="chip"><i style="--o:#c9a7ff"></i>Estação 03</span>
+          </div>
+          <span>Quebra o plano técnico em subtarefas P/M/G, vincula as rules aplicáveis e alimenta a fila determinística.</span>
+        </div>
+
+        <div class="cmd-item">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <code>/proxima-feature</code>
+            <span class="chip"><i style="--o:#4fd1b5"></i>Estação 04</span>
+          </div>
+          <span>Aciona os Builders para consumirem os próximos itens da fila (em paralelo quando sem conflito).</span>
+        </div>
+
+        <div class="cmd-item">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <code>/revisar</code>
+            <span class="chip"><i style="--o:#ff8a5c"></i>Estação 05 → 01</span>
+          </div>
+          <span>Roda o Portão A (<span class="mono">forge-sdd gate</span>), a auditoria Read-Only (Camada B) e entrega o Painel do Líder.</span>
+        </div>
+
+        <div class="cmd-item">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <code>forge-sdd queue</code>
+            <span class="chip"><i style="--o:var(--accent)"></i>CLI Go</span>
+          </div>
+          <span>Gerencia a fila local (<span class="mono">enqueue</span>, <span class="mono">next</span>, <span class="mono">claim</span>, <span class="mono">complete</span>, <span class="mono">review</span>, <span class="mono">list</span>) com detecção de conflito.</span>
+        </div>
+
+        <div class="cmd-item">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <code>forge-sdd gate</code>
+            <span class="chip"><i style="--o:var(--ok)"></i>CLI Go</span>
+          </div>
+          <span>Executa o Portão Determinístico Camada A (branch, spec vinculada, segredos, tamanho e testes).</span>
+        </div>
+
+        <div class="cmd-item">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <code>forge-sdd skills</code>
+            <span class="chip"><i style="--o:var(--warn)"></i>CLI Go</span>
+          </div>
+          <span>Propõe, aprova e sincroniza Auto-Skills (<span class="mono">DUP-05</span>) entre <span class="mono">.agents/</span>, <span class="mono">.claude/</span> e <span class="mono">.gemini/</span>.</span>
+        </div>
+
+        <div class="cmd-item">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <code>/status &amp; forge report</code>
+            <span class="chip"><i style="--o:#f2a65a"></i>Estação 01</span>
+          </div>
+          <span>Mostra o progresso atual, divergências com o Git remoto e relatório de telemetria por sessão.</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- SEÇÃO 4: GOVERNANÇA ATIVA (INTERAÇÃO SEPARADA SOBRE OS RISCOS DE IA NA MÍDIA) -->
     <section id="governanca">
       <div class="sec-h">
         <div>
-          <p class="eyebrow" style="color:var(--ok)">02 · Governança em 3 Camadas</p>
+          <p class="eyebrow" style="color:var(--ok)">04 · Governança em 3 Camadas</p>
           <h2>O antídoto contra o caos do desenvolvimento com IA sem supervisão.</h2>
           <p>
             Vazamento de credenciais, código duplicado e IAs que aprovam o próprio erro viraram notícia constante. No Forge-SDD 3.0, quem escreve o código jamais pode aprová-lo: veja ao lado como o Guardião Read-Only age em cada caso.
@@ -813,7 +1184,6 @@ footer {
       </div>
 
       <div class="gov-layout">
-        <!-- Abas de Ameaças Reais -->
         <div class="gov-tabs" id="govTabs">
           <button class="gov-tab active" data-gov="0" style="--k:var(--bad)" type="button">
             <div class="gov-tab-top">
@@ -852,7 +1222,6 @@ footer {
           </button>
         </div>
 
-        <!-- Card Inspetor Interativo com Mascote 3D Embutido -->
         <div class="gov-inspector" id="govInspector" style="--k:var(--bad)">
           <div class="gov-head">
             <div class="gov-avatar-wrap" id="govAvatarMount" title="Clique para interagir com o Analista de Governança"></div>
@@ -868,11 +1237,7 @@ footer {
             </div>
           </div>
 
-          <div class="term" id="govTerminal">
-            <div>$ forge-sdd gate --mode bloqueio</div>
-            <span class="bad-line">- [P-13 FALHOU] Credencial exposta detectada em internal/auth/client.go:42</span>
-            <span class="bad-line">- Veredito Camada B: "bloqueado" (violação SEG-01 — chave hardcoded)</span>
-          </div>
+          <div class="term" id="govTerminal"></div>
 
           <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding-top:6px;border-top:1px solid var(--line)">
             <div style="display:flex;gap:8px;flex-wrap:wrap">
@@ -885,11 +1250,11 @@ footer {
       </div>
     </section>
 
-    <!-- SEÇÃO 3: COMPARATIVO ANTES (v2.x) VS AGORA (v3.0) -->
+    <!-- SEÇÃO 5: COMPARATIVO ANTES (v2.x) VS AGORA (v3.0) -->
     <section id="evolucao">
       <div class="sec-h">
         <div>
-          <p class="eyebrow">03 · Evolução de Arquitetura</p>
+          <p class="eyebrow">05 · Evolução de Arquitetura</p>
           <h2>O que muda da geração v2.x para o Forge-SDD 3.0.</h2>
         </div>
       </div>
@@ -932,61 +1297,21 @@ footer {
         </div>
       </div>
     </section>
-
-    <!-- SEÇÃO 4: PAINEL EXECUTIVO DO LÍDER (CAMADA C) -->
-    <section id="painel">
-      <div class="sec-h">
-        <div>
-          <p class="eyebrow" style="color:var(--warn)">04 · Camada C Humana</p>
-          <h2>Você recebe apenas o Painel Executivo consolidado.</h2>
-          <p>Sem precisar ler logs extensos: o Líder reúne o resultado de cada etapa, o veredito da Governança e o que falta no backlog.</p>
-        </div>
-      </div>
-
-      <div class="panel">
-        <table>
-          <thead>
-            <tr>
-              <th>Etapa Processual</th>
-              <th>Transição entre Agentes</th>
-              <th>Artefato / Contrato</th>
-              <th>Veredito Governança</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><b>Passo 1 → 2 · Concepção</b></td>
-              <td>Líder → PM & Arquiteto (+ Você)</td>
-              <td><span class="mono">discovery.md + criteria.md (FLX-01)</span></td>
-              <td><span class="chip"><i style="--o:var(--ok)"></i>Spec Aprovada</span></td>
-            </tr>
-            <tr>
-              <td><b>Passo 2 → 3 · Planejamento</b></td>
-              <td>PM & Arquiteto → Planejador</td>
-              <td><span class="mono">plan.md + IDs + .agents/rules/</span></td>
-              <td><span class="chip"><i style="--o:var(--ok)"></i>Escopo Mapeado</span></td>
-            </tr>
-            <tr>
-              <td><b>Passo 3 → 4 · Fila & Paralelismo</b></td>
-              <td>Planejador → Builders A & B</td>
-              <td><span class="mono">sdd/.queue/queue.json (Onda 01)</span></td>
-              <td><span class="chip"><i style="--o:var(--ok)"></i>Portão A (PASS)</span></td>
-            </tr>
-            <tr>
-              <td><b>Passo 4 → 5 ↺ 1 · Auditoria & Fecho</b></td>
-              <td>Builders → Governança → Líder</td>
-              <td><span class="mono">Laudo JSON + Auto-Skill (DUP-05)</span></td>
-              <td><span class="chip"><i style="--o:var(--ok)"></i>Conforme (0 bloqueios)</span></td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </section>
   </main>
 
   <footer>
-    <span>Forge-SDD v3.0.0-beta · Design System alinhado ao padrão Dock iA</span>
-    <span>Fluxo processual interativo · Three.js 3D compacto</span>
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+      <span><strong>Forge-SDD v3.0.0-beta</strong> · Open Source sob <strong>Licença MIT</strong></span>
+      <span>·</span>
+      <a href="https://github.com/nathanramorim/forge-sdd" target="_blank" rel="noopener noreferrer" style="color:var(--fg);text-decoration:underline">
+        github.com/nathanramorim/forge-sdd
+      </a>
+      <span>·</span>
+      <a href="https://www.npmjs.com/package/@nathanramorim/forge-sdd" target="_blank" rel="noopener noreferrer" style="color:var(--muted);text-decoration:underline">
+        @nathanramorim/forge-sdd no NPM
+      </a>
+    </div>
+    <span>Design System alinhado ao padrão Dock iA · Three.js 3D compacto</span>
   </footer>
 </div>
 
@@ -1156,8 +1481,9 @@ function createCompactDockMascot3D(mountEl, agentHex, initialState, markType) {
   let currentState = initialState || 'working';
   let hopTimer = 0;
 
-  function setState(nextState) {
+  function setState(nextState, nextColorHex) {
     currentState = STATE_DEFS[nextState] ? nextState : 'working';
+    if (nextColorHex) bodyMat.color.setHex(nextColorHex);
     const def = STATE_DEFS[currentState];
     orbMat.color.setHex(def.orb);
     capGroup.visible = def.eyes === 'cap';
@@ -1210,7 +1536,16 @@ function createCompactDockMascot3D(mountEl, agentHex, initialState, markType) {
 }
 
 /* ==========================================================================
-   DADOS DAS 5 ESTAÇÕES E TRANSIÇÕES PROCESSUAIS (ENTRADA → SAÍDA → PRÓXIMO)
+   COPIAR COMANDO DO HERO
+   ========================================================================== */
+document.getElementById('copyHeroBtn').addEventListener('click', (e) => {
+  navigator.clipboard?.writeText('npx @nathanramorim/forge-sdd@latest init');
+  e.target.textContent = 'Copiado!';
+  setTimeout(() => { e.target.textContent = 'Copiar'; }, 1800);
+});
+
+/* ==========================================================================
+   DADOS DAS 5 ESTAÇÕES E TRANSIÇÕES PROCESSUAIS
    ========================================================================== */
 const STATIONS = [
   {
@@ -1332,7 +1667,6 @@ let activeStationIdx = 0;
 let autoCycleEnabled = true;
 let cycleProgress = 0;
 
-// 1. Renderiza os 5 nós da Esteira Processual Conectada no topo
 STATIONS.forEach((st, idx) => {
   const node = document.createElement('button');
   node.type = 'button';
@@ -1350,13 +1684,10 @@ STATIONS.forEach((st, idx) => {
     <div class="step-node-artifact">${st.outputArtifact}</div>
   `;
 
-  node.addEventListener('click', () => {
-    setActiveStation(idx, true);
-  });
+  node.addEventListener('click', () => setActiveStation(idx, true));
   stepperTrackEl.appendChild(node);
 });
 
-// 2. Renderiza os 5 cards detalhados com Mascote 3D compacto e Entrada/Saída processual
 STATIONS.forEach((st, idx) => {
   const stateKeys = Object.keys(st.states);
   const initialKey = st.defaultState;
@@ -1420,8 +1751,7 @@ STATIONS.forEach((st, idx) => {
   card.querySelectorAll('.state-pill').forEach((btn) => {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
-      const nextKey = btn.dataset.state;
-      setCardState(idx, nextKey);
+      setCardState(idx, btn.dataset.state);
       setActiveStation(idx, true);
     });
   });
@@ -1434,9 +1764,7 @@ STATIONS.forEach((st, idx) => {
     setActiveStation(idx, true);
   });
 
-  card.addEventListener('click', () => {
-    setActiveStation(idx, true);
-  });
+  card.addEventListener('click', () => setActiveStation(idx, true));
 });
 
 function setCardState(idx, stateKey) {
@@ -1447,13 +1775,9 @@ function setCardState(idx, stateKey) {
 
   const def = STATE_DEFS[stateKey];
   const chip = document.getElementById(`chip-${idx}`);
-  if (chip) {
-    chip.innerHTML = `<i style="--o:${def.cssOrb}"></i><b>${def.label}</b>`;
-  }
+  if (chip) chip.innerHTML = `<i style="--o:${def.cssOrb}"></i><b>${def.label}</b>`;
   const phrase = document.getElementById(`phrase-${idx}`);
-  if (phrase) {
-    phrase.textContent = item.st.states[stateKey];
-  }
+  if (phrase) phrase.textContent = item.st.states[stateKey];
   const pills = document.querySelectorAll(`#pills-${idx} .state-pill`);
   pills.forEach((p) => p.classList.toggle('on', p.dataset.state === stateKey));
 }
@@ -1469,7 +1793,6 @@ function updateProcessHandoffBar(idx) {
   document.getElementById('hoGateChip').innerHTML = `<i style="--o:${st.color}"></i>${st.handoffGate}`;
   document.getElementById('hoLoopNote').textContent = st.handoffNote;
 
-  // Atualiza os nós do stepper horizontal (done para anteriores, active para o atual)
   STATIONS.forEach((_, i) => {
     const node = document.getElementById(`step-node-${i}`);
     if (!node) return;
@@ -1497,23 +1820,190 @@ function setActiveStation(idx, pauseAuto) {
   }
 }
 
-document.getElementById('prevStepBtn').addEventListener('click', () => {
-  setActiveStation(activeStationIdx - 1, true);
-});
-document.getElementById('nextStepBtn').addEventListener('click', () => {
-  setActiveStation(activeStationIdx + 1, true);
-});
+document.getElementById('prevStepBtn').addEventListener('click', () => setActiveStation(activeStationIdx - 1, true));
+document.getElementById('nextStepBtn').addEventListener('click', () => setActiveStation(activeStationIdx + 1, true));
 document.getElementById('toggleCycleBtn').addEventListener('click', () => {
   autoCycleEnabled = !autoCycleEnabled;
-  document.getElementById('toggleCycleBtn').textContent = autoCycleEnabled
-    ? 'Pausar fluxo'
-    : 'Retomar fluxo';
+  document.getElementById('toggleCycleBtn').textContent = autoCycleEnabled ? 'Pausar fluxo' : 'Retomar fluxo';
 });
 
 updateProcessHandoffBar(0);
 
 /* ==========================================================================
-   SIMULADOR COMPACTO DE GOVERNANÇA (MASCOTE 3D EMBUTIDO + CICLO AUTOMÁTICO)
+   EMULADOR INTERATIVO REALISTA (PASSO A PASSO DE UMA FEATURE REAL)
+   ========================================================================== */
+const EMU_STEPS = [
+  {
+    stationLabel: 'Bootstrap CLI Go',
+    agentName: '01. O Líder (Orquestrador)',
+    agentHex: 0xf2a65a,
+    agentState: 'finished',
+    chipColor: 'var(--ok)',
+    chipText: 'Estrutura Pronta',
+    speech: 'Instalei os papéis das 5 estações (.agents/roles/), as regras modulares (.agents/rules/) e a Constitution por IDs.',
+    logHtml: `
+      <div class="cmd-input">$ forge init . --agent claude,gemini --name checkout-api</div>
+      <div class="dim">→ Gerando papéis canônicos em .agents/roles/{lider,pm-architect,planner,builder,governance}.md</div>
+      <div class="dim">→ Distribuindo regras em .agents/rules/sdd-{arquitetura,seguranca,reuso-e-duplicacao,codigo-e-testes,fluxo-e-portao}.md</div>
+      <div class="dim">→ Criando sdd/memory/constitution.md (IDs estáveis: ARQ-*, SEG-*, DUP-*, COD-*, TST-*, FLX-*, GOV-*)</div>
+      <div class="ok">✓ Estrutura Forge-SDD v3.0.0-beta criada com sucesso!</div>
+    `,
+    files: [
+      ['.agents/roles/ (5 estações)', 'criado', 'var(--ok)'],
+      ['.agents/rules/sdd-*.md', 'criado', 'var(--ok)'],
+      ['sdd/memory/constitution.md', 'criado', 'var(--ok)'],
+      ['sdd/memory/progress.md', '240 bytes ≤ 1 KB', 'var(--accent)']
+    ],
+    actionBtn: { label: 'Rodar /discovery no chat →', nextStep: 1 }
+  },
+  {
+    stationLabel: 'Estação 02 · Concepção',
+    agentName: '02. Produto & Arquiteto',
+    agentHex: 0x8aa4ff,
+    agentState: 'approval',
+    chipColor: 'var(--warn)',
+    chipText: 'Portão FLX-01 (Aguarda Você)',
+    speech: 'Mapeei o que já existe para não duplicar código e gerei a Spec. Preciso do seu "De Acordo" antes de acionar o Planejador.',
+    logHtml: `
+      <div class="cmd-input">&gt; /discovery adicionar pagamento PIX com webhook idempotente</div>
+      <div class="accent">[Estação 02 · PM &amp; Arquiteto] Executando Reuse Check obrigatório (DUP-01 / DUP-02)…</div>
+      <div class="dim">  • Reaproveitado: internal/http/middleware/hmac.go e internal/db/tx.go</div>
+      <div class="ok">✓ Gerado: sdd/discovery/discovery-01-pagamento-pix.md</div>
+      <div class="ok">✓ Gerado: sdd/discovery/criteria-01-pagamento-pix.md (CA-01..CA-05)</div>
+      <div class="warn">! PORTÃO HUMANO FLX-01: Revise a Spec antes de prosseguir para o plano técnico.</div>
+    `,
+    files: [
+      ['sdd/discovery/discovery-01-pagamento-pix.md', 'Reuse Check OK', 'var(--ok)'],
+      ['sdd/discovery/criteria-01-pagamento-pix.md', 'aguarda seu OK', 'var(--warn)'],
+      ['sdd/discovery/plan-01-*.md', 'bloqueado (FLX-01)', 'var(--faint)']
+    ],
+    actionBtn: { label: 'Aprovar Spec (FLX-01) e Planejar →', nextStep: 2, style: 'warn' }
+  },
+  {
+    stationLabel: 'Estação 03 · Planejamento & Fila',
+    agentName: '03. O Planejador',
+    agentHex: 0xc9a7ff,
+    agentState: 'thinking',
+    chipColor: 'var(--accent)',
+    chipText: 'Fila Calculada',
+    speech: 'Dividi a Spec em 3 tarefas: 01 e 02 não tocam nos mesmos arquivos e vão rodar em paralelo; a 03 aguarda na fila.',
+    logHtml: `
+      <div class="cmd-input">&gt; /split-features</div>
+      <div class="accent">[Estação 03 · Planejador] Vinculando IDs da Constitution e rules por subtarefa (GOV-04)…</div>
+      <div class="dim">  • feat-01-01 (P): Domínio PIX [ARQ-01, TST-01] → sem conflito (Onda Paralela 1)</div>
+      <div class="dim">  • feat-01-02 (M): Cliente Banco [SEG-01, TST-01] → sem conflito (Onda Paralela 1)</div>
+      <div class="dim">  • feat-01-03 (M): Webhook Handler [SEG-02, DUP-01] → depends_on: [01, 02] (Onda 2)</div>
+      <div class="cmd-input">$ forge-sdd queue enqueue sdd/features/feat-01-pagamento-pix/*.md</div>
+      <div class="ok">✓ 3 tarefas gravadas em sdd/.queue/queue.json (0 colisões na Onda 1)</div>
+    `,
+    files: [
+      ['sdd/discovery/plan-01-pagamento-pix.md', 'gerado', 'var(--ok)'],
+      ['sdd/.queue/queue.json (feat-01-01 & 02)', 'queued (paralelo)', 'var(--accent)'],
+      ['sdd/.queue/queue.json (feat-01-03)', 'queued (depends_on)', 'var(--warn)']
+    ],
+    actionBtn: { label: 'Disparar Builders (/proxima-feature) →', nextStep: 3 }
+  },
+  {
+    stationLabel: 'Estação 04 · Execução & Portão A',
+    agentName: '04. Fila de Builders',
+    agentHex: 0x4fd1b5,
+    agentState: 'working',
+    chipColor: 'var(--ok)',
+    chipText: 'Portão A: PASS',
+    speech: 'Executamos as tarefas da fila respeitando as dependências e validamos tudo no Portão Determinístico Camada A!',
+    logHtml: `
+      <div class="cmd-input">&gt; /proxima-feature</div>
+      <div class="accent">[Builder A &amp; Builder B] Executando Onda 1 em paralelo (feat-01-01 + feat-01-02)…</div>
+      <div class="dim">[Builder A] concluído → liberando dependência de feat-01-03…</div>
+      <div class="cmd-input">$ forge-sdd gate --mode bloqueio --branch feat/01-pagamento-pix</div>
+      <div class="ok">  ✓ [P-01] Branch feat/01-pagamento-pix válida</div>
+      <div class="ok">  ✓ [P-13] Zero segredos expostos no diff</div>
+      <div class="ok">  ✓ [P-23] go test ./... &amp; go vet ./... (100% PASS)</div>
+    `,
+    files: [
+      ['feat-01-01 & feat-01-02', 'done (Portão A PASS)', 'var(--ok)'],
+      ['feat-01-03 (Webhook Handler)', 'done (Portão A PASS)', 'var(--ok)'],
+      ['sdd/memory/progress.md', '712 bytes ≤ 1024 B', 'var(--ok)']
+    ],
+    actionBtn: { label: 'Rodar Auditoria Read-Only (/revisar) →', nextStep: 4 }
+  },
+  {
+    stationLabel: 'Estação 05 → 01 · Governança & Líder',
+    agentName: '05. Governança → 01. Líder',
+    agentHex: 0x3ecf8e,
+    agentState: 'finished',
+    chipColor: 'var(--ok)',
+    chipText: 'Veredito: Conforme',
+    speech: 'Auditoria Read-Only aprovada sem ressalvas! O Líder consolidou seu Painel Executivo e sincronizou 1 nova Auto-Skill.',
+    logHtml: `
+      <div class="cmd-input">&gt; /revisar</div>
+      <div class="accent">[Estação 05 · Governança Read-Only] Auditando diff contra ARQ-01, SEG-01, DUP-01, TST-01…</div>
+      <div class="ok">✓ Parecer Camada B: {"veredito": "conforme", "bloqueios": [], "auto_skills_candidatas": ["webhook-hmac-idempotente"]}</div>
+      <div class="cmd-input">$ forge-sdd skills approve webhook-hmac-idempotente</div>
+      <div class="ok">✓ Auto-Skill sincronizada em .agents/skills/, .claude/skills/ e .gemini/skills/</div>
+      <div class="ok">✓ Painel Executivo do Líder (Camada C): 3/3 tarefas aprovadas · 0 pendências na fila!</div>
+    `,
+    files: [
+      ['sdd/.queue/queue.json (3/3 tarefas)', 'status: approved', 'var(--ok)'],
+      ['.agents/skills/webhook-hmac-idempotente/', 'Auto-Skill ativa', 'var(--ok)'],
+      ['Painel Executivo (Camada C)', 'entregue ao humano', 'var(--ok)']
+    ],
+    actionBtn: { label: 'Reiniciar demonstração ↺', nextStep: 0, style: 'ghost' }
+  }
+];
+
+const emuAvatarMount = document.getElementById('emuAvatarMount');
+const emuMascot = createCompactDockMascot3D(emuAvatarMount, 0xf2a65a, 'finished', 'ring');
+let currentEmuIdx = 0;
+
+function renderEmuStep(idx) {
+  currentEmuIdx = idx;
+  const st = EMU_STEPS[idx];
+
+  document.querySelectorAll('.emu-cmd-btn').forEach((b, i) => {
+    b.classList.toggle('active', i === idx);
+  });
+
+  document.getElementById('emuLog').innerHTML = st.logHtml;
+  document.getElementById('emuStepCounter').textContent = `Passo ${idx + 1} de ${EMU_STEPS.length}`;
+  document.getElementById('emuStationLabel').textContent = st.stationLabel;
+  document.getElementById('emuAgentName').textContent = st.agentName;
+  document.getElementById('emuAgentSpeech').textContent = st.speech;
+  document.getElementById('emuStateChip').innerHTML = `<i style="--o:${st.chipColor}"></i>${st.chipText}`;
+
+  const fileListEl = document.getElementById('emuFileList');
+  fileListEl.innerHTML = st.files.map(([name, badge, color]) => `
+    <div class="emu-file-item">
+      <span>${name}</span>
+      <span class="chip" style="padding:2px 8px;font-size:10px"><i style="--o:${color}"></i>${badge}</span>
+    </div>
+  `).join('');
+
+  const slot = document.getElementById('emuActionSlot');
+  const btnClass = st.actionBtn.style ? `btn ${st.actionBtn.style} sm` : 'btn ok sm';
+  slot.innerHTML = `<button type="button" class="${btnClass}" id="emuDynamicBtn">${st.actionBtn.label}</button>`;
+  document.getElementById('emuDynamicBtn').addEventListener('click', () => {
+    renderEmuStep(st.actionBtn.nextStep);
+  });
+
+  emuMascot.setState(st.agentState, st.agentHex);
+  emuMascot.triggerHop();
+}
+
+document.querySelectorAll('.emu-cmd-btn').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    renderEmuStep(parseInt(btn.dataset.emu, 10));
+  });
+});
+
+document.getElementById('emuNextStepBtn').addEventListener('click', () => {
+  renderEmuStep((currentEmuIdx + 1) % EMU_STEPS.length);
+});
+
+renderEmuStep(0);
+
+/* ==========================================================================
+   SIMULADOR COMPACTO DE GOVERNANÇA
    ========================================================================== */
 const GOV_SCENARIOS = [
   {
@@ -1652,17 +2142,13 @@ document.getElementById('govBtnNext').addEventListener('click', () => {
 
 document.getElementById('toggleGovCycleBtn').addEventListener('click', () => {
   govAutoCycle = !govAutoCycle;
-  document.getElementById('toggleGovCycleBtn').textContent = govAutoCycle
-    ? 'Pausar simulação'
-    : 'Retomar simulação';
+  document.getElementById('toggleGovCycleBtn').textContent = govAutoCycle ? 'Pausar simulação' : 'Retomar simulação';
 });
 
-govMount.addEventListener('click', () => {
-  govMascot.triggerHop();
-});
+govMount.addEventListener('click', () => govMascot.triggerHop());
 
 /* ==========================================================================
-   LOOP GLOBAL DE ANIMAÇÃO (Rastreio do Cursor + Ciclo Processual Automático)
+   LOOP GLOBAL DE ANIMAÇÃO
    ========================================================================== */
 let pointerX = 0;
 let pointerY = 0;
@@ -1680,18 +2166,14 @@ function animateAll() {
   const dt = elapsed - lastTime;
   lastTime = elapsed;
 
-  mascotControllers.forEach((item) => {
-    item.ctrl.update(elapsed, pointerX, pointerY);
-  });
-
+  mascotControllers.forEach((item) => item.ctrl.update(elapsed, pointerX, pointerY));
+  emuMascot.update(elapsed, pointerX, pointerY);
   govMascot.update(elapsed, pointerX, pointerY);
 
   if (autoCycleEnabled && !document.hidden) {
     cycleProgress += dt / 4.8;
     const progBar = document.getElementById(`prog-${activeStationIdx}`);
-    if (progBar) {
-      progBar.style.width = Math.min(100, cycleProgress * 100) + '%';
-    }
+    if (progBar) progBar.style.width = Math.min(100, cycleProgress * 100) + '%';
     if (cycleProgress >= 1) {
       const nextStation = (activeStationIdx + 1) % STATIONS.length;
       setActiveStation(nextStation, false);
@@ -1703,9 +2185,7 @@ function animateAll() {
 
   if (govAutoCycle && !document.hidden) {
     govTimer += dt;
-    if (govTimer >= 6.5) {
-      selectGov((currentGovIdx + 1) % GOV_SCENARIOS.length);
-    }
+    if (govTimer >= 6.5) selectGov((currentGovIdx + 1) % GOV_SCENARIOS.length);
   }
 }
 

@@ -2,19 +2,19 @@
 
 ## Status
 ```
-Feature 55 — Telemetria cobertura total + /report (7 subtarefas) [x] done
-Feature 58 — Orquestração Autônoma, Governança A/B/C e Auto-Skills (7 subtarefas) [x] done
-Release v3.0.0-beta — branch feat/58-orquestracao-autonoma-governanca-skills [x] pronta
+Feature 55 — Telemetria cobertura total + /report [x] done
+Feature 58 — Orquestração Autônoma, Governança A/B/C e Auto-Skills [x] done
+Discovery 59 — Módulo Visual Plugável das 5 Estações e Personagens [~] Gate 1 (FLX-01)
 ```
 
 ## Features ativas
-Nenhuma feature `todo`/`doing` pendente. Lista completa em `sdd/features/index.md`.
+- `sdd/discovery/discovery-59-modulo-visual-estacoes-personagens.md` + `criteria-59` — em revisão humana (Gate 1 — `FLX-01`).
 
 ## Próximo passo
-**Iniciar:** Estabilizar `v3.0.0-beta` no PR aberto (Regra 11) antes de promover a `v3.0.0` estável.
-**Bloqueios:** —
+**Iniciar:** Revisão humana do Discovery 59 (`FLX-01`) para acionar a Estação 03 (`Planejador` -> `plan-59`).
+**Bloqueios:** Decisão sobre empacotamento (A1 `forge-sdd studio` vs A2 pacote externo).
 
 ## Handoff da última sessão
-- Feature 58 (`feat-58-01`..`07`): 5 estações (`.agents/roles/`), Constituição por IDs + `.agents/rules/sdd-*.md` (`GOV-04`), Reuse Check (`DUP-02`), Fila (`forge-sdd queue`), Portão A/B/C (`forge-sdd gate`), Auto-Skills (`forge-sdd skills`) e `forge-sdd governance`.
+- Concepção (`Estação 02`): criados `discovery-59` e `criteria-59` (5 personagens 3D `dock-ia` + leitura passiva SSE de `sdd/`).
 
 > Histórico completo em `progress-log.md`
