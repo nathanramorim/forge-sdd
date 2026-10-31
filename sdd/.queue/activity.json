@@ -1,5 +1,45 @@
 [
   {
+    "timestamp": "2026-10-31T22:35:50Z",
+    "station": "lider",
+    "tool": "orquestrador",
+    "action": "portao_flx01_destravado",
+    "details": "Spec aprovada pelo usuário. Transição para Estação 03 (Planejador) pronta.",
+    "status": "running"
+  },
+  {
+    "timestamp": "2026-10-31T22:35:45Z",
+    "station": "pm-architect",
+    "tool": "studio-ui",
+    "action": "aprovacao_portao_flx01",
+    "details": "Humano aprovou a spec discovery.md no Studio",
+    "status": "completed"
+  },
+  {
+    "timestamp": "2026-10-31T22:34:27Z",
+    "station": "pm-architect",
+    "tool": "human_gate",
+    "action": "approve sdd/features/feat-63-studio-navegavel-aprovacao-spec/discovery.md",
+    "details": "Portão FLX-01 Superado: Spec aprovada pelo humano",
+    "status": "success"
+  },
+  {
+    "timestamp": "2026-10-31T22:34:19Z",
+    "station": "pm-architect",
+    "tool": "human_gate",
+    "action": "approve sdd/features/feat-63-studio-navegavel-aprovacao-spec/discovery.md",
+    "details": "Portão FLX-01 Superado: Spec aprovada pelo humano",
+    "status": "success"
+  },
+  {
+    "timestamp": "2026-10-31T22:34:07Z",
+    "station": "pm-architect",
+    "tool": "human_gate",
+    "action": "approve sdd/features/feat-63-studio-navegavel-aprovacao-spec/discovery.md",
+    "details": "Portão FLX-01 Superado: Spec aprovada pelo humano",
+    "status": "success"
+  },
+  {
     "timestamp": "2026-10-31T22:21:43Z",
     "station": "lider",
     "tool": "subagent",

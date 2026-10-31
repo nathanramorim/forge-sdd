@@ -539,7 +539,7 @@ async function openSpecViewer(specPath) {
   const backdrop = document.getElementById('specModalBackdrop');
   if (!modal || !backdrop) return;
 
-  const targetPath = specPath || 'sdd/features/feat-63-studio-navegavel-aprovacao-spec/discovery.md';
+  const targetPath = specPath || 'sdd/discovery/discovery-63-studio-navegavel-aprovacao-spec.md';
   currentOpenSpecPath = targetPath;
 
   if (!document.getElementById('specMarkdownContent')) {
@@ -1106,7 +1106,7 @@ function applySnapshot(snap) {
     document.getElementById('hoTo').textContent = ho.to_station;
     const isSpecHandoff = ho.from_station === 'pm-architect' || ho.to_station === 'pm-architect' || (ho.gate && ho.gate.includes('FLX-01'));
     if (isSpecHandoff) {
-      document.getElementById('hoPayload').innerHTML = `${escapeHtml(ho.payload)} • <a href="javascript:void(0)" onclick="openSpecViewer('sdd/features/feat-63-studio-navegavel-aprovacao-spec/discovery.md')" style="color:var(--accent);text-decoration:underline;font-weight:700;">Ver Spec (FLX-01)</a>`;
+      document.getElementById('hoPayload').innerHTML = `${escapeHtml(ho.payload)} • <a href="javascript:void(0)" onclick="openSpecViewer('sdd/discovery/discovery-63-studio-navegavel-aprovacao-spec.md')" style="color:var(--accent);text-decoration:underline;font-weight:700;">Ver Spec (FLX-01)</a>`;
     } else {
       document.getElementById('hoPayload').textContent = ho.payload;
     }
@@ -1230,8 +1230,9 @@ function applySnapshot(snap) {
         }
       };
 
+      const pmSpecPath = (st.items && st.items.length > 0 && st.items[0].artifact_path) ? st.items[0].artifact_path : 'sdd/discovery/discovery-63-studio-navegavel-aprovacao-spec.md';
       const specBadgeHtml = st.id === 'pm-architect' ? `
-        <a href="javascript:void(0)" class="spec-link-btn" onclick="event.stopPropagation(); openSpecViewer('sdd/features/feat-63-studio-navegavel-aprovacao-spec/discovery.md')" style="color:#ffd8a8;font-size:10.5px;font-weight:600;text-decoration:none;background:rgba(242,166,90,0.15);padding:2px 7px;border-radius:4px;border:1px solid rgba(242,166,90,0.3);">📄 Ver Spec (FLX-01)</a>
+        <a href="javascript:void(0)" class="spec-link-btn" onclick="event.stopPropagation(); openSpecViewer('${escapeHtml(pmSpecPath)}')" style="color:#ffd8a8;font-size:10.5px;font-weight:600;text-decoration:none;background:rgba(242,166,90,0.15);padding:2px 7px;border-radius:4px;border:1px solid rgba(242,166,90,0.3);">📄 Ver Spec (FLX-01)</a>
       ` : '';
 
       card.innerHTML = `

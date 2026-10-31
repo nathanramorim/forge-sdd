@@ -98,7 +98,7 @@ func (a *Aggregator) GetSnapshot() (*StudioSnapshot, error) {
 			MascotState:    "idle",
 			CurrentFocus:   "Elaborando Discovery, Criteria e C4",
 			InputContract:  "Demanda do Líder + Código Atual",
-			OutputContract: "discovery.md + criteria.md",
+			OutputContract: "discovery-<ID>-<nome>.md + criteria-<ID>-<nome>.md",
 		},
 		{
 			ID:             queue.StationPlanner,
@@ -109,7 +109,7 @@ func (a *Aggregator) GetSnapshot() (*StudioSnapshot, error) {
 			MascotState:    "idle",
 			CurrentFocus:   "Quebrando Spec em Tasks P/M/G determinísticas",
 			InputContract:  "Spec Aprovada (Portão FLX-01)",
-			OutputContract: "plan.md + tarefas enfileiradas",
+			OutputContract: "plan-<ID>-<nome>.md + tarefas enfileiradas",
 		},
 		{
 			ID:             queue.StationBuilder,
