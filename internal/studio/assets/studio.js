@@ -219,6 +219,7 @@ function createForgeMascot3D(mountEl, colorVal, initialState, markType) {
   setState(currentState, agentHex);
 
   return {
+    domElement: renderer.domElement,
     setState,
     triggerHop: () => { hopTimer = 0.55; },
     update: (t, lookX, lookY) => {
@@ -340,13 +341,9 @@ function applySnapshot(snap) {
 
   // Grid das 5 estações
   const grid = document.getElementById('stationsGrid');
-  grid.innerHTML = '';
 
   snap.stations.forEach((st, idx) => {
     const isActive = st.id === snap.active_station;
-    const card = document.createElement('div');
-    card.className = `station-card ${isActive ? 'active' : ''}`;
-    card.style.setProperty('--c', st.color);
 
     // O QUE ESTÁ EXECUTANDO POR AGENTE (Destaque Principal)
     const execTask = st.executing_task;
@@ -400,49 +397,78 @@ function applySnapshot(snap) {
       itemsHtml = `<div style="color:var(--muted);font-style:italic;">Nenhum item pendente</div>`;
     }
 
-    card.innerHTML = `
-      <div class="station-top">
-        <div class="mascot-stage" id="stage-${st.id}"></div>
-        <div class="station-info">
-          <h3>${st.name}</h3>
-          <p class="role">${st.role}</p>
-          <span class="chip" style="margin-top:4px;"><i style="--o:${st.color}"></i>${st.mascot_state}</span>
+    let card = document.getElementById(`station-card-${st.id}`);
+    if (!card) {
+      card = document.createElement('div');
+      card.id = `station-card-${st.id}`;
+      card.className = `station-card ${isActive ? 'active' : ''}`;
+      card.style.setProperty('--c', st.color);
+
+      card.innerHTML = `
+        <div class="station-top">
+          <div class="mascot-stage" id="stage-${st.id}"></div>
+          <div class="station-info">
+            <h3>${st.name}</h3>
+            <p class="role">${st.role}</p>
+            <span class="chip" id="chip-${st.id}" style="margin-top:4px;"><i style="--o:${st.color}"></i>${st.mascot_state}</span>
+          </div>
         </div>
-      </div>
 
-      ${execHtml}
+        <div id="exec-wrap-${st.id}">${execHtml}</div>
 
-      <div class="io-strip">
-        <div class="io-item"><span>Recebe</span><b>${st.input_contract}</b></div>
-        <div class="io-item"><span>Entrega</span><b>${st.output_contract}</b></div>
-      </div>
-
-      <div class="queue-items-box">
-        <div class="queue-header-row">
-          <span>Fila (${st.id}.json)</span>
-          <span>v${st.version}</span>
+        <div class="io-strip">
+          <div class="io-item"><span>Recebe</span><b>${st.input_contract}</b></div>
+          <div class="io-item"><span>Entrega</span><b>${st.output_contract}</b></div>
         </div>
-        ${itemsHtml}
-      </div>
-    `;
 
-    grid.appendChild(card);
+        <div class="queue-items-box">
+          <div class="queue-header-row">
+            <span>Fila (${st.id}.json)</span>
+            <span>v${st.version}</span>
+          </div>
+          <div id="queue-items-${st.id}">${itemsHtml}</div>
+        </div>
+      `;
+      grid.appendChild(card);
+    } else {
+      card.className = `station-card ${isActive ? 'active' : ''}`;
+      card.style.setProperty('--c', st.color);
+      const chip = document.getElementById(`chip-${st.id}`);
+      if (chip) chip.innerHTML = `<i style="--o:${st.color}"></i>${st.mascot_state}`;
+      const execWrap = document.getElementById(`exec-wrap-${st.id}`);
+      if (execWrap) execWrap.innerHTML = execHtml;
+      const queueItems = document.getElementById(`queue-items-${st.id}`);
+      if (queueItems) queueItems.innerHTML = itemsHtml;
+    }
 
     // Inicialização ou atualização do Mascote (Three.js 3D com fallback SVG)
-    const stage = card.querySelector(`#stage-${st.id}`);
-    let ctrl = mascotControllers[st.id];
-    if (!ctrl) {
-      ctrl = createForgeMascot3D(stage, st.color, st.mascot_state, st.mark);
-      if (ctrl) {
-        mascotControllers[st.id] = ctrl;
+    const stage = document.getElementById(`stage-${st.id}`);
+    if (stage) {
+      let ctrl = mascotControllers[st.id];
+      if (!ctrl) {
+        try {
+          ctrl = createForgeMascot3D(stage, st.color, st.mascot_state, st.mark);
+        } catch (err) {
+          console.warn('Erro ao criar Three.js mascot:', err);
+        }
+        if (ctrl && ctrl.domElement) {
+          mascotControllers[st.id] = ctrl;
+        } else {
+          renderMascotFallbackSvg(stage, st.color, st.mark, st.mascot_state);
+        }
       } else {
-        renderMascotFallbackSvg(stage, st.color, st.mark, st.mascot_state);
+        if (ctrl.domElement && !stage.contains(ctrl.domElement)) {
+          stage.innerHTML = '';
+          stage.appendChild(ctrl.domElement);
+        }
+        if (ctrl.setState) {
+          ctrl.setState(st.mascot_state, st.color);
+          ctrl.triggerHop();
+        }
       }
-    } else {
-      // Se o elemento DOM foi recriado, remonta o renderer do Three.js
-      if (ctrl.setState) {
-        ctrl.setState(st.mascot_state, st.color);
-        ctrl.triggerHop();
+
+      if (stage.children.length === 0) {
+        renderMascotFallbackSvg(stage, st.color, st.mark, st.mascot_state);
       }
     }
   });
