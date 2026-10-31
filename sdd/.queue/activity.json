@@ -1,5 +1,45 @@
 [
   {
+    "timestamp": "2026-10-31T23:32:25Z",
+    "station": "governance",
+    "tool": "handoff",
+    "action": "builder -\u003e governance",
+    "details": "Handoff concluído: feat-63-03-visualizador-spec-e-portao-flx01-sse transferido para governance",
+    "status": "success"
+  },
+  {
+    "timestamp": "2026-10-31T23:32:08Z",
+    "station": "builder",
+    "tool": "handoff",
+    "action": "planner -\u003e builder",
+    "details": "Handoff concluído: feat-63-03-visualizador-spec-e-portao-flx01-sse transferido para builder",
+    "status": "success"
+  },
+  {
+    "timestamp": "2026-10-31T23:25:48Z",
+    "station": "governance",
+    "tool": "handoff",
+    "action": "builder -\u003e governance",
+    "details": "Handoff concluído: feat-63-spec-aprovada transferido para governance",
+    "status": "success"
+  },
+  {
+    "timestamp": "2026-10-31T23:24:57Z",
+    "station": "planner",
+    "tool": "handoff",
+    "action": "receive sdd/features/feat-63-studio-navegavel-aprovacao-spec/feat-63-03-visualizador-spec-e-portao-flx01-sse.md",
+    "details": "Handoff recebido de PM/Architect: especificação pronta para fatiamento",
+    "status": "success"
+  },
+  {
+    "timestamp": "2026-10-31T23:24:57Z",
+    "station": "pm-architect",
+    "tool": "human_gate",
+    "action": "approve sdd/features/feat-63-studio-navegavel-aprovacao-spec/feat-63-03-visualizador-spec-e-portao-flx01-sse.md",
+    "details": "Portão FLX-01 Superado: Spec aprovada pelo humano",
+    "status": "success"
+  },
+  {
     "timestamp": "2026-10-31T23:18:45Z",
     "station": "builder",
     "tool": "handoff",

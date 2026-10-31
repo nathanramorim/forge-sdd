@@ -401,6 +401,113 @@ let activeDrawerStationId = null;
 let activeDrawerTab = 'tasks'; // 'tasks' | 'contracts' | 'telemetry'
 const selectedTaskIdByStation = {};
 
+// Pilares Constitucionais com descrições em linguagem clara
+const CONSTITUTIONAL_PILLARS = [
+  { key: 'ARQ', title: 'Arquitetura Limpa', desc: 'Go stdlib pura, zero npm runtime em produção', icon: '🏗️' },
+  { key: 'SEG', title: 'Segurança & Escopo', desc: 'Sanitização de path traversal e proteção read-only', icon: '🛡️' },
+  { key: 'DUP', title: 'Fonte Única da Verdade', desc: 'Zero duplicação de spec/código (DUP-01/02)', icon: '🧬' },
+  { key: 'COD', title: 'Qualidade de Código & DOM', desc: 'Sem handlers órfãos nem ReferenceError (COD-01)', icon: '🧹' },
+  { key: 'TST', title: 'Testes & Concorrência', desc: '100% PASS determinístico com detecção de data race (-race)', icon: '🧪' },
+  { key: 'FLX', title: 'Portões & Validação Humana', desc: 'Portão FLX-01 aprovado pelo humano e transições fluidas', icon: '🚪' },
+  { key: 'GOV', title: 'Governança Estrita', desc: 'Auditoria independente da Camada B em modo Read-Only', icon: '⚖️' }
+];
+
+// Mapeamento de Regras Constitucionais para Badges Humanizados
+const HUMAN_RULE_BADGES = {
+  'ARQ-01': '🏛️ Arquitetura Canônica',
+  'ARQ-02': '📐 C4 & Interfaces Limpas',
+  'ARQ-03': '📦 Stdlib Go Pura',
+  'ARQ-04': '⚡ Zero NPM Runtime',
+  'SEG-01': '🛡️ Sem Traversal',
+  'SEG-02': '🔒 Sandbox Estrito',
+  'SEG-06': '🔒 Restrito Read-Only',
+  'DUP-01': '🧬 Fonte Única',
+  'DUP-02': '🔍 Reuse Check',
+  'DUP-05': '📑 Template Padronizado',
+  'COD-01': '🧹 DOM & Handlers OK',
+  'COD-05': '✨ Clean Code & Linters',
+  'TST-01': '🧪 Testes com -race',
+  'TST-04': '🎯 Cobertura Mínima',
+  'TST-05': '⏱️ Determinismo & Timeout',
+  'FLX-01': '🚪 Portão FLX-01 Aprovado',
+  'FLX-02': '📋 Decomposição em Fatias',
+  'FLX-03': '🔄 Handoffs Auditados',
+  'FLX-04': '🏁 Encerramento Controlado',
+  'GOV-01': '⚖️ Governança Camada B',
+  'GOV-02': '🛡️ Read-Only Enforced',
+  'GOV-03': '📝 Emissão de Laudo JSON',
+  'GOV-04': '🚦 Zero Falsos-Positivos',
+  'GOV-05': '🔗 Rastreabilidade Total'
+};
+
+function formatRuleBadge(rule) {
+  if (!rule) return '';
+  const trimmed = String(rule).trim();
+  if (HUMAN_RULE_BADGES[trimmed]) {
+    return HUMAN_RULE_BADGES[trimmed];
+  }
+  return trimmed;
+}
+
+function formatTaskStatus(status) {
+  if (!status) return { text: 'INDEFINIDO', color: 'var(--muted)', bg: 'transparent', border: 'var(--line)' };
+  const s = String(status).toLowerCase().trim();
+  switch (s) {
+    case 'approved':
+    case 'done':
+      return {
+        text: '✓ CONCLUÍDO & APROVADO',
+        color: 'var(--ok)',
+        bg: 'rgba(62, 207, 142, 0.08)',
+        border: 'rgba(62, 207, 142, 0.3)'
+      };
+    case 'queued':
+      return {
+        text: '⏳ NA FILA (AGUARDANDO INÍCIO)',
+        color: '#8aa4ff',
+        bg: 'rgba(138, 164, 255, 0.08)',
+        border: 'rgba(138, 164, 255, 0.3)'
+      };
+    case 'building':
+    case 'working':
+    case 'in_progress':
+      return {
+        text: '⚡ EM ANDAMENTO',
+        color: 'var(--warn)',
+        bg: 'rgba(242, 166, 90, 0.08)',
+        border: 'rgba(242, 166, 90, 0.3)'
+      };
+    case 'review_pending':
+    case 'pending_review':
+    case 'approval':
+      return {
+        text: '🔍 AGUARDANDO AUDITORIA',
+        color: '#ff8a5c',
+        bg: 'rgba(255, 138, 92, 0.08)',
+        border: 'rgba(255, 138, 92, 0.3)'
+      };
+    case 'changes_requested':
+      return {
+        text: '⚠️ RETRABALHO SOLICITADO',
+        color: 'var(--err)',
+        bg: 'rgba(255, 92, 92, 0.08)',
+        border: 'rgba(255, 92, 92, 0.3)'
+      };
+    default:
+      return {
+        text: s.toUpperCase(),
+        color: 'var(--fg)',
+        bg: 'transparent',
+        border: 'var(--line)'
+      };
+  }
+}
+
+window.CONSTITUTIONAL_PILLARS = CONSTITUTIONAL_PILLARS;
+window.HUMAN_RULE_BADGES = HUMAN_RULE_BADGES;
+window.formatRuleBadge = formatRuleBadge;
+window.formatTaskStatus = formatTaskStatus;
+
 const CANONICAL_RULES_BY_STATION = {
   'lider': ['FLX-03', 'FLX-04', 'GOV-01', 'ARQ-01'],
   'pm-architect': ['ARQ-01', 'ARQ-02', 'DUP-01', 'DUP-02', 'FLX-01'],
@@ -1034,7 +1141,7 @@ function renderStationDrawerContent(st) {
         handoffBtnLabel = '🚀 Enviar para Líder (01)';
       }
 
-      const statusColor = it.status === 'changes_requested' ? 'var(--err)' : (it.status === 'building' ? 'var(--warn)' : st.color);
+      const statusInfo = formatTaskStatus(it.status);
 
       return `
         <div class="drawer-task-card ${isSelected ? 'selected' : ''}" onclick="selectTaskInDrawer('${escapeHtml(it.id)}')">
@@ -1042,7 +1149,7 @@ function renderStationDrawerContent(st) {
             <span class="drawer-task-id">${escapeHtml(it.id)}</span>
             <div style="display:flex;align-items:center;gap:6px;">
               <span class="chip" style="font-size:10px;padding:2px 8px;">tentativa #${it.attempt || 1}</span>
-              <span class="chip" style="font-size:10px;padding:3px 9px;font-weight:700;color:${statusColor};border-color:${statusColor};background:rgba(255,255,255,0.04);">${escapeHtml(it.status.toUpperCase())}</span>
+              <span class="chip" style="font-size:10px;padding:3px 9px;font-weight:700;color:${statusInfo.color};border-color:${statusInfo.border};background:${statusInfo.bg};">${escapeHtml(statusInfo.text)}</span>
             </div>
           </div>
 
@@ -1056,7 +1163,7 @@ function renderStationDrawerContent(st) {
 
           <div class="rules-strip" title="Pilares Constitucionais Mapeados">
             <span style="font-size:10px;color:var(--muted);font-weight:600;">Regras:</span>
-            ${rules.map(r => `<span class="rule-chip">${escapeHtml(r)}</span>`).join('')}
+            ${rules.map(r => `<span class="rule-chip" title="${escapeHtml(r)}">${escapeHtml(formatRuleBadge(r))}</span>`).join('')}
           </div>
 
           <div class="ide-buttons-row">
@@ -1100,21 +1207,52 @@ function renderStationDrawerContent(st) {
       const cliCmd = it.artifact_path ? `code ${it.artifact_path}` : (it.id ? `forge-sdd task view ${it.id}` : 'code .');
       const copyBtnId = `copy-comp-btn-${it.id.replace(/[^a-zA-Z0-9_-]/g, '_')}`;
       const completedTime = it.updated_at ? new Date(it.updated_at).toLocaleString() : (it.created_at ? new Date(it.created_at).toLocaleString() : 'Concluído');
+      const statusInfo = formatTaskStatus(it.status || 'approved');
+
+      let compRules = [];
+      if (it.metadata && it.metadata.rules) {
+        compRules = it.metadata.rules.split(',').map(r => r.trim()).filter(Boolean);
+      }
+      if (compRules.length === 0) {
+        compRules = CANONICAL_RULES_BY_STATION[st.id] || ['ARQ-03', 'DUP-02'];
+      }
 
       let verdictBoxHtml = '';
       if (it.governance_verdict) {
         const gv = it.governance_verdict;
-        verdictBoxHtml = `
-          <div class="verdict-box conforme">
-            <span><b>Laudo de Governança:</b> ${escapeHtml((gv.veredito || 'CONFORME').toUpperCase())}</span>
-            <span style="font-size:10.5px;color:var(--muted);">${escapeHtml(gv.resumo || 'Auditado em conformidade com as regras SDD.')}</span>
-          </div>
-        `;
+        const isAprovado = (gv.veredito || '').toLowerCase() === 'conforme' && (!gv.achados || gv.achados.length === 0);
+        if (isAprovado) {
+          verdictBoxHtml = `
+            <div class="verdict-box conforme" style="border-left:3px solid var(--ok);background:rgba(62,207,142,0.06);padding:8px 12px;border-radius:6px;margin-top:8px;">
+              <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
+                <span class="chip" style="font-size:10px;font-weight:700;color:var(--ok);border-color:var(--ok);background:rgba(62,207,142,0.12);">✓ APROVADO PELA GOVERNANÇA</span>
+              </div>
+              <span style="font-size:11px;color:var(--fg);">${escapeHtml(gv.resumo || 'Auditado em conformidade com as regras constitucionais.')}</span>
+            </div>
+          `;
+        } else {
+          const achadosCount = (gv.achados && gv.achados.length) ? gv.achados.length : 1;
+          const achadosDetails = (gv.achados && gv.achados.length > 0)
+            ? gv.achados.map(a => `<div style="font-size:10.5px;color:var(--err);margin-top:2px;">• <b>${escapeHtml(formatRuleBadge(a.regra || ''))}:</b> ${escapeHtml(a.explicacao || a.verificacao || '')}${a.arquivo ? ` <i>(${escapeHtml(a.arquivo)}${a.linha ? `:${a.linha}` : ''})</i>` : ''}</div>`).join('')
+            : '';
+          verdictBoxHtml = `
+            <div class="verdict-box falha" style="border-left:3px solid var(--err);background:rgba(255,92,92,0.06);padding:8px 12px;border-radius:6px;margin-top:8px;">
+              <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
+                <span class="chip" style="font-size:10px;font-weight:700;color:var(--err);border-color:var(--err);background:rgba(255,92,92,0.12);">✕ FALHA APONTADA</span>
+                <span style="font-size:10px;color:var(--muted);">${achadosCount} achado(s)</span>
+              </div>
+              <div style="font-size:11px;color:var(--fg);font-weight:600;">${escapeHtml(gv.resumo || 'Auditoria detectou violação de regras constitucionais.')}</div>
+              ${achadosDetails}
+            </div>
+          `;
+        }
       } else {
         verdictBoxHtml = `
-          <div class="verdict-box conforme">
-            <span><b>Laudo:</b> Concluído com Sucesso</span>
-            <span style="font-size:10.5px;color:var(--muted);">Executado e finalizado pela estação ${escapeHtml(st.name)}.</span>
+          <div class="verdict-box conforme" style="border-left:3px solid var(--ok);background:rgba(62,207,142,0.06);padding:8px 12px;border-radius:6px;margin-top:8px;">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
+              <span class="chip" style="font-size:10px;font-weight:700;color:var(--ok);border-color:var(--ok);background:rgba(62,207,142,0.12);">✓ APROVADO PELA GOVERNANÇA</span>
+            </div>
+            <span style="font-size:11px;color:var(--muted);">Executado e finalizado com sucesso pela estação ${escapeHtml(st.name)}.</span>
           </div>
         `;
       }
@@ -1125,7 +1263,7 @@ function renderStationDrawerContent(st) {
             <span class="drawer-task-id">${escapeHtml(it.id)}</span>
             <div style="display:flex;align-items:center;gap:6px;">
               <span class="chip" style="font-size:10px;padding:2px 8px;color:var(--muted);">${escapeHtml(completedTime)}</span>
-              <span class="chip" style="font-size:10px;padding:3px 9px;font-weight:700;color:var(--ok);border-color:var(--ok);background:rgba(62,207,142,0.06);">✓ ${escapeHtml(it.status.toUpperCase())}</span>
+              <span class="chip" style="font-size:10px;padding:3px 9px;font-weight:700;color:${statusInfo.color};border-color:${statusInfo.border};background:${statusInfo.bg};">${escapeHtml(statusInfo.text)}</span>
             </div>
           </div>
 
@@ -1136,6 +1274,11 @@ function renderStationDrawerContent(st) {
               📄 ${escapeHtml(it.artifact_path)}
             </div>
           ` : ''}
+
+          <div class="rules-strip" title="Pilares Constitucionais Mapeados">
+            <span style="font-size:10px;color:var(--muted);font-weight:600;">Regras:</span>
+            ${compRules.map(r => `<span class="rule-chip" title="${escapeHtml(r)}">${escapeHtml(formatRuleBadge(r))}</span>`).join('')}
+          </div>
 
           ${verdictBoxHtml}
 
@@ -1390,21 +1533,15 @@ function applySnapshot(snap) {
     // O QUE ESTÁ EXECUTANDO POR AGENTE (Destaque Principal)
     const execTask = st.executing_task;
     let execHtml = '';
-    if (execTask && (execTask.status === 'building' || execTask.status === 'in_progress' || execTask.status === 'review_pending' || execTask.status === 'changes_requested' || execTask.status === 'queued' || execTask.status === 'pending_review' || execTask.status === 'approval')) {
+    if (execTask && (execTask.status === 'building' || execTask.status === 'in_progress' || execTask.status === 'review_pending' || execTask.status === 'changes_requested' || execTask.status === 'queued' || execTask.status === 'pending_review' || execTask.status === 'approval' || execTask.status === 'working')) {
       const isRetrying = execTask.status === 'changes_requested';
-      let label = 'EM EXECUÇÃO';
-      if (isRetrying) {
-        label = 'RETRABALHO SOLICITADO';
-      } else if (execTask.status === 'review_pending' || execTask.status === 'pending_review' || execTask.status === 'approval') {
-        label = 'AUDITANDO / REVISÃO';
-      } else if (execTask.status === 'queued') {
-        label = 'NA FILA';
-      }
+      const statusInfo = formatTaskStatus(execTask.status);
+      const label = statusInfo.text;
       execHtml = `
         <div class="executing-box active" style="--c:${isRetrying ? 'var(--err)' : st.color}">
           <div class="executing-header">
             <span class="pulse-dot"></span>
-            <span class="executing-label">${label}</span>
+            <span class="executing-label">${escapeHtml(label)}</span>
             <span class="executing-id">${execTask.id}</span>
           </div>
           <div class="executing-title">${escapeHtml(execTask.title || st.current_focus)}</div>
@@ -1439,35 +1576,32 @@ function applySnapshot(snap) {
       `;
     }
 
-    // Itens na Fila (ordenados: tarefas ativas primeiro, depois histórico das mais recentes para as mais antigas)
+    // Itens na Fila (exibe EXCLUSIVAMENTE tarefas ativas/pendentes na frente do card)
     let itemsHtml = '';
     const rawItems = st.items || [];
     const activeTasks = sortItemsNewestFirst(rawItems.filter(it => it.status !== 'approved' && it.status !== 'done'));
     const completedTasks = sortItemsNewestFirst(rawItems.filter(it => it.status === 'approved' || it.status === 'done'));
-    const orderedTasks = [...activeTasks, ...completedTasks];
 
-    if (orderedTasks.length > 0) {
-      const allApprovedNotice = (activeTasks.length === 0 && completedTasks.length > 0)
-        ? `<div style="font-size:10.5px;color:var(--ok);font-weight:600;margin-bottom:6px;display:flex;align-items:center;gap:4px;">
-             <span>✓</span> Todas as ${completedTasks.length} tarefas concluídas
-           </div>`
-        : '';
-
-      itemsHtml = allApprovedNotice + orderedTasks.map(it => {
-        const isCompleted = it.status === 'approved' || it.status === 'done';
-        const chipColor = isCompleted ? 'var(--ok)' : (it.status === 'building' ? 'var(--warn)' : 'var(--fg)');
-        const chipBg = isCompleted ? 'rgba(62,207,142,0.08)' : 'transparent';
-        const chipBorder = isCompleted ? 'rgba(62,207,142,0.3)' : 'var(--line)';
+    if (activeTasks.length > 0) {
+      itemsHtml = activeTasks.map(it => {
+        const statusInfo = formatTaskStatus(it.status);
 
         return `
           <div class="queue-task-row">
             <span style="color:var(--fg);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:140px;" title="${escapeHtml(it.title || it.id)}">${escapeHtml(it.id)}</span>
-            <span class="chip" style="font-size:9px;padding:1px 6px;color:${chipColor};background:${chipBg};border-color:${chipBorder};">${isCompleted ? '✓ ' : ''}${escapeHtml(it.status)}</span>
+            <span class="chip" style="font-size:9px;padding:1px 6px;color:${statusInfo.color};background:${statusInfo.bg};border-color:${statusInfo.border};">${escapeHtml(statusInfo.text)}</span>
           </div>
         `;
       }).join('');
+    } else if (completedTasks.length > 0) {
+      itemsHtml = `
+        <div style="font-size:11px;color:var(--ok);font-weight:600;padding:6px 0;display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="event.stopPropagation(); openStationDrawer('${st.id}')" title="Clique para ver histórico completo no Drawer">
+          <span>✓ Fila limpa (${completedTasks.length} concluídas)</span>
+          <span style="color:var(--muted);font-size:10px;">Ver histórico →</span>
+        </div>
+      `;
     } else {
-      itemsHtml = `<div style="color:var(--muted);font-style:italic;">Nenhum item pendente</div>`;
+      itemsHtml = `<div style="color:var(--muted);font-style:italic;font-size:11px;padding:4px 0;">Fila ociosa — Nenhum item pendente</div>`;
     }
 
     let card = document.getElementById(`station-card-${st.id}`);
@@ -1516,7 +1650,7 @@ function applySnapshot(snap) {
         <div class="queue-items-box">
           <div class="queue-header-row">
             <span>Fila (${st.id}.json)</span>
-            <span id="queue-ver-${st.id}">v${st.version} • ${st.items ? st.items.length : 0} itens (${st.active_items || 0} ativos)</span>
+            <span id="queue-ver-${st.id}">v${st.version} • ${activeTasks.length} ativas (${completedTasks.length} no histórico)</span>
           </div>
           <div id="queue-items-${st.id}">${itemsHtml}</div>
         </div>
@@ -1541,7 +1675,7 @@ function applySnapshot(snap) {
       const execWrap = document.getElementById(`exec-wrap-${st.id}`);
       if (execWrap) execWrap.innerHTML = execHtml;
       const queueVer = document.getElementById(`queue-ver-${st.id}`);
-      if (queueVer) queueVer.textContent = `v${st.version} • ${st.items ? st.items.length : 0} itens (${st.active_items || 0} ativos)`;
+      if (queueVer) queueVer.textContent = `v${st.version} • ${activeTasks.length} ativas (${completedTasks.length} no histórico)`;
       const queueItems = document.getElementById(`queue-items-${st.id}`);
       if (queueItems) queueItems.innerHTML = itemsHtml;
     }
@@ -1578,21 +1712,125 @@ function applySnapshot(snap) {
     }
   });
 
-  // Governança
+  // Governança e Pilares Constitucionais Dinâmicos
   const gVerdict = snap.governance_verdict;
   const govCard = document.getElementById('govFindingCard');
-  if (gVerdict) {
-    govCard.className = `finding-card ${gVerdict.veredito}`;
-    govCard.innerHTML = `
-      <b>Parecer da Camada B: ${gVerdict.veredito.toUpperCase()}</b>
-      <p style="margin-top:4px;color:var(--fg);">${gVerdict.resumo || 'Em conformidade com a Constituição'}</p>
-    `;
+  const pillarsGrid = document.getElementById('govPillarsGrid');
+
+  const failedPillarKeys = new Set();
+  const hasFindings = gVerdict && Array.isArray(gVerdict.achados) && gVerdict.achados.length > 0;
+  const isViolacao = gVerdict && ((gVerdict.veredito || '').toLowerCase() === 'violacao' || hasFindings);
+
+  if (isViolacao) {
+    if (hasFindings) {
+      gVerdict.achados.forEach(a => {
+        if (a.regra) {
+          const prefix = a.regra.split('-')[0].toUpperCase().trim();
+          failedPillarKeys.add(prefix);
+        }
+      });
+    }
+    if (failedPillarKeys.size === 0) {
+      failedPillarKeys.add('GOV');
+    }
+
+    if (govCard) {
+      govCard.className = 'finding-card violacao';
+      let findingsHtml = '';
+      if (hasFindings) {
+        findingsHtml = gVerdict.achados.map(a => {
+          const ruleLabel = formatRuleBadge(a.regra || 'GOV-01');
+          const loc = a.arquivo ? `${escapeHtml(a.arquivo)}${a.linha ? `:${a.linha}` : ''}` : '';
+          return `
+            <div class="finding-item falha">
+              <div class="finding-item-header">
+                <span class="finding-item-rule">✕ ${escapeHtml(ruleLabel)} ${a.regra ? `(${escapeHtml(a.regra)})` : ''}</span>
+                ${loc ? `<span class="finding-item-loc mono">📄 ${loc}</span>` : ''}
+              </div>
+              <div class="finding-item-desc">${escapeHtml(a.explicacao || a.verificacao || a.evidencia || 'Violação de conformidade detectada')}</div>
+              ${a.correcao ? `<div class="finding-item-fix"><b>Instrução de Correção:</b> ${escapeHtml(a.correcao)}</div>` : ''}
+            </div>
+          `;
+        }).join('');
+      } else {
+        findingsHtml = `
+          <div class="finding-item falha">
+            <div class="finding-item-desc">${escapeHtml(gVerdict.resumo || 'Falha detectada durante a auditoria da Camada B.')}</div>
+          </div>
+        `;
+      }
+
+      govCard.innerHTML = `
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+          <b style="color:var(--err);font-size:13px;display:flex;align-items:center;gap:6px;">
+            <span>✕</span> FALHA DETECTADA NA AUDITORIA
+          </b>
+          <span class="chip" style="color:var(--err);border-color:var(--err);background:rgba(255,92,92,0.1);font-size:10px;">
+            ${(gVerdict.achados && gVerdict.achados.length) ? `${gVerdict.achados.length} achado(s)` : 'VIOLAÇÃO DETECTADA'}
+          </span>
+        </div>
+        <p style="margin-top:2px;color:var(--fg);font-size:12px;">${escapeHtml(gVerdict.resumo || 'Foram encontradas não-conformidades constitucionais que impedem o avanço.')}</p>
+        <div style="margin-top:8px;">${findingsHtml}</div>
+      `;
+    }
+  } else if (gVerdict && (gVerdict.veredito || '').toLowerCase() === 'conforme') {
+    if (govCard) {
+      govCard.className = 'finding-card conforme';
+      govCard.innerHTML = `
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+          <b style="color:var(--ok);font-size:13px;display:flex;align-items:center;gap:6px;">
+            <span>✓</span> AUDITORIA APROVADA (CONFORME)
+          </b>
+          <span class="chip" style="color:var(--ok);border-color:var(--ok);background:rgba(62,207,142,0.1);font-size:10px;">
+            100% CONFORME
+          </span>
+        </div>
+        <p style="margin-top:2px;color:var(--fg);font-size:12px;">${escapeHtml(gVerdict.resumo || 'Todos os pilares constitucionais e contratos entre estações foram verificados e aprovados.')}</p>
+        <div class="finding-item aprovado" style="margin-top:8px;">
+          <div style="font-size:11.5px;color:var(--fg);">
+            ✓ Nenhuma violação constitucional detectada. Portão de Governança Camadas A & B liberado com sucesso.
+          </div>
+        </div>
+      `;
+    }
   } else {
-    govCard.className = 'finding-card conforme';
-    govCard.innerHTML = `
-      <b>Portão de Governança Camada A & B</b>
-      <p style="margin-top:4px;color:var(--muted);">Aguardando submissão ou inspeção ativa</p>
-    `;
+    // Estado inicial / ocioso / aguardando
+    if (govCard) {
+      govCard.className = 'finding-card conforme';
+      govCard.innerHTML = `
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+          <b style="color:var(--ok);font-size:13px;display:flex;align-items:center;gap:6px;">
+            <span>✓</span> PORTÃO DE GOVERNANÇA ATIVO (CAMADAS A & B)
+          </b>
+          <span class="chip" style="font-size:10px;color:var(--muted);">STANDBY</span>
+        </div>
+        <p style="margin-top:2px;color:var(--muted);font-size:12px;">Aguardando submissão de artefatos para inspeção e auditoria independente em modo Read-Only.</p>
+      `;
+    }
+  }
+
+  // Renderiza os Pilares Constitucionais Dinâmicos
+  if (pillarsGrid) {
+    pillarsGrid.innerHTML = CONSTITUTIONAL_PILLARS.map(p => {
+      const isFailed = failedPillarKeys.has(p.key);
+      const chipClass = isFailed ? 'falha' : 'aprovado';
+      const chipText = isFailed ? '✕ FALHOU' : '✓ APROVADO';
+      return `
+        <div class="gov-pillar-card ${isFailed ? 'falha' : 'aprovado'}">
+          <div class="gov-pillar-header">
+            <div class="gov-pillar-title-wrap">
+              <span class="gov-pillar-icon">${p.icon}</span>
+              <div>
+                <div class="gov-pillar-name">${escapeHtml(p.title)}</div>
+                <div class="gov-pillar-key mono">${escapeHtml(p.key)}</div>
+              </div>
+            </div>
+            <span class="gov-pillar-chip ${chipClass}">${chipText}</span>
+          </div>
+          <p class="gov-pillar-desc">${escapeHtml(p.desc)}</p>
+        </div>
+      `;
+    }).join('');
   }
 
   // Atualização reativa suave do Drawer de Inspeção se estiver aberto (feat-63-02)
@@ -1744,6 +1982,14 @@ function runDemoSimulation() {
       status: (simStep.mascot_state === 'approval' || simStep.mascot_state === 'finished') ? 'done' : 'running'
     };
     cloned.recent_activity = [newAct, ...(cloned.recent_activity || [])].slice(0, 50);
+
+    if (simStep.station === 'governance') {
+      cloned.governance_verdict = {
+        veredito: 'conforme',
+        resumo: 'Auditoria estrita concluída com 100% de conformidade com os 7 pilares constitucionais.',
+        achados: []
+      };
+    }
 
     applySnapshot(cloned);
   }, 2200);

@@ -46,6 +46,7 @@ func TestIndexHTMLContract(t *testing.T) {
 		"id=\"hoGate\"",
 		"id=\"stationsGrid\"",
 		"id=\"govFindingCard\"",
+		"id=\"govPillarsGrid\"",
 		"id=\"drawerBackdrop\"",
 		"id=\"stationDrawer\"",
 		"id=\"lastUpdate\"",
@@ -267,6 +268,77 @@ func TestStudioAssetsSpecViewer(t *testing.T) {
 	for _, req := range requiredJS {
 		if !strings.Contains(jsStr, req) {
 			t.Errorf("studio.js não contém função/recurso obrigatório: %s", req)
+		}
+	}
+}
+
+func TestStudioGovernanceAndPillars(t *testing.T) {
+	// 1. Validar Markup no index.html
+	htmlData, err := assetsFS.ReadFile("assets/index.html")
+	if err != nil {
+		t.Fatalf("falha ao ler assets/index.html: %v", err)
+	}
+	htmlStr := string(htmlData)
+	requiredHTML := []string{
+		`id="govSection"`,
+		`id="govFindingCard"`,
+		`id="govPillarsGrid"`,
+		`Parecer da Auditoria (Camada B)`,
+		`Pilares Constitucionais Verificados`,
+	}
+	for _, req := range requiredHTML {
+		if !strings.Contains(htmlStr, req) {
+			t.Errorf("index.html não contém trecho obrigatório de governança: %s", req)
+		}
+	}
+
+	// 2. Validar CSS em studio.css
+	cssData, err := assetsFS.ReadFile("assets/studio.css")
+	if err != nil {
+		t.Fatalf("falha ao ler assets/studio.css: %v", err)
+	}
+	cssStr := string(cssData)
+	requiredCSS := []string{
+		".gov-pillars-grid",
+		".gov-pillar-card",
+		".gov-pillar-card.falha",
+		".gov-pillar-card.aprovado",
+		".gov-pillar-chip",
+		".finding-item.aprovado",
+		".finding-item.falha",
+	}
+	for _, req := range requiredCSS {
+		if !strings.Contains(cssStr, req) {
+			t.Errorf("studio.css não contém estilo obrigatório de governança: %s", req)
+		}
+	}
+
+	// 3. Validar JS em studio.js
+	jsData, err := assetsFS.ReadFile("assets/studio.js")
+	if err != nil {
+		t.Fatalf("falha ao ler assets/studio.js: %v", err)
+	}
+	jsStr := string(jsData)
+	requiredJS := []string{
+		"CONSTITUTIONAL_PILLARS",
+		"HUMAN_RULE_BADGES",
+		"formatRuleBadge",
+		"formatTaskStatus",
+		"govPillarsGrid",
+		"govFindingCard",
+		"FALHA DETECTADA NA AUDITORIA",
+		"AUDITORIA APROVADA (CONFORME)",
+		"APROVADO PELA GOVERNANÇA",
+		"FALHA APONTADA",
+		"✓ CONCLUÍDO & APROVADO",
+		"⏳ NA FILA (AGUARDANDO INÍCIO)",
+		"⚡ EM ANDAMENTO",
+		"🔍 AGUARDANDO AUDITORIA",
+		"⚠️ RETRABALHO SOLICITADO",
+	}
+	for _, req := range requiredJS {
+		if !strings.Contains(jsStr, req) {
+			t.Errorf("studio.js não contém recurso/termo obrigatório: %s", req)
 		}
 	}
 }
