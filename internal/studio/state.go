@@ -44,6 +44,7 @@ type ActiveTaskDTO struct {
 // StudioSnapshot representa o estado consolidado determinístico do projeto.
 type StudioSnapshot struct {
 	ProjectName       string                `json:"project_name"`
+	ProjectDir        string                `json:"project_dir"`
 	Version           string                `json:"version"`
 	ActiveStation     string                `json:"active_station"`
 	ActiveStationIdx  int                   `json:"active_station_idx"`
@@ -363,8 +364,14 @@ func (a *Aggregator) GetSnapshot() (*StudioSnapshot, error) {
 		projectName = "forge-sdd"
 	}
 
+	absDir, err := filepath.Abs(a.Dir)
+	if err != nil {
+		absDir = a.Dir
+	}
+
 	return &StudioSnapshot{
 		ProjectName:       projectName,
+		ProjectDir:        filepath.ToSlash(absDir),
 		Version:           readProjectVersion(a.Dir),
 		ActiveStation:     activeStation,
 		ActiveStationIdx:  activeIdx,

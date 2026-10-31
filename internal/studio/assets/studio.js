@@ -411,7 +411,14 @@ const CANONICAL_RULES_BY_STATION = {
 
 function getIdeFilePath(artifactPath) {
   if (!artifactPath) return '';
-  return artifactPath.startsWith('/') ? artifactPath : '/' + artifactPath;
+  if (artifactPath.startsWith('/')) return artifactPath;
+  const projectDir = (lastSnapshot && lastSnapshot.project_dir)
+    ? lastSnapshot.project_dir.replace(/\/+$/, '')
+    : '';
+  if (projectDir) {
+    return projectDir + '/' + artifactPath.replace(/^\/+/, '');
+  }
+  return '/' + artifactPath;
 }
 
 function fallbackCopy(text) {
