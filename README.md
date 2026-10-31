@@ -40,52 +40,52 @@ npx @nathanramorim/forge-sdd@latest init
 npx @nathanramorim/forge-sdd@latest init . --agent copilot,gemini --name meu-projeto
 ```
 
-## ✨ Orquestração Independente, Portão de Governança (A/B/C), Constituição por IDs e Auto-Skills (v3.0.0-beta)
+## Orquestração Independente, Portão de Governança (A/B/C), Constituição por IDs e Auto-Skills (v3.0.0-beta)
 
-> **De um assistente fazendo tudo sozinho para uma equipe de 5 especialistas trabalhando em paralelo por você.**
-> Na versão 3.0, você alinha a ideia com o **Líder**, aprova a planta do projeto e deixa a esteira trabalhar: planejadores, construtores em paralelo e um auditor independente entregam o software pronto e verificado em um **Painel Executivo** simples para sua decisão final.
+> **De um agente solitário para uma esteira de 5 especialistas trabalhando em paralelo por você.**
+> Na versão 3.0, você alinha a visão com o **Líder**, aprova a planta do projeto e aciona uma linha de produção autônoma: planejadores, construtores em paralelo e um auditor independente entregam o software validado em um **Painel Executivo** para sua decisão final.
 
 ```mermaid
 flowchart LR
-    subgraph Voce["👤 VOCÊ (No Controle)"]
-        V1["1. Conta sua ideia"]
-        V2["2. Aprova a planta do projeto"]
-        V3["3. Recebe o Painel Pronto"]
+    subgraph Voce["VOCÊ // DIREÇÃO E APROVAÇÃO"]
+        V1["01. Alinha a demanda"]
+        V2["02. Aprova a especificação"]
+        V3["03. Recebe o Painel Executivo"]
     end
 
-    subgraph Equipe["🤖 SUA FÁBRICA AUTÔNOMA (Forge SDD 3.0)"]
+    subgraph Equipe["FORGE-SDD 3.0 // ESTEIRA AUTÔNOMA EM 5 ESTAÇÕES"]
         direction TB
-        E1["🎯 1. O Líder (Maestro)<br/>Coordena a equipe e fala com você"]
-        E2["📐 2. Produto & Arquiteto<br/>Transformam sua ideia em um projeto claro"]
-        E3["🗺️ 3. O Planejador<br/>Divide o projeto em tarefas pequenas e seguras"]
+        E1["01 // LÍDER (Orquestrador)<br/>Coordena as estações e reporta a você"]
+        E2["02 // PRODUTO & ARQUITETO<br/>Especificação técnica e verificação de reuso"]
+        E3["03 // PLANEJADOR<br/>Decompõe em tarefas e vincula regras"]
 
-        subgraph Paralelo["⚡ Execução simultânea (Fila Inteligente)"]
-            B1["🔨 4. Construtor A<br/>Cria a Parte 1"]
-            B2["🔨 4. Construtor B<br/>Cria a Parte 2"]
+        subgraph Paralelo["EXECUÇÃO SIMULTÂNEA // FILA DETERMINÍSTICA"]
+            B1["04A // BUILDER A<br/>Frente Independente 1"]
+            B2["04B // BUILDER B<br/>Frente Independente 2"]
         end
 
-        E5["🛡️ 5. Auditor de Qualidade e Segurança<br/>(Não mexe no código — só fiscaliza se tudo<br/>seguiu as regras e não tem falhas)"]
-        SK["🧠 Memória que Aprende Sozinha<br/>O que dá certo vira habilidade automática<br/>para os próximos projetos"]
+        E5["05 // AUDITOR DE GOVERNANÇA<br/>(Somente Leitura — audita arquitetura,<br/>boas práticas e segurança)"]
+        SK["MOTOR AUTO-SKILLS<br/>Padrões recorrentes (3x) viram<br/>habilidades reutilizáveis automaticamente"]
     end
 
     V1 --> E1
     E1 --> E2
-    E2 -->|"Pede seu OK"| V2
-    V2 -->|"Aprovado!"| E3
+    E2 -->|"Portão FLX-01"| V2
+    V2 -->|"Aprovado"| E3
     E3 --> B1 & B2
     B1 & B2 --> E5
-    E5 -->|"Aprovado na auditoria"| E1
-    E5 -.->|"Ensina novos padrões"| SK
-    E1 -->|"Resumo claro: o que foi feito,<br/>status de cada etapa e o que falta"| V3
+    E5 -->|"Laudo técnico"| E1
+    E5 -.->|"Cataloga padrão"| SK
+    E1 -->|"O que foi feito, estado por etapa<br/>e o que resta no backlog"| V3
 ```
 
-| Estação | Papel na Vida Real | O que ele faz por você |
+| Estação | Função Executiva | Responsabilidade na Esteira |
 | :--- | :--- | :--- |
-| **1. O Líder** 🎯 | *Gerente de Operações* | Seu único ponto de contato. Aciona os especialistas certos e devolve um **Painel Executivo** (*o que foi feito, status de cada etapa e o que falta*). |
-| **2. Produto & Arquiteto** 📐 | *Arquiteto da Obra* | Desenha o que será feito e verifica o que já pode ser reaproveitado (`Reuse Check`). **Nada começa sem o seu "De Acordo" na planta.** |
-| **3. O Planejador** 🗺️ | *Engenheiro de Produção* | Fatia a planta aprovada em tarefas pequenas e indica quais regras de qualidade e segurança cada tarefa deve seguir. |
-| **4. Os Construtores** 🔨 | *Equipe de Execução* | Consomem tarefas de uma **fila inteligente** (`forge-sdd queue`): o que é independente roda **em paralelo**; o que tem dependência aguarda sua vez. |
-| **5. O Auditor de Governança** 🛡️ | *Fiscal Independente* | **Proibido de alterar código.** Inspeciona se a entrega respeitou arquitetura, boas práticas e segurança antes de liberar para o Líder. |
+| **01 // Líder** | *Gerente de Operações* | Único ponto de contato humano. Aciona as estações e consolida o **Painel Executivo (Camada C)** (*o que foi feito, status de cada etapa e o que falta*). |
+| **02 // Produto & Arquiteto** | *Autoria da Especificação* | Desenha a solução e verifica o que já existe (`Reuse Check`). **Nenhuma implementação inicia sem sua aprovação na especificação (`FLX-01`).** |
+| **03 // Planejador** | *Engenharia de Plano* | Decompõe a especificação aprovada em tarefas atômicas e seleciona apenas os módulos de regras aplicáveis a cada tarefa. |
+| **04 // Builders** | *Execução em Fila* | Consomem tarefas de uma **fila determinística** (`forge-sdd queue`): frentes independentes rodam **em paralelo**; dependências aguardam liberação. |
+| **05 // Governança** | *Auditoria Independente* | **Sem permissão de escrita em código.** Audita se a entrega respeitou arquitetura, boas práticas e segurança antes de devolver ao Líder. |
 
 ### Destaques Técnicos da `v3.0.0-beta`
 *   **5 Estações Coordenadas (`.agents/roles/`):** fonte canônica única dos papéis com adaptadores finos para Claude Code, Gemini e GitHub Copilot.

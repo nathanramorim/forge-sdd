@@ -25,21 +25,21 @@ flowchart TB
 
     subgraph V3["Agora (v3.0.0-beta) — 5 Estações Independentes + Fila + Portão A/B/C + Auto-Skills"]
         direction TB
-        H["👤 Humano"] <-->|"1. Aprova Spec (FLX-01)<br/>2. Recebe Painel Executivo (Camada C)"| L["🎯 Estação 1: Líder (Orquestrador)<br/>.agents/roles/lider.md"]
+        H["HUMANO"] <-->|"1. Aprova Spec (FLX-01)<br/>2. Recebe Painel Executivo (Camada C)"| L["01 // Líder (Orquestrador)<br/>.agents/roles/lider.md"]
 
-        L -->|"Aciona Concepção"| PM["📐 Estação 2: PM + Arquiteto<br/>.agents/roles/pm-architect.md<br/>(discovery + criteria + Reuse Check DUP-01)"]
+        L -->|"Aciona Concepção"| PM["02 // PM + Arquiteto<br/>.agents/roles/pm-architect.md<br/>(discovery + criteria + Reuse Check DUP-01)"]
         PM -->|"Portão Humano Obrigatório (FLX-01)"| L
 
-        L -->|"Spec aprovada"| PL["🗺️ Estação 3: Planejador (Plan)<br/>.agents/roles/planner.md<br/>(Mapeia IDs Constitution + .agents/rules/sdd-*.md)"]
-        PL -->|"Quebra em P/M/G + depends_on"| Q[("🗂️ Fila Determinística<br/>sdd/.queue/queue.json<br/>(forge-sdd queue)")]
+        L -->|"Spec aprovada"| PL["03 // Planejador (Plan)<br/>.agents/roles/planner.md<br/>(Mapeia IDs Constitution + .agents/rules/sdd-*.md)"]
+        PL -->|"Quebra em P/M/G + depends_on"| Q[("Fila Determinística<br/>sdd/.queue/queue.json<br/>(forge-sdd queue)")]
 
-        Q -->|"Onda Paralela (sem conflito)"| B1["🔨 Estação 4: Builder A<br/>.agents/roles/builder.md"]
-        Q -->|"Onda Paralela / Fila"| B2["🔨 Estação 4: Builder B<br/>.agents/roles/builder.md"]
+        Q -->|"Onda Paralela (sem conflito)"| B1["04A // Builder A<br/>.agents/roles/builder.md"]
+        Q -->|"Onda Paralela / Fila"| B2["04B // Builder B<br/>.agents/roles/builder.md"]
 
-        B1 & B2 -->|"Entrega concluída"| GA["⚙️ Portão Camada A (Determinístico)<br/>forge-sdd gate (P-01..P-23)"]
-        GA -->|"Se Camada A = PASS"| GB["🛡️ Estação 5: Analista de Governança<br/>.agents/roles/governance.md<br/>(Camada B — Estritamente Read-Only)"]
+        B1 & B2 -->|"Entrega concluída"| GA["Portão Camada A (Determinístico)<br/>forge-sdd gate (P-01..P-23)"]
+        GA -->|"Se Camada A = PASS"| GB["05 // Analista de Governança<br/>.agents/roles/governance.md<br/>(Camada B — Estritamente Read-Only)"]
         GB -->|"Veredito JSON + Candidatas Auto-Skill"| L
-        L -->|"Regra de Três (DUP-05 / GOV-03)"| SK["♻️ Motor Auto-Skills (forge-sdd skills)<br/>.agents/skills/ → .claude/skills/ & .gemini/skills/"]
+        L -->|"Regra de Três (DUP-05 / GOV-03)"| SK["Motor Auto-Skills (forge-sdd skills)<br/>.agents/skills/ → .claude/skills/ & .gemini/skills/"]
     end
 ```
 

@@ -3,300 +3,819 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Forge-SDD 3.0 — Sua Fábrica Autônoma de Software em 5 Estações</title>
+  <title>FORGE-SDD 3.0 — Autonomous Engineering Architecture</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap');
-    body {
-      font-family: 'Inter', sans-serif;
-      background-color: #090d16;
-      color: #f8fafc;
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+    :root {
+      --bg-obsidian: #050608;
+      --bg-panel: rgba(12, 15, 22, 0.72);
+      --border-hairline: rgba(255, 255, 255, 0.08);
+      --accent-copper: #e58e3c;
+      --accent-cyan: #38bdf8;
+      --accent-emerald: #10b981;
     }
-    .mono { font-family: 'JetBrains Mono', monospace; }
-    .glow-amber { box-shadow: 0 0 40px -10px rgba(245, 158, 11, 0.35); }
-    .glow-emerald { box-shadow: 0 0 40px -10px rgba(16, 185, 129, 0.3); }
-    .card-glass {
-      background: linear-gradient(180deg, rgba(30, 41, 59, 0.65) 0%, rgba(15, 23, 42, 0.85) 100%);
-      backdrop-filter: blur(12px);
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: var(--bg-obsidian);
+      color: #e2e8f0;
+      overflow-x: hidden;
+    }
+
+    .font-display {
+      font-family: 'Syne', sans-serif;
+      letter-spacing: -0.03em;
+    }
+
+    .mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .panel-glass {
+      background: linear-gradient(165deg, rgba(18, 22, 31, 0.78) 0%, rgba(8, 10, 15, 0.92) 100%);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--border-hairline);
+      transition: border-color 0.35s cubic-bezier(0.16, 1, 0.3, 1), transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s ease;
+    }
+
+    .panel-glass:hover {
+      border-color: rgba(229, 142, 60, 0.38);
+      transform: translateY(-2px);
+      box-shadow: 0 24px 48px -18px rgba(0, 0, 0, 0.8), 0 0 32px -12px rgba(229, 142, 60, 0.18);
+    }
+
+    .panel-active {
+      border-color: rgba(229, 142, 60, 0.65) !important;
+      box-shadow: 0 0 40px -10px rgba(229, 142, 60, 0.25);
+    }
+
+    .grid-backdrop {
+      background-image:
+        linear-gradient(to right, rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+      background-size: 64px 64px;
+    }
+
+    #three-hero-canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      pointer-events: auto;
+    }
+
+    .hero-gradient-mask {
+      background: radial-gradient(circle at 65% 50%, transparent 15%, rgba(5, 6, 8, 0.75) 65%, #050608 95%);
+      pointer-events: none;
+    }
+
+    .hairline-divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.12) 50%, transparent 100%);
     }
   </style>
 </head>
-<body class="min-h-screen antialiased selection:bg-amber-500 selection:text-slate-950">
+<body class="min-h-screen antialiased selection:bg-amber-500/30 selection:text-amber-200 grid-backdrop">
 
-  <!-- HERO SECTION -->
-  <section class="relative overflow-hidden border-b border-slate-800/80 py-20 px-6">
-    <div class="max-w-6xl mx-auto text-center">
-      <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-semibold tracking-wide uppercase mb-6">
-        <span>✨ Novo Forge-SDD v3.0-beta</span>
-        <span class="text-slate-600">•</span>
-        <span>Orquestração Autônoma em 5 Estações</span>
+  <!-- TOP NAVIGATION BAR -->
+  <header class="sticky top-0 z-30 border-b border-white/[0.06] bg-[#050608]/80 backdrop-blur-md">
+    <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-4">
+        <div class="w-2.5 h-2.5 rounded-full bg-[#e58e3c] shadow-[0_0_12px_#e58e3c]"></div>
+        <span class="mono text-xs tracking-[0.22em] uppercase text-white font-semibold">FORGE-SDD</span>
+        <span class="mono text-[11px] px-2 py-0.5 rounded border border-white/10 text-slate-400">v3.0.0-beta</span>
+      </div>
+      <div class="hidden md:flex items-center gap-8 text-xs mono uppercase tracking-widest text-slate-400">
+        <a href="#arquitetura" class="hover:text-white transition-colors">01. Esteira 5 Estações</a>
+        <a href="#comparativo" class="hover:text-white transition-colors">02. Evolução v2 → v3</a>
+        <a href="#governanca" class="hover:text-white transition-colors">03. Painel Executivo</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- HERO SECTION WITH INTERACTIVE THREE.JS TOPOLOGY -->
+  <section class="relative min-h-[86vh] flex items-center overflow-hidden border-b border-white/[0.07]">
+    <canvas id="three-hero-canvas" aria-label="Malha 3D interativa das 5 estações do Forge-SDD"></canvas>
+    <div class="absolute inset-0 hero-gradient-mask z-0"></div>
+
+    <div class="relative z-10 max-w-7xl mx-auto px-6 py-24 w-full grid grid-cols-1 lg:grid-cols-12 gap-12 items-center pointer-events-none">
+      <div class="lg:col-span-7 space-y-8 pointer-events-auto">
+        <div class="inline-flex items-center gap-3 px-3.5 py-1.5 rounded-full border border-white/10 bg-white/[0.03]">
+          <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>
+          <span class="mono text-[11px] uppercase tracking-[0.18em] text-slate-300">Arquitetura de Engenharia Autônoma</span>
+        </div>
+
+        <h1 class="font-display text-4xl sm:text-6xl font-bold tracking-tight text-white leading-[1.06]">
+          De um agente solitário para uma
+          <span class="bg-gradient-to-r from-[#f6b87e] via-[#e58e3c] to-[#38bdf8] bg-clip-text text-transparent">
+            esteira de 5 especialistas em paralelo.
+          </span>
+        </h1>
+
+        <p class="text-base sm:text-lg text-slate-300/90 max-w-2xl leading-relaxed font-light">
+          No Forge-SDD 3.0, você deixa de supervisionar cada linha gerada pela IA. Você alinha a visão com o <strong class="font-medium text-white">Líder</strong>, aprova a especificação e aciona uma linha de produção onde planejamento, construção paralela e auditoria independente operam com rigor determinístico.
+        </p>
+
+        <!-- Interactive 3D Station Switcher -->
+        <div class="pt-2">
+          <div class="mono text-[11px] uppercase tracking-[0.16em] text-slate-400 mb-3">
+            Inspecionar estação no núcleo 3D (passe o mouse ou clique):
+          </div>
+          <div class="flex flex-wrap gap-2" id="station-buttons">
+            <button data-station="0" class="station-btn active mono text-xs px-3.5 py-2 rounded border border-amber-500/50 bg-amber-500/10 text-amber-200 transition-all">
+              01 // Líder
+            </button>
+            <button data-station="1" class="station-btn mono text-xs px-3.5 py-2 rounded border border-white/10 bg-white/[0.02] text-slate-300 hover:border-white/30 transition-all">
+              02 // Concepção
+            </button>
+            <button data-station="2" class="station-btn mono text-xs px-3.5 py-2 rounded border border-white/10 bg-white/[0.02] text-slate-300 hover:border-white/30 transition-all">
+              03 // Planejador
+            </button>
+            <button data-station="3" class="station-btn mono text-xs px-3.5 py-2 rounded border border-white/10 bg-white/[0.02] text-slate-300 hover:border-white/30 transition-all">
+              04 // Builders (Paralelo)
+            </button>
+            <button data-station="4" class="station-btn mono text-xs px-3.5 py-2 rounded border border-white/10 bg-white/[0.02] text-slate-300 hover:border-white/30 transition-all">
+              05 // Governança
+            </button>
+          </div>
+        </div>
+
+        <!-- Live Telemetry HUD Card -->
+        <div id="hud-station-detail" class="panel-glass rounded-xl p-5 max-w-xl border-l-2 border-l-[#e58e3c]">
+          <div class="flex items-center justify-between mb-1.5">
+            <span id="hud-code" class="mono text-[11px] uppercase tracking-widest text-[#e58e3c]">ESTAÇÃO 01 // ORQUESTRAÇÃO CENTRAL</span>
+            <span id="hud-badge" class="mono text-[10px] px-2 py-0.5 rounded bg-white/5 text-slate-300 border border-white/10">PONTO DE CONTATO HUMANO</span>
+          </div>
+          <h2 id="hud-title" class="text-lg font-semibold text-white">O Líder (Maestro da Operação)</h2>
+          <p id="hud-desc" class="text-sm text-slate-300/90 mt-1 leading-relaxed">
+            Recebe sua demanda, coordena as demais estações em ondas paralelas ou sequenciais e devolve um Painel Executivo consolidado mostrando o que foi entregue, o estado de cada etapa e o que resta.
+          </p>
+        </div>
       </div>
 
-      <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight leading-tight max-w-4xl mx-auto">
-        De um assistente fazendo tudo sozinho para
-        <span class="bg-gradient-to-r from-amber-400 via-orange-400 to-emerald-400 bg-clip-text text-transparent">
-          5 especialistas trabalhando em paralelo por você.
-        </span>
-      </h1>
+      <!-- Right 3D Legend Overlay -->
+      <div class="lg:col-span-5 flex flex-col items-end justify-end pointer-events-none">
+        <div class="panel-glass rounded-xl p-4 border border-white/10 max-w-xs w-full space-y-2.5 text-xs pointer-events-auto">
+          <div class="mono text-[10px] uppercase tracking-widest text-slate-400 border-b border-white/10 pb-2">
+            Telemetria da Topologia 3D
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-slate-400">Núcleo Central (Âmbar)</span>
+            <span class="mono text-amber-300">Líder & Portão C</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-slate-400">Anéis Orbitais (Ciano)</span>
+            <span class="mono text-sky-300">Fila & Construtores</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-slate-400">Escudo Externo (Esmeralda)</span>
+            <span class="mono text-emerald-300">Governança Read-Only</span>
+          </div>
+          <div class="pt-1 text-[11px] text-slate-500 mono">
+            Arraste ou mova o cursor para rotacionar a malha.
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
 
-      <p class="mt-6 text-lg md:text-xl text-slate-300 max-w-3xl mx-auto leading-relaxed">
-        Chega de vigiar a IA linha por linha. No <strong>Forge 3.0</strong>, você alinha a ideia com o <strong>Líder</strong>, aprova a planta do projeto e deixa a fábrica trabalhar: planejadores, construtores paralelos e um auditor independente entregam tudo pronto em um <strong>Painel Executivo</strong>.
+  <!-- SECTION 1: AS 5 ESTAÇÕES EXPLICADAS DE FORMA EXECUTIVA -->
+  <section id="arquitetura" class="py-24 px-6 max-w-7xl mx-auto">
+    <div class="flex flex-col md:flex-row md:items-end justify-between mb-14 gap-6">
+      <div>
+        <div class="mono text-xs uppercase tracking-[0.2em] text-[#e58e3c] mb-2">01 // Divisão de Responsabilidades</div>
+        <h2 class="font-display text-3xl sm:text-4xl font-bold text-white">Cinco estações. Zero sobreposição de função.</h2>
+      </div>
+      <p class="text-sm text-slate-400 max-w-md leading-relaxed">
+        Assim como em uma operação industrial de alta precisão, quem projeta não executa, e quem executa jamais audita a própria entrega.
       </p>
     </div>
-  </section>
 
-  <!-- VISUAL PIPELINE (PARA LEIGOS) -->
-  <section class="py-16 px-6 max-w-6xl mx-auto">
-    <div class="text-center mb-12">
-      <h2 class="text-2xl md:text-3xl font-bold">Como sua Esteira Autônoma funciona na prática</h2>
-      <p class="text-slate-400 mt-2">Uma linha de montagem inteligente onde cada especialista faz apenas o que domina.</p>
-    </div>
-
-    <!-- 5 STATIONS FLOW -->
-    <div class="grid grid-cols-1 lg:grid-cols-5 gap-5 relative">
-
-      <!-- Estação 1 -->
-      <div class="card-glass rounded-2xl p-6 border border-amber-500/40 glow-amber flex flex-col justify-between">
+    <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+      <!-- Card 1 -->
+      <div class="panel-glass rounded-xl p-6 flex flex-col justify-between" data-card-station="0">
         <div>
-          <div class="flex items-center justify-between mb-4">
-            <span class="text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded bg-amber-500/20 text-amber-300">Estação 1</span>
-            <span class="text-2xl">🎯</span>
+          <div class="flex items-center justify-between mb-6">
+            <span class="mono text-xs text-[#e58e3c] font-semibold">01 / LÍDER</span>
+            <svg class="w-5 h-5 text-[#e58e3c]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <circle cx="12" cy="12" r="3"/><path d="M12 2v4m0 12v4M2 12h4m12 0h4"/>
+            </svg>
           </div>
-          <h3 class="text-lg font-bold text-white">O Líder (Maestro)</h3>
-          <p class="text-xs text-amber-300/90 font-medium mt-0.5 mb-3">Gerente de Operações</p>
-          <p class="text-sm text-slate-300 leading-relaxed">
-            É o seu único ponto de contato. Recebe seu pedido, aciona a equipe certa e, no final, te entrega o <strong>Painel Executivo</strong>.
+          <h3 class="text-base font-semibold text-white">Orquestrador Executivo</h3>
+          <p class="text-xs text-slate-400 mono mt-1 mb-4">Gerente de Operações</p>
+          <p class="text-sm text-slate-300/90 leading-relaxed">
+            Seu único interlocutor. Distribui o trabalho entre os especialistas e consolida o relatório final de progresso.
           </p>
         </div>
-        <div class="mt-5 pt-3 border-t border-slate-800 text-xs text-slate-400 flex items-center gap-1.5">
-          <span class="w-2 h-2 rounded-full bg-amber-400"></span>
-          <span>Você fala diretamente com ele</span>
+        <div class="mt-6 pt-4 border-t border-white/[0.06] mono text-[11px] text-amber-300/90">
+          INTERAÇÃO HUMANA DIRETA
         </div>
       </div>
 
-      <!-- Estação 2 -->
-      <div class="card-glass rounded-2xl p-6 border border-slate-700/80 flex flex-col justify-between">
+      <!-- Card 2 -->
+      <div class="panel-glass rounded-xl p-6 flex flex-col justify-between" data-card-station="1">
         <div>
-          <div class="flex items-center justify-between mb-4">
-            <span class="text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded bg-blue-500/20 text-blue-300">Estação 2</span>
-            <span class="text-2xl">📐</span>
+          <div class="flex items-center justify-between mb-6">
+            <span class="mono text-xs text-sky-400 font-semibold">02 / CONCEPÇÃO</span>
+            <svg class="w-5 h-5 text-sky-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M3 21h18M5 21V7l7-4 7 4v14M9 9h6m-6 4h6"/>
+            </svg>
           </div>
-          <h3 class="text-lg font-bold text-white">Produto & Arquiteto</h3>
-          <p class="text-xs text-blue-300/90 font-medium mt-0.5 mb-3">Arquiteto da Obra</p>
-          <p class="text-sm text-slate-300 leading-relaxed">
-            Transforma sua ideia em uma planta clara e verifica o que já existe para não reinventar a roda.
+          <h3 class="text-base font-semibold text-white">Produto & Arquiteto</h3>
+          <p class="text-xs text-slate-400 mono mt-1 mb-4">Autoria da Especificação</p>
+          <p class="text-sm text-slate-300/90 leading-relaxed">
+            Converte sua necessidade em especificação técnica e mapeia o que já existe no sistema antes de propor código novo.
           </p>
         </div>
-        <div class="mt-5 pt-3 border-t border-slate-800 text-xs text-blue-300 font-medium flex items-center gap-1.5">
-          <span>✋ Pede seu "De Acordo" antes de construir</span>
+        <div class="mt-6 pt-4 border-t border-white/[0.06] mono text-[11px] text-sky-300/90">
+          EXIGE SUA APROVAÇÃO NA PLANTA
         </div>
       </div>
 
-      <!-- Estação 3 -->
-      <div class="card-glass rounded-2xl p-6 border border-slate-700/80 flex flex-col justify-between">
+      <!-- Card 3 -->
+      <div class="panel-glass rounded-xl p-6 flex flex-col justify-between" data-card-station="2">
         <div>
-          <div class="flex items-center justify-between mb-4">
-            <span class="text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded bg-purple-500/20 text-purple-300">Estação 3</span>
-            <span class="text-2xl">🗺️</span>
+          <div class="flex items-center justify-between mb-6">
+            <span class="mono text-xs text-indigo-400 font-semibold">03 / PLANEJADOR</span>
+            <svg class="w-5 h-5 text-indigo-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <rect x="3" y="4" width="18" height="5" rx="1"/><rect x="3" y="13" width="8" height="7" rx="1"/><rect x="13" y="13" width="8" height="7" rx="1"/>
+            </svg>
           </div>
-          <h3 class="text-lg font-bold text-white">O Planejador</h3>
-          <p class="text-xs text-purple-300/90 font-medium mt-0.5 mb-3">Engenheiro de Produção</p>
-          <p class="text-sm text-slate-300 leading-relaxed">
-            Fatia a planta aprovada em tarefas pequenas e anota exatamente quais regras de segurança cada tarefa precisa seguir.
+          <h3 class="text-base font-semibold text-white">Engenharia de Plano</h3>
+          <p class="text-xs text-slate-400 mono mt-1 mb-4">Decomposição & Regras</p>
+          <p class="text-sm text-slate-300/90 leading-relaxed">
+            Divide a especificação aprovada em unidades atômicas e vincula apenas as diretrizes de segurança e arquitetura pertinentes.
           </p>
         </div>
-        <div class="mt-5 pt-3 border-t border-slate-800 text-xs text-slate-400">
-          <span>Organiza a fila inteligente</span>
+        <div class="mt-6 pt-4 border-t border-white/[0.06] mono text-[11px] text-indigo-300/90">
+          ALIMENTA A FILA DETERMINÍSTICA
         </div>
       </div>
 
-      <!-- Estação 4 -->
-      <div class="card-glass rounded-2xl p-6 border border-cyan-500/40 flex flex-col justify-between">
+      <!-- Card 4 -->
+      <div class="panel-glass rounded-xl p-6 flex flex-col justify-between" data-card-station="3">
         <div>
-          <div class="flex items-center justify-between mb-4">
-            <span class="text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded bg-cyan-500/20 text-cyan-300">Estação 4</span>
-            <span class="text-2xl">⚡</span>
+          <div class="flex items-center justify-between mb-6">
+            <span class="mono text-xs text-cyan-400 font-semibold">04 / BUILDERS</span>
+            <svg class="w-5 h-5 text-cyan-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+            </svg>
           </div>
-          <h3 class="text-lg font-bold text-white">Os Construtores</h3>
-          <p class="text-xs text-cyan-300/90 font-medium mt-0.5 mb-3">Execução em Paralelo</p>
-          <p class="text-sm text-slate-300 leading-relaxed">
-            Pegam tarefas da fila: o que não depende de outra coisa <strong>roda ao mesmo tempo</strong>; o que tem dependência aguarda sua vez.
+          <h3 class="text-base font-semibold text-white">Execução em Fila</h3>
+          <p class="text-xs text-slate-400 mono mt-1 mb-4">Construção Paralela</p>
+          <p class="text-sm text-slate-300/90 leading-relaxed">
+            Múltiplos agentes consomem a fila: frentes sem conflito de arquivos avançam simultaneamente; frentes dependentes aguardam.
           </p>
         </div>
-        <div class="mt-5 pt-3 border-t border-slate-800 text-xs text-cyan-300 font-medium">
-          <span>Velocidade multiplicada sem conflito</span>
+        <div class="mt-6 pt-4 border-t border-white/[0.06] mono text-[11px] text-cyan-300/90">
+          PARALELISMO SEM COLISÃO
         </div>
       </div>
 
-      <!-- Estação 5 -->
-      <div class="card-glass rounded-2xl p-6 border border-emerald-500/40 glow-emerald flex flex-col justify-between">
+      <!-- Card 5 -->
+      <div class="panel-glass rounded-xl p-6 flex flex-col justify-between" data-card-station="4">
         <div>
-          <div class="flex items-center justify-between mb-4">
-            <span class="text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded bg-emerald-500/20 text-emerald-300">Estação 5</span>
-            <span class="text-2xl">🛡️</span>
+          <div class="flex items-center justify-between mb-6">
+            <span class="mono text-xs text-emerald-400 font-semibold">05 / GOVERNANÇA</span>
+            <svg class="w-5 h-5 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            </svg>
           </div>
-          <h3 class="text-lg font-bold text-white">O Auditor</h3>
-          <p class="text-xs text-emerald-300/90 font-medium mt-0.5 mb-3">Fiscal Independente</p>
-          <p class="text-sm text-slate-300 leading-relaxed">
-            <strong>Proibido de alterar código.</strong> Audita se a entrega seguiu a arquitetura, boas práticas e segurança antes de voltar ao Líder.
+          <h3 class="text-base font-semibold text-white">Auditoria Independente</h3>
+          <p class="text-xs text-slate-400 mono mt-1 mb-4">Operação Somente Leitura</p>
+          <p class="text-sm text-slate-300/90 leading-relaxed">
+            Sem permissão de escrita em código. Inspeciona conformidade arquitetural, testes e segurança antes de emitir o laudo ao Líder.
           </p>
         </div>
-        <div class="mt-5 pt-3 border-t border-slate-800 text-xs text-emerald-300 font-medium">
-          <span>100% imparcial (Somente Leitura)</span>
+        <div class="mt-6 pt-4 border-t border-white/[0.06] mono text-[11px] text-emerald-300/90">
+          AUDITORIA IMPARCIAL (CAMADA B)
         </div>
       </div>
-
     </div>
   </section>
 
-  <!-- ANTES VS AGORA -->
-  <section class="py-12 px-6 max-w-6xl mx-auto">
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+  <div class="hairline-divider max-w-7xl mx-auto"></div>
 
-      <!-- ANTES -->
-      <div class="rounded-2xl p-8 bg-rose-950/20 border border-rose-500/30">
-        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-500/15 text-rose-300 text-xs font-bold uppercase mb-4">
-          ❌ Como era antes (v2.x — O "Faz-Tudo" Solitário)
+  <!-- SECTION 2: ANTES (v2.x) VS AGORA (v3.0) -->
+  <section id="comparativo" class="py-24 px-6 max-w-7xl mx-auto">
+    <div class="mb-14">
+      <div class="mono text-xs uppercase tracking-[0.2em] text-sky-400 mb-2">02 // Mudança de Paradigma</div>
+      <h2 class="font-display text-3xl sm:text-4xl font-bold text-white">O que muda da geração v2.x para o Forge-SDD 3.0</h2>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <!-- Modelo Anterior -->
+      <div class="panel-glass rounded-2xl p-8 border border-white/[0.07]">
+        <div class="flex items-center justify-between pb-5 mb-6 border-b border-white/[0.07]">
+          <span class="mono text-xs uppercase tracking-widest text-slate-400">ARQUITETURA ANTERIOR (v2.x)</span>
+          <span class="mono text-xs px-2.5 py-1 rounded bg-white/[0.04] text-slate-400">Fluxo Linear Único</span>
         </div>
-        <ul class="space-y-4 text-slate-300 text-sm">
-          <li class="flex items-start gap-3">
-            <span class="text-rose-400 font-bold">1.</span>
-            <span><strong>Um agente só tentando fazer tudo:</strong> a mesma IA que escrevia o código era a que revisava o próprio trabalho.</span>
-          </li>
-          <li class="flex items-start gap-3">
-            <span class="text-rose-400 font-bold">2.</span>
-            <span><strong>Uma tarefa por vez:</strong> mesmo quando 4 partes do sistema eram independentes, você precisava esperar uma terminar para começar a outra.</span>
-          </li>
-          <li class="flex items-start gap-3">
-            <span class="text-rose-400 font-bold">3.</span>
-            <span><strong>Manual gigante em toda conversa:</strong> a IA precisava reler todas as regras do projeto do zero a cada passo, gastando mais e perdendo o foco.</span>
-          </li>
-          <li class="flex items-start gap-3">
-            <span class="text-rose-400 font-bold">4.</span>
-            <span><strong>Conhecimento repetitivo:</strong> atividades padronizadas precisavam ser reexplicadas manualmente.</span>
-          </li>
-        </ul>
+
+        <div class="space-y-6">
+          <div class="grid grid-cols-12 gap-4">
+            <div class="col-span-3 mono text-xs text-slate-500 pt-0.5">TOPOLOGIA</div>
+            <div class="col-span-9 text-sm text-slate-300">
+              <strong class="text-white font-medium block mb-1">Agente único acumulando papéis</strong>
+              A mesma sessão que escrevia o código era responsável por revisar a própria entrega, reduzindo o rigor crítico.
+            </div>
+          </div>
+          <div class="grid grid-cols-12 gap-4">
+            <div class="col-span-3 mono text-xs text-slate-500 pt-0.5">EXECUÇÃO</div>
+            <div class="col-span-9 text-sm text-slate-300">
+              <strong class="text-white font-medium block mb-1">Processamento estritamente sequencial</strong>
+              Mesmo tarefas sem relação entre si precisavam aguardar uma única fila manual em texto.
+            </div>
+          </div>
+          <div class="grid grid-cols-12 gap-4">
+            <div class="col-span-3 mono text-xs text-slate-500 pt-0.5">CONTEXTO</div>
+            <div class="col-span-9 text-sm text-slate-300">
+              <strong class="text-white font-medium block mb-1">Constituição monolítica</strong>
+              Todas as regras do projeto eram carregadas integralmente a cada sessão, consumindo janela de contexto com instruções irrelevantes à tarefa.
+            </div>
+          </div>
+          <div class="grid grid-cols-12 gap-4">
+            <div class="col-span-3 mono text-xs text-slate-500 pt-0.5">APRENDIZADO</div>
+            <div class="col-span-9 text-sm text-slate-300">
+              <strong class="text-white font-medium block mb-1">Catalogação manual de padrões</strong>
+              Habilidades reutilizáveis dependiam de criação manual pelo desenvolvedor.
+            </div>
+          </div>
+        </div>
       </div>
 
-      <!-- AGORA -->
-      <div class="rounded-2xl p-8 bg-emerald-950/20 border border-emerald-500/30">
-        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/15 text-emerald-300 text-xs font-bold uppercase mb-4">
-          ✅ Como é no Forge 3.0 (Fábrica Autônoma)
+      <!-- Modelo Novo -->
+      <div class="panel-glass rounded-2xl p-8 border border-[#e58e3c]/40 shadow-[0_0_50px_-15px_rgba(229,142,60,0.18)]">
+        <div class="flex items-center justify-between pb-5 mb-6 border-b border-white/[0.1]">
+          <span class="mono text-xs uppercase tracking-widest text-[#e58e3c]">NOVA ARQUITETURA (v3.0.0-beta)</span>
+          <span class="mono text-xs px-2.5 py-1 rounded bg-[#e58e3c]/15 text-amber-200 border border-[#e58e3c]/30">Orquestração Distribuída</span>
         </div>
-        <ul class="space-y-4 text-slate-200 text-sm">
-          <li class="flex items-start gap-3">
-            <span class="text-emerald-400 font-bold">1.</span>
-            <span><strong>Separação real de poderes:</strong> quem planeja não programa; quem programa não aprova; quem audita não toca no código.</span>
-          </li>
-          <li class="flex items-start gap-3">
-            <span class="text-emerald-400 font-bold">2.</span>
-            <span><strong>Fila inteligente com paralelismo:</strong> tarefas independentes rodam juntas em paralelo; tarefas dependentes entram na fila automaticamente.</span>
-          </li>
-          <li class="flex items-start gap-3">
-            <span class="text-emerald-400 font-bold">3.</span>
-            <span><strong>Manual distribuído sob demanda:</strong> cada especialista abre apenas a página de regras exata da tarefa que está executando.</span>
-          </li>
-          <li class="flex items-start gap-3">
-            <span class="text-emerald-400 font-bold">4.</span>
-            <span><strong>Memória que aprende sozinha (Auto-Skills):</strong> repetiu um padrão 3 vezes? Ele vira uma habilidade automática para toda a equipe.</span>
-          </li>
-        </ul>
-      </div>
 
+        <div class="space-y-6">
+          <div class="grid grid-cols-12 gap-4">
+            <div class="col-span-3 mono text-xs text-[#e58e3c] pt-0.5">TOPOLOGIA</div>
+            <div class="col-span-9 text-sm text-slate-200">
+              <strong class="text-white font-semibold block mb-1">Separação estrita em 5 Estações</strong>
+              Concepção, Planejamento, Construção e Auditoria operam com permissões isoladas sob coordenação do Líder.
+            </div>
+          </div>
+          <div class="grid grid-cols-12 gap-4">
+            <div class="col-span-3 mono text-xs text-[#e58e3c] pt-0.5">EXECUÇÃO</div>
+            <div class="col-span-9 text-sm text-slate-200">
+              <strong class="text-white font-semibold block mb-1">Motor de fila com detecção de colisão</strong>
+              O binário avalia os arquivos tocados: tarefas independentes rodam em paralelo; dependências aguardam na fila automaticamente.
+            </div>
+          </div>
+          <div class="grid grid-cols-12 gap-4">
+            <div class="col-span-3 mono text-xs text-[#e58e3c] pt-0.5">CONTEXTO</div>
+            <div class="col-span-9 text-sm text-slate-200">
+              <strong class="text-white font-semibold block mb-1">Constituição por IDs + Regras sob demanda</strong>
+              Princípios imutáveis ficam em 1 página indexada; guias operacionais detalhados são carregados somente quando a tarefa exige.
+            </div>
+          </div>
+          <div class="grid grid-cols-12 gap-4">
+            <div class="col-span-3 mono text-xs text-[#e58e3c] pt-0.5">APRENDIZADO</div>
+            <div class="col-span-9 text-sm text-slate-200">
+              <strong class="text-white font-semibold block mb-1">Motor de Auto-Skills (Regra de Três)</strong>
+              Procedimentos repetidos 3 vezes são convertidos e sincronizados automaticamente como Skills reutilizáveis.
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </section>
 
-  <!-- OS 3 SUPERPODERES + PAINEL EXECUTIVO -->
-  <section class="py-16 px-6 max-w-6xl mx-auto">
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+  <div class="hairline-divider max-w-7xl mx-auto"></div>
 
-      <!-- 3 Superpoderes -->
+  <!-- SECTION 3: TRIPLO PORTÃO DE GOVERNANÇA & PAINEL EXECUTIVO -->
+  <section id="governanca" class="py-24 px-6 max-w-7xl mx-auto">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
       <div class="lg:col-span-5 space-y-6">
-        <h2 class="text-2xl md:text-3xl font-bold leading-tight">
-          Você não lê logs intermináveis.<br/>
-          <span class="text-amber-400">Você recebe um Painel Executivo.</span>
+        <div class="mono text-xs uppercase tracking-[0.2em] text-emerald-400">03 // Governança em 3 Camadas</div>
+        <h2 class="font-display text-3xl sm:text-4xl font-bold text-white leading-tight">
+          Visibilidade executiva sem ruído operacional.
         </h2>
-        <p class="text-slate-300 text-sm leading-relaxed">
-          Quando a equipe termina uma onda de entregas, o Líder filtra o ruído técnico e apresenta uma visão clara para você tomar decisões em segundos:
+        <p class="text-sm text-slate-300/90 leading-relaxed">
+          Nenhuma entrega chega à sua tela sem antes atravessar duas barreiras técnicas independentes. Você recebe apenas o diagnóstico consolidado para decidir:
         </p>
-        <div class="space-y-4">
-          <div class="p-4 rounded-xl bg-slate-900/90 border border-slate-800">
-            <div class="font-semibold text-white text-sm">📚 1. Constituição Enxuta + Regras Modulares</div>
-            <p class="text-xs text-slate-400 mt-1">Os princípios do projeto ficam em 1 página; os detalhes técnicos são carregados só quando necessários.</p>
+
+        <div class="space-y-4 pt-2">
+          <div class="p-4 rounded-xl bg-white/[0.02] border border-white/[0.07]">
+            <div class="flex items-center justify-between">
+              <span class="mono text-xs font-semibold text-sky-300">CAMADA A // PORTÃO DETERMINÍSTICO</span>
+              <span class="mono text-[10px] text-slate-500">CLI GO NATIVO</span>
+            </div>
+            <p class="text-xs text-slate-400 mt-1.5 leading-relaxed">
+              Validação instantânea de testes automatizados, ausência de credenciais expostas, limites de arquivo e vínculo com a especificação.
+            </p>
           </div>
-          <div class="p-4 rounded-xl bg-slate-900/90 border border-slate-800">
-            <div class="font-semibold text-white text-sm">🔒 2. Triplo Portão de Qualidade (A → B → C)</div>
-            <p class="text-xs text-slate-400 mt-1"><strong>Camada A:</strong> Robô checa testes e segredos. <strong>Camada B:</strong> Auditor IA revisa arquitetura. <strong>Camada C:</strong> Seu painel final.</p>
+
+          <div class="p-4 rounded-xl bg-white/[0.02] border border-white/[0.07]">
+            <div class="flex items-center justify-between">
+              <span class="mono text-xs font-semibold text-emerald-300">CAMADA B // AUDITORIA SEMÂNTICA READ-ONLY</span>
+              <span class="mono text-[10px] text-slate-500">AGENTE INDEPENDENTE</span>
+            </div>
+            <p class="text-xs text-slate-400 mt-1.5 leading-relaxed">
+              Cruza o código entregue contra os IDs da Constituição e emite veredito fundamentado em evidências (<span class="mono text-slate-300">conforme</span>, <span class="mono text-slate-300">ressalvas</span> ou <span class="mono text-slate-300">bloqueado</span>).
+            </p>
           </div>
-          <div class="p-4 rounded-xl bg-slate-900/90 border border-slate-800">
-            <div class="font-semibold text-white text-sm">🧠 3. Auto-Skills (A Regra de Três)</div>
-            <p class="text-xs text-slate-400 mt-1">Padrões recorrentes viram habilidades prontas sincronizadas entre Claude, Gemini e Copilot.</p>
+
+          <div class="p-4 rounded-xl bg-white/[0.02] border border-[#e58e3c]/40">
+            <div class="flex items-center justify-between">
+              <span class="mono text-xs font-semibold text-[#e58e3c]">CAMADA C // PAINEL EXECUTIVO DO LÍDER</span>
+              <span class="mono text-[10px] text-amber-300/80">DECISÃO HUMANA</span>
+            </div>
+            <p class="text-xs text-slate-300 mt-1.5 leading-relaxed">
+              Apresenta o que já foi concluído, o estado de cada estação, eventuais habilidades aprendidas e o que resta no backlog.
+            </p>
           </div>
         </div>
       </div>
 
-      <!-- Mockup do Painel do Líder -->
-      <div class="lg:col-span-7 card-glass rounded-2xl border border-slate-700/80 p-6 shadow-2xl">
-        <div class="flex items-center justify-between pb-4 mb-5 border-b border-slate-800">
-          <div class="flex items-center gap-2">
-            <span class="w-3 h-3 rounded-full bg-rose-500"></span>
-            <span class="w-3 h-3 rounded-full bg-amber-500"></span>
-            <span class="w-3 h-3 rounded-full bg-emerald-500"></span>
-            <span class="ml-2 text-xs mono text-slate-400">Painel Executivo do Líder (Camada C)</span>
+      <!-- Executive Console Mockup -->
+      <div class="lg:col-span-7 panel-glass rounded-2xl p-6 sm:p-8 border border-white/10">
+        <div class="flex flex-wrap items-center justify-between gap-4 pb-5 mb-6 border-b border-white/[0.08]">
+          <div>
+            <div class="mono text-[11px] uppercase tracking-widest text-slate-400">CONSOLE EXECUTIVO // CAMADA C</div>
+            <div class="text-base font-semibold text-white mt-0.5">Relatório de Fechamento de Onda — Feature 58</div>
           </div>
-          <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-300">
-            ✓ Auditoria Aprovada
+          <div class="mono text-xs px-3 py-1 rounded border border-emerald-500/40 bg-emerald-500/10 text-emerald-300">
+            VEREDITO GLOBAL: CONFORME
+          </div>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="border-b border-white/[0.08] mono text-[11px] uppercase text-slate-400">
+                <th class="py-3 pr-4">Unidade / Escopo</th>
+                <th class="py-3 px-3">Alocação</th>
+                <th class="py-3 px-3">Portão A</th>
+                <th class="py-3 pl-3 text-right">Auditoria B</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-white/[0.05] text-xs">
+              <tr>
+                <td class="py-3.5 pr-4 font-medium text-white">Especificação & Critérios de Aceite</td>
+                <td class="py-3.5 px-3 mono text-sky-300">Gate FLX-01</td>
+                <td class="py-3.5 px-3 mono text-emerald-400">PASS</td>
+                <td class="py-3.5 pl-3 text-right mono text-emerald-300">APROVADO</td>
+              </tr>
+              <tr>
+                <td class="py-3.5 pr-4 font-medium text-white">Constituição por IDs & Regras Modulares</td>
+                <td class="py-3.5 px-3 mono text-cyan-300">Onda Paralela 01</td>
+                <td class="py-3.5 px-3 mono text-emerald-400">PASS</td>
+                <td class="py-3.5 pl-3 text-right mono text-emerald-300">CONFORME</td>
+              </tr>
+              <tr>
+                <td class="py-3.5 pr-4 font-medium text-white">Papéis Canônicos das 5 Estações</td>
+                <td class="py-3.5 px-3 mono text-cyan-300">Onda Paralela 01</td>
+                <td class="py-3.5 px-3 mono text-emerald-400">PASS</td>
+                <td class="py-3.5 pl-3 text-right mono text-emerald-300">CONFORME</td>
+              </tr>
+              <tr>
+                <td class="py-3.5 pr-4 font-medium text-white">Motor de Fila & Portão Determinístico</td>
+                <td class="py-3.5 px-3 mono text-cyan-300">Onda Paralela 01</td>
+                <td class="py-3.5 px-3 mono text-emerald-400">PASS</td>
+                <td class="py-3.5 pl-3 text-right mono text-emerald-300">CONFORME</td>
+              </tr>
+              <tr>
+                <td class="py-3.5 pr-4 font-medium text-white">Integração CLI & Testes Golden</td>
+                <td class="py-3.5 px-3 mono text-indigo-300">Fila (pós Onda 01)</td>
+                <td class="py-3.5 px-3 mono text-emerald-400">PASS</td>
+                <td class="py-3.5 pl-3 text-right mono text-emerald-300">CONFORME</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="mt-6 pt-5 border-t border-white/[0.08] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <div class="mono text-[11px] uppercase tracking-wider text-[#e58e3c]">Auto-Skill Extraída no Fechamento (DUP-05)</div>
+            <div class="text-xs text-slate-300 mt-0.5">
+              Padrão recorrente <span class="mono text-white">novo-subcomando-cli-sdd</span> catalogado e sincronizado entre agentes.
+            </div>
+          </div>
+          <span class="mono text-[11px] px-3 py-1 rounded bg-white/[0.04] border border-white/10 text-slate-300 self-start sm:self-center">
+            0 PENDÊNCIAS NA FILA
           </span>
         </div>
-
-        <div class="space-y-3 text-xs">
-          <div class="grid grid-cols-12 text-slate-400 font-semibold pb-2 border-b border-slate-800/80">
-            <div class="col-span-5">Etapa / Tarefa</div>
-            <div class="col-span-3">Execução</div>
-            <div class="col-span-2">Portão A</div>
-            <div class="col-span-2">Auditor B</div>
-          </div>
-
-          <div class="grid grid-cols-12 items-center py-2.5 border-b border-slate-800/40">
-            <div class="col-span-5 font-medium text-white">📐 Planta & Critérios (Spec)</div>
-            <div class="col-span-3 text-blue-300">Aprovada por Você</div>
-            <div class="col-span-2 text-emerald-400">✓ OK</div>
-            <div class="col-span-2"><span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300">Conforme</span></div>
-          </div>
-
-          <div class="grid grid-cols-12 items-center py-2.5 border-b border-slate-800/40">
-            <div class="col-span-5 font-medium text-white">🔨 Tarefa 01 — Regras & Arquitetura</div>
-            <div class="col-span-3 text-cyan-300">⚡ Onda Paralela 1</div>
-            <div class="col-span-2 text-emerald-400">✓ PASS</div>
-            <div class="col-span-2"><span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300">Conforme</span></div>
-          </div>
-
-          <div class="grid grid-cols-12 items-center py-2.5 border-b border-slate-800/40">
-            <div class="col-span-5 font-medium text-white">🔨 Tarefa 02 — Motor de Fila & Portão</div>
-            <div class="col-span-3 text-cyan-300">⚡ Onda Paralela 1</div>
-            <div class="col-span-2 text-emerald-400">✓ PASS</div>
-            <div class="col-span-2"><span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300">Conforme</span></div>
-          </div>
-
-          <div class="grid grid-cols-12 items-center py-2.5 border-b border-slate-800/40">
-            <div class="col-span-5 font-medium text-white">🔨 Tarefa 03 — Integração Final</div>
-            <div class="col-span-3 text-purple-300">🗂️ Fila (após 01 e 02)</div>
-            <div class="col-span-2 text-emerald-400">✓ PASS</div>
-            <div class="col-span-2"><span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300">Conforme</span></div>
-          </div>
-        </div>
-
-        <div class="mt-5 p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-between">
-          <div>
-            <div class="text-xs font-bold text-amber-300">🧠 Nova Habilidade Aprendida Automaticamente (Auto-Skill)</div>
-            <div class="text-xs text-slate-300 mt-0.5">Padrão repetido 3x salvo e sincronizado para os próximos projetos.</div>
-          </div>
-          <span class="px-2.5 py-1 rounded bg-amber-500/20 text-amber-300 text-xs font-semibold mono">Ativa</span>
-        </div>
       </div>
-
     </div>
   </section>
 
+  <!-- THREE.JS INTERACTIVE 5-STATION TOPOLOGY SCRIPT -->
+  <script>
+    (function () {
+      const stationsData = [
+        {
+          code: 'ESTAÇÃO 01 // ORQUESTRAÇÃO CENTRAL',
+          badge: 'PONTO DE CONTATO HUMANO',
+          title: 'O Líder (Maestro da Operação)',
+          desc: 'Recebe sua demanda, coordena as demais estações em ondas paralelas ou sequenciais e devolve um Painel Executivo consolidado mostrando o que foi entregue, o estado de cada etapa e o que resta.',
+          cameraTarget: { x: 0, y: 0.4, z: 0 }
+        },
+        {
+          code: 'ESTAÇÃO 02 // ESPECIFICAÇÃO & REUSO',
+          badge: 'PORTÃO HUMANO FLX-01',
+          title: 'Produto & Arquiteto',
+          desc: 'Investiga o que já existe no repositório para evitar duplicação e estrutura a especificação funcional e critérios de aceite. Nenhum código é iniciado sem sua validação na planta.',
+          cameraTarget: { x: -2.6, y: 1.1, z: 0.5 }
+        },
+        {
+          code: 'ESTAÇÃO 03 // ENGENHARIA DE PLANO',
+          badge: 'MAPEAMENTO DE REGRAS',
+          title: 'O Planejador',
+          desc: 'Decompõe a especificação aprovada em tarefas atômicas (P/M/G), define dependências de execução e seleciona apenas os módulos de regras necessários para cada tarefa.',
+          cameraTarget: { x: -1.2, y: -1.3, z: 0.8 }
+        },
+        {
+          code: 'ESTAÇÃO 04 // EXECUÇÃO ISOLADA',
+          badge: 'FILA & PARALELISMO',
+          title: 'Fila de Builders em Paralelo',
+          desc: 'Consome tarefas validadas sem conflito de arquivos. Frentes independentes avançam simultaneamente em subagentes dedicados; frentes com dependência aguardam liberação automática.',
+          cameraTarget: { x: 1.8, y: 0.9, z: 0.6 }
+        },
+        {
+          code: 'ESTAÇÃO 05 // AUDITORIA IMPARCIAL',
+          badge: 'SOMENTE LEITURA (CAMADA B)',
+          title: 'Analista de Governança',
+          desc: 'Opera sem permissão de edição. Audita a entrega contra os IDs da Constituição, segurança e testes, emitindo parecer técnico estruturado de volta para o Líder.',
+          cameraTarget: { x: 2.6, y: -1.0, z: 0.4 }
+        }
+      ];
+
+      const canvas = document.getElementById('three-hero-canvas');
+      const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 100);
+      camera.position.set(0.8, 0.6, 8.2);
+
+      // Ambient & Key Lights
+      scene.add(new THREE.AmbientLight(0x94a3b8, 0.65));
+      const keyLight = new THREE.PointLight(0xe58e3c, 2.4, 25);
+      keyLight.position.set(4, 5, 6);
+      scene.add(keyLight);
+
+      const rimLight = new THREE.PointLight(0x38bdf8, 1.8, 25);
+      rimLight.position.set(-5, -4, 4);
+      scene.add(rimLight);
+
+      const rootGroup = new THREE.Group();
+      rootGroup.position.x = 1.65;
+      scene.add(rootGroup);
+
+      // Outer Governance Shield Ring (Wireframe Torus + Icosahedron Cage)
+      const shieldGeo = new THREE.IcosahedronGeometry(3.35, 2);
+      const shieldMat = new THREE.MeshBasicMaterial({
+        color: 0x1e293b,
+        wireframe: true,
+        transparent: true,
+        opacity: 0.22
+      });
+      const shieldMesh = new THREE.Mesh(shieldGeo, shieldMat);
+      rootGroup.add(shieldMesh);
+
+      const ringGeo = new THREE.TorusGeometry(2.75, 0.012, 16, 120);
+      const ringMat = new THREE.MeshBasicMaterial({
+        color: 0x38bdf8,
+        transparent: true,
+        opacity: 0.28
+      });
+      const orbitalRing1 = new THREE.Mesh(ringGeo, ringMat);
+      orbitalRing1.rotation.x = Math.PI / 2.6;
+      rootGroup.add(orbitalRing1);
+
+      const orbitalRing2 = new THREE.Mesh(
+        new THREE.TorusGeometry(2.15, 0.01, 16, 100),
+        new THREE.MeshBasicMaterial({ color: 0xe58e3c, transparent: true, opacity: 0.25 })
+      );
+      orbitalRing2.rotation.x = -Math.PI / 3.1;
+      orbitalRing2.rotation.y = Math.PI / 5;
+      rootGroup.add(orbitalRing2);
+
+      // 5 Station Positions in 3D Space
+      const nodePositions = [
+        new THREE.Vector3(0, 0.15, 0),       // 0: Líder (Center Core)
+        new THREE.Vector3(-2.1, 1.15, 0.4),  // 1: Concepção (PM + Arch)
+        new THREE.Vector3(-1.35, -1.25, 0.7),// 2: Planejador
+        new THREE.Vector3(1.55, 1.05, 0.5),  // 3: Builders Cluster
+        new THREE.Vector3(2.1, -1.05, 0.3)   // 4: Governança
+      ];
+
+      const nodeColors = [0xe58e3c, 0x38bdf8, 0x818cf8, 0x22d3ee, 0x10b981];
+      const stationMeshes = [];
+
+      nodePositions.forEach((pos, idx) => {
+        const group = new THREE.Group();
+        group.position.copy(pos);
+
+        const radius = idx === 0 ? 0.44 : 0.28;
+        const coreGeo = idx === 0
+          ? new THREE.OctahedronGeometry(radius, 1)
+          : new THREE.IcosahedronGeometry(radius, 1);
+
+        const coreMat = new THREE.MeshStandardMaterial({
+          color: nodeColors[idx],
+          emissive: nodeColors[idx],
+          emissiveIntensity: idx === 0 ? 0.55 : 0.32,
+          roughness: 0.25,
+          metalness: 0.75,
+          wireframe: false
+        });
+        const core = new THREE.Mesh(coreGeo, coreMat);
+        group.add(core);
+
+        const shellGeo = new THREE.IcosahedronGeometry(radius * 1.48, 1);
+        const shellMat = new THREE.MeshBasicMaterial({
+          color: nodeColors[idx],
+          wireframe: true,
+          transparent: true,
+          opacity: 0.42
+        });
+        const shell = new THREE.Mesh(shellGeo, shellMat);
+        group.add(shell);
+
+        // For Station 4 (Builders), add 2 satellite parallel builder nodes
+        if (idx === 3) {
+          for (let s = 0; s < 2; s++) {
+            const sat = new THREE.Mesh(
+              new THREE.OctahedronGeometry(0.12, 0),
+              new THREE.MeshBasicMaterial({ color: 0x22d3ee, wireframe: true })
+            );
+            sat.position.set(s === 0 ? 0.55 : -0.5, s === 0 ? 0.35 : -0.35, 0.2);
+            group.add(sat);
+          }
+        }
+
+        rootGroup.add(group);
+        stationMeshes.push({ group, core, shell, baseScale: 1 });
+      });
+
+      // Connecting Conduits (Curves between Stations)
+      const links = [
+        [0, 1], [1, 2], [0, 2], [2, 3], [3, 4], [4, 0]
+      ];
+      const curves = [];
+
+      links.forEach(([a, b]) => {
+        const start = nodePositions[a];
+        const end = nodePositions[b];
+        const mid = start.clone().lerp(end, 0.5);
+        mid.z += 0.55;
+
+        const curve = new THREE.QuadraticBezierCurve3(start, mid, end);
+        curves.push(curve);
+
+        const points = curve.getPoints(40);
+        const lineGeo = new THREE.BufferGeometry().setFromPoints(points);
+        const lineMat = new THREE.LineBasicMaterial({
+          color: 0x64748b,
+          transparent: true,
+          opacity: 0.38
+        });
+        rootGroup.add(new THREE.Line(lineGeo, lineMat));
+      });
+
+      // Data Packet Particles flowing along the conduits
+      const packetCount = 24;
+      const packets = [];
+      const packetGeo = new THREE.SphereGeometry(0.045, 8, 8);
+
+      for (let i = 0; i < packetCount; i++) {
+        const curveIndex = i % curves.length;
+        const mat = new THREE.MeshBasicMaterial({
+          color: i % 2 === 0 ? 0xe58e3c : 0x38bdf8
+        });
+        const mesh = new THREE.Mesh(packetGeo, mat);
+        rootGroup.add(mesh);
+        packets.push({
+          mesh,
+          curve: curves[curveIndex],
+          t: Math.random(),
+          speed: 0.0028 + Math.random() * 0.0022
+        });
+      }
+
+      // Subtle Background Starfield / Dust
+      const dustGeo = new THREE.BufferGeometry();
+      const dustCount = 260;
+      const dustPos = new Float32Array(dustCount * 3);
+      for (let i = 0; i < dustCount * 3; i++) {
+        dustPos[i] = (Math.random() - 0.5) * 18;
+      }
+      dustGeo.setAttribute('position', new THREE.BufferAttribute(dustPos, 3));
+      const dustMat = new THREE.PointsMaterial({
+        color: 0x94a3b8,
+        size: 0.028,
+        transparent: true,
+        opacity: 0.4
+      });
+      scene.add(new THREE.Points(dustGeo, dustMat));
+
+      // Resize Handler
+      function onResize() {
+        const parent = canvas.parentElement;
+        const w = parent.clientWidth;
+        const h = parent.clientHeight;
+        renderer.setSize(w, h, false);
+        camera.aspect = w / h;
+        rootGroup.position.x = w < 1024 ? 0 : 1.65;
+        camera.updateProjectionMatrix();
+      }
+      window.addEventListener('resize', onResize);
+      onResize();
+
+      // Mouse Parallax & Station Selection State
+      let mouseX = 0;
+      let mouseY = 0;
+      let activeStation = 0;
+
+      window.addEventListener('mousemove', (e) => {
+        mouseX = (e.clientX / window.innerWidth - 0.5) * 2;
+        mouseY = (e.clientY / window.innerHeight - 0.5) * 2;
+      });
+
+      function selectStation(index) {
+        activeStation = index;
+        const info = stationsData[index];
+        document.getElementById('hud-code').textContent = info.code;
+        document.getElementById('hud-badge').textContent = info.badge;
+        document.getElementById('hud-title').textContent = info.title;
+        document.getElementById('hud-desc').textContent = info.desc;
+
+        document.querySelectorAll('.station-btn').forEach((btn, idx) => {
+          if (idx === index) {
+            btn.className = 'station-btn active mono text-xs px-3.5 py-2 rounded border border-amber-500/60 bg-amber-500/15 text-amber-200 transition-all';
+          } else {
+            btn.className = 'station-btn mono text-xs px-3.5 py-2 rounded border border-white/10 bg-white/[0.02] text-slate-300 hover:border-white/30 transition-all';
+          }
+        });
+
+        document.querySelectorAll('[data-card-station]').forEach((card, idx) => {
+          card.classList.toggle('panel-active', idx === index);
+        });
+      }
+
+      document.querySelectorAll('.station-btn').forEach((btn) => {
+        const idx = parseInt(btn.getAttribute('data-station'), 10);
+        btn.addEventListener('mouseenter', () => selectStation(idx));
+        btn.addEventListener('click', () => selectStation(idx));
+      });
+
+      document.querySelectorAll('[data-card-station]').forEach((card) => {
+        const idx = parseInt(card.getAttribute('data-card-station'), 10);
+        card.addEventListener('mouseenter', () => selectStation(idx));
+      });
+
+      // Animation Loop
+      let clock = new THREE.Clock();
+      function animate() {
+        requestAnimationFrame(animate);
+        const elapsed = clock.getElapsedTime();
+
+        shieldMesh.rotation.y = elapsed * 0.08;
+        shieldMesh.rotation.x = Math.sin(elapsed * 0.15) * 0.12;
+        orbitalRing1.rotation.z = elapsed * 0.18;
+        orbitalRing2.rotation.z = -elapsed * 0.14;
+
+        // Smooth group parallax + focus offset toward active station
+        const targetPos = nodePositions[activeStation];
+        const desiredRotY = mouseX * 0.35 - targetPos.x * 0.08;
+        const desiredRotX = mouseY * 0.22 + targetPos.y * 0.06;
+        rootGroup.rotation.y += (desiredRotY - rootGroup.rotation.y) * 0.05;
+        rootGroup.rotation.x += (desiredRotX - rootGroup.rotation.x) * 0.05;
+
+        // Pulse active station node
+        stationMeshes.forEach((item, idx) => {
+          item.core.rotation.y = elapsed * 0.6;
+          item.shell.rotation.x = -elapsed * 0.4;
+          const isSelected = idx === activeStation;
+          const targetScale = isSelected ? 1.38 + Math.sin(elapsed * 4) * 0.06 : 1.0;
+          item.group.scale.lerp(new THREE.Vector3(targetScale, targetScale, targetScale), 0.1);
+          item.core.material.emissiveIntensity = isSelected ? 0.85 : 0.28;
+          item.shell.material.opacity = isSelected ? 0.78 : 0.32;
+        });
+
+        // Advance telemetry packets along bezier conduits
+        packets.forEach((p) => {
+          p.t = (p.t + p.speed) % 1;
+          const pos = p.curve.getPointAt(p.t);
+          p.mesh.position.copy(pos);
+        });
+
+        renderer.render(scene, camera);
+      }
+
+      selectStation(0);
+      animate();
+    })();
+  </script>
 </body>
 </html>
