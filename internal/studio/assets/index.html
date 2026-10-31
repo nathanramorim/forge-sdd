@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Forge-SDD Studio — Estações & Personagens</title>
+  <link rel="stylesheet" href="/studio.css">
+</head>
+<body>
+  <!-- Header Fixo e Responsivo (CA-10) -->
+  <header class="studio-header">
+    <div class="brand-row">
+      <div class="brand-dot"></div>
+      <div class="brand-title">forge-sdd studio</div>
+    </div>
+    <div class="header-status-group">
+      <div class="chip">
+        <span>Projeto:</span>
+        <b id="projectName" style="color:var(--fg);">forge-sdd</b>
+      </div>
+      <div class="chip">
+        <span id="projectVersion">v3.0.1</span>
+      </div>
+      <div class="chip live" id="statusChip">
+        <i></i>LIVE SSE
+      </div>
+      <div class="mode-toggle">
+        <button id="btnLive" class="mode-btn active" onclick="setStudioMode('LIVE')">LIVE</button>
+        <button id="btnDemo" class="mode-btn" onclick="setStudioMode('DEMO')">DEMO</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Container Principal -->
+  <main class="studio-wrap">
+    <!-- Trilho de Handoff Ativo (CA-06) -->
+    <section class="handoff-box" aria-label="Trilho de Handoff">
+      <div class="handoff-route">
+        <span class="handoff-pill mono" id="hoFrom">lider</span>
+        <div class="handoff-pipe" aria-hidden="true">
+          <div class="handoff-packet"></div>
+        </div>
+        <span class="handoff-pill mono" id="hoTo">pm-architect</span>
+      </div>
+      <div class="handoff-payload">
+        <b>Transição & Contrato</b>
+        <span id="hoPayload">Discovery & Especificação</span>
+      </div>
+      <div class="chip" id="hoGate">
+        <i style="--o:var(--ok)"></i>Portão Validado
+      </div>
+    </section>
+
+    <!-- Grid das 5 Estações Canônicas e Mascotes (CA-05) -->
+    <section class="stations-grid" id="stationsGrid" aria-label="Estações de Trabalho">
+      <!-- Cards renderizados dinamicamente via studio.js -->
+    </section>
+
+    <!-- Inspetor de Governança (CA-08) -->
+    <section class="gov-section" aria-label="Inspetor de Governança">
+      <div class="gov-panel">
+        <h3>Inspetor de Governança</h3>
+        <p style="color:var(--muted);font-size:12px;">Auditoria estrita em conformidade com as Camadas A (Gate determinístico) e B (Analista Read-Only).</p>
+        <div class="gov-findings-list">
+          <div class="finding-card conforme" id="govFindingCard">
+            <b>Portão de Governança Camada A & B</b>
+            <p style="margin-top:4px;color:var(--muted);">Aguardando submissão ou inspeção ativa</p>
+          </div>
+        </div>
+      </div>
+      <div class="gov-panel">
+        <h3>Pilares Constitucionais (sdd/memory/constitution.md)</h3>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(130px, 1fr));gap:8px;margin-top:12px;">
+          <div class="chip mono" style="justify-content:center;">ARQ (1..4) OK</div>
+          <div class="chip mono" style="justify-content:center;">SEG (1..6) OK</div>
+          <div class="chip mono" style="justify-content:center;">DUP (1..5) OK</div>
+          <div class="chip mono" style="justify-content:center;">COD (1..5) OK</div>
+          <div class="chip mono" style="justify-content:center;">TST (1..5) OK</div>
+          <div class="chip mono" style="justify-content:center;">FLX (1..4) OK</div>
+          <div class="chip mono" style="justify-content:center;">GOV (1..5) OK</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Rodapé -->
+  <footer class="studio-foot">
+    <div>
+      <span>forge-sdd studio • Runtime Go 100% Stdlib • Arquitetura Sem Dependências</span>
+    </div>
+    <div>
+      <span>Última atualização: <span id="lastUpdate" class="mono">--:--:--</span></span>
+    </div>
+  </footer>
+
+  <script src="/studio.js"></script>
+</body>
+</html>

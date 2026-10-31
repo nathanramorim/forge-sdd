@@ -1,8 +1,8 @@
 {
-  "feature_id": "feat-60-site-estatico-seo-performance",
-  "branch": "feat/60-site-estatico-seo-performance",
+  "feature_id": "feat-59-modulo-visual-estacoes-personagens",
+  "branch": "feat/59-modulo-visual-estacoes-personagens",
   "spec_status": "reviewed",
-  "updated_at": "2026-10-31T17:53:28Z",
+  "updated_at": "2026-10-31T19:11:41Z",
   "items": [
     {
       "task_id": "feat-60-01-scaffold-astro-seo-dados-tipados",
@@ -99,6 +99,62 @@
         "veredito": "conforme",
         "achados": [],
         "resumo": "Configuração Cloudflare Workers Static Assets wrangler.jsonc, headers de cache imutavel e seguranca, suite de verificacao verify-build.mjs cobrindo CA-01 a CA-10 e documentacao atualizadas com sucesso."
+      }
+    },
+    {
+      "task_id": "feat-59-01-filas-por-estacao-idempotencia-escrita-atomica",
+      "title": "feat-59-01 — Motor de Filas por Estação (`sdd/.queue/stations/*.json`), Idempotência Estrita (`IdempotencyKey`) e Escrita Atômica",
+      "spec_path": "sdd/features/feat-59-modulo-visual-estacoes-personagens/feat-59-01-filas-por-estacao-idempotencia-escrita-atomica.md",
+      "status": "approved",
+      "rules": [],
+      "skills_used": [],
+      "attempts": 1,
+      "governance_verdict": {
+        "veredito": "conforme",
+        "achados": [],
+        "resumo": "Motor de 5 filas por estação, idempotência SHA-256 e escrita atômica implementados com testes de concorrência e CLI handoff/stations."
+      }
+    },
+    {
+      "task_id": "feat-59-02-agregador-read-only-e-servidor-http-sse",
+      "title": "feat-59-02 — Agregador Read-Only de Estado (`internal/studio`) e Servidor HTTP/SSE (`forge-sdd studio`)",
+      "spec_path": "sdd/features/feat-59-modulo-visual-estacoes-personagens/feat-59-02-agregador-read-only-e-servidor-http-sse.md",
+      "status": "approved",
+      "rules": [],
+      "skills_used": [],
+      "attempts": 1,
+      "governance_verdict": {
+        "veredito": "conforme",
+        "achados": [],
+        "resumo": "Backend agregador StudioSnapshot, endpoints /api/state e /api/events SSE, bloqueio de mutação 405 e CLI forge-sdd studio testados com corrida e aprovados."
+      }
+    },
+    {
+      "task_id": "feat-59-03-interface-visual-embarcada-estacoes-e-governanca",
+      "title": "feat-59-03 — Interface Visual Embarcada (`embed.FS`) com os 5 Personagens das Estações, Trilho de Handoff, Filas Individuais e Inspetor de Governança",
+      "spec_path": "sdd/features/feat-59-modulo-visual-estacoes-personagens/feat-59-03-interface-visual-embarcada-estacoes-e-governanca.md",
+      "status": "approved",
+      "rules": [],
+      "skills_used": [],
+      "attempts": 1,
+      "governance_verdict": {
+        "veredito": "conforme",
+        "achados": [],
+        "resumo": "Assets web embutidos com sucesso via embed.FS contendo os 5 mascotes com SVG fallback de alta fidelidade, trilho de handoff, cartoes das estacoes individuais, inspetor de governanca e conexao SSE com alternancia LIVE/DEMO. Zero dependencias externas."
+      }
+    },
+    {
+      "task_id": "feat-59-04-integracao-estacoes-catalogo-e-documentacao",
+      "title": "feat-59-04 — Integração de Handoff nas 5 Estações (`.agents/`), Catálogo de Conceitos (`concepts.md`) e Documentação (`FLOW.md` / `README.md` / `history.md`)",
+      "spec_path": "sdd/features/feat-59-modulo-visual-estacoes-personagens/feat-59-04-integracao-estacoes-catalogo-e-documentacao.md",
+      "status": "approved",
+      "rules": [],
+      "skills_used": [],
+      "attempts": 1,
+      "governance_verdict": {
+        "veredito": "conforme",
+        "achados": [],
+        "resumo": "Conceitos de filas por estacao e modulo visual plugavel Forge Studio registrados em concepts.md. Fluxos e comandos documentados em FLOW.md e README.md. Historico de releases atualizado com a v3.0.1-beta.2 e templates sincronizados."
       }
     }
   ]

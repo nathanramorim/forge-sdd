@@ -105,25 +105,21 @@ func Load(dir string) (*Queue, error) {
 	return &q, nil
 }
 
-// Save persiste a fila em <dir>/sdd/.queue/queue.json atualizando UpdatedAt.
+// Save persiste a fila em <dir>/sdd/.queue/queue.json atualizando UpdatedAt de forma atômica
+// e sincronizando as filas das estações builder.json e governance.json.
 func Save(dir string, q *Queue) error {
 	path := QueueFilePath(dir)
-	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
-		return fmt.Errorf("falha ao criar diretório da fila: %w", err)
-	}
 	if q.SpecStatus == "" {
 		q.SpecStatus = "reviewed"
 	}
 	q.UpdatedAt = time.Now().UTC().Format(time.RFC3339)
 
-	data, err := json.MarshalIndent(q, "", "  ")
-	if err != nil {
-		return fmt.Errorf("falha ao serializar fila: %w", err)
+	if err := WriteJSONAtomic(path, q, 0o644); err != nil {
+		return fmt.Errorf("falha ao gravar fila %s: %w", path, err)
 	}
-	data = append(data, '\n')
-	if err := os.WriteFile(path, data, 0o644); err != nil {
-		return fmt.Errorf("falha ao gravar %s: %w", path, err)
-	}
+
+	// Sincroniza com as filas canônicas de estações
+	_ = SyncLegacyQueue(dir, q)
 	return nil
 }
 

@@ -180,8 +180,12 @@ main
 | 58-06 | feat-58-orquestracao-autonoma-governanca-skills/feat-58-06-motor-auto-skills-regra-de-tres.md | feat/58-orquestracao-autonoma-governanca-skills | 58-06 | done |
 | 58-07 | feat-58-orquestracao-autonoma-governanca-skills/feat-58-07-importador-governanca-update-docs-e-release-v3-beta.md | feat/58-orquestracao-autonoma-governanca-skills | 58-07 | done |
 | 61 | fix-61-lp-handoff-overlap-e-link-instagram.md | fix/61-lp-handoff-overlap-e-link-instagram | 61 | done |
-| 60-01 | feat-60-site-estatico-seo-performance/feat-60-01-scaffold-astro-seo-dados-tipados.md | feat/60-site-estatico-seo-performance | 60-01 | todo |
-| 60-02 | feat-60-site-estatico-seo-performance/feat-60-02-componentes-ssg-pre-renderizados-fallback-svg.md | feat/60-site-estatico-seo-performance | 60-02 | todo |
-| 60-03 | feat-60-site-estatico-seo-performance/feat-60-03-hidratacao-interacoes-motor-3d-otimizado.md | feat/60-site-estatico-seo-performance | 60-03 | todo |
+| 60-01 | feat-60-site-estatico-seo-performance/feat-60-01-scaffold-astro-seo-dados-tipados.md | feat/60-site-estatico-seo-performance | 60-01 | done |
+| 60-02 | feat-60-site-estatico-seo-performance/feat-60-02-componentes-ssg-pre-renderizados-fallback-svg.md | feat/60-site-estatico-seo-performance | 60-02 | done |
+| 60-03 | feat-60-site-estatico-seo-performance/feat-60-03-hidratacao-interacoes-motor-3d-otimizado.md | feat/60-site-estatico-seo-performance | 60-03 | done |
 | 60-04 | feat-60-site-estatico-seo-performance/feat-60-04-cloudflare-workers-testes-seo-fidelidade.md | feat/60-site-estatico-seo-performance | 60-04 | done |
-| 62 | fix-62-remover-metadados-player-video.md | fix/62-remover-metadados-player-video | 62 | todo |
+| 62 | fix-62-remover-metadados-player-video.md | fix/62-remover-metadados-player-video | 62 | done |
+| 59-01 | feat-59-modulo-visual-estacoes-personagens/feat-59-01-filas-por-estacao-idempotencia-escrita-atomica.md | feat/59-modulo-visual-estacoes-personagens | 59-01 | done |
+| 59-02 | feat-59-modulo-visual-estacoes-personagens/feat-59-02-agregador-read-only-e-servidor-http-sse.md | feat/59-modulo-visual-estacoes-personagens | 59-02 | done |
+| 59-03 | feat-59-modulo-visual-estacoes-personagens/feat-59-03-interface-visual-embarcada-estacoes-e-governanca.md | feat/59-modulo-visual-estacoes-personagens | 59-03 | done |
+| 59-04 | feat-59-modulo-visual-estacoes-personagens/feat-59-04-integracao-estacoes-catalogo-e-documentacao.md | feat/59-modulo-visual-estacoes-personagens | 59-04 | done |

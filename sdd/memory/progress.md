@@ -2,20 +2,23 @@
 
 ## Status
 ```
-Feature 58 — Orquestração Autônoma, Governança A/B/C e Auto-Skills [x] done
-Fix 61 — LP Handoff Bar Overlap + Link Instagram (@nathan.ramorim) [x] done
-Feature 60 — Site Estático Oficial (forge-sdd.org) Astro + SEO [x] done
-Fix 62 — Player de Vídeo Limpo (sem metadados redundantes) [x] done
-Release v3.0.1-beta.1 — Publicada no NPM e GitHub Releases [x] done
-Discovery 59 — Módulo Visual (Forge Studio) + Filas por Estação [ ] ready to split
+Feat 58 — Orquestração Autônoma v3.0 [x] done
+Fix 61 — Handoff Overlap + Instagram (@nathan.ramorim) [x] done
+Feat 60 — Site Oficial (forge-sdd.org) Astro SSG [x] done
+Fix 62 — Player de Vídeo Limpo [x] done
+Release v3.0.1-beta.1 — NPM & GitHub Releases [x] done
+Feat 59 — Forge Studio + Filas por Estação [x] 4/4 done
+  ├─ 59-01 Filas por Estação + Idempotência [x] done
+  ├─ 59-02 Backend Read-Only HTTP/SSE [x] done
+  ├─ 59-03 UI embed.FS 5 Mascotes [x] done
+  └─ 59-04 Integração Estações + Docs [x] done
 ```
 
 ## Features ativas
-- Nenhuma feature em andamento. Branch base atual: `release/v3.0.1`.
-- Próximo trabalho: Discovery 59 (`sdd/discovery/plan-59-modulo-visual-estacoes-personagens.md`).
+- Nenhuma ativa (Feat 59 concluída).
 
 ## Próximo passo
-**Iniciar:** Executar `/split-features` para o Discovery 59 na branch `feat/59-modulo-visual-estacoes-personagens`.
+**PR:** Merge de `feat/59-modulo-visual-estacoes-personagens` para `release/v3.0.1`.
 **Bloqueios:** —
 
 > Histórico completo em `progress-log.md`

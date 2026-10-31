@@ -87,8 +87,10 @@ flowchart LR
 | **04 // Builders** | *Execução em Fila* | Consomem tarefas de uma **fila determinística** (`forge-sdd queue`): frentes independentes rodam **em paralelo**; dependências aguardam liberação. |
 | **05 // Governança** | *Auditoria Independente* | **Sem permissão de escrita em código.** Audita se a entrega respeitou arquitetura, boas práticas e segurança antes de devolver ao Líder. |
 
-### Destaques Técnicos da `v3.0.0-beta`
+### Destaques Técnicos da `v3.0.0-beta` e `v3.0.1-beta`
 *   **5 Estações Coordenadas (`.agents/roles/`):** fonte canônica única dos papéis com adaptadores finos para Claude Code, Gemini e GitHub Copilot.
+*   **Painel Visual Embarcado & Forge Studio (`forge-sdd studio`):** servidor HTTP/SSE estritamente read-only em `127.0.0.1:4321` com interface web completa embarcada via `embed.FS` (`ARQ-03`). Acompanhe os 5 mascotes com fallback SVG 2D de alta fidelidade, trilho de handoff vivo em trânsito com loop de retrabalho `05 ↺ 04` e inspeção do Portão de Governança das Camadas A e B sem qualquer dependência externa de runtime.
+*   **Filas Individuais por Estação & Handoff Determinístico (`forge-sdd queue handoff` / `stations`):** persistência atômica isolada em `sdd/.queue/stations/<station>.json` com idempotência estrita via SHA-256 e sincronização bidirecional com a fila do Builder.
 *   **Constituição por IDs Estáveis + Rules Modulares (`.agents/rules/sdd-*.md`):** `sdd/memory/constitution.md` mantém "o quê e por quê" enxuto com IDs (`ARQ`, `SEG`, `DUP`, `COD`, `TST`, `FLX`, `GOV`), enquanto as rules detalham "como cumprir" sob demanda sem duplicar texto (`GOV-04`).
 *   **Fila do Builder (`forge-sdd queue`) e Portão em 3 Camadas (`forge-sdd gate`):** exige seção `"O que já existe"` (Reuse Check `DUP-02`) na Spec, roda checks determinísticos `P-xx` (Camada A) e valida o parecer JSON baseado em evidências do Analista de Governança (Camada B) antes da aprovação humana no Líder (Camada C).
 *   **Auto-Skills (`forge-sdd skills`) e Pacotes de Governança (`forge-sdd governance`):** atividades padronizadas repetidas viram skills reutilizáveis em `.agents/skills/` sincronizadas para `.claude/skills/` e `.gemini/skills/`.

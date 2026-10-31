@@ -1,0 +1,133 @@
+package studio_test
+
+import (
+	"context"
+	"encoding/json"
+	"net/http"
+	"strings"
+	"testing"
+	"time"
+
+	"github.com/forge-sdd/cli/internal/queue"
+	"github.com/forge-sdd/cli/internal/studio"
+)
+
+func TestStudioServer_StateAndReadOnly(t *testing.T) {
+	tempDir := t.TempDir()
+
+	// Cria itens em lider e builder
+	_, _, err := queue.EnqueueStationItem(tempDir, queue.StationItem{
+		ID:        "item-lider",
+		Title:     "Demanda do Líder",
+		Station:   queue.StationLider,
+		Operation: "conception",
+		Status:    queue.StatusBuilding,
+	})
+	if err != nil {
+		t.Fatalf("erro ao criar item no lider: %v", err)
+	}
+
+	srv, err := studio.NewServer(studio.Config{
+		Dir:  tempDir,
+		Host: "127.0.0.1",
+		Port: 0, // porta dinâmica
+	})
+	if err != nil {
+		t.Fatalf("erro ao criar studio server: %v", err)
+	}
+
+	if err := srv.Listen(); err != nil {
+		t.Fatalf("erro ao abrir porta: %v", err)
+	}
+
+	go func() {
+		_ = srv.Start()
+	}()
+	defer func() {
+		_ = srv.Stop()
+	}()
+
+	url := srv.URL()
+
+	// 1. Testa GET /api/state
+	resp, err := http.Get(url + "/api/state")
+	if err != nil {
+		t.Fatalf("falha ao requisitar /api/state: %v", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		t.Errorf("esperado status 200, recebido %d", resp.StatusCode)
+	}
+
+	var snap studio.StudioSnapshot
+	if err := json.NewDecoder(resp.Body).Decode(&snap); err != nil {
+		t.Fatalf("falha ao decodificar snapshot: %v", err)
+	}
+
+	if len(snap.Stations) != 5 {
+		t.Fatalf("esperado 5 estações no snapshot, recebido %d", len(snap.Stations))
+	}
+	if snap.ActiveStation != queue.StationLider {
+		t.Errorf("esperado active station lider, recebido %s", snap.ActiveStation)
+	}
+
+	// 2. Testa Rejeição de Métodos de Mutação (POST, PUT, DELETE) -> 405 Method Not Allowed
+	mutations := []string{http.MethodPost, http.MethodPut, http.MethodDelete}
+	for _, m := range mutations {
+		req, _ := http.NewRequest(m, url+"/api/state", strings.NewReader(`{"bad":"mutation"}`))
+		mResp, err := http.DefaultClient.Do(req)
+		if err != nil {
+			t.Fatalf("erro na requisição de mutação %s: %v", m, err)
+		}
+		if mResp.StatusCode != http.StatusMethodNotAllowed {
+			t.Errorf("esperado 405 Method Not Allowed para %s, recebido %d", m, mResp.StatusCode)
+		}
+		mResp.Body.Close()
+	}
+}
+
+func TestStudioServer_SSE(t *testing.T) {
+	tempDir := t.TempDir()
+
+	srv, err := studio.NewServer(studio.Config{
+		Dir:  tempDir,
+		Host: "127.0.0.1",
+		Port: 0,
+	})
+	if err != nil {
+		t.Fatalf("erro ao criar studio: %v", err)
+	}
+
+	if err := srv.Listen(); err != nil {
+		t.Fatalf("erro ao abrir porta: %v", err)
+	}
+
+	go func() {
+		_ = srv.Start()
+	}()
+	defer func() {
+		_ = srv.Stop()
+	}()
+
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, srv.URL()+"/api/events", nil)
+	if err != nil {
+		t.Fatalf("erro ao criar req SSE: %v", err)
+	}
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		t.Fatalf("falha ao conectar no SSE: %v", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		t.Errorf("esperado status 200 no SSE, recebido %d", resp.StatusCode)
+	}
+	if ct := resp.Header.Get("Content-Type"); !strings.Contains(ct, "text/event-stream") {
+		t.Errorf("esperado Content-Type text/event-stream, recebido %s", ct)
+	}
+}

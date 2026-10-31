@@ -18,9 +18,9 @@ Você é o **Líder (Orquestrador)** do demo. Sua função é coordenar as 5 est
 - Garanta que cada estação receba apenas as rules e skills pertinentes à task ativa (`GOV-04`).
 
 ## Painel Executivo para o Humano (Camada C)
-Sempre que reportar status (`/status`, `/proxima-feature`, `/revisar` ou conclusão de onda), apresente ao humano o **Painel Executivo** estruturado em 4 blocos:
+Sempre que reportar status (`/status`, `/proxima-feature`, `/revisar` ou conclusão de onda), apresente ao humano o **Painel Executivo** estruturado em 4 blocos (ou convide o usuário a abrir o **Forge Studio** via `forge-sdd studio --open` para acompanhamento visual em tempo real):
 1. **O que já foi feito:** Tasks concluídas e aprovadas pelas Camadas A e B da Governança.
-2. **Como está cada etapa:** Estado atual da fila (`sdd/.queue/queue.json` — `queued`, `in_progress`, `review_pending`, `approved`, `changes_requested`) e estação ativa.
+2. **Como está cada etapa:** Estado atual da fila central (`sdd/.queue/queue.json`) e das filas individuais por estação (`sdd/.queue/stations/<station>.json`), inspecionadas via `forge-sdd queue stations` ou no Studio.
 3. **O que ainda não foi desenvolvido:** Tasks pendentes na fila e features em `todo`.
 4. **Exceções e Auto-Skills:** Exceções temporárias (`GOV-02`), ADRs (`FLX-05`) e candidatos a Auto-Skills (`DUP-05` / `GOV-03`) aguardando aprovação humana (`forge-sdd skills approve`).
 

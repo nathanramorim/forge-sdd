@@ -139,3 +139,27 @@ usados, número de sessões, duração total, e a idade medida do projeto
 (`/status`, `/doctor`, `/constitution`, `/c4-architecture`,
 `/upgrade-sdd`, `/tutorial`) não gravam telemetria — não produzem
 entrega, ficariam fora do escopo do relatório.
+
+---
+
+## 🎨 8. Forge Studio & Trilho de Handoff das Estações (`forge-sdd studio`)
+
+A qualquer momento do ciclo de desenvolvimento, os engenheiros ou o Líder podem inicializar a interface visual embarcada do Forge Studio para inspecionar em tempo real o fluxo entre as 5 estações:
+
+```bash
+# Iniciar servidor local HTTP/SSE (estritamente read-only)
+forge-sdd studio --port 4321
+
+# Ou abrir automaticamente no navegador padrão
+forge-sdd studio --open
+```
+
+**Capacidades:**
+* **Visualização Viva das 5 Estações:** Acompanhe o status (`idle`, `working`, `thinking`, `finished`, `approval`, `error`) e os avatares dos personagens (`Líder`, `PM & Arquiteto`, `Planejador`, `Builder` e `Governança`) com fallback SVG 2D de alta fidelidade e zero dependências externas (`ARQ-03`).
+* **Trilho de Handoff & Loop de Retrabalho:** Mostra o pacote em trânsito e contratos de I/O em tempo real via Server-Sent Events (SSE). Handoffs de transição ou devoluções de retrabalho (`05 ↺ 04`) podem ser auditados via:
+  ```bash
+  forge-sdd queue handoff --from builder --to governance --task feat-59-01 --gate "Testes Locais Conforme"
+  ```
+* **Filas Atômicas por Estação:** Inspecione `sdd/.queue/stations/<station>.json` com garantia de idempotência estrita via SHA-256 e escrita atômica contra race conditions (`forge-sdd queue stations`).
+* **Segurança e Isolamento Total (`SEG-01` e `SEG-06`):** O servidor do Studio roda em `127.0.0.1` e rejeita qualquer mutação com `405 Method Not Allowed`, garantindo integridade absoluta do repositório.
+

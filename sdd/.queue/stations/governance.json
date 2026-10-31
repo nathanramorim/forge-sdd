@@ -1,0 +1,153 @@
+{
+  "station": "governance",
+  "version": 11,
+  "updated_at": "2026-10-31T19:11:41Z",
+  "processed_keys": [
+    "c79730d2c7e03d48f3689a666be98e04",
+    "08027fd7735ceb3678a5e1de3214073a",
+    "9668abaed2463ee8ca911b42cb84fd0b",
+    "edd98de66c1224097f2e17a50a6d683f",
+    "35cc4786eb665ece2b3eb380a4bc36ea",
+    "d854893da61427d341be80a7a4e66f1b",
+    "69ffdf8a793bf739a25fe806b9f2c769",
+    "7a9eb6207619c29b16d68ed3967a92d9"
+  ],
+  "items": [
+    {
+      "id": "feat-60-01-scaffold-astro-seo-dados-tipados",
+      "title": "Auditoria Camada B: feat-60-01 — Scaffold Astro 5 SSG em `/site`, SEO Técnico (`SeoHead`, JSON-LD, Sitemap, `llms.txt`) e Extração de Dados Tipados",
+      "station": "governance",
+      "operation": "review",
+      "status": "approved",
+      "artifact_path": "sdd/features/feat-60-site-estatico-seo-performance/feat-60-01-scaffold-astro-seo-dados-tipados.md",
+      "idempotency_key": "c79730d2c7e03d48f3689a666be98e04",
+      "attempt": 1,
+      "created_at": "2026-10-31T19:01:43Z",
+      "updated_at": "2026-10-31T19:11:41Z",
+      "governance_verdict": {
+        "veredito": "conforme",
+        "achados": [],
+        "resumo": "Scaffold Astro 5 SSG, dados tipados e SEO implementados com sucesso."
+      }
+    },
+    {
+      "id": "feat-60-02-componentes-ssg-pre-renderizados-fallback-svg",
+      "title": "Auditoria Camada B: feat-60-02 — Componentes Astro 1:1 Pré-Renderizados no Build (Header, Hero, 5 Estações, Emulador, Instalação, Governança, Evolução e Footer) com Fallback SVG",
+      "station": "governance",
+      "operation": "review",
+      "status": "approved",
+      "artifact_path": "sdd/features/feat-60-site-estatico-seo-performance/feat-60-02-componentes-ssg-pre-renderizados-fallback-svg.md",
+      "idempotency_key": "08027fd7735ceb3678a5e1de3214073a",
+      "attempt": 1,
+      "created_at": "2026-10-31T19:01:43Z",
+      "updated_at": "2026-10-31T19:11:41Z",
+      "governance_verdict": {
+        "veredito": "conforme",
+        "achados": [],
+        "resumo": "Componentes 1:1 pré-renderizados no build com Fallback SVG e CLS=0."
+      }
+    },
+    {
+      "id": "feat-60-03-hidratacao-interacoes-motor-3d-otimizado",
+      "title": "Auditoria Camada B: feat-60-03 — Hidratação Progressiva de Interações (`interactions.ts`) e Motor WebGL Otimizado (`mascot-3d.ts`) com Tree-Shaking e Pausa fora da Viewport",
+      "station": "governance",
+      "operation": "review",
+      "status": "approved",
+      "artifact_path": "sdd/features/feat-60-site-estatico-seo-performance/feat-60-03-hidratacao-interacoes-motor-3d-otimizado.md",
+      "idempotency_key": "9668abaed2463ee8ca911b42cb84fd0b",
+      "attempt": 1,
+      "created_at": "2026-10-31T19:01:43Z",
+      "updated_at": "2026-10-31T19:11:41Z",
+      "governance_verdict": {
+        "veredito": "conforme",
+        "achados": [],
+        "resumo": "Módulos interactions.ts e mascot-3d.ts implementados com tree-shaking ESM, requestIdleCallback, IntersectionObserver para WebGL, transição de fallback SVG sem CLS e ciclo interativo completo."
+      }
+    },
+    {
+      "id": "feat-60-04-cloudflare-workers-testes-seo-fidelidade",
+      "title": "Auditoria Camada B: feat-60-04 — Configuração Cloudflare Workers (`wrangler.jsonc` + `_headers`), Suite de Testes de Fidelidade/SEO (`npm test`) e Documentação",
+      "station": "governance",
+      "operation": "review",
+      "status": "approved",
+      "artifact_path": "sdd/features/feat-60-site-estatico-seo-performance/feat-60-04-cloudflare-workers-testes-seo-fidelidade.md",
+      "idempotency_key": "edd98de66c1224097f2e17a50a6d683f",
+      "attempt": 1,
+      "created_at": "2026-10-31T19:01:43Z",
+      "updated_at": "2026-10-31T19:11:41Z",
+      "governance_verdict": {
+        "veredito": "conforme",
+        "achados": [],
+        "resumo": "Configuração Cloudflare Workers Static Assets wrangler.jsonc, headers de cache imutavel e seguranca, suite de verificacao verify-build.mjs cobrindo CA-01 a CA-10 e documentacao atualizadas com sucesso."
+      }
+    },
+    {
+      "id": "feat-59-01-filas-por-estacao-idempotencia-escrita-atomica",
+      "title": "Auditoria Camada B: feat-59-01 — Motor de Filas por Estação (`sdd/.queue/stations/*.json`), Idempotência Estrita (`IdempotencyKey`) e Escrita Atômica",
+      "station": "governance",
+      "operation": "review",
+      "status": "approved",
+      "artifact_path": "sdd/features/feat-59-modulo-visual-estacoes-personagens/feat-59-01-filas-por-estacao-idempotencia-escrita-atomica.md",
+      "idempotency_key": "35cc4786eb665ece2b3eb380a4bc36ea",
+      "attempt": 1,
+      "created_at": "2026-10-31T19:01:52Z",
+      "updated_at": "2026-10-31T19:11:41Z",
+      "governance_verdict": {
+        "veredito": "conforme",
+        "achados": [],
+        "resumo": "Motor de 5 filas por estação, idempotência SHA-256 e escrita atômica implementados com testes de concorrência e CLI handoff/stations."
+      }
+    },
+    {
+      "id": "feat-59-02-agregador-read-only-e-servidor-http-sse",
+      "title": "Auditoria Camada B: feat-59-02 — Agregador Read-Only de Estado (`internal/studio`) e Servidor HTTP/SSE (`forge-sdd studio`)",
+      "station": "governance",
+      "operation": "review",
+      "status": "approved",
+      "artifact_path": "sdd/features/feat-59-modulo-visual-estacoes-personagens/feat-59-02-agregador-read-only-e-servidor-http-sse.md",
+      "idempotency_key": "d854893da61427d341be80a7a4e66f1b",
+      "attempt": 1,
+      "created_at": "2026-10-31T19:05:41Z",
+      "updated_at": "2026-10-31T19:11:41Z",
+      "governance_verdict": {
+        "veredito": "conforme",
+        "achados": [],
+        "resumo": "Backend agregador StudioSnapshot, endpoints /api/state e /api/events SSE, bloqueio de mutação 405 e CLI forge-sdd studio testados com corrida e aprovados."
+      }
+    },
+    {
+      "id": "feat-59-03-interface-visual-embarcada-estacoes-e-governanca",
+      "title": "Auditoria Camada B: feat-59-03 — Interface Visual Embarcada (`embed.FS`) com os 5 Personagens das Estações, Trilho de Handoff, Filas Individuais e Inspetor de Governança",
+      "station": "governance",
+      "operation": "review",
+      "status": "approved",
+      "artifact_path": "sdd/features/feat-59-modulo-visual-estacoes-personagens/feat-59-03-interface-visual-embarcada-estacoes-e-governanca.md",
+      "idempotency_key": "69ffdf8a793bf739a25fe806b9f2c769",
+      "attempt": 1,
+      "created_at": "2026-10-31T19:09:10Z",
+      "updated_at": "2026-10-31T19:11:41Z",
+      "governance_verdict": {
+        "veredito": "conforme",
+        "achados": [],
+        "resumo": "Assets web embutidos com sucesso via embed.FS contendo os 5 mascotes com SVG fallback de alta fidelidade, trilho de handoff, cartoes das estacoes individuais, inspetor de governanca e conexao SSE com alternancia LIVE/DEMO. Zero dependencias externas."
+      }
+    },
+    {
+      "id": "feat-59-04-integracao-estacoes-catalogo-e-documentacao",
+      "title": "Auditoria Camada B: feat-59-04 — Integração de Handoff nas 5 Estações (`.agents/`), Catálogo de Conceitos (`concepts.md`) e Documentação (`FLOW.md` / `README.md` / `history.md`)",
+      "station": "governance",
+      "operation": "review",
+      "status": "approved",
+      "artifact_path": "sdd/features/feat-59-modulo-visual-estacoes-personagens/feat-59-04-integracao-estacoes-catalogo-e-documentacao.md",
+      "idempotency_key": "7a9eb6207619c29b16d68ed3967a92d9",
+      "attempt": 1,
+      "created_at": "2026-10-31T19:11:41Z",
+      "updated_at": "2026-10-31T19:11:41Z",
+      "governance_verdict": {
+        "veredito": "conforme",
+        "achados": [],
+        "resumo": "Conceitos de filas por estacao e modulo visual plugavel Forge Studio registrados em concepts.md. Fluxos e comandos documentados em FLOW.md e README.md. Historico de releases atualizado com a v3.0.1-beta.2 e templates sincronizados."
+      }
+    }
+  ]
+}
