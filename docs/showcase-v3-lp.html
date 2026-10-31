@@ -3,36 +3,29 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>FORGE-SDD 3.0 — Esquadrão Autônomo de 5 Especialistas</title>
+  <title>Forge-SDD 3.0 — Esquadrão Autônomo & Governança Ativa para IA</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap');
 
     :root {
       --bg-studio: #090b10;
       --border-hairline: rgba(255, 255, 255, 0.08);
-      --accent-amber: #f59e0b;
+    }
+
+    body, h1, h2, h3, h4, button, span, p, div, table {
+      font-family: 'Montserrat', sans-serif;
     }
 
     body {
-      font-family: 'Plus Jakarta Sans', sans-serif;
       background-color: var(--bg-studio);
       color: #e2e8f0;
       overflow-x: hidden;
     }
 
-    .font-display {
-      font-family: 'Syne', sans-serif;
-      letter-spacing: -0.03em;
-    }
-
-    .mono {
-      font-family: 'JetBrains Mono', monospace;
-    }
-
     .panel-glass {
-      background: linear-gradient(165deg, rgba(20, 25, 36, 0.78) 0%, rgba(10, 13, 20, 0.92) 100%);
+      background: linear-gradient(165deg, rgba(20, 25, 36, 0.8) 0%, rgba(10, 13, 20, 0.94) 100%);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
       border: 1px solid var(--border-hairline);
@@ -42,17 +35,29 @@
     .panel-glass:hover {
       border-color: rgba(245, 158, 11, 0.4);
       transform: translateY(-3px);
-      box-shadow: 0 24px 48px -18px rgba(0, 0, 0, 0.8), 0 0 32px -12px rgba(245, 158, 11, 0.18);
+      box-shadow: 0 24px 48px -18px rgba(0, 0, 0, 0.8), 0 0 32px -12px rgba(245, 158, 11, 0.16);
     }
 
     .panel-active {
       border-color: rgba(245, 158, 11, 0.75) !important;
-      box-shadow: 0 0 42px -10px rgba(245, 158, 11, 0.28);
+      box-shadow: 0 0 42px -10px rgba(245, 158, 11, 0.26);
       transform: translateY(-4px);
     }
 
+    .gov-btn-active-block {
+      border-color: rgba(244, 63, 94, 0.75) !important;
+      background: rgba(244, 63, 94, 0.14) !important;
+      box-shadow: 0 0 35px -8px rgba(244, 63, 94, 0.3);
+    }
+
+    .gov-btn-active-pass {
+      border-color: rgba(16, 185, 129, 0.75) !important;
+      background: rgba(16, 185, 129, 0.14) !important;
+      box-shadow: 0 0 35px -8px rgba(16, 185, 129, 0.3);
+    }
+
     .studio-backdrop {
-      background: radial-gradient(circle at 50% 0%, rgba(30, 41, 59, 0.35) 0%, rgba(9, 11, 16, 1) 70%);
+      background: radial-gradient(circle at 50% 0%, rgba(30, 41, 59, 0.38) 0%, rgba(9, 11, 16, 1) 70%);
     }
 
     #three-stage-container {
@@ -66,14 +71,25 @@
       box-shadow: 0 30px 80px -20px rgba(0, 0, 0, 0.85), inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
     }
 
-    #three-characters-canvas {
+    #three-gov-container {
+      position: relative;
+      width: 100%;
+      height: 430px;
+      border-radius: 1.5rem;
+      overflow: hidden;
+      background: radial-gradient(circle at 50% 45%, #112229 0%, #080b11 78%);
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      box-shadow: 0 30px 80px -20px rgba(0, 0, 0, 0.85), inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
+    }
+
+    canvas {
       width: 100%;
       height: 100%;
       display: block;
       cursor: grab;
     }
 
-    #three-characters-canvas:active {
+    canvas:active {
       cursor: grabbing;
     }
 
@@ -88,15 +104,16 @@
   <!-- TOP NAVIGATION BAR -->
   <header class="sticky top-0 z-30 border-b border-white/[0.06] bg-[#090b10]/85 backdrop-blur-md">
     <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-      <div class="flex items-center gap-4">
+      <div class="flex items-center gap-3.5">
         <div class="w-2.5 h-2.5 rounded-full bg-amber-400 shadow-[0_0_12px_#f59e0b]"></div>
-        <span class="mono text-xs tracking-[0.22em] uppercase text-white font-semibold">FORGE-SDD</span>
-        <span class="mono text-[11px] px-2 py-0.5 rounded border border-white/10 text-slate-400">v3.0.0-beta</span>
+        <span class="text-sm tracking-wider font-extrabold text-white">FORGE-SDD</span>
+        <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full border border-white/10 text-slate-300 bg-white/[0.03]">v3.0.0-beta</span>
       </div>
-      <div class="hidden md:flex items-center gap-8 text-xs mono uppercase tracking-widest text-slate-400">
-        <a href="#esquadrao" class="hover:text-white transition-colors">01. Os 5 Especialistas</a>
-        <a href="#comparativo" class="hover:text-white transition-colors">02. Evolução v2 → v3</a>
-        <a href="#governanca" class="hover:text-white transition-colors">03. Painel Executivo</a>
+      <div class="hidden md:flex items-center gap-8 text-xs font-semibold tracking-wide text-slate-400">
+        <a href="#esquadrao" class="hover:text-white transition-colors">Os 5 Especialistas</a>
+        <a href="#simulador-governanca" class="hover:text-emerald-400 transition-colors text-emerald-300/90">Blindagem & Governança IA</a>
+        <a href="#comparativo" class="hover:text-white transition-colors">Evolução v2 → v3</a>
+        <a href="#painel-lider" class="hover:text-white transition-colors">Painel Executivo</a>
       </div>
     </div>
   </header>
@@ -104,41 +121,41 @@
   <!-- HERO + INTERACTIVE 3D CHARACTER DIORAMA -->
   <section class="py-14 px-6 max-w-7xl mx-auto">
     <div class="text-center max-w-4xl mx-auto mb-10 space-y-5">
-      <div class="inline-flex items-center gap-3 px-3.5 py-1.5 rounded-full border border-white/10 bg-white/[0.03]">
+      <div class="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full border border-white/10 bg-white/[0.03]">
         <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
-        <span class="mono text-[11px] uppercase tracking-[0.18em] text-slate-300">Sua Fábrica Autônoma em 5 Estações</span>
+        <span class="text-xs font-semibold tracking-wide text-slate-300">Sua Fábrica Autônoma em 5 Estações</span>
       </div>
 
-      <h1 class="font-display text-4xl sm:text-6xl font-bold tracking-tight text-white leading-[1.06]">
+      <h1 class="text-4xl sm:text-6xl font-extrabold tracking-tight text-white leading-[1.1]">
         De um faz-tudo solitário para um
         <span class="bg-gradient-to-r from-amber-300 via-orange-400 to-sky-400 bg-clip-text text-transparent">
           esquadrão de 5 especialistas com personalidade própria.
         </span>
       </h1>
 
-      <p class="text-base sm:text-lg text-slate-300/90 max-w-3xl mx-auto leading-relaxed font-light">
-        No Forge-SDD 3.0, cada agente tem um papel claro, um temperamento próprio e limites rigorosos. Você conversa com o <strong class="font-medium text-white">Líder</strong>, aprova a planta do <strong class="font-medium text-white">Arquiteto</strong> e assiste ao <strong class="font-medium text-white">Planejador</strong>, aos <strong class="font-medium text-white">Gêmeos Construtores</strong> e ao <strong class="font-medium text-white">Auditor Imparcial</strong> entregarem seu projeto.
+      <p class="text-base sm:text-lg text-slate-300/90 max-w-3xl mx-auto leading-relaxed font-normal">
+        No Forge-SDD 3.0, cada agente tem um papel claro, um temperamento próprio e limites rigorosos. Você conversa com o <strong class="font-semibold text-white">Líder</strong>, aprova a planta do <strong class="font-semibold text-white">Arquiteto</strong> e assiste ao <strong class="font-semibold text-white">Planejador</strong>, aos <strong class="font-semibold text-white">Gêmeos Construtores</strong> e ao <strong class="font-semibold text-white">Auditor Imparcial</strong> entregarem seu projeto.
       </p>
     </div>
 
     <!-- CHARACTER SELECTOR PILLS -->
     <div class="flex flex-wrap items-center justify-center gap-2.5 mb-6" id="station-buttons">
-      <button data-station="0" class="station-btn mono text-xs px-4 py-2.5 rounded-full border border-amber-400/60 bg-amber-400/15 text-amber-200 transition-all">
-        01 // O Líder (Maestro)
+      <button data-station="0" class="station-btn text-xs font-semibold px-4 py-2.5 rounded-full border border-amber-400/60 bg-amber-400/15 text-amber-200 transition-all">
+        1. O Líder (Maestro)
       </button>
-      <button data-station="1" class="station-btn mono text-xs px-4 py-2.5 rounded-full border border-white/10 bg-white/[0.03] text-slate-300 hover:border-white/30 transition-all">
-        02 // Arquiteto (Óculos & Planta)
+      <button data-station="1" class="station-btn text-xs font-semibold px-4 py-2.5 rounded-full border border-white/10 bg-white/[0.03] text-slate-300 hover:border-white/30 transition-all">
+        2. Arquiteto (Óculos & Planta)
       </button>
-      <button data-station="2" class="station-btn mono text-xs px-4 py-2.5 rounded-full border border-white/10 bg-white/[0.03] text-slate-300 hover:border-white/30 transition-all">
-        03 // Planejador (Estrategista)
+      <button data-station="2" class="station-btn text-xs font-semibold px-4 py-2.5 rounded-full border border-white/10 bg-white/[0.03] text-slate-300 hover:border-white/30 transition-all">
+        3. Planejador (Estrategista)
       </button>
-      <button data-station="3" class="station-btn mono text-xs px-4 py-2.5 rounded-full border border-white/10 bg-white/[0.03] text-slate-300 hover:border-white/30 transition-all">
-        04 // Gêmeos Builders (Em Paralelo)
+      <button data-station="3" class="station-btn text-xs font-semibold px-4 py-2.5 rounded-full border border-white/10 bg-white/[0.03] text-slate-300 hover:border-white/30 transition-all">
+        4. Gêmeos Builders (Em Paralelo)
       </button>
-      <button data-station="4" class="station-btn mono text-xs px-4 py-2.5 rounded-full border border-white/10 bg-white/[0.03] text-slate-300 hover:border-white/30 transition-all">
-        05 // Auditor (Monóculo & Escudo)
+      <button data-station="4" class="station-btn text-xs font-semibold px-4 py-2.5 rounded-full border border-white/10 bg-white/[0.03] text-slate-300 hover:border-white/30 transition-all">
+        5. Auditor (Monóculo & Escudo)
       </button>
-      <button data-station="-1" class="station-btn mono text-xs px-4 py-2.5 rounded-full border border-white/10 bg-white/[0.03] text-slate-400 hover:text-white transition-all">
+      <button data-station="-1" class="station-btn text-xs font-semibold px-4 py-2.5 rounded-full border border-white/10 bg-white/[0.03] text-slate-400 hover:text-white transition-all">
         Visão Completa da Bancada
       </button>
     </div>
@@ -150,18 +167,18 @@
       <!-- Floating Character Personality Bio Overlay -->
       <div class="absolute bottom-5 left-5 right-5 md:right-auto md:max-w-md panel-glass rounded-2xl p-5 border-l-2 border-l-amber-400 pointer-events-none">
         <div class="flex items-center justify-between gap-2 mb-1">
-          <span id="hud-code" class="mono text-[11px] uppercase tracking-widest text-amber-300">ESTAÇÃO 01 // O MAESTRO CALMO</span>
-          <span id="hud-trait" class="mono text-[10px] px-2 py-0.5 rounded bg-white/10 text-slate-200">LIDERANÇA & SÍNTESE</span>
+          <span id="hud-code" class="text-[11px] font-bold tracking-wider uppercase text-amber-300">Estação 1 • O Maestro Calmo</span>
+          <span id="hud-trait" class="text-[10px] font-semibold px-2.5 py-0.5 rounded-full bg-white/10 text-slate-200">Liderança & Síntese</span>
         </div>
         <h2 id="hud-title" class="text-lg font-bold text-white">O Líder (Orquestrador)</h2>
-        <p id="hud-desc" class="text-xs sm:text-sm text-slate-300 mt-1 leading-relaxed">
+        <p id="hud-desc" class="text-xs sm:text-sm text-slate-300 mt-1 leading-relaxed font-normal">
           Sereno, organizado e direto ao ponto. Com sua coroa de antena e prancheta luminosa, ele ouve sua ideia, aciona cada colega na hora certa e traduz tudo em um Painel Executivo limpo para você.
         </p>
       </div>
 
       <!-- Top Right Stage Hint -->
-      <div class="hidden sm:flex absolute top-4 right-4 items-center gap-2 px-3 py-1.5 rounded-full bg-black/40 border border-white/10 backdrop-blur-md text-[11px] mono text-slate-300 pointer-events-none">
-        <span>Clique nos personagens 3D ou nos botões acima para focar a câmera</span>
+      <div class="hidden sm:flex absolute top-4 right-4 items-center gap-2 px-3.5 py-1.5 rounded-full bg-black/40 border border-white/10 backdrop-blur-md text-xs font-medium text-slate-300 pointer-events-none">
+        <span>Clique nos personagens 3D ou nos botões acima para aproximar</span>
       </div>
     </div>
   </section>
@@ -170,11 +187,11 @@
   <section id="esquadrao" class="py-16 px-6 max-w-7xl mx-auto">
     <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
       <div>
-        <div class="mono text-xs uppercase tracking-[0.2em] text-amber-400 mb-2">01 // Conheça o Esquadrão</div>
-        <h2 class="font-display text-3xl sm:text-4xl font-bold text-white">Cada personagem tem um talento e uma regra de ouro.</h2>
+        <div class="text-xs font-bold uppercase tracking-wider text-amber-400 mb-2">Conheça o Esquadrão</div>
+        <h2 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">Cada personagem tem um talento e uma regra de ouro.</h2>
       </div>
       <p class="text-sm text-slate-400 max-w-md leading-relaxed">
-        Clique em qualquer card abaixo para aproximar a câmera 3D do personagem correspondente no palco acima.
+        Clique em qualquer card abaixo para focar a câmera 3D no personagem correspondente no palco acima.
       </p>
     </div>
 
@@ -183,16 +200,16 @@
       <div class="panel-glass rounded-2xl p-6 flex flex-col justify-between cursor-pointer" data-card-station="0">
         <div>
           <div class="flex items-center justify-between mb-4">
-            <span class="mono text-xs text-amber-400 font-semibold">01 / O LÍDER</span>
+            <span class="text-xs text-amber-400 font-bold">01. O Líder</span>
             <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
           </div>
           <h3 class="text-base font-bold text-white">O Maestro Calmo</h3>
-          <p class="text-xs text-amber-300/80 mono mt-0.5 mb-3">Coroa Dourada & Prancheta</p>
+          <p class="text-xs text-amber-300/80 font-medium mt-0.5 mb-3">Coroa Dourada & Prancheta</p>
           <p class="text-sm text-slate-300/90 leading-relaxed">
             Seu único ponto de contato. Nunca escreve código no impulso: coordena a equipe e te entrega o resumo executivo pronto.
           </p>
         </div>
-        <div class="mt-5 pt-3 border-t border-white/[0.06] mono text-[10px] text-slate-400 uppercase">
+        <div class="mt-5 pt-3 border-t border-white/[0.06] text-[11px] font-semibold text-slate-400">
           Personalidade: Diplomático & Preciso
         </div>
       </div>
@@ -201,16 +218,16 @@
       <div class="panel-glass rounded-2xl p-6 flex flex-col justify-between cursor-pointer" data-card-station="1">
         <div>
           <div class="flex items-center justify-between mb-4">
-            <span class="mono text-xs text-sky-400 font-semibold">02 / CONCEPÇÃO</span>
+            <span class="text-xs text-sky-400 font-bold">02. Concepção</span>
             <span class="w-2.5 h-2.5 rounded-full bg-sky-400"></span>
           </div>
           <h3 class="text-base font-bold text-white">O Arquiteto Curioso</h3>
-          <p class="text-xs text-sky-300/80 mono mt-0.5 mb-3">Óculos Redondos & Planta</p>
+          <p class="text-xs text-sky-300/80 font-medium mt-0.5 mb-3">Óculos Redondos & Planta</p>
           <p class="text-sm text-slate-300/90 leading-relaxed">
             Adora investigar o que já existe para não reinventar a roda. Desenha a planta completa e espera seu "De Acordo" para liberar a obra.
           </p>
         </div>
-        <div class="mt-5 pt-3 border-t border-white/[0.06] mono text-[10px] text-slate-400 uppercase">
+        <div class="mt-5 pt-3 border-t border-white/[0.06] text-[11px] font-semibold text-slate-400">
           Personalidade: Investigativo & Criativo
         </div>
       </div>
@@ -219,16 +236,16 @@
       <div class="panel-glass rounded-2xl p-6 flex flex-col justify-between cursor-pointer" data-card-station="2">
         <div>
           <div class="flex items-center justify-between mb-4">
-            <span class="mono text-xs text-indigo-400 font-semibold">03 / PLANEJADOR</span>
+            <span class="text-xs text-indigo-400 font-bold">03. Planejador</span>
             <span class="w-2.5 h-2.5 rounded-full bg-indigo-400"></span>
           </div>
           <h3 class="text-base font-bold text-white">O Estrategista</h3>
-          <p class="text-xs text-indigo-300/80 mono mt-0.5 mb-3">Headset & Blocos P / M / G</p>
+          <p class="text-xs text-indigo-300/80 font-medium mt-0.5 mb-3">Headset & Blocos P / M / G</p>
           <p class="text-sm text-slate-300/90 leading-relaxed">
             Metódico, divide qualquer projeto complexo em blocos pequenos e separa só a página do manual que cada tarefa vai precisar.
           </p>
         </div>
-        <div class="mt-5 pt-3 border-t border-white/[0.06] mono text-[10px] text-slate-400 uppercase">
+        <div class="mt-5 pt-3 border-t border-white/[0.06] text-[11px] font-semibold text-slate-400">
           Personalidade: Organizado & Focado
         </div>
       </div>
@@ -237,16 +254,16 @@
       <div class="panel-glass rounded-2xl p-6 flex flex-col justify-between cursor-pointer" data-card-station="3">
         <div>
           <div class="flex items-center justify-between mb-4">
-            <span class="mono text-xs text-cyan-400 font-semibold">04 / BUILDERS</span>
+            <span class="text-xs text-cyan-400 font-bold">04. Builders</span>
             <span class="w-2.5 h-2.5 rounded-full bg-cyan-400"></span>
           </div>
           <h3 class="text-base font-bold text-white">Os Gêmeos de Obra</h3>
-          <p class="text-xs text-cyan-300/80 mono mt-0.5 mb-3">Capacetes & Fila Paralela</p>
+          <p class="text-xs text-cyan-300/80 font-medium mt-0.5 mb-3">Capacetes & Fila Paralela</p>
           <p class="text-sm text-slate-300/90 leading-relaxed">
             Trabalham juntos sem esbarrar um no outro: pegam tarefas independentes ao mesmo tempo e colocam em fila o que tem dependência.
           </p>
         </div>
-        <div class="mt-5 pt-3 border-t border-white/[0.06] mono text-[10px] text-slate-400 uppercase">
+        <div class="mt-5 pt-3 border-t border-white/[0.06] text-[11px] font-semibold text-slate-400">
           Personalidade: Ágeis & Incansáveis
         </div>
       </div>
@@ -255,16 +272,16 @@
       <div class="panel-glass rounded-2xl p-6 flex flex-col justify-between cursor-pointer" data-card-station="4">
         <div>
           <div class="flex items-center justify-between mb-4">
-            <span class="mono text-xs text-emerald-400 font-semibold">05 / GOVERNANÇA</span>
+            <span class="text-xs text-emerald-400 font-bold">05. Governança</span>
             <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
           </div>
           <h3 class="text-base font-bold text-white">O Guardião Imparcial</h3>
-          <p class="text-xs text-emerald-300/80 mono mt-0.5 mb-3">Monóculo & Mãos Atrás</p>
+          <p class="text-xs text-emerald-300/80 font-medium mt-0.5 mb-3">Monóculo & Mãos Atrás</p>
           <p class="text-sm text-slate-300/90 leading-relaxed">
             Mantém as mãozinhas para trás porque é proibido de editar código. Examina segurança, testes e arquitetura antes de carimbar a entrega.
           </p>
         </div>
-        <div class="mt-5 pt-3 border-t border-white/[0.06] mono text-[10px] text-slate-400 uppercase">
+        <div class="mt-5 pt-3 border-t border-white/[0.06] text-[11px] font-semibold text-slate-400">
           Personalidade: Rigoroso & Imparcial
         </div>
       </div>
@@ -273,32 +290,156 @@
 
   <div class="hairline-divider max-w-7xl mx-auto"></div>
 
+  <!-- NEW DEDICATED INTERACTIVE GOVERNANCE SECTION (THE ANTIDOTE TO "VIBE CODING" RISKS) -->
+  <section id="simulador-governanca" class="py-24 px-6 max-w-7xl mx-auto">
+    <div class="max-w-3xl mb-12">
+      <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs font-bold tracking-wide mb-4">
+        <span>Blindagem Ativa contra os Riscos da IA</span>
+      </div>
+      <h2 class="text-3xl sm:text-5xl font-extrabold text-white tracking-tight leading-tight">
+        Por que o desenvolvimento com IA sem governança está sendo tão criticado?
+      </h2>
+      <p class="text-base text-slate-300/90 mt-4 leading-relaxed">
+        Todos os dias vemos casos na mídia de IAs que expõem senhas, apagam regras de negócio, duplicam código sem necessidade ou aprovam o próprio erro. No Forge-SDD 3.0, <strong class="text-white font-semibold">quem constrói nunca tem poder para se autoaprovar</strong>. Teste abaixo como o nosso <strong class="text-emerald-300 font-semibold">Guardião de Governança</strong> reage a cada ameaça real:
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
+
+      <!-- Left Column: Interactive Threat Scenarios -->
+      <div class="lg:col-span-5 flex flex-col justify-between space-y-3">
+        <div class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">
+          Clique em um cenário real para simular a inspeção 3D:
+        </div>
+
+        <!-- Scenario 0: Secret Leak / Main Branch -->
+        <button data-gov="0" class="gov-scenario-btn gov-btn-active-block text-left p-5 rounded-2xl panel-glass border border-white/10 transition-all">
+          <div class="flex items-center justify-between mb-1.5">
+            <span class="text-xs font-bold text-rose-400 uppercase tracking-wide">Ameaça 01 • Vazamento de Segredo / Produção</span>
+            <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-rose-500/20 text-rose-300">Bloqueio Imediato</span>
+          </div>
+          <h3 class="text-sm sm:text-base font-bold text-white">"A IA deixou uma chave de API no código ou tentou salvar direto na branch principal"</h3>
+          <p class="text-xs text-slate-300 mt-1.5 leading-relaxed">
+            O Portão Determinístico (Camada A) barra o pacote instantaneamente antes mesmo da revisão humana.
+          </p>
+        </button>
+
+        <!-- Scenario 1: Duplication / AI Slop -->
+        <button data-gov="1" class="gov-scenario-btn text-left p-5 rounded-2xl panel-glass border border-white/10 transition-all">
+          <div class="flex items-center justify-between mb-1.5">
+            <span class="text-xs font-bold text-amber-400 uppercase tracking-wide">Ameaça 02 • Código Duplicado ("AI Slop")</span>
+            <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300">Devolvido ao Builder</span>
+          </div>
+          <h3 class="text-sm sm:text-base font-bold text-white">"A IA ignorou um componente que já existia no projeto e recriou tudo do zero"</h3>
+          <p class="text-xs text-slate-300 mt-1.5 leading-relaxed">
+            O Auditor de Monóculo (Camada B) cruza a entrega com o Reuse Check da planta e exige o reaproveitamento.
+          </p>
+        </button>
+
+        <!-- Scenario 2: Architecture Violation & Missing Tests -->
+        <button data-gov="2" class="gov-scenario-btn text-left p-5 rounded-2xl panel-glass border border-white/10 transition-all">
+          <div class="flex items-center justify-between mb-1.5">
+            <span class="text-xs font-bold text-rose-400 uppercase tracking-wide">Ameaça 03 • Quebra de Arquitetura sem Testes</span>
+            <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-rose-500/20 text-rose-300">Reprovado na Auditoria</span>
+          </div>
+          <h3 class="text-sm sm:text-base font-bold text-white">"Funciona na aparência, mas misturou camadas e não incluiu testes automatizados"</h3>
+          <p class="text-xs text-slate-300 mt-1.5 leading-relaxed">
+            Como o Auditor é proibido de editar código, ele não faz "remendos": reprova com evidências e devolve para correção.
+          </p>
+        </button>
+
+        <!-- Scenario 3: Clean Approved Delivery -->
+        <button data-gov="3" class="gov-scenario-btn text-left p-5 rounded-2xl panel-glass border border-white/10 transition-all">
+          <div class="flex items-center justify-between mb-1.5">
+            <span class="text-xs font-bold text-emerald-400 uppercase tracking-wide">Cenário 04 • Entrega Segura & Padronizada</span>
+            <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300">Selo Conforme</span>
+          </div>
+          <h3 class="text-sm sm:text-base font-bold text-white">"Código limpo, testado, seguindo a arquitetura e reaproveitando o que já existe"</h3>
+          <p class="text-xs text-slate-300 mt-1.5 leading-relaxed">
+            Atravessa os Portões A e B, sobe para o seu Painel Executivo (Camada C) e, se repetido 3x, vira Auto-Skill!
+          </p>
+        </button>
+      </div>
+
+      <!-- Right Column: 3D Governance Scanner Stage + Live Verdict Report -->
+      <div class="lg:col-span-7 flex flex-col justify-between space-y-4">
+        <div id="three-gov-container">
+          <canvas id="three-gov-canvas" aria-label="Simulador 3D do Guardião de Governança inspecionando pacotes de código"></canvas>
+
+          <!-- Top Status Pill inside 3D Scanner -->
+          <div class="absolute top-4 left-4 right-4 flex flex-wrap items-center justify-between gap-2 pointer-events-none">
+            <div class="px-3.5 py-1.5 rounded-full bg-black/55 border border-white/10 backdrop-blur-md text-xs font-bold text-white flex items-center gap-2">
+              <span id="gov-status-dot" class="w-2.5 h-2.5 rounded-full bg-rose-500 animate-ping"></span>
+              <span id="gov-status-label">PORTÃO ATIVO: PACOTE INTERCEPTADO</span>
+            </div>
+            <div class="px-3.5 py-1.5 rounded-full bg-black/55 border border-white/10 backdrop-blur-md text-xs font-semibold text-emerald-300">
+              Auditor em Modo Somente Leitura (Mãos para trás)
+            </div>
+          </div>
+
+          <!-- Bottom Live Verdict HUD inside 3D Scanner -->
+          <div id="gov-hud-card" class="absolute bottom-4 left-4 right-4 panel-glass rounded-2xl p-5 border-l-4 border-l-rose-500 pointer-events-none">
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-1">
+              <span id="gov-rule-id" class="text-xs font-extrabold uppercase tracking-wider text-rose-400">Regra Acionada: SEG-01 / P-13 (Segurança & Isolamento)</span>
+              <span id="gov-layer-badge" class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-rose-500/20 text-rose-200">Barrado na Camada A + B</span>
+            </div>
+            <h4 id="gov-verdict-title" class="text-base sm:text-lg font-bold text-white">
+              Credencial exposta detectada. Entrega bloqueada antes do commit.
+            </h4>
+            <p id="gov-verdict-desc" class="text-xs sm:text-sm text-slate-300 mt-1 leading-relaxed">
+              O escudo de governança fechou a passagem do pacote na esteira. O Builder recebe a linha exata da violação para remover o segredo antes que você precise se preocupar.
+            </p>
+          </div>
+        </div>
+
+        <!-- 3 Pillars of Trust Bar -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div class="panel-glass rounded-xl p-4 border border-white/[0.06]">
+            <div class="text-xs font-bold text-white">1. Zero Autoaprovação</div>
+            <p class="text-xs text-slate-400 mt-1">Quem escreve o código jamais dá o veredito final sobre ele.</p>
+          </div>
+          <div class="panel-glass rounded-xl p-4 border border-white/[0.06]">
+            <div class="text-xs font-bold text-white">2. Auditor de Mãos Atadas</div>
+            <p class="text-xs text-slate-400 mt-1">O fiscal não faz gambiarras silenciosas: ele só lê, julga e aponta provas.</p>
+          </div>
+          <div class="panel-glass rounded-xl p-4 border border-white/[0.06]">
+            <div class="text-xs font-bold text-white">3. Regras Sob Demanda</div>
+            <p class="text-xs text-slate-400 mt-1">A IA não esquece as regras porque recebe apenas a cartilha exata daquela tarefa.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <div class="hairline-divider max-w-7xl mx-auto"></div>
+
   <!-- SECTION 2: ANTES (v2.x) VS AGORA (v3.0) -->
   <section id="comparativo" class="py-20 px-6 max-w-7xl mx-auto">
     <div class="mb-12">
-      <div class="mono text-xs uppercase tracking-[0.2em] text-sky-400 mb-2">02 // O Que Mudou</div>
-      <h2 class="font-display text-3xl sm:text-4xl font-bold text-white">Por que sair de 1 agente genérico para 5 especialistas?</h2>
+      <div class="text-xs font-bold uppercase tracking-wider text-sky-400 mb-2">Evolução Arquitetural</div>
+      <h2 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">O que muda da versão anterior para o Forge-SDD 3.0</h2>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
       <!-- Modelo Anterior -->
       <div class="panel-glass rounded-2xl p-8 border border-white/[0.07]">
         <div class="flex items-center justify-between pb-5 mb-6 border-b border-white/[0.07]">
-          <span class="mono text-xs uppercase tracking-widest text-slate-400">VERSÃO ANTERIOR (v2.x)</span>
-          <span class="mono text-xs px-2.5 py-1 rounded bg-white/[0.04] text-slate-400">O Faz-Tudo Solitário</span>
+          <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Versão Anterior (v2.x)</span>
+          <span class="text-xs font-semibold px-3 py-1 rounded-full bg-white/[0.04] text-slate-400">O Faz-Tudo Solitário</span>
         </div>
 
         <div class="space-y-5 text-sm text-slate-300">
           <div>
-            <strong class="text-white font-medium block mb-1">1. O mesmo agente construía e avaliava o próprio trabalho</strong>
-            Sem um auditor separado, erros sutis de arquitetura ou segurança passavam despercebidos na revisão.
+            <strong class="text-white font-semibold block mb-1">1. O mesmo agente construía e avaliava o próprio trabalho</strong>
+            Sem um auditor separado, desvios sutis de arquitetura ou segurança passavam despercebidos na revisão.
           </div>
           <div>
-            <strong class="text-white font-medium block mb-1">2. Uma tarefa por vez, mesmo quando independentes</strong>
+            <strong class="text-white font-semibold block mb-1">2. Uma tarefa por vez, mesmo quando independentes</strong>
             Tudo rodava em fila única manual, deixando projetos maiores lentos.
           </div>
           <div>
-            <strong class="text-white font-medium block mb-1">3. Manual gigante carregado do zero a cada pergunta</strong>
+            <strong class="text-white font-semibold block mb-1">3. Manual gigante carregado do zero a cada pergunta</strong>
             O agente precisava ler todas as regras do projeto sempre, diluindo a atenção no que realmente importava.
           </div>
         </div>
@@ -307,21 +448,21 @@
       <!-- Modelo Novo -->
       <div class="panel-glass rounded-2xl p-8 border border-amber-500/40">
         <div class="flex items-center justify-between pb-5 mb-6 border-b border-white/[0.1]">
-          <span class="mono text-xs uppercase tracking-widest text-amber-300">NOVA VERSÃO (v3.0.0-beta)</span>
-          <span class="mono text-xs px-2.5 py-1 rounded bg-amber-500/15 text-amber-200 border border-amber-500/30">Esquadrão Coordenado</span>
+          <span class="text-xs font-bold uppercase tracking-wider text-amber-300">Nova Versão (v3.0.0-beta)</span>
+          <span class="text-xs font-semibold px-3 py-1 rounded-full bg-amber-500/15 text-amber-200 border border-amber-500/30">Esquadrão Coordenado</span>
         </div>
 
         <div class="space-y-5 text-sm text-slate-200">
           <div>
-            <strong class="text-white font-semibold block mb-1">1. Separação real de papéis e personalidades</strong>
+            <strong class="text-white font-bold block mb-1">1. Separação real de papéis e personalidades</strong>
             Quem planeja não programa; quem programa não aprova; e o Auditor analisa tudo em modo somente leitura.
           </div>
           <div>
-            <strong class="text-white font-semibold block mb-1">2. Gêmeos Builders trabalhando em paralelo na fila</strong>
+            <strong class="text-white font-bold block mb-1">2. Gêmeos Builders trabalhando em paralelo na fila</strong>
             Tarefas que não mexem nos mesmos arquivos avançam juntas; tarefas com dependência aguardam sua vez automaticamente.
           </div>
           <div>
-            <strong class="text-white font-semibold block mb-1">3. Manual sob demanda + Memória que aprende sozinha (Auto-Skills)</strong>
+            <strong class="text-white font-bold block mb-1">3. Manual sob demanda + Memória que aprende sozinha (Auto-Skills)</strong>
             Cada agente recebe apenas a regra exata da sua tarefa e, quando a equipe repete um padrão 3 vezes, ele vira uma habilidade automática.
           </div>
         </div>
@@ -332,11 +473,11 @@
   <div class="hairline-divider max-w-7xl mx-auto"></div>
 
   <!-- SECTION 3: PAINEL EXECUTIVO DO LÍDER -->
-  <section id="governanca" class="py-20 px-6 max-w-7xl mx-auto">
+  <section id="painel-lider" class="py-20 px-6 max-w-7xl mx-auto">
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
       <div class="lg:col-span-5 space-y-5">
-        <div class="mono text-xs uppercase tracking-[0.2em] text-emerald-400">03 // Visão Humana Simplificada</div>
-        <h2 class="font-display text-3xl sm:text-4xl font-bold text-white leading-tight">
+        <div class="text-xs font-bold uppercase tracking-wider text-emerald-400">Visão Humana Simplificada</div>
+        <h2 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight leading-tight">
           No final, o Líder te entrega um Painel Executivo claro.
         </h2>
         <p class="text-sm text-slate-300/90 leading-relaxed">
@@ -347,84 +488,204 @@
       <div class="lg:col-span-7 panel-glass rounded-2xl p-6 sm:p-8 border border-white/10">
         <div class="flex flex-wrap items-center justify-between gap-4 pb-5 mb-6 border-b border-white/[0.08]">
           <div>
-            <div class="mono text-[11px] uppercase tracking-widest text-slate-400">PAINEL DO LÍDER // CAMADA C</div>
-            <div class="text-base font-semibold text-white mt-0.5">Resumo Executivo da Entrega</div>
+            <div class="text-xs font-bold uppercase tracking-wider text-slate-400">Painel do Líder • Camada C</div>
+            <div class="text-base font-bold text-white mt-0.5">Resumo Executivo da Entrega</div>
           </div>
-          <div class="mono text-xs px-3 py-1 rounded border border-emerald-500/40 bg-emerald-500/10 text-emerald-300">
-            AUDITORIA APROVADA
+          <div class="text-xs font-bold px-3.5 py-1 rounded-full border border-emerald-500/40 bg-emerald-500/10 text-emerald-300">
+            Auditoria Aprovada
           </div>
         </div>
 
         <div class="space-y-3 text-xs">
-          <div class="grid grid-cols-12 text-slate-400 mono uppercase pb-2 border-b border-white/[0.08]">
+          <div class="grid grid-cols-12 text-slate-400 font-bold uppercase pb-2 border-b border-white/[0.08]">
             <div class="col-span-5">Etapa</div>
             <div class="col-span-4">Responsável</div>
             <div class="col-span-3 text-right">Status</div>
           </div>
           <div class="grid grid-cols-12 items-center py-2.5 border-b border-white/[0.05]">
-            <div class="col-span-5 font-medium text-white">Planta & Critérios (Spec)</div>
-            <div class="col-span-4 text-sky-300 mono">02 // Arquiteto + Você</div>
-            <div class="col-span-3 text-right text-emerald-300 mono">Aprovada</div>
+            <div class="col-span-5 font-semibold text-white">Planta & Critérios (Spec)</div>
+            <div class="col-span-4 text-sky-300 font-medium">02. Arquiteto + Você</div>
+            <div class="col-span-3 text-right text-emerald-300 font-bold">Aprovada</div>
           </div>
           <div class="grid grid-cols-12 items-center py-2.5 border-b border-white/[0.05]">
-            <div class="col-span-5 font-medium text-white">Regras & Papéis da Equipe</div>
-            <div class="col-span-4 text-cyan-300 mono">04 // Builders (Paralelo)</div>
-            <div class="col-span-3 text-right text-emerald-300 mono">Conforme</div>
+            <div class="col-span-5 font-semibold text-white">Regras & Papéis da Equipe</div>
+            <div class="col-span-4 text-cyan-300 font-medium">04. Builders (Paralelo)</div>
+            <div class="col-span-3 text-right text-emerald-300 font-bold">Conforme</div>
           </div>
           <div class="grid grid-cols-12 items-center py-2.5 border-b border-white/[0.05]">
-            <div class="col-span-5 font-medium text-white">Motor de Fila & Auto-Skills</div>
-            <div class="col-span-4 text-cyan-300 mono">04 // Builders (Paralelo)</div>
-            <div class="col-span-3 text-right text-emerald-300 mono">Conforme</div>
+            <div class="col-span-5 font-semibold text-white">Motor de Fila & Auto-Skills</div>
+            <div class="col-span-4 text-cyan-300 font-medium">04. Builders (Paralelo)</div>
+            <div class="col-span-3 text-right text-emerald-300 font-bold">Conforme</div>
           </div>
           <div class="grid grid-cols-12 items-center py-2.5">
-            <div class="col-span-5 font-medium text-white">Inspeção de Segurança & Testes</div>
-            <div class="col-span-4 text-emerald-300 mono">05 // Auditor Read-Only</div>
-            <div class="col-span-3 text-right text-emerald-300 mono">0 Bloqueios</div>
+            <div class="col-span-5 font-semibold text-white">Inspeção de Segurança & Testes</div>
+            <div class="col-span-4 text-emerald-300 font-medium">05. Auditor Read-Only</div>
+            <div class="col-span-3 text-right text-emerald-300 font-bold">0 Bloqueios</div>
           </div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- THREE.JS CUTE CHARACTERS DIORAMA SCRIPT -->
+  <!-- SHARED CUTE BOT FACTORY + BOTH THREE.JS SCENES -->
   <script>
+    // Shared Builder Function for Cute Designer-Toy Bots
+    function createCuteBotBase(primaryColor, accentColor, scale = 1) {
+      const root = new THREE.Group();
+      root.scale.set(scale, scale, scale);
+
+      const bodyMat = new THREE.MeshStandardMaterial({
+        color: primaryColor,
+        roughness: 0.28,
+        metalness: 0.15
+      });
+
+      const darkMat = new THREE.MeshStandardMaterial({
+        color: 0x0b0f17,
+        roughness: 0.15,
+        metalness: 0.4
+      });
+
+      const eyeMat = new THREE.MeshBasicMaterial({ color: accentColor });
+      const blushMat = new THREE.MeshBasicMaterial({
+        color: 0xf472b6,
+        transparent: true,
+        opacity: 0.55
+      });
+
+      // Chubby Rounded Torso
+      const torso = new THREE.Mesh(new THREE.SphereGeometry(0.42, 32, 32), bodyMat);
+      torso.scale.set(1, 1.08, 0.92);
+      torso.position.y = 0.52;
+      torso.castShadow = true;
+      root.add(torso);
+
+      // Belly Accent Badge
+      const belly = new THREE.Mesh(
+        new THREE.SphereGeometry(0.28, 24, 24),
+        new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.4 })
+      );
+      belly.scale.set(0.95, 0.85, 0.35);
+      belly.position.set(0, 0.48, 0.31);
+      root.add(belly);
+
+      // Cute Big Head Group
+      const headGroup = new THREE.Group();
+      headGroup.position.y = 1.18;
+      root.add(headGroup);
+
+      const head = new THREE.Mesh(new THREE.SphereGeometry(0.48, 32, 32), bodyMat);
+      head.scale.set(1.12, 0.96, 1.0);
+      head.castShadow = true;
+      headGroup.add(head);
+
+      // Glossy Black Face Visor
+      const visor = new THREE.Mesh(new THREE.SphereGeometry(0.41, 32, 32), darkMat);
+      visor.scale.set(1.08, 0.78, 0.65);
+      visor.position.set(0, 0.0, 0.22);
+      headGroup.add(visor);
+
+      // Cute Expressive LED Eyes
+      const eyesGroup = new THREE.Group();
+      eyesGroup.position.set(0, 0.02, 0.49);
+      headGroup.add(eyesGroup);
+
+      const leftEye = new THREE.Mesh(new THREE.SphereGeometry(0.065, 16, 16), eyeMat);
+      leftEye.scale.set(1, 1.25, 0.3);
+      leftEye.position.x = -0.15;
+      eyesGroup.add(leftEye);
+
+      const rightEye = new THREE.Mesh(new THREE.SphereGeometry(0.065, 16, 16), eyeMat);
+      rightEye.scale.set(1, 1.25, 0.3);
+      rightEye.position.x = 0.15;
+      eyesGroup.add(rightEye);
+
+      // Eye Sparkles
+      const sparkleMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+      const spL = new THREE.Mesh(new THREE.SphereGeometry(0.022, 8, 8), sparkleMat);
+      spL.position.set(-0.13, 0.04, 0.02);
+      eyesGroup.add(spL);
+
+      const spR = new THREE.Mesh(new THREE.SphereGeometry(0.022, 8, 8), sparkleMat);
+      spR.position.set(0.17, 0.04, 0.02);
+      eyesGroup.add(spR);
+
+      // Rosy Cheeks (Blush)
+      const cheekL = new THREE.Mesh(new THREE.CircleGeometry(0.045, 16), blushMat);
+      cheekL.position.set(-0.24, -0.07, 0.47);
+      cheekL.rotation.y = -0.35;
+      headGroup.add(cheekL);
+
+      const cheekR = new THREE.Mesh(new THREE.CircleGeometry(0.045, 16), blushMat);
+      cheekR.position.set(0.24, -0.07, 0.47);
+      cheekR.rotation.y = 0.35;
+      headGroup.add(cheekR);
+
+      // Floating Cute Paws (Hands)
+      const leftHand = new THREE.Mesh(new THREE.SphereGeometry(0.11, 16, 16), bodyMat);
+      leftHand.position.set(-0.55, 0.58, 0.15);
+      leftHand.castShadow = true;
+      root.add(leftHand);
+
+      const rightHand = new THREE.Mesh(new THREE.SphereGeometry(0.11, 16, 16), bodyMat);
+      rightHand.position.set(0.55, 0.58, 0.15);
+      rightHand.castShadow = true;
+      root.add(rightHand);
+
+      // Little Rounded Feet
+      const leftFoot = new THREE.Mesh(new THREE.SphereGeometry(0.13, 16, 16), darkMat);
+      leftFoot.scale.set(1, 0.6, 1.3);
+      leftFoot.position.set(-0.19, 0.08, 0.05);
+      root.add(leftFoot);
+
+      const rightFoot = new THREE.Mesh(new THREE.SphereGeometry(0.13, 16, 16), darkMat);
+      rightFoot.scale.set(1, 0.6, 1.3);
+      rightFoot.position.set(0.19, 0.08, 0.05);
+      root.add(rightFoot);
+
+      return { root, headGroup, eyesGroup, leftEye, rightEye, eyeMat, leftHand, rightHand, torso };
+    }
+
+    // ============================================================================
+    // SCENE 1: HERO 5-CHARACTER SQUAD STAGE
+    // ============================================================================
     (function () {
       const charactersMeta = [
         {
-          code: 'ESTAÇÃO 01 // O MAESTRO CALMO',
-          trait: 'LIDERANÇA & SÍNTESE',
+          code: 'Estação 1 • O Maestro Calmo',
+          trait: 'Liderança & Síntese',
           title: 'O Líder (Orquestrador)',
           desc: 'Sereno, organizado e direto ao ponto. Com sua coroa de antena dourada e prancheta luminosa, ele ouve sua ideia, aciona cada colega na hora certa e traduz tudo em um Painel Executivo limpo para você.',
           camPos: { x: -5.2, y: 1.75, z: 4.3 },
           lookAt: { x: -5.2, y: 0.9, z: 0 }
         },
         {
-          code: 'ESTAÇÃO 02 // O ARQUITETO CURIOSO',
-          trait: 'ÓCULOS REDONDOS & PLANTA',
+          code: 'Estação 2 • O Arquiteto Curioso',
+          trait: 'Óculos Redondos & Planta',
           title: 'Produto & Arquiteto',
           desc: 'Curioso e detalhista. Usa óculos redondos de arquiteto e carrega a planta enrolada debaixo do braço. Sempre checa o que já existe para economizar trabalho e pede seu OK antes da obra começar.',
           camPos: { x: -2.6, y: 1.75, z: 4.3 },
           lookAt: { x: -2.6, y: 0.9, z: 0 }
         },
         {
-          code: 'ESTAÇÃO 03 // O ESTRATEGISTA',
-          trait: 'HEADSET & BLOCOS P/M/G',
+          code: 'Estação 3 • O Estrategista',
+          trait: 'Headset & Blocos P / M / G',
           title: 'O Planejador',
           desc: 'Super focado e metódico. Com seu headset de controle, ele malabareia bloquinhos P, M e G no ar, organizando quem faz o quê e separando apenas a página certa do manual de regras.',
           camPos: { x: 0, y: 1.75, z: 4.3 },
           lookAt: { x: 0, y: 0.9, z: 0 }
         },
         {
-          code: 'ESTAÇÃO 04 // OS GÊMEOS CONSTRUTORES',
-          trait: 'CAPACETE DE OBRA & PARALELISMO',
+          code: 'Estação 4 • Os Gêmeos Construtores',
+          trait: 'Capacete de Obra & Paralelismo',
           title: 'Os Builders (Execução em Paralelo)',
           desc: 'Dois robozinhos gêmeos cheios de energia usando capacetes de obra. Trabalham ao mesmo tempo nas tarefas que não colidem e respeitam a fila quando uma etapa depende da outra.',
           camPos: { x: 2.6, y: 1.75, z: 4.3 },
           lookAt: { x: 2.6, y: 0.9, z: 0 }
         },
         {
-          code: 'ESTAÇÃO 05 // O GUARDIÃO IMPARCIAL',
-          trait: 'MONÓCULO & MÃOS ATRÁS',
+          code: 'Estação 5 • O Guardião Imparcial',
+          trait: 'Monóculo & Mãos Atrás',
           title: 'O Auditor de Governança',
           desc: 'Atento e incorruptível. Mantém as mãozinhas cruzadas atrás das costas porque é proibido de alterar código: usa seu monóculo de inspeção e escudo verde para aprovar segurança e arquitetura.',
           camPos: { x: 5.2, y: 1.75, z: 4.3 },
@@ -442,21 +703,15 @@
       const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
       renderer.shadowMap.enabled = true;
-      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
       const scene = new THREE.Scene();
       const camera = new THREE.PerspectiveCamera(36, 1, 0.1, 100);
       camera.position.set(overviewCam.camPos.x, overviewCam.camPos.y, overviewCam.camPos.z);
 
-      // Studio Lighting (Warm Key, Cool Fill, Rim Light — no space/stars!)
-      const hemiLight = new THREE.HemisphereLight(0xe2e8f0, 0x0f172a, 0.85);
-      scene.add(hemiLight);
-
+      scene.add(new THREE.HemisphereLight(0xe2e8f0, 0x0f172a, 0.85));
       const dirLight = new THREE.DirectionalLight(0xfff7ed, 1.35);
       dirLight.position.set(5, 10, 7);
       dirLight.castShadow = true;
-      dirLight.shadow.mapSize.width = 2048;
-      dirLight.shadow.mapSize.height = 2048;
       scene.add(dirLight);
 
       const rimLightLeft = new THREE.PointLight(0xf59e0b, 1.4, 18);
@@ -467,145 +722,20 @@
       rimLightRight.position.set(7, 3, -3);
       scene.add(rimLightRight);
 
-      // Studio Workbench Floor & Conveyor Track
-      const floorGeo = new THREE.CylinderGeometry(9.5, 9.8, 0.3, 64);
-      const floorMat = new THREE.MeshStandardMaterial({
-        color: 0x0f1420,
-        roughness: 0.6,
-        metalness: 0.2
-      });
-      const floor = new THREE.Mesh(floorGeo, floorMat);
+      const floor = new THREE.Mesh(
+        new THREE.CylinderGeometry(9.5, 9.8, 0.3, 64),
+        new THREE.MeshStandardMaterial({ color: 0x0f1420, roughness: 0.6, metalness: 0.2 })
+      );
       floor.position.y = -0.25;
       floor.receiveShadow = true;
       scene.add(floor);
 
-      // Glowing Conveyor Line connecting the 5 Pedestals
-      const trackGeo = new THREE.BoxGeometry(11.2, 0.05, 0.32);
-      const trackMat = new THREE.MeshStandardMaterial({
-        color: 0x1e293b,
-        roughness: 0.3,
-        metalness: 0.7
-      });
-      const track = new THREE.Mesh(trackGeo, trackMat);
+      const track = new THREE.Mesh(
+        new THREE.BoxGeometry(11.2, 0.05, 0.32),
+        new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.3, metalness: 0.7 })
+      );
       track.position.set(0, -0.06, 0.65);
       scene.add(track);
-
-      // Helper to build a Cute Rounded Bot Base (Head + Chubby Body + Visor + Blinking Eyes + Blush)
-      function createCuteBotBase(primaryColor, accentColor, scale = 1) {
-        const root = new THREE.Group();
-        root.scale.set(scale, scale, scale);
-
-        const bodyMat = new THREE.MeshStandardMaterial({
-          color: primaryColor,
-          roughness: 0.28,
-          metalness: 0.15
-        });
-
-        const darkMat = new THREE.MeshStandardMaterial({
-          color: 0x0b0f17,
-          roughness: 0.15,
-          metalness: 0.4
-        });
-
-        const eyeMat = new THREE.MeshBasicMaterial({ color: accentColor });
-        const blushMat = new THREE.MeshBasicMaterial({
-          color: 0xf472b6,
-          transparent: true,
-          opacity: 0.55
-        });
-
-        // Chubby Rounded Torso
-        const torso = new THREE.Mesh(new THREE.SphereGeometry(0.42, 32, 32), bodyMat);
-        torso.scale.set(1, 1.08, 0.92);
-        torso.position.y = 0.52;
-        torso.castShadow = true;
-        root.add(torso);
-
-        // Belly Accent Badge
-        const belly = new THREE.Mesh(
-          new THREE.SphereGeometry(0.28, 24, 24),
-          new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.4 })
-        );
-        belly.scale.set(0.95, 0.85, 0.35);
-        belly.position.set(0, 0.48, 0.31);
-        root.add(belly);
-
-        // Cute Big Head Group
-        const headGroup = new THREE.Group();
-        headGroup.position.y = 1.18;
-        root.add(headGroup);
-
-        const head = new THREE.Mesh(new THREE.SphereGeometry(0.48, 32, 32), bodyMat);
-        head.scale.set(1.12, 0.96, 1.0);
-        head.castShadow = true;
-        headGroup.add(head);
-
-        // Glossy Black Face Visor
-        const visor = new THREE.Mesh(new THREE.SphereGeometry(0.41, 32, 32), darkMat);
-        visor.scale.set(1.08, 0.78, 0.65);
-        visor.position.set(0, 0.0, 0.22);
-        headGroup.add(visor);
-
-        // Cute Expressive LED Eyes
-        const eyesGroup = new THREE.Group();
-        eyesGroup.position.set(0, 0.02, 0.49);
-        headGroup.add(eyesGroup);
-
-        const leftEye = new THREE.Mesh(new THREE.SphereGeometry(0.065, 16, 16), eyeMat);
-        leftEye.scale.set(1, 1.25, 0.3);
-        leftEye.position.x = -0.15;
-        eyesGroup.add(leftEye);
-
-        const rightEye = new THREE.Mesh(new THREE.SphereGeometry(0.065, 16, 16), eyeMat);
-        rightEye.scale.set(1, 1.25, 0.3);
-        rightEye.position.x = 0.15;
-        eyesGroup.add(rightEye);
-
-        // Eye Sparkles (Cute Anime/Toy Highlight)
-        const sparkleMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
-        const spL = new THREE.Mesh(new THREE.SphereGeometry(0.022, 8, 8), sparkleMat);
-        spL.position.set(-0.13, 0.04, 0.02);
-        eyesGroup.add(spL);
-
-        const spR = new THREE.Mesh(new THREE.SphereGeometry(0.022, 8, 8), sparkleMat);
-        spR.position.set(0.17, 0.04, 0.02);
-        eyesGroup.add(spR);
-
-        // Rosy Cheeks (Blush)
-        const cheekL = new THREE.Mesh(new THREE.CircleGeometry(0.045, 16), blushMat);
-        cheekL.position.set(-0.24, -0.07, 0.47);
-        cheekL.rotation.y = -0.35;
-        headGroup.add(cheekL);
-
-        const cheekR = new THREE.Mesh(new THREE.CircleGeometry(0.045, 16), blushMat);
-        cheekR.position.set(0.24, -0.07, 0.47);
-        cheekR.rotation.y = 0.35;
-        headGroup.add(cheekR);
-
-        // Floating Cute Paws (Hands)
-        const leftHand = new THREE.Mesh(new THREE.SphereGeometry(0.11, 16, 16), bodyMat);
-        leftHand.position.set(-0.55, 0.58, 0.15);
-        leftHand.castShadow = true;
-        root.add(leftHand);
-
-        const rightHand = new THREE.Mesh(new THREE.SphereGeometry(0.11, 16, 16), bodyMat);
-        rightHand.position.set(0.55, 0.58, 0.15);
-        rightHand.castShadow = true;
-        root.add(rightHand);
-
-        // Little Rounded Feet
-        const leftFoot = new THREE.Mesh(new THREE.SphereGeometry(0.13, 16, 16), darkMat);
-        leftFoot.scale.set(1, 0.6, 1.3);
-        leftFoot.position.set(-0.19, 0.08, 0.05);
-        root.add(leftFoot);
-
-        const rightFoot = new THREE.Mesh(new THREE.SphereGeometry(0.13, 16, 16), darkMat);
-        rightFoot.scale.set(1, 0.6, 1.3);
-        rightFoot.position.set(0.19, 0.08, 0.05);
-        root.add(rightFoot);
-
-        return { root, headGroup, eyesGroup, leftHand, rightHand, torso };
-      }
 
       const stationPositionsX = [-5.2, -2.6, 0, 2.6, 5.2];
       const stationColors = [0xf59e0b, 0x38bdf8, 0x818cf8, 0x22d3ee, 0x10b981];
@@ -617,7 +747,6 @@
         stationGroup.position.set(posX, 0, 0);
         scene.add(stationGroup);
 
-        // Pedestal Base with Glowing Ring
         const ped = new THREE.Mesh(
           new THREE.CylinderGeometry(0.85, 0.95, 0.16, 32),
           new THREE.MeshStandardMaterial({ color: 0x161f30, roughness: 0.4, metalness: 0.5 })
@@ -634,7 +763,6 @@
         glowRing.position.y = 0.06;
         stationGroup.add(glowRing);
 
-        // Hitbox for easy clicking on each character
         const hitBox = new THREE.Mesh(
           new THREE.CylinderGeometry(0.9, 0.9, 2.2, 16),
           new THREE.MeshBasicMaterial({ visible: false })
@@ -644,210 +772,121 @@
         stationGroup.add(hitBox);
         clickableMeshes.push(hitBox);
 
-        // 01 // LÍDER (Warm Cream/Gold Body + Floating Crown Antenna + Glowing Clipboard)
         if (idx === 0) {
           const bot = createCuteBotBase(0xfef3c7, 0xf59e0b, 1.05);
           stationGroup.add(bot.root);
-
-          // Little Maestro Crown / Antenna on Head
-          const crownMat = new THREE.MeshStandardMaterial({
-            color: 0xf59e0b,
-            emissive: 0xf59e0b,
-            emissiveIntensity: 0.35,
-            metalness: 0.7,
-            roughness: 0.2
-          });
+          const crownMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, emissive: 0xf59e0b, emissiveIntensity: 0.35, metalness: 0.7, roughness: 0.2 });
           const crownRing = new THREE.Mesh(new THREE.TorusGeometry(0.18, 0.035, 12, 32), crownMat);
           crownRing.rotation.x = Math.PI / 2;
           crownRing.position.y = 0.55;
           bot.headGroup.add(crownRing);
-
           const antennaTip = new THREE.Mesh(new THREE.OctahedronGeometry(0.09, 0), crownMat);
           antennaTip.position.y = 0.68;
           bot.headGroup.add(antennaTip);
-
-          // Floating Golden Executive Clipboard next to Right Hand
-          const board = new THREE.Mesh(
-            new THREE.BoxGeometry(0.28, 0.36, 0.03),
-            new THREE.MeshBasicMaterial({ color: 0xf59e0b, transparent: true, opacity: 0.75 })
-          );
+          const board = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.36, 0.03), new THREE.MeshBasicMaterial({ color: 0xf59e0b, transparent: true, opacity: 0.75 }));
           board.position.set(0.68, 0.72, 0.32);
           board.rotation.y = -0.4;
           bot.root.add(board);
-
           characters.push({ idx, type: 'lider', bot, crownRing, antennaTip, board, glowRing });
         }
 
-        // 02 // ARQUITETO (Sky Blue Body + Cute Round Glasses + Beret Hat + Blueprint Roll)
         if (idx === 1) {
           const bot = createCuteBotBase(0xe0f2fe, 0x38bdf8, 1.0);
           stationGroup.add(bot.root);
-
-          // Cute Round Architect Glasses
           const glassMat = new THREE.MeshStandardMaterial({ color: 0xfbbf24, metalness: 0.8, roughness: 0.2 });
           const rimL = new THREE.Mesh(new THREE.TorusGeometry(0.12, 0.018, 12, 32), glassMat);
           rimL.position.set(-0.15, 0.02, 0.5);
           bot.headGroup.add(rimL);
-
           const rimR = new THREE.Mesh(new THREE.TorusGeometry(0.12, 0.018, 12, 32), glassMat);
           rimR.position.set(0.15, 0.02, 0.5);
           bot.headGroup.add(rimR);
-
           const bridge = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.08, 8), glassMat);
           bridge.rotation.z = Math.PI / 2;
           bridge.position.set(0, 0.02, 0.5);
           bot.headGroup.add(bridge);
-
-          // Cute Architect Beret on top of head
-          const beret = new THREE.Mesh(
-            new THREE.CylinderGeometry(0.32, 0.25, 0.12, 24),
-            new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.5 })
-          );
+          const beret = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.25, 0.12, 24), new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.5 }));
           beret.position.set(0.08, 0.45, 0);
           beret.rotation.z = -0.22;
           bot.headGroup.add(beret);
-
-          // Rolled Blueprint Scroll in Left Hand
-          const scroll = new THREE.Mesh(
-            new THREE.CylinderGeometry(0.06, 0.06, 0.42, 16),
-            new THREE.MeshStandardMaterial({ color: 0x38bdf8, emissive: 0x0284c7, emissiveIntensity: 0.3 })
-          );
+          const scroll = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.42, 16), new THREE.MeshStandardMaterial({ color: 0x38bdf8, emissive: 0x0284c7, emissiveIntensity: 0.3 }));
           scroll.rotation.z = Math.PI / 3;
           scroll.position.set(-0.58, 0.62, 0.28);
           bot.root.add(scroll);
-
           characters.push({ idx, type: 'architect', bot, scroll, glowRing });
         }
 
-        // 03 // PLANEJADOR (Indigo Body + Tactical Headset + 3 Floating P/M/G Task Cubes)
         if (idx === 2) {
           const bot = createCuteBotBase(0xe0e7ff, 0x818cf8, 1.0);
           stationGroup.add(bot.root);
-
-          // Cute Headphone Arc + Ear Cups
           const hpMat = new THREE.MeshStandardMaterial({ color: 0x4f46e5, roughness: 0.3, metalness: 0.5 });
           const earL = new THREE.Mesh(new THREE.CylinderGeometry(0.13, 0.13, 0.08, 20), hpMat);
           earL.rotation.z = Math.PI / 2;
           earL.position.set(-0.54, 0.02, 0);
           bot.headGroup.add(earL);
-
           const earR = new THREE.Mesh(new THREE.CylinderGeometry(0.13, 0.13, 0.08, 20), hpMat);
           earR.rotation.z = Math.PI / 2;
           earR.position.set(0.54, 0.02, 0);
           bot.headGroup.add(earR);
-
-          // 3 Juggling Task Cubes (P, M, G) floating in front
           const cubesGroup = new THREE.Group();
           cubesGroup.position.set(0, 0.78, 0.55);
           bot.root.add(cubesGroup);
-
           const cubeColors = [0x38bdf8, 0x818cf8, 0xf59e0b];
           const cubes = [];
           for (let c = 0; c < 3; c++) {
             const size = 0.09 + c * 0.025;
-            const cube = new THREE.Mesh(
-              new THREE.BoxGeometry(size, size, size),
-              new THREE.MeshStandardMaterial({
-                color: cubeColors[c],
-                emissive: cubeColors[c],
-                emissiveIntensity: 0.4,
-                roughness: 0.2
-              })
-            );
+            const cube = new THREE.Mesh(new THREE.BoxGeometry(size, size, size), new THREE.MeshStandardMaterial({ color: cubeColors[c], emissive: cubeColors[c], emissiveIntensity: 0.4, roughness: 0.2 }));
             cube.position.x = (c - 1) * 0.24;
             cubesGroup.add(cube);
             cubes.push(cube);
           }
-
           characters.push({ idx, type: 'planner', bot, cubes, glowRing });
         }
 
-        // 04 // GÊMEOS BUILDERS (Two Smaller Chubby Twins Side-by-Side with Construction Hardhats!)
         if (idx === 3) {
           const twinA = createCuteBotBase(0xcffafe, 0x06b6d4, 0.74);
           twinA.root.position.set(-0.36, 0, 0.08);
           twinA.root.rotation.y = 0.2;
           stationGroup.add(twinA.root);
-
           const twinB = createCuteBotBase(0xcffafe, 0x22d3ee, 0.74);
           twinB.root.position.set(0.36, 0, -0.05);
           twinB.root.rotation.y = -0.2;
           stationGroup.add(twinB.root);
-
-          // Construction Hardhats on both twins
           const hatMatA = new THREE.MeshStandardMaterial({ color: 0xfbbf24, roughness: 0.3 });
           const hatMatB = new THREE.MeshStandardMaterial({ color: 0x06b6d4, roughness: 0.3 });
-
-          [
-            { twin: twinA, mat: hatMatA },
-            { twin: twinB, mat: hatMatB }
-          ].forEach(({ twin, mat }) => {
+          [{ twin: twinA, mat: hatMatA }, { twin: twinB, mat: hatMatB }].forEach(({ twin, mat }) => {
             const dome = new THREE.Mesh(new THREE.SphereGeometry(0.46, 24, 16, 0, Math.PI * 2, 0, Math.PI / 2), mat);
             dome.position.y = 0.18;
             twin.headGroup.add(dome);
-
             const brim = new THREE.Mesh(new THREE.CylinderGeometry(0.52, 0.52, 0.04, 24), mat);
             brim.position.y = 0.2;
             twin.headGroup.add(brim);
           });
-
-          // Shared Glowing Block being assembled between them
-          const workBlock = new THREE.Mesh(
-            new THREE.OctahedronGeometry(0.14, 0),
-            new THREE.MeshStandardMaterial({
-              color: 0x22d3ee,
-              emissive: 0x22d3ee,
-              emissiveIntensity: 0.6,
-              wireframe: false
-            })
-          );
+          const workBlock = new THREE.Mesh(new THREE.OctahedronGeometry(0.14, 0), new THREE.MeshStandardMaterial({ color: 0x22d3ee, emissive: 0x22d3ee, emissiveIntensity: 0.6 }));
           workBlock.position.set(0, 0.58, 0.45);
           stationGroup.add(workBlock);
-
           characters.push({ idx, type: 'builders', twinA, twinB, workBlock, glowRing });
         }
 
-        // 05 // AUDITOR DE GOVERNANÇA (Mint/Platinum Body + Inspector Monocle + Hands Behind Back + Shield)
         if (idx === 4) {
           const bot = createCuteBotBase(0xd1fae5, 0x10b981, 1.0);
           stationGroup.add(bot.root);
-
-          // Hands tucked politely behind the back (Read-Only: never touches the code!)
           bot.leftHand.position.set(-0.22, 0.45, -0.38);
           bot.rightHand.position.set(0.22, 0.45, -0.38);
-
-          // Inspector Monocle over Right Eye
           const monocleMat = new THREE.MeshStandardMaterial({ color: 0x34d399, metalness: 0.9, roughness: 0.1 });
           const monocleRim = new THREE.Mesh(new THREE.TorusGeometry(0.14, 0.022, 12, 32), monocleMat);
           monocleRim.position.set(0.15, 0.02, 0.51);
           bot.headGroup.add(monocleRim);
-
-          const monocleLens = new THREE.Mesh(
-            new THREE.CircleGeometry(0.13, 24),
-            new THREE.MeshBasicMaterial({ color: 0x10b981, transparent: true, opacity: 0.28 })
-          );
+          const monocleLens = new THREE.Mesh(new THREE.CircleGeometry(0.13, 24), new THREE.MeshBasicMaterial({ color: 0x10b981, transparent: true, opacity: 0.28 }));
           monocleLens.position.set(0.15, 0.02, 0.51);
           bot.headGroup.add(monocleLens);
-
-          // Floating Read-Only Emerald Shield beside the Auditor
-          const shield = new THREE.Mesh(
-            new THREE.OctahedronGeometry(0.24, 1),
-            new THREE.MeshBasicMaterial({
-              color: 0x10b981,
-              wireframe: true,
-              transparent: true,
-              opacity: 0.75
-            })
-          );
+          const shield = new THREE.Mesh(new THREE.OctahedronGeometry(0.24, 1), new THREE.MeshBasicMaterial({ color: 0x10b981, wireframe: true, transparent: true, opacity: 0.75 }));
           shield.scale.set(1, 1.25, 0.25);
           shield.position.set(-0.66, 0.75, 0.28);
           bot.root.add(shield);
-
           characters.push({ idx, type: 'auditor', bot, shield, glowRing });
         }
       });
 
-      // Flowing Task Tokens along the Conveyor Track in front of the bots
       const conveyorTokens = [];
       for (let t = 0; t < 6; t++) {
         const token = new THREE.Mesh(
@@ -859,7 +898,6 @@
         conveyorTokens.push({ mesh: token, progress: t / 6 });
       }
 
-      // Resize Handler
       function onResize() {
         const w = container.clientWidth;
         const h = container.clientHeight;
@@ -870,22 +908,19 @@
       window.addEventListener('resize', onResize);
       onResize();
 
-      // Camera Focus & Selection State
-      let selectedStation = -1; // Start with full squad overview or station 0
+      let selectedStation = -1;
       const targetCamPos = new THREE.Vector3(overviewCam.camPos.x, overviewCam.camPos.y, overviewCam.camPos.z);
       const targetLookAt = new THREE.Vector3(overviewCam.lookAt.x, overviewCam.lookAt.y, overviewCam.lookAt.z);
       const currentLookAt = new THREE.Vector3(overviewCam.lookAt.x, overviewCam.lookAt.y, overviewCam.lookAt.z);
 
       let mouseX = 0;
       let mouseY = 0;
-
       container.addEventListener('mousemove', (e) => {
         const rect = container.getBoundingClientRect();
         mouseX = ((e.clientX - rect.left) / rect.width - 0.5) * 2;
         mouseY = ((e.clientY - rect.top) / rect.height - 0.5) * 2;
       });
 
-      // Click Raycaster on 3D Characters
       const raycaster = new THREE.Raycaster();
       const pointer = new THREE.Vector2();
       canvas.addEventListener('click', (e) => {
@@ -895,8 +930,7 @@
         raycaster.setFromCamera(pointer, camera);
         const intersects = raycaster.intersectObjects(clickableMeshes);
         if (intersects.length > 0) {
-          const idx = intersects[0].object.userData.stationIndex;
-          focusStation(idx);
+          focusStation(intersects[0].object.userData.stationIndex);
         }
       });
 
@@ -918,9 +952,9 @@
         document.querySelectorAll('.station-btn').forEach((btn) => {
           const bIdx = parseInt(btn.getAttribute('data-station'), 10);
           if (bIdx === index) {
-            btn.className = 'station-btn mono text-xs px-4 py-2.5 rounded-full border border-amber-400/70 bg-amber-400/20 text-amber-200 transition-all';
+            btn.className = 'station-btn text-xs font-semibold px-4 py-2.5 rounded-full border border-amber-400/70 bg-amber-400/20 text-amber-200 transition-all';
           } else {
-            btn.className = 'station-btn mono text-xs px-4 py-2.5 rounded-full border border-white/10 bg-white/[0.03] text-slate-300 hover:border-white/30 transition-all';
+            btn.className = 'station-btn text-xs font-semibold px-4 py-2.5 rounded-full border border-white/10 bg-white/[0.03] text-slate-300 hover:border-white/30 transition-all';
           }
         });
 
@@ -943,13 +977,11 @@
         card.addEventListener('mouseenter', () => focusStation(idx));
       });
 
-      // Animation Loop with Cute Personality Idles & Eye Blinking
       const clock = new THREE.Clock();
       function animate() {
         requestAnimationFrame(animate);
         const t = clock.getElapsedTime();
 
-        // Smooth camera glide + subtle mouse parallax
         const desiredCamX = targetCamPos.x + mouseX * 0.35;
         const desiredCamY = targetCamPos.y - mouseY * 0.2;
         camera.position.x += (desiredCamX - camera.position.x) * 0.06;
@@ -959,16 +991,13 @@
         currentLookAt.lerp(targetLookAt, 0.07);
         camera.lookAt(currentLookAt);
 
-        // Periodic Cute Eye Blink (every ~3.8 seconds)
         const blinkCycle = t % 3.8;
         const eyeScaleY = blinkCycle > 3.65 ? 0.1 : 1.0;
 
         characters.forEach((c) => {
-          const isFocused = selectedStation === c.idx || selectedStation === -1;
           c.glowRing.scale.setScalar(selectedStation === c.idx ? 1.12 + Math.sin(t * 5) * 0.03 : 1.0);
 
           if (c.type === 'lider') {
-            // Calm maestro breathing, gentle waving & floating crown
             c.bot.root.position.y = Math.sin(t * 2.2) * 0.05;
             c.bot.headGroup.rotation.y = mouseX * 0.25 + Math.sin(t * 1.2) * 0.08;
             c.bot.headGroup.rotation.z = Math.sin(t * 1.5) * 0.04;
@@ -978,9 +1007,7 @@
             c.antennaTip.position.y = 0.68 + Math.sin(t * 4) * 0.03;
             c.board.position.y = 0.72 + Math.cos(t * 2.5) * 0.04;
           }
-
           if (c.type === 'architect') {
-            // Curious head tilt inspecting the blueprint
             c.bot.root.position.y = Math.sin(t * 2.0 + 1) * 0.045;
             c.bot.headGroup.rotation.z = 0.12 + Math.sin(t * 1.8) * 0.06;
             c.bot.headGroup.rotation.y = mouseX * 0.22;
@@ -988,9 +1015,7 @@
             c.bot.rightHand.position.y = 0.62 + Math.cos(t * 3) * 0.06;
             c.scroll.rotation.y = Math.sin(t * 2) * 0.2;
           }
-
           if (c.type === 'planner') {
-            // Juggling the P, M, G task blocks in rhythm
             c.bot.root.position.y = Math.sin(t * 2.4 + 2) * 0.04;
             c.bot.headGroup.rotation.y = Math.sin(t * 2.5) * 0.12;
             c.bot.eyesGroup.scale.y = eyeScaleY;
@@ -1002,9 +1027,7 @@
             c.bot.leftHand.position.y = 0.58 + Math.sin(t * 3.5) * 0.07;
             c.bot.rightHand.position.y = 0.58 - Math.sin(t * 3.5) * 0.07;
           }
-
           if (c.type === 'builders') {
-            // Energetic twin builders bouncing in alternating parallel rhythm!
             c.twinA.root.position.y = Math.abs(Math.sin(t * 4.2)) * 0.09;
             c.twinB.root.position.y = Math.abs(Math.cos(t * 4.2)) * 0.09;
             c.twinA.eyesGroup.scale.y = eyeScaleY;
@@ -1013,11 +1036,8 @@
             c.twinB.leftHand.position.y = 0.62 + Math.cos(t * 6) * 0.09;
             c.workBlock.rotation.y = t * 2.2;
             c.workBlock.rotation.x = t * 1.4;
-            c.workBlock.position.y = 0.58 + Math.sin(t * 4) * 0.04;
           }
-
           if (c.type === 'auditor') {
-            // Composed inspector with hands behind back & scanning shield
             c.bot.root.position.y = Math.sin(t * 1.8 + 3) * 0.035;
             c.bot.headGroup.rotation.y = Math.sin(t * 1.1) * 0.15 + mouseX * 0.15;
             c.bot.eyesGroup.scale.y = eyeScaleY;
@@ -1026,7 +1046,6 @@
           }
         });
 
-        // Move task tokens along conveyor track
         conveyorTokens.forEach((tk) => {
           tk.progress = (tk.progress + 0.0018) % 1;
           tk.mesh.position.x = -5.2 + tk.progress * 10.4;
@@ -1036,9 +1055,262 @@
         renderer.render(scene, camera);
       }
 
-      // Start showing the full 5-character squad on the workbench, with HUD ready on Station 01
       focusStation(-1);
       animate();
+    })();
+
+    // ============================================================================
+    // SCENE 2: INTERACTIVE GOVERNANCE & AI SAFETY SIMULATOR (DEDICATED 3D STAGE)
+    // ============================================================================
+    (function () {
+      const govScenarios = [
+        {
+          statusLabel: 'PORTÃO ATIVO: PACOTE INTERCEPTADO',
+          dotClass: 'w-2.5 h-2.5 rounded-full bg-rose-500 animate-ping',
+          borderClass: 'border-l-rose-500',
+          ruleId: 'Regra Acionada: SEG-01 / P-13 (Segurança & Isolamento)',
+          ruleColor: 'text-rose-400',
+          badgeText: 'Barrado na Camada A + B',
+          badgeClass: 'bg-rose-500/20 text-rose-200',
+          title: 'Credencial exposta detectada. Entrega bloqueada antes do commit.',
+          desc: 'O escudo de governança fechou a passagem do pacote na esteira. O Builder recebe a linha exata da violação para remover o segredo antes que você precise se preocupar.',
+          blocked: true,
+          accentHex: 0xf43f5e
+        },
+        {
+          statusLabel: 'AUDITORIA SEMÂNTICA: DUPLICAÇÃO DETECTADA',
+          dotClass: 'w-2.5 h-2.5 rounded-full bg-amber-400 animate-ping',
+          borderClass: 'border-l-amber-400',
+          ruleId: 'Regra Acionada: DUP-01 / DUP-02 (Reuso Obrigatório)',
+          ruleColor: 'text-amber-300',
+          badgeText: 'Retornado para Refatoração',
+          badgeClass: 'bg-amber-500/20 text-amber-200',
+          title: 'Componente duplicado barrado pelo Auditor de Monóculo.',
+          desc: 'O Auditor comparou o código com o Reuse Check da planta, identificou que a função já existia no projeto e devolveu a tarefa para o Builder reaproveitar o módulo oficial.',
+          blocked: true,
+          accentHex: 0xf59e0b
+        },
+        {
+          statusLabel: 'AUDITORIA SEMÂNTICA: VIOLAÇÃO DE ARQUITETURA',
+          dotClass: 'w-2.5 h-2.5 rounded-full bg-rose-500 animate-ping',
+          borderClass: 'border-l-rose-500',
+          ruleId: 'Regra Acionada: ARQ-01 / TST-01 (Camadas & Testes)',
+          ruleColor: 'text-rose-400',
+          badgeText: 'Reprovado sem Testes',
+          badgeClass: 'bg-rose-500/20 text-rose-200',
+          title: 'Lógica fora da camada correta e ausência de testes unitários.',
+          desc: 'Como o Auditor tem as mãos atadas (Somente Leitura), ele jamais faz remendos silenciosos: emite laudo reprovado exigindo separação limpa de pacotes e testes passando.',
+          blocked: true,
+          accentHex: 0xf43f5e
+        },
+        {
+          statusLabel: 'PORTÃO LIBERADO: ENTREGA 100% CONFORME',
+          dotClass: 'w-2.5 h-2.5 rounded-full bg-emerald-400',
+          borderClass: 'border-l-emerald-400',
+          ruleId: 'Verificação Completa: ARQ + SEG + DUP + TST Aprovados',
+          ruleColor: 'text-emerald-400',
+          badgeText: 'Liberado para o Painel do Líder',
+          badgeClass: 'bg-emerald-500/20 text-emerald-200',
+          title: 'Código seguro, testado e fiel à arquitetura passa pelo portão!',
+          desc: 'O escudo esmeralda se abre, o pacote segue para o Painel Executivo do Líder e o padrão validado é catalogado pelo motor de Auto-Skills.',
+          blocked: false,
+          accentHex: 0x10b981
+        }
+      ];
+
+      const container = document.getElementById('three-gov-container');
+      const canvas = document.getElementById('three-gov-canvas');
+      const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(35, 1, 0.1, 100);
+      camera.position.set(0, 1.85, 5.4);
+      camera.lookAt(0, 0.75, 0);
+
+      scene.add(new THREE.HemisphereLight(0xe2e8f0, 0x0f172a, 0.9));
+      const keyLight = new THREE.DirectionalLight(0xffffff, 1.3);
+      keyLight.position.set(3, 6, 5);
+      scene.add(keyLight);
+
+      const dynamicLight = new THREE.PointLight(0xf43f5e, 2.2, 12);
+      dynamicLight.position.set(-0.4, 1.2, 1.5);
+      scene.add(dynamicLight);
+
+      // Platform & Conveyor Track
+      const base = new THREE.Mesh(
+        new THREE.CylinderGeometry(3.8, 4.1, 0.24, 48),
+        new THREE.MeshStandardMaterial({ color: 0x0f1722, roughness: 0.5, metalness: 0.3 })
+      );
+      base.position.y = -0.15;
+      scene.add(base);
+
+      const belt = new THREE.Mesh(
+        new THREE.BoxGeometry(5.6, 0.06, 0.65),
+        new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.3, metalness: 0.7 })
+      );
+      belt.position.set(0, 0.0, 0.45);
+      scene.add(belt);
+
+      // Cute Auditor Character standing behind the conveyor belt
+      const auditor = createCuteBotBase(0xd1fae5, 0x10b981, 1.12);
+      auditor.root.position.set(0.55, 0.0, -0.35);
+      auditor.root.rotation.y = -0.25;
+      // Hands tucked behind back (Read-Only!)
+      auditor.leftHand.position.set(-0.22, 0.45, -0.38);
+      auditor.rightHand.position.set(0.22, 0.45, -0.38);
+      scene.add(auditor.root);
+
+      // Inspector Monocle
+      const monocleMat = new THREE.MeshStandardMaterial({ color: 0x34d399, metalness: 0.9, roughness: 0.1 });
+      const monocleRim = new THREE.Mesh(new THREE.TorusGeometry(0.145, 0.024, 12, 32), monocleMat);
+      monocleRim.position.set(0.15, 0.02, 0.51);
+      auditor.headGroup.add(monocleRim);
+
+      // Laser Gate Barrier Arch across the Conveyor Belt
+      const gateArch = new THREE.Group();
+      gateArch.position.set(-0.35, 0, 0.45);
+      scene.add(gateArch);
+
+      const pillarGeo = new THREE.CylinderGeometry(0.06, 0.06, 1.45, 16);
+      const pillarMat = new THREE.MeshStandardMaterial({ color: 0x334155, metalness: 0.7, roughness: 0.2 });
+      const pillarL = new THREE.Mesh(pillarGeo, pillarMat);
+      pillarL.position.set(0, 0.72, -0.45);
+      gateArch.add(pillarL);
+
+      const pillarR = new THREE.Mesh(pillarGeo, pillarMat);
+      pillarR.position.set(0, 0.72, 0.45);
+      gateArch.add(pillarR);
+
+      // Laser Forcefield Shield Plane inside the Gate Arch
+      const shieldPlaneMat = new THREE.MeshBasicMaterial({
+        color: 0xf43f5e,
+        transparent: true,
+        opacity: 0.42,
+        side: THREE.DoubleSide
+      });
+      const shieldPlane = new THREE.Mesh(new THREE.PlaneGeometry(0.86, 1.32), shieldPlaneMat);
+      shieldPlane.rotation.y = Math.PI / 2;
+      shieldPlane.position.set(0, 0.7, 0);
+      gateArch.add(shieldPlane);
+
+      // Wireframe Octahedron Shield Emblem floating above Gate
+      const shieldBadgeMat = new THREE.MeshBasicMaterial({
+        color: 0xf43f5e,
+        wireframe: true
+      });
+      const shieldBadge = new THREE.Mesh(new THREE.OctahedronGeometry(0.24, 1), shieldBadgeMat);
+      shieldBadge.position.set(0, 1.62, 0);
+      gateArch.add(shieldBadge);
+
+      // Incoming Code Delivery Cube on the Conveyor
+      const packetMat = new THREE.MeshStandardMaterial({
+        color: 0xf43f5e,
+        emissive: 0xf43f5e,
+        emissiveIntensity: 0.5,
+        roughness: 0.25
+      });
+      const codePacket = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.34, 0.34), packetMat);
+      codePacket.position.set(-2.2, 0.25, 0.45);
+      scene.add(codePacket);
+
+      function onResizeGov() {
+        const w = container.clientWidth;
+        const h = container.clientHeight;
+        renderer.setSize(w, h, false);
+        camera.aspect = w / h;
+        camera.updateProjectionMatrix();
+      }
+      window.addEventListener('resize', onResizeGov);
+      onResizeGov();
+
+      let currentScenario = govScenarios[0];
+      let packetX = -2.4;
+
+      function selectGovScenario(index) {
+        currentScenario = govScenarios[index];
+        packetX = -2.4; // Reset packet to start of conveyor for dramatic inspection
+
+        document.getElementById('gov-status-label').textContent = currentScenario.statusLabel;
+        document.getElementById('gov-status-dot').className = currentScenario.dotClass;
+        document.getElementById('gov-rule-id').textContent = currentScenario.ruleId;
+        document.getElementById('gov-rule-id').className = 'text-xs font-extrabold uppercase tracking-wider ' + currentScenario.ruleColor;
+        document.getElementById('gov-layer-badge').textContent = currentScenario.badgeText;
+        document.getElementById('gov-layer-badge').className = 'text-[11px] font-bold px-2.5 py-0.5 rounded-full ' + currentScenario.badgeClass;
+        document.getElementById('gov-verdict-title').textContent = currentScenario.title;
+        document.getElementById('gov-verdict-desc').textContent = currentScenario.desc;
+
+        const hudCard = document.getElementById('gov-hud-card');
+        hudCard.className = 'absolute bottom-4 left-4 right-4 panel-glass rounded-2xl p-5 border-l-4 pointer-events-none ' + currentScenario.borderClass;
+
+        shieldPlaneMat.color.setHex(currentScenario.accentHex);
+        shieldBadgeMat.color.setHex(currentScenario.accentHex);
+        packetMat.color.setHex(currentScenario.accentHex);
+        packetMat.emissive.setHex(currentScenario.accentHex);
+        dynamicLight.color.setHex(currentScenario.accentHex);
+        auditor.eyeMat.color.setHex(currentScenario.blocked ? 0xf59e0b : 0x10b981);
+
+        document.querySelectorAll('.gov-scenario-btn').forEach((btn, idx) => {
+          btn.classList.remove('gov-btn-active-block', 'gov-btn-active-pass');
+          if (idx === index) {
+            btn.classList.add(currentScenario.blocked ? 'gov-btn-active-block' : 'gov-btn-active-pass');
+          }
+        });
+      }
+
+      document.querySelectorAll('.gov-scenario-btn').forEach((btn) => {
+        const idx = parseInt(btn.getAttribute('data-gov'), 10);
+        btn.addEventListener('click', () => selectGovScenario(idx));
+      });
+
+      const clock = new THREE.Clock();
+      function animateGov() {
+        requestAnimationFrame(animateGov);
+        const t = clock.getElapsedTime();
+
+        // Auditor cute idle & head tracking the code packet
+        auditor.root.position.y = Math.sin(t * 2.2) * 0.04;
+        shieldBadge.rotation.y = t * 1.4;
+        shieldBadge.position.y = 1.62 + Math.sin(t * 3) * 0.04;
+
+        if (currentScenario.blocked) {
+          // Packet approaches gate at x = -0.55, gets blocked, shakes and bounces back!
+          shieldPlane.visible = true;
+          shieldPlaneMat.opacity = 0.35 + Math.sin(t * 8) * 0.12;
+          if (packetX < -0.62) {
+            packetX += 0.028;
+          } else {
+            // Shake at the barrier and reset loop
+            codePacket.position.y = 0.25 + Math.sin(t * 35) * 0.03;
+            if (Math.sin(t * 2.2) < -0.92) {
+              packetX = -2.4;
+            }
+          }
+          // Auditor shakes head "No" gently when packet is at barrier
+          auditor.headGroup.rotation.y = packetX >= -0.65
+            ? -0.25 + Math.sin(t * 14) * 0.14
+            : -0.25 + (packetX * 0.15);
+          auditor.headGroup.rotation.x = 0;
+        } else {
+          // Approved! Shield opens (translucent green), packet glides all the way through!
+          shieldPlaneMat.opacity = 0.14;
+          packetX += 0.032;
+          if (packetX > 2.4) packetX = -2.4;
+          codePacket.position.y = 0.25 + Math.sin(t * 4) * 0.03;
+          // Auditor nods head "Yes" approvingly!
+          auditor.headGroup.rotation.y = -0.25 + (packetX * 0.12);
+          auditor.headGroup.rotation.x = Math.sin(t * 6) * 0.08;
+        }
+
+        codePacket.position.x = packetX;
+        codePacket.rotation.y = t * 1.2;
+        codePacket.rotation.x = t * 0.8;
+
+        renderer.render(scene, camera);
+      }
+
+      selectGovScenario(0);
+      animateGov();
     })();
   </script>
 </body>
