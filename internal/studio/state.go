@@ -257,5 +257,5 @@ func readProjectVersion(dir string) string {
 	if err == nil && len(data) > 0 {
 		return strings.TrimSpace(string(data))
 	}
-	return "3.2.0-beta"
+	return "3.2.1-beta"
 }

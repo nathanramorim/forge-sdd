@@ -4,6 +4,15 @@ Este arquivo registra o histórico de entregas de produto deste projeto.
 
 ## Entregas
 
+### Versão 3.2.1-beta — Mascotes 3D Three.js no Studio e Visualização de Tarefa Ativa por Agente (Beta)
+
+Atualização incremental da linha v3.2 (versão 3.2.1-beta) trazendo melhorias visuais e ergonômicas ao **Forge Studio**:
+
+*   **Motor 3D Three.js Embarcado para os 5 Mascotes:** Integração nativa do Three.js embutido em `internal/studio/assets/three.min.js` via `embed.FS` (100% offline). Renderização 3D idêntica à do site oficial com floating bob, sombra dinâmica, olhar reativo ao mouse (`mousemove`), piscadas naturais, oscilação de antena, reações de salto (*hop*) e fallback SVG 2D automático (`CLS = 0`).
+*   **Visualização de Atividade Viva por Agente:** Cada card das 5 estações agora conta com uma caixa destacada indicando exatamente o que o agente está executando no momento (`EM EXECUÇÃO`, `RETRABALHO SOLICITADO`, `AUDITANDO` ou `STANDBY`), com ID da tarefa, título e ponto pulsante em tempo real.
+*   **Modo DEMO Enriquecido:** A simulação percorre sequencialmente o ciclo de vida real demonstrando o trabalho de cada um dos 5 especialistas com contratos de transição e animações dedicadas.
+*   **Porta Dinâmica em Testes:** Servidor HTTP agora suporta `Port: 0` para portas efêmeras do SO, eliminando colisões de bind quando o usuário está com o Studio aberto durante execuções de teste.
+
 ### Versão 3.2.0-beta — Forge Studio (Módulo Visual Plugável), Filas Atômicas por Estação e Handoff Determinístico (Beta)
 
 Entrega do ciclo v3.2 (versão 3.2.0-beta) integrando o módulo visual plugável do Forge Studio e o motor de filas atômicas com handoff determinístico entre as 5 estações (Feature 59, 4 entregas: `feat-59-01` a `feat-59-04`).

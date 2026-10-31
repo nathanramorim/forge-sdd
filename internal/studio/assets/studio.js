@@ -326,7 +326,7 @@ function applySnapshot(snap) {
   lastSnapshot = snap;
 
   document.getElementById('projectName').textContent = snap.project_name || 'forge-sdd';
-  document.getElementById('projectVersion').textContent = 'v' + (snap.version || '3.2.0-beta');
+  document.getElementById('projectVersion').textContent = 'v' + (snap.version || '3.2.1-beta');
   document.getElementById('lastUpdate').textContent = new Date(snap.updated_at).toLocaleTimeString();
 
   // Handoff Bar
