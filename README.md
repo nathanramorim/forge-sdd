@@ -40,7 +40,62 @@ npx @nathanramorim/forge-sdd@latest init
 npx @nathanramorim/forge-sdd@latest init . --agent copilot,gemini --name meu-projeto
 ```
 
-## ✨ Telemetria com Cobertura Total e Relatório de Métricas (v2.4.0)
+## Orquestração Independente, Portão de Governança (A/B/C), Constituição por IDs e Auto-Skills (v3.0.0-beta)
+
+> **De um agente solitário para uma esteira de 5 especialistas trabalhando em paralelo por você.**
+> Na versão 3.0, você alinha a visão com o **Líder**, aprova a planta do projeto e aciona uma linha de produção autônoma: planejadores, construtores em paralelo e um auditor independente entregam o software validado em um **Painel Executivo** para sua decisão final.
+
+```mermaid
+flowchart LR
+    subgraph Voce["VOCÊ // DIREÇÃO E APROVAÇÃO"]
+        V1["01. Alinha a demanda"]
+        V2["02. Aprova a especificação"]
+        V3["03. Recebe o Painel Executivo"]
+    end
+
+    subgraph Equipe["FORGE-SDD 3.0 // ESTEIRA AUTÔNOMA EM 5 ESTAÇÕES"]
+        direction TB
+        E1["01 // LÍDER (Orquestrador)<br/>Coordena as estações e reporta a você"]
+        E2["02 // PRODUTO & ARQUITETO<br/>Especificação técnica e verificação de reuso"]
+        E3["03 // PLANEJADOR<br/>Decompõe em tarefas e vincula regras"]
+
+        subgraph Paralelo["EXECUÇÃO SIMULTÂNEA // FILA DETERMINÍSTICA"]
+            B1["04A // BUILDER A<br/>Frente Independente 1"]
+            B2["04B // BUILDER B<br/>Frente Independente 2"]
+        end
+
+        E5["05 // AUDITOR DE GOVERNANÇA<br/>(Somente Leitura — audita arquitetura,<br/>boas práticas e segurança)"]
+        SK["MOTOR AUTO-SKILLS<br/>Padrões recorrentes (3x) viram<br/>habilidades reutilizáveis automaticamente"]
+    end
+
+    V1 --> E1
+    E1 --> E2
+    E2 -->|"Portão FLX-01"| V2
+    V2 -->|"Aprovado"| E3
+    E3 --> B1 & B2
+    B1 & B2 --> E5
+    E5 -->|"Laudo técnico"| E1
+    E5 -.->|"Cataloga padrão"| SK
+    E1 -->|"O que foi feito, estado por etapa<br/>e o que resta no backlog"| V3
+```
+
+| Estação | Função Executiva | Responsabilidade na Esteira |
+| :--- | :--- | :--- |
+| **01 // Líder** | *Gerente de Operações* | Único ponto de contato humano. Aciona as estações e consolida o **Painel Executivo (Camada C)** (*o que foi feito, status de cada etapa e o que falta*). |
+| **02 // Produto & Arquiteto** | *Autoria da Especificação* | Desenha a solução e verifica o que já existe (`Reuse Check`). **Nenhuma implementação inicia sem sua aprovação na especificação (`FLX-01`).** |
+| **03 // Planejador** | *Engenharia de Plano* | Decompõe a especificação aprovada em tarefas atômicas e seleciona apenas os módulos de regras aplicáveis a cada tarefa. |
+| **04 // Builders** | *Execução em Fila* | Consomem tarefas de uma **fila determinística** (`forge-sdd queue`): frentes independentes rodam **em paralelo**; dependências aguardam liberação. |
+| **05 // Governança** | *Auditoria Independente* | **Sem permissão de escrita em código.** Audita se a entrega respeitou arquitetura, boas práticas e segurança antes de devolver ao Líder. |
+
+### Destaques Técnicos da `v3.0.0-beta`
+*   **5 Estações Coordenadas (`.agents/roles/`):** fonte canônica única dos papéis com adaptadores finos para Claude Code, Gemini e GitHub Copilot.
+*   **Constituição por IDs Estáveis + Rules Modulares (`.agents/rules/sdd-*.md`):** `sdd/memory/constitution.md` mantém "o quê e por quê" enxuto com IDs (`ARQ`, `SEG`, `DUP`, `COD`, `TST`, `FLX`, `GOV`), enquanto as rules detalham "como cumprir" sob demanda sem duplicar texto (`GOV-04`).
+*   **Fila do Builder (`forge-sdd queue`) e Portão em 3 Camadas (`forge-sdd gate`):** exige seção `"O que já existe"` (Reuse Check `DUP-02`) na Spec, roda checks determinísticos `P-xx` (Camada A) e valida o parecer JSON baseado em evidências do Analista de Governança (Camada B) antes da aprovação humana no Líder (Camada C).
+*   **Auto-Skills (`forge-sdd skills`) e Pacotes de Governança (`forge-sdd governance`):** atividades padronizadas repetidas viram skills reutilizáveis em `.agents/skills/` sincronizadas para `.claude/skills/` e `.gemini/skills/`.
+
+---
+
+## 📢 Novidades da Versão Anterior (v2.4.0) — Telemetria com Cobertura Total e Relatório de Métricas
 
 *   **Nenhuma sessão perdida:** `/discovery`, `/split-features`, `/nova-feature` e `/archive` agora gravam telemetria automaticamente, junto dos comandos que já gravavam (`/proxima-feature`, `/revisar`, `/novo-fix`) — antes, uma sessão que passasse só por esses quatro comandos não deixava rastro nenhum em `sdd/.metrics/`.
 *   **Novo comando `forge-sdd report`:** mostra, por feature/fix/discovery, tokens gastos, modelos de IA usados, duração de cada sessão, e há quanto tempo (medido pela telemetria) o projeto está ativo.

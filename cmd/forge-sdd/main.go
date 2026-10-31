@@ -12,8 +12,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// version é injetada via ldflags: -X main.version=2.4.0
-var version = "2.4.0"
+// version é injetada via ldflags: -X main.version=3.0.0-beta
+var version = "3.0.0-beta"
 
 var rootCmd = &cobra.Command{
 	Use:   "forge-sdd",
@@ -388,6 +388,10 @@ func init() {
 	rootCmd.AddCommand(sessionCmd)
 	rootCmd.AddCommand(reportCmd)
 	rootCmd.AddCommand(lessonsCmd)
+	rootCmd.AddCommand(queueCmd)
+	rootCmd.AddCommand(gateCmd)
+	rootCmd.AddCommand(skillsCmd)
+	rootCmd.AddCommand(governanceCmd)
 }
 
 func main() {

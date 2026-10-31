@@ -1,8 +1,8 @@
-Leia `sdd/memory/progress.md` e reporte:
-1. Features concluídas na última sessão
-2. Feature ativa (status `in-progress`) e tasks pendentes
-3. Próxima feature (status `todo`) e suas tasks
-4. Bloqueios registrados
+Leia `sdd/memory/progress.md` (e `sdd/.queue/queue.json`, se existir) assumindo o papel de **Líder** (`.agents/roles/lider.md`) e apresente o **Painel Executivo (Camada C)** para o humano:
+1. **Concluído e Aprovado pela Governança (`approved` / `done`):** tasks/features entregues e validadas nas Camadas A e B.
+2. **Em Andamento / Em Revisão (`building`, `review_pending`, `changes_requested`):** estado de cada etapa ativa na fila do Builder e eventuais achados de Governança.
+3. **O que ainda não foi desenvolvido (`queued` / `todo`):** próximas tasks na fila ou features pendentes no roadmap.
+4. **Exceções, Bloqueios e Auto-Skills:** bloqueios registrados, exceções temporárias (`constitution-exception`) e skills propostas (`forge-sdd skills list`).
 5. **Sincronização remota (obrigatória antes do relatório):** consulte `sdd/memory/constitution.md` → "VCS / Work Item System".
    - Se for `nenhum`, pule esta etapa sem tentar nenhum comando de VCS (mesma regra já usada para PR).
    - Caso contrário, rode `git fetch` e compare a branch atual e `main` contra `origin` (ahead/behind). Se `github`, rode também `gh pr list` e cruze com `sdd/features/index.md` (heurística: prefixo de branch bate com a coluna `Branch` do índice).
@@ -15,7 +15,7 @@ Leia `sdd/memory/progress.md` e reporte:
    - Divergência remota relevante encontrada (branch órfã, PR não referenciado) → sugerir investigar essa divergência antes de qualquer outro comando.
    - Nenhum discovery em `sdd/discovery/` e nenhuma feature registrada → `/discovery`
    - Discovery presente sem features correspondentes criadas em `sdd/features/` → `/split-features`
-   - Existe feature com status `todo` → `/proxima-feature`
+   - Existe feature com status `todo` ou item na fila → `/proxima-feature`
    - Todas as features estão `done` → `/archive` ou `/discovery` (novo ciclo)
 
-Formato de saída: tabela markdown + seção "Divergência Remota" (se houver) + lista de próximos passos + linha final "Próximo comando sugerido".
+Formato de saída: Painel Executivo em 4 seções + seção "Divergência Remota" (se houver) + lista de próximos passos + linha final "Próximo comando sugerido".

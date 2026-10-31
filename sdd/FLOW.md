@@ -25,13 +25,13 @@ flowchart TD
 
 Este arquivo é a **única fonte da verdade** para a sequência macro de comandos do Forge-SDD. `CLAUDE.md`/`GEMINI.md`/`copilot-instructions.md` e os chatmodes Orquestrador **citam** os estágios abaixo — não reescrevem a sequência completa. Mapeamento entre a narrativa de produto (Problema → Proposta → Refinamento → Execução → Entrega) e os 7 passos técnicos deste documento:
 
-| Estágio (narrativa) | Passo(s) técnico(s) | Comando |
-|---|---|---|
-| Problema | 1. Discovery | `/discovery` |
-| Proposta | 2. Split (opcional) | `/split-features` |
-| Refinamento | 3. Branch + Especificação | `/nova-feature` |
-| Execução | 4. Implementação | `/proxima-feature` |
-| Entrega | 5. Revisão + 6. PR/Handoff | `/revisar` → `gh pr create` |
+| Estágio (narrativa) | Estação / Papel (`.agents/roles/`) | Passo(s) técnico(s) | Comando |
+|---|---|---|---|
+| Problema & Arquitetura | **Líder + PM + Arquiteto** (`lider`, `pm-architect`) | 1. Discovery + Reuse Check (`DUP-02`) + Gate 1 de Spec (`FLX-01`) | `/discovery` |
+| Planejamento & Fila | **Planejador + Líder** (`planner`, `lider`) | 2. Plan (mapeando IDs da Constitution e `.agents/rules/`) + Split + Enfileiramento | `/split-features` (`forge-sdd queue enqueue`) |
+| Refinamento | **PM/Arquiteto + Planejador** | 3. Branch Única (`Regra 15`) + Especificação Revisada | `/nova-feature` |
+| Execução Independente | **Builder** (`builder`) | 4. Consumo da Fila em Contexto Isolado (`queue next` → `complete`) | `/proxima-feature` |
+| Governança & Entrega | **Analista de Governança → Líder** (`governance`, `lider`) | 5. Portão Camada A (`forge-sdd gate`) + Camada B (JSON com evidência `queue review`) + Auto-Skills (`forge-sdd skills`) + 6. Painel Executivo (Camada C) / PR | `/revisar` → `/status` → `gh pr create` |
 
 O ciclo `READ-MIN → PLAN → ACT → WRITE → CLOSE` descrito em `CLAUDE.md` é o protocolo **por comando** (o que qualquer agente faz dentro de uma única invocação); a tabela acima é o pipeline **por feature** (a sequência de comandos ao longo de uma sessão completa). São dois eixos complementares, não descrições concorrentes do mesmo fluxo.
 

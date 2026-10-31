@@ -1,5 +1,7 @@
 # Discovery 53 — Esteira de Execução de Feature em 3 Sessões (Spec → Act → Revisor)
 
+> **Status: Superseded by [`discovery-58-orquestracao-autonoma-governanca-skills.md`](discovery-58-orquestracao-autonoma-governanca-skills.md)** — consolidado na arquitetura de 5 estações (Líder, PM+Arquiteto, Planejador, Fila do Builder e Analista de Governança) da `v3.0.0-beta`.
+
 Esta descoberta responde a uma pergunta direta do usuário — "já implementamos usar multi-sessão aqui?" — e à direção que ele deu em seguida: para executar uma feature, a esteira deveria ter três estações separadas, **Spec**, **Act** e **Revisor**, cada uma potencialmente isolada em sua própria sessão. Investigação nesta mesma conversa confirmou que hoje isso **não existe como mecanismo operacional** — só como conceito documentado e desatualizado (`docs/metodologia-sdd.md` §9) e como uma decisão explicitamente adiada (`feat-5ae2-06`, o spike de subagentes nativos, concluiu "não migrar sem levar a decisão ao usuário" e recomendou reexecutar a investigação a cada discovery futuro — este é esse discovery).
 
 ## 1. Contexto e Problema (Porquê)

@@ -2,19 +2,19 @@
 
 ## Status
 ```
-Feature 55 — Telemetria cobertura total + /report (7 subtarefas) [x] done
-Release v2.4.0 (estável) — PR #53 promovido a main [x] publicada
+Feature 55 — Telemetria cobertura total + /report [x] done
+Feature 58 — Orquestração Autônoma, Governança A/B/C e Auto-Skills [x] done
+Discovery 59 — Forge Studio + Filas Idempotentes por Estação [x] Spec + Plan prontos
 ```
 
 ## Features ativas
-Nenhuma feature `todo`/`doing` pendente. Lista completa em `sdd/features/index.md`.
+- `sdd/discovery/{discovery,criteria,plan}-59-modulo-visual-estacoes-personagens.md` — Gate 1 (`FLX-01`) aprovado e `plan-59` gerado (4 subtarefas `feat-59-01..04`).
 
 ## Próximo passo
-**Iniciar:** Nenhuma feature `todo`.
+**Iniciar:** Executar `/split-features` para fatiar `plan-59` em `sdd/features/feat-59-modulo-visual-estacoes-personagens/` e enfileirar nos Builders.
 **Bloqueios:** —
 
 ## Handoff da última sessão
-- v2.4.0 promovida direto a estável (desvio pontual da Regra 11, autorizado pelo usuário); `/code-review` pré-merge corrigiu 4 achados (prompts Copilot desatualizados, writer do `report`, `ClassifySessionType` por substring, gofmt).
-- Feature 55: telemetria cobre `/discovery`, `/split-features`, `/nova-feature`, `/archive`; novo `forge-sdd report` (tokens/modelo/duração + idade do projeto).
+- Estações 02 e 03: atualizados `discovery-59` e `criteria-59` (Opção A1 `forge-sdd studio` + 5 filas idempotentes `sdd/.queue/stations/*.json` com `idempotency_key` e escrita atômica) e criado `plan-59`.
 
 > Histórico completo em `progress-log.md`

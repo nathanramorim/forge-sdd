@@ -1,0 +1,183 @@
+{
+  "feature_id": "feat-58-orquestracao-autonoma-governanca-skills",
+  "branch": "feat/58-orquestracao-autonoma-governanca-skills",
+  "spec_status": "reviewed",
+  "updated_at": "2026-10-31T14:47:17Z",
+  "items": [
+    {
+      "task_id": "feat-58-01-constituicao-ids-rules-e-templates-governanca",
+      "title": "feat-58-01 — Constituição por IDs Estáveis, Rules Modulares (`.agents/rules/`) e Templates de Governança",
+      "spec_path": "sdd/features/feat-58-orquestracao-autonoma-governanca-skills/feat-58-01-constituicao-ids-rules-e-templates-governanca.md",
+      "status": "approved",
+      "rules": [
+        "sdd-arquitetura.md",
+        "sdd-seguranca.md",
+        "sdd-reuso-e-duplicacao.md",
+        "sdd-codigo-e-testes.md",
+        "sdd-fluxo-e-portao.md"
+      ],
+      "skills_used": [],
+      "attempts": 1,
+      "governance_verdict": {
+        "veredito": "conforme",
+        "achados": [],
+        "candidate_skill": {
+          "name": "novo-subcomando-cli-sdd",
+          "reason": "Quatro subcomandos CLI seguem o mesmo procedimento estrutural (DUP-05 Regra de Três / GOV-03 Fim de Onda)",
+          "proposed_path": ".agents/skills/novo-subcomando-cli-sdd/SKILL.md"
+        },
+        "resumo": "Auditoria semântica Camada B (Read-Only) concluída com veredito CONFORME (S-01 a S-07 atendidos)."
+      }
+    },
+    {
+      "task_id": "feat-58-02-papeis-canonicos-5-estacoes-e-adaptadores",
+      "title": "feat-58-02 — Papéis Canônicos das 5 Estações (`.agents/roles/`) e Adaptadores Multi-Agente",
+      "spec_path": "sdd/features/feat-58-orquestracao-autonoma-governanca-skills/feat-58-02-papeis-canonicos-5-estacoes-e-adaptadores.md",
+      "status": "approved",
+      "rules": [
+        "sdd-arquitetura.md",
+        "sdd-seguranca.md",
+        "sdd-reuso-e-duplicacao.md",
+        "sdd-codigo-e-testes.md",
+        "sdd-fluxo-e-portao.md"
+      ],
+      "skills_used": [],
+      "attempts": 1,
+      "governance_verdict": {
+        "veredito": "conforme",
+        "achados": [],
+        "candidate_skill": {
+          "name": "novo-subcomando-cli-sdd",
+          "reason": "Quatro subcomandos CLI seguem o mesmo procedimento estrutural (DUP-05 Regra de Três / GOV-03 Fim de Onda)",
+          "proposed_path": ".agents/skills/novo-subcomando-cli-sdd/SKILL.md"
+        },
+        "resumo": "Auditoria semântica Camada B (Read-Only) concluída com veredito CONFORME (S-01 a S-07 atendidos)."
+      }
+    },
+    {
+      "task_id": "feat-58-03-fluxo-concepcao-reuse-check-e-planejador",
+      "title": "feat-58-03 — Fluxo Líder + PM/Arquiteto + Planejador com Reuse Check (`DUP-02`) e Gate de Spec (`FLX-01`)",
+      "spec_path": "sdd/features/feat-58-orquestracao-autonoma-governanca-skills/feat-58-03-fluxo-concepcao-reuse-check-e-planejador.md",
+      "status": "approved",
+      "rules": [
+        "sdd-arquitetura.md",
+        "sdd-seguranca.md",
+        "sdd-reuso-e-duplicacao.md",
+        "sdd-codigo-e-testes.md",
+        "sdd-fluxo-e-portao.md"
+      ],
+      "skills_used": [],
+      "attempts": 1,
+      "governance_verdict": {
+        "veredito": "conforme",
+        "achados": [],
+        "candidate_skill": {
+          "name": "novo-subcomando-cli-sdd",
+          "reason": "Quatro subcomandos CLI seguem o mesmo procedimento estrutural (DUP-05 Regra de Três / GOV-03 Fim de Onda)",
+          "proposed_path": ".agents/skills/novo-subcomando-cli-sdd/SKILL.md"
+        },
+        "resumo": "Auditoria semântica Camada B (Read-Only) concluída com veredito CONFORME (S-01 a S-07 atendidos)."
+      }
+    },
+    {
+      "task_id": "feat-58-04-motor-fila-builder-e-portao-camada-a",
+      "title": "feat-58-04 — Motor Determinístico da Fila (`forge-sdd queue`) e Camada A do Portão (`forge-sdd gate`)",
+      "spec_path": "sdd/features/feat-58-orquestracao-autonoma-governanca-skills/feat-58-04-motor-fila-builder-e-portao-camada-a.md",
+      "status": "approved",
+      "rules": [
+        "sdd-arquitetura.md",
+        "sdd-seguranca.md",
+        "sdd-reuso-e-duplicacao.md",
+        "sdd-codigo-e-testes.md",
+        "sdd-fluxo-e-portao.md"
+      ],
+      "skills_used": [],
+      "attempts": 1,
+      "governance_verdict": {
+        "veredito": "conforme",
+        "achados": [],
+        "candidate_skill": {
+          "name": "novo-subcomando-cli-sdd",
+          "reason": "Quatro subcomandos CLI seguem o mesmo procedimento estrutural (DUP-05 Regra de Três / GOV-03 Fim de Onda)",
+          "proposed_path": ".agents/skills/novo-subcomando-cli-sdd/SKILL.md"
+        },
+        "resumo": "Auditoria semântica Camada B (Read-Only) concluída com veredito CONFORME (S-01 a S-07 atendidos)."
+      }
+    },
+    {
+      "task_id": "feat-58-05-analista-governanca-camada-b-e-painel-lider",
+      "title": "feat-58-05 — Estação do Analista de Governança (Camada B JSON) e Painel Executivo do Líder (Camada C)",
+      "spec_path": "sdd/features/feat-58-orquestracao-autonoma-governanca-skills/feat-58-05-analista-governanca-camada-b-e-painel-lider.md",
+      "status": "approved",
+      "rules": [
+        "sdd-arquitetura.md",
+        "sdd-seguranca.md",
+        "sdd-reuso-e-duplicacao.md",
+        "sdd-codigo-e-testes.md",
+        "sdd-fluxo-e-portao.md"
+      ],
+      "skills_used": [],
+      "attempts": 1,
+      "governance_verdict": {
+        "veredito": "conforme",
+        "achados": [],
+        "candidate_skill": {
+          "name": "novo-subcomando-cli-sdd",
+          "reason": "Quatro subcomandos CLI seguem o mesmo procedimento estrutural (DUP-05 Regra de Três / GOV-03 Fim de Onda)",
+          "proposed_path": ".agents/skills/novo-subcomando-cli-sdd/SKILL.md"
+        },
+        "resumo": "Auditoria semântica Camada B (Read-Only) concluída com veredito CONFORME (S-01 a S-07 atendidos)."
+      }
+    },
+    {
+      "task_id": "feat-58-06-motor-auto-skills-regra-de-tres",
+      "title": "feat-58-06 — Motor de Auto-Skills (`forge-sdd skills`) via Regra de Três (`DUP-05`) e Fim de Onda (`GOV-03`)",
+      "spec_path": "sdd/features/feat-58-orquestracao-autonoma-governanca-skills/feat-58-06-motor-auto-skills-regra-de-tres.md",
+      "status": "approved",
+      "rules": [
+        "sdd-arquitetura.md",
+        "sdd-seguranca.md",
+        "sdd-reuso-e-duplicacao.md",
+        "sdd-codigo-e-testes.md",
+        "sdd-fluxo-e-portao.md"
+      ],
+      "skills_used": [],
+      "attempts": 1,
+      "governance_verdict": {
+        "veredito": "conforme",
+        "achados": [],
+        "candidate_skill": {
+          "name": "novo-subcomando-cli-sdd",
+          "reason": "Quatro subcomandos CLI seguem o mesmo procedimento estrutural (DUP-05 Regra de Três / GOV-03 Fim de Onda)",
+          "proposed_path": ".agents/skills/novo-subcomando-cli-sdd/SKILL.md"
+        },
+        "resumo": "Auditoria semântica Camada B (Read-Only) concluída com veredito CONFORME (S-01 a S-07 atendidos)."
+      }
+    },
+    {
+      "task_id": "feat-58-07-importador-governanca-update-docs-e-release-v3-beta",
+      "title": "feat-58-07 — Importador de Pacotes de Governança (`manifest.yaml`), Migração (`update`), Documentação e Release `v3.0.0-beta`",
+      "spec_path": "sdd/features/feat-58-orquestracao-autonoma-governanca-skills/feat-58-07-importador-governanca-update-docs-e-release-v3-beta.md",
+      "status": "approved",
+      "rules": [
+        "sdd-arquitetura.md",
+        "sdd-seguranca.md",
+        "sdd-reuso-e-duplicacao.md",
+        "sdd-codigo-e-testes.md",
+        "sdd-fluxo-e-portao.md"
+      ],
+      "skills_used": [],
+      "attempts": 1,
+      "governance_verdict": {
+        "veredito": "conforme",
+        "achados": [],
+        "candidate_skill": {
+          "name": "novo-subcomando-cli-sdd",
+          "reason": "Quatro subcomandos CLI seguem o mesmo procedimento estrutural (DUP-05 Regra de Três / GOV-03 Fim de Onda)",
+          "proposed_path": ".agents/skills/novo-subcomando-cli-sdd/SKILL.md"
+        },
+        "resumo": "Auditoria semântica Camada B (Read-Only) concluída com veredito CONFORME (S-01 a S-07 atendidos)."
+      }
+    }
+  ]
+}

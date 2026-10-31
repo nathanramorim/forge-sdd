@@ -6,17 +6,26 @@ forge-sdd — stack principal: .
 ## Lifecycle (todo agente)
 _Protocolo por comando. O pipeline por feature (Discovery → ... → PR) está em `sdd/FLOW.md` — fonte única da verdade._
 
-1. **READ-MIN:** ler `sdd/memory/progress.md` (Builder e Revisor também leem `sdd/memory/lessons.md` — padrões de erro já corrigidos, antes de implementar/revisar)
+1. **READ-MIN:** ler `sdd/memory/progress.md` (Builder e Analista de Governança também leem `sdd/memory/lessons.md` — padrões de erro já corrigidos, antes de implementar/revisar)
 2. **PLAN:** reportar intenção, aguardar confirmação — e perguntar objetivamente se a atividade deve ser delegada a um subagente (varredura/pesquisa extensa tende a "sim"; edição pontual e pequena tende a "não"; decisão final é sempre do usuário). Em ferramentas sem esse conceito, item não aplicável.
-3. **ACT:** executar no escopo do papel
+3. **ACT:** executar no escopo do papel canônico em `.agents/roles/` (ou via subagente em `.claude/agents/`)
 4. **WRITE:** editar apenas arquivos do escopo
-5. **CLOSE** (Orquestrador): atualizar progress, gravar telemetria em `sdd/.metrics/session-<ISO8601>.json` (se `telemetry.enabled`), archive se necessário
+5. **CLOSE** (Líder / Orquestrador): atualizar progress, gravar telemetria em `sdd/.metrics/session-<ISO8601>.json` (se `telemetry.enabled`), archive se necessário
 
 ## Arquivos críticos
 - `sdd/memory/progress.md` — estado ativo (leia primeiro a cada sessão)
-- `sdd/memory/constitution.md` — regras imutáveis
+- `sdd/memory/constitution.md` — regras imutáveis numeradas por IDs (`ARQ-*`, `SEG-*`, `DUP-*`, `COD-*`, `TST-*`, `FLX-*`, `GOV-*`)
 - `sdd/features/feat-XX-*.md` (ou aninhados em subpastas) — tarefa atual
-- `.agents/rules/*.md` — regras de domínio do projeto (design system, arquitetura, acessibilidade, ...). Antes de agir sobre código ou design, consulte os arquivos relevantes à tarefa corrente.
+- `.agents/rules/*.md` — regras de domínio do projeto ("o como cumprir" da Constitution, carregadas sob demanda por task). Antes de agir sobre código ou design, consulte os arquivos relevantes à tarefa corrente.
+- `.agents/roles/*.md` — fonte única dos papéis das 5 estações (adaptados em `.claude/agents/*.md`).
+
+## Papéis Canônicos e 5 Estações (`.agents/roles/` → `.claude/agents/`)
+- **Líder (Orquestrador):** `.agents/roles/lider.md` (`.claude/agents/lider.md`) — coordena as estações, gerencia gates humanos e apresenta o Painel Executivo.
+- **Concepção (PM + Arquiteto):** `.agents/roles/pm-architect.md` (`.claude/agents/pm-architect.md`) — gera `discovery` e `criteria` com Reuse Check (`DUP-02`) e diagramas C4 Mermaid.
+- **Planejador (`Plan`):** `.agents/roles/planner.md` (`.claude/agents/planner.md`) — transforma a Spec revisada (`FLX-01`) em `plan` e tasks mapeando rules e IDs da Constituição.
+- **Fila do Builder:** `.agents/roles/builder.md` (`.claude/agents/builder.md`) — consome tasks de `sdd/.queue/queue.json` em contexto isolado e valida a Camada A (`forge-sdd gate`).
+- **Analista de Governança (Camada B Read-Only):** `.agents/roles/governance.md` (`.claude/agents/governance.md`) — revisor semântico blindado contra prompt injection (`FLX-08`), verifica `S-01..S-07` e emite parecer JSON com evidência.
+- **Apoio:** `.agents/roles/archivist.md` e `.agents/roles/migrator.md`.
 
 ## MCPs
 O Claude Desktop utiliza a configuração global em `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) ou `%APPDATA%\Claude\claude_desktop_config.json` (Windows).
@@ -32,7 +41,7 @@ Recomenda-se configurar os seguintes MCPs:
 - Nunca commite direto em `main`
 - Consulte `sdd/memory/constitution.md` antes de decisões arquiteturais
 - Use ferramentas de leitura antes de editar qualquer arquivo
-- Siga rigorosamente a responsabilidade única por artefato (Specifier escreve specs, Builder escreve código, etc.)
+- Siga rigorosamente a responsabilidade única por estação (PM/Arquiteto concebe, Planejador planeja, Builder implementa, Governança audita em modo read-only)
 - Ao quebrar features em tasks ou discovery em features, agrupar arquivos em subpastas sob `sdd/features/` (a pasta da feature gerada pelo discovery deve refletir o nome do discovery).
 
 ## Comandos Customizados
