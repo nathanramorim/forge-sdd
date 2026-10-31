@@ -393,6 +393,597 @@ function renderConsoleLogs(activities) {
   }).join('');
 }
 
+// ============================================================================
+// STATION DRAWER & DEEP-LINKS (feat-63-02, CA-01, CA-02, CA-04, CA-10)
+// ============================================================================
+
+let activeDrawerStationId = null;
+let activeDrawerTab = 'tasks'; // 'tasks' | 'contracts' | 'telemetry'
+const selectedTaskIdByStation = {};
+
+const CANONICAL_RULES_BY_STATION = {
+  'lider': ['FLX-03', 'FLX-04', 'GOV-01', 'ARQ-01'],
+  'pm-architect': ['ARQ-01', 'ARQ-02', 'DUP-01', 'DUP-02', 'FLX-01'],
+  'planner': ['ARQ-03', 'FLX-02', 'DUP-05', 'COD-05'],
+  'builder': ['ARQ-03', 'ARQ-04', 'DUP-02', 'COD-01', 'COD-05', 'TST-01', 'TST-04', 'TST-05'],
+  'governance': ['GOV-01', 'GOV-02', 'GOV-03', 'GOV-04', 'GOV-05', 'SEG-01', 'SEG-02']
+};
+
+function getIdeFilePath(artifactPath) {
+  if (!artifactPath) return '';
+  return artifactPath.startsWith('/') ? artifactPath : '/' + artifactPath;
+}
+
+function fallbackCopy(text) {
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.position = 'fixed';
+  ta.style.opacity = '0';
+  document.body.appendChild(ta);
+  ta.select();
+  try {
+    document.execCommand('copy');
+  } catch (e) {
+    console.warn('Falha no fallback de cópia:', e);
+  }
+  document.body.removeChild(ta);
+}
+
+function copyCommand(cmd, btn) {
+  if (!cmd) return;
+  const setSuccess = () => {
+    const btnEl = typeof btn === 'string' ? document.getElementById(btn) : btn;
+    if (btnEl) {
+      const orig = btnEl.innerText;
+      btnEl.innerText = 'Copiado!';
+      btnEl.classList.add('copied');
+      setTimeout(() => {
+        btnEl.innerText = orig;
+        btnEl.classList.remove('copied');
+      }, 1500);
+    }
+  };
+
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(cmd).then(setSuccess).catch(() => {
+      fallbackCopy(cmd);
+      setSuccess();
+    });
+  } else {
+    fallbackCopy(cmd);
+    setSuccess();
+  }
+}
+
+function inspectSpec(pathOrId) {
+  if (!pathOrId) return;
+  openSpecViewer(pathOrId);
+}
+
+let currentOpenSpecPath = null;
+
+async function openSpecViewer(specPath) {
+  const modal = document.getElementById('specViewerModal');
+  const backdrop = document.getElementById('specModalBackdrop');
+  if (!modal || !backdrop) return;
+
+  const targetPath = specPath || 'sdd/features/feat-63-studio-navegavel-aprovacao-spec/discovery.md';
+  currentOpenSpecPath = targetPath;
+
+  modal.innerHTML = `
+    <div class="spec-modal-header">
+      <div class="spec-modal-title-group">
+        <span class="chip mono" style="font-size:10px;">SPEC</span>
+        <span class="spec-modal-title" title="${escapeHtml(targetPath)}">${escapeHtml(targetPath)}</span>
+      </div>
+      <button class="drawer-close-btn" onclick="closeSpecViewer()" aria-label="Fechar modal" title="Fechar (ESC)">✕</button>
+    </div>
+    <div class="spec-modal-body">
+      <div style="text-align:center;padding:40px;color:var(--muted);">Carregando especificação...</div>
+    </div>
+  `;
+
+  modal.classList.add('open');
+  backdrop.classList.add('open');
+
+  try {
+    const res = await fetch(`/api/spec?path=${encodeURIComponent(targetPath)}`);
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      modal.querySelector('.spec-modal-body').innerHTML = `
+        <div style="background:rgba(235,94,85,0.1);border:1px solid var(--err);border-radius:8px;padding:20px;color:var(--err);">
+          <b>Erro ao carregar especificação</b>
+          <p style="margin-top:6px;font-size:13px;">${escapeHtml(errData.error || res.statusText)}</p>
+        </div>
+      `;
+      return;
+    }
+
+    const data = await res.json();
+    const vsCodeUri = data.absolute_path ? `vscode://file${data.absolute_path}` : `vscode://`;
+    const isApproved = data.status === 'approved';
+
+    modal.innerHTML = `
+      <div class="spec-modal-header">
+        <div class="spec-modal-title-group">
+          <span class="chip mono" style="font-size:10px;">${escapeHtml(data.station || 'pm-architect')}</span>
+          <span class="spec-modal-title" title="${escapeHtml(data.path)}">${escapeHtml(data.path)}</span>
+          <span class="chip" style="font-size:10px;color:${isApproved ? 'var(--ok)' : 'var(--warn)'};border-color:currentColor;">
+            ${escapeHtml(data.status || 'pending_review')}
+          </span>
+        </div>
+        <div class="spec-modal-actions">
+          <a href="${vsCodeUri}" class="btn-ide ide-link-btn" title="Abrir no editor VS Code local">
+            Abrir no VS Code
+          </a>
+          <button class="approve-spec-btn ${isApproved ? 'approved' : ''}" 
+                  onclick="approveSpec('${escapeHtml(data.path)}')" 
+                  title="Aprovação Humana no Portão FLX-01"
+                  ${isApproved ? 'disabled' : ''}>
+            ${isApproved ? '✓ Spec Aprovada (FLX-01)' : 'Aprovar Spec (FLX-01)'}
+          </button>
+          <button class="drawer-close-btn" onclick="closeSpecViewer()" aria-label="Fechar" title="Fechar (ESC)">✕</button>
+        </div>
+      </div>
+      <div class="spec-modal-body">
+        <div class="markdown-body">
+          ${renderMarkdown(data.content)}
+        </div>
+      </div>
+    `;
+  } catch (err) {
+    modal.querySelector('.spec-modal-body').innerHTML = `
+      <div style="background:rgba(235,94,85,0.1);border:1px solid var(--err);border-radius:8px;padding:20px;color:var(--err);">
+        <b>Falha na comunicação com o servidor</b>
+        <p style="margin-top:6px;font-size:13px;">${escapeHtml(err.message)}</p>
+      </div>
+    `;
+  }
+}
+
+function closeSpecViewer() {
+  currentOpenSpecPath = null;
+  const modal = document.getElementById('specViewerModal');
+  const backdrop = document.getElementById('specModalBackdrop');
+  if (modal) modal.classList.remove('open');
+  if (backdrop) backdrop.classList.remove('open');
+}
+
+async function approveSpec(specPath) {
+  const targetPath = specPath || currentOpenSpecPath;
+  if (!targetPath) return;
+
+  try {
+    const res = await fetch('/api/spec/approve', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ spec_path: targetPath })
+    });
+
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      alert(`Erro ao aprovar spec: ${errData.error || res.statusText}`);
+      return;
+    }
+
+    const data = await res.json();
+    showToast(`✓ Especificação aprovada no Portão FLX-01: ${data.spec_path}`);
+
+    // Fecha o modal após aprovação com sucesso
+    setTimeout(() => {
+      closeSpecViewer();
+    }, 400);
+
+    // Atualiza estado se estiver em LIVE
+    if (currentMode === 'LIVE') {
+      fetch('/api/state').then(r => r.json()).then(applySnapshot).catch(console.error);
+    }
+  } catch (err) {
+    alert(`Falha ao conectar ao servidor: ${err.message}`);
+  }
+}
+
+function showToast(msg) {
+  let toast = document.getElementById('studioToast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'studioToast';
+    toast.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#1a2332;border:1px solid var(--ok);color:#3ecf8e;padding:12px 20px;border-radius:8px;font:600 13px var(--f-mono);box-shadow:0 8px 30px rgba(0,0,0,0.5);z-index:9999;transition:all 0.3s ease;transform:translateY(100px);opacity:0;';
+    document.body.appendChild(toast);
+  }
+  toast.textContent = msg;
+  toast.style.transform = 'translateY(0)';
+  toast.style.opacity = '1';
+  setTimeout(() => {
+    toast.style.transform = 'translateY(100px)';
+    toast.style.opacity = '0';
+  }, 3500);
+}
+
+function renderMarkdown(md) {
+  if (!md) return '';
+  const lines = md.split('\n');
+  let html = '';
+  let inCode = false;
+  let codeBuffer = '';
+  let inList = false;
+  let inTable = false;
+  let tableHeader = true;
+
+  const escapeText = (t) => t
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+
+  const formatInline = (t) => {
+    let res = escapeText(t);
+    res = res.replace(/`([^`]+)`/g, '<code>$1</code>');
+    res = res.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+    res = res.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+    return res;
+  };
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+
+    // Code blocks
+    if (line.trim().startsWith('```')) {
+      if (inCode) {
+        html += `<pre><code>${escapeText(codeBuffer)}</code></pre>\n`;
+        codeBuffer = '';
+        inCode = false;
+      } else {
+        if (inList) { html += '</ul>\n'; inList = false; }
+        if (inTable) { html += '</tbody></table>\n'; inTable = false; }
+        inCode = true;
+      }
+      continue;
+    }
+    if (inCode) {
+      codeBuffer += (codeBuffer ? '\n' : '') + line;
+      continue;
+    }
+
+    const trimmed = line.trim();
+
+    // Tables
+    if (trimmed.startsWith('|') && trimmed.endsWith('|')) {
+      const isDivider = trimmed.split('|').filter(c => c.trim()).every(c => /^[-:]+$/.test(c.trim()));
+      if (isDivider) {
+        tableHeader = false;
+        continue;
+      }
+      const cells = trimmed.split('|').slice(1, -1).map(c => c.trim());
+      if (!inTable) {
+        if (inList) { html += '</ul>\n'; inList = false; }
+        html += '<table>\n';
+        inTable = true;
+        tableHeader = true;
+      }
+      if (tableHeader) {
+        html += '<thead><tr>' + cells.map(c => `<th>${formatInline(c)}</th>`).join('') + '</tr></thead>\n<tbody>\n';
+      } else {
+        html += '<tr>' + cells.map(c => `<td>${formatInline(c)}</td>`).join('') + '</tr>\n';
+      }
+      continue;
+    } else if (inTable) {
+      html += '</tbody></table>\n';
+      inTable = false;
+    }
+
+    // Checklist
+    if (/^[-*]\s+\[([ xX])\]\s+(.*)$/.test(trimmed)) {
+      if (!inList) { html += '<ul style="list-style:none;padding-left:4px;">\n'; inList = true; }
+      const match = trimmed.match(/^[-*]\s+\[([ xX])\]\s+(.*)$/);
+      const checked = match[1].toLowerCase() === 'x';
+      html += `<li class="checklist-item"><input type="checkbox" ${checked ? 'checked' : ''} disabled> <span>${formatInline(match[2])}</span></li>\n`;
+      continue;
+    }
+
+    // Bullet lists
+    if (/^[-*]\s+(.*)$/.test(trimmed)) {
+      if (!inList) { html += '<ul>\n'; inList = true; }
+      const itemText = trimmed.replace(/^[-*]\s+/, '');
+      html += `<li>${formatInline(itemText)}</li>\n`;
+      continue;
+    } else if (inList) {
+      html += '</ul>\n';
+      inList = false;
+    }
+
+    // Empty line
+    if (!trimmed) {
+      continue;
+    }
+
+    // Headers
+    if (trimmed.startsWith('#### ')) {
+      html += `<h4>${formatInline(trimmed.substring(5))}</h4>\n`;
+    } else if (trimmed.startsWith('### ')) {
+      html += `<h3>${formatInline(trimmed.substring(4))}</h3>\n`;
+    } else if (trimmed.startsWith('## ')) {
+      html += `<h2>${formatInline(trimmed.substring(3))}</h2>\n`;
+    } else if (trimmed.startsWith('# ')) {
+      html += `<h1>${formatInline(trimmed.substring(2))}</h1>\n`;
+    } else if (trimmed.startsWith('> ')) {
+      html += `<blockquote>${formatInline(trimmed.substring(2))}</blockquote>\n`;
+    } else if (trimmed.startsWith('---') || trimmed.startsWith('***')) {
+      html += '<hr style="border:none;border-top:1px solid var(--line);margin:18px 0;">\n';
+    } else {
+      html += `<p>${formatInline(trimmed)}</p>\n`;
+    }
+  }
+
+  if (inCode) {
+    html += `<pre><code>${escapeText(codeBuffer)}</code></pre>\n`;
+  }
+  if (inList) {
+    html += '</ul>\n';
+  }
+  if (inTable) {
+    html += '</tbody></table>\n';
+  }
+
+  return html;
+}
+
+function selectTaskInDrawer(taskId) {
+  if (!activeDrawerStationId) return;
+  selectedTaskIdByStation[activeDrawerStationId] = taskId;
+  if (lastSnapshot && lastSnapshot.stations) {
+    const st = lastSnapshot.stations.find(s => s.id === activeDrawerStationId);
+    if (st) {
+      renderStationDrawerContent(st);
+    }
+  }
+}
+
+function switchDrawerTab(tab) {
+  activeDrawerTab = tab;
+  if (activeDrawerStationId && lastSnapshot && lastSnapshot.stations) {
+    const st = lastSnapshot.stations.find(s => s.id === activeDrawerStationId);
+    if (st) {
+      renderStationDrawerContent(st);
+    }
+  }
+}
+
+function openStationDrawer(stationId, tab) {
+  activeDrawerStationId = stationId;
+  if (tab) {
+    activeDrawerTab = tab;
+  }
+  const drawer = document.getElementById('stationDrawer');
+  const backdrop = document.getElementById('drawerBackdrop');
+  if (!drawer || !backdrop) return;
+
+  drawer.classList.add('open');
+  drawer.removeAttribute('aria-hidden');
+  backdrop.classList.add('open');
+
+  if (lastSnapshot && lastSnapshot.stations) {
+    const st = lastSnapshot.stations.find(s => s.id === stationId);
+    if (st) {
+      renderStationDrawerContent(st);
+    }
+  }
+}
+
+function closeStationDrawer() {
+  activeDrawerStationId = null;
+  const drawer = document.getElementById('stationDrawer');
+  const backdrop = document.getElementById('drawerBackdrop');
+  if (drawer) {
+    drawer.classList.remove('open');
+    drawer.setAttribute('aria-hidden', 'true');
+  }
+  if (backdrop) {
+    backdrop.classList.remove('open');
+  }
+}
+
+window.openStationDrawer = openStationDrawer;
+window.closeStationDrawer = closeStationDrawer;
+window.switchDrawerTab = switchDrawerTab;
+window.selectTaskInDrawer = selectTaskInDrawer;
+window.copyCommand = copyCommand;
+window.inspectSpec = inspectSpec;
+window.openSpecViewer = openSpecViewer;
+window.closeSpecViewer = closeSpecViewer;
+window.approveSpec = approveSpec;
+window.renderMarkdown = renderMarkdown;
+
+window.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    const modal = document.getElementById('specViewerModal');
+    if (modal && modal.classList.contains('open')) {
+      closeSpecViewer();
+    } else if (activeDrawerStationId) {
+      closeStationDrawer();
+    }
+  }
+});
+
+function renderStationDrawerContent(st) {
+  const drawer = document.getElementById('stationDrawer');
+  if (!drawer) return;
+
+  drawer.style.setProperty('--c', st.color);
+
+  const stActs = (currentActivities || []).filter(a => a.station === st.id);
+  const items = st.items || [];
+  const selectedTaskId = selectedTaskIdByStation[st.id] || (items.length > 0 ? items[0].id : null);
+
+  // --- Painel Tarefas ---
+  let tasksHtml = '';
+  if (items.length > 0) {
+    tasksHtml = items.map(it => {
+      const isSelected = it.id === selectedTaskId;
+      const filePath = getIdeFilePath(it.artifact_path);
+      const vsCodeUri = filePath ? `vscode://file${filePath}` : 'vscode://';
+      const cursorUri = filePath ? `cursor://file${filePath}` : 'cursor://';
+      const cliCmd = it.artifact_path ? `code ${it.artifact_path}` : (it.id ? `forge-sdd task view ${it.id}` : 'code .');
+      const copyBtnId = `copy-btn-${it.id.replace(/[^a-zA-Z0-9_-]/g, '_')}`;
+
+      let rules = [];
+      if (it.metadata && it.metadata.rules) {
+        rules = it.metadata.rules.split(',').map(r => r.trim()).filter(Boolean);
+      }
+      if (rules.length === 0) {
+        rules = CANONICAL_RULES_BY_STATION[st.id] || ['ARQ-03', 'DUP-02'];
+      }
+
+      return `
+        <div class="drawer-task-card ${isSelected ? 'selected' : ''}" onclick="selectTaskInDrawer('${escapeHtml(it.id)}')">
+          <div class="drawer-task-header">
+            <span class="drawer-task-id">${escapeHtml(it.id)}</span>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <span class="chip" style="font-size:10px;padding:2px 8px;">tentativa #${it.attempt || 1}</span>
+              <span class="chip" style="font-size:10px;padding:2px 8px;color:${st.color};border-color:${st.color};">${escapeHtml(it.status)}</span>
+            </div>
+          </div>
+
+          <div class="drawer-task-title">${escapeHtml(it.title || it.id)}</div>
+
+          ${it.artifact_path ? `
+            <div class="drawer-task-path" title="${escapeHtml(it.artifact_path)}">
+              📄 ${escapeHtml(it.artifact_path)}
+            </div>
+          ` : ''}
+
+          <div class="rules-strip" title="Pilares Constitucionais Mapeados">
+            <span style="font-size:10px;color:var(--muted);font-weight:600;">Regras:</span>
+            ${rules.map(r => `<span class="rule-chip">${escapeHtml(r)}</span>`).join('')}
+          </div>
+
+          <div class="ide-buttons-row">
+            <a href="${vsCodeUri}" class="btn-ide ide-link-btn" title="Abrir arquivo no editor VS Code nativo">
+              Abrir no VS Code
+            </a>
+            <a href="${cursorUri}" class="btn-ide ide-link-btn cursor-btn" title="Abrir arquivo no editor Cursor">
+              Cursor
+            </a>
+            <button id="${copyBtnId}" class="copy-btn ide-link-btn" onclick="event.stopPropagation(); copyCommand('${escapeHtml(cliCmd)}', '${copyBtnId}')" title="Copiar comando CLI para terminal local">
+              Copiar CLI
+            </button>
+            <button class="inspect-spec-btn ide-link-btn" onclick="event.stopPropagation(); openSpecViewer('${escapeHtml(it.artifact_path || it.id)}')" title="Ver especificação técnica detalhada">
+              Ver Spec
+            </button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  } else {
+    tasksHtml = `
+      <div style="background:var(--bg3);border:1px dashed var(--line);border-radius:10px;padding:24px;text-align:center;color:var(--muted);">
+        <p style="font-size:13px;font-weight:600;color:var(--fg);margin-bottom:6px;">Nenhuma tarefa na fila desta estação</p>
+        <p style="font-size:11.5px;">Aguardando novo handoff em <code>sdd/.queue/stations/${escapeHtml(st.id)}.json</code>.</p>
+      </div>
+    `;
+  }
+
+  // --- Painel Contratos ---
+  const contractsHtml = `
+    <div class="contract-section">
+      <div class="contract-card">
+        <span class="contract-label">Papel Canônico (.agents/roles/${escapeHtml(st.id)}.md)</span>
+        <div class="contract-val">${escapeHtml(st.role)}</div>
+        <p style="font-size:12px;color:var(--muted);margin-top:4px;">
+          Responsabilidade canônica definida na esteira SDD das 5 estações.
+        </p>
+      </div>
+
+      <div class="contract-card">
+        <span class="contract-label">Recebe (Entrada)</span>
+        <div class="contract-val" style="color:#79d4fd;">${escapeHtml(st.input_contract || 'Demanda inicial')}</div>
+      </div>
+
+      <div class="contract-card">
+        <span class="contract-label">Entrega (Saída)</span>
+        <div class="contract-val" style="color:var(--ok);">${escapeHtml(st.output_contract || 'Artefato validado')}</div>
+      </div>
+
+      <div class="contract-card">
+        <span class="contract-label">Metadados de Fila</span>
+        <div style="display:flex;gap:10px;margin-top:6px;flex-wrap:wrap;">
+          <span class="chip mono">Fila: ${escapeHtml(st.id)}.json</span>
+          <span class="chip mono">Versão: v${st.version}</span>
+          <span class="chip mono">Itens: ${st.items ? st.items.length : 0}</span>
+        </div>
+      </div>
+    </div>
+  `;
+
+  // --- Painel Telemetria ---
+  let telemetryHtml = '';
+  if (stActs.length > 0) {
+    telemetryHtml = `
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        ${stActs.map(act => `
+          <div class="log-row" style="background:var(--bg3);padding:8px 12px;border-radius:6px;border:1px solid var(--line);">
+            <span class="log-time">${new Date(act.timestamp).toLocaleTimeString()}</span>
+            <span class="log-tool" style="max-width:none;"><span class="tool-chip-dot"></span>${escapeHtml(act.tool || 'cmd')}</span>
+            <span class="log-action" style="grid-column: 3 / 5;" title="${escapeHtml(act.action || act.details || '')}">
+              <b>${escapeHtml(act.action || '')}</b>
+              <span class="detail-hint">${escapeHtml(act.details || '')}</span>
+            </span>
+            <span class="log-status ${act.status || 'done'}">${escapeHtml(act.status || 'done')}</span>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  } else {
+    telemetryHtml = `
+      <div style="background:var(--bg3);border:1px dashed var(--line);border-radius:10px;padding:24px;text-align:center;color:var(--muted);">
+        <p style="font-size:13px;font-weight:600;color:var(--fg);margin-bottom:6px;">Nenhuma ação recente registrada</p>
+        <p style="font-size:11.5px;">A telemetria da estação ${escapeHtml(st.name)} será exibida aqui em tempo real assim que os comandos forem emitidos.</p>
+      </div>
+    `;
+  }
+
+  drawer.innerHTML = `
+    <div class="drawer-header">
+      <div class="drawer-title-group">
+        <div class="drawer-badge-row">
+          <span class="chip" style="color:${st.color};border-color:${st.color};padding:2px 8px;font-size:10px;">
+            <i style="--o:${st.color}"></i>${escapeHtml(st.mascot_state.toUpperCase())}
+          </span>
+          <span class="chip mono" style="font-size:10px;padding:2px 8px;">Marca: ${escapeHtml(st.mark)}</span>
+        </div>
+        <div class="drawer-station-name">
+          <span>${escapeHtml(st.name)}</span>
+        </div>
+        <div class="drawer-station-role">${escapeHtml(st.role)}</div>
+      </div>
+      <button class="drawer-close-btn" onclick="closeStationDrawer()" aria-label="Fechar painel da estação" title="Fechar (ESC)">✕</button>
+    </div>
+
+    <div class="drawer-tabs">
+      <button class="drawer-tab ${activeDrawerTab === 'tasks' ? 'active' : ''}" onclick="switchDrawerTab('tasks')">
+        Tarefas (${items.length})
+      </button>
+      <button class="drawer-tab ${activeDrawerTab === 'contracts' ? 'active' : ''}" onclick="switchDrawerTab('contracts')">
+        Contratos &amp; Papel
+      </button>
+      <button class="drawer-tab ${activeDrawerTab === 'telemetry' ? 'active' : ''}" onclick="switchDrawerTab('telemetry')">
+        Telemetria (${stActs.length})
+      </button>
+    </div>
+
+    <div class="drawer-body">
+      <div class="drawer-pane ${activeDrawerTab === 'tasks' ? 'active' : ''}">
+        ${tasksHtml}
+      </div>
+      <div class="drawer-pane ${activeDrawerTab === 'contracts' ? 'active' : ''}">
+        ${contractsHtml}
+      </div>
+      <div class="drawer-pane ${activeDrawerTab === 'telemetry' ? 'active' : ''}">
+        ${telemetryHtml}
+      </div>
+    </div>
+  `;
+}
+
 // Renderiza a grade de estações e atualiza os DOMs
 function applySnapshot(snap) {
   if (!snap) return;
@@ -411,7 +1002,12 @@ function applySnapshot(snap) {
   if (ho) {
     document.getElementById('hoFrom').textContent = ho.from_station;
     document.getElementById('hoTo').textContent = ho.to_station;
-    document.getElementById('hoPayload').textContent = ho.payload;
+    const isSpecHandoff = ho.from_station === 'pm-architect' || ho.to_station === 'pm-architect' || (ho.gate && ho.gate.includes('FLX-01'));
+    if (isSpecHandoff) {
+      document.getElementById('hoPayload').innerHTML = `${escapeHtml(ho.payload)} • <a href="javascript:void(0)" onclick="openSpecViewer('sdd/features/feat-63-studio-navegavel-aprovacao-spec/discovery.md')" style="color:var(--accent);text-decoration:underline;font-weight:700;">Ver Spec (FLX-01)</a>`;
+    } else {
+      document.getElementById('hoPayload').textContent = ho.payload;
+    }
     document.getElementById('hoGate').innerHTML = `<i></i>${ho.gate}`;
   }
 
@@ -520,6 +1116,16 @@ function applySnapshot(snap) {
       card.id = `station-card-${st.id}`;
       card.className = `station-card ${isActive ? 'active' : ''}`;
       card.style.setProperty('--c', st.color);
+      card.setAttribute('tabindex', '0');
+      card.setAttribute('role', 'button');
+      card.setAttribute('aria-label', `Inspecionar Estação ${st.name}`);
+      card.onclick = () => openStationDrawer(st.id);
+      card.onkeydown = (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          openStationDrawer(st.id);
+        }
+      };
 
       card.innerHTML = `
         <div class="station-top">
@@ -550,6 +1156,16 @@ function applySnapshot(snap) {
     } else {
       card.className = `station-card ${isActive ? 'active' : ''}`;
       card.style.setProperty('--c', st.color);
+      card.setAttribute('tabindex', '0');
+      card.setAttribute('role', 'button');
+      card.setAttribute('aria-label', `Inspecionar Estação ${st.name}`);
+      card.onclick = () => openStationDrawer(st.id);
+      card.onkeydown = (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          openStationDrawer(st.id);
+        }
+      };
       const chip = document.getElementById(`chip-${st.id}`);
       if (chip) chip.innerHTML = `<i style="--o:${st.color}"></i>${st.mascot_state}`;
       const execWrap = document.getElementById(`exec-wrap-${st.id}`);
@@ -605,6 +1221,14 @@ function applySnapshot(snap) {
       <b>Portão de Governança Camada A & B</b>
       <p style="margin-top:4px;color:var(--muted);">Aguardando submissão ou inspeção ativa</p>
     `;
+  }
+
+  // Atualização reativa suave do Drawer de Inspeção se estiver aberto (feat-63-02)
+  if (activeDrawerStationId && snap.stations) {
+    const activeSt = snap.stations.find(s => s.id === activeDrawerStationId);
+    if (activeSt) {
+      renderStationDrawerContent(activeSt);
+    }
   }
 }
 

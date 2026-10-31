@@ -47,6 +47,30 @@ func (h *SSEHub) Stop() {
 	close(h.stopChan)
 }
 
+// NotifyChange força uma atualização e emissão imediata do estado para os clientes conectados.
+func (h *SSEHub) NotifyChange() {
+	snap, err := h.agg.GetSnapshot()
+	if err != nil {
+		return
+	}
+
+	h.mu.Lock()
+	defer h.mu.Unlock()
+
+	h.lastHash = snap.StateHash
+	data, err := json.Marshal(snap)
+	if err != nil {
+		return
+	}
+	msg := fmt.Sprintf("event: state\ndata: %s\n\n", string(data))
+	for ch := range h.clients {
+		select {
+		case ch <- msg:
+		default:
+		}
+	}
+}
+
 func (h *SSEHub) checkAndBroadcast() {
 	snap, err := h.agg.GetSnapshot()
 	if err != nil {

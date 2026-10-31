@@ -1,8 +1,8 @@
 {
-  "feature_id": "feat-59-modulo-visual-estacoes-personagens",
-  "branch": "feat/59-modulo-visual-estacoes-personagens",
-  "spec_status": "reviewed",
-  "updated_at": "2026-10-31T19:11:41Z",
+  "feature_id": "feat-63",
+  "branch": "feat/63-studio-navegavel-aprovacao-spec",
+  "spec_status": "approved",
+  "updated_at": "2026-10-31T22:20:26Z",
   "items": [
     {
       "task_id": "feat-60-01-scaffold-astro-seo-dados-tipados",
@@ -155,6 +155,48 @@
         "veredito": "conforme",
         "achados": [],
         "resumo": "Conceitos de filas por estacao e modulo visual plugavel Forge Studio registrados em concepts.md. Fluxos e comandos documentados em FLOW.md e README.md. Historico de releases atualizado com a v3.0.1-beta.2 e templates sincronizados."
+      }
+    },
+    {
+      "task_id": "feat-63-01-api-spec-e-sanitizacao",
+      "title": "feat-63-01 — Endpoint de Leitura de Spec (`GET /api/spec`) e Sanitização Estrita contra Path Traversal",
+      "spec_path": "sdd/features/feat-63-studio-navegavel-aprovacao-spec/feat-63-01-api-spec-e-sanitizacao.md",
+      "status": "approved",
+      "rules": [],
+      "skills_used": [],
+      "attempts": 1,
+      "governance_verdict": {
+        "veredito": "conforme",
+        "achados": [],
+        "resumo": "Endpoint GET /api/spec implementado com sanitização estrita de path traversal e testes determinísticos com corrida aprovados."
+      }
+    },
+    {
+      "task_id": "feat-63-02-drawer-inspecao-estacoes-e-deep-link",
+      "title": "feat-63-02 — Componente Station Drawer (`.station-drawer`), Cartões Clicáveis e Deep-Link para IDE Local",
+      "spec_path": "sdd/features/feat-63-studio-navegavel-aprovacao-spec/feat-63-02-drawer-inspecao-estacoes-e-deep-link.md",
+      "status": "approved",
+      "rules": [],
+      "skills_used": [],
+      "attempts": 1,
+      "governance_verdict": {
+        "veredito": "conforme",
+        "achados": [],
+        "resumo": "Station Drawer (.station-drawer) e deep-links de IDE implementados com sucesso e aprovados pela Governança."
+      }
+    },
+    {
+      "task_id": "feat-63-03-visualizador-spec-e-portao-flx01-sse",
+      "title": "feat-63-03 — Visualizador de Spec Embutido, Aprovação Humana no Portão FLX-01 e Sincronização em Tempo Real via SSE",
+      "spec_path": "sdd/features/feat-63-studio-navegavel-aprovacao-spec/feat-63-03-visualizador-spec-e-portao-flx01-sse.md",
+      "status": "approved",
+      "rules": [],
+      "skills_used": [],
+      "attempts": 1,
+      "governance_verdict": {
+        "veredito": "conforme",
+        "achados": [],
+        "resumo": "Visualizador de Spec, aprovação humana no Portão FLX-01 e sync SSE implementados e aprovados integralmente pela Governança."
       }
     }
   ]

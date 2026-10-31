@@ -1,5 +1,85 @@
 [
   {
+    "timestamp": "2026-10-31T22:20:26Z",
+    "station": "pm-architect",
+    "tool": "human_gate",
+    "action": "approve sdd/features/feat-63-studio-navegavel-aprovacao-spec/discovery.md",
+    "details": "Portão FLX-01 Superado: Spec aprovada pelo humano",
+    "status": "success"
+  },
+  {
+    "timestamp": "2026-10-31T22:12:51Z",
+    "station": "builder",
+    "tool": "edit_file",
+    "action": "implementando Spec Viewer, aprovação FLX-01 e sync SSE",
+    "details": "Escopo: index.html, studio.css, studio.js e server.go",
+    "status": "running"
+  },
+  {
+    "timestamp": "2026-10-31T22:12:50Z",
+    "station": "lider",
+    "tool": "subagent",
+    "action": "despachando Builder para feat-63-03",
+    "details": "Iniciando implementação do Visualizador de Spec, Aprovação FLX-01 e SSE",
+    "status": "done"
+  },
+  {
+    "timestamp": "2026-10-31T22:10:44Z",
+    "station": "builder",
+    "tool": "edit_file",
+    "action": "implementando station drawer e deep-links de IDE",
+    "details": "Escopo: index.html, studio.css, studio.js e assets_test.go",
+    "status": "running"
+  },
+  {
+    "timestamp": "2026-10-31T22:10:44Z",
+    "station": "lider",
+    "tool": "subagent",
+    "action": "despachando Builder para feat-63-02",
+    "details": "Iniciando implementação do Drawer de Inspeção e Deep-Links",
+    "status": "done"
+  },
+  {
+    "timestamp": "2026-10-31T22:09:00Z",
+    "station": "builder",
+    "tool": "edit_file",
+    "action": "implementando GET /api/spec e sanitização path traversal",
+    "details": "Escopo: internal/studio/server.go e server_test.go",
+    "status": "running"
+  },
+  {
+    "timestamp": "2026-10-31T22:08:59Z",
+    "station": "lider",
+    "tool": "subagent",
+    "action": "despachando Builder para feat-63-01",
+    "details": "Iniciando implementação da task feat-63-01 em contexto isolado",
+    "status": "done"
+  },
+  {
+    "timestamp": "2026-10-31T22:06:16Z",
+    "station": "lider",
+    "tool": "subagent",
+    "action": "despachando Planejador para fatiamento em tarefas P/M/G",
+    "details": "Subagente Estação 03 (Planejador) acionado com a Spec aprovada pelo humano",
+    "status": "running"
+  },
+  {
+    "timestamp": "2026-10-31T22:05:40Z",
+    "station": "lider",
+    "tool": "ask_question",
+    "action": "solicitando revisão humana da Spec (Portão FLX-01)",
+    "details": "Aguardando aprovação do humano para enfileirar tarefas",
+    "status": "running"
+  },
+  {
+    "timestamp": "2026-10-31T22:05:40Z",
+    "station": "pm-architect",
+    "tool": "write_file",
+    "action": "write_file discovery.md + criteria.md",
+    "details": "Spec feat-63 elaborada e submetida ao Portão FLX-01",
+    "status": "done"
+  },
+  {
     "timestamp": "2026-10-31T21:58:11Z",
     "station": "builder",
     "tool": "edit_file",

@@ -10,13 +10,14 @@ Release v3.0.1-beta.1 — NPM & GitHub Releases [x] done
 Feat 59 — Forge Studio + Filas por Estação [x] 4/4 done
 Release v3.2.0-beta — NPM & GitHub Releases [x] done
 Release v3.2.1-beta — Three.js 3D Mascotes & Tarefa Ativa [x] done
+Feat 63 — Studio Navegável & Aprovação Spec [x] 3/3 done
 ```
 
 ## Features ativas
-- Nenhuma ativa (Release v3.2.1-beta concluída).
+- Nenhuma ativa (Feat 63 concluída e aprovada pela Governança).
 
 ## Próximo passo
-**Próximo:** Definir próximo discovery ou feature.
+**Próximo:** Definir próximo ciclo de evolução ou release.
 **Bloqueios:** —
 
 > Histórico completo em `progress-log.md`

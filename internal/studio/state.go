@@ -147,7 +147,11 @@ func (a *Aggregator) GetSnapshot() (*StudioSnapshot, error) {
 			stations[i].Items = sq.Items
 
 			activeCount := 0
-			for _, it := range sq.Items {
+			var pendingApprovalItem *queue.StationItem
+			for idxItem, it := range sq.Items {
+				if st.ID == queue.StationPMArchitect && (it.Status == "pending_review" || it.Status == "approval" || it.Status == "review_pending") {
+					pendingApprovalItem = &sq.Items[idxItem]
+				}
 				if it.Status == queue.StatusBuilding {
 					stations[i].MascotState = "working"
 					activeStation = st.ID
@@ -171,6 +175,18 @@ func (a *Aggregator) GetSnapshot() (*StudioSnapshot, error) {
 				}
 				if it.Status != queue.StatusApproved {
 					activeCount++
+				}
+			}
+			if st.ID == queue.StationPMArchitect && pendingApprovalItem != nil && stations[i].ExecutingTask == nil {
+				stations[i].MascotState = "approval"
+				activeStation = st.ID
+				activeIdx = i
+				stations[i].CurrentFocus = "Aguardando Revisão Humana (FLX-01): " + pendingApprovalItem.Title
+				stations[i].ExecutingTask = &ActiveTaskDTO{
+					ID:        pendingApprovalItem.ID,
+					Title:     pendingApprovalItem.Title,
+					Status:    "pending_review",
+					Operation: pendingApprovalItem.Operation,
 				}
 			}
 			stations[i].ActiveItems = activeCount
@@ -212,6 +228,22 @@ func (a *Aggregator) GetSnapshot() (*StudioSnapshot, error) {
 						activeStation = queue.StationGovernance
 						activeIdx = gIdx
 					}
+				}
+			}
+		}
+
+		if (legacyQ.SpecStatus == "pending_review" || legacyQ.SpecStatus == "approval" || legacyQ.SpecStatus == "review_pending") {
+			for pmIdx, s := range stations {
+				if s.ID == queue.StationPMArchitect && stations[pmIdx].ExecutingTask == nil {
+					stations[pmIdx].MascotState = "approval"
+					stations[pmIdx].CurrentFocus = "Aguardando Revisão Humana (FLX-01)"
+					stations[pmIdx].ExecutingTask = &ActiveTaskDTO{
+						ID:     legacyQ.FeatureID,
+						Title:  "Aguardando Revisão Humana da Spec (FLX-01)",
+						Status: "pending_review",
+					}
+					activeStation = queue.StationPMArchitect
+					activeIdx = pmIdx
 				}
 			}
 		}
@@ -269,6 +301,16 @@ func (a *Aggregator) GetSnapshot() (*StudioSnapshot, error) {
 		Payload:     stations[activeIdx].OutputContract,
 		Gate:        "Portão Determinístico SDD",
 		IsLoop:      false,
+	}
+
+	if activeStation == queue.StationPMArchitect && stations[activeIdx].MascotState == "approval" {
+		handoff = &HandoffDTO{
+			FromStation: queue.StationPMArchitect,
+			ToStation:   queue.StationPlanner,
+			Payload:     "discovery.md + criteria.md",
+			Gate:        "Portão FLX-01 Bloqueado (Aguardando Aprovação Humana)",
+			IsLoop:      false,
+		}
 	}
 
 	now := time.Now().UTC().Format(time.RFC3339)

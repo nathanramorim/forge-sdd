@@ -104,6 +104,50 @@
     </section>
   </main>
 
+  <!-- Drawer Lateral de Inspeção de Estação -->
+  <div id="drawerBackdrop" class="drawer-backdrop" onclick="closeStationDrawer()"></div>
+  <aside id="stationDrawer" class="station-drawer" aria-label="Painel de Inspeção da Estação"></aside>
+
+  <!-- Modal Visualizador de Spec Embutido (feat-63-03, Portão FLX-01) -->
+  <div id="specModalBackdrop" class="spec-modal-backdrop" onclick="closeSpecViewer()"></div>
+  <div id="specViewerModal" class="spec-viewer-modal" role="dialog" aria-modal="true" aria-labelledby="specModalTitle">
+    <div class="spec-modal-header">
+      <div class="spec-header-info">
+        <div class="spec-header-top-row">
+          <span class="chip mono" id="specStationBadge">02. PM & Arquiteto</span>
+          <span class="chip mono" id="specStatusBadge">Aguardando Revisão (FLX-01)</span>
+        </div>
+        <h2 id="specModalTitle">Especificação de Feature</h2>
+        <div class="spec-meta-row">
+          <span class="spec-path-label mono" id="specPathLabel">sdd/features/...</span>
+          <button id="specCopyPathBtn" class="copy-btn mono" onclick="copySpecPath()">Copiar Caminho</button>
+        </div>
+      </div>
+      <div class="spec-header-actions">
+        <a id="specVsCodeLink" href="#" class="btn-ide mono" title="Abrir no VS Code">VS Code</a>
+        <a id="specCursorLink" href="#" class="btn-ide cursor-btn mono" title="Abrir no Cursor">Cursor</a>
+        <button class="spec-close-btn" onclick="closeSpecViewer()" aria-label="Fechar Visualizador">&times;</button>
+      </div>
+    </div>
+    <div class="spec-modal-body" id="specModalBody">
+      <div class="markdown-body" id="specMarkdownContent">
+        <!-- Conteúdo Markdown formatado -->
+      </div>
+    </div>
+    <div class="spec-modal-footer">
+      <div class="spec-footer-info">
+        <span class="mono" id="specFileSize">0 bytes</span>
+        <span class="spec-gate-hint">Portão FLX-01 — Revisão Técnica & Conformidade Humana</span>
+      </div>
+      <div class="spec-footer-actions">
+        <button class="btn-secondary" onclick="closeSpecViewer()">Fechar</button>
+        <button id="btnApproveSpec" class="approve-spec-btn" onclick="handleApproveSpecClick()">
+          <span class="approve-icon">✓</span> Aprovar Spec (FLX-01)
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- Rodapé -->
   <footer class="studio-foot">
     <div>
