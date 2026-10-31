@@ -1584,24 +1584,34 @@ function applySnapshot(snap) {
 
     if (activeTasks.length > 0) {
       itemsHtml = activeTasks.map(it => {
-        const statusInfo = formatTaskStatus(it.status);
+        let shortStatus = 'NA FILA';
+        let statusColor = 'var(--accent)';
+        if (it.status === 'building' || it.status === 'working') {
+          shortStatus = 'EXECUÇÃO';
+          statusColor = 'var(--warn)';
+        } else if (it.status === 'review_pending' || it.status === 'approval' || it.status === 'pending_review') {
+          shortStatus = 'AUDITORIA';
+          statusColor = '#ffd8a8';
+        } else if (it.status === 'changes_requested') {
+          shortStatus = 'RETRABALHO';
+          statusColor = 'var(--err)';
+        }
 
         return `
           <div class="queue-task-row">
-            <span style="color:var(--fg);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:140px;" title="${escapeHtml(it.title || it.id)}">${escapeHtml(it.id)}</span>
-            <span class="chip" style="font-size:9px;padding:1px 6px;color:${statusInfo.color};background:${statusInfo.bg};border-color:${statusInfo.border};">${escapeHtml(statusInfo.text)}</span>
+            <span style="color:var(--fg);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:105px;font-size:11px;" title="${escapeHtml(it.title || it.id)}">${escapeHtml(it.id)}</span>
+            <span class="chip" style="font-size:8.5px;padding:1px 5px;color:${statusColor};border-color:currentColor;flex-shrink:0;">${shortStatus}</span>
           </div>
         `;
       }).join('');
     } else if (completedTasks.length > 0) {
       itemsHtml = `
-        <div style="font-size:11px;color:var(--ok);font-weight:600;padding:6px 0;display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="event.stopPropagation(); openStationDrawer('${st.id}')" title="Clique para ver histórico completo no Drawer">
-          <span>✓ Fila limpa (${completedTasks.length} concluídas)</span>
-          <span style="color:var(--muted);font-size:10px;">Ver histórico →</span>
+        <div style="font-size:11px;color:var(--ok);font-weight:600;padding:6px 0;display:flex;align-items:center;gap:6px;">
+          <span>✓</span> <span>${completedTasks.length} concluídas</span>
         </div>
       `;
     } else {
-      itemsHtml = `<div style="color:var(--muted);font-style:italic;font-size:11px;padding:4px 0;">Fila ociosa — Nenhum item pendente</div>`;
+      itemsHtml = `<div style="color:var(--muted);font-style:italic;font-size:11px;padding:4px 0;">Fila ociosa</div>`;
     }
 
     let card = document.getElementById(`station-card-${st.id}`);
@@ -1624,7 +1634,7 @@ function applySnapshot(snap) {
 
       const pmSpecPath = (st.items && st.items.length > 0 && st.items[0].artifact_path) ? st.items[0].artifact_path : 'sdd/discovery/discovery-63-studio-navegavel-aprovacao-spec.md';
       const specBadgeHtml = st.id === 'pm-architect' ? `
-        <a href="javascript:void(0)" class="spec-link-btn" onclick="event.stopPropagation(); openSpecViewer('${escapeHtml(pmSpecPath)}')" style="color:#ffd8a8;font-size:10.5px;font-weight:600;text-decoration:none;background:rgba(242,166,90,0.15);padding:2px 7px;border-radius:4px;border:1px solid rgba(242,166,90,0.3);">📄 Ver Spec (FLX-01)</a>
+        <a href="javascript:void(0)" class="spec-link-btn" onclick="event.stopPropagation(); openSpecViewer('${escapeHtml(pmSpecPath)}')" style="color:#ffd8a8;font-size:10px;font-weight:600;text-decoration:none;background:rgba(242,166,90,0.15);padding:2px 6px;border-radius:4px;border:1px solid rgba(242,166,90,0.3);">📄 Spec (FLX-01)</a>
       ` : '';
 
       card.innerHTML = `
@@ -1649,8 +1659,8 @@ function applySnapshot(snap) {
 
         <div class="queue-items-box">
           <div class="queue-header-row">
-            <span>Fila (${st.id}.json)</span>
-            <span id="queue-ver-${st.id}">v${st.version} • ${activeTasks.length} ativas (${completedTasks.length} no histórico)</span>
+            <span class="mono" style="font-size:10px;color:var(--muted);font-weight:700;">FILA</span>
+            <span id="queue-ver-${st.id}" class="chip mono" style="font-size:9px;padding:1px 5px;">v${st.version}</span>
           </div>
           <div id="queue-items-${st.id}">${itemsHtml}</div>
         </div>
@@ -1675,7 +1685,7 @@ function applySnapshot(snap) {
       const execWrap = document.getElementById(`exec-wrap-${st.id}`);
       if (execWrap) execWrap.innerHTML = execHtml;
       const queueVer = document.getElementById(`queue-ver-${st.id}`);
-      if (queueVer) queueVer.textContent = `v${st.version} • ${activeTasks.length} ativas (${completedTasks.length} no histórico)`;
+      if (queueVer) queueVer.textContent = `v${st.version}`;
       const queueItems = document.getElementById(`queue-items-${st.id}`);
       if (queueItems) queueItems.innerHTML = itemsHtml;
     }

@@ -1,5 +1,37 @@
 [
   {
+    "timestamp": "2026-10-31T23:44:45Z",
+    "station": "lider",
+    "tool": "handoff",
+    "action": "governance -\u003e lider",
+    "details": "Handoff concluído: feat-63-spec-aprovada transferido para lider",
+    "status": "success"
+  },
+  {
+    "timestamp": "2026-10-31T23:44:41Z",
+    "station": "lider",
+    "tool": "handoff",
+    "action": "governance -\u003e lider",
+    "details": "Handoff concluído: feat-63-03-visualizador-spec-e-portao-flx01-sse transferido para lider",
+    "status": "success"
+  },
+  {
+    "timestamp": "2026-10-31T23:44:36Z",
+    "station": "planner",
+    "tool": "handoff",
+    "action": "receive sdd/discovery/discovery-63-studio-navegavel-aprovacao-spec.md",
+    "details": "Handoff recebido de PM/Architect: especificação pronta para fatiamento",
+    "status": "success"
+  },
+  {
+    "timestamp": "2026-10-31T23:44:36Z",
+    "station": "pm-architect",
+    "tool": "human_gate",
+    "action": "approve sdd/discovery/discovery-63-studio-navegavel-aprovacao-spec.md",
+    "details": "Portão FLX-01 Superado: Spec aprovada pelo humano",
+    "status": "success"
+  },
+  {
     "timestamp": "2026-10-31T23:32:25Z",
     "station": "governance",
     "tool": "handoff",

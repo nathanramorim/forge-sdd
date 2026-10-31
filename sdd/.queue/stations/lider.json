@@ -1,7 +1,7 @@
 {
   "station": "lider",
-  "version": 1,
-  "updated_at": "2026-10-31T22:50:00Z",
+  "version": 4,
+  "updated_at": "2026-10-31T23:50:00Z",
   "processed_keys": [
     "a5e9e900175357b9e0c5526ad56536cd"
   ],
@@ -18,7 +18,7 @@
       "input_contract": "Demanda do Humano",
       "output_contract": "Demanda Estruturada -> Estação 02",
       "created_at": "2026-10-31T22:50:00Z",
-      "updated_at": "2026-10-31T22:50:00Z"
+      "updated_at": "2026-10-31T23:50:00Z"
     }
   ]
 }

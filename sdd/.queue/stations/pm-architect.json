@@ -1,7 +1,7 @@
 {
   "station": "pm-architect",
-  "version": 9,
-  "updated_at": "2026-10-31T23:24:57Z",
+  "version": 11,
+  "updated_at": "2026-10-31T23:44:36Z",
   "processed_keys": [
     "4f75dcab0bf602fa1ad48a3bb48a0a98",
     "a5e9e900175357b9e0c5526ad56536cd",
@@ -20,7 +20,7 @@
       "input_contract": "Demanda do Humano / Líder",
       "output_contract": "discovery-63-studio-navegavel-aprovacao-spec.md (Portão FLX-01)",
       "created_at": "2026-10-31T22:20:26Z",
-      "updated_at": "2026-10-31T23:13:00Z"
+      "updated_at": "2026-10-31T23:44:36Z"
     },
     {
       "id": "feat-63-03-visualizador-spec-e-portao-flx01-sse",
