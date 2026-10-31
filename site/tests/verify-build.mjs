@@ -46,6 +46,9 @@ assert(html.includes('id="governanca"'), 'Seção #governanca ausente');
 assert(html.includes('id="evolucao"'), 'Seção #evolucao ausente');
 assert(html.includes('id="video"'), 'Seção #video ausente');
 assert(html.includes('src="/video/forge-sdd-v3.mp4"'), 'Vídeo /video/forge-sdd-v3.mp4 ausente');
+// Invariantes Fix 62: apenas o vídeo limpo, sem nome de arquivo ou menção a ferramenta geradora
+assert(!html.includes('forge-sdd-v3-demo.mp4'), 'Nome de arquivo do vídeo não deve ser exibido na UI');
+assert(!html.includes('gerado pelo BRAG') && !html.includes('gerada com BRAG'), 'Menção à ferramenta geradora não deve ser exibida na UI');
 
 // 4. Invariantes de Design System e Fix 61 (CA-05)
 console.log('4. Verificando invariantes de UI, links oficiais e Fix 61...');

@@ -183,4 +183,5 @@ main
 | 60-01 | feat-60-site-estatico-seo-performance/feat-60-01-scaffold-astro-seo-dados-tipados.md | feat/60-site-estatico-seo-performance | 60-01 | todo |
 | 60-02 | feat-60-site-estatico-seo-performance/feat-60-02-componentes-ssg-pre-renderizados-fallback-svg.md | feat/60-site-estatico-seo-performance | 60-02 | todo |
 | 60-03 | feat-60-site-estatico-seo-performance/feat-60-03-hidratacao-interacoes-motor-3d-otimizado.md | feat/60-site-estatico-seo-performance | 60-03 | todo |
-| 60-04 | feat-60-site-estatico-seo-performance/feat-60-04-cloudflare-workers-testes-seo-fidelidade.md | feat/60-site-estatico-seo-performance | 60-04 | todo |
+| 60-04 | feat-60-site-estatico-seo-performance/feat-60-04-cloudflare-workers-testes-seo-fidelidade.md | feat/60-site-estatico-seo-performance | 60-04 | done |
+| 62 | fix-62-remover-metadados-player-video.md | fix/62-remover-metadados-player-video | 62 | todo |
