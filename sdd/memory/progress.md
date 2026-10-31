@@ -4,17 +4,17 @@
 ```
 Feature 55 — Telemetria cobertura total + /report [x] done
 Feature 58 — Orquestração Autônoma, Governança A/B/C e Auto-Skills [x] done
-Discovery 59 — Módulo Visual Plugável das 5 Estações e Personagens [~] Gate 1 (FLX-01)
+Discovery 59 — Forge Studio + Filas Idempotentes por Estação [x] Spec + Plan prontos
 ```
 
 ## Features ativas
-- `sdd/discovery/discovery-59-modulo-visual-estacoes-personagens.md` + `criteria-59` — em revisão humana (Gate 1 — `FLX-01`).
+- `sdd/discovery/{discovery,criteria,plan}-59-modulo-visual-estacoes-personagens.md` — Gate 1 (`FLX-01`) aprovado e `plan-59` gerado (4 subtarefas `feat-59-01..04`).
 
 ## Próximo passo
-**Iniciar:** Revisão humana do Discovery 59 (`FLX-01`) para acionar a Estação 03 (`Planejador` -> `plan-59`).
-**Bloqueios:** Decisão sobre empacotamento (A1 `forge-sdd studio` vs A2 pacote externo).
+**Iniciar:** Executar `/split-features` para fatiar `plan-59` em `sdd/features/feat-59-modulo-visual-estacoes-personagens/` e enfileirar nos Builders.
+**Bloqueios:** —
 
 ## Handoff da última sessão
-- Concepção (`Estação 02`): criados `discovery-59` e `criteria-59` (5 personagens 3D `dock-ia` + leitura passiva SSE de `sdd/`).
+- Estações 02 e 03: atualizados `discovery-59` e `criteria-59` (Opção A1 `forge-sdd studio` + 5 filas idempotentes `sdd/.queue/stations/*.json` com `idempotency_key` e escrita atômica) e criado `plan-59`.
 
 > Histórico completo em `progress-log.md`
