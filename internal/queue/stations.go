@@ -240,16 +240,19 @@ func Handoff(dir, fromStation, toStation, itemID, title, artifactPath, inputCont
 		idempotencyKey = CalculateIdempotencyKey(toStation, itemID, "handoff-from-"+fromStation, artifactPath, 1)
 	}
 
-	// 1. Atualiza estação de origem (se tiver o item, marca como approved/concluído)
+	// 1. Atualiza estação de origem (marca qualquer item correspondente como approved/concluído)
 	fromSQ, err := loadStationQueueLocked(dir, fromStation)
 	if err == nil {
+		updatedFrom := false
 		for i, it := range fromSQ.Items {
-			if it.ID == itemID {
+			if it.ID == itemID || (artifactPath != "" && it.ArtifactPath == artifactPath) {
 				fromSQ.Items[i].Status = StatusApproved
 				fromSQ.Items[i].UpdatedAt = time.Now().UTC().Format(time.RFC3339)
-				_ = saveStationQueueLocked(dir, fromSQ)
-				break
+				updatedFrom = true
 			}
+		}
+		if updatedFrom {
+			_ = saveStationQueueLocked(dir, fromSQ)
 		}
 	}
 
