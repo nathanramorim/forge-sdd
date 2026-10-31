@@ -1,0 +1,336 @@
+:root {
+  --bg: #0d0f14;
+  --bg2: #12151d;
+  --bg3: #1a1e29;
+  --fg: #f0f3fa;
+  --muted: #8b95a8;
+  --accent: #4f8ef7;
+  --accent-soft: rgba(79, 142, 247, 0.12);
+  --ok: #3ecf8e;
+  --warn: #f2a65a;
+  --err: #f2677a;
+  --line: rgba(255, 255, 255, 0.08);
+  --line2: rgba(255, 255, 255, 0.16);
+  --r-card: 14px;
+  --r-capsule: 999px;
+  --f-body: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --f-mono: 'JetBrains Mono', monospace;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font: 14px/1.5 var(--f-body);
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.mono { font-family: var(--f-mono); }
+
+/* Header Fixo e Responsivo (CA-10) */
+header.studio-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(13, 15, 20, 0.88);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--line);
+  padding: 12px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.brand-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.brand-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 12px var(--accent);
+}
+.brand-title {
+  font: 700 16px var(--f-body);
+  letter-spacing: -0.02em;
+}
+
+.header-status-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: var(--r-capsule);
+  font: 600 11.5px var(--f-body);
+  background: var(--bg3);
+  border: 1px solid var(--line);
+  color: var(--muted);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.chip i {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--o, var(--accent));
+  box-shadow: 0 0 8px var(--o, var(--accent));
+}
+.chip.live {
+  color: var(--ok);
+  border-color: rgba(62, 207, 142, 0.35);
+}
+
+.mode-toggle {
+  display: inline-flex;
+  padding: 2px;
+  border-radius: var(--r-capsule);
+  background: var(--bg2);
+  border: 1px solid var(--line);
+}
+.mode-btn {
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  font: 600 11px var(--f-body);
+  padding: 4px 10px;
+  border-radius: var(--r-capsule);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.mode-btn.active {
+  background: var(--accent);
+  color: #fff;
+}
+
+/* Container Principal */
+main.studio-wrap {
+  flex: 1;
+  max-width: 1400px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Trilho de Handoff (CA-06) */
+.handoff-box {
+  background: var(--bg2);
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  padding: 16px 20px;
+  display: grid;
+  grid-template-columns: max-content minmax(260px, 1fr) auto;
+  gap: 20px;
+  align-items: center;
+}
+@media (max-width: 1180px) {
+  .handoff-box { grid-template-columns: 1fr; gap: 14px; }
+}
+
+.handoff-route {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.handoff-pill {
+  padding: 6px 12px;
+  border-radius: var(--r-capsule);
+  background: var(--bg3);
+  border: 1px solid var(--line2);
+  font: 700 12px var(--f-body);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.handoff-pipe {
+  position: relative;
+  width: 44px;
+  flex: 0 0 44px;
+  height: 6px;
+  border-radius: 999px;
+  background: #1a1e29;
+  overflow: hidden;
+}
+.handoff-packet {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 36%;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--accent);
+  animation: packet-flow 1.4s ease-in-out infinite;
+}
+@keyframes packet-flow {
+  0% { left: -36%; }
+  100% { left: 100%; }
+}
+
+.handoff-payload {
+  font: 500 12.5px/1.4 var(--f-body);
+  color: #d3d9e8;
+}
+.handoff-payload b {
+  display: block;
+  font: 700 11px var(--f-body);
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--muted);
+}
+
+/* Grid das 5 Estações e Mascotes (CA-05) */
+.stations-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+}
+
+.station-card {
+  position: relative;
+  background: var(--bg2);
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.station-card.active {
+  border-color: var(--c, var(--accent));
+  box-shadow: 0 0 20px rgba(79, 142, 247, 0.15);
+}
+
+.station-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.mascot-stage {
+  width: 78px;
+  height: 86px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.station-info h3 {
+  font: 700 14px var(--f-body);
+  color: var(--fg);
+}
+.station-info p.role {
+  font: 500 11px var(--f-mono);
+  color: var(--muted);
+}
+
+.io-strip {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  background: rgba(0, 0, 0, 0.2);
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+}
+.io-item span {
+  display: block;
+  font: 600 9.5px var(--f-mono);
+  color: var(--muted);
+  text-transform: uppercase;
+}
+.io-item b {
+  display: block;
+  font: 600 11px var(--f-body);
+  color: #c9d2e3;
+  margin-top: 2px;
+}
+
+.queue-items-box {
+  background: var(--bg3);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 10px;
+  font-family: var(--f-mono);
+  font-size: 11px;
+  max-height: 120px;
+  overflow-y: auto;
+}
+.queue-header-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  color: var(--muted);
+  font-weight: 600;
+}
+.queue-task-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 3px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+}
+.queue-task-row:first-child { border-top: none; }
+
+/* Inspetor de Governança (CA-08) */
+.gov-section {
+  background: var(--bg2);
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  padding: 20px;
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 20px;
+}
+@media (max-width: 900px) {
+  .gov-section { grid-template-columns: 1fr; }
+}
+
+.gov-panel h3 {
+  font: 700 15px var(--f-body);
+  margin-bottom: 8px;
+}
+.gov-findings-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+}
+.finding-card {
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: var(--bg3);
+  border: 1px solid var(--line);
+  font: 500 12px var(--f-mono);
+}
+.finding-card.conforme { border-left: 4px solid var(--ok); }
+.finding-card.violacao { border-left: 4px solid var(--err); }
+
+footer.studio-foot {
+  padding: 16px 24px;
+  border-top: 1px solid var(--line);
+  font: 500 11px var(--f-mono);
+  color: var(--muted);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}

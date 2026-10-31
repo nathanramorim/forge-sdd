@@ -1,0 +1,30 @@
+{
+  "$schema": "forge-sdd/metrics/1.0",
+  "feature": "sdd/features/feat-59-modulo-visual-estacoes-personagens",
+  "phase": "59-04",
+  "agent_path": [
+    "lider",
+    "builder",
+    "governance"
+  ],
+  "tokens_input": 0,
+  "tokens_output": 0,
+  "turns": 0,
+  "duration_seconds": 0,
+  "criterio_atendido": true,
+  "model": "",
+  "rework_lines": 0,
+  "context7_calls": 0,
+  "git_calls": 0,
+  "files_touched": [
+    "cmd/forge-sdd/studio.go",
+    "internal/studio/server.go",
+    "internal/queue/stations.go",
+    "internal/studio/assets/index.html",
+    "sdd/FLOW.md",
+    "README.md",
+    "sdd/releases/history.md"
+  ],
+  "outcome": "approved",
+  "sdd_version": "3.0.0-beta"
+}

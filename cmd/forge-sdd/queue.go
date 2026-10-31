@@ -178,7 +178,78 @@ var queuePanelCmd = &cobra.Command{
 	},
 }
 
+var queueHandoffCmd = &cobra.Command{
+	Use:   "handoff",
+	Short: "Transfere um artefato de forma idempotente entre duas estações",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		dir, _ := cmd.Flags().GetString("dir")
+		from, _ := cmd.Flags().GetString("from")
+		to, _ := cmd.Flags().GetString("to")
+		id, _ := cmd.Flags().GetString("id")
+		title, _ := cmd.Flags().GetString("title")
+		artifact, _ := cmd.Flags().GetString("artifact")
+		input, _ := cmd.Flags().GetString("input")
+		output, _ := cmd.Flags().GetString("output")
+		idempotencyKey, _ := cmd.Flags().GetString("idempotency-key")
+
+		if from == "" || to == "" || id == "" {
+			return fmt.Errorf("flags --from, --to e --id são obrigatórias")
+		}
+
+		item, hit, err := queue.Handoff(dir, from, to, id, title, artifact, input, output, idempotencyKey)
+		if err != nil {
+			return err
+		}
+
+		hitMsg := ""
+		if hit {
+			hitMsg = " (hit idempotente detectado)"
+		}
+		fmt.Printf("✓ Handoff concluído (%s -> %s): %s [%s]%s\n", from, to, item.ID, item.IdempotencyKey, hitMsg)
+		return nil
+	},
+}
+
+var queueStationsCmd = &cobra.Command{
+	Use:   "stations",
+	Short: "Lista o estado e versão das 5 filas de estações",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		dir, _ := cmd.Flags().GetString("dir")
+		stations := queue.CanonicalStations()
+
+		fmt.Println("Filas Dedicadas por Estação:")
+		for _, st := range stations {
+			sq, err := queue.LoadStationQueue(dir, st)
+			if err != nil {
+				fmt.Printf("  - %s: erro ao carregar (%v)\n", st, err)
+				continue
+			}
+			activeCount := 0
+			for _, it := range sq.Items {
+				if it.Status != queue.StatusApproved {
+					activeCount++
+				}
+			}
+			fmt.Printf("  - [%s] versão: %d | total itens: %d (ativos: %d) | chaves: %d\n",
+				st, sq.Version, len(sq.Items), activeCount, len(sq.ProcessedKeys))
+		}
+		return nil
+	},
+}
+
 func init() {
+	queueHandoffCmd.Flags().String("dir", ".", "Diretório alvo do projeto Forge-SDD")
+	queueHandoffCmd.Flags().String("from", "", "Estação de origem (ex: lider, pm-architect, planner, builder, governance)")
+	queueHandoffCmd.Flags().String("to", "", "Estação de destino (ex: lider, pm-architect, planner, builder, governance)")
+	queueHandoffCmd.Flags().String("id", "", "ID do item ou artefato em transição")
+	queueHandoffCmd.Flags().String("title", "", "Título descritivo do artefato")
+	queueHandoffCmd.Flags().String("artifact", "", "Caminho do arquivo de artefato gerado")
+	queueHandoffCmd.Flags().String("input", "", "Descrição do contrato de entrada")
+	queueHandoffCmd.Flags().String("output", "", "Descrição do contrato de saída")
+	queueHandoffCmd.Flags().String("idempotency-key", "", "Chave de idempotência (opcional; gerada via SHA-256 se omitida)")
+
+	queueStationsCmd.Flags().String("dir", ".", "Diretório alvo do projeto Forge-SDD")
+
 	queueEnqueueCmd.Flags().String("dir", ".", "Diretório alvo do projeto Forge-SDD")
 	queueEnqueueCmd.Flags().String("feature", "", "ID da feature (ex: feat-58)")
 	queueEnqueueCmd.Flags().String("branch", "", "Branch da feature (ex: feat/58-nome)")
@@ -208,4 +279,6 @@ func init() {
 	queueCmd.AddCommand(queueReviewCmd)
 	queueCmd.AddCommand(queueListCmd)
 	queueCmd.AddCommand(queuePanelCmd)
+	queueCmd.AddCommand(queueHandoffCmd)
+	queueCmd.AddCommand(queueStationsCmd)
 }
