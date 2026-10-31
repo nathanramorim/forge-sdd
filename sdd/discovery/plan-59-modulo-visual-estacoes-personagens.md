@@ -45,13 +45,13 @@ Respeita a **Rule of 7** (4 subtarefas ordenadas de baixo para cima), incorpora 
 
 ---
 
-### Fase 3 — Interface Visual 3D Embarcada (`embed.FS`): 5 Personagens `dock-ia` + Filas + Governança
+### Fase 3 — Interface Visual Embarcada (`embed.FS`): 5 Personagens das Estações + Filas + Governança
 
-- [ ] **`feat-59-03` — Interface Visual Embarcada (`embed.FS`) com os 5 Personagens 3D (`dock-ia` + `Three.js`), Trilho de Handoff, Filas Individuais e Inspetor de Governança** · **Tamanho: `M`**
+- [ ] **`feat-59-03` — Interface Visual Embarcada (`embed.FS`) com os 5 Personagens das Estações, Trilho de Handoff, Filas Individuais e Inspetor de Governança** · **Tamanho: `M`**
   - **Depende de:** `feat-59-02`
   - **Escopo:**
-    1. Embutir em `internal/studio/assets/index.html` (via `embed.FS` — `ARQ-03`) a interface visual evoluída a partir de `docs/showcase-v3-lp.html` com os tokens oficiais do `dock-ia` (`--bg: #0d0f14`, `--bg2: #12151d`, `--bg3: #1a1e29`, `Montserrat` + `JetBrains Mono`).
-    2. Renderizar os **5 personagens 3D compactos em Three.js** (`buildCompactBot` com fallback SVG 2D automático caso WebGL não esteja disponível):
+    1. Embutir em `internal/studio/assets/index.html` (via `embed.FS` — `ARQ-03`) a interface visual evoluída a partir de `docs/showcase-v3-lp.html` com os tokens do Design System (`--bg: #0d0f14`, `--bg2: #12151d`, `--bg3: #1a1e29`, `Montserrat` + `JetBrains Mono`).
+    2. Renderizar os **5 personagens compactos das estações** (`createForgeMascot3D` com fallback SVG 2D automático caso WebGL não esteja disponível):
        - `01. O Líder` (`#f2a65a`, marca `ring`)
        - `02. PM & Arquiteto` (`#8aa4ff`, marca `diamond`)
        - `03. O Planejador` (`#c9a7ff`, marca `bar`)
@@ -91,7 +91,7 @@ feat-59-01 (5 Filas por Estação + IdempotencyKey + Escrita Atômica)
 feat-59-02 (Agregador Read-Only internal/studio + Servidor HTTP/SSE)
     │
     ▼
-feat-59-03 (SPA 3D Embarcada embed.FS: 5 Personagens dock-ia + Filas + Inspetor)
+feat-59-03 (SPA Embarcada embed.FS: 5 Personagens + Filas + Inspetor)
     │
     ▼
 feat-59-04 (Catálogo concepts.md + Templates .agents/ + Docs Regra 12 + Gate)

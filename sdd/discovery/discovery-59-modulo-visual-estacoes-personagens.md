@@ -1,6 +1,6 @@
 # Discovery 59 — Módulo Visual Plugável das 5 Estações e Personagens (`Forge Studio`) + Filas Idempotentes por Agente
 
-Este discovery especifica a concepção de produto e arquitetura para o **módulo visual desacoplado e plugável (`forge-sdd studio`)** capaz de exibir em tempo real o trabalho de cada agente do Forge-SDD utilizando exatamente os **5 personagens 3D compactos no padrão `dock-ia`**, o **trilho processual de Handoff (Entrada/Saída)** e o **Inspetor de Governança (Camadas A, B e C)**, sustentado por **filas dedicadas e estritamente idempotentes por estação (`sdd/.queue/stations/<station>.json`)**.
+Este discovery especifica a concepção de produto e arquitetura para o **módulo visual desacoplado e plugável (`forge-sdd studio`)** capaz de exibir em tempo real o trabalho de cada agente do Forge-SDD utilizando os **5 personagens compactos das estações**, o **trilho processual de Handoff (Entrada/Saída)** e o **Inspetor de Governança (Camadas A, B e C)**, sustentado por **filas dedicadas e estritamente idempotentes por estação (`sdd/.queue/stations/<station>.json`)**.
 
 > **Decisões Resolvidas no Portão de Revisão Humana (`FLX-01` — Gate 1 Aprovado):**
 > 1. **Empacotamento escolhido (Opção A1):** Subcomando opcional no próprio binário Go (`forge-sdd studio`, via `net/http` + `embed.FS` + `SSE` da stdlib). Permanece 100% inerte e sem impacto na rotina caso não seja invocado.
@@ -12,7 +12,7 @@ Este discovery especifica a concepção de produto e arquitetura para o **módul
 
 - **Invisibilidade operacional durante a execução autônoma:** Com a chegada do Forge-SDD `v3.0` (`discovery-58`), o ciclo passou a operar em 5 estações coordenadas (`01. O Líder`, `02. PM & Arquiteto`, `03. O Planejador`, `04. Fila de Builders`, `05. Analista de Governança`). Porém, quem acompanha pelo terminal ou chat da IDE enxerga apenas logs textuais esparsos e precisa abrir arquivos Markdown/JSON manualmente para entender quem está trabalhando, qual contrato de entrada/saída está em vigor e qual foi o veredito da Governança.
 - **Assimetria entre a Fila do Builder e as demais Estações + Risco de Duplicação (Idempotência):** Até a Feature 58, apenas o Builder possuía fila formal (`sdd/.queue/queue.json`). Se um comando ou subagente de Concepção, Planejamento ou Governança fosse reexecutado (retry de LLM, reconexão ou duplo disparo), não havia uma fila própria por estação nem garantia de idempotência (`idempotency_key`) para evitar reprocessamento ou eventos duplicados.
-- **Identidade visual e tangibilidade já aprovadas no `showcase-v3-lp.html` e no `dock-ia`:** O usuário já validou a linguagem visual e os 5 personagens 3D compactos (`Three.js` com estética `dock-ia`, olhos que acompanham o cursor, marcas peitorais `ring`, `diamond`, `bar`, `wave`, `tri` e animações por estado). Falta conectar essa vitrine diretamente às filas reais das 5 estações.
+- **Identidade visual e tangibilidade já aprovadas no `showcase-v3-lp.html`:** O usuário já validou a linguagem visual e os 5 personagens compactos (olhos que acompanham o cursor, marcas peitorais `ring`, `diamond`, `bar`, `wave`, `tri` e animações por estado). Falta conectar essa vitrine diretamente às filas reais das 5 estações.
 - **Risco de acoplamento no Core da CLI:** O `forge-sdd` tem como princípio inegociável da Constituição (`ARQ-03`, `ARQ-04`) ser um binário leve, determinístico e sem dependências externas em runtime. Portanto, a interface visual **jamais pode ser um requisito bloqueante** para os agentes: o `forge-sdd studio` atua como um **observador passivo (Read-Only Sidecar)** sobre as filas das 5 estações.
 
 ---
@@ -26,14 +26,13 @@ Este discovery especifica a concepção de produto e arquitetura para o **módul
 
 ## 3. O que já existe (Reuse Check — `DUP-01` / `DUP-02`)
 
-Antes de propor qualquer componente novo, mapeamos os ativos já prontos no `forge-sdd` e no repositório irmão `/Users/nathanramorim/git/dock-ia`:
+Antes de propor qualquer componente novo, mapeamos os ativos já prontos no `forge-sdd`:
 
 | Ativo Existente | Onde reside | O que já entrega pronto | Decisão (`reusar`, `estender`, `criar`) |
 | --- | --- | --- | --- |
 | **Fila Determinística do Builder (`queue.json`)** | `internal/queue/queue.go` (`sdd/.queue/queue.json`) | Persiste `feature_id`, `branch`, `spec_status`, `updated_at` e `items[]` com `task_id`, `title`, `spec_path`, `status`, `rules`, `skills_used`, `attempts` e `governance_verdict`. | **`estender`** — evoluir `internal/queue` para suportar as **5 filas por estação** (`sdd/.queue/stations/<station>.json`) com `idempotency_key`, escrita atômica e retrocompatibilidade total com `sdd/.queue/queue.json`. |
 | **Estado e Métricas SDD** | `sdd/memory/progress.md`, `sdd/features/index.md`, `sdd/.metrics/session-*.json` (`internal/telemetry`) | Indica a feature ativa, histórico de sessões, comandos executados, duração e status macro do projeto. | **`reusar` (leitura passiva)** — contexto suplementar para o cabeçalho do projeto no Studio. |
-| **Palco 3D dos 5 Personagens + Esteira Processual** | `docs/showcase-v3-lp.html` | Contém a implementação completa e aprovada dos **5 mascotes 3D em Three.js** (`buildCompactBot`, geometrias procedurais, marcas peitorais, animações por estado, rastreamento de mouse), o **Trilho Processual (`01 → 02 → 03 → 04 → 05`)**, os cards de contrato (`Recebe` / `Entrega`) e o **Inspetor de Governança**. | **`reusar` e `estender`** — embutir via `embed.FS` no subcomando `forge-sdd studio` alimentado em tempo real via SSE pelas 5 filas. |
-| **Design System e Estados de Mascote `dock-ia`** | `/Users/nathanramorim/git/dock-ia/produto/design-system.md` e `app/packages/ui-kit/src/mascot.ts` | Tokens oficiais (`--bg: #0d0f14`, `--bg2: #12151d`, `--bg3: #1a1e29`, `--accent: #4f8ef7`, `--ok: #3ecf8e`, `--warn: #f5b04a`, `--bad: #f2677a`), tipografia (`Montserrat` + `JetBrains Mono`) e máquina de estados (`idle`, `working`, `thinking`, `searching`, `approval`, `finished`, `error`). | **`reusar`** — manter 100% de fidelidade visual e semântica com o ecossistema `dock-ia`. |
+| **Palco dos 5 Personagens + Esteira Processual** | `docs/showcase-v3-lp.html` | Contém a implementação completa e aprovada dos **5 personagens das estações** (`createForgeMascot3D`, marcas peitorais, animações por estado, rastreamento de mouse), o **Trilho Processual (`01 → 02 → 03 → 04 → 05`)**, os cards de contrato (`Recebe` / `Entrega`), os tokens do Design System (`--bg: #0d0f14`, `--bg2: #12151d`, `--bg3: #1a1e29`, `Montserrat` + `JetBrains Mono`) e o **Inspetor de Governança**. | **`reusar` e `estender`** — embutir via `embed.FS` no subcomando `forge-sdd studio` alimentado em tempo real via SSE pelas 5 filas. |
 | **Servidor Local Read-Only (`forge-sdd studio`)** | *Não existe no `forge-sdd`* | Servidor HTTP/SSE na `stdlib` Go que observa `sdd/.queue/stations/*.json` e projeta o estado vivo para o navegador. | **`criar` (`internal/studio` + `cmd/forge-sdd/studio.go`)** — subcomando opcional zero-impacto seguindo a skill `novo-subcomando-cli-sdd`. |
 
 ---
@@ -66,7 +65,7 @@ Cada um dos 5 agentes possui sua própria fila dedicada em disco, eliminando inf
 
 ### 4.3 Os 5 Personagens Conectados Diretamente às Suas Filas
 
-| Estação | Personagem | Cor (`color`) | Marca (`mark`) | Fila Dedicada | Estados (`dock-ia`) Derivados da Própria Fila | Contratos Visíveis no Card (`Recebe` → `Entrega`) |
+| Estação | Personagem | Cor (`color`) | Marca (`mark`) | Fila Dedicada | Estados Derivados da Própria Fila | Contratos Visíveis no Card (`Recebe` → `Entrega`) |
 | --- | --- | --- | --- | --- | --- | --- |
 | **01** | **O Líder** (*Orquestrador*) | `#f2a65a` (Âmbar) | `ring` | `stations/lider.json` | `approval` (aguardando Gate 1 ou Camada C) · `working` (orquestrando handoff) · `finished` · `idle` | **Recebe:** Demanda do usuário + Parecer JSON da Governança.<br>**Entrega:** Aprovação Gate 1 (`FLX-01`), despacho de fila e release. |
 | **02** | **PM & Arquiteto** (*Concepção*) | `#8aa4ff` (Azul) | `diamond` | `stations/pm-architect.json` | `thinking` (elaborando Discovery/Criteria/C4) · `finished` (Spec entregue) · `idle` | **Recebe:** Intenção de produto + `constitution.md` + `concepts.md`.<br>**Entrega:** `discovery-ID.md` + `criteria-ID.md` (Reuse Check `DUP-02` + C4). |
@@ -78,10 +77,10 @@ Cada um dos 5 agentes possui sua própria fila dedicada em disco, eliminando inf
 
 ## 5. Decisão Tecnológica Consolidada (Opção A1 — `forge-sdd studio`)
 
-| Critério | **Opção A1 Escolhida: Subcomando Opcional `forge-sdd studio` (`net/http` + `embed.FS` + `SSE`)** | Opção B (Futura/Compatível): Conector no App Desktop `dock-ia` | Opção C (Descartada por ora): Extensão VS Code |
+| Critério | **Opção A1 Escolhida: Subcomando Opcional `forge-sdd studio` (`net/http` + `embed.FS` + `SSE`)** | Opção B (Descartada): App Desktop Externo | Opção C (Descartada): Extensão VS Code |
 | --- | --- | --- | --- |
-| **Como funciona** | Subcomando Go opcional que serve a SPA HTML/CSS/Three.js embutida via `embed.FS` (`ARQ-03`) e expõe `/api/state` e `/api/events` (SSE) lendo `sdd/.queue/stations/*.json`. | O contrato JSON `/api/state` e os arquivos `sdd/.queue/stations/*.json` já ficam prontos caso o app desktop `dock-ia` queira lê-los nativamente depois. | Preso a IDEs baseadas no VS Code. |
-| **Dependências externas** | **Zero (`ARQ-04`, `SEG-07`).** Usa exclusivamente a biblioteca padrão do Go no binário. | Requer Tauri/Rust do `dock-ia`. | Requer Node/VSIX. |
+| **Como funciona** | Subcomando Go opcional que serve a SPA embutida via `embed.FS` (`ARQ-03`) e expõe `/api/state` e `/api/events` (SSE) lendo `sdd/.queue/stations/*.json`. | Aplicação desktop externa separada do binário CLI. | Preso a IDEs baseadas no VS Code. |
+| **Dependências externas** | **Zero (`ARQ-04`, `SEG-07`).** Usa exclusivamente a biblioteca padrão do Go no binário. | Requer runtime desktop externo. | Requer Node/VSIX. |
 | **Impacto na rotina do `forge-sdd`** | **Zero.** Totalmente desacoplado; só roda quando o usuário chama `forge-sdd studio`. | Zero no CLI. | Zero no CLI. |
 
 ---
@@ -92,7 +91,7 @@ Cada um dos 5 agentes possui sua própria fila dedicada em disco, eliminando inf
 - Filas dedicadas por estação em `sdd/.queue/stations/{lider,pm-architect,planner,builder,governance}.json` com controle estrito de idempotência (`idempotency_key`, histórico de chaves processadas, `version` monotônico e escrita atômica `temp + rename`).
 - Retrocompatibilidade transparente entre `sdd/.queue/stations/builder.json` e `sdd/.queue/queue.json`.
 - Subcomandos determinísticos na CLI (`forge-sdd queue station ...` / `handoff`) para consultar e transicionar itens entre as 5 estações de forma idempotente.
-- Subcomando opcional `forge-sdd studio` (`--port`, `--host`, `--no-open`) servindo a interface visual com os **5 personagens 3D compactos** (`dock-ia` + `Three.js`), **Trilho Processual (`01 → 02 → 03 → 04 → 05 ↺`)**, **Contratos de Entrada/Saída**, **Filas por Agente** e **Inspetor de Governança**.
+- Subcomando opcional `forge-sdd studio` (`--port`, `--host`, `--no-open`) servindo a interface visual com os **5 personagens das estações**, **Trilho Processual (`01 → 02 → 03 → 04 → 05 ↺`)**, **Contratos de Entrada/Saída**, **Filas por Agente** e **Inspetor de Governança**.
 - Modo dual na interface: **Modo Ao Vivo (`LIVE`)** via SSE e **Modo Simulação (`DEMO`)** interativo.
 
 ### Out of Scope (Fora do Escopo)

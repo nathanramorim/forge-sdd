@@ -9,7 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Montserrat:wght@500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <style>
-/* Tokens oficiais do Design System (dock-ia) */
+/* Tokens oficiais do Design System Forge-SDD */
 :root {
   --bg: #0d0f14;
   --bg2: #12151d;
@@ -897,14 +897,65 @@ footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
   flex-wrap: wrap;
   border-top: 1px solid var(--line);
   margin-top: 32px;
 }
+
+/* Links com ícones vetoriais integrados ao Design System */
+.ds-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 12px;
+  border-radius: var(--r-capsule);
+  background: var(--s-dock);
+  border: 1px solid var(--line);
+  font: 600 11.5px var(--f-body);
+  color: var(--muted);
+  transition: color .2s, border-color .2s, background .2s;
+}
+.ds-link:hover {
+  color: var(--fg);
+  border-color: var(--line2);
+  background: var(--bg3);
+}
+.ds-link svg,
+.btn svg {
+  width: 15px;
+  height: 15px;
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
 </style>
 </head>
 <body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <!-- Ícones em linha (stroke 1.8) seguindo estritamente o Design System -->
+    <symbol id="ico-github" viewBox="0 0 24 24">
+      <path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.4 5.4 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/>
+      <path d="M9 18c-4.51 2-5-2-7-2"/>
+    </symbol>
+    <symbol id="ico-npm" viewBox="0 0 24 24">
+      <rect x="3" y="3" width="18" height="18" rx="3"/>
+      <path d="M7.5 16.5v-9h9v9"/>
+      <path d="M12 7.5v9"/>
+      <path d="M16.5 16.5h-3"/>
+    </symbol>
+    <symbol id="ico-instagram" viewBox="0 0 24 24">
+      <rect x="3" y="3" width="18" height="18" rx="5"/>
+      <circle cx="12" cy="12" r="4"/>
+      <circle cx="17.5" cy="6.5" r="0.8" fill="currentColor"/>
+    </symbol>
+  </defs>
+</svg>
 
 <div class="wrap">
   <header>
@@ -919,8 +970,17 @@ footer {
       <a href="#emulador" class="keep">Emulador Real</a>
       <a href="#instalacao">Instalação & Comandos</a>
       <a href="#governanca">Governança IA</a>
-      <a href="https://github.com/nathanramorim/forge-sdd" target="_blank" rel="noopener noreferrer" class="btn ghost sm keep">
-        GitHub · Open Source ↗
+      <a href="https://www.npmjs.com/package/@nathanramorim/forge-sdd" target="_blank" rel="noopener noreferrer" class="ds-link keep" title="Pacote Oficial no NPM">
+        <svg aria-hidden="true"><use href="#ico-npm"/></svg>
+        <span>NPM</span>
+      </a>
+      <a href="https://github.com/nathanramorim/forge-sdd" target="_blank" rel="noopener noreferrer" class="ds-link keep" title="Repositório Open Source no GitHub">
+        <svg aria-hidden="true"><use href="#ico-github"/></svg>
+        <span>GitHub</span>
+      </a>
+      <a href="https://www.instagram.com/nathanramorim" target="_blank" rel="noopener noreferrer" class="ds-link keep" title="Instagram @nathanramorim">
+        <svg aria-hidden="true"><use href="#ico-instagram"/></svg>
+        <span>Instagram</span>
       </a>
     </nav>
   </header>
@@ -938,7 +998,12 @@ footer {
         <a class="btn" href="#emulador">Testar no Emulador Real</a>
         <a class="btn solid" href="#instalacao">Como Instalar & Usar</a>
         <a class="btn ghost" href="https://github.com/nathanramorim/forge-sdd" target="_blank" rel="noopener noreferrer">
-          Repositório GitHub (MIT) ↗
+          <svg aria-hidden="true"><use href="#ico-github"/></svg>
+          <span>GitHub (MIT)</span>
+        </a>
+        <a class="btn ghost" href="https://www.npmjs.com/package/@nathanramorim/forge-sdd" target="_blank" rel="noopener noreferrer">
+          <svg aria-hidden="true"><use href="#ico-npm"/></svg>
+          <span>Pacote NPM</span>
         </a>
       </div>
 
@@ -999,7 +1064,7 @@ footer {
         <div>
           <p class="eyebrow" style="color:var(--warn)">02 · Emulador Interativo Fiel</p>
           <h2>Veja como uma feature real nasce, roda em paralelo e passa na auditoria.</h2>
-          <p>Clique nos 5 comandos abaixo na ordem em que você usa no dia a dia. À esquerda você vê o terminal/chat real; à direita, o agente ativo em 3D e os arquivos gerados em <span class="mono">sdd/</span>.</p>
+          <p>Clique nos 5 comandos abaixo na ordem em que você usa no dia a dia. À esquerda você vê o terminal/chat real; à direita, a estação ativa e os arquivos gerados em <span class="mono">sdd/</span>.</p>
         </div>
         <div>
           <button class="btn solid sm" id="emuNextStepBtn" type="button">Executar próximo passo →</button>
@@ -1301,23 +1366,28 @@ footer {
 
   <footer>
     <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-      <span><strong>Forge-SDD v3.0.0-beta</strong> · Open Source sob <strong>Licença MIT</strong></span>
-      <span>·</span>
-      <a href="https://github.com/nathanramorim/forge-sdd" target="_blank" rel="noopener noreferrer" style="color:var(--fg);text-decoration:underline">
-        github.com/nathanramorim/forge-sdd
+      <span><strong>Forge-SDD v3.0.0-beta</strong> · Código aberto sob <strong>Licença MIT</strong></span>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+      <a href="https://github.com/nathanramorim/forge-sdd" target="_blank" rel="noopener noreferrer" class="ds-link" aria-label="GitHub Forge-SDD">
+        <svg aria-hidden="true"><use href="#ico-github"/></svg>
+        <span>GitHub</span>
       </a>
-      <span>·</span>
-      <a href="https://www.npmjs.com/package/@nathanramorim/forge-sdd" target="_blank" rel="noopener noreferrer" style="color:var(--muted);text-decoration:underline">
-        @nathanramorim/forge-sdd no NPM
+      <a href="https://www.npmjs.com/package/@nathanramorim/forge-sdd" target="_blank" rel="noopener noreferrer" class="ds-link" aria-label="Pacote NPM @nathanramorim/forge-sdd">
+        <svg aria-hidden="true"><use href="#ico-npm"/></svg>
+        <span>NPM</span>
+      </a>
+      <a href="https://www.instagram.com/nathanramorim" target="_blank" rel="noopener noreferrer" class="ds-link" aria-label="Instagram @nathanramorim">
+        <svg aria-hidden="true"><use href="#ico-instagram"/></svg>
+        <span>Instagram</span>
       </a>
     </div>
-    <span>Design System alinhado ao padrão Dock iA · Three.js 3D compacto</span>
   </footer>
 </div>
 
 <script>
 /* ==========================================================================
-   MOTOR 3D COMPACTO (PADRÃO DOCK-IA)
+   MOTOR DE PERSONAGENS DAS 5 ESTAÇÕES
    ========================================================================== */
 const STATE_DEFS = {
   working:  { label: 'Trabalhando',  orb: 0x4f8ef7, cssOrb: '#4f8ef7', eyes: 'cap' },
@@ -1328,7 +1398,7 @@ const STATE_DEFS = {
   error:    { label: 'Bloqueado',    orb: 0xf2677a, cssOrb: '#f2677a', eyes: 'x' }
 };
 
-function createCompactDockMascot3D(mountEl, agentHex, initialState, markType) {
+function createForgeMascot3D(mountEl, agentHex, initialState, markType) {
   const w = mountEl.clientWidth || 78;
   const h = mountEl.clientHeight || 86;
 
@@ -1745,7 +1815,7 @@ STATIONS.forEach((st, idx) => {
   gridEl.appendChild(card);
 
   const mount = card.querySelector(`#avatar-${idx}`);
-  const ctrl = createCompactDockMascot3D(mount, st.hex, initialKey, st.mark);
+  const ctrl = createForgeMascot3D(mount, st.hex, initialKey, st.mark);
   mascotControllers.push({ ctrl, card, st, currentKey: initialKey, stateKeys });
 
   card.querySelectorAll('.state-pill').forEach((btn) => {
@@ -1953,7 +2023,7 @@ const EMU_STEPS = [
 ];
 
 const emuAvatarMount = document.getElementById('emuAvatarMount');
-const emuMascot = createCompactDockMascot3D(emuAvatarMount, 0xf2a65a, 'finished', 'ring');
+const emuMascot = createForgeMascot3D(emuAvatarMount, 0xf2a65a, 'finished', 'ring');
 let currentEmuIdx = 0;
 
 function renderEmuStep(idx) {
@@ -2088,7 +2158,7 @@ const GOV_SCENARIOS = [
 ];
 
 const govMount = document.getElementById('govAvatarMount');
-const govMascot = createCompactDockMascot3D(govMount, 0x3ecf8e, 'error', 'tri');
+const govMascot = createForgeMascot3D(govMount, 0x3ecf8e, 'error', 'tri');
 let currentGovIdx = 0;
 let govAutoCycle = true;
 let govTimer = 0;

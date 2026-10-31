@@ -18,8 +18,7 @@ Especificação técnica e arquitetural do `discovery-59-modulo-visual-estacoes-
 | Procedimento para novo subcomando CLI | `.agents/skills/novo-subcomando-cli-sdd/SKILL.md` | Skill aprovada (`DUP-05`) padronizando criação de pacote em `internal/` + adaptador em `cmd/forge-sdd/` + testes | `reusar` | Aplicar a skill para criar `internal/studio` e `cmd/forge-sdd/studio.go` mantendo fronteira limpa (`ARQ-01`) |
 | Diagnóstico e leitura de `.sddrc` / `progress.md` | `internal/config/` e `internal/doctor/` | Leitura de configuração do projeto, branch e estrutura `sdd/` | `reusar` | Evita duplicar leitura de `.sddrc` (`DUP-01`, `DUP-03`) |
 | Lista de Auto-Skills propostas e aprovadas | `internal/skills/` (`.agents/skills/*/SKILL.md` e `sdd/skills/index.md`) | `skills.List(dir)` retorna todas as skills e seus status (`proposed`, `approved`) | `reusar` | Alimenta diretamente o painel de Auto-Skills no `forge-sdd studio` |
-| Palco 3D dos 5 Personagens + Trilho Processual + Inspetor | `docs/showcase-v3-lp.html` | Renderizador Three.js (`buildCompactBot`), os 5 personagens (`ring`, `diamond`, `bar`, `wave`, `tri`), animações por estado, trilho `01..05` e cards de contrato `Recebe`/`Entrega` | `estender` | Embutir via `embed.FS` em `internal/studio/assets/` adicionando conexão SSE (`EventSource`) com `/api/events` e `/api/state` |
-| Tokens visuais e estados de mascote | `/Users/nathanramorim/git/dock-ia/produto/design-system.md` e `app/packages/ui-kit/src/mascot.ts` | Paleta dark mode (`#0d0f14`, `#12151d`, `#1a1e29`), cores semânticas e estados (`idle`, `working`, `thinking`, `searching`, `approval`, `finished`, `error`) | `reusar` | Mantém consistência visual absoluta com o ecossistema `dock-ia` |
+| Palco dos 5 Personagens + Trilho Processual + Inspetor | `docs/showcase-v3-lp.html` | Renderizador dos 5 personagens (`createForgeMascot3D`, marcas `ring`, `diamond`, `bar`, `wave`, `tri`), animações por estado (`idle`, `working`, `thinking`, `searching`, `approval`, `finished`, `error`), tokens visuais (`#0d0f14`, `#12151d`, `#1a1e29`), trilho `01..05` e cards de contrato `Recebe`/`Entrega` | `estender` | Embutir via `embed.FS` em `internal/studio/assets/` adicionando conexão SSE (`EventSource`) com `/api/events` e `/api/state` |
 | Observador Read-Only + Servidor HTTP/SSE (`forge-sdd studio`) | Repositório `forge-sdd` | Não existe agregador de estado visual nem servidor SSE local | `criar` | Criar `internal/studio` e `cmd/forge-sdd/studio.go` usando apenas a `stdlib` Go (`net/http`, `embed`, `crypto/sha256`) |
 
 ### 1.3 Dependências novas (`SEG-07`)
@@ -63,7 +62,7 @@ graph LR
     subgraph sidecar["internal/studio (Subcomando Opcional forge-sdd studio)"]
         watcher["Observador de Estações (Read-Only)<br/>[Compara version das 5 filas]"]
         sse["Servidor HTTP + SSE (/api/state, /api/events)<br/>[127.0.0.1:4321 + embed.FS]"]
-        spa["SPA 3D: 5 Personagens + Filas + Inspetor<br/>[HTML + CSS Tokens dock-ia + Three.js]"]
+        spa["SPA: 5 Personagens + Filas + Inspetor<br/>[HTML + CSS Tokens Forge-SDD]"]
     end
 
     idem -->|"Escrita atômica e deduplicada"| q1 & q2 & q3 & q4 & q5
@@ -175,7 +174,7 @@ Todas as filas por estação residem em `sdd/.queue/stations/`:
 ### 4.1 Superfície CLI (`ARQ-06`)
 - `forge-sdd studio [--port 4321] [--host 127.0.0.1] [--dir .]`
   - Inicia o servidor HTTP Read-Only em `127.0.0.1:4321`.
-  - `GET /`: serve a aplicação visual embutida via `embed.FS` (HTML + CSS Tokens `dock-ia` + Three.js com os 5 personagens).
+  - `GET /`: serve a aplicação visual embutida via `embed.FS` (HTML + CSS Tokens Forge-SDD + os 5 personagens).
   - `GET /api/state`: retorna o snapshot JSON imediato contendo o estado das 5 filas (`stations[]`), o `active_station`, o último `handoff`, o resumo de `queue.json`, o último `governance_verdict` e as `skills[]`.
   - `GET /api/events`: stream `text/event-stream` (SSE) que envia um evento `event: state` sempre que a soma/vetor de `version` das 5 filas (`sdd/.queue/stations/*.json`) ou `sdd/.queue/queue.json` mudar.
 
@@ -192,7 +191,7 @@ Todas as filas por estação residem em `sdd/.queue/stations/`:
 - **CA-02 (5 Filas por Estação em `sdd/.queue/stations/*.json`):** Ao inicializar ou operar o fluxo das estações (`lider`, `pm-architect`, `planner`, `builder`, `governance`), cada estação persiste seu estado próprio em `sdd/.queue/stations/<station>.json` mantendo sincronia entre `builder.json` e `sdd/.queue/queue.json`.
 - **CA-03 (Idempotência Estrita — `IdempotencyKey`):** Executar 2 ou mais vezes seguidas a mesma operação de `enqueue`, `handoff`, `claim`, `complete` ou `review` com a mesma `idempotency_key` (ou mesmos parâmetros determinísticos) resulta em **no-op idempotente**: apenas 1 item na fila, mesmo `version` após a 1ª gravação e zero duplicação.
 - **CA-04 (Escrita Atômica e Concorrência Segura):** Testes concorrentes (`go test -race ./internal/queue/...`) comprovando que leituras simultâneas durante múltiplas escritas em `sdd/.queue/stations/*.json` nunca leem JSON corrompido ou parcial.
-- **CA-05 (Fidelidade dos 5 Personagens 3D e Marcas `dock-ia`):** A interface servida por `forge-sdd studio` renderiza exatamente os 5 personagens (`01. O Líder` `#f2a65a` `ring`, `02. PM & Arquiteto` `#8aa4ff` `diamond`, `03. O Planejador` `#c9a7ff` `bar`, `04. Fila de Builders` `#4fd1b5` `wave`, `05. Analista de Governança` `#ff8a5c` `tri`) refletindo o estado real de cada arquivo `sdd/.queue/stations/<station>.json`.
+- **CA-05 (Fidelidade dos 5 Personagens e Marcas das Estações):** A interface servida por `forge-sdd studio` renderiza exatamente os 5 personagens (`01. O Líder` `#f2a65a` `ring`, `02. PM & Arquiteto` `#8aa4ff` `diamond`, `03. O Planejador` `#c9a7ff` `bar`, `04. Fila de Builders` `#4fd1b5` `wave`, `05. Analista de Governança` `#ff8a5c` `tri`) refletindo o estado real de cada arquivo `sdd/.queue/stations/<station>.json`.
 - **CA-06 (Visão Processual de Handoff, Contratos e Filas Individuais):** Cada card de estação exibe seu personagem 3D, os contratos **`Recebe (Entrada)`** e **`Entrega (Saída)`** e os itens presentes na sua própria fila (`stations/<station>.json`), além do trilho superior destacando o Handoff ativo (`01 → 02 → 03 → 04 → 05` e loop `05 ↺ 04`).
 - **CA-07 (Sincronização em Tempo Real via SSE):** Quando qualquer arquivo em `sdd/.queue/stations/*.json` ou `sdd/.queue/queue.json` tem sua `version` incrementada, o endpoint `/api/events` emite o novo snapshot via SSE em `< 500ms`.
 - **CA-08 (Inspetor de Governança + Modo Simulação):** Exibe o parecer JSON real do Analista de Governança (`achados[]` com evidência e `candidate_skill`) e oferece botão de **Modo Simulação (`DEMO`)** para demonstrar todas as estações interativamente mesmo quando o repositório estiver em repouso.
