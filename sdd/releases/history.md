@@ -4,9 +4,9 @@ Este arquivo registra o histórico de entregas de produto deste projeto.
 
 ## Entregas
 
-### Versão 3.0.1-beta.2 — Forge Studio (Módulo Visual Plugável), Filas Atômicas por Estação e Handoff Determinístico (Beta)
+### Versão 3.2.0-beta — Forge Studio (Módulo Visual Plugável), Filas Atômicas por Estação e Handoff Determinístico (Beta)
 
-Terceira entrega beta da linha v3.0 baseada na branch `release/v3.0.1` (Feature 59, 4 entregas: `feat-59-01` a `feat-59-04`). Introduz o módulo visual plugável do Forge Studio e o motor de filas atômicas com handoff determinístico entre as 5 estações.
+Entrega do ciclo v3.2 (versão 3.2.0-beta) integrando o módulo visual plugável do Forge Studio e o motor de filas atômicas com handoff determinístico entre as 5 estações (Feature 59, 4 entregas: `feat-59-01` a `feat-59-04`).
 
 *   **Forge Studio & Servidor Read-Only HTTP/SSE (`forge-sdd studio`):** Servidor local isolado em `127.0.0.1:4321` sem nenhuma dependência Go externa (`net/http` e `embed.FS` nativos da stdlib — `ARQ-03`, `ARQ-04`). Rejeita mutações com `405 Method Not Allowed` (`SEG-01`, `SEG-06`) e distribui snapshots via Server-Sent Events (`/api/events`).
 *   **Interface Web Embarcada com 5 Mascotes & Trilho de Handoff:** Frontend completo pré-embutido em `internal/studio/assets/` com visualização dos 5 mascotes (`Líder`, `PM & Arquiteto`, `Planejador`, `Builder` e `Governança`) usando fallback SVG 2D de alta fidelidade e `CLS = 0`, trilho processual animado com pacote em trânsito e loop de retrabalho `05 ↺ 04`, cards de status e chaveador de modo `LIVE / DEMO`.

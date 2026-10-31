@@ -8,17 +8,14 @@ Feat 60 — Site Oficial (forge-sdd.org) Astro SSG [x] done
 Fix 62 — Player de Vídeo Limpo [x] done
 Release v3.0.1-beta.1 — NPM & GitHub Releases [x] done
 Feat 59 — Forge Studio + Filas por Estação [x] 4/4 done
-  ├─ 59-01 Filas por Estação + Idempotência [x] done
-  ├─ 59-02 Backend Read-Only HTTP/SSE [x] done
-  ├─ 59-03 UI embed.FS 5 Mascotes [x] done
-  └─ 59-04 Integração Estações + Docs [x] done
+Release v3.2.0-beta — NPM & GitHub Releases [x] done
 ```
 
 ## Features ativas
-- Nenhuma ativa (Feat 59 concluída).
+- Nenhuma ativa (Feat 59 e Release v3.2.0-beta concluídas).
 
 ## Próximo passo
-**PR:** Merge de `feat/59-modulo-visual-estacoes-personagens` para `release/v3.0.1`.
+**Próximo:** Definir próximo discovery ou feature.
 **Bloqueios:** —
 
 > Histórico completo em `progress-log.md`
