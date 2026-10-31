@@ -1,0 +1,111 @@
+---
+interface Props {
+  title?: string;
+  description?: string;
+  canonicalUrl?: string;
+  ogImage?: string;
+}
+
+const {
+  title = "Forge-SDD 3.0 — Orquestração Autônoma em 5 Estações com Governança Read-Only",
+  description = "Framework de desenvolvimento guiado por especificações (SDD) para equipes que usam agentes de IA. Substitui o caos de um único agente por uma esteira de 5 estações especializadas, governança em 3 camadas e portões determinísticos.",
+  canonicalUrl = "https://forge-sdd.org/",
+  ogImage = "https://forge-sdd.org/og-image.svg"
+} = Astro.props;
+
+const softwareApplicationSchema = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Forge-SDD",
+  "alternateName": "forge-sdd",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "macOS, Linux, Windows",
+  "softwareVersion": "3.0.0-beta",
+  "license": "https://opensource.org/licenses/MIT",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "author": {
+    "@type": "Person",
+    "name": "Nathan Amorim",
+    "url": "https://www.instagram.com/nathan.ramorim"
+  },
+  "codeRepository": "https://github.com/nathanramorim/forge-sdd",
+  "installUrl": "https://www.npmjs.com/package/@nathanramorim/forge-sdd",
+  "description": description
+};
+
+const websiteSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "Forge-SDD",
+  "url": "https://forge-sdd.org"
+};
+
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "O que é o Forge-SDD 3.0?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "O Forge-SDD é um framework open source de desenvolvimento guiado por especificações (SDD) que orquestra agentes de inteligência artificial em uma esteira de 5 estações especializadas com governança somente-leitura."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Como funciona a Governança em 3 Camadas?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "A Camada A executa validações determinísticas no terminal via CLI Go (forge-sdd gate). A Camada B roda um subagente de auditoria com zero permissão de escrita que bloqueia violações arquiteturais e de segurança. A Camada C apresenta o laudo validado e Auto-Skills no Painel Executivo do Líder."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Com quais ferramentas o Forge-SDD é compatível?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "É 100% compatível com Claude Code, Google Gemini CLI, Antigravity, GitHub Copilot e qualquer IDE com suporte a subcomandos CLI."
+      }
+    }
+  ]
+};
+---
+
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>{title}</title>
+<meta name="description" content={description} />
+<link rel="canonical" href={canonicalUrl} />
+<meta name="robots" content="index, follow" />
+<meta name="theme-color" content="#0d0f14" />
+<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+<!-- Open Graph / Facebook -->
+<meta property="og:type" content="website" />
+<meta property="og:url" content={canonicalUrl} />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:image" content={ogImage} />
+<meta property="og:locale" content="pt_BR" />
+
+<!-- Twitter -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:url" content={canonicalUrl} />
+<meta name="twitter:title" content={title} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={ogImage} />
+
+<!-- Preconnect & Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600&family=Montserrat:wght@500;600;700;800&display=swap" rel="stylesheet" />
+
+<!-- JSON-LD Structured Data -->
+<script type="application/ld+json" set:html={JSON.stringify(softwareApplicationSchema)} />
+<script type="application/ld+json" set:html={JSON.stringify(websiteSchema)} />
+<script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />

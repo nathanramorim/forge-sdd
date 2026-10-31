@@ -5,8 +5,8 @@
 
 > CLI open source que instala em qualquer projeto a **Metodologia Forge-SDD** — um framework de desenvolvimento guiado por IA que elimina a repetição de instruções, garante padrões arquiteturais e traz a expertise de um engenheiro sênior para o seu fluxo diário.
 
-🚀 **Landing Page Oficial:** [forge-sdd.vercel.app](https://forge-sdd.vercel.app)
-📖 **Wiki & Documentação Completa:** [Wiki do Forge-SDD](https://forge-sdd.vercel.app/wiki#introducao)
+🚀 **Site Oficial (Astro 5 SSG):** [forge-sdd.org](https://forge-sdd.org)
+📖 **Wiki & Documentação Completa:** [Documentação do Forge-SDD](https://forge-sdd.org)
 
 ---
 
@@ -14,7 +14,7 @@
 
 O **forge-sdd** nasceu para **mudar a dinâmica de desenvolvimento orientado a IA**. Ele resolve o desafio de manter a consistência, qualidade e velocidade do desenvolvimento através de agentes de IA locais especializados (Orquestrador, Builder, Revisor, etc.) operando sob a metodologia SDD (Software Design Doc).
 
-Para conhecer todos os comandos disponíveis (`/status`, `/discovery`, `/nova-feature`, etc.), guias rápidos de início do zero e adoção em projetos existentes, acesse a nossa **[Landing Page Oficial](https://forge-sdd.vercel.app)** ou a **[Wiki do Projeto](https://forge-sdd.vercel.app/wiki#introducao)**.
+Para conhecer todos os comandos disponíveis (`/status`, `/discovery`, `/nova-feature`, etc.), guias rápidos de início do zero e adoção em projetos existentes, acesse o nosso **[Site Oficial](https://forge-sdd.org)**. O código-fonte da aplicação estática está isolado em `/site` (`ARQ-04`) e pré-renderizado via Astro 5 para máxima pontuação Core Web Vitals e SEO.
 
 ---
 

@@ -71,6 +71,8 @@ main
                                                                                      └─ feat/03-ergonomia-de-comandos-e-sincronizacao
                                                                                          └─ feat/55-telemetria-cobertura-total-e-relatorio
                                                                                              └─ feat/58-orquestracao-autonoma-governanca-skills
+                                                                                                 └─ fix/61-lp-handoff-overlap-e-link-instagram
+                                                                                                     └─ feat/60-site-estatico-seo-performance
             ```
 
                                        ## Janelas de paralelismo
@@ -80,6 +82,7 @@ main
                                        feat-03-01 (correção de nome do adaptador Claude) é pré-requisito de feat-03-02 (migração em `update`); ambas podem entrar na mesma branch/PR (baixo risco combinado). feat-03-03 (sincronização remota em `/status`), feat-03-04 (clarify) e feat-03-05 (confirmação de subagente) são independentes entre si e de feat-03-01/02 — podem ser paralelas. feat-03-04 e feat-03-05 compartilham a mesma preocupação ("quando interromper o usuário com uma pergunta") e podem ser unificadas a critério do revisor. feat-03-06 fecha o pacote e depende de todas as anteriores.
                                        feat-55-01 (classificação de tipo de sessão) é pré-requisito de feat-55-02 (comando `report`, que agrupa por tipo). feat-55-03/04/05/06 (cobertura de telemetria em `/discovery`, `/split-features`, `/nova-feature`, `/archive`) são independentes entre si e de feat-55-01/02 — mesmo padrão de "um comando por task" de feat-02-03/feat-03, podem ser todas paralelas. feat-55-07 fecha o pacote e depende de todas as anteriores.
                                        feat-58-01 (Constituição por IDs + Rules + Templates) e feat-58-02 (Papéis das 5 estações) não dependem entre si e podem rodar em paralelo. feat-58-04 (Fila Go + Portão Camada A) e feat-58-06 (Motor de Auto-Skills) também são pacotes Go independentes (`internal/queue`+`internal/gate` vs `internal/skills`) e podem rodar em paralelo antes de feat-58-05 e feat-58-07 (`v3.0.0-beta`).
+                                       feat-60-01 estabelece o scaffold Astro 5 em `/site`, `global.css`, SEO Head e os contratos de dados tipados em `site/src/data/`; a seguir, `feat-60-02` (componentes `.astro` pré-renderizados no build + fallback SVG em `site/src/components/`) e `feat-60-03` (hidratação `interactions.ts` + motor 3D `mascot-3d.ts` em `site/src/scripts/`) operam sobre diretórios distintos, encerrando em `feat-60-04` (Cloudflare Workers `wrangler.jsonc`, `_headers` e suite determinística `verify-build.mjs`).
 
                                        ## Índice
 
@@ -176,3 +179,9 @@ main
 | 58-05 | feat-58-orquestracao-autonoma-governanca-skills/feat-58-05-analista-governanca-camada-b-e-painel-lider.md | feat/58-orquestracao-autonoma-governanca-skills | 58-05 | done |
 | 58-06 | feat-58-orquestracao-autonoma-governanca-skills/feat-58-06-motor-auto-skills-regra-de-tres.md | feat/58-orquestracao-autonoma-governanca-skills | 58-06 | done |
 | 58-07 | feat-58-orquestracao-autonoma-governanca-skills/feat-58-07-importador-governanca-update-docs-e-release-v3-beta.md | feat/58-orquestracao-autonoma-governanca-skills | 58-07 | done |
+| 61 | fix-61-lp-handoff-overlap-e-link-instagram.md | fix/61-lp-handoff-overlap-e-link-instagram | 61 | done |
+| 60-01 | feat-60-site-estatico-seo-performance/feat-60-01-scaffold-astro-seo-dados-tipados.md | feat/60-site-estatico-seo-performance | 60-01 | todo |
+| 60-02 | feat-60-site-estatico-seo-performance/feat-60-02-componentes-ssg-pre-renderizados-fallback-svg.md | feat/60-site-estatico-seo-performance | 60-02 | todo |
+| 60-03 | feat-60-site-estatico-seo-performance/feat-60-03-hidratacao-interacoes-motor-3d-otimizado.md | feat/60-site-estatico-seo-performance | 60-03 | todo |
+| 60-04 | feat-60-site-estatico-seo-performance/feat-60-04-cloudflare-workers-testes-seo-fidelidade.md | feat/60-site-estatico-seo-performance | 60-04 | done |
+| 62 | fix-62-remover-metadados-player-video.md | fix/62-remover-metadados-player-video | 62 | todo |

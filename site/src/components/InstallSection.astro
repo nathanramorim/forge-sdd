@@ -1,0 +1,113 @@
+<section id="instalacao">
+  <div class="sec-h">
+    <div>
+      <p class="eyebrow">03 · Instalação &amp; Guia Rápido</p>
+      <h2>Simples de instalar. Funciona com os agentes que você já usa.</h2>
+      <p>Compatível com <strong>Claude Code</strong>, <strong>Google Gemini / Antigravity</strong> e <strong>GitHub Copilot</strong>. Código 100% aberto sob licença MIT.</p>
+    </div>
+  </div>
+
+  <div class="install-grid">
+    <div class="panel">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <span class="chip"><i style="--o:var(--ok)"></i>Opção 1 · Instalação Global (Recomendado)</span>
+        <span class="mono">npm / npx</span>
+      </div>
+      <h3 style="font:700 15px var(--f-body);margin-bottom:6px">Instale uma vez e use o comando curto <span class="mono" style="color:#fff">forge</span></h3>
+      <div class="term" style="margin-top:10px">
+        <div># 1. Instale globalmente via NPM</div>
+        <div style="color:#fff;font-weight:600">npm install -g @nathanramorim/forge-sdd</div>
+        <div style="margin-top:8px"># 2. Inicialize dentro do seu projeto</div>
+        <div style="color:#fff;font-weight:600">forge init</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <span class="chip"><i style="--o:var(--accent)"></i>Opção 2 · Uso Direto sem Instalar</span>
+        <span class="mono">Zero Config</span>
+      </div>
+      <h3 style="font:700 15px var(--f-body);margin-bottom:6px">Rode direto via <span class="mono" style="color:#fff">npx</span> ou atualize projetos existentes</h3>
+      <div class="term" style="margin-top:10px">
+        <div># Inicialização interativa (escolha Claude, Gemini, Copilot)</div>
+        <div style="color:#fff;font-weight:600">npx @nathanramorim/forge-sdd@latest init</div>
+        <div style="margin-top:8px"># Atualizar para v3.0 preservando seu histórico</div>
+        <div style="color:#fff;font-weight:600">forge update</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Principais Comandos no Chat e no Terminal -->
+  <div class="sec-h" style="margin-top:28px;margin-bottom:14px">
+    <div>
+      <h3 style="font:700 18px var(--f-body)">Principais comandos do dia a dia</h3>
+      <p style="margin-top:4px">Você conversa com o time por comandos de barra (<span class="mono">/comando</span>) no chat da IDE, enquanto o binário <span class="mono">forge-sdd</span> garante fila, portões e skills no terminal.</p>
+    </div>
+  </div>
+
+  <div class="cmd-ref-grid">
+    <div class="cmd-item">
+      <div class="cmd-item-head">
+        <code>/discovery [ideia]</code>
+        <span class="chip"><i style="--o:#8aa4ff"></i>Estação 02</span>
+      </div>
+      <p class="cmd-desc">Faz o Reuse Check ("O que já existe"), gera a Spec e os critérios e aguarda seu OK no Portão FLX-01.</p>
+    </div>
+
+    <div class="cmd-item">
+      <div class="cmd-item-head">
+        <code>/split-features</code>
+        <span class="chip"><i style="--o:#c9a7ff"></i>Estação 03</span>
+      </div>
+      <p class="cmd-desc">Quebra o plano técnico em subtarefas P/M/G, vincula as rules aplicáveis e alimenta a fila determinística.</p>
+    </div>
+
+    <div class="cmd-item">
+      <div class="cmd-item-head">
+        <code>/proxima-feature</code>
+        <span class="chip"><i style="--o:#4fd1b5"></i>Estação 04</span>
+      </div>
+      <p class="cmd-desc">Aciona os Builders para consumirem os próximos itens da fila (em paralelo quando sem conflito).</p>
+    </div>
+
+    <div class="cmd-item">
+      <div class="cmd-item-head">
+        <code>/revisar</code>
+        <span class="chip"><i style="--o:#ff8a5c"></i>Estação 05 &rarr; 01</span>
+      </div>
+      <p class="cmd-desc">Roda o Portão A (<span class="mono">forge-sdd gate</span>), a auditoria Read-Only (Camada B) e entrega o Painel do Líder.</p>
+    </div>
+
+    <div class="cmd-item">
+      <div class="cmd-item-head">
+        <code>forge-sdd queue</code>
+        <span class="chip"><i style="--o:var(--accent)"></i>CLI Go</span>
+      </div>
+      <p class="cmd-desc">Gerencia a fila local (<span class="mono">enqueue</span>, <span class="mono">next</span>, <span class="mono">claim</span>, <span class="mono">complete</span>, <span class="mono">review</span>, <span class="mono">list</span>) com detecção de conflito.</p>
+    </div>
+
+    <div class="cmd-item">
+      <div class="cmd-item-head">
+        <code>forge-sdd gate</code>
+        <span class="chip"><i style="--o:var(--ok)"></i>CLI Go</span>
+      </div>
+      <p class="cmd-desc">Executa o Portão Determinístico Camada A (branch, spec vinculada, segredos, tamanho e testes).</p>
+    </div>
+
+    <div class="cmd-item">
+      <div class="cmd-item-head">
+        <code>forge-sdd skills</code>
+        <span class="chip"><i style="--o:var(--warn)"></i>CLI Go</span>
+      </div>
+      <p class="cmd-desc">Propõe, aprova e sincroniza Auto-Skills (<span class="mono">DUP-05</span>) entre <span class="mono">.agents/</span>, <span class="mono">.claude/</span> e <span class="mono">.gemini/</span>.</p>
+    </div>
+
+    <div class="cmd-item">
+      <div class="cmd-item-head">
+        <code>/status &amp; forge report</code>
+        <span class="chip"><i style="--o:#f2a65a"></i>Estação 01</span>
+      </div>
+      <p class="cmd-desc">Mostra o progresso atual, divergências com o Git remoto e relatório de telemetria por sessão.</p>
+    </div>
+  </div>
+</section>

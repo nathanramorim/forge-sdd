@@ -1,0 +1,24 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "lp-forgesdd",
+  "compatibility_date": "2024-11-01",
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
+  "assets": {
+    "directory": "./dist",
+    "html_handling": "auto-trailing-slash",
+    "not_found_handling": "single-page-application"
+  },
+  "workers_dev": true,
+  "routes": [
+    {
+      "pattern": "forge-sdd.org/*",
+      "zone_name": "forge-sdd.org"
+    },
+    {
+      "pattern": "www.forge-sdd.org/*",
+      "zone_name": "forge-sdd.org"
+    }
+  ]
+}

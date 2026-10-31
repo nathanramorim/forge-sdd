@@ -1,0 +1,32 @@
+---
+// site/src/components/VideoSection.astro
+---
+
+<section id="video">
+  <div class="sec-h">
+    <div>
+      <p class="eyebrow" style="color:var(--accent)">06 · Demonstração Oficial em Vídeo</p>
+      <h2>Veja o Forge-SDD 3.0 em ação em 60 segundos.</h2>
+      <p>Assista à demonstração oficial apresentando a esteira autônoma em 5 estações, o portão determinístico Camada A e a governança somente-leitura na prática.</p>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <span class="chip"><i style="--o:var(--accent)"></i>Vídeo Oficial</span>
+      <span class="chip"><i style="--o:var(--ok)"></i>1080p Full HD</span>
+    </div>
+  </div>
+
+  <div class="video-container">
+    <div class="video-card">
+      <video
+        controls
+        preload="metadata"
+        poster="/video/forge-sdd-v3-poster.jpg"
+        playsinline
+        class="video-player"
+      >
+        <source src="/video/forge-sdd-v3.mp4" type="video/mp4" />
+        Seu navegador não suporta a reprodução de vídeo HTML5.
+      </video>
+    </div>
+  </div>
+</section>

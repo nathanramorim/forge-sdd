@@ -1,0 +1,89 @@
+---
+import { GOV_SCENARIOS } from '../data/governance';
+import MascotFallbackSvg from './MascotFallbackSvg.astro';
+
+const sc0 = GOV_SCENARIOS[0];
+---
+
+<section id="governanca">
+  <div class="sec-h">
+    <div>
+      <p class="eyebrow" style="color:var(--ok)">04 · Governança em 3 Camadas</p>
+      <h2>O antídoto contra o caos do desenvolvimento com IA sem supervisão.</h2>
+      <p>
+        Vazamento de credenciais, código duplicado e IAs que aprovam o próprio erro viraram notícia constante. No Forge-SDD 3.0, quem escreve o código jamais pode aprová-lo: veja ao lado como o Guardião Read-Only age em cada caso.
+      </p>
+    </div>
+    <div>
+      <button class="btn ghost sm" id="toggleGovCycleBtn" type="button">Pausar simulação</button>
+    </div>
+  </div>
+
+  <div class="gov-layout">
+    <div class="gov-tabs" id="govTabs">
+      <button class="gov-tab active" data-gov="0" style="--k:var(--bad)" type="button">
+        <div class="gov-tab-top">
+          <span class="chip"><i style="--o:var(--bad)"></i>Segurança · SEG-01 / P-13</span>
+          <span class="mono">Retorna 05 &olarr; 04</span>
+        </div>
+        <h4>1. Vazamento de chave de API ou commit direto na main</h4>
+        <p>O binário determinístico intercepta segredos expostos ou tentativa de alterar a branch principal antes do código sair da máquina.</p>
+      </button>
+
+      <button class="gov-tab" data-gov="1" style="--k:var(--warn)" type="button">
+        <div class="gov-tab-top">
+          <span class="chip"><i style="--o:var(--warn)"></i>Reuso · DUP-01 / DUP-02</span>
+          <span class="mono">Retorna 05 &olarr; 04</span>
+        </div>
+        <h4>2. Código duplicado que ignora o que já existe no projeto</h4>
+        <p>O Analista de Governança compara a entrega com a seção "O que já existe" da Spec e barra funções recriadas do zero.</p>
+      </button>
+
+      <button class="gov-tab" data-gov="2" style="--k:var(--bad)" type="button">
+        <div class="gov-tab-top">
+          <span class="chip"><i style="--o:var(--bad)"></i>Arquitetura · ARQ-01 / TST-01</span>
+          <span class="mono">Retorna 05 &olarr; 04</span>
+        </div>
+        <h4>3. Regra de negócio na camada errada e sem testes</h4>
+        <p>Por ser estritamente somente leitura, o auditor não faz remendos silenciosos: ele reprova com evidência e exige testes verdes.</p>
+      </button>
+
+      <button class="gov-tab" data-gov="3" style="--k:var(--ok)" type="button">
+        <div class="gov-tab-top">
+          <span class="chip"><i style="--o:var(--ok)"></i>Entrega Limpa · DUP-05</span>
+          <span class="mono">Avança 05 &rarr; 01 (Você)</span>
+        </div>
+        <h4>4. Entrega validada e transformada em habilidade automática</h4>
+        <p>Passando pelas Camadas A e B, o Líder atualiza seu Painel Executivo e cataloga padrões repetidos 3 vezes como Auto-Skill.</p>
+      </button>
+    </div>
+
+    <div class="gov-inspector" id="govInspector" style="--k:var(--bad)">
+      <div class="gov-head">
+        <div class="gov-avatar-wrap" id="govAvatarMount" title="Clique para interagir com o Analista de Governança">
+          <MascotFallbackSvg color="#ff8a5c" mark="tri" state="error" width={86} height={94} />
+        </div>
+        <div style="flex:1;min-width:0">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:6px">
+            <span class="chip" id="govStateChip"><i style="--o:var(--bad)"></i>Bloqueado na Auditoria</span>
+            <span class="mono" id="govRuleCode">SEG-01 · P-13</span>
+          </div>
+          <h3 id="govInspectorTitle" style="font:700 16px/1.3 var(--f-body)">{sc0.title}</h3>
+          <p id="govInspectorSub" style="font:500 12.5px/1.45 var(--f-body);color:var(--muted);margin-top:4px">
+            {sc0.sub}
+          </p>
+        </div>
+      </div>
+
+      <div class="term" id="govTerminal" set:html={sc0.termHtml} />
+
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding-top:6px;border-top:1px solid var(--line)">
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn warn sm" id="govBtnFix" type="button">Simular correção do Builder</button>
+          <button class="btn ghost sm" id="govBtnNext" type="button">Próximo cenário &rarr;</button>
+        </div>
+        <span class="mono" id="govFooterNote">Permissão de escrita do Auditor: 0 arquivos</span>
+      </div>
+    </div>
+  </div>
+</section>

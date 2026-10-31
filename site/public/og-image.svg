@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <radialGradient id="bg-glow" cx="50%" cy="25%" r="65%">
+      <stop offset="0%" stop-color="#1e2a4a" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#0d0f14" stop-opacity="1"/>
+    </radialGradient>
+    <linearGradient id="accent-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#4f8ef7"/>
+      <stop offset="50%" stop-color="#8aa4ff"/>
+      <stop offset="100%" stop-color="#3ecf8e"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="#0d0f14"/>
+  <rect width="1200" height="630" fill="url(#bg-glow)"/>
+
+  <!-- Top Pill -->
+  <g transform="translate(420, 60)">
+    <rect width="360" height="40" rx="20" fill="#12151d" stroke="#252d40" stroke-width="1.5"/>
+    <circle cx="24" cy="20" r="5" fill="#3ecf8e"/>
+    <text x="42" y="25" fill="#e9ecf4" font-family="system-ui, sans-serif" font-weight="600" font-size="14">FORGE-SDD 3.0 · ESTEIRA EM 5 ESTAÇÕES</text>
+  </g>
+
+  <!-- Headline -->
+  <text x="600" y="210" fill="#ffffff" font-family="system-ui, sans-serif" font-weight="800" font-size="52" text-anchor="middle" letter-spacing="-1">
+    De 1 agente sobrecarregado para
+  </text>
+  <text x="600" y="275" fill="url(#accent-grad)" font-family="system-ui, sans-serif" font-weight="800" font-size="52" text-anchor="middle" letter-spacing="-1">
+    5 especialistas em esteira autônoma.
+  </text>
+
+  <!-- Subtitle -->
+  <text x="600" y="340" fill="#99a2b8" font-family="system-ui, sans-serif" font-weight="500" font-size="22" text-anchor="middle">
+    Governança em 3 Camadas · Auditoria Somente-Leitura · Motor CLI em Go
+  </text>
+
+  <!-- 5 Station Pills -->
+  <g transform="translate(150, 400)">
+    <!-- 01 -->
+    <rect x="0" y="0" width="160" height="44" rx="22" fill="#181c26" stroke="#f2a65a" stroke-width="1.5"/>
+    <circle cx="20" cy="22" r="5" fill="#f2a65a"/>
+    <text x="34" y="27" fill="#e9ecf4" font-family="system-ui, sans-serif" font-weight="700" font-size="13">01 · O Líder</text>
+
+    <!-- 02 -->
+    <rect x="180" y="0" width="170" height="44" rx="22" fill="#181c26" stroke="#8aa4ff" stroke-width="1.5"/>
+    <circle cx="200" cy="22" r="5" fill="#8aa4ff"/>
+    <text x="214" y="27" fill="#e9ecf4" font-family="system-ui, sans-serif" font-weight="700" font-size="13">02 · PM &amp; Arquiteto</text>
+
+    <!-- 03 -->
+    <rect x="370" y="0" width="170" height="44" rx="22" fill="#181c26" stroke="#c9a7ff" stroke-width="1.5"/>
+    <circle cx="390" cy="22" r="5" fill="#c9a7ff"/>
+    <text x="404" y="27" fill="#e9ecf4" font-family="system-ui, sans-serif" font-weight="700" font-size="13">03 · O Planejador</text>
+
+    <!-- 04 -->
+    <rect x="560" y="0" width="160" height="44" rx="22" fill="#181c26" stroke="#4fd1b5" stroke-width="1.5"/>
+    <circle cx="580" cy="22" r="5" fill="#4fd1b5"/>
+    <text x="594" y="27" fill="#e9ecf4" font-family="system-ui, sans-serif" font-weight="700" font-size="13">04 · Builders</text>
+
+    <!-- 05 -->
+    <rect x="740" y="0" width="160" height="44" rx="22" fill="#181c26" stroke="#ff8a5c" stroke-width="1.5"/>
+    <circle cx="760" cy="22" r="5" fill="#ff8a5c"/>
+    <text x="774" y="27" fill="#e9ecf4" font-family="system-ui, sans-serif" font-weight="700" font-size="13">05 · Governança</text>
+  </g>
+
+  <!-- Bottom Terminal command -->
+  <g transform="translate(320, 500)">
+    <rect width="560" height="56" rx="14" fill="#090b10" stroke="#363e52" stroke-width="1.2"/>
+    <text x="32" y="35" fill="#3ecf8e" font-family="ui-monospace, monospace" font-weight="600" font-size="18">$ npx @nathanramorim/forge-sdd@latest init</text>
+  </g>
+
+  <!-- Official domain -->
+  <text x="600" y="598" fill="#667089" font-family="system-ui, sans-serif" font-weight="600" font-size="15" text-anchor="middle" letter-spacing="1">
+    HTTPS://FORGE-SDD.ORG · OPEN SOURCE · MIT LICENSE
+  </text>
+</svg>

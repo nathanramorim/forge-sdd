@@ -1,0 +1,15 @@
+# Forge-SDD 3.0
+> Framework open source (licença MIT) de desenvolvimento guiado por especificações (SDD) com esteira autônoma de 5 estações especializadas, governança em 3 camadas e motor CLI determinístico em Go.
+
+- Site Oficial: https://forge-sdd.org
+- Repositório GitHub: https://github.com/nathanramorim/forge-sdd
+- Pacote NPM: https://www.npmjs.com/package/@nathanramorim/forge-sdd
+- Instalação Rápida: npx @nathanramorim/forge-sdd@latest init
+- Documentação Técnica: https://forge-sdd.org/
+
+## As 5 Estações Especializadas
+1. Estação 01 (O Líder): Orquestrador único e ponto de contato com o humano.
+2. Estação 02 (PM & Arquiteto): Mapeia ativos existentes (Reuse Check DUP-01), escreve a Spec e exige aprovação humana no Portão FLX-01.
+3. Estação 03 (O Planejador): Fatia a Spec aprovada em subtarefas atômicas P/M/G e popula a fila determinística sdd/.queue/queue.json.
+4. Estação 04 (Builders): Implementam código e testes em paralelo para tarefas sem conflito de arquivos e validam no Portão Camada A (forge-sdd gate).
+5. Estação 05 (Analista de Governança): Auditoria estritamente somente-leitura (0 arquivos com permissão de escrita) que impede que o agente aprove o próprio erro, devolvendo falhas para a fila do Builder (05 -> 04).
