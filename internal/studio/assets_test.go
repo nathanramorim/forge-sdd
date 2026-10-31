@@ -191,3 +191,74 @@ func TestStudioAssetsDrawerAndLinks(t *testing.T) {
 		t.Errorf("conteúdo servido de /studio.js não contém as rotinas do drawer e deep links")
 	}
 }
+
+func TestStudioAssetsSpecViewer(t *testing.T) {
+	// 1. Validar Markup no index.html (feat-63-03)
+	htmlData, err := assetsFS.ReadFile("assets/index.html")
+	if err != nil {
+		t.Fatalf("falha ao ler assets/index.html: %v", err)
+	}
+	htmlStr := string(htmlData)
+	requiredHTML := []string{
+		`id="specModalBackdrop"`,
+		`class="spec-modal-backdrop"`,
+		`closeSpecViewer()`,
+		`id="specViewerModal"`,
+		`class="spec-viewer-modal"`,
+		`aria-label="Visualizador de Especificação"`,
+		`copySpecPath()`,
+		`handleApproveSpecClick()`,
+	}
+	for _, req := range requiredHTML {
+		if !strings.Contains(htmlStr, req) {
+			t.Errorf("index.html não contém trecho obrigatório: %s", req)
+		}
+	}
+
+	// 2. Validar CSS em studio.css (feat-63-03)
+	cssData, err := assetsFS.ReadFile("assets/studio.css")
+	if err != nil {
+		t.Fatalf("falha ao ler assets/studio.css: %v", err)
+	}
+	cssStr := string(cssData)
+	requiredCSS := []string{
+		".spec-modal-backdrop",
+		".spec-viewer-modal",
+		"max-width: 92vw",
+		"max-height: 88vh",
+		".approve-spec-btn",
+		"#3ecf8e",
+		".markdown-body",
+		".checklist-item",
+	}
+	for _, req := range requiredCSS {
+		if !strings.Contains(cssStr, req) {
+			t.Errorf("studio.css não contém seletor/regra obrigatória: %s", req)
+		}
+	}
+
+	// 3. Validar JS em studio.js (feat-63-03)
+	jsData, err := assetsFS.ReadFile("assets/studio.js")
+	if err != nil {
+		t.Fatalf("falha ao ler assets/studio.js: %v", err)
+	}
+	jsStr := string(jsData)
+	requiredJS := []string{
+		"openSpecViewer",
+		"closeSpecViewer",
+		"approveSpec",
+		"copySpecPath",
+		"handleApproveSpecClick",
+		"renderMarkdown",
+		"/api/spec/approve",
+		"Aprovar Spec (FLX-01)",
+		"vscode://",
+		"window.copySpecPath = copySpecPath;",
+		"window.handleApproveSpecClick = handleApproveSpecClick;",
+	}
+	for _, req := range requiredJS {
+		if !strings.Contains(jsStr, req) {
+			t.Errorf("studio.js não contém função/recurso obrigatório: %s", req)
+		}
+	}
+}

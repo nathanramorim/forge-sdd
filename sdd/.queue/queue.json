@@ -2,7 +2,7 @@
   "feature_id": "feat-63",
   "branch": "feat/63-studio-navegavel-aprovacao-spec",
   "spec_status": "approved",
-  "updated_at": "2026-10-31T22:20:26Z",
+  "updated_at": "2026-10-31T22:31:10Z",
   "items": [
     {
       "task_id": "feat-60-01-scaffold-astro-seo-dados-tipados",
@@ -196,7 +196,7 @@
       "governance_verdict": {
         "veredito": "conforme",
         "achados": [],
-        "resumo": "Visualizador de Spec, aprovação humana no Portão FLX-01 e sync SSE implementados e aprovados integralmente pela Governança."
+        "resumo": "Reavaliação da task feat-63-03 concluída com êxito. COD-01 sanado, ARQ, SEG, TST 100% conformes."
       }
     }
   ]

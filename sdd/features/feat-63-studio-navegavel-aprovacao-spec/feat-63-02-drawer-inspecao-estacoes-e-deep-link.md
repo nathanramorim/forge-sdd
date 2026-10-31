@@ -4,7 +4,7 @@
 **Fase:** 63-02
 **Tamanho:** `M`
 **Depende de:** `feat-63-01-api-spec-e-sanitizacao`
-**Status:** `todo`
+**Status:** `done`
 
 ## Objetivo
 

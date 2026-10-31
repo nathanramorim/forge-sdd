@@ -4,7 +4,7 @@
 **Fase:** 63-03
 **Tamanho:** `M`
 **Depende de:** `feat-63-01-api-spec-e-sanitizacao`, `feat-63-02-drawer-inspecao-estacoes-e-deep-link`
-**Status:** `todo`
+**Status:** `done`
 
 ## Objetivo
 

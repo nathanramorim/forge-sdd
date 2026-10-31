@@ -56,7 +56,7 @@ feat-63-03 (Visualizador Markdown + Portão FLX-01 Aprovação Humana + SSE) [M]
 
 ### Fase 2 — UI Interativa: Gaveta Lateral de Inspeção das Estações e Deep-Link de IDE
 
-- [ ] **`feat-63-02` — Componente Station Drawer (`.station-drawer`), Cartões Clicáveis e Deep-Link para IDE Local** · **Tamanho: `M`**
+- [x] **`feat-63-02` — Componente Station Drawer (`.station-drawer`), Cartões Clicáveis e Deep-Link para IDE Local** · **Tamanho: `M`**
   - **Branch:** `feat/63-studio-navegavel-aprovacao-spec`
   - **Depende de:** `feat-63-01`
   - **Objetivo & Escopo:**
@@ -89,7 +89,7 @@ feat-63-03 (Visualizador Markdown + Portão FLX-01 Aprovação Humana + SSE) [M]
 
 ### Fase 3 — Visualizador de Spec, Portão FLX-01 com Aprovação Humana e Sincronização SSE
 
-- [ ] **`feat-63-03` — Visualizador de Spec Embutido, Aprovação Humana no Portão FLX-01 e Sincronização em Tempo Real via SSE** · **Tamanho: `M`**
+- [x] **`feat-63-03` — Visualizador de Spec Embutido, Aprovação Humana no Portão FLX-01 e Sincronização em Tempo Real via SSE** · **Tamanho: `M`**
   - **Branch:** `feat/63-studio-navegavel-aprovacao-spec`
   - **Depende de:** `feat-63-01`, `feat-63-02`
   - **Objetivo & Escopo:**

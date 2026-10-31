@@ -74,8 +74,8 @@ func NewServer(cfg Config) (*Server, error) {
 		})
 	}
 
-	// Middleware de Segurança (SEG-01 / SEG-02 / SEG-06): Permite POST exclusivamente em /api/spec/approve
-	securityHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	// Middleware de Segurança (SEG-01 / SEG-02 / SEG-06 / FLX-01): Permite POST exclusivamente em /api/spec/approve
+	readOnlyHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodPost {
 			if r.URL.Path != "/api/spec/approve" {
 				http.Error(w, "Method Not Allowed (Studio é estritamente Read-Only)", http.StatusMethodNotAllowed)
@@ -91,7 +91,7 @@ func NewServer(cfg Config) (*Server, error) {
 	})
 
 	s.httpServer = &http.Server{
-		Handler:      securityHandler,
+		Handler:      readOnlyHandler,
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 0, // SSE requer escrita contínua sem timeout rígido
 	}

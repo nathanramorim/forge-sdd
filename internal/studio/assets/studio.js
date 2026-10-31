@@ -462,6 +462,78 @@ function inspectSpec(pathOrId) {
 
 let currentOpenSpecPath = null;
 
+const SPEC_MODAL_FALLBACK_HTML = `
+  <div class="spec-modal-header">
+    <div class="spec-header-info">
+      <div class="spec-header-top-row">
+        <span class="chip mono" id="specStationBadge">02. PM & Arquiteto</span>
+        <span class="chip mono" id="specStatusBadge">Aguardando Revisão (FLX-01)</span>
+      </div>
+      <h2 id="specModalTitle">Especificação de Feature</h2>
+      <div class="spec-meta-row">
+        <span class="spec-path-label mono" id="specPathLabel">sdd/features/...</span>
+        <button id="specCopyPathBtn" class="copy-btn mono" onclick="copySpecPath()">Copiar Caminho</button>
+      </div>
+    </div>
+    <div class="spec-header-actions">
+      <a id="specVsCodeLink" href="#" class="btn-ide mono" title="Abrir no VS Code">VS Code</a>
+      <a id="specCursorLink" href="#" class="btn-ide cursor-btn mono" title="Abrir no Cursor">Cursor</a>
+      <button class="spec-close-btn" onclick="closeSpecViewer()" aria-label="Fechar Visualizador">&times;</button>
+    </div>
+  </div>
+  <div class="spec-modal-body" id="specModalBody">
+    <div class="markdown-body" id="specMarkdownContent">
+      <!-- Conteúdo Markdown formatado -->
+    </div>
+  </div>
+  <div class="spec-modal-footer">
+    <div class="spec-footer-info">
+      <span class="mono" id="specFileSize">0 bytes</span>
+      <span class="spec-gate-hint">Portão FLX-01 — Revisão Técnica & Conformidade Humana</span>
+    </div>
+    <div class="spec-footer-actions">
+      <button class="btn-secondary" onclick="closeSpecViewer()">Fechar</button>
+      <button id="btnApproveSpec" class="approve-spec-btn" onclick="handleApproveSpecClick()">
+        <span class="approve-icon">✓</span> Aprovar Spec (FLX-01)
+      </button>
+    </div>
+  </div>
+`;
+
+function copySpecPath() {
+  const path = currentOpenSpecPath || (document.getElementById('specPathLabel') ? document.getElementById('specPathLabel').textContent.trim() : '');
+  if (!path) return;
+  const btn = document.getElementById('specCopyPathBtn');
+  const original = btn ? btn.textContent : 'Copiar Caminho';
+  const setSuccess = () => {
+    if (btn) {
+      btn.textContent = 'Copiado!';
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.textContent = original;
+        btn.classList.remove('copied');
+      }, 1500);
+    }
+    showToast(`Caminho copiado: ${path}`);
+  };
+
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(path).then(setSuccess).catch(() => {
+      fallbackCopy(path);
+      setSuccess();
+    });
+  } else {
+    fallbackCopy(path);
+    setSuccess();
+  }
+}
+
+function handleApproveSpecClick() {
+  if (currentOpenSpecPath) {
+    approveSpec(currentOpenSpecPath);
+  }
+}
+
 async function openSpecViewer(specPath) {
   const modal = document.getElementById('specViewerModal');
   const backdrop = document.getElementById('specModalBackdrop');
@@ -470,18 +542,31 @@ async function openSpecViewer(specPath) {
   const targetPath = specPath || 'sdd/features/feat-63-studio-navegavel-aprovacao-spec/discovery.md';
   currentOpenSpecPath = targetPath;
 
-  modal.innerHTML = `
-    <div class="spec-modal-header">
-      <div class="spec-modal-title-group">
-        <span class="chip mono" style="font-size:10px;">SPEC</span>
-        <span class="spec-modal-title" title="${escapeHtml(targetPath)}">${escapeHtml(targetPath)}</span>
-      </div>
-      <button class="drawer-close-btn" onclick="closeSpecViewer()" aria-label="Fechar modal" title="Fechar (ESC)">✕</button>
-    </div>
-    <div class="spec-modal-body">
-      <div style="text-align:center;padding:40px;color:var(--muted);">Carregando especificação...</div>
-    </div>
-  `;
+  if (!document.getElementById('specMarkdownContent')) {
+    modal.innerHTML = SPEC_MODAL_FALLBACK_HTML;
+  }
+
+  const titleEl = document.getElementById('specModalTitle');
+  const pathLabelEl = document.getElementById('specPathLabel');
+  const markdownEl = document.getElementById('specMarkdownContent');
+  const statusBadge = document.getElementById('specStatusBadge');
+  const stationBadge = document.getElementById('specStationBadge');
+  const vsCodeLink = document.getElementById('specVsCodeLink');
+  const cursorLink = document.getElementById('specCursorLink');
+  const fileSizeEl = document.getElementById('specFileSize');
+  const btnApprove = document.getElementById('btnApproveSpec');
+
+  if (titleEl) titleEl.textContent = targetPath.split('/').pop() || 'Especificação de Feature';
+  if (pathLabelEl) pathLabelEl.textContent = targetPath;
+  if (stationBadge) stationBadge.textContent = '02. PM & Arquiteto';
+  if (statusBadge) {
+    statusBadge.textContent = 'Carregando especificação...';
+    statusBadge.style.color = 'var(--muted)';
+    statusBadge.style.borderColor = 'currentColor';
+  }
+  if (markdownEl) {
+    markdownEl.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted);">Carregando especificação...</div>';
+  }
 
   modal.classList.add('open');
   backdrop.classList.add('open');
@@ -490,54 +575,55 @@ async function openSpecViewer(specPath) {
     const res = await fetch(`/api/spec?path=${encodeURIComponent(targetPath)}`);
     if (!res.ok) {
       const errData = await res.json().catch(() => ({}));
-      modal.querySelector('.spec-modal-body').innerHTML = `
-        <div style="background:rgba(235,94,85,0.1);border:1px solid var(--err);border-radius:8px;padding:20px;color:var(--err);">
-          <b>Erro ao carregar especificação</b>
-          <p style="margin-top:6px;font-size:13px;">${escapeHtml(errData.error || res.statusText)}</p>
-        </div>
-      `;
+      if (markdownEl) {
+        markdownEl.innerHTML = `
+          <div style="background:rgba(235,94,85,0.1);border:1px solid var(--err);border-radius:8px;padding:20px;color:var(--err);">
+            <b>Erro ao carregar especificação</b>
+            <p style="margin-top:6px;font-size:13px;">${escapeHtml(errData.error || res.statusText)}</p>
+          </div>
+        `;
+      }
       return;
     }
 
     const data = await res.json();
-    const vsCodeUri = data.absolute_path ? `vscode://file${data.absolute_path}` : `vscode://`;
+    const vsCodeUri = data.absolute_path ? `vscode://file${data.absolute_path.startsWith('/') ? data.absolute_path : '/' + data.absolute_path}` : 'vscode://';
+    const cursorUri = data.absolute_path ? `cursor://file${data.absolute_path.startsWith('/') ? data.absolute_path : '/' + data.absolute_path}` : 'cursor://';
     const isApproved = data.status === 'approved';
 
-    modal.innerHTML = `
-      <div class="spec-modal-header">
-        <div class="spec-modal-title-group">
-          <span class="chip mono" style="font-size:10px;">${escapeHtml(data.station || 'pm-architect')}</span>
-          <span class="spec-modal-title" title="${escapeHtml(data.path)}">${escapeHtml(data.path)}</span>
-          <span class="chip" style="font-size:10px;color:${isApproved ? 'var(--ok)' : 'var(--warn)'};border-color:currentColor;">
-            ${escapeHtml(data.status || 'pending_review')}
-          </span>
-        </div>
-        <div class="spec-modal-actions">
-          <a href="${vsCodeUri}" class="btn-ide ide-link-btn" title="Abrir no editor VS Code local">
-            Abrir no VS Code
-          </a>
-          <button class="approve-spec-btn ${isApproved ? 'approved' : ''}" 
-                  onclick="approveSpec('${escapeHtml(data.path)}')" 
-                  title="Aprovação Humana no Portão FLX-01"
-                  ${isApproved ? 'disabled' : ''}>
-            ${isApproved ? '✓ Spec Aprovada (FLX-01)' : 'Aprovar Spec (FLX-01)'}
-          </button>
-          <button class="drawer-close-btn" onclick="closeSpecViewer()" aria-label="Fechar" title="Fechar (ESC)">✕</button>
-        </div>
-      </div>
-      <div class="spec-modal-body">
-        <div class="markdown-body">
-          ${renderMarkdown(data.content)}
-        </div>
-      </div>
-    `;
+    if (stationBadge) {
+      stationBadge.textContent = data.station ? (data.station === 'pm-architect' ? '02. PM & Arquiteto' : data.station) : '02. PM & Arquiteto';
+    }
+    if (statusBadge) {
+      statusBadge.textContent = isApproved ? '✓ Aprovada (FLX-01)' : 'Aguardando Revisão (FLX-01)';
+      statusBadge.style.color = isApproved ? 'var(--ok)' : 'var(--warn)';
+      statusBadge.style.borderColor = 'currentColor';
+    }
+    if (pathLabelEl) pathLabelEl.textContent = data.path;
+    if (vsCodeLink) vsCodeLink.href = vsCodeUri;
+    if (cursorLink) cursorLink.href = cursorUri;
+    if (fileSizeEl) fileSizeEl.textContent = `${data.size || (data.content ? data.content.length : 0)} bytes`;
+    if (markdownEl) markdownEl.innerHTML = renderMarkdown(data.content);
+
+    if (btnApprove) {
+      btnApprove.disabled = isApproved;
+      if (isApproved) {
+        btnApprove.classList.add('approved');
+        btnApprove.innerHTML = '<span class="approve-icon">✓</span> Spec Aprovada (FLX-01)';
+      } else {
+        btnApprove.classList.remove('approved');
+        btnApprove.innerHTML = '<span class="approve-icon">✓</span> Aprovar Spec (FLX-01)';
+      }
+    }
   } catch (err) {
-    modal.querySelector('.spec-modal-body').innerHTML = `
-      <div style="background:rgba(235,94,85,0.1);border:1px solid var(--err);border-radius:8px;padding:20px;color:var(--err);">
-        <b>Falha na comunicação com o servidor</b>
-        <p style="margin-top:6px;font-size:13px;">${escapeHtml(err.message)}</p>
-      </div>
-    `;
+    if (markdownEl) {
+      markdownEl.innerHTML = `
+        <div style="background:rgba(235,94,85,0.1);border:1px solid var(--err);border-radius:8px;padding:20px;color:var(--err);">
+          <b>Falha na comunicação com o servidor</b>
+          <p style="margin-top:6px;font-size:13px;">${escapeHtml(err.message)}</p>
+        </div>
+      `;
+    }
   }
 }
 
@@ -569,10 +655,23 @@ async function approveSpec(specPath) {
     const data = await res.json();
     showToast(`✓ Especificação aprovada no Portão FLX-01: ${data.spec_path}`);
 
+    const btnApprove = document.getElementById('btnApproveSpec');
+    if (btnApprove) {
+      btnApprove.disabled = true;
+      btnApprove.classList.add('approved');
+      btnApprove.innerHTML = '<span class="approve-icon">✓</span> Spec Aprovada (FLX-01)';
+    }
+    const statusBadge = document.getElementById('specStatusBadge');
+    if (statusBadge) {
+      statusBadge.textContent = '✓ Aprovada (FLX-01)';
+      statusBadge.style.color = 'var(--ok)';
+      statusBadge.style.borderColor = 'currentColor';
+    }
+
     // Fecha o modal após aprovação com sucesso
     setTimeout(() => {
       closeSpecViewer();
-    }, 400);
+    }, 600);
 
     // Atualiza estado se estiver em LIVE
     if (currentMode === 'LIVE') {
@@ -787,11 +886,14 @@ window.closeStationDrawer = closeStationDrawer;
 window.switchDrawerTab = switchDrawerTab;
 window.selectTaskInDrawer = selectTaskInDrawer;
 window.copyCommand = copyCommand;
+window.copySpecPath = copySpecPath;
+window.handleApproveSpecClick = handleApproveSpecClick;
 window.inspectSpec = inspectSpec;
 window.openSpecViewer = openSpecViewer;
 window.closeSpecViewer = closeSpecViewer;
 window.approveSpec = approveSpec;
 window.renderMarkdown = renderMarkdown;
+window.renderMarkdownToHtml = renderMarkdown;
 
 window.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') {
@@ -1119,6 +1221,7 @@ function applySnapshot(snap) {
       card.setAttribute('tabindex', '0');
       card.setAttribute('role', 'button');
       card.setAttribute('aria-label', `Inspecionar Estação ${st.name}`);
+      card.setAttribute('onclick', `openStationDrawer('${st.id}')`);
       card.onclick = () => openStationDrawer(st.id);
       card.onkeydown = (e) => {
         if (e.key === 'Enter' || e.key === ' ') {
@@ -1127,13 +1230,20 @@ function applySnapshot(snap) {
         }
       };
 
+      const specBadgeHtml = st.id === 'pm-architect' ? `
+        <a href="javascript:void(0)" class="spec-link-btn" onclick="event.stopPropagation(); openSpecViewer('sdd/features/feat-63-studio-navegavel-aprovacao-spec/discovery.md')" style="color:#ffd8a8;font-size:10.5px;font-weight:600;text-decoration:none;background:rgba(242,166,90,0.15);padding:2px 7px;border-radius:4px;border:1px solid rgba(242,166,90,0.3);">📄 Ver Spec (FLX-01)</a>
+      ` : '';
+
       card.innerHTML = `
         <div class="station-top">
           <div class="mascot-stage" id="stage-${st.id}"></div>
           <div class="station-info">
             <h3>${st.name}</h3>
             <p class="role">${st.role}</p>
-            <span class="chip" id="chip-${st.id}" style="margin-top:4px;"><i style="--o:${st.color}"></i>${st.mascot_state}</span>
+            <div style="display:flex;align-items:center;gap:6px;margin-top:4px;flex-wrap:wrap;">
+              <span class="chip" id="chip-${st.id}"><i style="--o:${st.color}"></i>${st.mascot_state}</span>
+              ${specBadgeHtml}
+            </div>
           </div>
         </div>
 
@@ -1159,6 +1269,7 @@ function applySnapshot(snap) {
       card.setAttribute('tabindex', '0');
       card.setAttribute('role', 'button');
       card.setAttribute('aria-label', `Inspecionar Estação ${st.name}`);
+      card.setAttribute('onclick', `openStationDrawer('${st.id}')`);
       card.onclick = () => openStationDrawer(st.id);
       card.onkeydown = (e) => {
         if (e.key === 'Enter' || e.key === ' ') {

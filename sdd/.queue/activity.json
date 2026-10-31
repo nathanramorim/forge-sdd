@@ -1,5 +1,13 @@
 [
   {
+    "timestamp": "2026-10-31T22:21:43Z",
+    "station": "lider",
+    "tool": "subagent",
+    "action": "despachando Builder para retrabalho da task 63-03",
+    "details": "Camada B solicitou correções: TestAPISpecApprove (TST-01) e handlers inline (COD-01)",
+    "status": "running"
+  },
+  {
     "timestamp": "2026-10-31T22:20:26Z",
     "station": "pm-architect",
     "tool": "human_gate",
