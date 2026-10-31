@@ -84,8 +84,8 @@ func (a *Aggregator) GetSnapshot() (*StudioSnapshot, error) {
 			Role:           "Orquestrador · Maestro do Ciclo",
 			Color:          "#f2a65a",
 			Mark:           "ring",
-			MascotState:    "working",
-			CurrentFocus:   "Coordenando estações e reportando ao humano",
+			MascotState:    "idle",
+			CurrentFocus:   "Orquestrando ciclo, monitorando filas e portões",
 			InputContract:  "Demanda do Humano / Parecer da Governança",
 			OutputContract: "Demanda Estruturada → Estação 02",
 		},
@@ -238,6 +238,28 @@ func (a *Aggregator) GetSnapshot() (*StudioSnapshot, error) {
 		stations[i].RecentActivity = stActivities
 		if len(stActivities) > 0 {
 			stations[i].CurrentAction = fmt.Sprintf("%s: %s", stActivities[0].Tool, stActivities[0].Action)
+		}
+	}
+
+	// Se nenhuma estação tiver task em building na fila, a atividade viva mais recente define a estação ativa
+	if stations[activeIdx].MascotState == "idle" && len(activities) > 0 {
+		latest := activities[0]
+		for i, st := range stations {
+			if st.ID == latest.Station {
+				activeStation = st.ID
+				activeIdx = i
+				if latest.Status == "running" || latest.Status == "working" {
+					if st.ID == queue.StationPMArchitect {
+						stations[i].MascotState = "thinking"
+					} else if st.ID == queue.StationGovernance {
+						stations[i].MascotState = "approval"
+					} else {
+						stations[i].MascotState = "working"
+					}
+					stations[i].CurrentFocus = fmt.Sprintf("[%s] %s", latest.Tool, latest.Action)
+				}
+				break
+			}
 		}
 	}
 

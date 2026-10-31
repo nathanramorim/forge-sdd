@@ -1,5 +1,21 @@
 [
   {
+    "timestamp": "2026-10-31T21:58:11Z",
+    "station": "builder",
+    "tool": "edit_file",
+    "action": "edit_file internal/studio/state.go",
+    "details": "Separando responsabilidades canônicas: Builder assume código e testes",
+    "status": "running"
+  },
+  {
+    "timestamp": "2026-10-31T21:58:10Z",
+    "station": "lider",
+    "tool": "subagent",
+    "action": "despachando demanda de telemetria ao Builder",
+    "details": "Orquestração concluída: Estação 04 (Builder) ativada para implementação",
+    "status": "done"
+  },
+  {
     "timestamp": "2026-10-31T21:56:12Z",
     "station": "lider",
     "tool": "subagent",
