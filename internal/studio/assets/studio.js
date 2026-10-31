@@ -653,7 +653,7 @@ async function approveSpec(specPath) {
     }
 
     const data = await res.json();
-    showToast(`✓ Especificação aprovada no Portão FLX-01: ${data.spec_path}`);
+    showToast(`✓ Especificação aprovada no Portão FLX-01 e enviada para o Planejador (03): ${data.spec_path}`);
 
     const btnApprove = document.getElementById('btnApproveSpec');
     if (btnApprove) {
@@ -697,6 +697,52 @@ function showToast(msg) {
     toast.style.transform = 'translateY(100px)';
     toast.style.opacity = '0';
   }, 3500);
+}
+
+async function sendHandoff(from, to, taskId, title, artifactPath) {
+  try {
+    const res = await fetch('/api/handoff', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        from: from,
+        to: to,
+        task_id: taskId,
+        title: title,
+        artifact_path: artifactPath
+      })
+    });
+
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      alert(`Erro na transferência de handoff: ${errData.error || res.statusText}`);
+      return null;
+    }
+
+    const data = await res.json();
+    showToast(`✓ Artefato transferido: ${from} → ${to}`);
+
+    if (currentMode === 'LIVE') {
+      fetch('/api/state')
+        .then(r => r.json())
+        .then(applySnapshot)
+        .catch(console.error);
+    }
+    return data;
+  } catch (err) {
+    alert(`Falha na comunicação de handoff: ${err.message}`);
+    return null;
+  }
+}
+
+function handleHandoffClick(btn) {
+  if (!btn) return;
+  const from = btn.getAttribute('data-from');
+  const to = btn.getAttribute('data-to');
+  const taskId = btn.getAttribute('data-id');
+  const title = btn.getAttribute('data-title');
+  const artifactPath = btn.getAttribute('data-artifact');
+  window.sendHandoff(from, to, taskId, title, artifactPath);
 }
 
 function renderMarkdown(md) {
@@ -892,6 +938,8 @@ window.inspectSpec = inspectSpec;
 window.openSpecViewer = openSpecViewer;
 window.closeSpecViewer = closeSpecViewer;
 window.approveSpec = approveSpec;
+window.sendHandoff = sendHandoff;
+window.handleHandoffClick = handleHandoffClick;
 window.renderMarkdown = renderMarkdown;
 window.renderMarkdownToHtml = renderMarkdown;
 
@@ -906,20 +954,38 @@ window.addEventListener('keydown', (e) => {
   }
 });
 
+function getToolColor(tool) {
+  const t = (tool || '').toLowerCase();
+  if (t.includes('git')) return '#f05032';
+  if (t.includes('go') || t.includes('test')) return '#00add8';
+  if (t.includes('command') || t.includes('sh') || t.includes('cmd')) return '#4f8ef7';
+  if (t.includes('read')) return '#a78bfa';
+  if (t.includes('write')) return '#3ecf8e';
+  if (t.includes('edit')) return '#f2a65a';
+  if (t.includes('gate') || t.includes('audit')) return '#ff8a5c';
+  if (t.includes('subagent')) return '#e879f9';
+  if (t.includes('context7') || t.includes('search')) return '#38c6e8';
+  return '#8aa4ff';
+}
+
 function renderStationDrawerContent(st) {
   const drawer = document.getElementById('stationDrawer');
   if (!drawer) return;
 
   drawer.style.setProperty('--c', st.color);
 
-  const stActs = (currentActivities || []).filter(a => a.station === st.id);
+  const stationActsFromList = (currentActivities || []).filter(a => a.station === st.id);
+  const stActs = (st.recent_activity && st.recent_activity.length > 0) ? st.recent_activity : stationActsFromList;
   const items = st.items || [];
   const selectedTaskId = selectedTaskIdByStation[st.id] || (items.length > 0 ? items[0].id : null);
 
+  const activeItems = items.filter(it => it.status !== 'approved' && it.status !== 'done');
+  const completedItems = items.filter(it => it.status === 'approved' || it.status === 'done');
+
   // --- Painel Tarefas ---
-  let tasksHtml = '';
-  if (items.length > 0) {
-    tasksHtml = items.map(it => {
+  let activeCardsHtml = '';
+  if (activeItems.length > 0) {
+    activeCardsHtml = activeItems.map(it => {
       const isSelected = it.id === selectedTaskId;
       const filePath = getIdeFilePath(it.artifact_path);
       const vsCodeUri = filePath ? `vscode://file${filePath}` : 'vscode://';
@@ -935,13 +1001,31 @@ function renderStationDrawerContent(st) {
         rules = CANONICAL_RULES_BY_STATION[st.id] || ['ARQ-03', 'DUP-02'];
       }
 
+      let handoffTarget = null;
+      let handoffBtnLabel = null;
+      if (st.id === 'pm-architect') {
+        handoffTarget = 'planner';
+        handoffBtnLabel = '🚀 Enviar para Planejador (03)';
+      } else if (st.id === 'planner') {
+        handoffTarget = 'builder';
+        handoffBtnLabel = '🚀 Enviar para Builder (04)';
+      } else if (st.id === 'builder') {
+        handoffTarget = 'governance';
+        handoffBtnLabel = '🚀 Enviar para Governança (05)';
+      } else if (st.id === 'governance') {
+        handoffTarget = 'lider';
+        handoffBtnLabel = '🚀 Enviar para Líder (01)';
+      }
+
+      const statusColor = it.status === 'changes_requested' ? 'var(--err)' : (it.status === 'building' ? 'var(--warn)' : st.color);
+
       return `
         <div class="drawer-task-card ${isSelected ? 'selected' : ''}" onclick="selectTaskInDrawer('${escapeHtml(it.id)}')">
           <div class="drawer-task-header">
             <span class="drawer-task-id">${escapeHtml(it.id)}</span>
             <div style="display:flex;align-items:center;gap:6px;">
               <span class="chip" style="font-size:10px;padding:2px 8px;">tentativa #${it.attempt || 1}</span>
-              <span class="chip" style="font-size:10px;padding:2px 8px;color:${st.color};border-color:${st.color};">${escapeHtml(it.status)}</span>
+              <span class="chip" style="font-size:10px;padding:3px 9px;font-weight:700;color:${statusColor};border-color:${statusColor};background:rgba(255,255,255,0.04);">${escapeHtml(it.status.toUpperCase())}</span>
             </div>
           </div>
 
@@ -971,18 +1055,117 @@ function renderStationDrawerContent(st) {
             <button class="inspect-spec-btn ide-link-btn" onclick="event.stopPropagation(); openSpecViewer('${escapeHtml(it.artifact_path || it.id)}')" title="Ver especificação técnica detalhada">
               Ver Spec
             </button>
+            ${handoffTarget ? `
+              <button class="btn-handoff ide-link-btn" data-from="${escapeHtml(st.id)}" data-to="${escapeHtml(handoffTarget)}" data-id="${escapeHtml(it.id)}" data-title="${escapeHtml(it.title || it.id)}" data-artifact="${escapeHtml(it.artifact_path || '')}" onclick="event.stopPropagation(); handleHandoffClick(this)" title="Transferir tarefa e artefato para a próxima estação">
+                ${escapeHtml(handoffBtnLabel)}
+              </button>
+            ` : ''}
           </div>
         </div>
       `;
     }).join('');
   } else {
-    tasksHtml = `
-      <div style="background:var(--bg3);border:1px dashed var(--line);border-radius:10px;padding:24px;text-align:center;color:var(--muted);">
-        <p style="font-size:13px;font-weight:600;color:var(--fg);margin-bottom:6px;">Nenhuma tarefa na fila desta estação</p>
-        <p style="font-size:11.5px;">Aguardando novo handoff em <code>sdd/.queue/stations/${escapeHtml(st.id)}.json</code>.</p>
+    activeCardsHtml = `
+      <div style="background:var(--bg3);border:1px dashed var(--line);border-radius:8px;padding:16px;text-align:center;color:var(--muted);">
+        <p style="font-size:12px;font-weight:600;color:var(--fg);margin-bottom:4px;">Nenhuma tarefa ativa ou pendente na fila</p>
+        <p style="font-size:11px;">Todas as tarefas recebidas foram executadas ou aguardam novo handoff.</p>
       </div>
     `;
   }
+
+  let completedCardsHtml = '';
+  if (completedItems.length > 0) {
+    completedCardsHtml = completedItems.map(it => {
+      const isSelected = it.id === selectedTaskId;
+      const filePath = getIdeFilePath(it.artifact_path);
+      const vsCodeUri = filePath ? `vscode://file${filePath}` : 'vscode://';
+      const cursorUri = filePath ? `cursor://file${filePath}` : 'cursor://';
+      const cliCmd = it.artifact_path ? `code ${it.artifact_path}` : (it.id ? `forge-sdd task view ${it.id}` : 'code .');
+      const copyBtnId = `copy-comp-btn-${it.id.replace(/[^a-zA-Z0-9_-]/g, '_')}`;
+      const completedTime = it.updated_at ? new Date(it.updated_at).toLocaleString() : (it.created_at ? new Date(it.created_at).toLocaleString() : 'Concluído');
+
+      let verdictBoxHtml = '';
+      if (it.governance_verdict) {
+        const gv = it.governance_verdict;
+        verdictBoxHtml = `
+          <div class="verdict-box conforme">
+            <span><b>Laudo de Governança:</b> ${escapeHtml((gv.veredito || 'CONFORME').toUpperCase())}</span>
+            <span style="font-size:10.5px;color:var(--muted);">${escapeHtml(gv.resumo || 'Auditado em conformidade com as regras SDD.')}</span>
+          </div>
+        `;
+      } else {
+        verdictBoxHtml = `
+          <div class="verdict-box conforme">
+            <span><b>Laudo:</b> Concluído com Sucesso</span>
+            <span style="font-size:10.5px;color:var(--muted);">Executado e finalizado pela estação ${escapeHtml(st.name)}.</span>
+          </div>
+        `;
+      }
+
+      return `
+        <div class="drawer-task-card completed ${isSelected ? 'selected' : ''}" onclick="selectTaskInDrawer('${escapeHtml(it.id)}')">
+          <div class="drawer-task-header">
+            <span class="drawer-task-id">${escapeHtml(it.id)}</span>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <span class="chip" style="font-size:10px;padding:2px 8px;color:var(--muted);">${escapeHtml(completedTime)}</span>
+              <span class="chip" style="font-size:10px;padding:3px 9px;font-weight:700;color:var(--ok);border-color:var(--ok);background:rgba(62,207,142,0.06);">✓ ${escapeHtml(it.status.toUpperCase())}</span>
+            </div>
+          </div>
+
+          <div class="drawer-task-title">${escapeHtml(it.title || it.id)}</div>
+
+          ${it.artifact_path ? `
+            <div class="drawer-task-path" title="${escapeHtml(it.artifact_path)}">
+              📄 ${escapeHtml(it.artifact_path)}
+            </div>
+          ` : ''}
+
+          ${verdictBoxHtml}
+
+          <div class="ide-buttons-row">
+            <a href="${vsCodeUri}" class="btn-ide ide-link-btn" title="Abrir arquivo no editor VS Code nativo">
+              Abrir no VS Code
+            </a>
+            <a href="${cursorUri}" class="btn-ide ide-link-btn cursor-btn" title="Abrir arquivo no editor Cursor">
+              Cursor
+            </a>
+            <button id="${copyBtnId}" class="copy-btn ide-link-btn" onclick="event.stopPropagation(); copyCommand('${escapeHtml(cliCmd)}', '${copyBtnId}')" title="Copiar comando CLI para terminal local">
+              Copiar CLI
+            </button>
+            ${it.artifact_path ? `
+              <button class="inspect-spec-btn ide-link-btn" onclick="event.stopPropagation(); openSpecViewer('${escapeHtml(it.artifact_path || it.id)}')" title="Ver especificação técnica detalhada">
+                Ver Spec
+              </button>
+            ` : ''}
+          </div>
+        </div>
+      `;
+    }).join('');
+  } else {
+    completedCardsHtml = `
+      <div style="background:var(--bg3);border:1px dashed var(--line);border-radius:8px;padding:16px;text-align:center;color:var(--muted);">
+        <p style="font-size:12px;font-weight:500;color:var(--muted);">Nenhuma tarefa concluída no histórico desta estação.</p>
+      </div>
+    `;
+  }
+
+  const tasksHtml = `
+    <div class="drawer-section-title">
+      <span>⚡ Tarefas Ativas / Na Fila</span>
+      <span class="chip mono">${activeItems.length}</span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:20px;">
+      ${activeCardsHtml}
+    </div>
+
+    <div class="drawer-section-title">
+      <span>📜 Histórico de Conclusões desta Estação</span>
+      <span class="chip mono">${completedItems.length}</span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      ${completedCardsHtml}
+    </div>
+  `;
 
   // --- Painel Contratos ---
   const contractsHtml = `
@@ -1010,35 +1193,68 @@ function renderStationDrawerContent(st) {
         <div style="display:flex;gap:10px;margin-top:6px;flex-wrap:wrap;">
           <span class="chip mono">Fila: ${escapeHtml(st.id)}.json</span>
           <span class="chip mono">Versão: v${st.version}</span>
-          <span class="chip mono">Itens: ${st.items ? st.items.length : 0}</span>
+          <span class="chip mono">Itens: ${items.length} (${st.active_items || 0} ativos)</span>
         </div>
       </div>
     </div>
   `;
 
-  // --- Painel Telemetria ---
+  // --- Painel Histórico de Ações (Telemetria) ---
   let telemetryHtml = '';
   if (stActs.length > 0) {
     telemetryHtml = `
-      <div style="display:flex;flex-direction:column;gap:8px;">
-        ${stActs.map(act => `
-          <div class="log-row" style="background:var(--bg3);padding:8px 12px;border-radius:6px;border:1px solid var(--line);">
-            <span class="log-time">${new Date(act.timestamp).toLocaleTimeString()}</span>
-            <span class="log-tool" style="max-width:none;"><span class="tool-chip-dot"></span>${escapeHtml(act.tool || 'cmd')}</span>
-            <span class="log-action" style="grid-column: 3 / 5;" title="${escapeHtml(act.action || act.details || '')}">
-              <b>${escapeHtml(act.action || '')}</b>
-              <span class="detail-hint">${escapeHtml(act.details || '')}</span>
-            </span>
-            <span class="log-status ${act.status || 'done'}">${escapeHtml(act.status || 'done')}</span>
-          </div>
-        `).join('')}
+      <div class="drawer-timeline">
+        ${stActs.map(act => {
+          const tColor = getToolColor(act.tool);
+          const actTime = act.timestamp ? new Date(act.timestamp).toLocaleTimeString() : '';
+          let statusBadge = '';
+          if (act.status) {
+            const isErr = act.status === 'error';
+            const isRun = act.status === 'running' || act.status === 'working';
+            const badgeColor = isErr ? 'var(--err)' : (isRun ? 'var(--warn)' : 'var(--ok)');
+            statusBadge = `<span class="chip" style="font-size:9.5px;padding:1px 6px;color:${badgeColor};border-color:${badgeColor};">${escapeHtml(act.status)}</span>`;
+          }
+
+          return `
+            <div class="drawer-timeline-item">
+              <span class="drawer-timeline-dot" style="--tool-color:${tColor};"></span>
+              <div class="drawer-timeline-card">
+                <div class="drawer-timeline-header">
+                  <span class="tool-chip" style="--c:${tColor};font-size:10px;padding:2px 8px;">
+                    <span class="tool-chip-dot" style="background:${tColor};"></span>${escapeHtml(act.tool || 'cmd')}
+                  </span>
+                  <div style="display:flex;align-items:center;gap:6px;">
+                    ${statusBadge}
+                    <span class="drawer-timeline-time">${escapeHtml(actTime)}</span>
+                  </div>
+                </div>
+                <div class="drawer-timeline-action">${escapeHtml(act.action || act.details || '')}</div>
+                ${act.details && act.details !== act.action ? `
+                  <div class="drawer-timeline-detail" title="${escapeHtml(act.details)}">${escapeHtml(act.details)}</div>
+                ` : ''}
+              </div>
+            </div>
+          `;
+        }).join('')}
       </div>
     `;
   } else {
+    const stationGuidance = {
+      'lider': 'O Líder orquestra os ciclos de desenvolvimento, monitora handoffs, delega tarefas aos subagentes e aprova avanços de estágio.',
+      'pm-architect': 'O PM & Arquiteto concebe especificações técnicas (Discovery, Criteria, C4), gerencia backlog e avalia reuso de código.',
+      'planner': 'O Planejador decompõe especificações aprovadas em tarefas atômicas sequenciais (Plano) com critérios de aceite estritos.',
+      'builder': 'O Builder implementa código e testes automatizados em contexto isolado, respeitando as regras constitucionais SDD.',
+      'governance': 'A Governança audita em modo estrito somente-leitura (Camada B) a conformidade arquitetural, de segurança e integridade.'
+    };
     telemetryHtml = `
       <div style="background:var(--bg3);border:1px dashed var(--line);border-radius:10px;padding:24px;text-align:center;color:var(--muted);">
-        <p style="font-size:13px;font-weight:600;color:var(--fg);margin-bottom:6px;">Nenhuma ação recente registrada</p>
-        <p style="font-size:11.5px;">A telemetria da estação ${escapeHtml(st.name)} será exibida aqui em tempo real assim que os comandos forem emitidos.</p>
+        <p style="font-size:13.5px;font-weight:700;color:var(--fg);margin-bottom:8px;">Nenhuma ação registrada para ${escapeHtml(st.name)}</p>
+        <div style="display:inline-block;text-align:left;background:rgba(0,0,0,0.25);border:1px solid var(--line);border-radius:8px;padding:12px 16px;margin:10px 0 16px;">
+          <div style="font-size:11px;font-weight:700;color:var(--c, var(--accent));text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px;">🎯 Papel da Estação</div>
+          <div style="font-size:12px;color:var(--fg);font-weight:600;margin-bottom:6px;">${escapeHtml(st.role)}</div>
+          <div style="font-size:11.5px;color:var(--muted);line-height:1.45;">${escapeHtml(stationGuidance[st.id] || 'As atividades serão registradas automaticamente conforme os comandos forem emitidos.')}</div>
+        </div>
+        <p style="font-size:11px;color:var(--muted);">Aguardando execução de tarefas ou novo handoff em <code>sdd/.queue/stations/${escapeHtml(st.id)}.json</code>.</p>
       </div>
     `;
   }
@@ -1068,7 +1284,7 @@ function renderStationDrawerContent(st) {
         Contratos &amp; Papel
       </button>
       <button class="drawer-tab ${activeDrawerTab === 'telemetry' ? 'active' : ''}" onclick="switchDrawerTab('telemetry')">
-        Telemetria (${stActs.length})
+        Histórico de Ações (${stActs.length})
       </button>
     </div>
 
@@ -1157,9 +1373,16 @@ function applySnapshot(snap) {
     // O QUE ESTÁ EXECUTANDO POR AGENTE (Destaque Principal)
     const execTask = st.executing_task;
     let execHtml = '';
-    if (execTask && (execTask.status === 'building' || execTask.status === 'in_progress' || execTask.status === 'review_pending' || execTask.status === 'changes_requested')) {
+    if (execTask && (execTask.status === 'building' || execTask.status === 'in_progress' || execTask.status === 'review_pending' || execTask.status === 'changes_requested' || execTask.status === 'queued' || execTask.status === 'pending_review' || execTask.status === 'approval')) {
       const isRetrying = execTask.status === 'changes_requested';
-      const label = isRetrying ? 'RETRABALHO SOLICITADO' : (execTask.status === 'review_pending' ? 'AUDITANDO' : 'EM EXECUÇÃO');
+      let label = 'EM EXECUÇÃO';
+      if (isRetrying) {
+        label = 'RETRABALHO SOLICITADO';
+      } else if (execTask.status === 'review_pending' || execTask.status === 'pending_review' || execTask.status === 'approval') {
+        label = 'AUDITANDO / REVISÃO';
+      } else if (execTask.status === 'queued') {
+        label = 'NA FILA';
+      }
       execHtml = `
         <div class="executing-box active" style="--c:${isRetrying ? 'var(--err)' : st.color}">
           <div class="executing-header">
@@ -1258,7 +1481,7 @@ function applySnapshot(snap) {
         <div class="queue-items-box">
           <div class="queue-header-row">
             <span>Fila (${st.id}.json)</span>
-            <span>v${st.version}</span>
+            <span id="queue-ver-${st.id}">v${st.version} • ${st.items ? st.items.length : 0} itens (${st.active_items || 0} ativos)</span>
           </div>
           <div id="queue-items-${st.id}">${itemsHtml}</div>
         </div>
@@ -1282,6 +1505,8 @@ function applySnapshot(snap) {
       if (chip) chip.innerHTML = `<i style="--o:${st.color}"></i>${st.mascot_state}`;
       const execWrap = document.getElementById(`exec-wrap-${st.id}`);
       if (execWrap) execWrap.innerHTML = execHtml;
+      const queueVer = document.getElementById(`queue-ver-${st.id}`);
+      if (queueVer) queueVer.textContent = `v${st.version} • ${st.items ? st.items.length : 0} itens (${st.active_items || 0} ativos)`;
       const queueItems = document.getElementById(`queue-items-${st.id}`);
       if (queueItems) queueItems.innerHTML = itemsHtml;
     }

@@ -1,9 +1,10 @@
 {
   "station": "pm-architect",
-  "version": 4,
-  "updated_at": "2026-10-31T22:34:27Z",
+  "version": 6,
+  "updated_at": "2026-10-31T22:50:07Z",
   "processed_keys": [
-    "4f75dcab0bf602fa1ad48a3bb48a0a98"
+    "4f75dcab0bf602fa1ad48a3bb48a0a98",
+    "a5e9e900175357b9e0c5526ad56536cd"
   ],
   "items": [
     {
@@ -16,7 +17,21 @@
       "idempotency_key": "4f75dcab0bf602fa1ad48a3bb48a0a98",
       "attempt": 1,
       "created_at": "2026-10-31T22:20:26Z",
-      "updated_at": "2026-10-31T22:34:27Z"
+      "updated_at": "2026-10-31T22:47:43Z"
+    },
+    {
+      "id": "feat-63-demanda",
+      "title": "Demanda: Studio Navegável e Aprovação de Spec",
+      "station": "pm-architect",
+      "operation": "handoff",
+      "status": "queued",
+      "artifact_path": "sdd/discovery/discovery-63-studio-navegavel-aprovacao-spec.md",
+      "idempotency_key": "a5e9e900175357b9e0c5526ad56536cd",
+      "attempt": 1,
+      "input_contract": "Demanda do Humano",
+      "output_contract": "discovery-63-studio-navegavel-aprovacao-spec.md",
+      "created_at": "2026-10-31T22:50:07Z",
+      "updated_at": "2026-10-31T22:50:07Z"
     }
   ]
 }

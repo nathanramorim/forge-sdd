@@ -417,6 +417,21 @@ main.studio-wrap {
   font-size: 11px;
   max-height: 120px;
   overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line) transparent;
+}
+.queue-items-box::-webkit-scrollbar {
+  width: 5px;
+}
+.queue-items-box::-webkit-scrollbar-track {
+  background: transparent;
+}
+.queue-items-box::-webkit-scrollbar-thumb {
+  background: var(--line);
+  border-radius: 3px;
+}
+.queue-items-box::-webkit-scrollbar-thumb:hover {
+  background: var(--line2);
 }
 .queue-header-row {
   display: flex;
@@ -778,6 +793,27 @@ footer.studio-foot {
   display: flex;
 }
 
+/* Seções Sutis do Drawer (Fila Ativa vs Histórico de Conclusões) */
+.drawer-section-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: var(--f-body);
+  font-size: 11.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+  padding: 4px 2px 8px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 12px;
+}
+.drawer-section-title span:first-child {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
 /* Cards de Tarefa na Lista da Gaveta */
 .drawer-task-card {
   background: var(--bg3);
@@ -796,6 +832,102 @@ footer.studio-foot {
 .drawer-task-card.selected {
   border-color: var(--c, var(--accent));
   box-shadow: 0 0 16px rgba(79, 142, 247, 0.15);
+}
+.drawer-task-card.completed {
+  opacity: 0.95;
+  border-color: rgba(62, 207, 142, 0.25);
+  background: rgba(18, 22, 31, 0.65);
+}
+.drawer-task-card.completed:hover {
+  border-color: var(--ok);
+}
+
+.verdict-box {
+  background: rgba(62, 207, 142, 0.08);
+  border: 1px solid rgba(62, 207, 142, 0.25);
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 11px;
+  color: #a7f3d0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* Timeline Vertical do Histórico de Ações */
+.drawer-timeline {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  padding-left: 20px;
+}
+.drawer-timeline::before {
+  content: '';
+  position: absolute;
+  top: 8px;
+  bottom: 8px;
+  left: 5px;
+  width: 2px;
+  background: var(--line);
+}
+.drawer-timeline-item {
+  position: relative;
+  padding-bottom: 14px;
+}
+.drawer-timeline-item:last-child {
+  padding-bottom: 0;
+}
+.drawer-timeline-dot {
+  position: absolute;
+  left: -19px;
+  top: 8px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--tool-color, var(--accent));
+  box-shadow: 0 0 6px var(--tool-color, var(--accent));
+  border: 2px solid var(--bg2);
+}
+.drawer-timeline-card {
+  background: var(--bg3);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: border-color 0.15s, background 0.15s;
+}
+.drawer-timeline-card:hover {
+  border-color: var(--line2);
+  background: rgba(26, 30, 41, 0.88);
+}
+.drawer-timeline-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.drawer-timeline-time {
+  font-family: var(--f-mono);
+  font-size: 10.5px;
+  color: var(--muted);
+}
+.drawer-timeline-action {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--fg);
+  line-height: 1.4;
+}
+.drawer-timeline-detail {
+  font-family: var(--f-mono);
+  font-size: 11px;
+  color: #9cb3d5;
+  background: rgba(0, 0, 0, 0.22);
+  padding: 4px 8px;
+  border-radius: 4px;
+  word-break: break-all;
 }
 .drawer-task-header {
   display: flex;
@@ -916,6 +1048,22 @@ footer.studio-foot {
   background: rgba(242, 166, 90, 0.28);
   border-color: var(--warn);
   color: #fff;
+}
+.btn-handoff {
+  background: linear-gradient(135deg, rgba(62, 207, 142, 0.16), rgba(79, 142, 247, 0.16));
+  border-color: rgba(62, 207, 142, 0.4);
+  color: #a7f3d0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+.btn-handoff:hover {
+  background: linear-gradient(135deg, rgba(62, 207, 142, 0.32), rgba(79, 142, 247, 0.32));
+  border-color: var(--ok);
+  color: #ffffff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(62, 207, 142, 0.3);
+}
+.btn-handoff:active {
+  transform: translateY(0);
 }
 
 /* Painel de Contratos */

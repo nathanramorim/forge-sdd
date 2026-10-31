@@ -63,6 +63,7 @@ func NewServer(cfg Config) (*Server, error) {
 	mux.HandleFunc("/api/events", s.handleEvents)
 	mux.HandleFunc("/api/spec", s.handleSpec)
 	mux.HandleFunc("/api/spec/approve", s.handleSpecApprove)
+	mux.HandleFunc("/api/handoff", s.handleHandoff)
 
 	// 2. Static Assets (embed.FS)
 	subFS, err := fs.Sub(assetsFS, "assets")
@@ -74,10 +75,10 @@ func NewServer(cfg Config) (*Server, error) {
 		})
 	}
 
-	// Middleware de Segurança (SEG-01 / SEG-02 / SEG-06 / FLX-01): Permite POST exclusivamente em /api/spec/approve
+	// Middleware de Segurança (SEG-01 / SEG-02 / SEG-06 / FLX-01): Permite POST exclusivamente em /api/spec/approve e /api/handoff
 	readOnlyHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodPost {
-			if r.URL.Path != "/api/spec/approve" {
+			if r.URL.Path != "/api/spec/approve" && r.URL.Path != "/api/handoff" {
 				http.Error(w, "Method Not Allowed (Studio é estritamente Read-Only)", http.StatusMethodNotAllowed)
 				return
 			}
@@ -192,6 +193,72 @@ type SpecApproveResponse struct {
 	TaskID   string `json:"task_id,omitempty"`
 	Station  string `json:"station,omitempty"`
 	Message  string `json:"message,omitempty"`
+}
+
+// HandoffRequest define o payload recebido em POST /api/handoff.
+type HandoffRequest struct {
+	From         string `json:"from"`
+	To           string `json:"to"`
+	TaskID       string `json:"task_id"`
+	Title        string `json:"title"`
+	ArtifactPath string `json:"artifact_path"`
+	Input        string `json:"input"`
+	Output       string `json:"output"`
+}
+
+// HandoffResponse define a resposta retornada por POST /api/handoff.
+type HandoffResponse struct {
+	Status string `json:"status"`
+	From   string `json:"from"`
+	To     string `json:"to"`
+	ItemID string `json:"item_id"`
+}
+
+// sanitizeArtifactPath valida e normaliza o caminho relativo de um artefato no projeto (SEG-01, SEG-02, SEG-04).
+func sanitizeArtifactPath(baseDir, rawPath string) (string, error) {
+	if strings.TrimSpace(rawPath) == "" {
+		return "", nil
+	}
+
+	// 1. Rejeição de caracteres nulos ou controle
+	if strings.ContainsRune(rawPath, 0) {
+		return "", fmt.Errorf("caminho contém caracteres inválidos")
+	}
+
+	// 2. Bloqueio imediato de caminhos absolutos ou prefixos que indicam traversal
+	if filepath.IsAbs(rawPath) || strings.HasPrefix(rawPath, "/") || strings.HasPrefix(rawPath, "\\") {
+		return "", fmt.Errorf("caminho absoluto não permitido")
+	}
+
+	// 3. Normalização com filepath.Clean
+	cleanRel := filepath.Clean(filepath.ToSlash(rawPath))
+	cleanRel = strings.TrimPrefix(cleanRel, "./")
+
+	if cleanRel == "." || cleanRel == ".." || strings.HasPrefix(cleanRel, "../") || strings.Contains(cleanRel, "/../") {
+		return "", fmt.Errorf("tentativa de path traversal detectada")
+	}
+
+	// 4. Resolução do caminho base do projeto e verificação de escape
+	if baseDir == "" {
+		baseDir = "."
+	}
+	absBase, err := filepath.Abs(baseDir)
+	if err != nil {
+		return "", fmt.Errorf("erro ao resolver caminho base do projeto")
+	}
+
+	fullPath := filepath.Join(absBase, filepath.FromSlash(cleanRel))
+	fullPathAbs, err := filepath.Abs(fullPath)
+	if err != nil {
+		return "", fmt.Errorf("caminho inválido")
+	}
+
+	relCheck, err := filepath.Rel(absBase, fullPathAbs)
+	if err != nil || strings.HasPrefix(relCheck, "..") || filepath.IsAbs(relCheck) {
+		return "", fmt.Errorf("acesso negado: caminho fora da raiz do projeto")
+	}
+
+	return filepath.ToSlash(cleanRel), nil
 }
 
 // sanitizeSpecPath valida e normaliza o caminho relativo de uma especificação (SEG-01, SEG-04).
@@ -414,10 +481,25 @@ func (s *Server) handleSpecApprove(w http.ResponseWriter, r *http.Request) {
 		_ = queue.Save(s.Dir, q)
 	}
 
-	// 3. Registra atividade na telemetria viva
-	_ = queue.RecordActivity(s.Dir, queue.StationPMArchitect, "human_gate", "approve "+cleanSlash, "Portão FLX-01 Superado: Spec aprovada pelo humano", "success")
+	// 3. Handoff imediato transferindo o artefato de PM & Arquiteto para o Planejador (preenche planner.json)
+	handoffTitle := "Planejamento: " + filepath.Base(cleanSlash)
+	_, _, _ = queue.Handoff(
+		s.Dir,
+		queue.StationPMArchitect,
+		queue.StationPlanner,
+		taskID,
+		handoffTitle,
+		cleanSlash,
+		"Spec Aprovada (Portão FLX-01)",
+		"Plano de Tarefas e Quebra de Features",
+		"",
+	)
 
-	// 4. Notifica SSEHub para disparar broadcast instantâneo aos clientes
+	// 4. Registra atividade na telemetria viva
+	_ = queue.RecordActivity(s.Dir, queue.StationPMArchitect, "human_gate", "approve "+cleanSlash, "Portão FLX-01 Superado: Spec aprovada pelo humano", "success")
+	_ = queue.RecordActivity(s.Dir, queue.StationPlanner, "handoff", "receive "+cleanSlash, "Handoff recebido de PM/Architect: especificação pronta para fatiamento", "success")
+
+	// 5. Notifica SSEHub para disparar broadcast instantâneo aos clientes
 	if s.Hub != nil {
 		s.Hub.NotifyChange()
 	}
@@ -428,6 +510,92 @@ func (s *Server) handleSpecApprove(w http.ResponseWriter, r *http.Request) {
 		TaskID:   taskID,
 		Station:  targetStation,
 		Message:  "Especificação aprovada com sucesso no Portão FLX-01",
+	}
+
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	_ = json.NewEncoder(w).Encode(resp)
+}
+
+func (s *Server) handleHandoff(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		writeJSONError(w, "Method Not Allowed (apenas POST é permitido nesta rota)", http.StatusMethodNotAllowed)
+		return
+	}
+
+	var req HandoffRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeJSONError(w, "JSON inválido no corpo da requisição", http.StatusBadRequest)
+		return
+	}
+
+	fromStation := strings.TrimSpace(req.From)
+	toStation := strings.TrimSpace(req.To)
+
+	if !queue.IsValidStation(fromStation) || !queue.IsValidStation(toStation) {
+		writeJSONError(w, fmt.Sprintf("estação inválida no handoff (%s -> %s)", fromStation, toStation), http.StatusBadRequest)
+		return
+	}
+
+	var cleanArtifact string
+	if strings.TrimSpace(req.ArtifactPath) != "" {
+		var err error
+		cleanArtifact, err = sanitizeArtifactPath(s.Dir, req.ArtifactPath)
+		if err != nil {
+			writeJSONError(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+	}
+
+	taskID := strings.TrimSpace(req.TaskID)
+	if taskID == "" {
+		if cleanArtifact != "" {
+			taskID = strings.TrimSuffix(filepath.Base(cleanArtifact), filepath.Ext(cleanArtifact))
+		} else {
+			taskID = fmt.Sprintf("task-%d", time.Now().UnixNano())
+		}
+	}
+
+	title := strings.TrimSpace(req.Title)
+	if title == "" {
+		title = fmt.Sprintf("Handoff: %s", taskID)
+	}
+
+	item, _, err := queue.Handoff(
+		s.Dir,
+		fromStation,
+		toStation,
+		taskID,
+		title,
+		cleanArtifact,
+		req.Input,
+		req.Output,
+		"",
+	)
+	if err != nil {
+		writeJSONError(w, fmt.Sprintf("falha ao realizar handoff: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	// Registra telemetria viva via queue.RecordActivity
+	_ = queue.RecordActivity(
+		s.Dir,
+		toStation,
+		"handoff",
+		fmt.Sprintf("%s -> %s", fromStation, toStation),
+		fmt.Sprintf("Handoff concluído: %s transferido para %s", taskID, toStation),
+		"success",
+	)
+
+	// Dispara s.Hub.NotifyChange()
+	if s.Hub != nil {
+		s.Hub.NotifyChange()
+	}
+
+	resp := HandoffResponse{
+		Status: "ok",
+		From:   fromStation,
+		To:     toStation,
+		ItemID: item.ID,
 	}
 
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")

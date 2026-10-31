@@ -131,3 +131,56 @@ func TestStudioServer_SSE(t *testing.T) {
 		t.Errorf("esperado Content-Type text/event-stream, recebido %s", ct)
 	}
 }
+
+func TestStudioState_PlannerQueuedItemActivation(t *testing.T) {
+	tempDir := t.TempDir()
+
+	// Enfileira item no Planejador com status queued (vindo de handoff do PM)
+	_, _, err := queue.EnqueueStationItem(tempDir, queue.StationItem{
+		ID:        "task-plan-01",
+		Title:     "Planejamento da Feature 63",
+		Station:   queue.StationPlanner,
+		Operation: "planning",
+		Status:    queue.StatusQueued,
+	})
+	if err != nil {
+		t.Fatalf("erro ao enfileirar item no planejador: %v", err)
+	}
+
+	agg := studio.NewAggregator(tempDir)
+	snap, err := agg.GetSnapshot()
+	if err != nil {
+		t.Fatalf("falha ao obter snapshot: %v", err)
+	}
+
+	if snap.ActiveStation != queue.StationPlanner {
+		t.Errorf("esperado ActiveStation %s, obtido %s", queue.StationPlanner, snap.ActiveStation)
+	}
+
+	var plannerStation *studio.StationDTO
+	for i := range snap.Stations {
+		if snap.Stations[i].ID == queue.StationPlanner {
+			plannerStation = &snap.Stations[i]
+			break
+		}
+	}
+	if plannerStation == nil {
+		t.Fatalf("estação planner não encontrada no snapshot")
+	}
+
+	if plannerStation.MascotState != "thinking" {
+		t.Errorf("esperado MascotState 'thinking', obtido %s", plannerStation.MascotState)
+	}
+	if !strings.HasPrefix(plannerStation.CurrentFocus, "Fila:") {
+		t.Errorf("esperado CurrentFocus iniciando com 'Fila:', obtido %s", plannerStation.CurrentFocus)
+	}
+	if plannerStation.ExecutingTask == nil {
+		t.Fatalf("esperado ExecutingTask não nulo para o Planejador")
+	}
+	if plannerStation.ExecutingTask.ID != "task-plan-01" {
+		t.Errorf("esperado ExecutingTask.ID 'task-plan-01', obtido %s", plannerStation.ExecutingTask.ID)
+	}
+	if plannerStation.ActiveItems != 1 {
+		t.Errorf("esperado ActiveItems 1, obtido %d", plannerStation.ActiveItems)
+	}
+}

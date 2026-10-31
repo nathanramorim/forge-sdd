@@ -138,10 +138,13 @@ func TestStudioAssetsDrawerAndLinks(t *testing.T) {
 		".drawer-tabs",
 		".drawer-tab",
 		".drawer-task-card",
+		".drawer-section-title",
+		".queue-items-box",
 		".btn-ide",
 		".ide-link-btn",
 		".copy-btn",
 		".inspect-spec-btn",
+		".btn-handoff",
 		"@media (max-width: 600px)",
 	}
 	for _, req := range requiredCSS {
@@ -163,10 +166,15 @@ func TestStudioAssetsDrawerAndLinks(t *testing.T) {
 		"selectTaskInDrawer",
 		"copyCommand",
 		"inspectSpec",
+		"sendHandoff",
+		"handleHandoffClick",
+		"/api/handoff",
 		"vscode://",
 		"cursor://",
 		"Escape",
 		"activeDrawerStationId",
+		"getToolColor",
+		"queue-ver-",
 	}
 	for _, req := range requiredJS {
 		if !strings.Contains(jsStr, req) {

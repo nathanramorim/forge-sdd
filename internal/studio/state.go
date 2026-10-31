@@ -148,9 +148,13 @@ func (a *Aggregator) GetSnapshot() (*StudioSnapshot, error) {
 
 			activeCount := 0
 			var pendingApprovalItem *queue.StationItem
+			var queuedItem *queue.StationItem
 			for idxItem, it := range sq.Items {
 				if st.ID == queue.StationPMArchitect && (it.Status == "pending_review" || it.Status == "approval" || it.Status == "review_pending") {
 					pendingApprovalItem = &sq.Items[idxItem]
+				}
+				if it.Status == queue.StatusQueued && queuedItem == nil {
+					queuedItem = &sq.Items[idxItem]
 				}
 				if it.Status == queue.StatusBuilding {
 					stations[i].MascotState = "working"
@@ -173,7 +177,7 @@ func (a *Aggregator) GetSnapshot() (*StudioSnapshot, error) {
 						Operation: it.Operation,
 					}
 				}
-				if it.Status != queue.StatusApproved {
+				if it.Status != queue.StatusApproved && it.Status != "done" {
 					activeCount++
 				}
 			}
@@ -189,8 +193,34 @@ func (a *Aggregator) GetSnapshot() (*StudioSnapshot, error) {
 					Operation: pendingApprovalItem.Operation,
 				}
 			}
+			if queuedItem != nil && stations[i].ExecutingTask == nil {
+				stations[i].ExecutingTask = &ActiveTaskDTO{
+					ID:        queuedItem.ID,
+					Title:     queuedItem.Title,
+					Status:    queuedItem.Status,
+					Operation: queuedItem.Operation,
+				}
+			}
 			stations[i].ActiveItems = activeCount
 		}
+	}
+
+	// Se a estação planner tiver tarefa em fila e nenhuma outra estação estiver em building, ativa o Planejador
+	hasBuildingStation := false
+	plannerIdx := -1
+	for idx, s := range stations {
+		if s.ID == queue.StationPlanner {
+			plannerIdx = idx
+		}
+		if s.ExecutingTask != nil && s.ExecutingTask.Status == queue.StatusBuilding {
+			hasBuildingStation = true
+		}
+	}
+	if !hasBuildingStation && plannerIdx >= 0 && stations[plannerIdx].ExecutingTask != nil && stations[plannerIdx].ExecutingTask.Status == queue.StatusQueued {
+		stations[plannerIdx].MascotState = "thinking"
+		stations[plannerIdx].CurrentFocus = "Fila: " + stations[plannerIdx].ExecutingTask.Title
+		activeStation = queue.StationPlanner
+		activeIdx = plannerIdx
 	}
 
 	// Carrega legado se existir e vincula à estação ativa correspondente

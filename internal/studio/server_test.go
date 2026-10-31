@@ -374,7 +374,26 @@ func TestAPISpecApprove_Success(t *testing.T) {
 		t.Errorf("item 'feat-63-01' não foi marcado como 'approved' na fila: %+v", sq.Items)
 	}
 
-	// 4. Teste de Idempotência: aprovar novamente a mesma spec não causa erro
+	// 4. Verifica se a fila planner.json recebeu o item enfileirado para planejamento
+	plannerSQ, err := queue.LoadStationQueue(tempDir, queue.StationPlanner)
+	if err != nil {
+		t.Fatalf("falha ao carregar fila do planejador (planner.json): %v", err)
+	}
+	var foundPlannerItem bool
+	for _, it := range plannerSQ.Items {
+		if it.ID == "feat-63-01" && it.Status == queue.StatusQueued && it.Station == queue.StationPlanner {
+			foundPlannerItem = true
+			if it.ArtifactPath != filepath.ToSlash(specRel) {
+				t.Errorf("artifact_path no planner inesperado: %q", it.ArtifactPath)
+			}
+			break
+		}
+	}
+	if !foundPlannerItem {
+		t.Errorf("item 'feat-63-01' não foi enfileirado em planner.json: %+v", plannerSQ.Items)
+	}
+
+	// 5. Teste de Idempotência: aprovar novamente a mesma spec não causa erro nem duplica
 	resp2, err := http.Post(srv.URL()+"/api/spec/approve", "application/json", bytes.NewReader(payload))
 	if err != nil {
 		t.Fatalf("falha na segunda requisição de aprovação: %v", err)
@@ -383,6 +402,17 @@ func TestAPISpecApprove_Success(t *testing.T) {
 
 	if resp2.StatusCode != http.StatusOK {
 		t.Fatalf("esperado 200 OK na segunda chamada idempotente, obtido %d", resp2.StatusCode)
+	}
+
+	plannerSQ2, _ := queue.LoadStationQueue(tempDir, queue.StationPlanner)
+	count := 0
+	for _, it := range plannerSQ2.Items {
+		if it.ID == "feat-63-01" {
+			count++
+		}
+	}
+	if count != 1 {
+		t.Errorf("item duplicado em planner.json após aprovação repetida: count=%d", count)
 	}
 }
 
@@ -592,5 +622,286 @@ func TestAPISpecApprove_SSEBroadcast(t *testing.T) {
 		}
 	case <-time.After(1500 * time.Millisecond):
 		t.Fatalf("timeout: broadcast SSE não foi recebido após POST /api/spec/approve")
+	}
+}
+
+func TestAPIHandoff(t *testing.T) {
+	t.Run("Success", TestAPIHandoff_Success)
+	t.Run("ValidationAndSecurity", TestAPIHandoff_ValidationAndSecurity)
+	t.Run("MethodNotAllowed", TestAPIHandoff_MethodNotAllowed)
+	t.Run("SSEBroadcast", TestAPIHandoff_SSEBroadcast)
+}
+
+func TestAPIHandoff_Success(t *testing.T) {
+	srv, tempDir := setupTestStudioServer(t)
+
+	// Prepara arquivo de artefato
+	artRel := filepath.Join("sdd", "features", "feat-99", "plan.md")
+	artFull := filepath.Join(tempDir, artRel)
+	_ = os.MkdirAll(filepath.Dir(artFull), 0755)
+	_ = os.WriteFile(artFull, []byte("# Plano de Implementação"), 0644)
+
+	// 1. Inicializa item na estação de origem (planner)
+	origItem := queue.StationItem{
+		ID:           "task-99-01",
+		Title:        "Planejamento Concluído",
+		Station:      queue.StationPlanner,
+		Operation:    "plan",
+		Status:       "review_pending",
+		ArtifactPath: filepath.ToSlash(artRel),
+	}
+	if _, _, err := queue.EnqueueStationItem(tempDir, origItem); err != nil {
+		t.Fatalf("falha ao enfileirar na estação de origem: %v", err)
+	}
+
+	// 2. Dispara POST /api/handoff de planner -> builder
+	payload := studio.HandoffRequest{
+		From:         queue.StationPlanner,
+		To:           queue.StationBuilder,
+		TaskID:       "task-99-01",
+		Title:        "Construção da Feature 99",
+		ArtifactPath: filepath.ToSlash(artRel),
+		Input:        "Plano Aprovado",
+		Output:       "Código e Testes",
+	}
+	payloadBytes, _ := json.Marshal(payload)
+
+	resp, err := http.Post(srv.URL()+"/api/handoff", "application/json", bytes.NewReader(payloadBytes))
+	if err != nil {
+		t.Fatalf("falha no POST /api/handoff: %v", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("esperado status 200 OK, obtido %d", resp.StatusCode)
+	}
+
+	var resData studio.HandoffResponse
+	if err := json.NewDecoder(resp.Body).Decode(&resData); err != nil {
+		t.Fatalf("falha ao decodificar JSON de resposta: %v", err)
+	}
+
+	if resData.Status != "ok" {
+		t.Errorf("status inesperado: %q", resData.Status)
+	}
+	if resData.From != queue.StationPlanner {
+		t.Errorf("From inesperado: %q", resData.From)
+	}
+	if resData.To != queue.StationBuilder {
+		t.Errorf("To inesperado: %q", resData.To)
+	}
+	if resData.ItemID != "task-99-01" {
+		t.Errorf("ItemID inesperado: %q", resData.ItemID)
+	}
+
+	// 3. Verifica se a fila de destino (builder.json) contém o item enfileirado
+	builderSQ, err := queue.LoadStationQueue(tempDir, queue.StationBuilder)
+	if err != nil {
+		t.Fatalf("falha ao carregar fila do builder: %v", err)
+	}
+	var foundInBuilder bool
+	for _, it := range builderSQ.Items {
+		if it.ID == "task-99-01" && it.Station == queue.StationBuilder && it.Status == queue.StatusQueued {
+			foundInBuilder = true
+			if it.ArtifactPath != filepath.ToSlash(artRel) {
+				t.Errorf("ArtifactPath inesperado no builder: %q", it.ArtifactPath)
+			}
+			break
+		}
+	}
+	if !foundInBuilder {
+		t.Errorf("item 'task-99-01' não foi encontrado na fila do builder: %+v", builderSQ.Items)
+	}
+
+	// 4. Verifica se a estação de origem (planner.json) teve o item marcado como approved
+	plannerSQ, err := queue.LoadStationQueue(tempDir, queue.StationPlanner)
+	if err != nil {
+		t.Fatalf("falha ao carregar fila do planner: %v", err)
+	}
+	for _, it := range plannerSQ.Items {
+		if it.ID == "task-99-01" && it.Status != queue.StatusApproved {
+			t.Errorf("item na estação de origem deveria estar approved, obtido %s", it.Status)
+		}
+	}
+
+	// 5. Teste de Idempotência: novo POST idêntico não duplica
+	resp2, err := http.Post(srv.URL()+"/api/handoff", "application/json", bytes.NewReader(payloadBytes))
+	if err != nil {
+		t.Fatalf("falha no segundo POST /api/handoff: %v", err)
+	}
+	defer resp2.Body.Close()
+
+	if resp2.StatusCode != http.StatusOK {
+		t.Fatalf("esperado status 200 na repetição de handoff, obtido %d", resp2.StatusCode)
+	}
+
+	builderSQ2, _ := queue.LoadStationQueue(tempDir, queue.StationBuilder)
+	count := 0
+	for _, it := range builderSQ2.Items {
+		if it.ID == "task-99-01" {
+			count++
+		}
+	}
+	if count != 1 {
+		t.Errorf("item duplicado na fila após chamada idempotente: count=%d", count)
+	}
+}
+
+func TestAPIHandoff_ValidationAndSecurity(t *testing.T) {
+	srv, _ := setupTestStudioServer(t)
+
+	tests := []struct {
+		name         string
+		payload      string
+		expectedCode int
+	}{
+		{
+			name:         "JSON mal formatado",
+			payload:      `{bad json`,
+			expectedCode: http.StatusBadRequest,
+		},
+		{
+			name:         "Estação de origem inválida",
+			payload:      `{"from": "alien", "to": "builder", "task_id": "t1"}`,
+			expectedCode: http.StatusBadRequest,
+		},
+		{
+			name:         "Estação de destino inválida",
+			payload:      `{"from": "pm-architect", "to": "martian", "task_id": "t1"}`,
+			expectedCode: http.StatusBadRequest,
+		},
+		{
+			name:         "Ambas estações vazias",
+			payload:      `{"from": "", "to": "", "task_id": "t1"}`,
+			expectedCode: http.StatusBadRequest,
+		},
+		{
+			name:         "Path traversal no artifact_path",
+			payload:      `{"from": "pm-architect", "to": "planner", "task_id": "t1", "artifact_path": "../../etc/passwd"}`,
+			expectedCode: http.StatusBadRequest,
+		},
+		{
+			name:         "Caminho absoluto no artifact_path",
+			payload:      `{"from": "pm-architect", "to": "planner", "task_id": "t1", "artifact_path": "/var/log/secret"}`,
+			expectedCode: http.StatusBadRequest,
+		},
+		{
+			name:         "Caractere nulo no artifact_path",
+			payload:      `{"from": "pm-architect", "to": "planner", "task_id": "t1", "artifact_path": "sdd/\u0000bad"}`,
+			expectedCode: http.StatusBadRequest,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			resp, err := http.Post(srv.URL()+"/api/handoff", "application/json", strings.NewReader(tt.payload))
+			if err != nil {
+				t.Fatalf("falha ao enviar POST: %v", err)
+			}
+			defer resp.Body.Close()
+
+			if resp.StatusCode != tt.expectedCode {
+				t.Errorf("esperado status %d, obtido %d", tt.expectedCode, resp.StatusCode)
+			}
+		})
+	}
+}
+
+func TestAPIHandoff_MethodNotAllowed(t *testing.T) {
+	srv, _ := setupTestStudioServer(t)
+
+	methods := []string{http.MethodGet, http.MethodPut, http.MethodDelete, http.MethodPatch}
+	for _, m := range methods {
+		t.Run(m, func(t *testing.T) {
+			req, err := http.NewRequest(m, srv.URL()+"/api/handoff", nil)
+			if err != nil {
+				t.Fatalf("falha ao criar requisição %s: %v", m, err)
+			}
+			resp, err := http.DefaultClient.Do(req)
+			if err != nil {
+				t.Fatalf("falha na requisição %s: %v", m, err)
+			}
+			defer resp.Body.Close()
+
+			if resp.StatusCode != http.StatusMethodNotAllowed {
+				t.Errorf("esperado 405 Method Not Allowed para método %s em /api/handoff, obtido %d", m, resp.StatusCode)
+			}
+		})
+	}
+}
+
+func TestAPIHandoff_SSEBroadcast(t *testing.T) {
+	srv, _ := setupTestStudioServer(t)
+
+	// Conecta cliente SSE em /api/events
+	respSSE, err := http.Get(srv.URL() + "/api/events")
+	if err != nil {
+		t.Fatalf("falha ao conectar no SSE /api/events: %v", err)
+	}
+	defer respSSE.Body.Close()
+
+	if respSSE.StatusCode != http.StatusOK {
+		t.Fatalf("esperado status 200 no SSE, obtido %d", respSSE.StatusCode)
+	}
+
+	reader := bufio.NewReader(respSSE.Body)
+
+	// Consome snapshot inicial
+	doneInitial := make(chan struct{})
+	go func() {
+		for {
+			line, err := reader.ReadString('\n')
+			if err != nil {
+				return
+			}
+			if strings.HasPrefix(line, "data:") {
+				close(doneInitial)
+				return
+			}
+		}
+	}()
+
+	select {
+	case <-doneInitial:
+	case <-time.After(2 * time.Second):
+		t.Fatalf("timeout aguardando snapshot inicial do SSE")
+	}
+
+	// Canal para capturar broadcast do handoff
+	broadcastReceived := make(chan string, 1)
+	go func() {
+		for {
+			line, err := reader.ReadString('\n')
+			if err != nil {
+				return
+			}
+			if strings.HasPrefix(line, "data:") {
+				dataStr := strings.TrimSpace(strings.TrimPrefix(line, "data:"))
+				broadcastReceived <- dataStr
+				return
+			}
+		}
+	}()
+
+	// Dispara POST /api/handoff
+	handoffPayload := `{"from": "builder", "to": "governance", "task_id": "feat-sse-handoff", "title": "Build Finalizado"}`
+	respHandoff, err := http.Post(srv.URL()+"/api/handoff", "application/json", strings.NewReader(handoffPayload))
+	if err != nil {
+		t.Fatalf("falha ao enviar POST de handoff: %v", err)
+	}
+	defer respHandoff.Body.Close()
+
+	if respHandoff.StatusCode != http.StatusOK {
+		t.Fatalf("esperado status 200 no handoff, obtido %d", respHandoff.StatusCode)
+	}
+
+	// Aguarda broadcast SSE
+	select {
+	case snapJSON := <-broadcastReceived:
+		if !strings.Contains(snapJSON, "governance") {
+			t.Errorf("snapshot SSE não contém dados da estação de destino: %s", snapJSON)
+		}
+	case <-time.After(1500 * time.Millisecond):
+		t.Fatalf("timeout: broadcast SSE não foi recebido após POST /api/handoff")
 	}
 }

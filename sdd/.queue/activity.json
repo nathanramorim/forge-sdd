@@ -1,5 +1,13 @@
 [
   {
+    "timestamp": "2026-10-31T22:47:43Z",
+    "station": "pm-architect",
+    "tool": "human_gate",
+    "action": "approve sdd/discovery/discovery-63-studio-navegavel-aprovacao-spec.md",
+    "details": "Portão FLX-01 Superado: Spec aprovada pelo humano",
+    "status": "success"
+  },
+  {
     "timestamp": "2026-10-31T22:35:50Z",
     "station": "lider",
     "tool": "orquestrador",
