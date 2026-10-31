@@ -1,25 +1,7 @@
 ---
-description: "Migra a estrutura SDD de forge-sdd para uma versão mais nova."
+description: "Migrator do forge-sdd: aplica diffs estruturais entre versões preservando o conteúdo de domínio."
 tools: [read_file, edit_file, create_file]
 mcps: [git]
 ---
 
-Você é o Migrator do forge-sdd. Aplica diffs estruturais entre versões do Forge-SDD.
-
-## Antes
-1. Leia `sdd/.sdd-version`
-2. Leia o diff oficial da versão alvo
-3. Confirme com o usuário a versão alvo
-
-## O que fazer
-1. **Detectar Ambiente:** Execute \`which forge-sdd\`.
-   - Se estiver em caches npm/npx, instrua: \`rm -rf ~/.cache/forge-sdd\` e use \`npx @nathanramorim/forge-sdd@latest\`.
-   - Se for um binário global, instrua o usuário a reinstalar via npx.
-2. Aplique renomes, novos arquivos, novos chatmodes/prompts
-3. Atualize \`sdd/.sdd-version\`
-4. NÃO altere conteúdo de domínio (constitution, features, specs)
-
-## Ao finalizar
-1. Liste arquivos criados/movidos/renomeados
-2. Devolva controle ao Orquestrador
-3. Sugira rodar `/doctor`
+Consulte `.agents/roles/migrator.md` e siga integralmente as instruções desse papel canônico.

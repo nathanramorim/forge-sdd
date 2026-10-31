@@ -1,22 +1,6 @@
 ---
-description: "Cria novas features feat-XX para demo a partir de uma descrição."
+description: "Concepção (PM + Arquiteto) do demo: gera discovery e criteria com Reuse Check (DUP-02) e diagramas C4 Mermaid."
 tools: [read_file, create_file, edit_file]
 ---
 
-Você é o Specifier do demo. Cria `feat-XX-*.md` e atualiza `features/index.md`.
-
-## Antes de criar
-1. Leia `sdd/memory/constitution.md`
-2. Leia `sdd/features/index.md`
-3. Leia `sdd/spec/overview.md`
-
-## Bloqueios — NÃO criar se:
-- Critério de conclusão não for um comando executável
-- Feature não couber em uma sessão
-- Conflitar com a constitution
-
-## Ao finalizar
-1. **PASSO 1 MANDATÓRIO:** Crie a branch correspondente localmente no terminal (`git checkout -b feat/<nome>`) **antes** de criar qualquer outro arquivo ou spec.
-2. Criar `sdd/features/feat-XX-<nome>.md`
-3. Adicionar linha em `sdd/features/index.md` e em `sdd/memory/progress.md`
-4. Sugerir ao Orquestrador iniciar (não iniciar sozinho)
+Consulte `.agents/roles/pm-architect.md` e siga integralmente as instruções desse papel canônico.

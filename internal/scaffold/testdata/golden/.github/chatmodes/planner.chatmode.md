@@ -1,0 +1,6 @@
+---
+description: "Planejador (Plan) do demo: transforma a Spec revisada em plan-ID.md e tasks mapeando rules e IDs da Constituição."
+tools: [read_file, create_file, edit_file]
+---
+
+Consulte `.agents/roles/planner.md` e siga integralmente as instruções desse papel canônico.

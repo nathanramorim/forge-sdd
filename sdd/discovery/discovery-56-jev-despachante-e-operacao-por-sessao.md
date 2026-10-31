@@ -1,5 +1,7 @@
 # Discovery 56 — Papéis Especialistas, Agent Teams do Claude e Jev (opcional) como Despachante
 
+> **Status: Superseded by [`discovery-58-orquestracao-autonoma-governanca-skills.md`](discovery-58-orquestracao-autonoma-governanca-skills.md)** — consolidado na arquitetura de 5 estações (Líder, PM+Arquiteto, Planejador, Fila do Builder e Analista de Governança), Constituição por IDs, Portão A/B/C e Auto-Skills da `v3.0.0-beta` (sem dependência do modelo externo Jev).
+
 Responde à pergunta: *como tornar o Forge mais independente em seus agentes e operar por sessão, incluindo o Jev como tomador de decisões?* Complementa o **discovery-53** (esteira Spec → Act → Revisor em 3 sessões), que definiu as estações e o handoff, mas **não definiu quem decide qual estação roda, quando e com qual agente**. Este discovery preenche essa lacuna.
 
 > **Revisão 2 (agent teams):** o usuário pediu para assimilar a responsabilidade de *agent teams* do Claude Code no CLI e gerar os papéis do Forge-SDD também para o Claude. Ver seção 6; a seção 7 reavalia o desenho do Jev e da esteira à luz dos teams.

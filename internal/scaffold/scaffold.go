@@ -252,7 +252,7 @@ func shouldPreserve(dest string, targetDir string) bool {
 	// .agents/commands/ (corpo canônico dos comandos) NÃO entra aqui: é gerado pelo
 	// forge-sdd e deve continuar sendo atualizado a cada init/update, como qualquer
 	// outro arquivo de configuração de agente.
-	if strings.HasPrefix(rel, ".agents/rules/") {
+	if strings.HasPrefix(rel, ".agents/rules/") || strings.HasPrefix(rel, ".agents/skills/") {
 		return true
 	}
 

@@ -3,18 +3,18 @@
 ## Status
 ```
 Feature 55 — Telemetria cobertura total + /report (7 subtarefas) [x] done
-Release v2.4.0 (estável) — PR #53 promovido a main [x] publicada
+Feature 58 — Orquestração Autônoma, Governança A/B/C e Auto-Skills (7 subtarefas) [x] done
+Release v3.0.0-beta — branch feat/58-orquestracao-autonoma-governanca-skills [x] pronta
 ```
 
 ## Features ativas
 Nenhuma feature `todo`/`doing` pendente. Lista completa em `sdd/features/index.md`.
 
 ## Próximo passo
-**Iniciar:** Nenhuma feature `todo`.
+**Iniciar:** Estabilizar `v3.0.0-beta` no PR aberto (Regra 11) antes de promover a `v3.0.0` estável.
 **Bloqueios:** —
 
 ## Handoff da última sessão
-- v2.4.0 promovida direto a estável (desvio pontual da Regra 11, autorizado pelo usuário); `/code-review` pré-merge corrigiu 4 achados (prompts Copilot desatualizados, writer do `report`, `ClassifySessionType` por substring, gofmt).
-- Feature 55: telemetria cobre `/discovery`, `/split-features`, `/nova-feature`, `/archive`; novo `forge-sdd report` (tokens/modelo/duração + idade do projeto).
+- Feature 58 (`feat-58-01`..`07`): 5 estações (`.agents/roles/`), Constituição por IDs + `.agents/rules/sdd-*.md` (`GOV-04`), Reuse Check (`DUP-02`), Fila (`forge-sdd queue`), Portão A/B/C (`forge-sdd gate`), Auto-Skills (`forge-sdd skills`) e `forge-sdd governance`.
 
 > Histórico completo em `progress-log.md`

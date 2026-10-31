@@ -6,17 +6,18 @@ forge-sdd — stack principal: .
 ## Lifecycle (todo agente)
 _Protocolo por comando. O pipeline por feature (Discovery → ... → PR) está em `sdd/FLOW.md` — fonte única da verdade._
 
-1. **READ-MIN:** ler `sdd/memory/progress.md` (Builder e Revisor também leem `sdd/memory/lessons.md` — padrões de erro já corrigidos, antes de implementar/revisar)
+1. **READ-MIN:** ler `sdd/memory/progress.md` (Builder e Analista de Governança também leem `sdd/memory/lessons.md` — padrões de erro já corrigidos, antes de implementar/revisar)
 2. **PLAN:** reportar intenção, aguardar confirmação — e perguntar objetivamente se a atividade deve ser delegada a um subagente (varredura/pesquisa extensa tende a "sim"; edição pontual e pequena tende a "não"; decisão final é sempre do usuário). Em ferramentas sem esse conceito, item não aplicável.
-3. **ACT:** executar no escopo do papel (use as skills em `.gemini/skills/`)
+3. **ACT:** executar no escopo do papel canônico em `.agents/roles/` (adaptado em `.gemini/skills/`)
 4. **WRITE:** editar apenas arquivos do escopo
-5. **CLOSE** (Orquestrador): atualizar progress, métricas, archive se necessário
+5. **CLOSE** (Líder / Orquestrador): atualizar progress, métricas, archive se necessário
 
 ## Arquivos críticos
 - `sdd/memory/progress.md` — estado ativo (leia primeiro a cada sessão)
-- `sdd/memory/constitution.md` — regras imutáveis
+- `sdd/memory/constitution.md` — regras imutáveis numeradas por IDs (`ARQ-*`, `SEG-*`, `DUP-*`, `COD-*`, `TST-*`, `FLX-*`, `GOV-*`)
 - `sdd/features/feat-XX-*.md` — tarefa atual
 - `.agents/rules/*.md` — regras de domínio do projeto (design system, arquitetura, acessibilidade, ...). Antes de agir sobre código ou design, consulte os arquivos relevantes à tarefa corrente.
+- `.agents/roles/*.md` — fonte única dos papéis das 5 estações.
 
 ## MCPs
 - O Gemini utiliza as configurações de MCP em `.gemini/mcp.json`.
@@ -31,17 +32,17 @@ _Protocolo por comando. O pipeline por feature (Discovery → ... → PR) está 
 - Nunca commite direto em `main`
 - Consulte `sdd/memory/constitution.md` antes de decisões arquiteturais
 - Use ferramentas de leitura antes de editar qualquer arquivo
-- Siga rigorosamente a responsabilidade única por artefato (Specifier escreve specs, Builder escreve código, etc.)
+- Siga rigorosamente a responsabilidade única por estação (PM/Arquiteto concebe, Planejador planeja, Builder implementa, Governança audita em modo read-only)
 
-## Skills & Papéis
-Este projeto define papéis específicos em `.gemini/skills/`. Carregue a instrução correspondente ao iniciar uma fase:
-- **Orquestrador:** `.gemini/skills/orquestrador.chatmode.md`
-- **Builder:** `.gemini/skills/builder.chatmode.md`
-- **Revisor:** `.gemini/skills/revisor.chatmode.md`
-- **Archivist:** `.gemini/skills/archivist.chatmode.md`
-- **Specifier:** `.gemini/skills/specifier.chatmode.md`
-- **Migrator:** `.gemini/skills/migrator.chatmode.md`
-- **Architect:** `.gemini/skills/c4-architecture.chatmode.md`
+## Skills & Papéis (5 Estações — `.agents/roles/`)
+Este projeto define os papéis canônicos em `.agents/roles/` com adaptadores em `.gemini/skills/`. Carregue a instrução correspondente ao iniciar uma estação:
+- **Líder (Orquestrador):** `.gemini/skills/orquestrador.chatmode.md` → `.agents/roles/lider.md`
+- **Concepção (PM + Arquiteto):** `.gemini/skills/specifier.chatmode.md` / `.gemini/skills/c4-architecture.chatmode.md` → `.agents/roles/pm-architect.md`
+- **Planejador (`Plan`):** `.gemini/skills/planner.chatmode.md` → `.agents/roles/planner.md`
+- **Fila do Builder:** `.gemini/skills/builder.chatmode.md` → `.agents/roles/builder.md`
+- **Analista de Governança (Camada B Read-Only):** `.gemini/skills/governance.chatmode.md` / `.gemini/skills/revisor.chatmode.md` → `.agents/roles/governance.md`
+- **Archivist:** `.gemini/skills/archivist.chatmode.md` → `.agents/roles/archivist.md`
+- **Migrator:** `.gemini/skills/migrator.chatmode.md` → `.agents/roles/migrator.md`
 
 ## Prompts (Comandos)
 Para executar uma tarefa, peça pelo nome do comando ou utilize uma das frases de exemplo. Eu consultarei a instrução correspondente em `.gemini/prompts/`:

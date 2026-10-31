@@ -70,6 +70,7 @@ main
                                                                                                                                  └─ feat/02-release-v2.2.0-beta
                                                                                      └─ feat/03-ergonomia-de-comandos-e-sincronizacao
                                                                                          └─ feat/55-telemetria-cobertura-total-e-relatorio
+                                                                                             └─ feat/58-orquestracao-autonoma-governanca-skills
             ```
 
                                        ## Janelas de paralelismo
@@ -78,6 +79,7 @@ main
                                        feat-02-01 e feat-02-02 são de baixo risco (pasta nova, sem migração) e podem entrar na mesma branch/PR. feat-02-03 (maior superfície: 12 comandos × 3 agentes) depende só de feat-02-01/02 e deve isolar um comando piloto (`/discovery`) antes de converter os demais. feat-02-04 depende de feat-02-01 e feat-02-03. feat-02-05 e feat-02-06 dependem de feat-02-03 (corpo canônico) e podem ser uma feature só ou duas, a critério do revisor. feat-02-07 fecha o pacote e depende de todas as anteriores.
                                        feat-03-01 (correção de nome do adaptador Claude) é pré-requisito de feat-03-02 (migração em `update`); ambas podem entrar na mesma branch/PR (baixo risco combinado). feat-03-03 (sincronização remota em `/status`), feat-03-04 (clarify) e feat-03-05 (confirmação de subagente) são independentes entre si e de feat-03-01/02 — podem ser paralelas. feat-03-04 e feat-03-05 compartilham a mesma preocupação ("quando interromper o usuário com uma pergunta") e podem ser unificadas a critério do revisor. feat-03-06 fecha o pacote e depende de todas as anteriores.
                                        feat-55-01 (classificação de tipo de sessão) é pré-requisito de feat-55-02 (comando `report`, que agrupa por tipo). feat-55-03/04/05/06 (cobertura de telemetria em `/discovery`, `/split-features`, `/nova-feature`, `/archive`) são independentes entre si e de feat-55-01/02 — mesmo padrão de "um comando por task" de feat-02-03/feat-03, podem ser todas paralelas. feat-55-07 fecha o pacote e depende de todas as anteriores.
+                                       feat-58-01 (Constituição por IDs + Rules + Templates) e feat-58-02 (Papéis das 5 estações) não dependem entre si e podem rodar em paralelo. feat-58-04 (Fila Go + Portão Camada A) e feat-58-06 (Motor de Auto-Skills) também são pacotes Go independentes (`internal/queue`+`internal/gate` vs `internal/skills`) e podem rodar em paralelo antes de feat-58-05 e feat-58-07 (`v3.0.0-beta`).
 
                                        ## Índice
 
@@ -167,3 +169,10 @@ main
 | 55-05 | feat-55-telemetria-cobertura-total-e-relatorio/feat-55-05-telemetria-nova-feature.md | feat/55-telemetria-cobertura-total-e-relatorio | 55-05 | done |
 | 55-06 | feat-55-telemetria-cobertura-total-e-relatorio/feat-55-06-telemetria-archive.md | feat/55-telemetria-cobertura-total-e-relatorio | 55-06 | done |
 | 55-07 | feat-55-telemetria-cobertura-total-e-relatorio/feat-55-07-documentacao-report.md | feat/55-telemetria-cobertura-total-e-relatorio | 55-07 | done |
+| 58-01 | feat-58-orquestracao-autonoma-governanca-skills/feat-58-01-constituicao-ids-rules-e-templates-governanca.md | feat/58-orquestracao-autonoma-governanca-skills | 58-01 | done |
+| 58-02 | feat-58-orquestracao-autonoma-governanca-skills/feat-58-02-papeis-canonicos-5-estacoes-e-adaptadores.md | feat/58-orquestracao-autonoma-governanca-skills | 58-02 | done |
+| 58-03 | feat-58-orquestracao-autonoma-governanca-skills/feat-58-03-fluxo-concepcao-reuse-check-e-planejador.md | feat/58-orquestracao-autonoma-governanca-skills | 58-03 | done |
+| 58-04 | feat-58-orquestracao-autonoma-governanca-skills/feat-58-04-motor-fila-builder-e-portao-camada-a.md | feat/58-orquestracao-autonoma-governanca-skills | 58-04 | done |
+| 58-05 | feat-58-orquestracao-autonoma-governanca-skills/feat-58-05-analista-governanca-camada-b-e-painel-lider.md | feat/58-orquestracao-autonoma-governanca-skills | 58-05 | done |
+| 58-06 | feat-58-orquestracao-autonoma-governanca-skills/feat-58-06-motor-auto-skills-regra-de-tres.md | feat/58-orquestracao-autonoma-governanca-skills | 58-06 | done |
+| 58-07 | feat-58-orquestracao-autonoma-governanca-skills/feat-58-07-importador-governanca-update-docs-e-release-v3-beta.md | feat/58-orquestracao-autonoma-governanca-skills | 58-07 | done |

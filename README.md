@@ -40,7 +40,16 @@ npx @nathanramorim/forge-sdd@latest init
 npx @nathanramorim/forge-sdd@latest init . --agent copilot,gemini --name meu-projeto
 ```
 
-## ✨ Telemetria com Cobertura Total e Relatório de Métricas (v2.4.0)
+## ✨ Orquestração Independente, Portão de Governança (A/B/C), Constituição por IDs e Auto-Skills (v3.0.0-beta)
+
+*   **5 Estações Coordenadas (`.agents/roles/`):** o **Líder** orquestra o fluxo junto ao **PM + Arquiteto** (`discovery` + `criteria` com Gate de Revisão de Spec), **Planejador** (`plan` mapeando rules por task), **Builder** (execução isolada via fila) e **Analista de Governança** (auditoria read-only semântica e determinística), devolvendo ao humano o Painel Executivo (*o que já foi feito, como está cada etapa e o que falta*).
+*   **Constituição por IDs Estáveis + Rules Modulares (`.agents/rules/sdd-*.md`):** `sdd/memory/constitution.md` mantém "o quê e por quê" enxuto com IDs (`ARQ`, `SEG`, `DUP`, `COD`, `TST`, `FLX`, `GOV`), enquanto as rules detalham "como cumprir" sob demanda sem duplicar texto (`GOV-04`).
+*   **Fila do Builder (`forge-sdd queue`) e Portão em 3 Camadas (`forge-sdd gate`):** exige seção `"O que já existe"` (Reuse Check `DUP-02`) na Spec, roda checks determinísticos `P-xx` (Camada A) e valida o parecer JSON baseado em evidências do Analista de Governança (Camada B) antes da aprovação humana no Líder (Camada C).
+*   **Auto-Skills (`forge-sdd skills`) e Pacotes de Governança (`forge-sdd governance`):** atividades padronizadas repetidas viram skills reutilizáveis em `.agents/skills/` sincronizadas para `.claude/skills/` e `.gemini/skills/`.
+
+---
+
+## 📢 Novidades da Versão Anterior (v2.4.0) — Telemetria com Cobertura Total e Relatório de Métricas
 
 *   **Nenhuma sessão perdida:** `/discovery`, `/split-features`, `/nova-feature` e `/archive` agora gravam telemetria automaticamente, junto dos comandos que já gravavam (`/proxima-feature`, `/revisar`, `/novo-fix`) — antes, uma sessão que passasse só por esses quatro comandos não deixava rastro nenhum em `sdd/.metrics/`.
 *   **Novo comando `forge-sdd report`:** mostra, por feature/fix/discovery, tokens gastos, modelos de IA usados, duração de cada sessão, e há quanto tempo (medido pela telemetria) o projeto está ativo.

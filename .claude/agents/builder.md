@@ -1,0 +1,8 @@
+---
+name: builder
+description: "Builder do forge-sdd: consome tasks da fila em contexto isolado, aplica rules/skills, implementa código/testes e valida Camada A."
+tools: Read, Grep, Glob, Bash, Edit, Write
+model: inherit
+---
+
+Consulte `.agents/roles/builder.md` e siga integralmente as instruções desse papel canônico.
