@@ -237,6 +237,35 @@ var queueStationsCmd = &cobra.Command{
 	},
 }
 
+var queueLogCmd = &cobra.Command{
+	Use:   "log",
+	Short: "Registra atomicamente a execução de uma tool/ação por uma estação",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		dir, _ := cmd.Flags().GetString("dir")
+		station, _ := cmd.Flags().GetString("station")
+		tool, _ := cmd.Flags().GetString("tool")
+		action, _ := cmd.Flags().GetString("action")
+		details, _ := cmd.Flags().GetString("details")
+		status, _ := cmd.Flags().GetString("status")
+
+		if station == "" {
+			station = queue.StationLider
+		}
+		if status == "" {
+			status = "success"
+		}
+		if tool == "" {
+			return fmt.Errorf("--tool é obrigatório (ex: run_command, read_file, edit_file, gate, git)")
+		}
+
+		if err := queue.RecordActivity(dir, station, tool, action, details, status); err != nil {
+			return err
+		}
+		fmt.Printf("✓ Atividade registrada para estação '%s': tool=%s\n", station, tool)
+		return nil
+	},
+}
+
 func init() {
 	queueHandoffCmd.Flags().String("dir", ".", "Diretório alvo do projeto Forge-SDD")
 	queueHandoffCmd.Flags().String("from", "", "Estação de origem (ex: lider, pm-architect, planner, builder, governance)")
@@ -273,6 +302,13 @@ func init() {
 
 	queuePanelCmd.Flags().String("dir", ".", "Diretório alvo do projeto Forge-SDD")
 
+	queueLogCmd.Flags().String("dir", ".", "Diretório alvo do projeto Forge-SDD")
+	queueLogCmd.Flags().String("station", "lider", "Estação responsável (lider, pm-architect, planner, builder, governance)")
+	queueLogCmd.Flags().String("tool", "", "Nome da ferramenta executada (run_command, read_file, edit_file, gate, git, etc)")
+	queueLogCmd.Flags().String("action", "", "Argumento, comando ou arquivo operado")
+	queueLogCmd.Flags().String("details", "", "Descrição resumida da intenção da operação")
+	queueLogCmd.Flags().String("status", "success", "Status da execução: running, success, error")
+
 	queueCmd.AddCommand(queueEnqueueCmd)
 	queueCmd.AddCommand(queueNextCmd)
 	queueCmd.AddCommand(queueCompleteCmd)
@@ -281,4 +317,5 @@ func init() {
 	queueCmd.AddCommand(queuePanelCmd)
 	queueCmd.AddCommand(queueHandoffCmd)
 	queueCmd.AddCommand(queueStationsCmd)
+	queueCmd.AddCommand(queueLogCmd)
 }

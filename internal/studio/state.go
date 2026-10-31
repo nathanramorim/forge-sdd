@@ -22,6 +22,9 @@ type StationDTO struct {
 	MascotState    string              `json:"mascot_state"` // idle, working, thinking, searching, approval, finished, error
 	CurrentFocus   string              `json:"current_focus"`
 	ExecutingTask  *ActiveTaskDTO      `json:"executing_task,omitempty"`
+	ActiveTools    []string            `json:"active_tools,omitempty"`
+	CurrentAction  string              `json:"current_action,omitempty"`
+	RecentActivity []queue.ActivityItem `json:"recent_activity,omitempty"`
 	InputContract  string              `json:"input_contract"`
 	OutputContract string              `json:"output_contract"`
 	Version        int64               `json:"version"`
@@ -46,6 +49,7 @@ type StudioSnapshot struct {
 	ActiveStationIdx  int                   `json:"active_station_idx"`
 	LastHandoff       *HandoffDTO           `json:"last_handoff,omitempty"`
 	GovernanceVerdict *queue.Verdict        `json:"governance_verdict,omitempty"`
+	RecentActivity    []queue.ActivityItem  `json:"recent_activity,omitempty"`
 	StateHash         string                `json:"state_hash"`
 	UpdatedAt         string                `json:"updated_at"`
 	Stations          []StationDTO          `json:"stations"`
@@ -213,6 +217,30 @@ func (a *Aggregator) GetSnapshot() (*StudioSnapshot, error) {
 		}
 	}
 
+	// Carrega histórico e ferramentas recentes de atividade
+	activities, _ := queue.LoadActivities(a.Dir)
+	for i, st := range stations {
+		toolMap := make(map[string]bool)
+		var stActivities []queue.ActivityItem
+		for _, act := range activities {
+			if act.Station == st.ID {
+				stActivities = append(stActivities, act)
+				if len(toolMap) < 4 {
+					toolMap[act.Tool] = true
+				}
+			}
+		}
+		var tools []string
+		for t := range toolMap {
+			tools = append(tools, t)
+		}
+		stations[i].ActiveTools = tools
+		stations[i].RecentActivity = stActivities
+		if len(stActivities) > 0 {
+			stations[i].CurrentAction = fmt.Sprintf("%s: %s", stActivities[0].Tool, stActivities[0].Action)
+		}
+	}
+
 	handoff := &HandoffDTO{
 		FromStation: stations[activeIdx].ID,
 		ToStation:   stations[(activeIdx+1)%len(stations)].ID,
@@ -231,6 +259,9 @@ func (a *Aggregator) GetSnapshot() (*StudioSnapshot, error) {
 	if legacyQ != nil {
 		fmt.Fprintf(hasher, "%s:%s;", legacyQ.FeatureID, legacyQ.UpdatedAt)
 	}
+	if len(activities) > 0 {
+		fmt.Fprintf(hasher, "%s:%s;", activities[0].Timestamp, activities[0].Action)
+	}
 	stateHash := hex.EncodeToString(hasher.Sum(nil))
 
 	projectName := filepath.Base(filepath.Clean(a.Dir))
@@ -245,6 +276,7 @@ func (a *Aggregator) GetSnapshot() (*StudioSnapshot, error) {
 		ActiveStationIdx:  activeIdx,
 		LastHandoff:       handoff,
 		GovernanceVerdict: lastVerdict,
+		RecentActivity:    activities,
 		StateHash:         stateHash,
 		UpdatedAt:         now,
 		Stations:          stations,

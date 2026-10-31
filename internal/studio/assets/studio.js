@@ -321,6 +321,78 @@ function renderMascotFallbackSvg(mountEl, color, mark, state) {
   `;
 }
 
+function escapeHtml(str) {
+  if (typeof str !== 'string') return '';
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+let currentActivities = [];
+let consoleFilter = 'all';
+
+window.filterConsole = function(station) {
+  consoleFilter = station;
+  document.querySelectorAll('#consoleFilterTabs .console-tab').forEach(tab => {
+    tab.classList.toggle('active', tab.dataset.filter === station);
+  });
+  renderConsoleLogs(currentActivities);
+};
+
+function renderConsoleLogs(activities) {
+  const container = document.getElementById('consoleLogs');
+  if (!container) return;
+
+  const filtered = (activities || []).filter(act => {
+    if (consoleFilter === 'all') return true;
+    return act.station === consoleFilter;
+  });
+
+  if (filtered.length === 0) {
+    container.innerHTML = `<div style="color:var(--muted);font-style:italic;padding:8px 0;">Nenhum evento registrado para esta estação.</div>`;
+    return;
+  }
+
+  container.innerHTML = filtered.slice(0, 50).map(act => {
+    const stMeta = {
+      'lider': { name: '01. LÍDER', color: '#f2a65a' },
+      'pm-architect': { name: '02. PM/ARQ', color: '#8aa4ff' },
+      'planner': { name: '03. PLAN', color: '#c9a7ff' },
+      'builder': { name: '04. BUILDER', color: '#4fd1b5' },
+      'governance': { name: '05. GOV', color: '#ff8a5c' }
+    }[act.station] || { name: act.station, color: '#4f8ef7' };
+
+    let timeStr = '--:--:--';
+    if (act.timestamp) {
+      try {
+        const d = new Date(act.timestamp);
+        timeStr = d.toTimeString().split(' ')[0] || act.timestamp.slice(11, 19);
+      } catch (e) {
+        timeStr = act.timestamp.slice(11, 19);
+      }
+    }
+    const statusClass = (act.status === 'running' || act.status === 'working') ? 'running' : (act.status === 'error' ? 'error' : 'done');
+
+    return `
+      <div class="log-row">
+        <span class="log-time">${escapeHtml(timeStr)}</span>
+        <span class="log-station" style="color:${stMeta.color};">
+          <span class="tool-chip-dot" style="--c:${stMeta.color};"></span>${escapeHtml(stMeta.name)}
+        </span>
+        <span class="log-tool">${escapeHtml(act.tool || 'tool')}</span>
+        <span class="log-action">
+          <b>${escapeHtml(act.action || '')}</b>
+          ${act.details ? `<span class="detail-hint">${escapeHtml(act.details)}</span>` : ''}
+        </span>
+        <span class="log-status ${statusClass}">${escapeHtml(act.status || 'done')}</span>
+      </div>
+    `;
+  }).join('');
+}
+
 // Renderiza a grade de estações e atualiza os DOMs
 function applySnapshot(snap) {
   if (!snap) return;
@@ -329,6 +401,10 @@ function applySnapshot(snap) {
   document.getElementById('projectName').textContent = snap.project_name || 'forge-sdd';
   document.getElementById('projectVersion').textContent = 'v' + (snap.version || '3.2.1-beta');
   document.getElementById('lastUpdate').textContent = new Date(snap.updated_at).toLocaleTimeString();
+
+  // Atualiza telemetria de atividades
+  currentActivities = snap.recent_activity || [];
+  renderConsoleLogs(currentActivities);
 
   // Handoff Bar
   const ho = snap.last_handoff;
@@ -345,6 +421,41 @@ function applySnapshot(snap) {
   snap.stations.forEach((st, idx) => {
     const isActive = st.id === snap.active_station;
 
+    // Ferramentas ativas ou padrão da estação
+    const defaultToolsByStation = {
+      'lider': ['run_command', 'git', 'read_file', 'subagent'],
+      'pm-architect': ['read_file', 'write_file', 'context7', 'search_web'],
+      'planner': ['read_file', 'edit_file', 'gate', 'write_file'],
+      'builder': ['edit_file', 'run_command', 'git', 'read_file'],
+      'governance': ['gate', 'read_file', 'analyst', 'audit']
+    };
+    const tools = (st.active_tools && st.active_tools.length > 0) ? st.active_tools : (defaultToolsByStation[st.id] || []);
+
+    let toolStripHtml = '';
+    if (tools.length > 0) {
+      toolStripHtml = `
+        <div class="tool-strip">
+          ${tools.map((t, tIdx) => {
+            const isToolRunning = tIdx === 0 && (st.mascot_state === 'working' || st.mascot_state === 'thinking' || st.mascot_state === 'searching' || st.mascot_state === 'approval');
+            return `
+              <span class="tool-chip ${isToolRunning ? 'running' : ''}" style="--c:${st.color}">
+                <span class="tool-chip-dot"></span>${escapeHtml(t)}
+              </span>
+            `;
+          }).join('')}
+        </div>
+      `;
+    }
+
+    let actionRowHtml = '';
+    if (st.current_action) {
+      actionRowHtml = `
+        <div class="executing-action-row" title="${escapeHtml(st.current_action)}">
+          <span class="act-label">CMD:</span><b>${escapeHtml(st.current_action)}</b>
+        </div>
+      `;
+    }
+
     // O QUE ESTÁ EXECUTANDO POR AGENTE (Destaque Principal)
     const execTask = st.executing_task;
     let execHtml = '';
@@ -358,7 +469,9 @@ function applySnapshot(snap) {
             <span class="executing-label">${label}</span>
             <span class="executing-id">${execTask.id}</span>
           </div>
-          <div class="executing-title">${execTask.title || st.current_focus}</div>
+          <div class="executing-title">${escapeHtml(execTask.title || st.current_focus)}</div>
+          ${actionRowHtml}
+          ${toolStripHtml}
         </div>
       `;
     } else if (st.mascot_state === 'working' || st.mascot_state === 'thinking' || st.mascot_state === 'searching') {
@@ -368,7 +481,9 @@ function applySnapshot(snap) {
             <span class="pulse-dot"></span>
             <span class="executing-label">ATIVIDADE VIVA</span>
           </div>
-          <div class="executing-title">${st.current_focus || 'Processando etapa do ciclo'}</div>
+          <div class="executing-title">${escapeHtml(st.current_focus || 'Processando etapa do ciclo')}</div>
+          ${actionRowHtml}
+          ${toolStripHtml}
         </div>
       `;
     } else {
@@ -379,7 +494,9 @@ function applySnapshot(snap) {
             <span class="executing-label">STATUS</span>
             <span class="executing-id" style="color:var(--muted);font-size:9.5px;">STANDBY</span>
           </div>
-          <div class="executing-title muted">${st.current_focus || 'Fila ociosa — Pronto para novo handoff'}</div>
+          <div class="executing-title muted">${escapeHtml(st.current_focus || 'Fila ociosa — Pronto para novo handoff')}</div>
+          ${actionRowHtml}
+          ${toolStripHtml}
         </div>
       `;
     }
@@ -389,8 +506,8 @@ function applySnapshot(snap) {
     if (st.items && st.items.length > 0) {
       itemsHtml = st.items.map(it => `
         <div class="queue-task-row">
-          <span style="color:var(--fg);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:140px;" title="${it.title || it.id}">${it.id}</span>
-          <span class="chip" style="font-size:9.5px;padding:1px 6px;">${it.status}</span>
+          <span style="color:var(--fg);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:140px;" title="${escapeHtml(it.title || it.id)}">${escapeHtml(it.id)}</span>
+          <span class="chip" style="font-size:9.5px;padding:1px 6px;">${escapeHtml(it.status)}</span>
         </div>
       `).join('');
     } else {
@@ -539,35 +656,50 @@ const DEMO_SIMULATION_STEPS = [
     mascot_state: 'working',
     executing: { id: 'sdd-ciclo-01', title: 'Orquestrando transição de onda e validando portões humanos', status: 'building' },
     gate: 'Gate 1 — Alinhamento de Visão Concluído',
-    payload: 'Demanda Estruturada → Estação 02 (PM & Arquiteto)'
+    payload: 'Demanda Estruturada → Estação 02 (PM & Arquiteto)',
+    tools: ['run_command', 'git', 'read_file', 'subagent'],
+    action: 'git status --porcelain',
+    details: 'Verificando integridade da árvore git e sincronizando ponteiros'
   },
   {
     station: 'pm-architect',
     mascot_state: 'thinking',
     executing: { id: 'discovery-60', title: 'Elaborando especificação técnica, diagramas C4 e Reuse Check', status: 'building' },
     gate: 'Gate 2 — Revisão Humana de Spec (FLX-01)',
-    payload: 'discovery.md + criteria.md → Estação 03'
+    payload: 'discovery.md + criteria.md → Estação 03',
+    tools: ['read_file', 'write_file', 'context7', 'search_web'],
+    action: 'read_file sdd/features/feat-60-01-scaffold.md',
+    details: 'Auditoria de critérios de aceitação e diagramas arquiteturais C4'
   },
   {
     station: 'planner',
     mascot_state: 'working',
     executing: { id: 'plan-60', title: 'Fatiando spec em tarefas P/M/G e mapeando rules por task', status: 'building' },
     gate: 'Gate 3 — Plano Validado e Enfileirado',
-    payload: 'plan.md + queue.json → Estação 04 (Builders)'
+    payload: 'plan.md + queue.json → Estação 04 (Builders)',
+    tools: ['read_file', 'edit_file', 'gate', 'write_file'],
+    action: 'edit_file sdd/features/plan.md',
+    details: 'Associando pilares ARQ-03, ARQ-04 e DUP-05 às sub-tarefas'
   },
   {
     station: 'builder',
     mascot_state: 'working',
     executing: { id: 'feat-60-03', title: 'Implementando código Go e suite de testes com detecção de corrida (-race)', status: 'building' },
     gate: 'Gate 4 — Testes Locais e Camada A (PASS)',
-    payload: 'Código + Testes Conforme → Estação 05 (Governança)'
+    payload: 'Código + Testes Conforme → Estação 05 (Governança)',
+    tools: ['edit_file', 'run_command', 'git', 'read_file'],
+    action: 'run_command go test -race -v ./internal/...',
+    details: 'Executando testes unitários determinísticos com detecção de concorrência'
   },
   {
     station: 'governance',
     mascot_state: 'approval',
     executing: { id: 'audit-60-03', title: 'Auditoria Read-Only contra Constituição e emissão de laudo JSON', status: 'review_pending' },
     gate: 'Gate 5 — Laudo Camada B Aprovado',
-    payload: 'Laudo Conforme → Estação 01 (Líder / PR)'
+    payload: 'Laudo Conforme → Estação 01 (Líder / PR)',
+    tools: ['gate', 'read_file', 'analyst', 'audit'],
+    action: 'gate audit-diff --strict',
+    details: 'Camada B Read-Only: 7 pilares verificados, 0 violações'
   }
 ];
 
@@ -588,9 +720,12 @@ function runDemoSimulation() {
         s.mascot_state = simStep.mascot_state;
         s.executing_task = simStep.executing;
         s.current_focus = simStep.executing.title;
+        s.active_tools = simStep.tools;
+        s.current_action = `${simStep.tools[0]}: ${simStep.action}`;
       } else {
         s.mascot_state = (i < currentDemoIdx) ? 'finished' : 'idle';
         s.executing_task = null;
+        s.current_action = '';
       }
     });
 
@@ -601,6 +736,18 @@ function runDemoSimulation() {
       gate: simStep.gate,
       is_loop: false
     };
+
+    // Cria evento no histórico recente de telemetria
+    const nowIso = new Date().toISOString();
+    const newAct = {
+      timestamp: nowIso,
+      station: simStep.station,
+      tool: simStep.tools[0],
+      action: simStep.action,
+      details: simStep.details,
+      status: (simStep.mascot_state === 'approval' || simStep.mascot_state === 'finished') ? 'done' : 'running'
+    };
+    cloned.recent_activity = [newAct, ...(cloned.recent_activity || [])].slice(0, 50);
 
     applySnapshot(cloned);
   }, 2200);

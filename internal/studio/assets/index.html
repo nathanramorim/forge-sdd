@@ -56,6 +56,27 @@
       <!-- Cards renderizados dinamicamente via studio.js -->
     </section>
 
+    <!-- Console de Telemetria & Micro-Ações de Tools em Tempo Real -->
+    <section class="console-section" id="activityConsole" aria-label="Console de Atividade e Telemetria em Tempo Real">
+      <div class="console-header">
+        <div class="console-title">
+          <span class="live-dot"></span>
+          <b>Telemetria das Estações & Uso de Tools em Tempo Real</b>
+        </div>
+        <div class="console-tabs" id="consoleFilterTabs">
+          <button class="console-tab active" data-filter="all" onclick="filterConsole('all')">TODAS AS ESTAÇÕES</button>
+          <button class="console-tab" data-filter="lider" onclick="filterConsole('lider')">01. LÍDER</button>
+          <button class="console-tab" data-filter="pm-architect" onclick="filterConsole('pm-architect')">02. PM & ARQUITETO</button>
+          <button class="console-tab" data-filter="planner" onclick="filterConsole('planner')">03. PLANEJADOR</button>
+          <button class="console-tab" data-filter="builder" onclick="filterConsole('builder')">04. BUILDER</button>
+          <button class="console-tab" data-filter="governance" onclick="filterConsole('governance')">05. GOVERNANÇA</button>
+        </div>
+      </div>
+      <div class="console-body" id="consoleLogs">
+        <!-- Linhas de atividade geradas em tempo real -->
+      </div>
+    </section>
+
     <!-- Inspetor de Governança (CA-08) -->
     <section class="gov-section" aria-label="Inspetor de Governança">
       <div class="gov-panel">
