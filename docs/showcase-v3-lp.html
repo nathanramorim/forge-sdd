@@ -3,24 +3,21 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>FORGE-SDD 3.0 — Autonomous Engineering Architecture</title>
+  <title>FORGE-SDD 3.0 — Esquadrão Autônomo de 5 Especialistas</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
     :root {
-      --bg-obsidian: #050608;
-      --bg-panel: rgba(12, 15, 22, 0.72);
+      --bg-studio: #090b10;
       --border-hairline: rgba(255, 255, 255, 0.08);
-      --accent-copper: #e58e3c;
-      --accent-cyan: #38bdf8;
-      --accent-emerald: #10b981;
+      --accent-amber: #f59e0b;
     }
 
     body {
       font-family: 'Plus Jakarta Sans', sans-serif;
-      background-color: var(--bg-obsidian);
+      background-color: var(--bg-studio);
       color: #e2e8f0;
       overflow-x: hidden;
     }
@@ -35,43 +32,49 @@
     }
 
     .panel-glass {
-      background: linear-gradient(165deg, rgba(18, 22, 31, 0.78) 0%, rgba(8, 10, 15, 0.92) 100%);
+      background: linear-gradient(165deg, rgba(20, 25, 36, 0.78) 0%, rgba(10, 13, 20, 0.92) 100%);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
       border: 1px solid var(--border-hairline);
-      transition: border-color 0.35s cubic-bezier(0.16, 1, 0.3, 1), transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s ease;
+      transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     .panel-glass:hover {
-      border-color: rgba(229, 142, 60, 0.38);
-      transform: translateY(-2px);
-      box-shadow: 0 24px 48px -18px rgba(0, 0, 0, 0.8), 0 0 32px -12px rgba(229, 142, 60, 0.18);
+      border-color: rgba(245, 158, 11, 0.4);
+      transform: translateY(-3px);
+      box-shadow: 0 24px 48px -18px rgba(0, 0, 0, 0.8), 0 0 32px -12px rgba(245, 158, 11, 0.18);
     }
 
     .panel-active {
-      border-color: rgba(229, 142, 60, 0.65) !important;
-      box-shadow: 0 0 40px -10px rgba(229, 142, 60, 0.25);
+      border-color: rgba(245, 158, 11, 0.75) !important;
+      box-shadow: 0 0 42px -10px rgba(245, 158, 11, 0.28);
+      transform: translateY(-4px);
     }
 
-    .grid-backdrop {
-      background-image:
-        linear-gradient(to right, rgba(255, 255, 255, 0.025) 1px, transparent 1px),
-        linear-gradient(to bottom, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
-      background-size: 64px 64px;
+    .studio-backdrop {
+      background: radial-gradient(circle at 50% 0%, rgba(30, 41, 59, 0.35) 0%, rgba(9, 11, 16, 1) 70%);
     }
 
-    #three-hero-canvas {
-      position: absolute;
-      inset: 0;
+    #three-stage-container {
+      position: relative;
+      width: 100%;
+      height: 500px;
+      border-radius: 1.5rem;
+      overflow: hidden;
+      background: radial-gradient(circle at 50% 35%, #161d2f 0%, #090c14 75%);
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      box-shadow: 0 30px 80px -20px rgba(0, 0, 0, 0.85), inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
+    }
+
+    #three-characters-canvas {
       width: 100%;
       height: 100%;
-      z-index: 0;
-      pointer-events: auto;
+      display: block;
+      cursor: grab;
     }
 
-    .hero-gradient-mask {
-      background: radial-gradient(circle at 65% 50%, transparent 15%, rgba(5, 6, 8, 0.75) 65%, #050608 95%);
-      pointer-events: none;
+    #three-characters-canvas:active {
+      cursor: grabbing;
     }
 
     .hairline-divider {
@@ -80,220 +83,189 @@
     }
   </style>
 </head>
-<body class="min-h-screen antialiased selection:bg-amber-500/30 selection:text-amber-200 grid-backdrop">
+<body class="min-h-screen antialiased selection:bg-amber-500/30 selection:text-amber-200 studio-backdrop">
 
   <!-- TOP NAVIGATION BAR -->
-  <header class="sticky top-0 z-30 border-b border-white/[0.06] bg-[#050608]/80 backdrop-blur-md">
+  <header class="sticky top-0 z-30 border-b border-white/[0.06] bg-[#090b10]/85 backdrop-blur-md">
     <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
       <div class="flex items-center gap-4">
-        <div class="w-2.5 h-2.5 rounded-full bg-[#e58e3c] shadow-[0_0_12px_#e58e3c]"></div>
+        <div class="w-2.5 h-2.5 rounded-full bg-amber-400 shadow-[0_0_12px_#f59e0b]"></div>
         <span class="mono text-xs tracking-[0.22em] uppercase text-white font-semibold">FORGE-SDD</span>
         <span class="mono text-[11px] px-2 py-0.5 rounded border border-white/10 text-slate-400">v3.0.0-beta</span>
       </div>
       <div class="hidden md:flex items-center gap-8 text-xs mono uppercase tracking-widest text-slate-400">
-        <a href="#arquitetura" class="hover:text-white transition-colors">01. Esteira 5 Estações</a>
+        <a href="#esquadrao" class="hover:text-white transition-colors">01. Os 5 Especialistas</a>
         <a href="#comparativo" class="hover:text-white transition-colors">02. Evolução v2 → v3</a>
         <a href="#governanca" class="hover:text-white transition-colors">03. Painel Executivo</a>
       </div>
     </div>
   </header>
 
-  <!-- HERO SECTION WITH INTERACTIVE THREE.JS TOPOLOGY -->
-  <section class="relative min-h-[86vh] flex items-center overflow-hidden border-b border-white/[0.07]">
-    <canvas id="three-hero-canvas" aria-label="Malha 3D interativa das 5 estações do Forge-SDD"></canvas>
-    <div class="absolute inset-0 hero-gradient-mask z-0"></div>
-
-    <div class="relative z-10 max-w-7xl mx-auto px-6 py-24 w-full grid grid-cols-1 lg:grid-cols-12 gap-12 items-center pointer-events-none">
-      <div class="lg:col-span-7 space-y-8 pointer-events-auto">
-        <div class="inline-flex items-center gap-3 px-3.5 py-1.5 rounded-full border border-white/10 bg-white/[0.03]">
-          <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>
-          <span class="mono text-[11px] uppercase tracking-[0.18em] text-slate-300">Arquitetura de Engenharia Autônoma</span>
-        </div>
-
-        <h1 class="font-display text-4xl sm:text-6xl font-bold tracking-tight text-white leading-[1.06]">
-          De um agente solitário para uma
-          <span class="bg-gradient-to-r from-[#f6b87e] via-[#e58e3c] to-[#38bdf8] bg-clip-text text-transparent">
-            esteira de 5 especialistas em paralelo.
-          </span>
-        </h1>
-
-        <p class="text-base sm:text-lg text-slate-300/90 max-w-2xl leading-relaxed font-light">
-          No Forge-SDD 3.0, você deixa de supervisionar cada linha gerada pela IA. Você alinha a visão com o <strong class="font-medium text-white">Líder</strong>, aprova a especificação e aciona uma linha de produção onde planejamento, construção paralela e auditoria independente operam com rigor determinístico.
-        </p>
-
-        <!-- Interactive 3D Station Switcher -->
-        <div class="pt-2">
-          <div class="mono text-[11px] uppercase tracking-[0.16em] text-slate-400 mb-3">
-            Inspecionar estação no núcleo 3D (passe o mouse ou clique):
-          </div>
-          <div class="flex flex-wrap gap-2" id="station-buttons">
-            <button data-station="0" class="station-btn active mono text-xs px-3.5 py-2 rounded border border-amber-500/50 bg-amber-500/10 text-amber-200 transition-all">
-              01 // Líder
-            </button>
-            <button data-station="1" class="station-btn mono text-xs px-3.5 py-2 rounded border border-white/10 bg-white/[0.02] text-slate-300 hover:border-white/30 transition-all">
-              02 // Concepção
-            </button>
-            <button data-station="2" class="station-btn mono text-xs px-3.5 py-2 rounded border border-white/10 bg-white/[0.02] text-slate-300 hover:border-white/30 transition-all">
-              03 // Planejador
-            </button>
-            <button data-station="3" class="station-btn mono text-xs px-3.5 py-2 rounded border border-white/10 bg-white/[0.02] text-slate-300 hover:border-white/30 transition-all">
-              04 // Builders (Paralelo)
-            </button>
-            <button data-station="4" class="station-btn mono text-xs px-3.5 py-2 rounded border border-white/10 bg-white/[0.02] text-slate-300 hover:border-white/30 transition-all">
-              05 // Governança
-            </button>
-          </div>
-        </div>
-
-        <!-- Live Telemetry HUD Card -->
-        <div id="hud-station-detail" class="panel-glass rounded-xl p-5 max-w-xl border-l-2 border-l-[#e58e3c]">
-          <div class="flex items-center justify-between mb-1.5">
-            <span id="hud-code" class="mono text-[11px] uppercase tracking-widest text-[#e58e3c]">ESTAÇÃO 01 // ORQUESTRAÇÃO CENTRAL</span>
-            <span id="hud-badge" class="mono text-[10px] px-2 py-0.5 rounded bg-white/5 text-slate-300 border border-white/10">PONTO DE CONTATO HUMANO</span>
-          </div>
-          <h2 id="hud-title" class="text-lg font-semibold text-white">O Líder (Maestro da Operação)</h2>
-          <p id="hud-desc" class="text-sm text-slate-300/90 mt-1 leading-relaxed">
-            Recebe sua demanda, coordena as demais estações em ondas paralelas ou sequenciais e devolve um Painel Executivo consolidado mostrando o que foi entregue, o estado de cada etapa e o que resta.
-          </p>
-        </div>
+  <!-- HERO + INTERACTIVE 3D CHARACTER DIORAMA -->
+  <section class="py-14 px-6 max-w-7xl mx-auto">
+    <div class="text-center max-w-4xl mx-auto mb-10 space-y-5">
+      <div class="inline-flex items-center gap-3 px-3.5 py-1.5 rounded-full border border-white/10 bg-white/[0.03]">
+        <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+        <span class="mono text-[11px] uppercase tracking-[0.18em] text-slate-300">Sua Fábrica Autônoma em 5 Estações</span>
       </div>
 
-      <!-- Right 3D Legend Overlay -->
-      <div class="lg:col-span-5 flex flex-col items-end justify-end pointer-events-none">
-        <div class="panel-glass rounded-xl p-4 border border-white/10 max-w-xs w-full space-y-2.5 text-xs pointer-events-auto">
-          <div class="mono text-[10px] uppercase tracking-widest text-slate-400 border-b border-white/10 pb-2">
-            Telemetria da Topologia 3D
-          </div>
-          <div class="flex items-center justify-between">
-            <span class="text-slate-400">Núcleo Central (Âmbar)</span>
-            <span class="mono text-amber-300">Líder & Portão C</span>
-          </div>
-          <div class="flex items-center justify-between">
-            <span class="text-slate-400">Anéis Orbitais (Ciano)</span>
-            <span class="mono text-sky-300">Fila & Construtores</span>
-          </div>
-          <div class="flex items-center justify-between">
-            <span class="text-slate-400">Escudo Externo (Esmeralda)</span>
-            <span class="mono text-emerald-300">Governança Read-Only</span>
-          </div>
-          <div class="pt-1 text-[11px] text-slate-500 mono">
-            Arraste ou mova o cursor para rotacionar a malha.
-          </div>
+      <h1 class="font-display text-4xl sm:text-6xl font-bold tracking-tight text-white leading-[1.06]">
+        De um faz-tudo solitário para um
+        <span class="bg-gradient-to-r from-amber-300 via-orange-400 to-sky-400 bg-clip-text text-transparent">
+          esquadrão de 5 especialistas com personalidade própria.
+        </span>
+      </h1>
+
+      <p class="text-base sm:text-lg text-slate-300/90 max-w-3xl mx-auto leading-relaxed font-light">
+        No Forge-SDD 3.0, cada agente tem um papel claro, um temperamento próprio e limites rigorosos. Você conversa com o <strong class="font-medium text-white">Líder</strong>, aprova a planta do <strong class="font-medium text-white">Arquiteto</strong> e assiste ao <strong class="font-medium text-white">Planejador</strong>, aos <strong class="font-medium text-white">Gêmeos Construtores</strong> e ao <strong class="font-medium text-white">Auditor Imparcial</strong> entregarem seu projeto.
+      </p>
+    </div>
+
+    <!-- CHARACTER SELECTOR PILLS -->
+    <div class="flex flex-wrap items-center justify-center gap-2.5 mb-6" id="station-buttons">
+      <button data-station="0" class="station-btn mono text-xs px-4 py-2.5 rounded-full border border-amber-400/60 bg-amber-400/15 text-amber-200 transition-all">
+        01 // O Líder (Maestro)
+      </button>
+      <button data-station="1" class="station-btn mono text-xs px-4 py-2.5 rounded-full border border-white/10 bg-white/[0.03] text-slate-300 hover:border-white/30 transition-all">
+        02 // Arquiteto (Óculos & Planta)
+      </button>
+      <button data-station="2" class="station-btn mono text-xs px-4 py-2.5 rounded-full border border-white/10 bg-white/[0.03] text-slate-300 hover:border-white/30 transition-all">
+        03 // Planejador (Estrategista)
+      </button>
+      <button data-station="3" class="station-btn mono text-xs px-4 py-2.5 rounded-full border border-white/10 bg-white/[0.03] text-slate-300 hover:border-white/30 transition-all">
+        04 // Gêmeos Builders (Em Paralelo)
+      </button>
+      <button data-station="4" class="station-btn mono text-xs px-4 py-2.5 rounded-full border border-white/10 bg-white/[0.03] text-slate-300 hover:border-white/30 transition-all">
+        05 // Auditor (Monóculo & Escudo)
+      </button>
+      <button data-station="-1" class="station-btn mono text-xs px-4 py-2.5 rounded-full border border-white/10 bg-white/[0.03] text-slate-400 hover:text-white transition-all">
+        Visão Completa da Bancada
+      </button>
+    </div>
+
+    <!-- 3D CHARACTERS STAGE -->
+    <div id="three-stage-container">
+      <canvas id="three-characters-canvas" aria-label="Palco 3D interativo com os 5 personagens do Forge-SDD"></canvas>
+
+      <!-- Floating Character Personality Bio Overlay -->
+      <div class="absolute bottom-5 left-5 right-5 md:right-auto md:max-w-md panel-glass rounded-2xl p-5 border-l-2 border-l-amber-400 pointer-events-none">
+        <div class="flex items-center justify-between gap-2 mb-1">
+          <span id="hud-code" class="mono text-[11px] uppercase tracking-widest text-amber-300">ESTAÇÃO 01 // O MAESTRO CALMO</span>
+          <span id="hud-trait" class="mono text-[10px] px-2 py-0.5 rounded bg-white/10 text-slate-200">LIDERANÇA & SÍNTESE</span>
         </div>
+        <h2 id="hud-title" class="text-lg font-bold text-white">O Líder (Orquestrador)</h2>
+        <p id="hud-desc" class="text-xs sm:text-sm text-slate-300 mt-1 leading-relaxed">
+          Sereno, organizado e direto ao ponto. Com sua coroa de antena e prancheta luminosa, ele ouve sua ideia, aciona cada colega na hora certa e traduz tudo em um Painel Executivo limpo para você.
+        </p>
+      </div>
+
+      <!-- Top Right Stage Hint -->
+      <div class="hidden sm:flex absolute top-4 right-4 items-center gap-2 px-3 py-1.5 rounded-full bg-black/40 border border-white/10 backdrop-blur-md text-[11px] mono text-slate-300 pointer-events-none">
+        <span>Clique nos personagens 3D ou nos botões acima para focar a câmera</span>
       </div>
     </div>
   </section>
 
-  <!-- SECTION 1: AS 5 ESTAÇÕES EXPLICADAS DE FORMA EXECUTIVA -->
-  <section id="arquitetura" class="py-24 px-6 max-w-7xl mx-auto">
-    <div class="flex flex-col md:flex-row md:items-end justify-between mb-14 gap-6">
+  <!-- SECTION 1: PERSONALIDADE E PAPEL DE CADA PERSONAGEM -->
+  <section id="esquadrao" class="py-16 px-6 max-w-7xl mx-auto">
+    <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
       <div>
-        <div class="mono text-xs uppercase tracking-[0.2em] text-[#e58e3c] mb-2">01 // Divisão de Responsabilidades</div>
-        <h2 class="font-display text-3xl sm:text-4xl font-bold text-white">Cinco estações. Zero sobreposição de função.</h2>
+        <div class="mono text-xs uppercase tracking-[0.2em] text-amber-400 mb-2">01 // Conheça o Esquadrão</div>
+        <h2 class="font-display text-3xl sm:text-4xl font-bold text-white">Cada personagem tem um talento e uma regra de ouro.</h2>
       </div>
       <p class="text-sm text-slate-400 max-w-md leading-relaxed">
-        Assim como em uma operação industrial de alta precisão, quem projeta não executa, e quem executa jamais audita a própria entrega.
+        Clique em qualquer card abaixo para aproximar a câmera 3D do personagem correspondente no palco acima.
       </p>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
-      <!-- Card 1 -->
-      <div class="panel-glass rounded-xl p-6 flex flex-col justify-between" data-card-station="0">
+      <!-- Card 1: Líder -->
+      <div class="panel-glass rounded-2xl p-6 flex flex-col justify-between cursor-pointer" data-card-station="0">
         <div>
-          <div class="flex items-center justify-between mb-6">
-            <span class="mono text-xs text-[#e58e3c] font-semibold">01 / LÍDER</span>
-            <svg class="w-5 h-5 text-[#e58e3c]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              <circle cx="12" cy="12" r="3"/><path d="M12 2v4m0 12v4M2 12h4m12 0h4"/>
-            </svg>
+          <div class="flex items-center justify-between mb-4">
+            <span class="mono text-xs text-amber-400 font-semibold">01 / O LÍDER</span>
+            <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
           </div>
-          <h3 class="text-base font-semibold text-white">Orquestrador Executivo</h3>
-          <p class="text-xs text-slate-400 mono mt-1 mb-4">Gerente de Operações</p>
+          <h3 class="text-base font-bold text-white">O Maestro Calmo</h3>
+          <p class="text-xs text-amber-300/80 mono mt-0.5 mb-3">Coroa Dourada & Prancheta</p>
           <p class="text-sm text-slate-300/90 leading-relaxed">
-            Seu único interlocutor. Distribui o trabalho entre os especialistas e consolida o relatório final de progresso.
+            Seu único ponto de contato. Nunca escreve código no impulso: coordena a equipe e te entrega o resumo executivo pronto.
           </p>
         </div>
-        <div class="mt-6 pt-4 border-t border-white/[0.06] mono text-[11px] text-amber-300/90">
-          INTERAÇÃO HUMANA DIRETA
+        <div class="mt-5 pt-3 border-t border-white/[0.06] mono text-[10px] text-slate-400 uppercase">
+          Personalidade: Diplomático & Preciso
         </div>
       </div>
 
-      <!-- Card 2 -->
-      <div class="panel-glass rounded-xl p-6 flex flex-col justify-between" data-card-station="1">
+      <!-- Card 2: PM + Arquiteto -->
+      <div class="panel-glass rounded-2xl p-6 flex flex-col justify-between cursor-pointer" data-card-station="1">
         <div>
-          <div class="flex items-center justify-between mb-6">
+          <div class="flex items-center justify-between mb-4">
             <span class="mono text-xs text-sky-400 font-semibold">02 / CONCEPÇÃO</span>
-            <svg class="w-5 h-5 text-sky-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              <path d="M3 21h18M5 21V7l7-4 7 4v14M9 9h6m-6 4h6"/>
-            </svg>
+            <span class="w-2.5 h-2.5 rounded-full bg-sky-400"></span>
           </div>
-          <h3 class="text-base font-semibold text-white">Produto & Arquiteto</h3>
-          <p class="text-xs text-slate-400 mono mt-1 mb-4">Autoria da Especificação</p>
+          <h3 class="text-base font-bold text-white">O Arquiteto Curioso</h3>
+          <p class="text-xs text-sky-300/80 mono mt-0.5 mb-3">Óculos Redondos & Planta</p>
           <p class="text-sm text-slate-300/90 leading-relaxed">
-            Converte sua necessidade em especificação técnica e mapeia o que já existe no sistema antes de propor código novo.
+            Adora investigar o que já existe para não reinventar a roda. Desenha a planta completa e espera seu "De Acordo" para liberar a obra.
           </p>
         </div>
-        <div class="mt-6 pt-4 border-t border-white/[0.06] mono text-[11px] text-sky-300/90">
-          EXIGE SUA APROVAÇÃO NA PLANTA
+        <div class="mt-5 pt-3 border-t border-white/[0.06] mono text-[10px] text-slate-400 uppercase">
+          Personalidade: Investigativo & Criativo
         </div>
       </div>
 
-      <!-- Card 3 -->
-      <div class="panel-glass rounded-xl p-6 flex flex-col justify-between" data-card-station="2">
+      <!-- Card 3: Planejador -->
+      <div class="panel-glass rounded-2xl p-6 flex flex-col justify-between cursor-pointer" data-card-station="2">
         <div>
-          <div class="flex items-center justify-between mb-6">
+          <div class="flex items-center justify-between mb-4">
             <span class="mono text-xs text-indigo-400 font-semibold">03 / PLANEJADOR</span>
-            <svg class="w-5 h-5 text-indigo-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              <rect x="3" y="4" width="18" height="5" rx="1"/><rect x="3" y="13" width="8" height="7" rx="1"/><rect x="13" y="13" width="8" height="7" rx="1"/>
-            </svg>
+            <span class="w-2.5 h-2.5 rounded-full bg-indigo-400"></span>
           </div>
-          <h3 class="text-base font-semibold text-white">Engenharia de Plano</h3>
-          <p class="text-xs text-slate-400 mono mt-1 mb-4">Decomposição & Regras</p>
+          <h3 class="text-base font-bold text-white">O Estrategista</h3>
+          <p class="text-xs text-indigo-300/80 mono mt-0.5 mb-3">Headset & Blocos P / M / G</p>
           <p class="text-sm text-slate-300/90 leading-relaxed">
-            Divide a especificação aprovada em unidades atômicas e vincula apenas as diretrizes de segurança e arquitetura pertinentes.
+            Metódico, divide qualquer projeto complexo em blocos pequenos e separa só a página do manual que cada tarefa vai precisar.
           </p>
         </div>
-        <div class="mt-6 pt-4 border-t border-white/[0.06] mono text-[11px] text-indigo-300/90">
-          ALIMENTA A FILA DETERMINÍSTICA
+        <div class="mt-5 pt-3 border-t border-white/[0.06] mono text-[10px] text-slate-400 uppercase">
+          Personalidade: Organizado & Focado
         </div>
       </div>
 
-      <!-- Card 4 -->
-      <div class="panel-glass rounded-xl p-6 flex flex-col justify-between" data-card-station="3">
+      <!-- Card 4: Builders -->
+      <div class="panel-glass rounded-2xl p-6 flex flex-col justify-between cursor-pointer" data-card-station="3">
         <div>
-          <div class="flex items-center justify-between mb-6">
+          <div class="flex items-center justify-between mb-4">
             <span class="mono text-xs text-cyan-400 font-semibold">04 / BUILDERS</span>
-            <svg class="w-5 h-5 text-cyan-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
-            </svg>
+            <span class="w-2.5 h-2.5 rounded-full bg-cyan-400"></span>
           </div>
-          <h3 class="text-base font-semibold text-white">Execução em Fila</h3>
-          <p class="text-xs text-slate-400 mono mt-1 mb-4">Construção Paralela</p>
+          <h3 class="text-base font-bold text-white">Os Gêmeos de Obra</h3>
+          <p class="text-xs text-cyan-300/80 mono mt-0.5 mb-3">Capacetes & Fila Paralela</p>
           <p class="text-sm text-slate-300/90 leading-relaxed">
-            Múltiplos agentes consomem a fila: frentes sem conflito de arquivos avançam simultaneamente; frentes dependentes aguardam.
+            Trabalham juntos sem esbarrar um no outro: pegam tarefas independentes ao mesmo tempo e colocam em fila o que tem dependência.
           </p>
         </div>
-        <div class="mt-6 pt-4 border-t border-white/[0.06] mono text-[11px] text-cyan-300/90">
-          PARALELISMO SEM COLISÃO
+        <div class="mt-5 pt-3 border-t border-white/[0.06] mono text-[10px] text-slate-400 uppercase">
+          Personalidade: Ágeis & Incansáveis
         </div>
       </div>
 
-      <!-- Card 5 -->
-      <div class="panel-glass rounded-xl p-6 flex flex-col justify-between" data-card-station="4">
+      <!-- Card 5: Governança -->
+      <div class="panel-glass rounded-2xl p-6 flex flex-col justify-between cursor-pointer" data-card-station="4">
         <div>
-          <div class="flex items-center justify-between mb-6">
+          <div class="flex items-center justify-between mb-4">
             <span class="mono text-xs text-emerald-400 font-semibold">05 / GOVERNANÇA</span>
-            <svg class="w-5 h-5 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-            </svg>
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
           </div>
-          <h3 class="text-base font-semibold text-white">Auditoria Independente</h3>
-          <p class="text-xs text-slate-400 mono mt-1 mb-4">Operação Somente Leitura</p>
+          <h3 class="text-base font-bold text-white">O Guardião Imparcial</h3>
+          <p class="text-xs text-emerald-300/80 mono mt-0.5 mb-3">Monóculo & Mãos Atrás</p>
           <p class="text-sm text-slate-300/90 leading-relaxed">
-            Sem permissão de escrita em código. Inspeciona conformidade arquitetural, testes e segurança antes de emitir o laudo ao Líder.
+            Mantém as mãozinhas para trás porque é proibido de editar código. Examina segurança, testes e arquitetura antes de carimbar a entrega.
           </p>
         </div>
-        <div class="mt-6 pt-4 border-t border-white/[0.06] mono text-[11px] text-emerald-300/90">
-          AUDITORIA IMPARCIAL (CAMADA B)
+        <div class="mt-5 pt-3 border-t border-white/[0.06] mono text-[10px] text-slate-400 uppercase">
+          Personalidade: Rigoroso & Imparcial
         </div>
       </div>
     </div>
@@ -302,87 +274,55 @@
   <div class="hairline-divider max-w-7xl mx-auto"></div>
 
   <!-- SECTION 2: ANTES (v2.x) VS AGORA (v3.0) -->
-  <section id="comparativo" class="py-24 px-6 max-w-7xl mx-auto">
-    <div class="mb-14">
-      <div class="mono text-xs uppercase tracking-[0.2em] text-sky-400 mb-2">02 // Mudança de Paradigma</div>
-      <h2 class="font-display text-3xl sm:text-4xl font-bold text-white">O que muda da geração v2.x para o Forge-SDD 3.0</h2>
+  <section id="comparativo" class="py-20 px-6 max-w-7xl mx-auto">
+    <div class="mb-12">
+      <div class="mono text-xs uppercase tracking-[0.2em] text-sky-400 mb-2">02 // O Que Mudou</div>
+      <h2 class="font-display text-3xl sm:text-4xl font-bold text-white">Por que sair de 1 agente genérico para 5 especialistas?</h2>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
       <!-- Modelo Anterior -->
       <div class="panel-glass rounded-2xl p-8 border border-white/[0.07]">
         <div class="flex items-center justify-between pb-5 mb-6 border-b border-white/[0.07]">
-          <span class="mono text-xs uppercase tracking-widest text-slate-400">ARQUITETURA ANTERIOR (v2.x)</span>
-          <span class="mono text-xs px-2.5 py-1 rounded bg-white/[0.04] text-slate-400">Fluxo Linear Único</span>
+          <span class="mono text-xs uppercase tracking-widest text-slate-400">VERSÃO ANTERIOR (v2.x)</span>
+          <span class="mono text-xs px-2.5 py-1 rounded bg-white/[0.04] text-slate-400">O Faz-Tudo Solitário</span>
         </div>
 
-        <div class="space-y-6">
-          <div class="grid grid-cols-12 gap-4">
-            <div class="col-span-3 mono text-xs text-slate-500 pt-0.5">TOPOLOGIA</div>
-            <div class="col-span-9 text-sm text-slate-300">
-              <strong class="text-white font-medium block mb-1">Agente único acumulando papéis</strong>
-              A mesma sessão que escrevia o código era responsável por revisar a própria entrega, reduzindo o rigor crítico.
-            </div>
+        <div class="space-y-5 text-sm text-slate-300">
+          <div>
+            <strong class="text-white font-medium block mb-1">1. O mesmo agente construía e avaliava o próprio trabalho</strong>
+            Sem um auditor separado, erros sutis de arquitetura ou segurança passavam despercebidos na revisão.
           </div>
-          <div class="grid grid-cols-12 gap-4">
-            <div class="col-span-3 mono text-xs text-slate-500 pt-0.5">EXECUÇÃO</div>
-            <div class="col-span-9 text-sm text-slate-300">
-              <strong class="text-white font-medium block mb-1">Processamento estritamente sequencial</strong>
-              Mesmo tarefas sem relação entre si precisavam aguardar uma única fila manual em texto.
-            </div>
+          <div>
+            <strong class="text-white font-medium block mb-1">2. Uma tarefa por vez, mesmo quando independentes</strong>
+            Tudo rodava em fila única manual, deixando projetos maiores lentos.
           </div>
-          <div class="grid grid-cols-12 gap-4">
-            <div class="col-span-3 mono text-xs text-slate-500 pt-0.5">CONTEXTO</div>
-            <div class="col-span-9 text-sm text-slate-300">
-              <strong class="text-white font-medium block mb-1">Constituição monolítica</strong>
-              Todas as regras do projeto eram carregadas integralmente a cada sessão, consumindo janela de contexto com instruções irrelevantes à tarefa.
-            </div>
-          </div>
-          <div class="grid grid-cols-12 gap-4">
-            <div class="col-span-3 mono text-xs text-slate-500 pt-0.5">APRENDIZADO</div>
-            <div class="col-span-9 text-sm text-slate-300">
-              <strong class="text-white font-medium block mb-1">Catalogação manual de padrões</strong>
-              Habilidades reutilizáveis dependiam de criação manual pelo desenvolvedor.
-            </div>
+          <div>
+            <strong class="text-white font-medium block mb-1">3. Manual gigante carregado do zero a cada pergunta</strong>
+            O agente precisava ler todas as regras do projeto sempre, diluindo a atenção no que realmente importava.
           </div>
         </div>
       </div>
 
       <!-- Modelo Novo -->
-      <div class="panel-glass rounded-2xl p-8 border border-[#e58e3c]/40 shadow-[0_0_50px_-15px_rgba(229,142,60,0.18)]">
+      <div class="panel-glass rounded-2xl p-8 border border-amber-500/40">
         <div class="flex items-center justify-between pb-5 mb-6 border-b border-white/[0.1]">
-          <span class="mono text-xs uppercase tracking-widest text-[#e58e3c]">NOVA ARQUITETURA (v3.0.0-beta)</span>
-          <span class="mono text-xs px-2.5 py-1 rounded bg-[#e58e3c]/15 text-amber-200 border border-[#e58e3c]/30">Orquestração Distribuída</span>
+          <span class="mono text-xs uppercase tracking-widest text-amber-300">NOVA VERSÃO (v3.0.0-beta)</span>
+          <span class="mono text-xs px-2.5 py-1 rounded bg-amber-500/15 text-amber-200 border border-amber-500/30">Esquadrão Coordenado</span>
         </div>
 
-        <div class="space-y-6">
-          <div class="grid grid-cols-12 gap-4">
-            <div class="col-span-3 mono text-xs text-[#e58e3c] pt-0.5">TOPOLOGIA</div>
-            <div class="col-span-9 text-sm text-slate-200">
-              <strong class="text-white font-semibold block mb-1">Separação estrita em 5 Estações</strong>
-              Concepção, Planejamento, Construção e Auditoria operam com permissões isoladas sob coordenação do Líder.
-            </div>
+        <div class="space-y-5 text-sm text-slate-200">
+          <div>
+            <strong class="text-white font-semibold block mb-1">1. Separação real de papéis e personalidades</strong>
+            Quem planeja não programa; quem programa não aprova; e o Auditor analisa tudo em modo somente leitura.
           </div>
-          <div class="grid grid-cols-12 gap-4">
-            <div class="col-span-3 mono text-xs text-[#e58e3c] pt-0.5">EXECUÇÃO</div>
-            <div class="col-span-9 text-sm text-slate-200">
-              <strong class="text-white font-semibold block mb-1">Motor de fila com detecção de colisão</strong>
-              O binário avalia os arquivos tocados: tarefas independentes rodam em paralelo; dependências aguardam na fila automaticamente.
-            </div>
+          <div>
+            <strong class="text-white font-semibold block mb-1">2. Gêmeos Builders trabalhando em paralelo na fila</strong>
+            Tarefas que não mexem nos mesmos arquivos avançam juntas; tarefas com dependência aguardam sua vez automaticamente.
           </div>
-          <div class="grid grid-cols-12 gap-4">
-            <div class="col-span-3 mono text-xs text-[#e58e3c] pt-0.5">CONTEXTO</div>
-            <div class="col-span-9 text-sm text-slate-200">
-              <strong class="text-white font-semibold block mb-1">Constituição por IDs + Regras sob demanda</strong>
-              Princípios imutáveis ficam em 1 página indexada; guias operacionais detalhados são carregados somente quando a tarefa exige.
-            </div>
-          </div>
-          <div class="grid grid-cols-12 gap-4">
-            <div class="col-span-3 mono text-xs text-[#e58e3c] pt-0.5">APRENDIZADO</div>
-            <div class="col-span-9 text-sm text-slate-200">
-              <strong class="text-white font-semibold block mb-1">Motor de Auto-Skills (Regra de Três)</strong>
-              Procedimentos repetidos 3 vezes são convertidos e sincronizados automaticamente como Skills reutilizáveis.
-            </div>
+          <div>
+            <strong class="text-white font-semibold block mb-1">3. Manual sob demanda + Memória que aprende sozinha (Auto-Skills)</strong>
+            Cada agente recebe apenas a regra exata da sua tarefa e, quando a equipe repete um padrão 3 vezes, ele vira uma habilidade automática.
           </div>
         </div>
       </div>
@@ -391,370 +331,596 @@
 
   <div class="hairline-divider max-w-7xl mx-auto"></div>
 
-  <!-- SECTION 3: TRIPLO PORTÃO DE GOVERNANÇA & PAINEL EXECUTIVO -->
-  <section id="governanca" class="py-24 px-6 max-w-7xl mx-auto">
+  <!-- SECTION 3: PAINEL EXECUTIVO DO LÍDER -->
+  <section id="governanca" class="py-20 px-6 max-w-7xl mx-auto">
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-      <div class="lg:col-span-5 space-y-6">
-        <div class="mono text-xs uppercase tracking-[0.2em] text-emerald-400">03 // Governança em 3 Camadas</div>
+      <div class="lg:col-span-5 space-y-5">
+        <div class="mono text-xs uppercase tracking-[0.2em] text-emerald-400">03 // Visão Humana Simplificada</div>
         <h2 class="font-display text-3xl sm:text-4xl font-bold text-white leading-tight">
-          Visibilidade executiva sem ruído operacional.
+          No final, o Líder te entrega um Painel Executivo claro.
         </h2>
         <p class="text-sm text-slate-300/90 leading-relaxed">
-          Nenhuma entrega chega à sua tela sem antes atravessar duas barreiras técnicas independentes. Você recebe apenas o diagnóstico consolidado para decidir:
+          Você não precisa vasculhar dezenas de arquivos técnicos para saber em que pé está o projeto. O Líder consolida o laudo do Auditor e mostra exatamente o que já foi feito, como está cada etapa e o que falta desenvolver.
         </p>
-
-        <div class="space-y-4 pt-2">
-          <div class="p-4 rounded-xl bg-white/[0.02] border border-white/[0.07]">
-            <div class="flex items-center justify-between">
-              <span class="mono text-xs font-semibold text-sky-300">CAMADA A // PORTÃO DETERMINÍSTICO</span>
-              <span class="mono text-[10px] text-slate-500">CLI GO NATIVO</span>
-            </div>
-            <p class="text-xs text-slate-400 mt-1.5 leading-relaxed">
-              Validação instantânea de testes automatizados, ausência de credenciais expostas, limites de arquivo e vínculo com a especificação.
-            </p>
-          </div>
-
-          <div class="p-4 rounded-xl bg-white/[0.02] border border-white/[0.07]">
-            <div class="flex items-center justify-between">
-              <span class="mono text-xs font-semibold text-emerald-300">CAMADA B // AUDITORIA SEMÂNTICA READ-ONLY</span>
-              <span class="mono text-[10px] text-slate-500">AGENTE INDEPENDENTE</span>
-            </div>
-            <p class="text-xs text-slate-400 mt-1.5 leading-relaxed">
-              Cruza o código entregue contra os IDs da Constituição e emite veredito fundamentado em evidências (<span class="mono text-slate-300">conforme</span>, <span class="mono text-slate-300">ressalvas</span> ou <span class="mono text-slate-300">bloqueado</span>).
-            </p>
-          </div>
-
-          <div class="p-4 rounded-xl bg-white/[0.02] border border-[#e58e3c]/40">
-            <div class="flex items-center justify-between">
-              <span class="mono text-xs font-semibold text-[#e58e3c]">CAMADA C // PAINEL EXECUTIVO DO LÍDER</span>
-              <span class="mono text-[10px] text-amber-300/80">DECISÃO HUMANA</span>
-            </div>
-            <p class="text-xs text-slate-300 mt-1.5 leading-relaxed">
-              Apresenta o que já foi concluído, o estado de cada estação, eventuais habilidades aprendidas e o que resta no backlog.
-            </p>
-          </div>
-        </div>
       </div>
 
-      <!-- Executive Console Mockup -->
       <div class="lg:col-span-7 panel-glass rounded-2xl p-6 sm:p-8 border border-white/10">
         <div class="flex flex-wrap items-center justify-between gap-4 pb-5 mb-6 border-b border-white/[0.08]">
           <div>
-            <div class="mono text-[11px] uppercase tracking-widest text-slate-400">CONSOLE EXECUTIVO // CAMADA C</div>
-            <div class="text-base font-semibold text-white mt-0.5">Relatório de Fechamento de Onda — Feature 58</div>
+            <div class="mono text-[11px] uppercase tracking-widest text-slate-400">PAINEL DO LÍDER // CAMADA C</div>
+            <div class="text-base font-semibold text-white mt-0.5">Resumo Executivo da Entrega</div>
           </div>
           <div class="mono text-xs px-3 py-1 rounded border border-emerald-500/40 bg-emerald-500/10 text-emerald-300">
-            VEREDITO GLOBAL: CONFORME
+            AUDITORIA APROVADA
           </div>
         </div>
 
-        <div class="overflow-x-auto">
-          <table class="w-full text-left border-collapse">
-            <thead>
-              <tr class="border-b border-white/[0.08] mono text-[11px] uppercase text-slate-400">
-                <th class="py-3 pr-4">Unidade / Escopo</th>
-                <th class="py-3 px-3">Alocação</th>
-                <th class="py-3 px-3">Portão A</th>
-                <th class="py-3 pl-3 text-right">Auditoria B</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-white/[0.05] text-xs">
-              <tr>
-                <td class="py-3.5 pr-4 font-medium text-white">Especificação & Critérios de Aceite</td>
-                <td class="py-3.5 px-3 mono text-sky-300">Gate FLX-01</td>
-                <td class="py-3.5 px-3 mono text-emerald-400">PASS</td>
-                <td class="py-3.5 pl-3 text-right mono text-emerald-300">APROVADO</td>
-              </tr>
-              <tr>
-                <td class="py-3.5 pr-4 font-medium text-white">Constituição por IDs & Regras Modulares</td>
-                <td class="py-3.5 px-3 mono text-cyan-300">Onda Paralela 01</td>
-                <td class="py-3.5 px-3 mono text-emerald-400">PASS</td>
-                <td class="py-3.5 pl-3 text-right mono text-emerald-300">CONFORME</td>
-              </tr>
-              <tr>
-                <td class="py-3.5 pr-4 font-medium text-white">Papéis Canônicos das 5 Estações</td>
-                <td class="py-3.5 px-3 mono text-cyan-300">Onda Paralela 01</td>
-                <td class="py-3.5 px-3 mono text-emerald-400">PASS</td>
-                <td class="py-3.5 pl-3 text-right mono text-emerald-300">CONFORME</td>
-              </tr>
-              <tr>
-                <td class="py-3.5 pr-4 font-medium text-white">Motor de Fila & Portão Determinístico</td>
-                <td class="py-3.5 px-3 mono text-cyan-300">Onda Paralela 01</td>
-                <td class="py-3.5 px-3 mono text-emerald-400">PASS</td>
-                <td class="py-3.5 pl-3 text-right mono text-emerald-300">CONFORME</td>
-              </tr>
-              <tr>
-                <td class="py-3.5 pr-4 font-medium text-white">Integração CLI & Testes Golden</td>
-                <td class="py-3.5 px-3 mono text-indigo-300">Fila (pós Onda 01)</td>
-                <td class="py-3.5 px-3 mono text-emerald-400">PASS</td>
-                <td class="py-3.5 pl-3 text-right mono text-emerald-300">CONFORME</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <div class="mt-6 pt-5 border-t border-white/[0.08] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <div class="mono text-[11px] uppercase tracking-wider text-[#e58e3c]">Auto-Skill Extraída no Fechamento (DUP-05)</div>
-            <div class="text-xs text-slate-300 mt-0.5">
-              Padrão recorrente <span class="mono text-white">novo-subcomando-cli-sdd</span> catalogado e sincronizado entre agentes.
-            </div>
+        <div class="space-y-3 text-xs">
+          <div class="grid grid-cols-12 text-slate-400 mono uppercase pb-2 border-b border-white/[0.08]">
+            <div class="col-span-5">Etapa</div>
+            <div class="col-span-4">Responsável</div>
+            <div class="col-span-3 text-right">Status</div>
           </div>
-          <span class="mono text-[11px] px-3 py-1 rounded bg-white/[0.04] border border-white/10 text-slate-300 self-start sm:self-center">
-            0 PENDÊNCIAS NA FILA
-          </span>
+          <div class="grid grid-cols-12 items-center py-2.5 border-b border-white/[0.05]">
+            <div class="col-span-5 font-medium text-white">Planta & Critérios (Spec)</div>
+            <div class="col-span-4 text-sky-300 mono">02 // Arquiteto + Você</div>
+            <div class="col-span-3 text-right text-emerald-300 mono">Aprovada</div>
+          </div>
+          <div class="grid grid-cols-12 items-center py-2.5 border-b border-white/[0.05]">
+            <div class="col-span-5 font-medium text-white">Regras & Papéis da Equipe</div>
+            <div class="col-span-4 text-cyan-300 mono">04 // Builders (Paralelo)</div>
+            <div class="col-span-3 text-right text-emerald-300 mono">Conforme</div>
+          </div>
+          <div class="grid grid-cols-12 items-center py-2.5 border-b border-white/[0.05]">
+            <div class="col-span-5 font-medium text-white">Motor de Fila & Auto-Skills</div>
+            <div class="col-span-4 text-cyan-300 mono">04 // Builders (Paralelo)</div>
+            <div class="col-span-3 text-right text-emerald-300 mono">Conforme</div>
+          </div>
+          <div class="grid grid-cols-12 items-center py-2.5">
+            <div class="col-span-5 font-medium text-white">Inspeção de Segurança & Testes</div>
+            <div class="col-span-4 text-emerald-300 mono">05 // Auditor Read-Only</div>
+            <div class="col-span-3 text-right text-emerald-300 mono">0 Bloqueios</div>
+          </div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- THREE.JS INTERACTIVE 5-STATION TOPOLOGY SCRIPT -->
+  <!-- THREE.JS CUTE CHARACTERS DIORAMA SCRIPT -->
   <script>
     (function () {
-      const stationsData = [
+      const charactersMeta = [
         {
-          code: 'ESTAÇÃO 01 // ORQUESTRAÇÃO CENTRAL',
-          badge: 'PONTO DE CONTATO HUMANO',
-          title: 'O Líder (Maestro da Operação)',
-          desc: 'Recebe sua demanda, coordena as demais estações em ondas paralelas ou sequenciais e devolve um Painel Executivo consolidado mostrando o que foi entregue, o estado de cada etapa e o que resta.',
-          cameraTarget: { x: 0, y: 0.4, z: 0 }
+          code: 'ESTAÇÃO 01 // O MAESTRO CALMO',
+          trait: 'LIDERANÇA & SÍNTESE',
+          title: 'O Líder (Orquestrador)',
+          desc: 'Sereno, organizado e direto ao ponto. Com sua coroa de antena dourada e prancheta luminosa, ele ouve sua ideia, aciona cada colega na hora certa e traduz tudo em um Painel Executivo limpo para você.',
+          camPos: { x: -5.2, y: 1.75, z: 4.3 },
+          lookAt: { x: -5.2, y: 0.9, z: 0 }
         },
         {
-          code: 'ESTAÇÃO 02 // ESPECIFICAÇÃO & REUSO',
-          badge: 'PORTÃO HUMANO FLX-01',
+          code: 'ESTAÇÃO 02 // O ARQUITETO CURIOSO',
+          trait: 'ÓCULOS REDONDOS & PLANTA',
           title: 'Produto & Arquiteto',
-          desc: 'Investiga o que já existe no repositório para evitar duplicação e estrutura a especificação funcional e critérios de aceite. Nenhum código é iniciado sem sua validação na planta.',
-          cameraTarget: { x: -2.6, y: 1.1, z: 0.5 }
+          desc: 'Curioso e detalhista. Usa óculos redondos de arquiteto e carrega a planta enrolada debaixo do braço. Sempre checa o que já existe para economizar trabalho e pede seu OK antes da obra começar.',
+          camPos: { x: -2.6, y: 1.75, z: 4.3 },
+          lookAt: { x: -2.6, y: 0.9, z: 0 }
         },
         {
-          code: 'ESTAÇÃO 03 // ENGENHARIA DE PLANO',
-          badge: 'MAPEAMENTO DE REGRAS',
+          code: 'ESTAÇÃO 03 // O ESTRATEGISTA',
+          trait: 'HEADSET & BLOCOS P/M/G',
           title: 'O Planejador',
-          desc: 'Decompõe a especificação aprovada em tarefas atômicas (P/M/G), define dependências de execução e seleciona apenas os módulos de regras necessários para cada tarefa.',
-          cameraTarget: { x: -1.2, y: -1.3, z: 0.8 }
+          desc: 'Super focado e metódico. Com seu headset de controle, ele malabareia bloquinhos P, M e G no ar, organizando quem faz o quê e separando apenas a página certa do manual de regras.',
+          camPos: { x: 0, y: 1.75, z: 4.3 },
+          lookAt: { x: 0, y: 0.9, z: 0 }
         },
         {
-          code: 'ESTAÇÃO 04 // EXECUÇÃO ISOLADA',
-          badge: 'FILA & PARALELISMO',
-          title: 'Fila de Builders em Paralelo',
-          desc: 'Consome tarefas validadas sem conflito de arquivos. Frentes independentes avançam simultaneamente em subagentes dedicados; frentes com dependência aguardam liberação automática.',
-          cameraTarget: { x: 1.8, y: 0.9, z: 0.6 }
+          code: 'ESTAÇÃO 04 // OS GÊMEOS CONSTRUTORES',
+          trait: 'CAPACETE DE OBRA & PARALELISMO',
+          title: 'Os Builders (Execução em Paralelo)',
+          desc: 'Dois robozinhos gêmeos cheios de energia usando capacetes de obra. Trabalham ao mesmo tempo nas tarefas que não colidem e respeitam a fila quando uma etapa depende da outra.',
+          camPos: { x: 2.6, y: 1.75, z: 4.3 },
+          lookAt: { x: 2.6, y: 0.9, z: 0 }
         },
         {
-          code: 'ESTAÇÃO 05 // AUDITORIA IMPARCIAL',
-          badge: 'SOMENTE LEITURA (CAMADA B)',
-          title: 'Analista de Governança',
-          desc: 'Opera sem permissão de edição. Audita a entrega contra os IDs da Constituição, segurança e testes, emitindo parecer técnico estruturado de volta para o Líder.',
-          cameraTarget: { x: 2.6, y: -1.0, z: 0.4 }
+          code: 'ESTAÇÃO 05 // O GUARDIÃO IMPARCIAL',
+          trait: 'MONÓCULO & MÃOS ATRÁS',
+          title: 'O Auditor de Governança',
+          desc: 'Atento e incorruptível. Mantém as mãozinhas cruzadas atrás das costas porque é proibido de alterar código: usa seu monóculo de inspeção e escudo verde para aprovar segurança e arquitetura.',
+          camPos: { x: 5.2, y: 1.75, z: 4.3 },
+          lookAt: { x: 5.2, y: 0.9, z: 0 }
         }
       ];
 
-      const canvas = document.getElementById('three-hero-canvas');
+      const overviewCam = {
+        camPos: { x: 0, y: 2.35, z: 8.6 },
+        lookAt: { x: 0, y: 0.85, z: 0 }
+      };
+
+      const container = document.getElementById('three-stage-container');
+      const canvas = document.getElementById('three-characters-canvas');
       const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.shadowMap.enabled = true;
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
       const scene = new THREE.Scene();
-      const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 100);
-      camera.position.set(0.8, 0.6, 8.2);
+      const camera = new THREE.PerspectiveCamera(36, 1, 0.1, 100);
+      camera.position.set(overviewCam.camPos.x, overviewCam.camPos.y, overviewCam.camPos.z);
 
-      // Ambient & Key Lights
-      scene.add(new THREE.AmbientLight(0x94a3b8, 0.65));
-      const keyLight = new THREE.PointLight(0xe58e3c, 2.4, 25);
-      keyLight.position.set(4, 5, 6);
-      scene.add(keyLight);
+      // Studio Lighting (Warm Key, Cool Fill, Rim Light — no space/stars!)
+      const hemiLight = new THREE.HemisphereLight(0xe2e8f0, 0x0f172a, 0.85);
+      scene.add(hemiLight);
 
-      const rimLight = new THREE.PointLight(0x38bdf8, 1.8, 25);
-      rimLight.position.set(-5, -4, 4);
-      scene.add(rimLight);
+      const dirLight = new THREE.DirectionalLight(0xfff7ed, 1.35);
+      dirLight.position.set(5, 10, 7);
+      dirLight.castShadow = true;
+      dirLight.shadow.mapSize.width = 2048;
+      dirLight.shadow.mapSize.height = 2048;
+      scene.add(dirLight);
 
-      const rootGroup = new THREE.Group();
-      rootGroup.position.x = 1.65;
-      scene.add(rootGroup);
+      const rimLightLeft = new THREE.PointLight(0xf59e0b, 1.4, 18);
+      rimLightLeft.position.set(-7, 3, -3);
+      scene.add(rimLightLeft);
 
-      // Outer Governance Shield Ring (Wireframe Torus + Icosahedron Cage)
-      const shieldGeo = new THREE.IcosahedronGeometry(3.35, 2);
-      const shieldMat = new THREE.MeshBasicMaterial({
+      const rimLightRight = new THREE.PointLight(0x38bdf8, 1.4, 18);
+      rimLightRight.position.set(7, 3, -3);
+      scene.add(rimLightRight);
+
+      // Studio Workbench Floor & Conveyor Track
+      const floorGeo = new THREE.CylinderGeometry(9.5, 9.8, 0.3, 64);
+      const floorMat = new THREE.MeshStandardMaterial({
+        color: 0x0f1420,
+        roughness: 0.6,
+        metalness: 0.2
+      });
+      const floor = new THREE.Mesh(floorGeo, floorMat);
+      floor.position.y = -0.25;
+      floor.receiveShadow = true;
+      scene.add(floor);
+
+      // Glowing Conveyor Line connecting the 5 Pedestals
+      const trackGeo = new THREE.BoxGeometry(11.2, 0.05, 0.32);
+      const trackMat = new THREE.MeshStandardMaterial({
         color: 0x1e293b,
-        wireframe: true,
-        transparent: true,
-        opacity: 0.22
+        roughness: 0.3,
+        metalness: 0.7
       });
-      const shieldMesh = new THREE.Mesh(shieldGeo, shieldMat);
-      rootGroup.add(shieldMesh);
+      const track = new THREE.Mesh(trackGeo, trackMat);
+      track.position.set(0, -0.06, 0.65);
+      scene.add(track);
 
-      const ringGeo = new THREE.TorusGeometry(2.75, 0.012, 16, 120);
-      const ringMat = new THREE.MeshBasicMaterial({
-        color: 0x38bdf8,
-        transparent: true,
-        opacity: 0.28
-      });
-      const orbitalRing1 = new THREE.Mesh(ringGeo, ringMat);
-      orbitalRing1.rotation.x = Math.PI / 2.6;
-      rootGroup.add(orbitalRing1);
+      // Helper to build a Cute Rounded Bot Base (Head + Chubby Body + Visor + Blinking Eyes + Blush)
+      function createCuteBotBase(primaryColor, accentColor, scale = 1) {
+        const root = new THREE.Group();
+        root.scale.set(scale, scale, scale);
 
-      const orbitalRing2 = new THREE.Mesh(
-        new THREE.TorusGeometry(2.15, 0.01, 16, 100),
-        new THREE.MeshBasicMaterial({ color: 0xe58e3c, transparent: true, opacity: 0.25 })
-      );
-      orbitalRing2.rotation.x = -Math.PI / 3.1;
-      orbitalRing2.rotation.y = Math.PI / 5;
-      rootGroup.add(orbitalRing2);
-
-      // 5 Station Positions in 3D Space
-      const nodePositions = [
-        new THREE.Vector3(0, 0.15, 0),       // 0: Líder (Center Core)
-        new THREE.Vector3(-2.1, 1.15, 0.4),  // 1: Concepção (PM + Arch)
-        new THREE.Vector3(-1.35, -1.25, 0.7),// 2: Planejador
-        new THREE.Vector3(1.55, 1.05, 0.5),  // 3: Builders Cluster
-        new THREE.Vector3(2.1, -1.05, 0.3)   // 4: Governança
-      ];
-
-      const nodeColors = [0xe58e3c, 0x38bdf8, 0x818cf8, 0x22d3ee, 0x10b981];
-      const stationMeshes = [];
-
-      nodePositions.forEach((pos, idx) => {
-        const group = new THREE.Group();
-        group.position.copy(pos);
-
-        const radius = idx === 0 ? 0.44 : 0.28;
-        const coreGeo = idx === 0
-          ? new THREE.OctahedronGeometry(radius, 1)
-          : new THREE.IcosahedronGeometry(radius, 1);
-
-        const coreMat = new THREE.MeshStandardMaterial({
-          color: nodeColors[idx],
-          emissive: nodeColors[idx],
-          emissiveIntensity: idx === 0 ? 0.55 : 0.32,
-          roughness: 0.25,
-          metalness: 0.75,
-          wireframe: false
+        const bodyMat = new THREE.MeshStandardMaterial({
+          color: primaryColor,
+          roughness: 0.28,
+          metalness: 0.15
         });
-        const core = new THREE.Mesh(coreGeo, coreMat);
-        group.add(core);
 
-        const shellGeo = new THREE.IcosahedronGeometry(radius * 1.48, 1);
-        const shellMat = new THREE.MeshBasicMaterial({
-          color: nodeColors[idx],
-          wireframe: true,
+        const darkMat = new THREE.MeshStandardMaterial({
+          color: 0x0b0f17,
+          roughness: 0.15,
+          metalness: 0.4
+        });
+
+        const eyeMat = new THREE.MeshBasicMaterial({ color: accentColor });
+        const blushMat = new THREE.MeshBasicMaterial({
+          color: 0xf472b6,
           transparent: true,
-          opacity: 0.42
+          opacity: 0.55
         });
-        const shell = new THREE.Mesh(shellGeo, shellMat);
-        group.add(shell);
 
-        // For Station 4 (Builders), add 2 satellite parallel builder nodes
-        if (idx === 3) {
-          for (let s = 0; s < 2; s++) {
-            const sat = new THREE.Mesh(
-              new THREE.OctahedronGeometry(0.12, 0),
-              new THREE.MeshBasicMaterial({ color: 0x22d3ee, wireframe: true })
-            );
-            sat.position.set(s === 0 ? 0.55 : -0.5, s === 0 ? 0.35 : -0.35, 0.2);
-            group.add(sat);
-          }
+        // Chubby Rounded Torso
+        const torso = new THREE.Mesh(new THREE.SphereGeometry(0.42, 32, 32), bodyMat);
+        torso.scale.set(1, 1.08, 0.92);
+        torso.position.y = 0.52;
+        torso.castShadow = true;
+        root.add(torso);
+
+        // Belly Accent Badge
+        const belly = new THREE.Mesh(
+          new THREE.SphereGeometry(0.28, 24, 24),
+          new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.4 })
+        );
+        belly.scale.set(0.95, 0.85, 0.35);
+        belly.position.set(0, 0.48, 0.31);
+        root.add(belly);
+
+        // Cute Big Head Group
+        const headGroup = new THREE.Group();
+        headGroup.position.y = 1.18;
+        root.add(headGroup);
+
+        const head = new THREE.Mesh(new THREE.SphereGeometry(0.48, 32, 32), bodyMat);
+        head.scale.set(1.12, 0.96, 1.0);
+        head.castShadow = true;
+        headGroup.add(head);
+
+        // Glossy Black Face Visor
+        const visor = new THREE.Mesh(new THREE.SphereGeometry(0.41, 32, 32), darkMat);
+        visor.scale.set(1.08, 0.78, 0.65);
+        visor.position.set(0, 0.0, 0.22);
+        headGroup.add(visor);
+
+        // Cute Expressive LED Eyes
+        const eyesGroup = new THREE.Group();
+        eyesGroup.position.set(0, 0.02, 0.49);
+        headGroup.add(eyesGroup);
+
+        const leftEye = new THREE.Mesh(new THREE.SphereGeometry(0.065, 16, 16), eyeMat);
+        leftEye.scale.set(1, 1.25, 0.3);
+        leftEye.position.x = -0.15;
+        eyesGroup.add(leftEye);
+
+        const rightEye = new THREE.Mesh(new THREE.SphereGeometry(0.065, 16, 16), eyeMat);
+        rightEye.scale.set(1, 1.25, 0.3);
+        rightEye.position.x = 0.15;
+        eyesGroup.add(rightEye);
+
+        // Eye Sparkles (Cute Anime/Toy Highlight)
+        const sparkleMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+        const spL = new THREE.Mesh(new THREE.SphereGeometry(0.022, 8, 8), sparkleMat);
+        spL.position.set(-0.13, 0.04, 0.02);
+        eyesGroup.add(spL);
+
+        const spR = new THREE.Mesh(new THREE.SphereGeometry(0.022, 8, 8), sparkleMat);
+        spR.position.set(0.17, 0.04, 0.02);
+        eyesGroup.add(spR);
+
+        // Rosy Cheeks (Blush)
+        const cheekL = new THREE.Mesh(new THREE.CircleGeometry(0.045, 16), blushMat);
+        cheekL.position.set(-0.24, -0.07, 0.47);
+        cheekL.rotation.y = -0.35;
+        headGroup.add(cheekL);
+
+        const cheekR = new THREE.Mesh(new THREE.CircleGeometry(0.045, 16), blushMat);
+        cheekR.position.set(0.24, -0.07, 0.47);
+        cheekR.rotation.y = 0.35;
+        headGroup.add(cheekR);
+
+        // Floating Cute Paws (Hands)
+        const leftHand = new THREE.Mesh(new THREE.SphereGeometry(0.11, 16, 16), bodyMat);
+        leftHand.position.set(-0.55, 0.58, 0.15);
+        leftHand.castShadow = true;
+        root.add(leftHand);
+
+        const rightHand = new THREE.Mesh(new THREE.SphereGeometry(0.11, 16, 16), bodyMat);
+        rightHand.position.set(0.55, 0.58, 0.15);
+        rightHand.castShadow = true;
+        root.add(rightHand);
+
+        // Little Rounded Feet
+        const leftFoot = new THREE.Mesh(new THREE.SphereGeometry(0.13, 16, 16), darkMat);
+        leftFoot.scale.set(1, 0.6, 1.3);
+        leftFoot.position.set(-0.19, 0.08, 0.05);
+        root.add(leftFoot);
+
+        const rightFoot = new THREE.Mesh(new THREE.SphereGeometry(0.13, 16, 16), darkMat);
+        rightFoot.scale.set(1, 0.6, 1.3);
+        rightFoot.position.set(0.19, 0.08, 0.05);
+        root.add(rightFoot);
+
+        return { root, headGroup, eyesGroup, leftHand, rightHand, torso };
+      }
+
+      const stationPositionsX = [-5.2, -2.6, 0, 2.6, 5.2];
+      const stationColors = [0xf59e0b, 0x38bdf8, 0x818cf8, 0x22d3ee, 0x10b981];
+      const characters = [];
+      const clickableMeshes = [];
+
+      stationPositionsX.forEach((posX, idx) => {
+        const stationGroup = new THREE.Group();
+        stationGroup.position.set(posX, 0, 0);
+        scene.add(stationGroup);
+
+        // Pedestal Base with Glowing Ring
+        const ped = new THREE.Mesh(
+          new THREE.CylinderGeometry(0.85, 0.95, 0.16, 32),
+          new THREE.MeshStandardMaterial({ color: 0x161f30, roughness: 0.4, metalness: 0.5 })
+        );
+        ped.position.y = -0.02;
+        ped.receiveShadow = true;
+        stationGroup.add(ped);
+
+        const glowRing = new THREE.Mesh(
+          new THREE.TorusGeometry(0.88, 0.022, 16, 64),
+          new THREE.MeshBasicMaterial({ color: stationColors[idx] })
+        );
+        glowRing.rotation.x = Math.PI / 2;
+        glowRing.position.y = 0.06;
+        stationGroup.add(glowRing);
+
+        // Hitbox for easy clicking on each character
+        const hitBox = new THREE.Mesh(
+          new THREE.CylinderGeometry(0.9, 0.9, 2.2, 16),
+          new THREE.MeshBasicMaterial({ visible: false })
+        );
+        hitBox.position.y = 1.0;
+        hitBox.userData = { stationIndex: idx };
+        stationGroup.add(hitBox);
+        clickableMeshes.push(hitBox);
+
+        // 01 // LÍDER (Warm Cream/Gold Body + Floating Crown Antenna + Glowing Clipboard)
+        if (idx === 0) {
+          const bot = createCuteBotBase(0xfef3c7, 0xf59e0b, 1.05);
+          stationGroup.add(bot.root);
+
+          // Little Maestro Crown / Antenna on Head
+          const crownMat = new THREE.MeshStandardMaterial({
+            color: 0xf59e0b,
+            emissive: 0xf59e0b,
+            emissiveIntensity: 0.35,
+            metalness: 0.7,
+            roughness: 0.2
+          });
+          const crownRing = new THREE.Mesh(new THREE.TorusGeometry(0.18, 0.035, 12, 32), crownMat);
+          crownRing.rotation.x = Math.PI / 2;
+          crownRing.position.y = 0.55;
+          bot.headGroup.add(crownRing);
+
+          const antennaTip = new THREE.Mesh(new THREE.OctahedronGeometry(0.09, 0), crownMat);
+          antennaTip.position.y = 0.68;
+          bot.headGroup.add(antennaTip);
+
+          // Floating Golden Executive Clipboard next to Right Hand
+          const board = new THREE.Mesh(
+            new THREE.BoxGeometry(0.28, 0.36, 0.03),
+            new THREE.MeshBasicMaterial({ color: 0xf59e0b, transparent: true, opacity: 0.75 })
+          );
+          board.position.set(0.68, 0.72, 0.32);
+          board.rotation.y = -0.4;
+          bot.root.add(board);
+
+          characters.push({ idx, type: 'lider', bot, crownRing, antennaTip, board, glowRing });
         }
 
-        rootGroup.add(group);
-        stationMeshes.push({ group, core, shell, baseScale: 1 });
+        // 02 // ARQUITETO (Sky Blue Body + Cute Round Glasses + Beret Hat + Blueprint Roll)
+        if (idx === 1) {
+          const bot = createCuteBotBase(0xe0f2fe, 0x38bdf8, 1.0);
+          stationGroup.add(bot.root);
+
+          // Cute Round Architect Glasses
+          const glassMat = new THREE.MeshStandardMaterial({ color: 0xfbbf24, metalness: 0.8, roughness: 0.2 });
+          const rimL = new THREE.Mesh(new THREE.TorusGeometry(0.12, 0.018, 12, 32), glassMat);
+          rimL.position.set(-0.15, 0.02, 0.5);
+          bot.headGroup.add(rimL);
+
+          const rimR = new THREE.Mesh(new THREE.TorusGeometry(0.12, 0.018, 12, 32), glassMat);
+          rimR.position.set(0.15, 0.02, 0.5);
+          bot.headGroup.add(rimR);
+
+          const bridge = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.08, 8), glassMat);
+          bridge.rotation.z = Math.PI / 2;
+          bridge.position.set(0, 0.02, 0.5);
+          bot.headGroup.add(bridge);
+
+          // Cute Architect Beret on top of head
+          const beret = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.32, 0.25, 0.12, 24),
+            new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.5 })
+          );
+          beret.position.set(0.08, 0.45, 0);
+          beret.rotation.z = -0.22;
+          bot.headGroup.add(beret);
+
+          // Rolled Blueprint Scroll in Left Hand
+          const scroll = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.06, 0.06, 0.42, 16),
+            new THREE.MeshStandardMaterial({ color: 0x38bdf8, emissive: 0x0284c7, emissiveIntensity: 0.3 })
+          );
+          scroll.rotation.z = Math.PI / 3;
+          scroll.position.set(-0.58, 0.62, 0.28);
+          bot.root.add(scroll);
+
+          characters.push({ idx, type: 'architect', bot, scroll, glowRing });
+        }
+
+        // 03 // PLANEJADOR (Indigo Body + Tactical Headset + 3 Floating P/M/G Task Cubes)
+        if (idx === 2) {
+          const bot = createCuteBotBase(0xe0e7ff, 0x818cf8, 1.0);
+          stationGroup.add(bot.root);
+
+          // Cute Headphone Arc + Ear Cups
+          const hpMat = new THREE.MeshStandardMaterial({ color: 0x4f46e5, roughness: 0.3, metalness: 0.5 });
+          const earL = new THREE.Mesh(new THREE.CylinderGeometry(0.13, 0.13, 0.08, 20), hpMat);
+          earL.rotation.z = Math.PI / 2;
+          earL.position.set(-0.54, 0.02, 0);
+          bot.headGroup.add(earL);
+
+          const earR = new THREE.Mesh(new THREE.CylinderGeometry(0.13, 0.13, 0.08, 20), hpMat);
+          earR.rotation.z = Math.PI / 2;
+          earR.position.set(0.54, 0.02, 0);
+          bot.headGroup.add(earR);
+
+          // 3 Juggling Task Cubes (P, M, G) floating in front
+          const cubesGroup = new THREE.Group();
+          cubesGroup.position.set(0, 0.78, 0.55);
+          bot.root.add(cubesGroup);
+
+          const cubeColors = [0x38bdf8, 0x818cf8, 0xf59e0b];
+          const cubes = [];
+          for (let c = 0; c < 3; c++) {
+            const size = 0.09 + c * 0.025;
+            const cube = new THREE.Mesh(
+              new THREE.BoxGeometry(size, size, size),
+              new THREE.MeshStandardMaterial({
+                color: cubeColors[c],
+                emissive: cubeColors[c],
+                emissiveIntensity: 0.4,
+                roughness: 0.2
+              })
+            );
+            cube.position.x = (c - 1) * 0.24;
+            cubesGroup.add(cube);
+            cubes.push(cube);
+          }
+
+          characters.push({ idx, type: 'planner', bot, cubes, glowRing });
+        }
+
+        // 04 // GÊMEOS BUILDERS (Two Smaller Chubby Twins Side-by-Side with Construction Hardhats!)
+        if (idx === 3) {
+          const twinA = createCuteBotBase(0xcffafe, 0x06b6d4, 0.74);
+          twinA.root.position.set(-0.36, 0, 0.08);
+          twinA.root.rotation.y = 0.2;
+          stationGroup.add(twinA.root);
+
+          const twinB = createCuteBotBase(0xcffafe, 0x22d3ee, 0.74);
+          twinB.root.position.set(0.36, 0, -0.05);
+          twinB.root.rotation.y = -0.2;
+          stationGroup.add(twinB.root);
+
+          // Construction Hardhats on both twins
+          const hatMatA = new THREE.MeshStandardMaterial({ color: 0xfbbf24, roughness: 0.3 });
+          const hatMatB = new THREE.MeshStandardMaterial({ color: 0x06b6d4, roughness: 0.3 });
+
+          [
+            { twin: twinA, mat: hatMatA },
+            { twin: twinB, mat: hatMatB }
+          ].forEach(({ twin, mat }) => {
+            const dome = new THREE.Mesh(new THREE.SphereGeometry(0.46, 24, 16, 0, Math.PI * 2, 0, Math.PI / 2), mat);
+            dome.position.y = 0.18;
+            twin.headGroup.add(dome);
+
+            const brim = new THREE.Mesh(new THREE.CylinderGeometry(0.52, 0.52, 0.04, 24), mat);
+            brim.position.y = 0.2;
+            twin.headGroup.add(brim);
+          });
+
+          // Shared Glowing Block being assembled between them
+          const workBlock = new THREE.Mesh(
+            new THREE.OctahedronGeometry(0.14, 0),
+            new THREE.MeshStandardMaterial({
+              color: 0x22d3ee,
+              emissive: 0x22d3ee,
+              emissiveIntensity: 0.6,
+              wireframe: false
+            })
+          );
+          workBlock.position.set(0, 0.58, 0.45);
+          stationGroup.add(workBlock);
+
+          characters.push({ idx, type: 'builders', twinA, twinB, workBlock, glowRing });
+        }
+
+        // 05 // AUDITOR DE GOVERNANÇA (Mint/Platinum Body + Inspector Monocle + Hands Behind Back + Shield)
+        if (idx === 4) {
+          const bot = createCuteBotBase(0xd1fae5, 0x10b981, 1.0);
+          stationGroup.add(bot.root);
+
+          // Hands tucked politely behind the back (Read-Only: never touches the code!)
+          bot.leftHand.position.set(-0.22, 0.45, -0.38);
+          bot.rightHand.position.set(0.22, 0.45, -0.38);
+
+          // Inspector Monocle over Right Eye
+          const monocleMat = new THREE.MeshStandardMaterial({ color: 0x34d399, metalness: 0.9, roughness: 0.1 });
+          const monocleRim = new THREE.Mesh(new THREE.TorusGeometry(0.14, 0.022, 12, 32), monocleMat);
+          monocleRim.position.set(0.15, 0.02, 0.51);
+          bot.headGroup.add(monocleRim);
+
+          const monocleLens = new THREE.Mesh(
+            new THREE.CircleGeometry(0.13, 24),
+            new THREE.MeshBasicMaterial({ color: 0x10b981, transparent: true, opacity: 0.28 })
+          );
+          monocleLens.position.set(0.15, 0.02, 0.51);
+          bot.headGroup.add(monocleLens);
+
+          // Floating Read-Only Emerald Shield beside the Auditor
+          const shield = new THREE.Mesh(
+            new THREE.OctahedronGeometry(0.24, 1),
+            new THREE.MeshBasicMaterial({
+              color: 0x10b981,
+              wireframe: true,
+              transparent: true,
+              opacity: 0.75
+            })
+          );
+          shield.scale.set(1, 1.25, 0.25);
+          shield.position.set(-0.66, 0.75, 0.28);
+          bot.root.add(shield);
+
+          characters.push({ idx, type: 'auditor', bot, shield, glowRing });
+        }
       });
 
-      // Connecting Conduits (Curves between Stations)
-      const links = [
-        [0, 1], [1, 2], [0, 2], [2, 3], [3, 4], [4, 0]
-      ];
-      const curves = [];
-
-      links.forEach(([a, b]) => {
-        const start = nodePositions[a];
-        const end = nodePositions[b];
-        const mid = start.clone().lerp(end, 0.5);
-        mid.z += 0.55;
-
-        const curve = new THREE.QuadraticBezierCurve3(start, mid, end);
-        curves.push(curve);
-
-        const points = curve.getPoints(40);
-        const lineGeo = new THREE.BufferGeometry().setFromPoints(points);
-        const lineMat = new THREE.LineBasicMaterial({
-          color: 0x64748b,
-          transparent: true,
-          opacity: 0.38
-        });
-        rootGroup.add(new THREE.Line(lineGeo, lineMat));
-      });
-
-      // Data Packet Particles flowing along the conduits
-      const packetCount = 24;
-      const packets = [];
-      const packetGeo = new THREE.SphereGeometry(0.045, 8, 8);
-
-      for (let i = 0; i < packetCount; i++) {
-        const curveIndex = i % curves.length;
-        const mat = new THREE.MeshBasicMaterial({
-          color: i % 2 === 0 ? 0xe58e3c : 0x38bdf8
-        });
-        const mesh = new THREE.Mesh(packetGeo, mat);
-        rootGroup.add(mesh);
-        packets.push({
-          mesh,
-          curve: curves[curveIndex],
-          t: Math.random(),
-          speed: 0.0028 + Math.random() * 0.0022
-        });
+      // Flowing Task Tokens along the Conveyor Track in front of the bots
+      const conveyorTokens = [];
+      for (let t = 0; t < 6; t++) {
+        const token = new THREE.Mesh(
+          new THREE.BoxGeometry(0.12, 0.08, 0.12),
+          new THREE.MeshBasicMaterial({ color: t % 2 === 0 ? 0xf59e0b : 0x38bdf8 })
+        );
+        token.position.set(-5.2 + t * 2.0, 0.02, 0.65);
+        scene.add(token);
+        conveyorTokens.push({ mesh: token, progress: t / 6 });
       }
-
-      // Subtle Background Starfield / Dust
-      const dustGeo = new THREE.BufferGeometry();
-      const dustCount = 260;
-      const dustPos = new Float32Array(dustCount * 3);
-      for (let i = 0; i < dustCount * 3; i++) {
-        dustPos[i] = (Math.random() - 0.5) * 18;
-      }
-      dustGeo.setAttribute('position', new THREE.BufferAttribute(dustPos, 3));
-      const dustMat = new THREE.PointsMaterial({
-        color: 0x94a3b8,
-        size: 0.028,
-        transparent: true,
-        opacity: 0.4
-      });
-      scene.add(new THREE.Points(dustGeo, dustMat));
 
       // Resize Handler
       function onResize() {
-        const parent = canvas.parentElement;
-        const w = parent.clientWidth;
-        const h = parent.clientHeight;
+        const w = container.clientWidth;
+        const h = container.clientHeight;
         renderer.setSize(w, h, false);
         camera.aspect = w / h;
-        rootGroup.position.x = w < 1024 ? 0 : 1.65;
         camera.updateProjectionMatrix();
       }
       window.addEventListener('resize', onResize);
       onResize();
 
-      // Mouse Parallax & Station Selection State
+      // Camera Focus & Selection State
+      let selectedStation = -1; // Start with full squad overview or station 0
+      const targetCamPos = new THREE.Vector3(overviewCam.camPos.x, overviewCam.camPos.y, overviewCam.camPos.z);
+      const targetLookAt = new THREE.Vector3(overviewCam.lookAt.x, overviewCam.lookAt.y, overviewCam.lookAt.z);
+      const currentLookAt = new THREE.Vector3(overviewCam.lookAt.x, overviewCam.lookAt.y, overviewCam.lookAt.z);
+
       let mouseX = 0;
       let mouseY = 0;
-      let activeStation = 0;
 
-      window.addEventListener('mousemove', (e) => {
-        mouseX = (e.clientX / window.innerWidth - 0.5) * 2;
-        mouseY = (e.clientY / window.innerHeight - 0.5) * 2;
+      container.addEventListener('mousemove', (e) => {
+        const rect = container.getBoundingClientRect();
+        mouseX = ((e.clientX - rect.left) / rect.width - 0.5) * 2;
+        mouseY = ((e.clientY - rect.top) / rect.height - 0.5) * 2;
       });
 
-      function selectStation(index) {
-        activeStation = index;
-        const info = stationsData[index];
-        document.getElementById('hud-code').textContent = info.code;
-        document.getElementById('hud-badge').textContent = info.badge;
-        document.getElementById('hud-title').textContent = info.title;
-        document.getElementById('hud-desc').textContent = info.desc;
+      // Click Raycaster on 3D Characters
+      const raycaster = new THREE.Raycaster();
+      const pointer = new THREE.Vector2();
+      canvas.addEventListener('click', (e) => {
+        const rect = canvas.getBoundingClientRect();
+        pointer.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+        pointer.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+        raycaster.setFromCamera(pointer, camera);
+        const intersects = raycaster.intersectObjects(clickableMeshes);
+        if (intersects.length > 0) {
+          const idx = intersects[0].object.userData.stationIndex;
+          focusStation(idx);
+        }
+      });
 
-        document.querySelectorAll('.station-btn').forEach((btn, idx) => {
-          if (idx === index) {
-            btn.className = 'station-btn active mono text-xs px-3.5 py-2 rounded border border-amber-500/60 bg-amber-500/15 text-amber-200 transition-all';
+      function focusStation(index) {
+        selectedStation = index;
+        if (index === -1) {
+          targetCamPos.set(overviewCam.camPos.x, overviewCam.camPos.y, overviewCam.camPos.z);
+          targetLookAt.set(overviewCam.lookAt.x, overviewCam.lookAt.y, overviewCam.lookAt.z);
+        } else {
+          const meta = charactersMeta[index];
+          targetCamPos.set(meta.camPos.x, meta.camPos.y, meta.camPos.z);
+          targetLookAt.set(meta.lookAt.x, meta.lookAt.y, meta.lookAt.z);
+          document.getElementById('hud-code').textContent = meta.code;
+          document.getElementById('hud-trait').textContent = meta.trait;
+          document.getElementById('hud-title').textContent = meta.title;
+          document.getElementById('hud-desc').textContent = meta.desc;
+        }
+
+        document.querySelectorAll('.station-btn').forEach((btn) => {
+          const bIdx = parseInt(btn.getAttribute('data-station'), 10);
+          if (bIdx === index) {
+            btn.className = 'station-btn mono text-xs px-4 py-2.5 rounded-full border border-amber-400/70 bg-amber-400/20 text-amber-200 transition-all';
           } else {
-            btn.className = 'station-btn mono text-xs px-3.5 py-2 rounded border border-white/10 bg-white/[0.02] text-slate-300 hover:border-white/30 transition-all';
+            btn.className = 'station-btn mono text-xs px-4 py-2.5 rounded-full border border-white/10 bg-white/[0.03] text-slate-300 hover:border-white/30 transition-all';
           }
         });
 
@@ -765,55 +931,113 @@
 
       document.querySelectorAll('.station-btn').forEach((btn) => {
         const idx = parseInt(btn.getAttribute('data-station'), 10);
-        btn.addEventListener('mouseenter', () => selectStation(idx));
-        btn.addEventListener('click', () => selectStation(idx));
+        btn.addEventListener('click', () => focusStation(idx));
       });
 
       document.querySelectorAll('[data-card-station]').forEach((card) => {
         const idx = parseInt(card.getAttribute('data-card-station'), 10);
-        card.addEventListener('mouseenter', () => selectStation(idx));
+        card.addEventListener('click', () => {
+          focusStation(idx);
+          document.getElementById('three-stage-container').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        });
+        card.addEventListener('mouseenter', () => focusStation(idx));
       });
 
-      // Animation Loop
-      let clock = new THREE.Clock();
+      // Animation Loop with Cute Personality Idles & Eye Blinking
+      const clock = new THREE.Clock();
       function animate() {
         requestAnimationFrame(animate);
-        const elapsed = clock.getElapsedTime();
+        const t = clock.getElapsedTime();
 
-        shieldMesh.rotation.y = elapsed * 0.08;
-        shieldMesh.rotation.x = Math.sin(elapsed * 0.15) * 0.12;
-        orbitalRing1.rotation.z = elapsed * 0.18;
-        orbitalRing2.rotation.z = -elapsed * 0.14;
+        // Smooth camera glide + subtle mouse parallax
+        const desiredCamX = targetCamPos.x + mouseX * 0.35;
+        const desiredCamY = targetCamPos.y - mouseY * 0.2;
+        camera.position.x += (desiredCamX - camera.position.x) * 0.06;
+        camera.position.y += (desiredCamY - camera.position.y) * 0.06;
+        camera.position.z += (targetCamPos.z - camera.position.z) * 0.06;
 
-        // Smooth group parallax + focus offset toward active station
-        const targetPos = nodePositions[activeStation];
-        const desiredRotY = mouseX * 0.35 - targetPos.x * 0.08;
-        const desiredRotX = mouseY * 0.22 + targetPos.y * 0.06;
-        rootGroup.rotation.y += (desiredRotY - rootGroup.rotation.y) * 0.05;
-        rootGroup.rotation.x += (desiredRotX - rootGroup.rotation.x) * 0.05;
+        currentLookAt.lerp(targetLookAt, 0.07);
+        camera.lookAt(currentLookAt);
 
-        // Pulse active station node
-        stationMeshes.forEach((item, idx) => {
-          item.core.rotation.y = elapsed * 0.6;
-          item.shell.rotation.x = -elapsed * 0.4;
-          const isSelected = idx === activeStation;
-          const targetScale = isSelected ? 1.38 + Math.sin(elapsed * 4) * 0.06 : 1.0;
-          item.group.scale.lerp(new THREE.Vector3(targetScale, targetScale, targetScale), 0.1);
-          item.core.material.emissiveIntensity = isSelected ? 0.85 : 0.28;
-          item.shell.material.opacity = isSelected ? 0.78 : 0.32;
+        // Periodic Cute Eye Blink (every ~3.8 seconds)
+        const blinkCycle = t % 3.8;
+        const eyeScaleY = blinkCycle > 3.65 ? 0.1 : 1.0;
+
+        characters.forEach((c) => {
+          const isFocused = selectedStation === c.idx || selectedStation === -1;
+          c.glowRing.scale.setScalar(selectedStation === c.idx ? 1.12 + Math.sin(t * 5) * 0.03 : 1.0);
+
+          if (c.type === 'lider') {
+            // Calm maestro breathing, gentle waving & floating crown
+            c.bot.root.position.y = Math.sin(t * 2.2) * 0.05;
+            c.bot.headGroup.rotation.y = mouseX * 0.25 + Math.sin(t * 1.2) * 0.08;
+            c.bot.headGroup.rotation.z = Math.sin(t * 1.5) * 0.04;
+            c.bot.eyesGroup.scale.y = eyeScaleY;
+            c.bot.leftHand.position.y = 0.62 + Math.sin(t * 3.5) * 0.08;
+            c.crownRing.rotation.z = t * 0.8;
+            c.antennaTip.position.y = 0.68 + Math.sin(t * 4) * 0.03;
+            c.board.position.y = 0.72 + Math.cos(t * 2.5) * 0.04;
+          }
+
+          if (c.type === 'architect') {
+            // Curious head tilt inspecting the blueprint
+            c.bot.root.position.y = Math.sin(t * 2.0 + 1) * 0.045;
+            c.bot.headGroup.rotation.z = 0.12 + Math.sin(t * 1.8) * 0.06;
+            c.bot.headGroup.rotation.y = mouseX * 0.22;
+            c.bot.eyesGroup.scale.y = eyeScaleY;
+            c.bot.rightHand.position.y = 0.62 + Math.cos(t * 3) * 0.06;
+            c.scroll.rotation.y = Math.sin(t * 2) * 0.2;
+          }
+
+          if (c.type === 'planner') {
+            // Juggling the P, M, G task blocks in rhythm
+            c.bot.root.position.y = Math.sin(t * 2.4 + 2) * 0.04;
+            c.bot.headGroup.rotation.y = Math.sin(t * 2.5) * 0.12;
+            c.bot.eyesGroup.scale.y = eyeScaleY;
+            c.cubes.forEach((cube, i) => {
+              cube.position.y = Math.sin(t * 3.5 + i * 1.4) * 0.11;
+              cube.rotation.x = t * 1.2 + i;
+              cube.rotation.y = t * 1.5;
+            });
+            c.bot.leftHand.position.y = 0.58 + Math.sin(t * 3.5) * 0.07;
+            c.bot.rightHand.position.y = 0.58 - Math.sin(t * 3.5) * 0.07;
+          }
+
+          if (c.type === 'builders') {
+            // Energetic twin builders bouncing in alternating parallel rhythm!
+            c.twinA.root.position.y = Math.abs(Math.sin(t * 4.2)) * 0.09;
+            c.twinB.root.position.y = Math.abs(Math.cos(t * 4.2)) * 0.09;
+            c.twinA.eyesGroup.scale.y = eyeScaleY;
+            c.twinB.eyesGroup.scale.y = eyeScaleY;
+            c.twinA.rightHand.position.y = 0.62 + Math.sin(t * 6) * 0.09;
+            c.twinB.leftHand.position.y = 0.62 + Math.cos(t * 6) * 0.09;
+            c.workBlock.rotation.y = t * 2.2;
+            c.workBlock.rotation.x = t * 1.4;
+            c.workBlock.position.y = 0.58 + Math.sin(t * 4) * 0.04;
+          }
+
+          if (c.type === 'auditor') {
+            // Composed inspector with hands behind back & scanning shield
+            c.bot.root.position.y = Math.sin(t * 1.8 + 3) * 0.035;
+            c.bot.headGroup.rotation.y = Math.sin(t * 1.1) * 0.15 + mouseX * 0.15;
+            c.bot.eyesGroup.scale.y = eyeScaleY;
+            c.shield.rotation.y = Math.sin(t * 1.5) * 0.35;
+            c.shield.position.y = 0.75 + Math.sin(t * 2.5) * 0.05;
+          }
         });
 
-        // Advance telemetry packets along bezier conduits
-        packets.forEach((p) => {
-          p.t = (p.t + p.speed) % 1;
-          const pos = p.curve.getPointAt(p.t);
-          p.mesh.position.copy(pos);
+        // Move task tokens along conveyor track
+        conveyorTokens.forEach((tk) => {
+          tk.progress = (tk.progress + 0.0018) % 1;
+          tk.mesh.position.x = -5.2 + tk.progress * 10.4;
+          tk.mesh.rotation.y = t * 1.5;
         });
 
         renderer.render(scene, camera);
       }
 
-      selectStation(0);
+      // Start showing the full 5-character squad on the workbench, with HUD ready on Station 01
+      focusStation(-1);
       animate();
     })();
   </script>
