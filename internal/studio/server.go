@@ -15,6 +15,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/forge-sdd/cli/internal/acp"
 	"github.com/forge-sdd/cli/internal/queue"
 )
 
@@ -23,18 +24,21 @@ var assetsFS embed.FS
 
 // Server implementa o servidor local Read-Only HTTP/SSE do Forge Studio.
 type Server struct {
-	Dir          string
-	Host         string
-	Port         int
-	Aggregator   *Aggregator
-	Hub          *SSEHub
-	httpServer   *http.Server
-	listener     net.Listener
-	mu           sync.RWMutex
-	stationLocks sync.Map
-	ctx          context.Context
-	cancel       context.CancelFunc
-	wg           sync.WaitGroup
+	Dir           string
+	Host          string
+	Port          int
+	Aggregator    *Aggregator
+	Hub           *SSEHub
+	httpServer    *http.Server
+	listener      net.Listener
+	mu            sync.RWMutex
+	stationLocks  sync.Map
+	ctx           context.Context
+	cancel        context.CancelFunc
+	wg            sync.WaitGroup
+	acpDispatcher *acp.RPCDispatcher
+	acpHandler    *acp.HTTPHandler
+	acpNotifChan  chan acp.Notification
 }
 
 // Config contém parâmetros de inicialização do Studio.
@@ -55,15 +59,42 @@ func NewServer(cfg Config) (*Server, error) {
 	hub := NewSSEHub(agg)
 
 	ctx, cancel := context.WithCancel(context.Background())
+	acpDisp := acp.NewDispatcher()
+	acpHandler := acp.NewHTTPHandler(acpDisp)
+	notifChan := make(chan acp.Notification, 64)
+	acpDisp.SubscribeNotifications(notifChan)
+
 	s := &Server{
-		Dir:        cfg.Dir,
-		Host:       cfg.Host,
-		Port:       cfg.Port,
-		Aggregator: agg,
-		Hub:        hub,
-		ctx:        ctx,
-		cancel:     cancel,
+		Dir:           cfg.Dir,
+		Host:          cfg.Host,
+		Port:          cfg.Port,
+		Aggregator:    agg,
+		Hub:           hub,
+		ctx:           ctx,
+		cancel:        cancel,
+		acpDispatcher: acpDisp,
+		acpHandler:    acpHandler,
+		acpNotifChan:  notifChan,
 	}
+
+	// Conecta notificações do ACPDispatcher ao SSEHub (ARQ-03)
+	s.wg.Add(1)
+	go func() {
+		defer s.wg.Done()
+		for {
+			select {
+			case <-s.ctx.Done():
+				return
+			case _, ok := <-s.acpNotifChan:
+				if !ok {
+					return
+				}
+				if s.Hub != nil {
+					s.Hub.NotifyChange()
+				}
+			}
+		}
+	}()
 
 	mux := http.NewServeMux()
 
@@ -75,7 +106,11 @@ func NewServer(cfg Config) (*Server, error) {
 	mux.HandleFunc("/api/handoff", s.handleHandoff)
 	mux.HandleFunc("/api/task/execute", s.handleTaskExecute)
 
-	// 2. Static Assets (embed.FS)
+	// 2. Transporte ACP HTTP/SSE (feat-64-03)
+	mux.HandleFunc("/api/acp/rpc", s.handleACPRPC)
+	mux.HandleFunc("/api/acp/events", s.handleACPEvents)
+
+	// 3. Static Assets (embed.FS)
 	subFS, err := fs.Sub(assetsFS, "assets")
 	if err == nil {
 		mux.Handle("/", http.FileServer(http.FS(subFS)))
@@ -85,10 +120,10 @@ func NewServer(cfg Config) (*Server, error) {
 		})
 	}
 
-	// Middleware de Segurança (SEG-01 / SEG-02 / SEG-06 / FLX-01): Permite POST exclusivamente em /api/spec/approve, /api/handoff e /api/task/execute
+	// Middleware de Segurança (SEG-01 / SEG-02 / SEG-06 / FLX-01): Permite POST exclusivamente em /api/spec/approve, /api/handoff, /api/task/execute e /api/acp/rpc
 	readOnlyHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodPost {
-			if r.URL.Path != "/api/spec/approve" && r.URL.Path != "/api/handoff" && r.URL.Path != "/api/task/execute" {
+			if r.URL.Path != "/api/spec/approve" && r.URL.Path != "/api/handoff" && r.URL.Path != "/api/task/execute" && r.URL.Path != "/api/acp/rpc" {
 				http.Error(w, "Method Not Allowed (Studio é estritamente Read-Only)", http.StatusMethodNotAllowed)
 				return
 			}
@@ -160,12 +195,70 @@ func (s *Server) Stop() error {
 	if s.cancel != nil {
 		s.cancel()
 	}
+	s.mu.Lock()
+	if s.acpDispatcher != nil && s.acpNotifChan != nil {
+		s.acpDispatcher.UnsubscribeNotifications(s.acpNotifChan)
+	}
+	s.mu.Unlock()
+
 	s.wg.Wait()
 	s.Hub.Stop()
 	if s.httpServer != nil {
 		return s.httpServer.Close()
 	}
 	return nil
+}
+
+// ACPDispatcher retorna a instância do despachador ACP do servidor.
+func (s *Server) ACPDispatcher() *acp.RPCDispatcher {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	return s.acpDispatcher
+}
+
+// ACPHandler retorna o manipulador HTTP do protocolo ACP.
+func (s *Server) ACPHandler() *acp.HTTPHandler {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	return s.acpHandler
+}
+
+// SetACPDispatcher configura um despachador ACP customizado (ex: para testes com mock).
+func (s *Server) SetACPDispatcher(d *acp.RPCDispatcher) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if s.acpDispatcher != nil && s.acpNotifChan != nil {
+		s.acpDispatcher.UnsubscribeNotifications(s.acpNotifChan)
+	}
+	s.acpDispatcher = d
+	s.acpHandler = acp.NewHTTPHandler(d)
+	if d != nil && s.acpNotifChan != nil {
+		d.SubscribeNotifications(s.acpNotifChan)
+	}
+}
+
+func (s *Server) handleACPRPC(w http.ResponseWriter, r *http.Request) {
+	s.mu.RLock()
+	handler := s.acpHandler
+	s.mu.RUnlock()
+
+	if handler != nil {
+		handler.ServeHTTP(w, r)
+		return
+	}
+	http.Error(w, "ACP handler indisponível", http.StatusServiceUnavailable)
+}
+
+func (s *Server) handleACPEvents(w http.ResponseWriter, r *http.Request) {
+	s.mu.RLock()
+	handler := s.acpHandler
+	s.mu.RUnlock()
+
+	if handler != nil {
+		handler.ServeEvents(w, r)
+		return
+	}
+	http.Error(w, "ACP handler indisponível", http.StatusServiceUnavailable)
 }
 
 func (s *Server) handleState(w http.ResponseWriter, r *http.Request) {
