@@ -1,183 +1,165 @@
 [
   {
-    "id": "act-1793537903614619000",
+    "timestamp": "2026-11-01T13:38:05Z",
+    "station": "governance",
+    "tool": "audit",
+    "action": "Auditoria PR #64 (CONFORME)",
+    "details": "Auditoria concluida com 100% de conformidade",
+    "status": "success"
+  },
+  {
+    "timestamp": "2026-11-01T13:37:50Z",
+    "station": "governance",
+    "tool": "audit",
+    "action": "Auditoria PR #64",
+    "details": "Inspecionando conformidade constitucional do terminal bonitinho",
+    "status": "success",
+    "durationMs": 274000,
+    "completedAt": "2026-11-01T13:42:24Z"
+  },
+  {
     "timestamp": "2026-11-01T12:58:23Z",
     "station": "lider",
     "tool": "orchestrate",
     "action": "feat-66-04-integracao-studio-e2e-validacao-constitucional",
     "details": "Notificação ao Líder: Ciclo autônomo concluído com 100% de aprovação",
-    "status": "success",
-    "completedAt": "2026-11-01T12:58:23Z"
+    "status": "success"
   },
   {
-    "id": "act-1793537903598337000",
     "timestamp": "2026-11-01T12:58:23Z",
     "station": "governance",
     "tool": "governance",
     "action": "audit (CONFORME)",
     "details": "Auditoria da Governança aprovada: 0 violações",
-    "status": "success",
-    "completedAt": "2026-11-01T12:58:23Z"
+    "status": "success"
   },
   {
-    "id": "act-1793537903521084000",
     "timestamp": "2026-11-01T12:58:23Z",
     "station": "governance",
     "tool": "audit",
     "action": "feat-66-04-integracao-studio-e2e-validacao-constitucional",
     "details": "Auditando conformidade constitucional",
-    "status": "success",
-    "completedAt": "2026-11-01T12:58:23Z"
+    "status": "success"
   },
   {
-    "id": "act-1793537903443346000",
     "timestamp": "2026-11-01T12:58:23Z",
     "station": "governance",
     "tool": "handoff",
     "action": "builder -\u003e governance",
     "details": "Handoff autônomo recebido: feat-66-04-integracao-studio-e2e-validacao-constitucional pronto para Governança",
-    "status": "success",
-    "completedAt": "2026-11-01T12:58:23Z"
+    "status": "success"
   },
   {
-    "id": "act-1793537903431246000",
     "timestamp": "2026-11-01T12:58:23Z",
     "station": "builder",
     "tool": "portao_a",
     "action": "go test -race ./... (PASS)",
     "details": "Portão A 100% aprovado: liberado para Governança",
-    "status": "success",
-    "completedAt": "2026-11-01T12:58:23Z"
+    "status": "success"
   },
   {
-    "id": "act-1793537902627886000",
     "timestamp": "2026-11-01T12:58:22Z",
     "station": "lider",
     "tool": "orchestrate",
     "action": "feat-66-03-ui-studio-modal-inspecao-passo-a-passo",
     "details": "Notificação ao Líder: Ciclo autônomo concluído com 100% de aprovação",
-    "status": "success",
-    "completedAt": "2026-11-01T12:58:22Z"
+    "status": "success"
   },
   {
-    "id": "act-1793537902608424000",
     "timestamp": "2026-11-01T12:58:22Z",
     "station": "governance",
     "tool": "governance",
     "action": "audit (CONFORME)",
     "details": "Auditoria da Governança aprovada: 0 violações",
-    "status": "success",
-    "completedAt": "2026-11-01T12:58:22Z"
+    "status": "success"
   },
   {
-    "id": "act-1793537902505961000",
     "timestamp": "2026-11-01T12:58:22Z",
     "station": "governance",
     "tool": "audit",
     "action": "feat-66-03-ui-studio-modal-inspecao-passo-a-passo",
     "details": "Auditando conformidade constitucional",
-    "status": "success",
-    "completedAt": "2026-11-01T12:58:22Z"
+    "status": "success"
   },
   {
-    "id": "act-1793537902413484000",
     "timestamp": "2026-11-01T12:58:22Z",
     "station": "builder",
     "tool": "portao_a",
     "action": "go test -race ./...",
     "details": "Executando testes locais Portão A",
-    "status": "success",
-    "completedAt": "2026-11-01T12:58:23Z"
+    "status": "success"
   },
   {
-    "id": "act-1793537902390036000",
     "timestamp": "2026-11-01T12:58:22Z",
     "station": "governance",
     "tool": "handoff",
     "action": "builder -\u003e governance",
     "details": "Handoff autônomo recebido: feat-66-03-ui-studio-modal-inspecao-passo-a-passo pronto para Governança",
-    "status": "success",
-    "completedAt": "2026-11-01T12:58:22Z"
+    "status": "success"
   },
   {
-    "id": "act-1793537902374151000",
     "timestamp": "2026-11-01T12:58:22Z",
     "station": "builder",
     "tool": "portao_a",
     "action": "go test -race ./... (PASS)",
     "details": "Portão A 100% aprovado: liberado para Governança",
-    "status": "success",
-    "completedAt": "2026-11-01T12:58:22Z"
+    "status": "success"
   },
   {
-    "id": "act-1793537900923091000",
     "timestamp": "2026-11-01T12:58:20Z",
     "station": "lider",
     "tool": "orchestrate",
     "action": "feat-66-02-modelo-telemetria-e-reconciliador-atividades-orfas",
     "details": "Notificação ao Líder: Ciclo autônomo concluído com 100% de aprovação",
-    "status": "success",
-    "completedAt": "2026-11-01T12:58:20Z"
+    "status": "success"
   },
   {
-    "id": "act-1793537900886874000",
     "timestamp": "2026-11-01T12:58:20Z",
     "station": "governance",
     "tool": "governance",
     "action": "audit (CONFORME)",
     "details": "Auditoria da Governança aprovada: 0 violações",
-    "status": "success",
-    "completedAt": "2026-11-01T12:58:20Z"
+    "status": "success"
   },
   {
-    "id": "act-1793537900772636000",
     "timestamp": "2026-11-01T12:58:20Z",
     "station": "governance",
     "tool": "audit",
     "action": "feat-66-02-modelo-telemetria-e-reconciliador-atividades-orfas",
     "details": "Auditando conformidade constitucional",
-    "status": "success",
-    "completedAt": "2026-11-01T12:58:20Z"
+    "status": "success"
   },
   {
-    "id": "act-1793537900713197000",
     "timestamp": "2026-11-01T12:58:20Z",
     "station": "builder",
     "tool": "portao_a",
     "action": "go test -race ./...",
     "details": "Executando testes locais Portão A",
-    "status": "success",
-    "completedAt": "2026-11-01T12:58:22Z"
+    "status": "success"
   },
   {
-    "id": "act-1793537900697481000",
     "timestamp": "2026-11-01T12:58:20Z",
     "station": "governance",
     "tool": "handoff",
     "action": "builder -\u003e governance",
     "details": "Handoff autônomo recebido: feat-66-02-modelo-telemetria-e-reconciliador-atividades-orfas pronto para Governança",
-    "status": "success",
-    "completedAt": "2026-11-01T12:58:20Z"
+    "status": "success"
   },
   {
-    "id": "act-1793537900670395000",
     "timestamp": "2026-11-01T12:58:20Z",
     "station": "builder",
     "tool": "portao_a",
     "action": "go test -race ./... (PASS)",
     "details": "Portão A 100% aprovado: liberado para Governança",
-    "status": "success",
-    "completedAt": "2026-11-01T12:58:20Z"
+    "status": "success"
   },
   {
-    "id": "act-1793537899845623000",
     "timestamp": "2026-11-01T12:58:19Z",
     "station": "builder",
     "tool": "portao_a",
     "action": "go test -race ./...",
     "details": "Executando testes locais Portão A",
-    "status": "success",
-    "completedAt": "2026-11-01T12:58:20Z"
+    "status": "success"
   },
   {
     "timestamp": "2026-11-01T12:39:39.923Z",
@@ -185,8 +167,7 @@
     "tool": "run_command",
     "action": "feat-66-01-estrutura-unificada-discovery-e-fixes",
     "details": "Builder iniciando implementação da feat-66-01 (Estrutura Unificada de Discovery)",
-    "status": "success",
-    "completedAt": "2026-11-01T12:58:19Z"
+    "status": "success"
   },
   {
     "timestamp": "2026-11-01T12:39:39.923Z",
@@ -418,22 +399,6 @@
     "tool": "orchestrate",
     "action": "feat-64-01-nucleo-acp-rpc-stdio",
     "details": "Notificação ao Líder: Ciclo autônomo concluído com 100% de aprovação",
-    "status": "success"
-  },
-  {
-    "timestamp": "2026-11-01T03:16:13Z",
-    "station": "governance",
-    "tool": "governance",
-    "action": "audit (CONFORME)",
-    "details": "Auditoria da Governança aprovada: 0 violações",
-    "status": "success"
-  },
-  {
-    "timestamp": "2026-11-01T03:16:13Z",
-    "station": "governance",
-    "tool": "audit",
-    "action": "feat-64-01-nucleo-acp-rpc-stdio",
-    "details": "Auditando conformidade constitucional",
     "status": "success"
   }
 ]
