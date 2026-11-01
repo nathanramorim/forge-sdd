@@ -342,3 +342,48 @@ func TestStudioGovernanceAndPillars(t *testing.T) {
 		}
 	}
 }
+
+func TestStudioBadgeReactivityAndIdeSecurity(t *testing.T) {
+	// 1. Validar JS em studio.js
+	jsData, err := assetsFS.ReadFile("assets/studio.js")
+	if err != nil {
+		t.Fatalf("falha ao ler assets/studio.js: %v", err)
+	}
+	jsStr := string(jsData)
+
+	requiredJS := []string{
+		"station-badges-",
+		"studio_project_dir",
+		"activeSpecTask",
+		"activePlannerSpecTask",
+		"queue-task-name",
+	}
+	for _, req := range requiredJS {
+		if !strings.Contains(jsStr, req) {
+			t.Errorf("studio.js não contém trecho obrigatório: %s", req)
+		}
+	}
+
+	// Garantir que nenhum card contenha link de texto redundante 'Ver histórico ->'
+	if strings.Contains(jsStr, "Ver histórico →") || strings.Contains(jsStr, "Ver histórico ->") {
+		t.Errorf("studio.js não deve conter link redundante 'Ver histórico ->'")
+	}
+
+	// 2. Validar CSS em studio.css
+	cssData, err := assetsFS.ReadFile("assets/studio.css")
+	if err != nil {
+		t.Fatalf("falha ao ler assets/studio.css: %v", err)
+	}
+	cssStr := string(cssData)
+
+	requiredCSS := []string{
+		".queue-task-row",
+		".queue-task-name",
+		"text-overflow: ellipsis",
+	}
+	for _, req := range requiredCSS {
+		if !strings.Contains(cssStr, req) {
+			t.Errorf("studio.css não contém regra obrigatória: %s", req)
+		}
+	}
+}

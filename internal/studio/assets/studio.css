@@ -456,10 +456,22 @@ main.studio-wrap {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 3px 0;
+  gap: 8px;
+  padding: 4px 0;
   border-top: 1px solid rgba(255, 255, 255, 0.04);
+  min-width: 0;
 }
 .queue-task-row:first-child { border-top: none; }
+.queue-task-row .queue-task-name {
+  color: var(--fg);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 11px;
+  font-weight: 500;
+  flex: 1 1 auto;
+  min-width: 0;
+}
 
 /* Inspetor de Governança (CA-08) */
 .gov-section {

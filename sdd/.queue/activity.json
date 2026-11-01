@@ -1,5 +1,13 @@
 [
   {
+    "timestamp": "2026-11-01T00:18:08Z",
+    "station": "governance",
+    "tool": "gate",
+    "action": "Auditoria Camada B",
+    "details": "Parecer emitido: 100% Conforme",
+    "status": "success"
+  },
+  {
     "timestamp": "2026-10-31T23:44:45Z",
     "station": "lider",
     "tool": "handoff",

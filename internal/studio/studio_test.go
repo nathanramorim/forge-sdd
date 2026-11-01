@@ -184,3 +184,107 @@ func TestStudioState_PlannerQueuedItemActivation(t *testing.T) {
 		t.Errorf("esperado ActiveItems 1, obtido %d", plannerStation.ActiveItems)
 	}
 }
+
+func TestStudioState_GovernanceQueueItemActivation(t *testing.T) {
+	statuses := []string{queue.StatusReviewPending, "in_progress", "running"}
+
+	for _, st := range statuses {
+		t.Run("status_"+st, func(t *testing.T) {
+			tempDir := t.TempDir()
+
+			_, _, err := queue.EnqueueStationItem(tempDir, queue.StationItem{
+				ID:        "gov-audit-01",
+				Title:     "Auditoria de Conformidade ARQ-01",
+				Station:   queue.StationGovernance,
+				Operation: "audit",
+				Status:    st,
+			})
+			if err != nil {
+				t.Fatalf("erro ao enfileirar item na governança: %v", err)
+			}
+
+			agg := studio.NewAggregator(tempDir)
+			snap, err := agg.GetSnapshot()
+			if err != nil {
+				t.Fatalf("falha ao obter snapshot: %v", err)
+			}
+
+			if snap.ActiveStation != queue.StationGovernance {
+				t.Errorf("esperado ActiveStation %s, obtido %s", queue.StationGovernance, snap.ActiveStation)
+			}
+
+			var govStation *studio.StationDTO
+			for i := range snap.Stations {
+				if snap.Stations[i].ID == queue.StationGovernance {
+					govStation = &snap.Stations[i]
+					break
+				}
+			}
+			if govStation == nil {
+				t.Fatalf("estação governance não encontrada")
+			}
+
+			if govStation.MascotState != "approval" {
+				t.Errorf("esperado MascotState 'approval', obtido %s", govStation.MascotState)
+			}
+			expectedFocus := "Auditando Conformidade: Auditoria de Conformidade ARQ-01"
+			if govStation.CurrentFocus != expectedFocus {
+				t.Errorf("esperado CurrentFocus %q, obtido %q", expectedFocus, govStation.CurrentFocus)
+			}
+			if govStation.ExecutingTask == nil {
+				t.Fatalf("esperado ExecutingTask preenchido")
+			}
+			if govStation.ExecutingTask.ID != "gov-audit-01" {
+				t.Errorf("esperado ExecutingTask.ID 'gov-audit-01', obtido %s", govStation.ExecutingTask.ID)
+			}
+			if govStation.ExecutingTask.Status != "review_pending" {
+				t.Errorf("esperado ExecutingTask.Status 'review_pending', obtido %s", govStation.ExecutingTask.Status)
+			}
+			if govStation.ExecutingTask.Operation != "audit" {
+				t.Errorf("esperado ExecutingTask.Operation 'audit', obtido %s", govStation.ExecutingTask.Operation)
+			}
+		})
+	}
+}
+
+func TestStudioState_GovernanceRecentActivityActivation(t *testing.T) {
+	for _, actStatus := range []string{"running", "working"} {
+		t.Run("status_"+actStatus, func(t *testing.T) {
+			tempDir := t.TempDir()
+
+			err := queue.RecordActivity(tempDir, queue.StationGovernance, "read_file", "internal/studio/state.go", "Auditoria Camada B", actStatus)
+			if err != nil {
+				t.Fatalf("erro ao registrar atividade: %v", err)
+			}
+
+			agg := studio.NewAggregator(tempDir)
+			snap, err := agg.GetSnapshot()
+			if err != nil {
+				t.Fatalf("falha ao obter snapshot: %v", err)
+			}
+
+			if snap.ActiveStation != queue.StationGovernance {
+				t.Errorf("esperado ActiveStation %s, obtido %s", queue.StationGovernance, snap.ActiveStation)
+			}
+
+			var govStation *studio.StationDTO
+			for i := range snap.Stations {
+				if snap.Stations[i].ID == queue.StationGovernance {
+					govStation = &snap.Stations[i]
+					break
+				}
+			}
+			if govStation == nil {
+				t.Fatalf("estação governance não encontrada")
+			}
+
+			if govStation.MascotState != "approval" {
+				t.Errorf("esperado MascotState 'approval', obtido %s", govStation.MascotState)
+			}
+			expectedFocus := "Auditoria Camada B em andamento"
+			if govStation.CurrentFocus != expectedFocus {
+				t.Errorf("esperado CurrentFocus %q, obtido %q", expectedFocus, govStation.CurrentFocus)
+			}
+		})
+	}
+}

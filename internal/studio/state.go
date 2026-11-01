@@ -157,7 +157,18 @@ func (a *Aggregator) GetSnapshot() (*StudioSnapshot, error) {
 				if it.Status == queue.StatusQueued && queuedItem == nil {
 					queuedItem = &sq.Items[idxItem]
 				}
-				if it.Status == queue.StatusBuilding {
+				if st.ID == queue.StationGovernance && (it.Status == queue.StatusReviewPending || it.Status == "in_progress" || it.Status == "running") {
+					stations[i].MascotState = "approval"
+					activeStation = st.ID
+					activeIdx = i
+					stations[i].CurrentFocus = "Auditando Conformidade: " + it.Title
+					stations[i].ExecutingTask = &ActiveTaskDTO{
+						ID:        it.ID,
+						Title:     it.Title,
+						Status:    "review_pending",
+						Operation: it.Operation,
+					}
+				} else if it.Status == queue.StatusBuilding {
 					stations[i].MascotState = "working"
 					activeStation = st.ID
 					activeIdx = i
@@ -213,7 +224,7 @@ func (a *Aggregator) GetSnapshot() (*StudioSnapshot, error) {
 		if s.ID == queue.StationPlanner {
 			plannerIdx = idx
 		}
-		if s.ExecutingTask != nil && s.ExecutingTask.Status == queue.StatusBuilding {
+		if s.ExecutingTask != nil && (s.ExecutingTask.Status == queue.StatusBuilding || s.ExecutingTask.Status == queue.StatusReviewPending) {
 			hasBuildingStation = true
 		}
 	}
@@ -323,6 +334,21 @@ func (a *Aggregator) GetSnapshot() (*StudioSnapshot, error) {
 				}
 				break
 			}
+		}
+	}
+
+	// Se a atividade mais recente de Governança tiver status "running" ou "working",
+	// garante que a Governança seja ativada como a estação em foco
+	for i, st := range stations {
+		if st.ID == queue.StationGovernance && len(st.RecentActivity) > 0 {
+			latestGov := st.RecentActivity[0]
+			if latestGov.Status == "running" || latestGov.Status == "working" {
+				activeStation = queue.StationGovernance
+				activeIdx = i
+				stations[i].MascotState = "approval"
+				stations[i].CurrentFocus = "Auditoria Camada B em andamento"
+			}
+			break
 		}
 	}
 

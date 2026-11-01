@@ -518,14 +518,37 @@ const CANONICAL_RULES_BY_STATION = {
 
 function getIdeFilePath(artifactPath) {
   if (!artifactPath) return '';
-  if (artifactPath.startsWith('/')) return artifactPath;
-  const projectDir = (lastSnapshot && lastSnapshot.project_dir)
-    ? lastSnapshot.project_dir.replace(/\/+$/, '')
+  let projectDir = (lastSnapshot && lastSnapshot.project_dir)
+    ? lastSnapshot.project_dir
     : '';
-  if (projectDir) {
-    return projectDir + '/' + artifactPath.replace(/^\/+/, '');
+  if (!projectDir) {
+    try {
+      projectDir = localStorage.getItem('studio_project_dir') || '';
+    } catch (e) {}
   }
-  return '/' + artifactPath;
+  projectDir = (projectDir || '').replace(/\/+$/, '');
+
+  // Se já for caminho absoluto no sistema operacional e coincidir com projectDir
+  if (projectDir && artifactPath.startsWith(projectDir)) {
+    return artifactPath;
+  }
+
+  // Se for um caminho absoluto real do sistema operacional (ex: /Users/..., /home/..., /private/...)
+  // mas que não comece com /sdd (que seria um caminho relativo com leading slash indevido)
+  if (artifactPath.startsWith('/') && !artifactPath.startsWith('/sdd')) {
+    return artifactPath;
+  }
+
+  // Remove barra inicial para normalizar caminho relativo ao projeto (ex: '/sdd/...' -> 'sdd/...')
+  const cleanPath = artifactPath.replace(/^\/+/, '');
+
+  if (projectDir) {
+    const absBase = projectDir.startsWith('/') ? projectDir : '/' + projectDir;
+    return absBase + '/' + cleanPath;
+  }
+
+  // Fallback: se projectDir ainda não estiver setado, nunca retorne '/sdd/...' sem prefixo absoluto!
+  return cleanPath;
 }
 
 function sortItemsNewestFirst(list) {
@@ -711,8 +734,9 @@ async function openSpecViewer(specPath) {
     }
 
     const data = await res.json();
-    const vsCodeUri = data.absolute_path ? `vscode://file${data.absolute_path.startsWith('/') ? data.absolute_path : '/' + data.absolute_path}` : 'vscode://';
-    const cursorUri = data.absolute_path ? `cursor://file${data.absolute_path.startsWith('/') ? data.absolute_path : '/' + data.absolute_path}` : 'cursor://';
+    const absPath = data.absolute_path || getIdeFilePath(data.path);
+    const vsCodeUri = absPath ? (absPath.startsWith('/') ? `vscode://file${absPath}` : `vscode://file/${absPath}`) : 'vscode://';
+    const cursorUri = absPath ? (absPath.startsWith('/') ? `cursor://file${absPath}` : `cursor://file/${absPath}`) : 'cursor://';
     const isApproved = data.status === 'approved';
 
     if (stationBadge) {
@@ -1112,8 +1136,8 @@ function renderStationDrawerContent(st) {
     activeCardsHtml = activeItems.map(it => {
       const isSelected = it.id === selectedTaskId;
       const filePath = getIdeFilePath(it.artifact_path);
-      const vsCodeUri = filePath ? `vscode://file${filePath}` : 'vscode://';
-      const cursorUri = filePath ? `cursor://file${filePath}` : 'cursor://';
+      const vsCodeUri = filePath ? (filePath.startsWith('/') ? `vscode://file${filePath}` : `vscode://file/${filePath}`) : 'vscode://';
+      const cursorUri = filePath ? (filePath.startsWith('/') ? `cursor://file${filePath}` : `cursor://file/${filePath}`) : 'cursor://';
       const cliCmd = it.artifact_path ? `code ${it.artifact_path}` : (it.id ? `forge-sdd task view ${it.id}` : 'code .');
       const copyBtnId = `copy-btn-${it.id.replace(/[^a-zA-Z0-9_-]/g, '_')}`;
 
@@ -1202,8 +1226,8 @@ function renderStationDrawerContent(st) {
     completedCardsHtml = completedItems.map(it => {
       const isSelected = it.id === selectedTaskId;
       const filePath = getIdeFilePath(it.artifact_path);
-      const vsCodeUri = filePath ? `vscode://file${filePath}` : 'vscode://';
-      const cursorUri = filePath ? `cursor://file${filePath}` : 'cursor://';
+      const vsCodeUri = filePath ? (filePath.startsWith('/') ? `vscode://file${filePath}` : `vscode://file/${filePath}`) : 'vscode://';
+      const cursorUri = filePath ? (filePath.startsWith('/') ? `cursor://file${filePath}` : `cursor://file/${filePath}`) : 'cursor://';
       const cliCmd = it.artifact_path ? `code ${it.artifact_path}` : (it.id ? `forge-sdd task view ${it.id}` : 'code .');
       const copyBtnId = `copy-comp-btn-${it.id.replace(/[^a-zA-Z0-9_-]/g, '_')}`;
       const completedTime = it.updated_at ? new Date(it.updated_at).toLocaleString() : (it.created_at ? new Date(it.created_at).toLocaleString() : 'Concluído');
@@ -1467,6 +1491,14 @@ function applySnapshot(snap) {
   if (!snap) return;
   lastSnapshot = snap;
 
+  if (snap.project_dir) {
+    try {
+      localStorage.setItem('studio_project_dir', snap.project_dir);
+    } catch (e) {
+      // quota or private mode
+    }
+  }
+
   document.getElementById('projectName').textContent = snap.project_name || 'forge-sdd';
   document.getElementById('projectVersion').textContent = 'v' + (snap.version || '3.2.1-beta');
   document.getElementById('lastUpdate').textContent = new Date(snap.updated_at).toLocaleTimeString();
@@ -1606,7 +1638,7 @@ function applySnapshot(snap) {
 
         return `
           <div class="queue-task-row">
-            <span style="color:var(--fg);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:105px;font-size:11px;" title="${escapeHtml(it.title || it.id)}">${escapeHtml(it.id)}</span>
+            <span class="queue-task-name" title="${escapeHtml(it.title || it.id)}">${escapeHtml(it.id)}</span>
             <span class="chip" style="font-size:8.5px;padding:1px 5px;color:${statusColor};border-color:currentColor;flex-shrink:0;">${shortStatus}</span>
           </div>
         `;
@@ -1619,6 +1651,27 @@ function applySnapshot(snap) {
       `;
     } else {
       itemsHtml = `<div style="color:var(--muted);font-style:italic;font-size:11px;padding:4px 0;">Fila ociosa</div>`;
+    }
+
+    // Badge de Spec (FLX-01):
+    // Na Estação 02 (PM & Arquiteto): exibido APENAS se houver tarefa com status ativo/pendente ('pending_review', 'approval', 'queued', 'in_progress') e artifact_path.
+    // Na Estação 03 (Planejador): se houver spec ativa recebida por handoff (status !== 'approved' && status !== 'done' com artifact_path), exibir badge discreto.
+    let specBadgeHtml = '';
+    if (st.id === 'pm-architect') {
+      const pendingStatuses = ['pending_review', 'approval', 'queued', 'in_progress'];
+      const activeSpecTask = (st.items || []).find(it => it.artifact_path && pendingStatuses.includes(it.status));
+      if (activeSpecTask) {
+        specBadgeHtml = `
+          <a href="javascript:void(0)" class="spec-link-btn" onclick="event.stopPropagation(); openSpecViewer('${escapeHtml(activeSpecTask.artifact_path)}')" style="color:#ffd8a8;font-size:10px;font-weight:600;text-decoration:none;background:rgba(242,166,90,0.15);padding:2px 6px;border-radius:4px;border:1px solid rgba(242,166,90,0.3);" title="Ver especificação técnica detalhada">📄 Spec (FLX-01)</a>
+        `;
+      }
+    } else if (st.id === 'planner') {
+      const activePlannerSpecTask = (st.items || []).find(it => it.artifact_path && it.status !== 'approved' && it.status !== 'done');
+      if (activePlannerSpecTask) {
+        specBadgeHtml = `
+          <a href="javascript:void(0)" class="spec-link-btn" onclick="event.stopPropagation(); openSpecViewer('${escapeHtml(activePlannerSpecTask.artifact_path)}')" style="color:#c9a7ff;font-size:10px;font-weight:600;text-decoration:none;background:rgba(157,110,237,0.15);padding:2px 6px;border-radius:4px;border:1px solid rgba(157,110,237,0.3);" title="Ver especificação técnica recebida da Estação 02">📄 Spec</a>
+        `;
+      }
     }
 
     let card = document.getElementById(`station-card-${st.id}`);
@@ -1639,18 +1692,13 @@ function applySnapshot(snap) {
         }
       };
 
-      const pmSpecPath = (st.items && st.items.length > 0 && st.items[0].artifact_path) ? st.items[0].artifact_path : 'sdd/discovery/discovery-63-studio-navegavel-aprovacao-spec.md';
-      const specBadgeHtml = st.id === 'pm-architect' ? `
-        <a href="javascript:void(0)" class="spec-link-btn" onclick="event.stopPropagation(); openSpecViewer('${escapeHtml(pmSpecPath)}')" style="color:#ffd8a8;font-size:10px;font-weight:600;text-decoration:none;background:rgba(242,166,90,0.15);padding:2px 6px;border-radius:4px;border:1px solid rgba(242,166,90,0.3);">📄 Spec (FLX-01)</a>
-      ` : '';
-
       card.innerHTML = `
         <div class="station-top">
           <div class="mascot-stage" id="stage-${st.id}"></div>
           <div class="station-info">
             <h3>${st.name}</h3>
             <p class="role">${st.role}</p>
-            <div style="display:flex;align-items:center;gap:6px;margin-top:4px;flex-wrap:wrap;">
+            <div id="station-badges-${st.id}" style="display:flex;align-items:center;gap:6px;margin-top:4px;flex-wrap:wrap;">
               <span class="chip" id="chip-${st.id}"><i style="--o:${st.color}"></i>${st.mascot_state}</span>
               ${specBadgeHtml}
             </div>
@@ -1687,8 +1735,16 @@ function applySnapshot(snap) {
           openStationDrawer(st.id);
         }
       };
-      const chip = document.getElementById(`chip-${st.id}`);
-      if (chip) chip.innerHTML = `<i style="--o:${st.color}"></i>${st.mascot_state}`;
+      const badgesContainer = document.getElementById(`station-badges-${st.id}`);
+      if (badgesContainer) {
+        badgesContainer.innerHTML = `
+          <span class="chip" id="chip-${st.id}"><i style="--o:${st.color}"></i>${st.mascot_state}</span>
+          ${specBadgeHtml}
+        `;
+      } else {
+        const chip = document.getElementById(`chip-${st.id}`);
+        if (chip) chip.innerHTML = `<i style="--o:${st.color}"></i>${st.mascot_state}`;
+      }
       const execWrap = document.getElementById(`exec-wrap-${st.id}`);
       if (execWrap) execWrap.innerHTML = execHtml;
       const queueVer = document.getElementById(`queue-ver-${st.id}`);
