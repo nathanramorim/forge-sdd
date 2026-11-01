@@ -146,6 +146,74 @@
     </div>
   </div>
 
+  <!-- Modal de Inspeção Detalhada de Telemetria (feat-66-03) -->
+  <div id="activityModalBackdrop" class="activity-modal-backdrop" onclick="closeActivityModal()"></div>
+  <div id="activityModal" class="activity-modal" role="dialog" aria-modal="true" aria-labelledby="activityModalTitle" aria-label="Detalhes da Telemetria da Estação">
+    <div class="activity-modal-header">
+      <div class="activity-header-info">
+        <div class="activity-header-top-row">
+          <span class="chip mono" id="actStationBadge">04. Builder</span>
+          <span class="chip mono" id="actStatusBadge">running</span>
+          <span class="act-nav-hint mono">← → navegar • ESC fechar</span>
+        </div>
+        <h2 id="activityModalTitle">Inspeção de Atividade</h2>
+        <div class="act-meta-row">
+          <span class="act-tool-badge mono" id="actToolName">tool</span>
+          <span class="act-action-label mono" id="actActionDesc">Ação</span>
+        </div>
+      </div>
+      <div class="activity-header-actions">
+        <button class="activity-nav-btn mono" id="btnActPrev" onclick="navigateActivity(-1)" title="Evento anterior (Seta Esquerda)">‹ Anterior</button>
+        <button class="activity-nav-btn mono" id="btnActNext" onclick="navigateActivity(1)" title="Próximo evento (Seta Direita)">Próximo ›</button>
+        <button class="activity-close-btn" onclick="closeActivityModal()" aria-label="Fechar Detalhes">&times;</button>
+      </div>
+    </div>
+    <div class="activity-modal-body" id="activityModalBody">
+      <div class="act-section" id="actCommandSection">
+        <div class="act-section-header">
+          <span class="act-section-title">Comando Executado</span>
+          <button id="actCopyCmdBtn" class="copy-btn mono" onclick="copyActivityCommand()">Copiar Comando</button>
+        </div>
+        <pre class="act-terminal-code mono" id="actCommandCode"><code></code></pre>
+      </div>
+
+      <div class="act-meta-grid">
+        <div class="act-meta-item">
+          <span class="act-meta-label">Arquivo Afetado</span>
+          <span class="act-meta-val mono" id="actFilePath">--</span>
+        </div>
+        <div class="act-meta-item">
+          <span class="act-meta-label">Duração</span>
+          <span class="act-meta-val mono" id="actDuration">--</span>
+        </div>
+        <div class="act-meta-item">
+          <span class="act-meta-label">Início</span>
+          <span class="act-meta-val mono" id="actStartTime">--</span>
+        </div>
+        <div class="act-meta-item">
+          <span class="act-meta-label">Término</span>
+          <span class="act-meta-val mono" id="actEndTime">--</span>
+        </div>
+      </div>
+
+      <div class="act-section" id="actOutputSection">
+        <div class="act-section-header">
+          <span class="act-section-title" id="actOutputTitle">Saída / Logs do Terminal</span>
+          <button id="actCopyOutBtn" class="copy-btn mono" onclick="copyActivityOutput()">Copiar Saída</button>
+        </div>
+        <pre class="act-terminal-output mono" id="actOutputTerminal"><code></code></pre>
+      </div>
+    </div>
+    <div class="activity-modal-footer">
+      <div class="act-footer-info">
+        <span class="mono" id="actIndexIndicator">Evento 0 de 0</span>
+      </div>
+      <div class="act-footer-actions">
+        <button class="btn-secondary" onclick="closeActivityModal()">Fechar</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Rodapé -->
   <footer class="studio-foot">
     <div>

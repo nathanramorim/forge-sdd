@@ -49,6 +49,8 @@ func TestIndexHTMLContract(t *testing.T) {
 		"id=\"govPillarsGrid\"",
 		"id=\"drawerBackdrop\"",
 		"id=\"stationDrawer\"",
+		"id=\"activityModalBackdrop\"",
+		"id=\"activityModal\"",
 		"id=\"lastUpdate\"",
 		"studio.css",
 		"studio.js",
@@ -436,5 +438,71 @@ func TestStudioAssetsAutoRunContract(t *testing.T) {
 	jsStr := string(jsData)
 	if strings.Contains(jsStr, "autorun-card-badge") || strings.Contains(jsStr, "autorun-running-chip") {
 		t.Errorf("studio.js não deve poluir os cards com badges residuais de auto-run")
+	}
+}
+
+func TestStudioActivityModalContract(t *testing.T) {
+	// 1. Validar Markup no index.html
+	htmlData, err := assetsFS.ReadFile("assets/index.html")
+	if err != nil {
+		t.Fatalf("falha ao ler assets/index.html: %v", err)
+	}
+	htmlStr := string(htmlData)
+	requiredHTML := []string{
+		`id="activityModal"`,
+		`id="activityModalBackdrop"`,
+		`id="actStationBadge"`,
+		`id="actStatusBadge"`,
+		`id="activityModalTitle"`,
+		`id="actCommandCode"`,
+		`id="actFilePath"`,
+		`id="actDuration"`,
+		`id="actOutputTerminal"`,
+		`id="btnActPrev"`,
+		`id="btnActNext"`,
+	}
+	for _, req := range requiredHTML {
+		if !strings.Contains(htmlStr, req) {
+			t.Errorf("index.html está faltando elemento do activityModal: %s", req)
+		}
+	}
+
+	// 2. Validar CSS em studio.css
+	cssData, err := assetsFS.ReadFile("assets/studio.css")
+	if err != nil {
+		t.Fatalf("falha ao ler assets/studio.css: %v", err)
+	}
+	cssStr := string(cssData)
+	requiredCSS := []string{
+		".activity-modal",
+		".activity-modal-backdrop",
+		".act-terminal-code",
+		".act-terminal-output",
+		".log-inspect-btn",
+	}
+	for _, req := range requiredCSS {
+		if !strings.Contains(cssStr, req) {
+			t.Errorf("studio.css está faltando seletor de telemetria: %s", req)
+		}
+	}
+
+	// 3. Validar JS em studio.js
+	jsData, err := assetsFS.ReadFile("assets/studio.js")
+	if err != nil {
+		t.Fatalf("falha ao ler assets/studio.js: %v", err)
+	}
+	jsStr := string(jsData)
+	requiredJS := []string{
+		"openActivityModal",
+		"closeActivityModal",
+		"navigateActivity",
+		"copyActivityCommand",
+		"copyActivityOutput",
+		"currentFilteredActivities",
+	}
+	for _, req := range requiredJS {
+		if !strings.Contains(jsStr, req) {
+			t.Errorf("studio.js está faltando função ou variável obrigatória: %s", req)
+		}
 	}
 }

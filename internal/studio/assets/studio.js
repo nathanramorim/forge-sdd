@@ -332,6 +332,8 @@ function escapeHtml(str) {
 }
 
 let currentActivities = [];
+let currentFilteredActivities = [];
+let currentActivityIndex = -1;
 let consoleFilter = 'all';
 
 window.filterConsole = function(station) {
@@ -351,12 +353,14 @@ function renderConsoleLogs(activities) {
     return act.station === consoleFilter;
   });
 
-  if (filtered.length === 0) {
+  currentFilteredActivities = filtered.slice(0, 50);
+
+  if (currentFilteredActivities.length === 0) {
     container.innerHTML = `<div style="color:var(--muted);font-style:italic;padding:8px 0;">Nenhum evento registrado para esta estação.</div>`;
     return;
   }
 
-  container.innerHTML = filtered.slice(0, 50).map(act => {
+  container.innerHTML = currentFilteredActivities.map((act, idx) => {
     const stMeta = {
       'lider': { name: '01. LÍDER', color: '#f2a65a' },
       'pm-architect': { name: '02. PM/ARQ', color: '#8aa4ff' },
@@ -377,7 +381,7 @@ function renderConsoleLogs(activities) {
     const statusClass = (act.status === 'running' || act.status === 'working') ? 'running' : (act.status === 'error' ? 'error' : 'done');
 
     return `
-      <div class="log-row">
+      <div class="log-row" role="button" tabindex="0" onclick="openActivityModal(${idx})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openActivityModal(${idx});}" title="Clique para ver detalhes do log e execução">
         <span class="log-time">${escapeHtml(timeStr)}</span>
         <span class="log-station" style="color:${stMeta.color};">
           <span class="tool-chip-dot" style="--c:${stMeta.color};"></span>${escapeHtml(stMeta.name)}
@@ -388,10 +392,186 @@ function renderConsoleLogs(activities) {
           ${act.details ? `<span class="detail-hint">${escapeHtml(act.details)}</span>` : ''}
         </span>
         <span class="log-status ${statusClass}">${escapeHtml(act.status || 'done')}</span>
+        <span class="log-inspect-btn" title="Inspecionar">🔍</span>
       </div>
     `;
   }).join('');
 }
+
+function openActivityModal(index) {
+  if (!currentFilteredActivities || index < 0 || index >= currentFilteredActivities.length) return;
+  currentActivityIndex = index;
+  const act = currentFilteredActivities[index];
+
+  const modal = document.getElementById('activityModal');
+  const backdrop = document.getElementById('activityModalBackdrop');
+  if (!modal || !backdrop) return;
+
+  const stMeta = {
+    'lider': { name: '01. LÍDER (ORQUESTRADOR)', color: '#f2a65a' },
+    'pm-architect': { name: '02. PM & ARQUITETO', color: '#8aa4ff' },
+    'planner': { name: '03. PLANEJADOR', color: '#c9a7ff' },
+    'builder': { name: '04. BUILDER', color: '#4fd1b5' },
+    'governance': { name: '05. GOVERNANÇA', color: '#ff8a5c' }
+  }[act.station] || { name: act.station, color: '#4f8ef7' };
+
+  // Badges no header
+  const stBadge = document.getElementById('actStationBadge');
+  if (stBadge) {
+    stBadge.textContent = stMeta.name;
+    stBadge.style.color = stMeta.color;
+    stBadge.style.borderColor = stMeta.color;
+  }
+
+  const statusBadge = document.getElementById('actStatusBadge');
+  if (statusBadge) {
+    const s = (act.status || 'done').toLowerCase();
+    statusBadge.textContent = s.toUpperCase();
+    if (s === 'running' || s === 'working') {
+      statusBadge.style.color = 'var(--warn)';
+      statusBadge.style.borderColor = 'var(--warn)';
+    } else if (s === 'error') {
+      statusBadge.style.color = 'var(--err)';
+      statusBadge.style.borderColor = 'var(--err)';
+    } else {
+      statusBadge.style.color = 'var(--ok)';
+      statusBadge.style.borderColor = 'var(--ok)';
+    }
+  }
+
+  // Tool e Ação
+  const toolName = document.getElementById('actToolName');
+  if (toolName) toolName.textContent = act.tool || 'tool';
+
+  const actionDesc = document.getElementById('actActionDesc');
+  if (actionDesc) actionDesc.textContent = act.action || act.details || '--';
+
+  // Comando
+  const cmdCode = document.getElementById('actCommandCode');
+  const fullCmd = act.command || (act.args && act.args.length > 0 ? act.args.join(' ') : '') || act.details || act.action || '';
+  if (cmdCode) {
+    const codeEl = cmdCode.querySelector('code');
+    if (codeEl) codeEl.textContent = fullCmd || '(Nenhum comando explícito)';
+  }
+
+  // Metadados
+  const filePathEl = document.getElementById('actFilePath');
+  if (filePathEl) {
+    filePathEl.textContent = act.file_path || act.filePath || '--';
+    filePathEl.title = act.file_path || act.filePath || '';
+  }
+
+  const durationEl = document.getElementById('actDuration');
+  if (durationEl) {
+    if (act.duration_ms && act.duration_ms > 0) {
+      durationEl.textContent = `${act.duration_ms} ms`;
+    } else {
+      durationEl.textContent = '--';
+    }
+  }
+
+  const startTimeEl = document.getElementById('actStartTime');
+  if (startTimeEl) {
+    startTimeEl.textContent = act.timestamp ? act.timestamp.replace('T', ' ').slice(0, 19) : '--';
+  }
+
+  const endTimeEl = document.getElementById('actEndTime');
+  if (endTimeEl) {
+    endTimeEl.textContent = act.completed_at ? act.completed_at.replace('T', ' ').slice(0, 19) : '--';
+  }
+
+  // Saída / Output / Erro
+  const outTerminal = document.getElementById('actOutputTerminal');
+  const outTitle = document.getElementById('actOutputTitle');
+  if (outTerminal) {
+    const codeEl = outTerminal.querySelector('code');
+    if (codeEl) {
+      if (act.error) {
+        outTerminal.classList.add('error-output');
+        if (outTitle) outTitle.textContent = 'Erro Capturado';
+        codeEl.textContent = act.error + (act.output ? '\n\n--- Saída Parcial ---\n' + act.output : '');
+      } else if (act.output) {
+        outTerminal.classList.remove('error-output');
+        if (outTitle) outTitle.textContent = 'Saída / Logs do Terminal';
+        codeEl.textContent = act.output;
+      } else {
+        outTerminal.classList.remove('error-output');
+        if (outTitle) outTitle.textContent = 'Saída / Logs do Terminal';
+        codeEl.textContent = '(Nenhuma saída capturada no terminal)';
+      }
+    }
+  }
+
+  // Indicador de Posição
+  const indEl = document.getElementById('actIndexIndicator');
+  if (indEl) {
+    indEl.textContent = `Evento ${index + 1} de ${currentFilteredActivities.length}`;
+  }
+
+  // Botões de Navegação
+  const btnPrev = document.getElementById('btnActPrev');
+  if (btnPrev) btnPrev.disabled = (index <= 0);
+
+  const btnNext = document.getElementById('btnActNext');
+  if (btnNext) btnNext.disabled = (index >= currentFilteredActivities.length - 1);
+
+  modal.classList.add('open');
+  backdrop.classList.add('open');
+}
+
+function closeActivityModal() {
+  const modal = document.getElementById('activityModal');
+  const backdrop = document.getElementById('activityModalBackdrop');
+  if (modal) modal.classList.remove('open');
+  if (backdrop) backdrop.classList.remove('open');
+  currentActivityIndex = -1;
+}
+
+function navigateActivity(delta) {
+  if (currentActivityIndex < 0) return;
+  const newIdx = currentActivityIndex + delta;
+  if (newIdx >= 0 && newIdx < currentFilteredActivities.length) {
+    openActivityModal(newIdx);
+  }
+}
+
+function copyActivityCommand() {
+  const cmdCode = document.getElementById('actCommandCode');
+  if (!cmdCode) return;
+  const codeEl = cmdCode.querySelector('code');
+  const text = codeEl ? codeEl.textContent : '';
+  if (!text) return;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById('actCopyCmdBtn');
+    if (btn) {
+      const orig = btn.textContent;
+      btn.textContent = 'Copiado!';
+      setTimeout(() => { btn.textContent = orig; }, 1800);
+    }
+  }).catch(() => {});
+}
+
+function copyActivityOutput() {
+  const outTerminal = document.getElementById('actOutputTerminal');
+  if (!outTerminal) return;
+  const codeEl = outTerminal.querySelector('code');
+  const text = codeEl ? codeEl.textContent : '';
+  if (!text) return;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById('actCopyOutBtn');
+    if (btn) {
+      const orig = btn.textContent;
+      btn.textContent = 'Copiado!';
+      setTimeout(() => { btn.textContent = orig; }, 1800);
+    }
+  }).catch(() => {});
+}
+
+window.openActivityModal = openActivityModal;
+window.closeActivityModal = closeActivityModal;
+window.navigateActivity = navigateActivity;
+window.copyActivityCommand = copyActivityCommand;
+window.copyActivityOutput = copyActivityOutput;
 
 // ============================================================================
 // STATION DRAWER & DEEP-LINKS (feat-63-02, CA-01, CA-02, CA-04, CA-10)
@@ -1135,6 +1315,22 @@ window.renderMarkdown = renderMarkdown;
 window.renderMarkdownToHtml = renderMarkdown;
 
 window.addEventListener('keydown', (e) => {
+  const actModal = document.getElementById('activityModal');
+  if (actModal && actModal.classList.contains('open')) {
+    if (e.key === 'Escape') {
+      closeActivityModal();
+      return;
+    }
+    if (e.key === 'ArrowLeft') {
+      navigateActivity(-1);
+      return;
+    }
+    if (e.key === 'ArrowRight') {
+      navigateActivity(1);
+      return;
+    }
+  }
+
   if (e.key === 'Escape') {
     const modal = document.getElementById('specViewerModal');
     if (modal && modal.classList.contains('open')) {
