@@ -529,23 +529,33 @@ function openActivityModal(index) {
     if (codeEl) {
       if (act.error) {
         outTerminal.classList.add('error-output');
-        if (outTitle) outTitle.textContent = 'Erro Capturado';
+        if (outTitle) outTitle.textContent = 'ERRO';
         rawOutputText = act.error + (act.output ? '\n\n--- Saída Parcial ---\n' + act.output : '');
       } else if (act.output) {
         outTerminal.classList.remove('error-output');
-        if (outTitle) outTitle.textContent = 'Saída / Logs do Terminal';
+        if (outTitle) outTitle.textContent = 'TERMINAL OUTPUT';
         rawOutputText = act.output;
       } else {
         outTerminal.classList.remove('error-output');
-        if (outTitle) outTitle.textContent = 'Detalhes da Operação';
-        let detailContent = `[STATUS: ${act.status.toUpperCase()}]\nEstação: ${stMeta.name}\nFerramenta: ${act.tool || 'tool'}`;
-        if (act.details) {
-          detailContent += `\nDetalhes: ${act.details}`;
-        }
+        if (outTitle) outTitle.textContent = 'DETALHES DA OPERAÇÃO';
+        const lines = [
+          `=== EXECUÇÃO DA ESTAÇÃO: ${stMeta.name.toUpperCase()} ===`,
+          `Status:       ${act.status.toUpperCase()}`,
+          `Ferramenta:   ${act.tool || 'run_command'}`,
+          `Comando:      ${fullCmd}`,
+          `Arquivo:      ${act.file_path || act.filePath || act.action || '--'}`,
+          `Início:       ${act.timestamp ? act.timestamp.replace('T', ' ').slice(0, 19) : '--'}`,
+          `Término:      ${act.completed_at ? act.completed_at.replace('T', ' ').slice(0, 19) : (act.timestamp ? act.timestamp.replace('T', ' ').slice(0, 19) : '--')}`,
+          `Duração:      ${act.duration_ms ? act.duration_ms + ' ms' : '--'}`,
+          ``,
+          `--- RESUMO DA OPERAÇÃO ---`,
+          act.details || act.action || 'Sem descrição adicional fornecida.',
+        ];
         if (act.action && act.action !== act.details) {
-          detailContent += `\nAção/Alvo: ${act.action}`;
+          lines.push(``, `--- ALVO / PARÂMETROS ---`, act.action);
         }
-        rawOutputText = detailContent;
+        lines.push(``, `[Processo finalizado com código 0]`);
+        rawOutputText = lines.join('\n');
       }
       currentRawTerminalText = rawOutputText;
       codeEl.textContent = rawOutputText;
