@@ -197,11 +197,34 @@
       </div>
 
       <div class="act-section" id="actOutputSection">
-        <div class="act-section-header">
-          <span class="act-section-title" id="actOutputTitle">Saída / Logs do Terminal</span>
-          <button id="actCopyOutBtn" class="copy-btn mono" onclick="copyActivityOutput()">Copiar Saída</button>
+        <div class="act-terminal-window">
+          <div class="act-terminal-header">
+            <div class="act-term-controls">
+              <span class="act-term-dot act-dot-red"></span>
+              <span class="act-term-dot act-dot-yellow"></span>
+              <span class="act-term-dot act-dot-green"></span>
+            </div>
+            <div class="act-term-title-wrapper">
+              <span class="act-term-icon">⚡</span>
+              <span class="act-section-title mono" id="actOutputTitle">Saída / Logs do Terminal</span>
+            </div>
+            <div class="act-term-search-bar">
+              <div class="act-search-input-wrapper">
+                <span class="act-search-icon">🔍</span>
+                <input type="text" id="actSearchInput" class="act-search-input mono" placeholder="Buscar no log... (Enter para próximo)" oninput="handleActivitySearchInput(this.value)" onkeydown="handleActivitySearchKeydown(event)" autocomplete="off" spellcheck="false" />
+                <span class="act-search-count mono" id="actSearchCount"></span>
+              </div>
+              <div class="act-search-nav">
+                <button class="act-search-btn mono" id="btnSearchPrev" onclick="navigateSearchResult(-1)" title="Ocorrência anterior (Shift+Enter)">▲</button>
+                <button class="act-search-btn mono" id="btnSearchNext" onclick="navigateSearchResult(1)" title="Próxima ocorrência (Enter)">▼</button>
+              </div>
+              <button id="actCopyOutBtn" class="copy-btn mono act-term-copy-btn" onclick="copyActivityOutput()">Copiar Log</button>
+            </div>
+          </div>
+          <div class="act-terminal-body-wrap" id="actTerminalBodyWrap">
+            <pre class="act-terminal-output mono" id="actOutputTerminal"><code id="actOutputCode"></code></pre>
+          </div>
         </div>
-        <pre class="act-terminal-output mono" id="actOutputTerminal"><code></code></pre>
       </div>
     </div>
     <div class="activity-modal-footer">

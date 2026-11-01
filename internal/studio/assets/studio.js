@@ -523,17 +523,18 @@ function openActivityModal(index) {
   // Saída / Output / Erro
   const outTerminal = document.getElementById('actOutputTerminal');
   const outTitle = document.getElementById('actOutputTitle');
+  let rawOutputText = '';
   if (outTerminal) {
-    const codeEl = outTerminal.querySelector('code');
+    const codeEl = document.getElementById('actOutputCode') || outTerminal.querySelector('code');
     if (codeEl) {
       if (act.error) {
         outTerminal.classList.add('error-output');
         if (outTitle) outTitle.textContent = 'Erro Capturado';
-        codeEl.textContent = act.error + (act.output ? '\n\n--- Saída Parcial ---\n' + act.output : '');
+        rawOutputText = act.error + (act.output ? '\n\n--- Saída Parcial ---\n' + act.output : '');
       } else if (act.output) {
         outTerminal.classList.remove('error-output');
         if (outTitle) outTitle.textContent = 'Saída / Logs do Terminal';
-        codeEl.textContent = act.output;
+        rawOutputText = act.output;
       } else {
         outTerminal.classList.remove('error-output');
         if (outTitle) outTitle.textContent = 'Detalhes da Operação';
@@ -544,9 +545,20 @@ function openActivityModal(index) {
         if (act.action && act.action !== act.details) {
           detailContent += `\nAção/Alvo: ${act.action}`;
         }
-        codeEl.textContent = detailContent;
+        rawOutputText = detailContent;
       }
+      currentRawTerminalText = rawOutputText;
+      codeEl.textContent = rawOutputText;
     }
+  }
+
+  // Resetar busca do terminal
+  resetActivitySearch();
+
+  // Scroll inicial para o topo
+  const termBodyWrap = document.getElementById('actTerminalBodyWrap');
+  if (termBodyWrap) {
+    termBodyWrap.scrollTop = 0;
   }
 
   // Indicador de Posição
@@ -566,12 +578,155 @@ function openActivityModal(index) {
   backdrop.classList.add('open');
 }
 
+// Estado e Handlers da Busca Interna do Terminal
+let currentRawTerminalText = '';
+let currentSearchMatches = [];
+let currentSearchMatchIndex = -1;
+
+function resetActivitySearch() {
+  const searchInput = document.getElementById('actSearchInput');
+  const searchCount = document.getElementById('actSearchCount');
+  const btnPrev = document.getElementById('btnSearchPrev');
+  const btnNext = document.getElementById('btnSearchNext');
+  if (searchInput) searchInput.value = '';
+  if (searchCount) {
+    searchCount.textContent = '';
+    searchCount.className = 'act-search-count mono';
+  }
+  if (btnPrev) btnPrev.disabled = true;
+  if (btnNext) btnNext.disabled = true;
+  currentSearchMatches = [];
+  currentSearchMatchIndex = -1;
+}
+
+function escapeHtml(str) {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function handleActivitySearchInput(query) {
+  const codeEl = document.getElementById('actOutputCode') || (document.getElementById('actOutputTerminal') ? document.getElementById('actOutputTerminal').querySelector('code') : null);
+  const searchCount = document.getElementById('actSearchCount');
+  const btnPrev = document.getElementById('btnSearchPrev');
+  const btnNext = document.getElementById('btnSearchNext');
+
+  if (!codeEl) return;
+
+  const trimmed = (query || '').trim();
+  if (!trimmed) {
+    codeEl.textContent = currentRawTerminalText;
+    if (searchCount) {
+      searchCount.textContent = '';
+      searchCount.className = 'act-search-count mono';
+    }
+    if (btnPrev) btnPrev.disabled = true;
+    if (btnNext) btnNext.disabled = true;
+    currentSearchMatches = [];
+    currentSearchMatchIndex = -1;
+    return;
+  }
+
+  // Encontrar todas as ocorrências de forma segura (case-insensitive)
+  const regex = new RegExp(trimmed.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+  let match;
+  let matchesIndices = [];
+  while ((match = regex.exec(currentRawTerminalText)) !== null) {
+    matchesIndices.push({ start: match.index, end: match.index + match[0].length });
+  }
+
+  if (matchesIndices.length === 0) {
+    codeEl.textContent = currentRawTerminalText;
+    if (searchCount) {
+      searchCount.textContent = '0 / 0';
+      searchCount.className = 'act-search-count mono no-results';
+    }
+    if (btnPrev) btnPrev.disabled = true;
+    if (btnNext) btnNext.disabled = true;
+    currentSearchMatches = [];
+    currentSearchMatchIndex = -1;
+    return;
+  }
+
+  currentSearchMatches = matchesIndices;
+  currentSearchMatchIndex = 0;
+  if (btnPrev) btnPrev.disabled = false;
+  if (btnNext) btnNext.disabled = false;
+
+  renderSearchHighlights();
+}
+
+function renderSearchHighlights() {
+  const codeEl = document.getElementById('actOutputCode') || (document.getElementById('actOutputTerminal') ? document.getElementById('actOutputTerminal').querySelector('code') : null);
+  const searchCount = document.getElementById('actSearchCount');
+  if (!codeEl) return;
+
+  if (searchCount) {
+    searchCount.textContent = `${currentSearchMatchIndex + 1} de ${currentSearchMatches.length}`;
+    searchCount.className = 'act-search-count mono has-results';
+  }
+
+  let html = '';
+  let lastIndex = 0;
+  for (let i = 0; i < currentSearchMatches.length; i++) {
+    const m = currentSearchMatches[i];
+    html += escapeHtml(currentRawTerminalText.slice(lastIndex, m.start));
+    const matchedText = currentRawTerminalText.slice(m.start, m.end);
+    const activeClass = (i === currentSearchMatchIndex) ? 'act-highlight active-match' : 'act-highlight';
+    html += `<mark class="${activeClass}" data-match-idx="${i}">${escapeHtml(matchedText)}</mark>`;
+    lastIndex = m.end;
+  }
+  html += escapeHtml(currentRawTerminalText.slice(lastIndex));
+  codeEl.innerHTML = html;
+
+  // Scroll até a correspondência ativa
+  scrollActiveMatchIntoView();
+}
+
+function scrollActiveMatchIntoView() {
+  const wrap = document.getElementById('actTerminalBodyWrap');
+  if (!wrap) return;
+  const activeEl = wrap.querySelector('.act-highlight.active-match');
+  if (activeEl) {
+    const wrapRect = wrap.getBoundingClientRect();
+    const activeRect = activeEl.getBoundingClientRect();
+    if (activeRect.top < wrapRect.top || activeRect.bottom > wrapRect.bottom) {
+      activeEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }
+}
+
+function navigateSearchResult(delta) {
+  if (currentSearchMatches.length === 0) return;
+  currentSearchMatchIndex = (currentSearchMatchIndex + delta + currentSearchMatches.length) % currentSearchMatches.length;
+  renderSearchHighlights();
+}
+
+function handleActivitySearchKeydown(e) {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    if (e.shiftKey) {
+      navigateSearchResult(-1);
+    } else {
+      navigateSearchResult(1);
+    }
+  } else if (e.key === 'Escape') {
+    resetActivitySearch();
+    const codeEl = document.getElementById('actOutputCode') || (document.getElementById('actOutputTerminal') ? document.getElementById('actOutputTerminal').querySelector('code') : null);
+    if (codeEl) codeEl.textContent = currentRawTerminalText;
+  }
+}
+
 function closeActivityModal() {
   const modal = document.getElementById('activityModal');
   const backdrop = document.getElementById('activityModalBackdrop');
   if (modal) modal.classList.remove('open');
   if (backdrop) backdrop.classList.remove('open');
   currentActivityIndex = -1;
+  resetActivitySearch();
 }
 
 function navigateActivity(delta) {
@@ -599,10 +754,7 @@ function copyActivityCommand() {
 }
 
 function copyActivityOutput() {
-  const outTerminal = document.getElementById('actOutputTerminal');
-  if (!outTerminal) return;
-  const codeEl = outTerminal.querySelector('code');
-  const text = codeEl ? codeEl.textContent : '';
+  const text = currentRawTerminalText || (document.getElementById('actOutputCode') ? document.getElementById('actOutputCode').textContent : '');
   if (!text) return;
   navigator.clipboard.writeText(text).then(() => {
     const btn = document.getElementById('actCopyOutBtn');
@@ -619,6 +771,9 @@ window.closeActivityModal = closeActivityModal;
 window.navigateActivity = navigateActivity;
 window.copyActivityCommand = copyActivityCommand;
 window.copyActivityOutput = copyActivityOutput;
+window.handleActivitySearchInput = handleActivitySearchInput;
+window.handleActivitySearchKeydown = handleActivitySearchKeydown;
+window.navigateSearchResult = navigateSearchResult;
 
 // ============================================================================
 // STATION DRAWER & DEEP-LINKS (feat-63-02, CA-01, CA-02, CA-04, CA-10)

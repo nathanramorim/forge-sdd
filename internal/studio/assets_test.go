@@ -458,6 +458,8 @@ func TestStudioActivityModalContract(t *testing.T) {
 		`id="actFilePath"`,
 		`id="actDuration"`,
 		`id="actOutputTerminal"`,
+		`id="actSearchInput"`,
+		`id="actTerminalBodyWrap"`,
 		`id="btnActPrev"`,
 		`id="btnActNext"`,
 	}
@@ -478,6 +480,9 @@ func TestStudioActivityModalContract(t *testing.T) {
 		".activity-modal-backdrop",
 		".act-terminal-code",
 		".act-terminal-output",
+		".act-terminal-window",
+		".act-search-input",
+		".act-highlight",
 		".log-inspect-btn",
 	}
 	for _, req := range requiredCSS {
@@ -498,6 +503,9 @@ func TestStudioActivityModalContract(t *testing.T) {
 		"navigateActivity",
 		"copyActivityCommand",
 		"copyActivityOutput",
+		"handleActivitySearchInput",
+		"handleActivitySearchKeydown",
+		"navigateSearchResult",
 		"currentFilteredActivities",
 	}
 	for _, req := range requiredJS {
