@@ -335,11 +335,11 @@ func TestStudioGovernanceAndPillars(t *testing.T) {
 		"AUDITORIA APROVADA (CONFORME)",
 		"APROVADO PELA GOVERNANÇA",
 		"FALHA APONTADA",
-		"✓ CONCLUÍDO & APROVADO",
-		"⏳ NA FILA (AGUARDANDO INÍCIO)",
-		"⚡ EM ANDAMENTO",
-		"🔍 AGUARDANDO AUDITORIA",
-		"⚠️ RETRABALHO SOLICITADO",
+		"CONCLUÍDO & APROVADO",
+		"NA FILA (AGUARDANDO INÍCIO)",
+		"EM ANDAMENTO",
+		"AGUARDANDO AUDITORIA",
+		"RETRABALHO SOLICITADO",
 	}
 	for _, req := range requiredJS {
 		if !strings.Contains(jsStr, req) {

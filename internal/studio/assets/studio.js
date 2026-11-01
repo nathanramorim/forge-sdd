@@ -405,7 +405,7 @@ function renderConsoleLogs(activities) {
           ${act.details ? `<span class="detail-hint">${escapeHtml(act.details)}</span>` : ''}
         </span>
         <span class="log-status ${statusClass}">${escapeHtml(act.status || 'done')}</span>
-        <span class="log-inspect-btn" title="Inspecionar">🔍</span>
+        <span class="log-inspect-btn" title="Inspecionar"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg></span>
       </div>
     `;
   }).join('');
@@ -1004,8 +1004,6 @@ function handleNotificationBellClick() {
 
 window.handleNotificationBellClick = handleNotificationBellClick;
 window.updateApprovalNotifications = updateApprovalNotifications;
-  'GOV-05': '🔗 Rastreabilidade Total'
-};
 
 function formatRuleBadge(rule) {
   if (!rule) return '';
@@ -1023,14 +1021,14 @@ function formatTaskStatus(status) {
     case 'approved':
     case 'done':
       return {
-        text: '✓ CONCLUÍDO & APROVADO',
+        text: 'CONCLUÍDO & APROVADO',
         color: 'var(--ok)',
         bg: 'rgba(62, 207, 142, 0.08)',
         border: 'rgba(62, 207, 142, 0.3)'
       };
     case 'queued':
       return {
-        text: '⏳ NA FILA (AGUARDANDO INÍCIO)',
+        text: 'NA FILA (AGUARDANDO INÍCIO)',
         color: '#8aa4ff',
         bg: 'rgba(138, 164, 255, 0.08)',
         border: 'rgba(138, 164, 255, 0.3)'
@@ -1039,14 +1037,14 @@ function formatTaskStatus(status) {
     case 'working':
     case 'in_progress':
       return {
-        text: '⚡ EM ANDAMENTO',
+        text: 'EM ANDAMENTO',
         color: 'var(--warn)',
         bg: 'rgba(242, 166, 90, 0.08)',
         border: 'rgba(242, 166, 90, 0.3)'
       };
     case 'ready_for_builder':
       return {
-        text: '📋 PRONTO PARA O BUILDER',
+        text: 'PRONTO PARA O BUILDER',
         color: '#38c6e8',
         bg: 'rgba(56, 198, 232, 0.08)',
         border: 'rgba(56, 198, 232, 0.3)'
@@ -1055,14 +1053,14 @@ function formatTaskStatus(status) {
     case 'pending_review':
     case 'approval':
       return {
-        text: '🔍 AGUARDANDO AUDITORIA',
+        text: 'AGUARDANDO AUDITORIA',
         color: '#ff8a5c',
         bg: 'rgba(255, 138, 92, 0.08)',
         border: 'rgba(255, 138, 92, 0.3)'
       };
     case 'changes_requested':
       return {
-        text: '⚠️ RETRABALHO SOLICITADO',
+        text: 'RETRABALHO SOLICITADO',
         color: 'var(--err)',
         bg: 'rgba(255, 92, 92, 0.08)',
         border: 'rgba(255, 92, 92, 0.3)'
@@ -1525,7 +1523,7 @@ function handleHandoffClick(btn) {
 
 async function executeTask(station, taskId) {
   try {
-    showToast(`⚡ Executando ciclo obrigatório da estação ${station}...`);
+    showToast(`Executando ciclo obrigatório da estação ${station}...`);
 
     const res = await fetch('/api/task/execute', {
       method: 'POST',
@@ -1871,16 +1869,16 @@ function renderStationDrawerContent(st) {
       let handoffBtnLabel = null;
       if (st.id === 'pm-architect') {
         handoffTarget = 'planner';
-        handoffBtnLabel = '🚀 Enviar para Planejador (03)';
+        handoffBtnLabel = 'Enviar para Planejador (03)';
       } else if (st.id === 'planner') {
         handoffTarget = 'builder';
-        handoffBtnLabel = '🚀 Enviar para Builder (04)';
+        handoffBtnLabel = 'Enviar para Builder (04)';
       } else if (st.id === 'builder') {
         handoffTarget = 'governance';
-        handoffBtnLabel = '🚀 Enviar para Governança (05)';
+        handoffBtnLabel = 'Enviar para Governança (05)';
       } else if (st.id === 'governance') {
         handoffTarget = 'lider';
-        handoffBtnLabel = '🚀 Enviar para Líder (01)';
+        handoffBtnLabel = 'Enviar para Líder (01)';
       }
 
       const statusInfo = formatTaskStatus(it.status);
@@ -1888,19 +1886,19 @@ function renderStationDrawerContent(st) {
       const isQueued = (it.status === 'queued');
       const isBuilding = (it.status === 'building' || it.status === 'working' || it.status === 'in_progress');
 
-      let executeBtnLabel = '⚡ Executar Tarefa nesta Estação';
+      let executeBtnLabel = 'Executar Tarefa nesta Estação';
       let buildingLabel = 'Executando...';
       if (st.id === 'builder') {
-        executeBtnLabel = '⚡ Executar no Builder (Portão A)';
+        executeBtnLabel = 'Executar no Builder (Portão A)';
         buildingLabel = 'Executando Testes...';
       } else if (st.id === 'pm-architect') {
-        executeBtnLabel = '⚡ Conceber & Validar Spec (FLX-01)';
+        executeBtnLabel = 'Conceber & Validar Spec (FLX-01)';
         buildingLabel = 'Concebendo Spec...';
       } else if (st.id === 'planner') {
-        executeBtnLabel = '⚡ Fatiar Tarefas & Planejar';
+        executeBtnLabel = 'Fatiar Tarefas & Planejar';
         buildingLabel = 'Planejando Tarefas...';
       } else if (st.id === 'governance') {
-        executeBtnLabel = '⚡ Auditar Conformidade Constitucional';
+        executeBtnLabel = 'Auditar Conformidade Constitucional';
         buildingLabel = 'Auditando Regras...';
       }
 
@@ -1910,27 +1908,27 @@ function renderStationDrawerContent(st) {
       }
 
       let isHandoffAllowed = false;
-      let handoffLockTooltip = '🔒 A tarefa precisa ser executada e validada nesta estação antes do handoff';
+      let handoffLockTooltip = 'A tarefa precisa ser executada e validada nesta estação antes do handoff';
 
       if (st.id === 'pm-architect') {
         isHandoffAllowed = (it.status === 'pending_review' || it.status === 'approval' || it.status === 'approved' || it.status === 'done');
         if (!isHandoffAllowed) {
-          handoffLockTooltip = '🔒 Requer concepção e validação de spec (Portão FLX-01) antes do handoff';
+          handoffLockTooltip = 'Requer concepção e validação de spec (Portão FLX-01) antes do handoff';
         }
       } else if (st.id === 'planner') {
         isHandoffAllowed = (it.status === 'ready_for_builder' || it.status === 'approved' || it.status === 'done');
         if (!isHandoffAllowed) {
-          handoffLockTooltip = '🔒 Requer fatiamento de tarefas com critérios de aceite antes de enviar ao Builder';
+          handoffLockTooltip = 'Requer fatiamento de tarefas com critérios de aceite antes de enviar ao Builder';
         }
       } else if (st.id === 'builder') {
         isHandoffAllowed = (it.status === 'review_pending' || it.status === 'approved' || it.status === 'done');
         if (!isHandoffAllowed) {
-          handoffLockTooltip = '🔒 Requer execução e testes aprovados (Portão A) antes de enviar para Governança';
+          handoffLockTooltip = 'Requer execução e testes aprovados (Portão A) antes de enviar para Governança';
         }
       } else if (st.id === 'governance') {
         isHandoffAllowed = (it.status === 'approved' || it.status === 'done');
         if (!isHandoffAllowed) {
-          handoffLockTooltip = '🔒 Requer emissão de veredito de conformidade da Governança antes de enviar ao Líder';
+          handoffLockTooltip = 'Requer emissão de veredito de conformidade da Governança antes de enviar ao Líder';
         }
       } else {
         isHandoffAllowed = (it.status === 'approved' || it.status === 'done');
@@ -1953,7 +1951,7 @@ function renderStationDrawerContent(st) {
 
           ${it.artifact_path ? `
             <div class="drawer-task-path" title="${escapeHtml(it.artifact_path)}">
-              📄 ${escapeHtml(it.artifact_path)}
+              ${escapeHtml(it.artifact_path)}
             </div>
           ` : ''}
 
@@ -2029,7 +2027,7 @@ function renderStationDrawerContent(st) {
 
           ${it.artifact_path ? `
             <div class="drawer-task-path" title="${escapeHtml(it.artifact_path)}">
-              📄 ${escapeHtml(it.artifact_path)}
+              ${escapeHtml(it.artifact_path)}
             </div>
           ` : ''}
 
@@ -2064,7 +2062,7 @@ function renderStationDrawerContent(st) {
 
   const tasksHtml = `
     <div class="drawer-section-title">
-      <span>⚡ Tarefas Ativas / Na Fila</span>
+      <span>Tarefas Ativas / Na Fila</span>
       <span class="chip mono">${activeItems.length}</span>
     </div>
     <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:20px;">
@@ -2072,7 +2070,7 @@ function renderStationDrawerContent(st) {
     </div>
 
     <div class="drawer-section-title">
-      <span>📜 Histórico de Conclusões desta Estação</span>
+      <span>Histórico de Conclusões desta Estação</span>
       <span class="chip mono">${completedItems.length}</span>
     </div>
     <div style="display:flex;flex-direction:column;gap:12px;">
@@ -2163,7 +2161,7 @@ function renderStationDrawerContent(st) {
       <div style="background:var(--bg3);border:1px dashed var(--line);border-radius:10px;padding:24px;text-align:center;color:var(--muted);">
         <p style="font-size:13.5px;font-weight:700;color:var(--fg);margin-bottom:8px;">Nenhuma ação registrada para ${escapeHtml(st.name)}</p>
         <div style="display:inline-block;text-align:left;background:rgba(0,0,0,0.25);border:1px solid var(--line);border-radius:8px;padding:12px 16px;margin:10px 0 16px;">
-          <div style="font-size:11px;font-weight:700;color:var(--c, var(--accent));text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px;">🎯 Papel da Estação</div>
+          <div style="font-size:11px;font-weight:700;color:var(--c, var(--accent));text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px;">Papel da Estação</div>
           <div style="font-size:12px;color:var(--fg);font-weight:600;margin-bottom:6px;">${escapeHtml(st.role)}</div>
           <div style="font-size:11.5px;color:var(--muted);line-height:1.45;">${escapeHtml(stationGuidance[st.id] || 'As atividades serão registradas automaticamente conforme os comandos forem emitidos.')}</div>
         </div>
@@ -2399,14 +2397,14 @@ function applySnapshot(snap) {
       const activeSpecTask = (st.items || []).find(it => it.artifact_path && pendingStatuses.includes(it.status));
       if (activeSpecTask) {
         specBadgeHtml = `
-          <a href="javascript:void(0)" class="spec-link-btn" onclick="event.stopPropagation(); openSpecViewer('${escapeHtml(activeSpecTask.artifact_path)}')" style="color:#ffd8a8;font-size:10px;font-weight:600;text-decoration:none;background:rgba(242,166,90,0.15);padding:2px 6px;border-radius:4px;border:1px solid rgba(242,166,90,0.3);" title="Ver especificação técnica detalhada">📄 Spec (FLX-01)</a>
+          <a href="javascript:void(0)" class="spec-link-btn" onclick="event.stopPropagation(); openSpecViewer('${escapeHtml(activeSpecTask.artifact_path)}')" style="color:#ffd8a8;font-size:10px;font-weight:600;text-decoration:none;background:rgba(242,166,90,0.15);padding:2px 6px;border-radius:4px;border:1px solid rgba(242,166,90,0.3);" title="Ver especificação técnica detalhada">Spec (FLX-01)</a>
         `;
       }
     } else if (st.id === 'planner') {
       const activePlannerSpecTask = (st.items || []).find(it => it.artifact_path && it.status !== 'approved' && it.status !== 'done');
       if (activePlannerSpecTask) {
         specBadgeHtml = `
-          <a href="javascript:void(0)" class="spec-link-btn" onclick="event.stopPropagation(); openSpecViewer('${escapeHtml(activePlannerSpecTask.artifact_path)}')" style="color:#c9a7ff;font-size:10px;font-weight:600;text-decoration:none;background:rgba(157,110,237,0.15);padding:2px 6px;border-radius:4px;border:1px solid rgba(157,110,237,0.3);" title="Ver especificação técnica recebida da Estação 02">📄 Spec</a>
+          <a href="javascript:void(0)" class="spec-link-btn" onclick="event.stopPropagation(); openSpecViewer('${escapeHtml(activePlannerSpecTask.artifact_path)}')" style="color:#c9a7ff;font-size:10px;font-weight:600;text-decoration:none;background:rgba(157,110,237,0.15);padding:2px 6px;border-radius:4px;border:1px solid rgba(157,110,237,0.3);" title="Ver especificação técnica recebida da Estação 02">Spec</a>
         `;
       }
     }
@@ -2567,7 +2565,7 @@ function applySnapshot(snap) {
             <div class="finding-item falha">
               <div class="finding-item-header">
                 <span class="finding-item-rule">✕ ${escapeHtml(ruleLabel)} ${a.regra ? `(${escapeHtml(a.regra)})` : ''}</span>
-                ${loc ? `<span class="finding-item-loc mono">📄 ${loc}</span>` : ''}
+                ${loc ? `<span class="finding-item-loc mono">${loc}</span>` : ''}
               </div>
               <div class="finding-item-desc">${escapeHtml(a.explicacao || a.verificacao || a.evidencia || 'Violação de conformidade detectada')}</div>
               ${a.correcao ? `<div class="finding-item-fix"><b>Instrução de Correção:</b> ${escapeHtml(a.correcao)}</div>` : ''}

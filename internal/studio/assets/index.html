@@ -25,12 +25,16 @@
         <i></i>LIVE SSE
       </div>
       <div class="chip autorun-chip" id="autoRunChip">
-        <span class="autorun-bolt">⚡</span> MODO AUTÔNOMO
+        <svg class="autorun-bolt" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px;"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+        MODO AUTÔNOMO
       </div>
       <!-- Central de Notificações de Aprovação Humana (feat-67-02) -->
       <div class="header-notification-wrap">
         <button id="headerNotificationBell" class="notification-bell-btn" onclick="handleNotificationBellClick()" title="Nenhuma aprovação pendente no momento" aria-label="Notificações de Aprovação Humana">
-          <span class="bell-icon">🔔</span>
+          <svg class="bell-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+          </svg>
           <span id="headerNotificationCount" class="notification-badge mono">0</span>
         </button>
       </div>
