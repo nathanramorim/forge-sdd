@@ -387,6 +387,24 @@ func (a *Aggregator) GetSnapshot() (*StudioSnapshot, error) {
 				}
 			}
 		}
+
+		// Garante que estações em standby no pool nunca exibam atividades com status 'running' no snapshot (feat-66-04)
+		for i, act := range activities {
+			if act.Status == "running" || act.Status == "working" {
+				if sess, ok := a.pool.GetSessionByStation(act.Station); ok && sess.State == acp.SessionStateStandby {
+					activities[i].Status = "success"
+				}
+			}
+		}
+		for i := range stations {
+			if sess, ok := a.pool.GetSessionByStation(stations[i].ID); ok && sess.State == acp.SessionStateStandby {
+				for j := range stations[i].RecentActivity {
+					if stations[i].RecentActivity[j].Status == "running" || stations[i].RecentActivity[j].Status == "working" {
+						stations[i].RecentActivity[j].Status = "success"
+					}
+				}
+			}
+		}
 	}
 
 	handoff := &HandoffDTO{

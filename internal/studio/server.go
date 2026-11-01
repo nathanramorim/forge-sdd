@@ -88,17 +88,23 @@ func NewServer(cfg Config) (*Server, error) {
 		attachBridge:  bridge,
 	}
 
+	wsDir := cfg.Dir
+	if wsDir == "" {
+		wsDir = "."
+	}
+	// Higienização inicial de atividades órfãs no boot do servidor (feat-66-04)
+	_, _ = queue.SanitizeOrphanActivities(wsDir)
+
 	if pool != nil {
-		wsDir := cfg.Dir
-		if wsDir == "" {
-			wsDir = "."
-		}
 		warmupCtx, warmupCancel := context.WithTimeout(ctx, 10*time.Second)
 		_, _ = pool.Warmup(warmupCtx, wsDir)
 		warmupCancel()
 		pool.StartHeartbeat(ctx)
 
 		pool.AddStateListener(func(station string, state acp.SessionState, lastSeenAt time.Time) {
+			if state == acp.SessionStateStandby {
+				_ = queue.ReconcileStationActivities(wsDir, station)
+			}
 			if s.Hub != nil {
 				s.Hub.Broadcast("station_state", map[string]any{
 					"type":       "station_state",

@@ -103,8 +103,9 @@ func TestSanitizeOrphanActivities(t *testing.T) {
 	_ = queue.RecordActivity(tempDir, queue.StationPMArchitect, "tool2", "act2", "det2", "running")
 	_ = queue.RecordActivity(tempDir, queue.StationGovernance, "tool3", "act3", "det3", "running")
 
-	err := queue.SanitizeOrphanActivities(tempDir)
+	count, err := queue.SanitizeOrphanActivities(tempDir)
 	require.NoError(t, err)
+	assert.Equal(t, 3, count)
 
 	items, err := queue.LoadActivities(tempDir)
 	require.NoError(t, err)

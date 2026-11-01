@@ -1,7 +1,7 @@
 {
   "station": "builder",
-  "version": 97,
-  "updated_at": "2026-11-01T12:39:39.922Z",
+  "version": 112,
+  "updated_at": "2026-11-01T12:58:23Z",
   "processed_keys": [
     "04dd6a4a482341b00be27e785371421d",
     "33d97bb9e86c646a0e20326c4747115e",
@@ -36,48 +36,48 @@
       "title": "feat-66-01 — Estrutura Unificada de Discovery em Pastas e Fixes Correlacionados no Forge-SDD",
       "station": "builder",
       "operation": "build",
-      "status": "building",
+      "status": "approved",
       "artifact_path": "sdd/discovery/66-telemetria-detalhada-inspecao-e-reconciliacao/features/feat-66-01-estrutura-unificada-discovery-e-fixes.md",
       "idempotency_key": "feat-66-01-key",
       "attempt": 0,
       "created_at": "2026-11-01T12:39:39.921Z",
-      "updated_at": "2026-11-01T12:39:39.921Z"
+      "updated_at": "2026-11-01T12:58:23Z"
     },
     {
       "id": "feat-66-02-modelo-telemetria-e-reconciliador-atividades-orfas",
       "title": "feat-66-02 — Extensão do Modelo de Telemetria e Reconciliador de Atividades Órfãs em Go",
       "station": "builder",
       "operation": "build",
-      "status": "queued",
+      "status": "approved",
       "artifact_path": "sdd/discovery/66-telemetria-detalhada-inspecao-e-reconciliacao/features/feat-66-02-modelo-telemetria-e-reconciliador-atividades-orfas.md",
       "idempotency_key": "feat-66-02-key",
       "attempt": 0,
       "created_at": "2026-11-01T12:39:39.921Z",
-      "updated_at": "2026-11-01T12:39:39.921Z"
+      "updated_at": "2026-11-01T12:58:20Z"
     },
     {
       "id": "feat-66-03-ui-studio-modal-inspecao-passo-a-passo",
       "title": "feat-66-03 — Interface do Studio: Modal Interativo de Inspeção Passo a Passo e Linhas Clicáveis",
       "station": "builder",
       "operation": "build",
-      "status": "queued",
+      "status": "approved",
       "artifact_path": "sdd/discovery/66-telemetria-detalhada-inspecao-e-reconciliacao/features/feat-66-03-ui-studio-modal-inspecao-passo-a-passo.md",
       "idempotency_key": "feat-66-03-key",
       "attempt": 0,
       "created_at": "2026-11-01T12:39:39.921Z",
-      "updated_at": "2026-11-01T12:39:39.921Z"
+      "updated_at": "2026-11-01T12:58:22Z"
     },
     {
       "id": "feat-66-04-integracao-studio-e2e-validacao-constitucional",
       "title": "feat-66-04 — Integração no Studio, Testes E2E e Validação Constitucional Completa",
       "station": "builder",
       "operation": "build",
-      "status": "queued",
+      "status": "approved",
       "artifact_path": "sdd/discovery/66-telemetria-detalhada-inspecao-e-reconciliacao/features/feat-66-04-integracao-studio-e2e-validacao-constitucional.md",
       "idempotency_key": "feat-66-04-key",
       "attempt": 0,
       "created_at": "2026-11-01T12:39:39.921Z",
-      "updated_at": "2026-11-01T12:39:39.921Z"
+      "updated_at": "2026-11-01T12:58:23Z"
     },
     {
       "id": "feat-60-01-scaffold-astro-seo-dados-tipados",
@@ -89,7 +89,7 @@
       "idempotency_key": "04dd6a4a482341b00be27e785371421d",
       "attempt": 1,
       "created_at": "2026-10-31T19:01:43Z",
-      "updated_at": "2026-11-01T11:14:06Z",
+      "updated_at": "2026-11-01T12:58:23Z",
       "governance_verdict": {
         "veredito": "conforme",
         "achados": [],
@@ -106,7 +106,7 @@
       "idempotency_key": "33d97bb9e86c646a0e20326c4747115e",
       "attempt": 1,
       "created_at": "2026-10-31T19:01:43Z",
-      "updated_at": "2026-11-01T11:14:06Z",
+      "updated_at": "2026-11-01T12:58:23Z",
       "governance_verdict": {
         "veredito": "conforme",
         "achados": [],
@@ -123,7 +123,7 @@
       "idempotency_key": "4bcb62262edb16a745df3830d3fe21b0",
       "attempt": 1,
       "created_at": "2026-10-31T19:01:43Z",
-      "updated_at": "2026-11-01T11:14:06Z",
+      "updated_at": "2026-11-01T12:58:23Z",
       "governance_verdict": {
         "veredito": "conforme",
         "achados": [],
@@ -140,7 +140,7 @@
       "idempotency_key": "3338ca18db625cfcd59b244b54aca114",
       "attempt": 1,
       "created_at": "2026-10-31T19:01:43Z",
-      "updated_at": "2026-11-01T11:14:06Z",
+      "updated_at": "2026-11-01T12:58:23Z",
       "governance_verdict": {
         "veredito": "conforme",
         "achados": [],
@@ -157,7 +157,7 @@
       "idempotency_key": "ad81c77044070e1045668ed22a0ec03d",
       "attempt": 1,
       "created_at": "2026-10-31T19:01:43Z",
-      "updated_at": "2026-11-01T11:14:06Z",
+      "updated_at": "2026-11-01T12:58:23Z",
       "governance_verdict": {
         "veredito": "conforme",
         "achados": [],
@@ -174,7 +174,7 @@
       "idempotency_key": "2fd406e026a1cd1de7ad6395d253dde9",
       "attempt": 1,
       "created_at": "2026-10-31T19:01:43Z",
-      "updated_at": "2026-11-01T11:14:06Z",
+      "updated_at": "2026-11-01T12:58:23Z",
       "governance_verdict": {
         "veredito": "conforme",
         "achados": [],
@@ -191,7 +191,7 @@
       "idempotency_key": "7e0c592e29a9582e986e721a7d147368",
       "attempt": 1,
       "created_at": "2026-10-31T19:01:43Z",
-      "updated_at": "2026-11-01T11:14:06Z",
+      "updated_at": "2026-11-01T12:58:23Z",
       "governance_verdict": {
         "veredito": "conforme",
         "achados": [],
@@ -208,7 +208,7 @@
       "idempotency_key": "03b73f4b171862db159ea3b237214565",
       "attempt": 1,
       "created_at": "2026-10-31T19:01:43Z",
-      "updated_at": "2026-11-01T11:14:06Z",
+      "updated_at": "2026-11-01T12:58:23Z",
       "governance_verdict": {
         "veredito": "conforme",
         "achados": [],
@@ -225,7 +225,7 @@
       "idempotency_key": "70f337bb9809011de85a3726a19b2790",
       "attempt": 1,
       "created_at": "2026-10-31T22:08:37Z",
-      "updated_at": "2026-11-01T11:14:06Z",
+      "updated_at": "2026-11-01T12:58:23Z",
       "governance_verdict": {
         "veredito": "conforme",
         "achados": [],
@@ -242,7 +242,7 @@
       "idempotency_key": "9891050b015ddf7235513ac7ed302c26",
       "attempt": 1,
       "created_at": "2026-10-31T22:08:37Z",
-      "updated_at": "2026-11-01T11:14:06Z",
+      "updated_at": "2026-11-01T12:58:23Z",
       "governance_verdict": {
         "veredito": "conforme",
         "achados": [],
@@ -259,7 +259,7 @@
       "idempotency_key": "27568114bf39dd36d87032c43c6aa5a2",
       "attempt": 1,
       "created_at": "2026-10-31T22:08:38Z",
-      "updated_at": "2026-11-01T11:14:06Z",
+      "updated_at": "2026-11-01T12:58:23Z",
       "governance_verdict": {
         "veredito": "conforme",
         "achados": [],
@@ -326,7 +326,7 @@
       "idempotency_key": "f7da640abccdf6425fea29d25b20e8e3",
       "attempt": 1,
       "created_at": "2026-11-01T02:07:14Z",
-      "updated_at": "2026-11-01T11:14:06Z"
+      "updated_at": "2026-11-01T12:58:23Z"
     },
     {
       "id": "discovery-65-prewarming-pool-sessoes-acp-estacoes",
@@ -366,7 +366,7 @@
       "idempotency_key": "401742645f4eec08aebd4509ecc999e6",
       "attempt": 0,
       "created_at": "2026-11-01T03:29:21Z",
-      "updated_at": "2026-11-01T11:14:06Z",
+      "updated_at": "2026-11-01T12:58:23Z",
       "governance_verdict": {
         "veredito": "conforme",
         "achados": null,
@@ -383,7 +383,7 @@
       "idempotency_key": "9a860ce97bf30bfa13d813f8b9de1806",
       "attempt": 0,
       "created_at": "2026-11-01T03:29:37Z",
-      "updated_at": "2026-11-01T11:14:06Z",
+      "updated_at": "2026-11-01T12:58:23Z",
       "governance_verdict": {
         "veredito": "conforme",
         "achados": null,
@@ -400,7 +400,7 @@
       "idempotency_key": "83b1cca875ccf1ed8e262efbdfceb5e9",
       "attempt": 0,
       "created_at": "2026-11-01T03:29:37Z",
-      "updated_at": "2026-11-01T11:14:06Z",
+      "updated_at": "2026-11-01T12:58:23Z",
       "governance_verdict": {
         "veredito": "conforme",
         "achados": null,
@@ -417,7 +417,7 @@
       "idempotency_key": "54002726f538a916de6ddc9b4c1c83dd",
       "attempt": 0,
       "created_at": "2026-11-01T03:29:37Z",
-      "updated_at": "2026-11-01T11:14:06Z",
+      "updated_at": "2026-11-01T12:58:23Z",
       "governance_verdict": {
         "veredito": "conforme",
         "achados": null,

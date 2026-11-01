@@ -12,6 +12,7 @@ import (
 	"testing"
 
 	"github.com/forge-sdd/cli/internal/config"
+	"github.com/forge-sdd/cli/internal/queue"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -498,5 +499,31 @@ func TestAttachCmd_Validation(t *testing.T) {
 	assert.Contains(t, output, "sess-04-builder")
 	assert.Contains(t, output, "🟢 Standby")
 	assert.Contains(t, output, "comando exit")
+}
+
+func TestQueueActivityCmd_SanitizeAndRecord(t *testing.T) {
+	tempDir := t.TempDir()
+
+	// 1. Gravar atividade inicial
+	rootCmd.SetArgs([]string{"queue", "activity", "--dir", tempDir, "--station", "builder", "--tool", "run_command", "--action", "go test", "--status", "running", "--command", "go test ./...", "--output", "PASS"})
+	err := rootCmd.Execute()
+	require.NoError(t, err)
+
+	items, err := queue.LoadActivities(tempDir)
+	require.NoError(t, err)
+	require.Len(t, items, 1)
+	assert.Equal(t, "running", items[0].Status)
+	assert.Equal(t, "go test ./...", items[0].Command)
+
+	// 2. Executar sanitização via CLI
+	rootCmd.SetArgs([]string{"queue", "activity", "--dir", tempDir, "--sanitize"})
+	err = rootCmd.Execute()
+	require.NoError(t, err)
+
+	itemsAfter, err := queue.LoadActivities(tempDir)
+	require.NoError(t, err)
+	require.Len(t, itemsAfter, 1)
+	assert.Equal(t, "success", itemsAfter[0].Status)
+	assert.NotEmpty(t, itemsAfter[0].CompletedAt)
 }
 

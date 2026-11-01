@@ -2,7 +2,7 @@
   "feature_id": "feat-65",
   "branch": "feat/65-prewarming-pool-sessoes-acp-estacoes",
   "spec_status": "approved",
-  "updated_at": "2026-11-01T11:14:06Z",
+  "updated_at": "2026-11-01T12:58:23Z",
   "items": [
     {
       "task_id": "feat-60-01-scaffold-astro-seo-dados-tipados",

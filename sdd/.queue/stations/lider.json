@@ -1,7 +1,7 @@
 {
   "station": "lider",
-  "version": 20,
-  "updated_at": "2026-11-01T11:14:06Z",
+  "version": 26,
+  "updated_at": "2026-11-01T12:58:23Z",
   "processed_keys": [
     "a5e9e900175357b9e0c5526ad56536cd",
     "beaddb8f1491bb0d76b8f3fcce55299b",
@@ -11,7 +11,10 @@
     "b66dd42f54843ca58bca7b748f862bbd",
     "f0e98d18ce39262f23c24ee90f63ec76",
     "eda198c869200c45aebad609c23fc1f7",
-    "fa927418d5990aa59b8a3de95ea8fcb4"
+    "fa927418d5990aa59b8a3de95ea8fcb4",
+    "01ff6e4f40795c820020b26b68bdfcee",
+    "026264b388069cdcdb2f39c358890236",
+    "48d4e9dba9a96f613d74feacb8bc3b7d"
   ],
   "items": [
     {
@@ -139,6 +142,48 @@
       "output_contract": "Ciclo Concluído",
       "created_at": "2026-11-01T11:14:06Z",
       "updated_at": "2026-11-01T11:14:06Z"
+    },
+    {
+      "id": "feat-66-02-modelo-telemetria-e-reconciliador-atividades-orfas",
+      "title": "feat-66-02 — Extensão do Modelo de Telemetria e Reconciliador de Atividades Órfãs em Go",
+      "station": "lider",
+      "operation": "handoff",
+      "status": "approved",
+      "artifact_path": "sdd/discovery/66-telemetria-detalhada-inspecao-e-reconciliacao/features/feat-66-02-modelo-telemetria-e-reconciliador-atividades-orfas.md",
+      "idempotency_key": "01ff6e4f40795c820020b26b68bdfcee",
+      "attempt": 1,
+      "input_contract": "Parecer Conforme Portão B",
+      "output_contract": "Ciclo Concluído",
+      "created_at": "2026-11-01T12:58:20Z",
+      "updated_at": "2026-11-01T12:58:20Z"
+    },
+    {
+      "id": "feat-66-03-ui-studio-modal-inspecao-passo-a-passo",
+      "title": "feat-66-03 — Interface do Studio: Modal Interativo de Inspeção Passo a Passo e Linhas Clicáveis",
+      "station": "lider",
+      "operation": "handoff",
+      "status": "approved",
+      "artifact_path": "sdd/discovery/66-telemetria-detalhada-inspecao-e-reconciliacao/features/feat-66-03-ui-studio-modal-inspecao-passo-a-passo.md",
+      "idempotency_key": "026264b388069cdcdb2f39c358890236",
+      "attempt": 1,
+      "input_contract": "Parecer Conforme Portão B",
+      "output_contract": "Ciclo Concluído",
+      "created_at": "2026-11-01T12:58:22Z",
+      "updated_at": "2026-11-01T12:58:22Z"
+    },
+    {
+      "id": "feat-66-04-integracao-studio-e2e-validacao-constitucional",
+      "title": "feat-66-04 — Integração no Studio, Testes E2E e Validação Constitucional Completa",
+      "station": "lider",
+      "operation": "handoff",
+      "status": "approved",
+      "artifact_path": "sdd/discovery/66-telemetria-detalhada-inspecao-e-reconciliacao/features/feat-66-04-integracao-studio-e2e-validacao-constitucional.md",
+      "idempotency_key": "48d4e9dba9a96f613d74feacb8bc3b7d",
+      "attempt": 1,
+      "input_contract": "Parecer Conforme Portão B",
+      "output_contract": "Ciclo Concluído",
+      "created_at": "2026-11-01T12:58:23Z",
+      "updated_at": "2026-11-01T12:58:23Z"
     }
   ]
 }

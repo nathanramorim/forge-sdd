@@ -131,33 +131,36 @@ func ReconcileStationActivities(dir, station string) error {
 }
 
 // SanitizeOrphanActivities varre activity.json e encerra qualquer atividade órfã presa em 'running'.
-func SanitizeOrphanActivities(dir string) error {
+func SanitizeOrphanActivities(dir string) (int, error) {
 	activityMu.Lock()
 	defer activityMu.Unlock()
 
 	items, err := LoadActivities(dir)
 	if err != nil || len(items) == 0 {
-		return err
+		return 0, err
 	}
 
 	now := time.Now().UTC().Format(time.RFC3339)
-	changed := false
+	reconciled := 0
 	for i := range items {
 		if items[i].Status == "running" {
 			items[i].Status = "success"
 			if items[i].CompletedAt == "" {
 				items[i].CompletedAt = now
 			}
-			changed = true
+			reconciled++
 		}
 	}
 
-	if !changed {
-		return nil
+	if reconciled == 0 {
+		return 0, nil
 	}
 
 	actPath := filepath.Join(dir, "sdd", ".queue", "activity.json")
-	return WriteJSONAtomic(actPath, items, 0o644)
+	if err := WriteJSONAtomic(actPath, items, 0o644); err != nil {
+		return 0, err
+	}
+	return reconciled, nil
 }
 
 // LoadActivities lê os registros recentes de atividade de sdd/.queue/activity.json.
