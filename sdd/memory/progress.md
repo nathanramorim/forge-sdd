@@ -10,14 +10,14 @@ Release v3.0.1-beta.1 — NPM & GitHub Releases [x] done
 Feat 59 — Forge Studio + Filas por Estação [x] 4/4 done
 Release v3.2.0-beta — NPM & GitHub Releases [x] done
 Release v3.2.1-beta — Three.js 3D Mascotes & Tarefa Ativa [x] done
-Feat 63 — Studio Navegável & Aprovação Spec [x] 3/3 done
+Feat 63 — Studio Navegável & Pipeline Autônomo [ ] em evolução
 ```
 
 ## Features ativas
-- Nenhuma ativa (Feat 63 concluída e aprovada pela Governança).
+- `feat/63-studio-navegavel-aprovacao-spec`: Studio interativo, esteira autônoma e refinamento de UX.
 
 ## Próximo passo
-**Próximo:** Definir próximo ciclo de evolução ou release.
+**Próximo:** Continuar refinamentos da Feat 63 isoladamente na branch.
 **Bloqueios:** —
 
 > Histórico completo em `progress-log.md`
