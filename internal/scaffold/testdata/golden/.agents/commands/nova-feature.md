@@ -9,13 +9,16 @@
    - **Retomada:** Rode `git branch --list <prefixo-branch>/*` para essa feature/fix. Se já existir uma branch correspondente de uma sessão anterior, pergunte se deve continuar a partir dela em vez de criar uma nova.
    - Crie a branch localmente no terminal (`git checkout -b <prefixo-branch>/<nome>`, a partir da branch de partida escolhida) **antes** de criar qualquer especificação ou logs.
 2. **Nomenclatura:** Siga a lógica única descrita em `sdd/memory/naming-convention.md`.
-3. **Criação (PM/Arquiteto + Planejador):** Crie o arquivo `sdd/features/<prefixo-arquivo>-ID-<nome>.md` contendo obrigatoriamente as seções:
+3. **Criação (PM/Arquiteto + Planejador):**
+   - Se a feature pertencer a uma iniciativa existente de Discovery: crie diretamente dentro de `sdd/discovery/<id>-<nome>/features/feat-<id>-<nome>.md`.
+   - Se for uma feature independente direta: crie uma pasta autocontida `sdd/features/feat-ID-<nome>/feat-ID-<nome>.md` (com subpastas para subtasks e fixes se necessário; suporta também arquivos legados `sdd/features/feat-ID-<nome>.md`).
+   O arquivo deve conter obrigatoriamente as seções:
    - `## Modelo do módulo` (`completo | enxuto` + justificativa — `ARQ-11`);
    - `## O que já existe` (tabela de Reuse Check — `DUP-02`);
    - `## Dependências novas` (`SEG-07`);
    - `## Rules e IDs da Constituição Aplicáveis` (consultando `sdd/memory/constitution.md` e `.agents/rules/*.md`);
    - `## Critérios de Aceitação Executáveis`.
-   Se a feature for complexa, use uma subpasta `sdd/features/<prefixo-arquivo>-ID-<nome>/` e organize as subtasks lá dentro. **A subpasta inteira é a unidade de execução: uma única branch (a criada no passo 1) agrupa todas as subtarefas — nunca crie uma branch por subtarefa.** Atualize o progresso e índice.
+   A pasta inteira é a unidade de execução: uma única branch (a criada no passo 1) agrupa todas as subtarefas — nunca crie uma branch por subtarefa. Atualize o progresso e índice.
 4. **Gate de Revisão de Spec (`FLX-01`) e Fila:** Submeta a Spec criada à revisão humana no Líder e, quando aprovada, enfileire para o Builder (`forge-sdd queue enqueue`).
 5. **Gravação de Métricas (determinística):** Se a telemetria estiver habilitada em `sdd/.sddrc`, execute `forge-sdd session record --feature "<arquivo feat/fix criado>" --outcome blocked --criterio-atendido=false` (a feature/fix ainda não foi implementada nesse ponto do fluxo).
 
