@@ -89,6 +89,7 @@ flowchart LR
 
 ### Destaques Técnicos da `v3.0.0-beta` e `v3.0.1-beta`
 *   **5 Estações Coordenadas (`.agents/roles/`):** fonte canônica única dos papéis com adaptadores finos para Claude Code, Gemini e GitHub Copilot.
+*   **Protocolo ACP & Integração com IDEs (`forge-sdd acp`):** servidor padronizado JSON-RPC 2.0 (via `stdio` e `HTTP/SSE`) que conecta diretamente IDEs externas (Zed via `agent_servers`, Cursor, VS Code) e o Forge Studio à linha de produção do SDD. Permite criar sessões isoladas, enfileirar demandas via `session/prompt`, receber notificações em tempo real e homologar o Portão FLX-01 com handoff determinístico via `gate/approve`. Veja o [Guia de Configuração para IDEs](docs/acp-ide-setup.md) e a [Regra Canônica do Protocolo ACP](.agents/rules/sdd-acp.md).
 *   **Painel Visual Embarcado & Forge Studio (`forge-sdd studio`):** servidor HTTP/SSE estritamente read-only em `127.0.0.1:4321` com interface web completa embarcada via `embed.FS` (`ARQ-03`). Acompanhe os 5 mascotes com fallback SVG 2D de alta fidelidade, trilho de handoff vivo em trânsito com loop de retrabalho `05 ↺ 04` e inspeção do Portão de Governança das Camadas A e B sem qualquer dependência externa de runtime.
 *   **Filas Individuais por Estação & Handoff Determinístico (`forge-sdd queue handoff` / `stations`):** persistência atômica isolada em `sdd/.queue/stations/<station>.json` com idempotência estrita via SHA-256 e sincronização bidirecional com a fila do Builder.
 *   **Constituição por IDs Estáveis + Rules Modulares (`.agents/rules/sdd-*.md`):** `sdd/memory/constitution.md` mantém "o quê e por quê" enxuto com IDs (`ARQ`, `SEG`, `DUP`, `COD`, `TST`, `FLX`, `GOV`), enquanto as rules detalham "como cumprir" sob demanda sem duplicar texto (`GOV-04`).
@@ -183,6 +184,7 @@ Esta versão trouxe o atalho global de execução `forge`, uma interface de onbo
 
 - [Landing Page](https://forge-sdd.vercel.app)
 - [Metodologia SDD](docs/metodologia-sdd.md)
+- [Guia de Integração com IDEs (Protocolo ACP)](docs/acp-ide-setup.md)
 - [Telemetria e Métricas](docs/telemetria.md)
 - [Guia de Contribuição](CONTRIBUTING.md)
 - [Licença MIT](LICENSE)

@@ -4,7 +4,7 @@
 **Fase:** 64-04
 **Tamanho:** `P`
 **Depende de:** `feat-64-01`, `feat-64-02`, `feat-64-03`
-**Status:** `ready`
+**Status:** `done`
 
 ## Objetivo
 
