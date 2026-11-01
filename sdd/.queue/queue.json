@@ -1,8 +1,8 @@
 {
-  "feature_id": "feat-63",
-  "branch": "feat/63-studio-navegavel-aprovacao-spec",
+  "feature_id": "feat-64",
+  "branch": "feat/64-protocolo-acp-comunicacao-estacoes-studio",
   "spec_status": "approved",
-  "updated_at": "2026-11-01T01:46:50Z",
+  "updated_at": "2026-11-01T02:12:51Z",
   "items": [
     {
       "task_id": "feat-60-01-scaffold-astro-seo-dados-tipados",
@@ -198,6 +198,33 @@
         "achados": [],
         "resumo": "Reavaliação da task feat-63-03 concluída com êxito. COD-01 sanado, ARQ, SEG, TST 100% conformes."
       }
+    },
+    {
+      "task_id": "feat-64-01",
+      "title": "feat-64-01 — Núcleo do Protocolo ACP (internal/acp), Tipos JSON-RPC 2.0 e Subcomando CLI forge-sdd acp",
+      "spec_path": "sdd/features/feat-64-protocolo-acp-comunicacao-estacoes-studio/feat-64-01-nucleo-acp-rpc-stdio.md",
+      "status": "review_pending",
+      "rules": [
+        "ARQ-01",
+        "ARQ-03",
+        "ARQ-04",
+        "ARQ-06",
+        "ARQ-11",
+        "SEG-01",
+        "SEG-04",
+        "SEG-07",
+        "DUP-02",
+        "DUP-05",
+        "COD-01",
+        "COD-02",
+        "COD-03",
+        "TST-01",
+        "TST-03",
+        "TST-04",
+        "TST-05"
+      ],
+      "skills_used": [],
+      "attempts": 1
     }
   ]
 }

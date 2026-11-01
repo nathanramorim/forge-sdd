@@ -1,7 +1,7 @@
 {
   "station": "builder",
-  "version": 51,
-  "updated_at": "2026-11-01T01:46:50Z",
+  "version": 54,
+  "updated_at": "2026-11-01T02:12:51Z",
   "processed_keys": [
     "04dd6a4a482341b00be27e785371421d",
     "33d97bb9e86c646a0e20326c4747115e",
@@ -17,7 +17,8 @@
     "da69e339128ff3d22024142fe807afe9",
     "45d604eb7f0cf3a5f93adc29fef22a68",
     "cdd48d7470a2f6e31a576b3ad5810873",
-    "f7335aad1c673c94d87b90d009f1f8d7"
+    "f7335aad1c673c94d87b90d009f1f8d7",
+    "f7da640abccdf6425fea29d25b20e8e3"
   ],
   "items": [
     {
@@ -30,7 +31,7 @@
       "idempotency_key": "04dd6a4a482341b00be27e785371421d",
       "attempt": 1,
       "created_at": "2026-10-31T19:01:43Z",
-      "updated_at": "2026-11-01T01:46:50Z",
+      "updated_at": "2026-11-01T02:12:51Z",
       "governance_verdict": {
         "veredito": "conforme",
         "achados": [],
@@ -47,7 +48,7 @@
       "idempotency_key": "33d97bb9e86c646a0e20326c4747115e",
       "attempt": 1,
       "created_at": "2026-10-31T19:01:43Z",
-      "updated_at": "2026-11-01T01:46:50Z",
+      "updated_at": "2026-11-01T02:12:51Z",
       "governance_verdict": {
         "veredito": "conforme",
         "achados": [],
@@ -64,7 +65,7 @@
       "idempotency_key": "4bcb62262edb16a745df3830d3fe21b0",
       "attempt": 1,
       "created_at": "2026-10-31T19:01:43Z",
-      "updated_at": "2026-11-01T01:46:50Z",
+      "updated_at": "2026-11-01T02:12:51Z",
       "governance_verdict": {
         "veredito": "conforme",
         "achados": [],
@@ -81,7 +82,7 @@
       "idempotency_key": "3338ca18db625cfcd59b244b54aca114",
       "attempt": 1,
       "created_at": "2026-10-31T19:01:43Z",
-      "updated_at": "2026-11-01T01:46:50Z",
+      "updated_at": "2026-11-01T02:12:51Z",
       "governance_verdict": {
         "veredito": "conforme",
         "achados": [],
@@ -98,7 +99,7 @@
       "idempotency_key": "ad81c77044070e1045668ed22a0ec03d",
       "attempt": 1,
       "created_at": "2026-10-31T19:01:43Z",
-      "updated_at": "2026-11-01T01:46:50Z",
+      "updated_at": "2026-11-01T02:12:51Z",
       "governance_verdict": {
         "veredito": "conforme",
         "achados": [],
@@ -115,7 +116,7 @@
       "idempotency_key": "2fd406e026a1cd1de7ad6395d253dde9",
       "attempt": 1,
       "created_at": "2026-10-31T19:01:43Z",
-      "updated_at": "2026-11-01T01:46:50Z",
+      "updated_at": "2026-11-01T02:12:51Z",
       "governance_verdict": {
         "veredito": "conforme",
         "achados": [],
@@ -132,7 +133,7 @@
       "idempotency_key": "7e0c592e29a9582e986e721a7d147368",
       "attempt": 1,
       "created_at": "2026-10-31T19:01:43Z",
-      "updated_at": "2026-11-01T01:46:50Z",
+      "updated_at": "2026-11-01T02:12:51Z",
       "governance_verdict": {
         "veredito": "conforme",
         "achados": [],
@@ -149,7 +150,7 @@
       "idempotency_key": "03b73f4b171862db159ea3b237214565",
       "attempt": 1,
       "created_at": "2026-10-31T19:01:43Z",
-      "updated_at": "2026-11-01T01:46:50Z",
+      "updated_at": "2026-11-01T02:12:51Z",
       "governance_verdict": {
         "veredito": "conforme",
         "achados": [],
@@ -166,7 +167,7 @@
       "idempotency_key": "70f337bb9809011de85a3726a19b2790",
       "attempt": 1,
       "created_at": "2026-10-31T22:08:37Z",
-      "updated_at": "2026-11-01T01:46:50Z",
+      "updated_at": "2026-11-01T02:12:51Z",
       "governance_verdict": {
         "veredito": "conforme",
         "achados": [],
@@ -183,7 +184,7 @@
       "idempotency_key": "9891050b015ddf7235513ac7ed302c26",
       "attempt": 1,
       "created_at": "2026-10-31T22:08:37Z",
-      "updated_at": "2026-11-01T01:46:50Z",
+      "updated_at": "2026-11-01T02:12:51Z",
       "governance_verdict": {
         "veredito": "conforme",
         "achados": [],
@@ -200,7 +201,7 @@
       "idempotency_key": "27568114bf39dd36d87032c43c6aa5a2",
       "attempt": 1,
       "created_at": "2026-10-31T22:08:38Z",
-      "updated_at": "2026-11-01T01:46:50Z",
+      "updated_at": "2026-11-01T02:12:51Z",
       "governance_verdict": {
         "veredito": "conforme",
         "achados": [],
@@ -256,6 +257,18 @@
       "output_contract": "Código Implementado e Testes Locais (Portão A)",
       "created_at": "2026-11-01T01:46:49Z",
       "updated_at": "2026-11-01T01:46:50Z"
+    },
+    {
+      "id": "feat-64-01",
+      "title": "feat-64-01 — Núcleo do Protocolo ACP (internal/acp), Tipos JSON-RPC 2.0 e Subcomando CLI forge-sdd acp",
+      "station": "builder",
+      "operation": "build",
+      "status": "review_pending",
+      "artifact_path": "sdd/features/feat-64-protocolo-acp-comunicacao-estacoes-studio/feat-64-01-nucleo-acp-rpc-stdio.md",
+      "idempotency_key": "f7da640abccdf6425fea29d25b20e8e3",
+      "attempt": 1,
+      "created_at": "2026-11-01T02:07:14Z",
+      "updated_at": "2026-11-01T02:12:51Z"
     }
   ]
 }

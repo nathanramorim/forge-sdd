@@ -1,7 +1,7 @@
 {
   "station": "governance",
-  "version": 49,
-  "updated_at": "2026-11-01T01:46:50Z",
+  "version": 52,
+  "updated_at": "2026-11-01T02:12:51Z",
   "processed_keys": [
     "c79730d2c7e03d48f3689a666be98e04",
     "08027fd7735ceb3678a5e1de3214073a",
@@ -30,7 +30,7 @@
       "idempotency_key": "c79730d2c7e03d48f3689a666be98e04",
       "attempt": 1,
       "created_at": "2026-10-31T19:01:43Z",
-      "updated_at": "2026-11-01T01:46:50Z",
+      "updated_at": "2026-11-01T02:12:51Z",
       "governance_verdict": {
         "veredito": "conforme",
         "achados": [],
@@ -47,7 +47,7 @@
       "idempotency_key": "08027fd7735ceb3678a5e1de3214073a",
       "attempt": 1,
       "created_at": "2026-10-31T19:01:43Z",
-      "updated_at": "2026-11-01T01:46:50Z",
+      "updated_at": "2026-11-01T02:12:51Z",
       "governance_verdict": {
         "veredito": "conforme",
         "achados": [],
@@ -64,7 +64,7 @@
       "idempotency_key": "9668abaed2463ee8ca911b42cb84fd0b",
       "attempt": 1,
       "created_at": "2026-10-31T19:01:43Z",
-      "updated_at": "2026-11-01T01:46:50Z",
+      "updated_at": "2026-11-01T02:12:51Z",
       "governance_verdict": {
         "veredito": "conforme",
         "achados": [],
@@ -81,7 +81,7 @@
       "idempotency_key": "edd98de66c1224097f2e17a50a6d683f",
       "attempt": 1,
       "created_at": "2026-10-31T19:01:43Z",
-      "updated_at": "2026-11-01T01:46:50Z",
+      "updated_at": "2026-11-01T02:12:51Z",
       "governance_verdict": {
         "veredito": "conforme",
         "achados": [],
@@ -98,7 +98,7 @@
       "idempotency_key": "35cc4786eb665ece2b3eb380a4bc36ea",
       "attempt": 1,
       "created_at": "2026-10-31T19:01:52Z",
-      "updated_at": "2026-11-01T01:46:50Z",
+      "updated_at": "2026-11-01T02:12:51Z",
       "governance_verdict": {
         "veredito": "conforme",
         "achados": [],
@@ -115,7 +115,7 @@
       "idempotency_key": "d854893da61427d341be80a7a4e66f1b",
       "attempt": 1,
       "created_at": "2026-10-31T19:05:41Z",
-      "updated_at": "2026-11-01T01:46:50Z",
+      "updated_at": "2026-11-01T02:12:51Z",
       "governance_verdict": {
         "veredito": "conforme",
         "achados": [],
@@ -132,7 +132,7 @@
       "idempotency_key": "69ffdf8a793bf739a25fe806b9f2c769",
       "attempt": 1,
       "created_at": "2026-10-31T19:09:10Z",
-      "updated_at": "2026-11-01T01:46:50Z",
+      "updated_at": "2026-11-01T02:12:51Z",
       "governance_verdict": {
         "veredito": "conforme",
         "achados": [],
@@ -149,7 +149,7 @@
       "idempotency_key": "7a9eb6207619c29b16d68ed3967a92d9",
       "attempt": 1,
       "created_at": "2026-10-31T19:11:41Z",
-      "updated_at": "2026-11-01T01:46:50Z",
+      "updated_at": "2026-11-01T02:12:51Z",
       "governance_verdict": {
         "veredito": "conforme",
         "achados": [],
@@ -166,7 +166,7 @@
       "idempotency_key": "523971372dd196443c62cf2b516c46f6",
       "attempt": 1,
       "created_at": "2026-10-31T22:10:27Z",
-      "updated_at": "2026-11-01T01:46:50Z",
+      "updated_at": "2026-11-01T02:12:51Z",
       "governance_verdict": {
         "veredito": "conforme",
         "achados": [],
@@ -183,7 +183,7 @@
       "idempotency_key": "17780c836619f1f2d99c865f471ad9f4",
       "attempt": 1,
       "created_at": "2026-10-31T22:11:41Z",
-      "updated_at": "2026-11-01T01:46:50Z",
+      "updated_at": "2026-11-01T02:12:51Z",
       "governance_verdict": {
         "veredito": "conforme",
         "achados": [],
@@ -200,7 +200,7 @@
       "idempotency_key": "e3f7c46591205a8661ce1d2f49f56fd8",
       "attempt": 1,
       "created_at": "2026-10-31T22:19:12Z",
-      "updated_at": "2026-11-01T01:46:50Z",
+      "updated_at": "2026-11-01T02:12:51Z",
       "governance_verdict": {
         "veredito": "conforme",
         "achados": [],
