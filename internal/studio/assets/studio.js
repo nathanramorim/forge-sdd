@@ -203,6 +203,8 @@ function createForgeMascot3D(mountEl, colorVal, initialState, markType) {
 
   let currentState = initialState || 'working';
   let hopTimer = 0;
+  let handoffRotationTarget = 0;
+  let handoffSpeechTimer = 0;
 
   function setState(nextState, nextColorHex) {
     currentState = STATE_DEFS[nextState] ? nextState : 'working';
@@ -222,6 +224,11 @@ function createForgeMascot3D(mountEl, colorVal, initialState, markType) {
     domElement: renderer.domElement,
     setState,
     triggerHop: () => { hopTimer = 0.55; },
+    triggerHandoffAnimation: (direction) => {
+      hopTimer = 0.65;
+      handoffRotationTarget = direction > 0 ? 0.35 : -0.35;
+      handoffSpeechTimer = 1.2;
+    },
     update: (t, lookX, lookY) => {
       let bobY = Math.sin(t * 2.4) * 0.055;
       if (hopTimer > 0) {
@@ -237,7 +244,13 @@ function createForgeMascot3D(mountEl, colorVal, initialState, markType) {
       }
       eyesRoot.position.x = Math.max(-0.09, Math.min(0.09, lookX * 0.08 + scanX));
       eyesRoot.position.y = -0.1 + Math.max(-0.06, Math.min(0.06, -lookY * 0.06));
-      botGroup.rotation.y = Math.max(-0.25, Math.min(0.25, lookX * 0.18));
+
+      if (handoffSpeechTimer > 0) {
+        handoffSpeechTimer = Math.max(0, handoffSpeechTimer - 0.016);
+        botGroup.rotation.y = handoffRotationTarget * Math.sin((handoffSpeechTimer / 1.2) * Math.PI);
+      } else {
+        botGroup.rotation.y = Math.max(-0.25, Math.min(0.25, lookX * 0.18));
+      }
 
       const blink = (t % 4.5) > 4.36 ? 0.08 : 1;
       eyesRoot.scale.y = blink;
@@ -1431,6 +1444,9 @@ async function sendHandoff(from, to, taskId, title, artifactPath) {
     const data = await res.json();
     showToast(`✓ Artefato transferido: ${from} → ${to}`);
 
+    // Dispara animação visual de handoff entre os mascotes 3D (feat-67-03)
+    triggerMascotHandoffVisual(from, to);
+
     if (currentMode === 'LIVE') {
       fetch('/api/state')
         .then(r => r.json())
@@ -1441,6 +1457,59 @@ async function sendHandoff(from, to, taskId, title, artifactPath) {
   } catch (err) {
     alert(`Falha na comunicação de handoff: ${err.message}`);
     return null;
+  }
+}
+
+let lastHandledHandoffKey = null;
+
+function triggerMascotHandoffVisual(from, to) {
+  if (!from || !to || from === to) return;
+  const stationOrder = ['lider', 'pm-architect', 'planner', 'builder', 'governance'];
+  const fromIdx = stationOrder.indexOf(from);
+  const toIdx = stationOrder.indexOf(to);
+  const dir = (toIdx >= fromIdx) ? 1 : -1;
+
+  if (mascotControllers[from] && typeof mascotControllers[from].triggerHandoffAnimation === 'function') {
+    mascotControllers[from].triggerHandoffAnimation(dir);
+  }
+  if (mascotControllers[to] && typeof mascotControllers[to].triggerHandoffAnimation === 'function') {
+    mascotControllers[to].triggerHandoffAnimation(-dir);
+  }
+
+  // Animação de feixe/partícula luminosa de transferência entre os mascotes (feat-67-03)
+  try {
+    const fromEl = document.getElementById(`stage-${from}`) || document.getElementById(`station-${from}`);
+    const toEl = document.getElementById(`stage-${to}`) || document.getElementById(`station-${to}`);
+    if (fromEl && toEl && typeof fromEl.getBoundingClientRect === 'function' && typeof toEl.getBoundingClientRect === 'function') {
+      const r1 = fromEl.getBoundingClientRect();
+      const r2 = toEl.getBoundingClientRect();
+
+      const startX = r1.left + r1.width / 2;
+      const startY = r1.top + r1.height * 0.45;
+      const endX = r2.left + r2.width / 2;
+      const endY = r2.top + r2.height * 0.45;
+
+      const orb = document.createElement('div');
+      orb.className = 'handoff-flight-orb';
+      orb.style.left = `${startX}px`;
+      orb.style.top = `${startY}px`;
+      document.body.appendChild(orb);
+
+      requestAnimationFrame(() => {
+        const deltaX = endX - startX;
+        const deltaY = endY - startY;
+        orb.style.transform = `translate(${deltaX}px, ${deltaY}px) scale(1.35)`;
+        orb.style.opacity = '1';
+        setTimeout(() => {
+          orb.style.opacity = '0';
+          setTimeout(() => {
+            if (orb.parentNode) orb.parentNode.removeChild(orb);
+          }, 350);
+        }, 700);
+      });
+    }
+  } catch (e) {
+    console.debug('Handoff visual particle skipped:', e);
   }
 }
 
@@ -1683,6 +1752,7 @@ window.openSpecViewer = openSpecViewer;
 window.closeSpecViewer = closeSpecViewer;
 window.approveSpec = approveSpec;
 window.sendHandoff = sendHandoff;
+window.triggerMascotHandoffVisual = triggerMascotHandoffVisual;
 window.handleHandoffClick = handleHandoffClick;
 window.executeTask = executeTask;
 window.renderMarkdown = renderMarkdown;
@@ -2178,6 +2248,13 @@ function applySnapshot(snap) {
       document.getElementById('hoPayload').textContent = ho.payload;
     }
     document.getElementById('hoGate').innerHTML = `<i></i>${ho.gate}`;
+
+    // Dispara animação entre os mascotes 3D caso haja nova transição detectada no snapshot (feat-67-03)
+    const currentHandoffKey = `${ho.from_station}->${ho.to_station}:${ho.payload || ''}`;
+    if (lastHandledHandoffKey && lastHandledHandoffKey !== currentHandoffKey) {
+      triggerMascotHandoffVisual(ho.from_station, ho.to_station);
+    }
+    lastHandledHandoffKey = currentHandoffKey;
   }
 
   // Grid das 5 estações

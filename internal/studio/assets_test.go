@@ -558,3 +558,34 @@ func TestStudioNotificationBellContract(t *testing.T) {
 		t.Errorf("studio.js está faltando função handleNotificationBellClick")
 	}
 }
+
+func TestStudioMascotHandoffAnimationContract(t *testing.T) {
+	// 1. Validar JS
+	jsData, err := assetsFS.ReadFile("assets/studio.js")
+	if err != nil {
+		t.Fatalf("falha ao ler assets/studio.js: %v", err)
+	}
+	jsStr := string(jsData)
+	requiredJS := []string{
+		"triggerHandoffAnimation",
+		"triggerMascotHandoffVisual",
+		"window.triggerMascotHandoffVisual",
+		"handoffRotationTarget",
+		"handoffSpeechTimer",
+	}
+	for _, req := range requiredJS {
+		if !strings.Contains(jsStr, req) {
+			t.Errorf("studio.js está faltando token de animação de handoff: %s", req)
+		}
+	}
+
+	// 2. Validar CSS
+	cssData, err := assetsFS.ReadFile("assets/studio.css")
+	if err != nil {
+		t.Fatalf("falha ao ler assets/studio.css: %v", err)
+	}
+	cssStr := string(cssData)
+	if !strings.Contains(cssStr, ".handoff-flight-orb") {
+		t.Errorf("studio.css está faltando .handoff-flight-orb")
+	}
+}

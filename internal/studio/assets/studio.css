@@ -2485,3 +2485,21 @@ footer.studio-foot {
   display: flex;
   gap: 8px;
 }
+
+/* ==========================================================================
+   Handoff Flight Orb & Visual Beam Animation (feat-67-03)
+   ========================================================================== */
+.handoff-flight-orb {
+  position: fixed;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #3ecf8e 20%, #2f80ed 70%, rgba(62, 207, 142, 0) 100%);
+  box-shadow: 0 0 16px rgba(62, 207, 142, 0.9), 0 0 32px rgba(47, 128, 237, 0.7);
+  pointer-events: none;
+  z-index: 99999;
+  transition: transform 0.75s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.35s ease;
+  margin-left: -10px;
+  margin-top: -10px;
+  opacity: 0.95;
+}
