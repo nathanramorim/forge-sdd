@@ -2092,8 +2092,7 @@ footer.studio-foot {
   color: var(--muted);
 }
 
-.act-terminal-code,
-.act-terminal-output {
+.act-terminal-code {
   margin: 0;
   background: #090d13;
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -2102,16 +2101,241 @@ footer.studio-foot {
   font-size: 12px;
   line-height: 1.55;
   color: #e6edf3;
-  max-height: 220px;
+  max-height: 140px;
   overflow-y: auto;
   white-space: pre-wrap;
   word-break: break-all;
   user-select: text;
 }
+
+/* Janela Bonita de Terminal (feat-66) */
+.act-terminal-window {
+  display: flex;
+  flex-direction: column;
+  background: #0d1117;
+  border: 1px solid #30363d;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+}
+
+.act-terminal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: #161b22;
+  border-bottom: 1px solid #30363d;
+  padding: 8px 14px;
+  flex-wrap: wrap;
+}
+
+.act-term-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.act-term-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.act-dot-red {
+  background: #ff5f56;
+  box-shadow: 0 0 6px rgba(255, 95, 86, 0.4);
+}
+
+.act-dot-yellow {
+  background: #ffbd2e;
+  box-shadow: 0 0 6px rgba(255, 189, 46, 0.4);
+}
+
+.act-dot-green {
+  background: #27c93f;
+  box-shadow: 0 0 6px rgba(39, 201, 63, 0.4);
+}
+
+.act-term-title-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  min-width: 140px;
+}
+
+.act-term-icon {
+  font-size: 13px;
+  color: #58a6ff;
+}
+
+.act-term-title-wrapper .act-section-title {
+  color: #c9d1d9;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.act-term-search-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.act-search-input-wrapper {
+  display: flex;
+  align-items: center;
+  background: #090d13;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  padding: 3px 8px;
+  gap: 6px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.act-search-input-wrapper:focus-within {
+  border-color: #58a6ff;
+  box-shadow: 0 0 0 2px rgba(88, 166, 255, 0.2);
+}
+
+.act-search-icon {
+  font-size: 11px;
+  opacity: 0.7;
+}
+
+.act-search-input {
+  background: transparent;
+  border: none;
+  color: #f0f6fc;
+  font-size: 11px;
+  outline: none;
+  width: 190px;
+}
+
+.act-search-input::placeholder {
+  color: #8b949e;
+}
+
+.act-search-count {
+  font-size: 10px;
+  color: #8b949e;
+  min-width: 42px;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.act-search-count.has-results {
+  color: #58a6ff;
+  font-weight: bold;
+}
+
+.act-search-count.no-results {
+  color: #ff7b72;
+}
+
+.act-search-nav {
+  display: flex;
+  gap: 2px;
+}
+
+.act-search-btn {
+  background: #21262d;
+  border: 1px solid #30363d;
+  color: #c9d1d9;
+  border-radius: 4px;
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.act-search-btn:hover:not(:disabled) {
+  background: #30363d;
+  color: #f0f6fc;
+}
+
+.act-search-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.act-term-copy-btn {
+  padding: 3px 10px;
+  font-size: 11px;
+}
+
+.act-terminal-body-wrap {
+  position: relative;
+  max-height: 380px;
+  min-height: 180px;
+  background: #090d13;
+  overflow-y: auto;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #30363d #090d13;
+}
+
+.act-terminal-body-wrap::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.act-terminal-body-wrap::-webkit-scrollbar-track {
+  background: #090d13;
+}
+
+.act-terminal-body-wrap::-webkit-scrollbar-thumb {
+  background: #30363d;
+  border-radius: 4px;
+}
+
+.act-terminal-body-wrap::-webkit-scrollbar-thumb:hover {
+  background: #484f58;
+}
+
+.act-terminal-output {
+  margin: 0;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 14px 18px;
+  font-size: 12px;
+  line-height: 1.6;
+  color: #c9d1d9;
+  font-family: 'JetBrains Mono', 'Fira Code', Menlo, Monaco, Consolas, monospace;
+  white-space: pre-wrap;
+  word-break: break-all;
+  user-select: text;
+}
+
 .act-terminal-output.error-output {
-  border-color: rgba(255, 92, 92, 0.35);
-  background: rgba(255, 92, 92, 0.04);
-  color: #ff9e9e;
+  color: #ff7b72;
+  background: rgba(255, 123, 114, 0.03);
+}
+
+/* Destaque de Busca no Terminal */
+.act-highlight {
+  background-color: rgba(255, 212, 59, 0.35);
+  color: #ffe066;
+  border-radius: 2px;
+  padding: 1px 2px;
+  font-weight: 600;
+  box-shadow: 0 0 0 1px rgba(255, 212, 59, 0.5);
+}
+
+.act-highlight.active-match {
+  background-color: #f0883e;
+  color: #000;
+  box-shadow: 0 0 0 2px #fff;
+  font-weight: 700;
 }
 
 .act-meta-grid {
