@@ -25,6 +25,7 @@ type RPCDispatcher struct {
 	serverVersion           string
 	initialized             bool
 	sessionManager          *SessionManager
+	pool                    *SessionPool
 }
 
 // NewDispatcher instancia um despachador com versão padrão e métodos base registrados.
@@ -37,13 +38,15 @@ func NewDispatcherWithVersion(version string) *RPCDispatcher {
 	if version == "" {
 		version = "3.2.1-beta"
 	}
+	sm := NewSessionManager()
 	d := &RPCDispatcher{
 		handlers:                make(map[string]HandlerFunc),
 		notificationHandlers:    make(map[string]NotificationHandlerFunc),
 		notificationSubscribers: make([]chan Notification, 0),
 		serverVersion:           version,
-		sessionManager:          NewSessionManager(),
+		sessionManager:          sm,
 	}
+	d.pool = NewSessionPool(sm, d)
 
 	d.registerDefaultHandlers()
 	return d
@@ -142,6 +145,36 @@ func (d *RPCDispatcher) registerDefaultHandlers() {
 	d.RegisterHandler("gate/approve", func(ctx context.Context, params json.RawMessage) (any, *RPCError) {
 		return HandleGateApprove(ctx, d, params)
 	})
+
+	d.RegisterHandler("pool/warmup", func(ctx context.Context, params json.RawMessage) (any, *RPCError) {
+		var p PoolWarmupParams
+		if len(params) > 0 {
+			if err := json.Unmarshal(params, &p); err != nil {
+				return nil, NewRPCError(CodeInvalidParams, fmt.Sprintf("invalid pool/warmup params: %v", err))
+			}
+		}
+
+		pool := d.Pool()
+		if pool == nil {
+			return nil, NewRPCError(CodeInternalError, "session pool unavailable")
+		}
+
+		result, err := pool.Warmup(ctx, p.WorkspaceDir)
+		if err != nil {
+			return nil, NewRPCError(CodeInvalidParams, fmt.Sprintf("falha no warmup do pool: %v", err))
+		}
+
+		return result, nil
+	})
+
+	d.RegisterHandler("pool/status", func(ctx context.Context, params json.RawMessage) (any, *RPCError) {
+		pool := d.Pool()
+		if pool == nil {
+			return nil, NewRPCError(CodeInternalError, "session pool unavailable")
+		}
+
+		return pool.Status(), nil
+	})
 }
 
 // RegisterHandler registra ou sobrescreve um handler para um método JSON-RPC (thread-safe).
@@ -191,6 +224,23 @@ func (d *RPCDispatcher) SetSessionManager(sm *SessionManager) {
 	d.mu.Lock()
 	defer d.mu.Unlock()
 	d.sessionManager = sm
+	if d.pool != nil {
+		d.pool.SetSessionManager(sm)
+	}
+}
+
+// Pool retorna o gerenciador de pool de sessões das 5 estações.
+func (d *RPCDispatcher) Pool() *SessionPool {
+	d.mu.RLock()
+	defer d.mu.RUnlock()
+	return d.pool
+}
+
+// SetPool atribui um SessionPool customizado ao despachador.
+func (d *RPCDispatcher) SetPool(pool *SessionPool) {
+	d.mu.Lock()
+	defer d.mu.Unlock()
+	d.pool = pool
 }
 
 // BroadcastSessionNotification emite uma notificação no canal unidirecional "session/notification".

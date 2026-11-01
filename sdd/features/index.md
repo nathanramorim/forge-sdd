@@ -193,3 +193,7 @@ main
 | 64-02 | feat-64-protocolo-acp-comunicacao-estacoes-studio/feat-64-02-sessoes-acp-filas-portao-flx01.md | feat/64-protocolo-acp-comunicacao-estacoes-studio | 64-02 | ready |
 | 64-03 | feat-64-protocolo-acp-comunicacao-estacoes-studio/feat-64-03-transporte-http-sse-studio.md | feat/64-protocolo-acp-comunicacao-estacoes-studio | 64-03 | ready |
 | 64-04 | feat-64-protocolo-acp-comunicacao-estacoes-studio/feat-64-04-exemplos-ide-docs-e2e.md | feat/64-protocolo-acp-comunicacao-estacoes-studio | 64-04 | ready |
+| 65-01 | feat-65-prewarming-pool-sessoes-acp-estacoes/feat-65-01-nucleo-pool-sessoes-prewarming-heartbeat.md | feat/65-prewarming-pool-sessoes-acp-estacoes | 65-01 | ready |
+| 65-02 | feat-65-prewarming-pool-sessoes-acp-estacoes/feat-65-02-orquestrador-handoff-continuo-portao-flx01.md | feat/65-prewarming-pool-sessoes-acp-estacoes | 65-02 | ready |
+| 65-03 | feat-65-prewarming-pool-sessoes-acp-estacoes/feat-65-03-subcomando-cli-attach-multiplexador.md | feat/65-prewarming-pool-sessoes-acp-estacoes | 65-03 | ready |
+| 65-04 | feat-65-prewarming-pool-sessoes-acp-estacoes/feat-65-04-integracao-studio-bootstrap-e2e.md | feat/65-prewarming-pool-sessoes-acp-estacoes | 65-04 | ready |

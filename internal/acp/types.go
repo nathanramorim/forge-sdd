@@ -3,6 +3,7 @@ package acp
 import (
 	"encoding/json"
 	"fmt"
+	"time"
 )
 
 // Constantes canônicas do protocolo JSON-RPC 2.0 e ACP
@@ -213,4 +214,107 @@ func NewNotification(method string, params any) Notification {
 		Method:  method,
 		Params:  params,
 	}
+}
+
+// SessionState define a máquina de estados operacionais de uma sessão no pool ACP.
+type SessionState string
+
+const (
+	SessionStateStandby         SessionState = "standby"
+	SessionStateProcessing      SessionState = "processing"
+	SessionStateApprovalPending SessionState = "approval_pending"
+	SessionStateError           SessionState = "error"
+	SessionStateOffline         SessionState = "offline"
+)
+
+// ValidSessionStates lista todos os estados canônicos de sessão válidos.
+func ValidSessionStates() []SessionState {
+	return []SessionState{
+		SessionStateStandby,
+		SessionStateProcessing,
+		SessionStateApprovalPending,
+		SessionStateError,
+		SessionStateOffline,
+	}
+}
+
+// IsValidSessionState verifica se o estado fornecido pertence aos estados canônicos.
+func IsValidSessionState(state SessionState) bool {
+	for _, s := range ValidSessionStates() {
+		if s == state {
+			return true
+		}
+	}
+	return false
+}
+
+// PooledSession representa uma sessão canônica pré-aquecida e gerenciada pelo SessionPool.
+type PooledSession struct {
+	SessionID           string            `json:"sessionId"`
+	Station             string            `json:"station"`
+	WorkspaceDir        string            `json:"workspaceDir"`
+	State               SessionState      `json:"state"`
+	ActiveItemID        string            `json:"activeItemId,omitempty"`
+	LastSeenAt          time.Time         `json:"lastSeenAt"`
+	AttachedClients     int               `json:"attachedClients"`
+	CreatedAt           time.Time         `json:"createdAt"`
+	UpdatedAt           time.Time         `json:"updatedAt"`
+	Metadata            map[string]string `json:"metadata,omitempty"`
+	ProcessingStartedAt time.Time         `json:"processingStartedAt,omitempty"`
+	LastTelemetryAt     time.Time         `json:"lastTelemetryAt,omitempty"`
+}
+
+// Clone cria uma cópia defensiva profunda da sessão no pool.
+func (s *PooledSession) Clone() *PooledSession {
+	if s == nil {
+		return nil
+	}
+	cp := *s
+	if s.Metadata != nil {
+		cp.Metadata = make(map[string]string, len(s.Metadata))
+		for k, v := range s.Metadata {
+			cp.Metadata[k] = v
+		}
+	}
+	return &cp
+}
+
+// SessionSummary representa um resumo condensado da telemetria de uma sessão no pool.
+type SessionSummary struct {
+	SessionID       string       `json:"sessionId"`
+	Station         string       `json:"station"`
+	State           SessionState `json:"state"`
+	LastSeenAt      time.Time    `json:"lastSeenAt"`
+	ActiveItemID    string       `json:"activeItemId,omitempty"`
+	AttachedClients int          `json:"attachedClients"`
+}
+
+// Summary extrai um SessionSummary a partir de uma PooledSession.
+func (s *PooledSession) Summary() SessionSummary {
+	return SessionSummary{
+		SessionID:       s.SessionID,
+		Station:         s.Station,
+		State:           s.State,
+		LastSeenAt:      s.LastSeenAt,
+		ActiveItemID:    s.ActiveItemID,
+		AttachedClients: s.AttachedClients,
+	}
+}
+
+// PoolWarmupParams define os parâmetros para inicialização/pré-aquecimento do SessionPool.
+type PoolWarmupParams struct {
+	WorkspaceDir string `json:"workspaceDir,omitempty"`
+}
+
+// PoolWarmupResult define o resultado retornado pelo comando pool/warmup.
+type PoolWarmupResult struct {
+	Status        string           `json:"status"`
+	SessionsCount int              `json:"sessionsCount"`
+	Sessions      []*PooledSession `json:"sessions"`
+}
+
+// PoolStatusResult define o resultado de telemetria e integridade retornado por pool/status.
+type PoolStatusResult struct {
+	Healthy  bool             `json:"healthy"`
+	Sessions []*PooledSession `json:"sessions"`
 }

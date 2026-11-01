@@ -178,6 +178,16 @@ func (sm *SessionManager) CreateSession(params SessionNewParams) (*Session, erro
 	return &cp, nil
 }
 
+// RegisterSession registra ou substitui uma sessão gerenciada (thread-safe).
+func (sm *SessionManager) RegisterSession(sess *Session) {
+	if sm == nil || sess == nil {
+		return
+	}
+	sm.mu.Lock()
+	defer sm.mu.Unlock()
+	sm.sessions[sess.ID] = sess
+}
+
 // GetSession busca uma sessão ativa pelo identificador (thread-safe).
 func (sm *SessionManager) GetSession(id string) (*Session, bool) {
 	sm.mu.RLock()
