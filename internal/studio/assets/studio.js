@@ -2153,9 +2153,9 @@ function renderStationDrawerContent(st) {
     `;
   } else {
     const stationGuidance = {
-      'lider': 'O Líder orquestra os ciclos de desenvolvimento, monitora handoffs, delega tarefas aos subagentes e aprova avanços de estágio.',
-      'pm-architect': 'O PM & Arquiteto concebe especificações técnicas (Discovery, Criteria, C4), gerencia backlog e avalia reuso de código.',
-      'planner': 'O Planejador decompõe especificações aprovadas em tarefas atômicas sequenciais (Plano) com critérios de aceite estritos.',
+      'lider': 'O Líder orquestra os ciclos de desenvolvimento, monitora transferências de tarefas, delega atividades aos subagentes e aprova avanços de estágio.',
+      'pm-architect': 'Fase 1 de Concepção & Planejamento: concebe soluções arquiteturais (Discovery, Critérios de Aceite e C4) e avalia reuso de código existente.',
+      'planner': 'Fase 2 de Concepção & Planejamento: após aprovação da especificação, decompõe a solução em tarefas atômicas sequenciais (Plano) com critérios claros para a Fila de Builders.',
       'builder': 'O Builder implementa código e testes automatizados em contexto isolado, respeitando as regras constitucionais SDD.',
       'governance': 'A Governança audita em modo estrito somente-leitura (Camada B) a conformidade arquitetural, de segurança e integridade.'
     };
@@ -2411,6 +2411,13 @@ function applySnapshot(snap) {
       }
     }
 
+    let phaseBadgeHtml = '';
+    if (st.id === 'pm-architect') {
+      phaseBadgeHtml = `<span class="chip mono stage-phase-badge" style="font-size:8.5px;padding:1px 5px;background:rgba(138,164,255,0.12);color:#8aa4ff;border-color:rgba(138,164,255,0.35);">Fase Concepção 1/2</span>`;
+    } else if (st.id === 'planner') {
+      phaseBadgeHtml = `<span class="chip mono stage-phase-badge" style="font-size:8.5px;padding:1px 5px;background:rgba(201,167,255,0.12);color:#c9a7ff;border-color:rgba(201,167,255,0.35);">Fase Planejamento 2/2</span>`;
+    }
+
     let card = document.getElementById(`station-card-${st.id}`);
     if (!card) {
       card = document.createElement('div');
@@ -2437,6 +2444,7 @@ function applySnapshot(snap) {
             <p class="role">${st.role}</p>
             <div id="station-badges-${st.id}" style="display:flex;align-items:center;gap:6px;margin-top:4px;flex-wrap:wrap;">
               <span class="chip" id="chip-${st.id}"><i style="--o:${st.color}"></i>${st.mascot_state}</span>
+              ${phaseBadgeHtml}
               ${specBadgeHtml}
             </div>
           </div>
@@ -2472,10 +2480,14 @@ function applySnapshot(snap) {
           openStationDrawer(st.id);
         }
       };
+      const roleEl = card.querySelector('.role');
+      if (roleEl && st.role) roleEl.textContent = st.role;
+
       const badgesContainer = document.getElementById(`station-badges-${st.id}`);
       if (badgesContainer) {
         badgesContainer.innerHTML = `
           <span class="chip" id="chip-${st.id}"><i style="--o:${st.color}"></i>${st.mascot_state}</span>
+          ${phaseBadgeHtml}
           ${specBadgeHtml}
         `;
       } else {

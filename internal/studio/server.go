@@ -305,6 +305,16 @@ func (s *Server) SetACPDispatcher(d *acp.RPCDispatcher) {
 			s.Aggregator.SetSessionPool(s.pool)
 		}
 		if s.pool != nil {
+			if !s.pool.IsWarmed() {
+				wsDir := s.Dir
+				if wsDir == "" {
+					wsDir = "."
+				}
+				warmupCtx, warmupCancel := context.WithTimeout(s.ctx, 10*time.Second)
+				_, _ = s.pool.Warmup(warmupCtx, wsDir)
+				warmupCancel()
+				s.pool.StartHeartbeat(s.ctx)
+			}
 			s.pool.AddStateListener(func(station string, state acp.SessionState, lastSeenAt time.Time) {
 				if s.Hub != nil {
 					s.Hub.Broadcast("station_state", map[string]any{

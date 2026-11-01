@@ -100,7 +100,7 @@ func (a *Aggregator) GetSnapshot() (*StudioSnapshot, error) {
 		{
 			ID:             queue.StationPMArchitect,
 			Name:           "02. PM & Arquiteto",
-			Role:           "Concepção da Spec & Reuse Check",
+			Role:           "Concepção & Planejamento · Fase 1 (Discovery & Arquitetura)",
 			Color:          "#8aa4ff",
 			Mark:           "diamond",
 			MascotState:    "idle",
@@ -111,7 +111,7 @@ func (a *Aggregator) GetSnapshot() (*StudioSnapshot, error) {
 		{
 			ID:             queue.StationPlanner,
 			Name:           "03. O Planejador",
-			Role:           "Fatiamento & Mapeamento de Regras",
+			Role:           "Concepção & Planejamento · Fase 2 (Fatiamento de Tarefas)",
 			Color:          "#c9a7ff",
 			Mark:           "bar",
 			MascotState:    "idle",

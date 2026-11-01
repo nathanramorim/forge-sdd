@@ -589,3 +589,49 @@ func TestStudioMascotHandoffAnimationContract(t *testing.T) {
 		t.Errorf("studio.css está faltando .handoff-flight-orb")
 	}
 }
+
+func TestStudioUnifiedConceptionPresentationContract(t *testing.T) {
+	// 1. Validar JS
+	jsData, err := assetsFS.ReadFile("assets/studio.js")
+	if err != nil {
+		t.Fatalf("falha ao ler assets/studio.js: %v", err)
+	}
+	jsStr := string(jsData)
+	requiredTokens := []string{
+		"stage-phase-badge",
+		"Fase Concepção 1/2",
+		"Fase Planejamento 2/2",
+		"Fase 1 de Concepção & Planejamento",
+		"Fase 2 de Concepção & Planejamento",
+	}
+	for _, req := range requiredTokens {
+		if !strings.Contains(jsStr, req) {
+			t.Errorf("studio.js está faltando indicador de Concepção & Planejamento: %s", req)
+		}
+	}
+
+	// 2. Validar Snapshot State
+	agg := NewAggregator(t.TempDir())
+	snap, err := agg.GetSnapshot()
+	if err != nil {
+		t.Fatalf("falha ao obter snapshot: %v", err)
+	}
+	var pmFound, plannerFound bool
+	for _, st := range snap.Stations {
+		if st.ID == "pm-architect" {
+			pmFound = true
+			if !strings.Contains(st.Role, "Concepção & Planejamento") {
+				t.Errorf("estação pm-architect deve explicitar Concepção & Planejamento no role, obteve %s", st.Role)
+			}
+		}
+		if st.ID == "planner" {
+			plannerFound = true
+			if !strings.Contains(st.Role, "Concepção & Planejamento") {
+				t.Errorf("estação planner deve explicitar Concepção & Planejamento no role, obteve %s", st.Role)
+			}
+		}
+	}
+	if !pmFound || !plannerFound {
+		t.Errorf("estações pm-architect e planner não foram encontradas no snapshot")
+	}
+}

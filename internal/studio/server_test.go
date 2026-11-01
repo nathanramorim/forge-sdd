@@ -11,6 +11,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/forge-sdd/cli/internal/acp"
 	"github.com/forge-sdd/cli/internal/queue"
 	"github.com/forge-sdd/cli/internal/studio"
 )
@@ -1081,6 +1082,38 @@ func TestStudioServer_AutoRunBuilderFailure(t *testing.T) {
 			if it.ID == taskID {
 				t.Errorf("tarefa com falha no Portão A não deveria ter sido transferida para Governança")
 			}
+		}
+	}
+}
+
+func TestStudioSessionPoolWarmupOnBoot(t *testing.T) {
+	srv, _ := setupTestStudioServer(t)
+
+	pool := srv.Pool()
+	if pool == nil {
+		t.Fatalf("SessionPool do servidor não deve ser nulo no boot")
+	}
+
+	if !pool.IsWarmed() {
+		t.Fatalf("SessionPool deve estar pré-aquecido (warmed=true) imediatamente após o boot")
+	}
+
+	expectedStations := []string{
+		queue.StationLider,
+		queue.StationPMArchitect,
+		queue.StationPlanner,
+		queue.StationBuilder,
+		queue.StationGovernance,
+	}
+
+	for _, st := range expectedStations {
+		sess, ok := pool.GetSessionByStation(st)
+		if !ok || sess == nil {
+			t.Errorf("estação %s deve ter sessão ativa no pool no boot", st)
+			continue
+		}
+		if sess.State != acp.SessionStateStandby {
+			t.Errorf("estação %s deveria estar em estado standby, obteve %s", st, sess.State)
 		}
 	}
 }
