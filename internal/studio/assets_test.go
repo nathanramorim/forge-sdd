@@ -410,24 +410,26 @@ func TestStudioAssetsAutoRunContract(t *testing.T) {
 	cssStr := string(cssData)
 	requiredCSS := []string{
 		".chip.autorun-chip",
-		".autorun-running-chip",
-		".autorun-card-badge",
 		"@keyframes autorunGlow",
 		"@keyframes boltPulse",
+		"white-space: normal",
 	}
 	for _, req := range requiredCSS {
 		if !strings.Contains(cssStr, req) {
 			t.Errorf("studio.css não contém regra de auto-run obrigatória: %s", req)
 		}
 	}
+	if strings.Contains(cssStr, ".autorun-card-badge") || strings.Contains(cssStr, ".autorun-running-chip") {
+		t.Errorf("studio.css não deve conter classes residuais de badges em cards (.autorun-card-badge, .autorun-running-chip)")
+	}
 
-	// 3. Validar JS em studio.js
+	// 3. Validar JS em studio.js (Modo autônomo não deve poluir cards de estações)
 	jsData, err := assetsFS.ReadFile("assets/studio.js")
 	if err != nil {
 		t.Fatalf("falha ao ler assets/studio.js: %v", err)
 	}
 	jsStr := string(jsData)
-	if !strings.Contains(jsStr, "⚡ Auto-Run: Executando automaticamente") {
-		t.Errorf("studio.js deve conter a indicação '⚡ Auto-Run: Executando automaticamente'")
+	if strings.Contains(jsStr, "autorun-card-badge") || strings.Contains(jsStr, "autorun-running-chip") {
+		t.Errorf("studio.js não deve poluir os cards com badges residuais de auto-run")
 	}
 }
