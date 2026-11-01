@@ -381,7 +381,7 @@ func TestAPISpecApprove_Success(t *testing.T) {
 	}
 	var foundPlannerItem bool
 	for _, it := range plannerSQ.Items {
-		if it.ID == "feat-63-01" && it.Status == queue.StatusQueued && it.Station == queue.StationPlanner {
+		if it.ID == "feat-63-01" && (it.Status == queue.StatusQueued || it.Status == queue.StatusBuilding) && it.Station == queue.StationPlanner {
 			foundPlannerItem = true
 			if it.ArtifactPath != filepath.ToSlash(specRel) {
 				t.Errorf("artifact_path no planner inesperado: %q", it.ArtifactPath)
@@ -903,5 +903,184 @@ func TestAPIHandoff_SSEBroadcast(t *testing.T) {
 		}
 	case <-time.After(1500 * time.Millisecond):
 		t.Fatalf("timeout: broadcast SSE não foi recebido após POST /api/handoff")
+	}
+}
+
+func TestStudioServer_AutoRunFlow(t *testing.T) {
+	tempDir := t.TempDir()
+
+	// 1. Enfileira tarefa no planner com status queued
+	taskID := "autorun-feat-100"
+	_, _, err := queue.EnqueueStationItem(tempDir, queue.StationItem{
+		ID:           taskID,
+		Title:        "Feature Autônoma Completa",
+		Station:      queue.StationPlanner,
+		Operation:    "plan",
+		Status:       queue.StatusQueued,
+		ArtifactPath: "sdd/features/feat-100/plan.md",
+	})
+	if err != nil {
+		t.Fatalf("erro ao enfileirar task no planner: %v", err)
+	}
+
+	srv, err := studio.NewServer(studio.Config{
+		Dir:  tempDir,
+		Host: "127.0.0.1",
+		Port: 0,
+	})
+	if err != nil {
+		t.Fatalf("falha ao inicializar servidor: %v", err)
+	}
+	if err := srv.Listen(); err != nil {
+		t.Fatalf("falha no listen: %v", err)
+	}
+	go func() {
+		_ = srv.Start()
+	}()
+	defer func() {
+		_ = srv.Stop()
+	}()
+
+	// Dispara o TriggerAutoRun na estação Planner
+	srv.TriggerAutoRun(queue.StationPlanner)
+
+	// Aguarda a esteira autônoma percorrer Planner -> Builder -> Governance -> Líder
+	deadline := time.Now().Add(4 * time.Second)
+	var completedAtLeader bool
+
+	for time.Now().Before(deadline) {
+		time.Sleep(100 * time.Millisecond)
+
+		liderSQ, err := queue.LoadStationQueue(tempDir, queue.StationLider)
+		if err == nil {
+			for _, it := range liderSQ.Items {
+				if it.ID == taskID && it.Status == queue.StatusApproved {
+					completedAtLeader = true
+					break
+				}
+			}
+		}
+		if completedAtLeader {
+			break
+		}
+	}
+
+	if !completedAtLeader {
+		t.Fatalf("esteira autônoma não concluiu o ciclo até o Líder dentro do prazo esperado")
+	}
+
+	// Verifica Governança
+	govSQ, err := queue.LoadStationQueue(tempDir, queue.StationGovernance)
+	if err != nil {
+		t.Fatalf("falha ao carregar fila de governança: %v", err)
+	}
+	var foundGovApproved bool
+	for _, it := range govSQ.Items {
+		if it.ID == taskID && it.Status == queue.StatusApproved && it.GovernanceVerdict != nil {
+			if it.GovernanceVerdict.Veredito == queue.VerdictConforme {
+				foundGovApproved = true
+				break
+			}
+		}
+	}
+	if !foundGovApproved {
+		t.Errorf("tarefa não foi devidamente aprovada com veredito conforme na Governança: %+v", govSQ.Items)
+	}
+
+	// Verifica atividades registradas
+	acts, err := queue.LoadActivities(tempDir)
+	if err != nil {
+		t.Fatalf("falha ao carregar atividades: %v", err)
+	}
+	hasPlannerSuccess := false
+	hasBuilderPortaoA := false
+	hasGovAudit := false
+	for _, a := range acts {
+		if a.Station == queue.StationPlanner && a.Status == "success" {
+			hasPlannerSuccess = true
+		}
+		if a.Station == queue.StationBuilder && a.Tool == "portao_a" && a.Status == "success" {
+			hasBuilderPortaoA = true
+		}
+		if a.Station == queue.StationGovernance && a.Tool == "governance" && a.Status == "success" {
+			hasGovAudit = true
+		}
+	}
+	if !hasPlannerSuccess {
+		t.Errorf("telemetria não registrou atividade de sucesso no Planner")
+	}
+	if !hasBuilderPortaoA {
+		t.Errorf("telemetria não registrou atividade de Portão A no Builder")
+	}
+	if !hasGovAudit {
+		t.Errorf("telemetria não registrou atividade de auditoria conforme na Governança")
+	}
+}
+
+func TestStudioServer_AutoRunBuilderFailure(t *testing.T) {
+	tempDir := t.TempDir()
+
+	os.Setenv("FORGE_TEST_FAIL_PORTAO_A", "true")
+	defer os.Unsetenv("FORGE_TEST_FAIL_PORTAO_A")
+
+	taskID := "builder-fail-task"
+	_, _, err := queue.EnqueueStationItem(tempDir, queue.StationItem{
+		ID:           taskID,
+		Title:        "Builder com Teste Quebrado",
+		Station:      queue.StationBuilder,
+		Operation:    "build",
+		Status:       queue.StatusQueued,
+		ArtifactPath: "sdd/features/fail/plan.md",
+	})
+	if err != nil {
+		t.Fatalf("erro ao enfileirar task: %v", err)
+	}
+
+	srv, err := studio.NewServer(studio.Config{
+		Dir:  tempDir,
+		Host: "127.0.0.1",
+		Port: 0,
+	})
+	if err != nil {
+		t.Fatalf("falha ao inicializar servidor: %v", err)
+	}
+	if err := srv.Listen(); err != nil {
+		t.Fatalf("falha no listen: %v", err)
+	}
+	go func() {
+		_ = srv.Start()
+	}()
+	defer func() {
+		_ = srv.Stop()
+	}()
+
+	srv.TriggerAutoRun(queue.StationBuilder)
+
+	// Aguarda processamento
+	time.Sleep(350 * time.Millisecond)
+
+	builderSQ, err := queue.LoadStationQueue(tempDir, queue.StationBuilder)
+	if err != nil {
+		t.Fatalf("falha ao ler fila do builder: %v", err)
+	}
+	var foundChangesRequested bool
+	for _, it := range builderSQ.Items {
+		if it.ID == taskID && it.Status == queue.StatusChangesRequested {
+			foundChangesRequested = true
+			break
+		}
+	}
+	if !foundChangesRequested {
+		t.Errorf("esperado status changes_requested no builder após falha nos testes, obtido: %+v", builderSQ.Items)
+	}
+
+	// Garante que NÃO houve handoff para governança
+	govSQ, _ := queue.LoadStationQueue(tempDir, queue.StationGovernance)
+	if govSQ != nil {
+		for _, it := range govSQ.Items {
+			if it.ID == taskID {
+				t.Errorf("tarefa com falha no Portão A não deveria ter sido transferida para Governança")
+			}
+		}
 	}
 }

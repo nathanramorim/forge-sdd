@@ -2,7 +2,7 @@
   "feature_id": "feat-63",
   "branch": "feat/63-studio-navegavel-aprovacao-spec",
   "spec_status": "approved",
-  "updated_at": "2026-11-01T00:37:26Z",
+  "updated_at": "2026-11-01T00:56:58Z",
   "items": [
     {
       "task_id": "feat-60-01-scaffold-astro-seo-dados-tipados",

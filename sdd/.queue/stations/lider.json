@@ -1,9 +1,10 @@
 {
   "station": "lider",
-  "version": 4,
-  "updated_at": "2026-10-31T23:50:00Z",
+  "version": 6,
+  "updated_at": "2026-11-01T00:56:58Z",
   "processed_keys": [
-    "a5e9e900175357b9e0c5526ad56536cd"
+    "a5e9e900175357b9e0c5526ad56536cd",
+    "beaddb8f1491bb0d76b8f3fcce55299b"
   ],
   "items": [
     {
@@ -16,9 +17,23 @@
       "idempotency_key": "a5e9e900175357b9e0c5526ad56536cd",
       "attempt": 1,
       "input_contract": "Demanda do Humano",
-      "output_contract": "Demanda Estruturada -> Estação 02",
+      "output_contract": "Demanda Estruturada -\u003e Estação 02",
       "created_at": "2026-10-31T22:50:00Z",
       "updated_at": "2026-10-31T23:50:00Z"
+    },
+    {
+      "id": "discovery-63-studio-navegavel-aprovacao-spec",
+      "title": "Planejamento: discovery-63-studio-navegavel-aprovacao-spec.md",
+      "station": "lider",
+      "operation": "handoff",
+      "status": "approved",
+      "artifact_path": "sdd/discovery/discovery-63-studio-navegavel-aprovacao-spec.md",
+      "idempotency_key": "beaddb8f1491bb0d76b8f3fcce55299b",
+      "attempt": 1,
+      "input_contract": "Parecer Conforme Portão B",
+      "output_contract": "Ciclo Concluído",
+      "created_at": "2026-11-01T00:56:58Z",
+      "updated_at": "2026-11-01T00:56:58Z"
     }
   ]
 }

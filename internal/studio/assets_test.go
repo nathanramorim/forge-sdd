@@ -387,3 +387,47 @@ func TestStudioBadgeReactivityAndIdeSecurity(t *testing.T) {
 		}
 	}
 }
+
+func TestStudioAssetsAutoRunContract(t *testing.T) {
+	// 1. Validar Markup no index.html
+	htmlData, err := assetsFS.ReadFile("assets/index.html")
+	if err != nil {
+		t.Fatalf("falha ao ler assets/index.html: %v", err)
+	}
+	htmlStr := string(htmlData)
+	if !strings.Contains(htmlStr, `id="autoRunChip"`) {
+		t.Errorf("index.html deve conter id=\"autoRunChip\"")
+	}
+	if !strings.Contains(htmlStr, "MODO AUTÔNOMO") {
+		t.Errorf("index.html deve conter 'MODO AUTÔNOMO'")
+	}
+
+	// 2. Validar CSS em studio.css
+	cssData, err := assetsFS.ReadFile("assets/studio.css")
+	if err != nil {
+		t.Fatalf("falha ao ler assets/studio.css: %v", err)
+	}
+	cssStr := string(cssData)
+	requiredCSS := []string{
+		".chip.autorun-chip",
+		".autorun-running-chip",
+		".autorun-card-badge",
+		"@keyframes autorunGlow",
+		"@keyframes boltPulse",
+	}
+	for _, req := range requiredCSS {
+		if !strings.Contains(cssStr, req) {
+			t.Errorf("studio.css não contém regra de auto-run obrigatória: %s", req)
+		}
+	}
+
+	// 3. Validar JS em studio.js
+	jsData, err := assetsFS.ReadFile("assets/studio.js")
+	if err != nil {
+		t.Fatalf("falha ao ler assets/studio.js: %v", err)
+	}
+	jsStr := string(jsData)
+	if !strings.Contains(jsStr, "⚡ Auto-Run: Executando automaticamente") {
+		t.Errorf("studio.js deve conter a indicação '⚡ Auto-Run: Executando automaticamente'")
+	}
+}

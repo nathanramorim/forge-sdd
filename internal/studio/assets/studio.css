@@ -96,6 +96,60 @@ header.studio-header {
   border-color: rgba(62, 207, 142, 0.35);
 }
 
+.chip.autorun-chip {
+  color: #c4b5fd;
+  background: rgba(167, 139, 250, 0.15);
+  border-color: rgba(167, 139, 250, 0.45);
+  font-weight: 700;
+  box-shadow: 0 0 10px rgba(167, 139, 250, 0.2);
+  letter-spacing: 0.02em;
+}
+
+.chip.autorun-chip .autorun-bolt {
+  display: inline-block;
+  animation: boltPulse 1.8s ease-in-out infinite alternate;
+  color: #facc15;
+}
+
+.autorun-running-chip {
+  font-size: 10px;
+  padding: 3px 9px;
+  font-weight: 700;
+  color: #c4b5fd !important;
+  border: 1px solid rgba(167, 139, 250, 0.5) !important;
+  background: rgba(167, 139, 250, 0.15) !important;
+  border-radius: var(--r-capsule);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  animation: autorunGlow 2s infinite ease-in-out;
+}
+
+.autorun-card-badge {
+  font-size: 9.5px;
+  padding: 2px 7px;
+  font-weight: 700;
+  color: #c4b5fd;
+  background: rgba(167, 139, 250, 0.2);
+  border: 1px solid rgba(167, 139, 250, 0.4);
+  border-radius: 4px;
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+@keyframes autorunGlow {
+  0% { box-shadow: 0 0 0 0 rgba(167, 139, 250, 0.4); }
+  70% { box-shadow: 0 0 0 6px rgba(167, 139, 250, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(167, 139, 250, 0); }
+}
+
+@keyframes boltPulse {
+  0% { transform: scale(1); opacity: 0.85; filter: drop-shadow(0 0 2px #facc15); }
+  100% { transform: scale(1.2); opacity: 1; filter: drop-shadow(0 0 8px #fde047); }
+}
+
 .mode-toggle {
   display: inline-flex;
   padding: 2px;
