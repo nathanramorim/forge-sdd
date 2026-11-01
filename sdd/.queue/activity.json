@@ -1,5 +1,13 @@
 [
   {
+    "timestamp": "2026-11-01T01:38:10Z",
+    "station": "pm-architect",
+    "tool": "gate_flx01",
+    "action": "Aguardando Aprovação Humana",
+    "details": "discovery-64 pronto para Portão FLX-01",
+    "status": "running"
+  },
+  {
     "timestamp": "2026-11-01T00:56:58Z",
     "station": "lider",
     "tool": "orchestrate",

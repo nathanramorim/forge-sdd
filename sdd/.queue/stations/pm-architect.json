@@ -1,13 +1,28 @@
 {
   "station": "pm-architect",
-  "version": 11,
-  "updated_at": "2026-10-31T23:44:36Z",
+  "version": 12,
+  "updated_at": "2026-11-01T01:35:00Z",
   "processed_keys": [
     "4f75dcab0bf602fa1ad48a3bb48a0a98",
     "a5e9e900175357b9e0c5526ad56536cd",
-    "5a16965d5b0144277a6bd723c0f75526"
+    "5a16965d5b0144277a6bd723c0f75526",
+    "acp64-discovery-spec-flx01"
   ],
   "items": [
+    {
+      "id": "feat-64-protocolo-acp-comunicacao-estacoes-studio",
+      "title": "Concepção & Spec: discovery-64-protocolo-acp-comunicacao-estacoes-studio.md",
+      "station": "pm-architect",
+      "operation": "discovery",
+      "status": "pending_review",
+      "artifact_path": "sdd/discovery/discovery-64-protocolo-acp-comunicacao-estacoes-studio.md",
+      "idempotency_key": "acp64-discovery-spec-flx01",
+      "attempt": 1,
+      "input_contract": "Demanda do Humano / Líder",
+      "output_contract": "discovery-64-protocolo-acp-comunicacao-estacoes-studio.md (Portão FLX-01)",
+      "created_at": "2026-11-01T01:35:00Z",
+      "updated_at": "2026-11-01T01:35:00Z"
+    },
     {
       "id": "feat-63-concepcao-spec",
       "title": "Concepção \u0026 Spec: discovery-63-studio-navegavel-aprovacao-spec.md",
