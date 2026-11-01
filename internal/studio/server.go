@@ -39,6 +39,9 @@ type Server struct {
 	acpDispatcher *acp.RPCDispatcher
 	acpHandler    *acp.HTTPHandler
 	acpNotifChan  chan acp.Notification
+	pool          *acp.SessionPool
+	orchestrator  *acp.HandoffOrchestrator
+	attachBridge  *acp.AttachBridge
 }
 
 // Config contém parâmetros de inicialização do Studio.
@@ -64,6 +67,11 @@ func NewServer(cfg Config) (*Server, error) {
 	notifChan := make(chan acp.Notification, 64)
 	acpDisp.SubscribeNotifications(notifChan)
 
+	pool := acpDisp.Pool()
+	orch := acpDisp.Orchestrator()
+	bridge := acpDisp.AttachBridge()
+	agg.SetSessionPool(pool)
+
 	s := &Server{
 		Dir:           cfg.Dir,
 		Host:          cfg.Host,
@@ -75,6 +83,32 @@ func NewServer(cfg Config) (*Server, error) {
 		acpDispatcher: acpDisp,
 		acpHandler:    acpHandler,
 		acpNotifChan:  notifChan,
+		pool:          pool,
+		orchestrator:  orch,
+		attachBridge:  bridge,
+	}
+
+	if pool != nil {
+		wsDir := cfg.Dir
+		if wsDir == "" {
+			wsDir = "."
+		}
+		warmupCtx, warmupCancel := context.WithTimeout(ctx, 10*time.Second)
+		_, _ = pool.Warmup(warmupCtx, wsDir)
+		warmupCancel()
+		pool.StartHeartbeat(ctx)
+
+		pool.AddStateListener(func(station string, state acp.SessionState, lastSeenAt time.Time) {
+			if s.Hub != nil {
+				s.Hub.Broadcast("station_state", map[string]any{
+					"type":       "station_state",
+					"station":    station,
+					"state":      string(state),
+					"lastSeenAt": lastSeenAt.UTC().Format(time.RFC3339),
+				})
+				s.Hub.NotifyChange()
+			}
+		})
 	}
 
 	// Conecta notificações do ACPDispatcher ao SSEHub (ARQ-03)
@@ -106,7 +140,8 @@ func NewServer(cfg Config) (*Server, error) {
 	mux.HandleFunc("/api/handoff", s.handleHandoff)
 	mux.HandleFunc("/api/task/execute", s.handleTaskExecute)
 
-	// 2. Transporte ACP HTTP/SSE (feat-64-03)
+	// 2. Transporte ACP HTTP/SSE (feat-64-03, feat-65-04)
+	mux.HandleFunc("/api/acp", s.handleACPRPC)
 	mux.HandleFunc("/api/acp/rpc", s.handleACPRPC)
 	mux.HandleFunc("/api/acp/events", s.handleACPEvents)
 
@@ -120,10 +155,10 @@ func NewServer(cfg Config) (*Server, error) {
 		})
 	}
 
-	// Middleware de Segurança (SEG-01 / SEG-02 / SEG-06 / FLX-01): Permite POST exclusivamente em /api/spec/approve, /api/handoff, /api/task/execute e /api/acp/rpc
+	// Middleware de Segurança (SEG-01 / SEG-02 / SEG-06 / FLX-01): Permite POST exclusivamente em /api/spec/approve, /api/handoff, /api/task/execute, /api/acp e /api/acp/rpc
 	readOnlyHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodPost {
-			if r.URL.Path != "/api/spec/approve" && r.URL.Path != "/api/handoff" && r.URL.Path != "/api/task/execute" && r.URL.Path != "/api/acp/rpc" {
+			if r.URL.Path != "/api/spec/approve" && r.URL.Path != "/api/handoff" && r.URL.Path != "/api/task/execute" && r.URL.Path != "/api/acp" && r.URL.Path != "/api/acp/rpc" {
 				http.Error(w, "Method Not Allowed (Studio é estritamente Read-Only)", http.StatusMethodNotAllowed)
 				return
 			}
@@ -196,6 +231,9 @@ func (s *Server) Stop() error {
 		s.cancel()
 	}
 	s.mu.Lock()
+	if s.pool != nil {
+		s.pool.StopHeartbeat()
+	}
 	if s.acpDispatcher != nil && s.acpNotifChan != nil {
 		s.acpDispatcher.UnsubscribeNotifications(s.acpNotifChan)
 	}
@@ -207,6 +245,27 @@ func (s *Server) Stop() error {
 		return s.httpServer.Close()
 	}
 	return nil
+}
+
+// Pool retorna o SessionPool das 5 estações associado ao Studio.
+func (s *Server) Pool() *acp.SessionPool {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	return s.pool
+}
+
+// Orchestrator retorna o HandoffOrchestrator associado ao Studio.
+func (s *Server) Orchestrator() *acp.HandoffOrchestrator {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	return s.orchestrator
+}
+
+// AttachBridge retorna o multiplexador de terminais AttachBridge associado ao Studio.
+func (s *Server) AttachBridge() *acp.AttachBridge {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	return s.attachBridge
 }
 
 // ACPDispatcher retorna a instância do despachador ACP do servidor.
@@ -232,8 +291,29 @@ func (s *Server) SetACPDispatcher(d *acp.RPCDispatcher) {
 	}
 	s.acpDispatcher = d
 	s.acpHandler = acp.NewHTTPHandler(d)
-	if d != nil && s.acpNotifChan != nil {
-		d.SubscribeNotifications(s.acpNotifChan)
+	if d != nil {
+		s.pool = d.Pool()
+		s.orchestrator = d.Orchestrator()
+		s.attachBridge = d.AttachBridge()
+		if s.Aggregator != nil {
+			s.Aggregator.SetSessionPool(s.pool)
+		}
+		if s.pool != nil {
+			s.pool.AddStateListener(func(station string, state acp.SessionState, lastSeenAt time.Time) {
+				if s.Hub != nil {
+					s.Hub.Broadcast("station_state", map[string]any{
+						"type":       "station_state",
+						"station":    station,
+						"state":      string(state),
+						"lastSeenAt": lastSeenAt.UTC().Format(time.RFC3339),
+					})
+					s.Hub.NotifyChange()
+				}
+			})
+		}
+		if s.acpNotifChan != nil {
+			d.SubscribeNotifications(s.acpNotifChan)
+		}
 	}
 }
 

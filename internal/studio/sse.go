@@ -71,6 +71,25 @@ func (h *SSEHub) NotifyChange() {
 	}
 }
 
+// Broadcast envia uma mensagem SSE com tipo de evento customizado e payload serializado em JSON.
+func (h *SSEHub) Broadcast(eventName string, payload any) {
+	data, err := json.Marshal(payload)
+	if err != nil {
+		return
+	}
+	msg := fmt.Sprintf("event: %s\ndata: %s\n\n", eventName, string(data))
+
+	h.mu.Lock()
+	defer h.mu.Unlock()
+
+	for ch := range h.clients {
+		select {
+		case ch <- msg:
+		default:
+		}
+	}
+}
+
 func (h *SSEHub) checkAndBroadcast() {
 	snap, err := h.agg.GetSnapshot()
 	if err != nil {

@@ -124,6 +124,18 @@ func (b *AttachBridge) BroadcastLog(station string, entry SessionLogEntry) {
 		}
 	}
 	b.mu.Unlock()
+
+	// 3. Registra na telemetria de atividades do SDD se workspace configurado
+	if b.pool != nil {
+		wsDir := b.pool.WorkspaceDir()
+		if wsDir != "" {
+			toolName := entry.Type
+			if toolName == "" || toolName == "info" {
+				toolName = "exec"
+			}
+			_ = queue.RecordActivity(wsDir, station, toolName, entry.Message, entry.Message, "running")
+		}
+	}
 }
 
 // GetHistory retorna uma cópia defensiva do histórico de logs recente da estação.

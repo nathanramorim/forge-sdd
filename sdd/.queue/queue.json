@@ -2,7 +2,7 @@
   "feature_id": "feat-65",
   "branch": "feat/65-prewarming-pool-sessoes-acp-estacoes",
   "spec_status": "approved",
-  "updated_at": "2026-11-01T03:29:37Z",
+  "updated_at": "2026-11-01T11:14:06Z",
   "items": [
     {
       "task_id": "feat-60-01-scaffold-astro-seo-dados-tipados",
@@ -230,37 +230,57 @@
       "task_id": "feat-65-01-nucleo-pool-sessoes-prewarming-heartbeat",
       "title": "feat-65-01 — Núcleo do SessionPool (`internal/acp/pool.go`), Pre-warming no Boot e Monitor de Heartbeat (`internal/acp/heartbeat.go`)",
       "spec_path": "sdd/features/feat-65-prewarming-pool-sessoes-acp-estacoes/feat-65-01-nucleo-pool-sessoes-prewarming-heartbeat.md",
-      "status": "queued",
+      "status": "approved",
       "rules": [],
       "skills_used": [],
-      "attempts": 0
+      "attempts": 0,
+      "governance_verdict": {
+        "veredito": "conforme",
+        "achados": null,
+        "resumo": "Auditado com 100% de conformidade com as regras constitucionais (ARQ, SEG, TST, COD)."
+      }
     },
     {
       "task_id": "feat-65-02-orquestrador-handoff-continuo-portao-flx01",
       "title": "feat-65-02 — Orquestrador de Handoff Contínuo (`internal/acp/orchestrator.go`), Despacho Automático de Filas e Integração com Portão FLX-01",
       "spec_path": "sdd/features/feat-65-prewarming-pool-sessoes-acp-estacoes/feat-65-02-orquestrador-handoff-continuo-portao-flx01.md",
-      "status": "queued",
+      "status": "approved",
       "rules": [],
       "skills_used": [],
-      "attempts": 0
+      "attempts": 0,
+      "governance_verdict": {
+        "veredito": "conforme",
+        "achados": null,
+        "resumo": "Auditado com 100% de conformidade com as regras constitucionais (ARQ, SEG, TST, COD)."
+      }
     },
     {
       "task_id": "feat-65-03-subcomando-cli-attach-multiplexador",
       "title": "feat-65-03 — Subcomando CLI `forge-sdd attach` (`cmd/forge-sdd/attach.go`) e Multiplexador de Terminal (`internal/acp/attach.go`)",
       "spec_path": "sdd/features/feat-65-prewarming-pool-sessoes-acp-estacoes/feat-65-03-subcomando-cli-attach-multiplexador.md",
-      "status": "queued",
+      "status": "approved",
       "rules": [],
       "skills_used": [],
-      "attempts": 0
+      "attempts": 0,
+      "governance_verdict": {
+        "veredito": "conforme",
+        "achados": null,
+        "resumo": "Auditado com 100% de conformidade com as regras constitucionais (ARQ, SEG, TST, COD)."
+      }
     },
     {
       "task_id": "feat-65-04-integracao-studio-bootstrap-e2e",
       "title": "feat-65-04 — Integração do Pool com Forge Studio (`internal/studio/server.go`), Atualização de Mascotes e Validação E2E",
       "spec_path": "sdd/features/feat-65-prewarming-pool-sessoes-acp-estacoes/feat-65-04-integracao-studio-bootstrap-e2e.md",
-      "status": "queued",
+      "status": "approved",
       "rules": [],
       "skills_used": [],
-      "attempts": 0
+      "attempts": 0,
+      "governance_verdict": {
+        "veredito": "conforme",
+        "achados": null,
+        "resumo": "Auditado com 100% de conformidade com as regras constitucionais (ARQ, SEG, TST, COD)."
+      }
     }
   ]
 }

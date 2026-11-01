@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/forge-sdd/cli/internal/acp"
 	"github.com/forge-sdd/cli/internal/queue"
 )
 
@@ -68,12 +69,18 @@ type HandoffDTO struct {
 
 // Aggregator lê passivamente o filesystem SDD e monta o StudioSnapshot.
 type Aggregator struct {
-	Dir string
+	Dir  string
+	pool *acp.SessionPool
 }
 
 // NewAggregator cria uma nova instância de leitura passiva sobre o diretório do projeto.
 func NewAggregator(dir string) *Aggregator {
 	return &Aggregator{Dir: dir}
+}
+
+// SetSessionPool associa um SessionPool ao Aggregator para sincronização de estados ao vivo.
+func (a *Aggregator) SetSessionPool(pool *acp.SessionPool) {
+	a.pool = pool
 }
 
 // GetSnapshot constrói o snapshot completo em modo somente-leitura.
@@ -352,6 +359,36 @@ func (a *Aggregator) GetSnapshot() (*StudioSnapshot, error) {
 		}
 	}
 
+	// Sincroniza estados em tempo real com o SessionPool se presente
+	if a.pool != nil {
+		for i, st := range stations {
+			if sess, ok := a.pool.GetSessionByStation(st.ID); ok {
+				switch sess.State {
+				case acp.SessionStateProcessing:
+					if st.ID == queue.StationPlanner {
+						stations[i].MascotState = "thinking"
+					} else {
+						stations[i].MascotState = "working"
+					}
+					activeStation = st.ID
+					activeIdx = i
+					if sess.ActiveItemID != "" {
+						stations[i].CurrentFocus = "Executando: " + sess.ActiveItemID
+					}
+				case acp.SessionStateApprovalPending:
+					stations[i].MascotState = "approval"
+					activeStation = st.ID
+					activeIdx = i
+					if sess.ActiveItemID != "" {
+						stations[i].CurrentFocus = "Aguardando Revisão Humana (FLX-01): " + sess.ActiveItemID
+					}
+				case acp.SessionStateError:
+					stations[i].MascotState = "error"
+				}
+			}
+		}
+	}
+
 	handoff := &HandoffDTO{
 		FromStation: stations[activeIdx].ID,
 		ToStation:   stations[(activeIdx+1)%len(stations)].ID,
@@ -375,7 +412,12 @@ func (a *Aggregator) GetSnapshot() (*StudioSnapshot, error) {
 	// Gera StateHash para SSE (versões combinadas)
 	hasher := sha256.New()
 	for _, st := range stations {
-		fmt.Fprintf(hasher, "%s:%d:%d;", st.ID, st.Version, st.ActiveItems)
+		fmt.Fprintf(hasher, "%s:%d:%d:%s;", st.ID, st.Version, st.ActiveItems, st.MascotState)
+	}
+	if a.pool != nil {
+		for _, s := range a.pool.ListSessions() {
+			fmt.Fprintf(hasher, "pool:%s:%s:%s;", s.Station, s.State, s.ActiveItemID)
+		}
 	}
 	if legacyQ != nil {
 		fmt.Fprintf(hasher, "%s:%s;", legacyQ.FeatureID, legacyQ.UpdatedAt)

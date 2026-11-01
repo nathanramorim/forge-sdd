@@ -38,7 +38,12 @@ type SessionPool struct {
 	warmed          bool
 	heartbeat       *HeartbeatMonitor
 	orchestrator    *HandoffOrchestrator
+	listenersMu     sync.RWMutex
+	stateListeners  []SessionStateListener
 }
+
+// SessionStateListener define a assinatura de callback para mudanças de estado das sessões no pool.
+type SessionStateListener func(station string, state SessionState, lastSeenAt time.Time)
 
 // NewSessionPool instancia um SessionPool configurado com SessionManager e RPCDispatcher opcionais.
 func NewSessionPool(sm *SessionManager, dispatcher *RPCDispatcher) *SessionPool {
@@ -89,6 +94,31 @@ func (p *SessionPool) SetOrchestrator(o *HandoffOrchestrator) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 	p.orchestrator = o
+}
+
+// AddStateListener registra um listener para eventos de transição de estado das sessões.
+func (p *SessionPool) AddStateListener(l SessionStateListener) {
+	if l == nil {
+		return
+	}
+	p.listenersMu.Lock()
+	defer p.listenersMu.Unlock()
+	p.stateListeners = append(p.stateListeners, l)
+}
+
+func (p *SessionPool) notifyListeners(station string, state SessionState, lastSeenAt time.Time) {
+	p.listenersMu.RLock()
+	if len(p.stateListeners) == 0 {
+		p.listenersMu.RUnlock()
+		return
+	}
+	listeners := make([]SessionStateListener, len(p.stateListeners))
+	copy(listeners, p.stateListeners)
+	p.listenersMu.RUnlock()
+
+	for _, l := range listeners {
+		l(station, state, lastSeenAt)
+	}
 }
 
 // StartHeartbeat inicia o monitor de batimentos em background.
@@ -292,6 +322,7 @@ func (p *SessionPool) UpdateSessionState(sessionID string, state SessionState, a
 			Timestamp: now.Format(time.RFC3339),
 		})
 	}
+	p.notifyListeners(cloned.Station, cloned.State, cloned.LastSeenAt)
 
 	return cloned, nil
 }
@@ -345,6 +376,7 @@ func (p *SessionPool) TransitionState(station string, newState SessionState, rea
 			Timestamp: now.Format(time.RFC3339),
 		})
 	}
+	p.notifyListeners(cloned.Station, cloned.State, cloned.LastSeenAt)
 
 	return nil
 }

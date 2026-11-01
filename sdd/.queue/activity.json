@@ -1,5 +1,197 @@
 [
   {
+    "timestamp": "2026-11-01T11:14:06Z",
+    "station": "lider",
+    "tool": "orchestrate",
+    "action": "feat-65-04-integracao-studio-bootstrap-e2e",
+    "details": "Notificação ao Líder: Ciclo autônomo concluído com 100% de aprovação",
+    "status": "success"
+  },
+  {
+    "timestamp": "2026-11-01T11:14:06Z",
+    "station": "governance",
+    "tool": "governance",
+    "action": "audit (CONFORME)",
+    "details": "Auditoria da Governança aprovada: 0 violações",
+    "status": "success"
+  },
+  {
+    "timestamp": "2026-11-01T11:14:06Z",
+    "station": "governance",
+    "tool": "audit",
+    "action": "feat-65-04-integracao-studio-bootstrap-e2e",
+    "details": "Auditando conformidade constitucional",
+    "status": "running"
+  },
+  {
+    "timestamp": "2026-11-01T11:14:06Z",
+    "station": "governance",
+    "tool": "handoff",
+    "action": "builder -\u003e governance",
+    "details": "Handoff autônomo recebido: feat-65-04-integracao-studio-bootstrap-e2e pronto para Governança",
+    "status": "success"
+  },
+  {
+    "timestamp": "2026-11-01T11:14:06Z",
+    "station": "builder",
+    "tool": "portao_a",
+    "action": "go test -race ./... (PASS)",
+    "details": "Portão A 100% aprovado: liberado para Governança",
+    "status": "success"
+  },
+  {
+    "timestamp": "2026-11-01T11:14:05Z",
+    "station": "lider",
+    "tool": "orchestrate",
+    "action": "feat-65-03-subcomando-cli-attach-multiplexador",
+    "details": "Notificação ao Líder: Ciclo autônomo concluído com 100% de aprovação",
+    "status": "success"
+  },
+  {
+    "timestamp": "2026-11-01T11:14:05Z",
+    "station": "governance",
+    "tool": "governance",
+    "action": "audit (CONFORME)",
+    "details": "Auditoria da Governança aprovada: 0 violações",
+    "status": "success"
+  },
+  {
+    "timestamp": "2026-11-01T11:14:05Z",
+    "station": "governance",
+    "tool": "audit",
+    "action": "feat-65-03-subcomando-cli-attach-multiplexador",
+    "details": "Auditando conformidade constitucional",
+    "status": "running"
+  },
+  {
+    "timestamp": "2026-11-01T11:14:05Z",
+    "station": "builder",
+    "tool": "portao_a",
+    "action": "go test -race ./...",
+    "details": "Executando testes locais Portão A",
+    "status": "running"
+  },
+  {
+    "timestamp": "2026-11-01T11:14:05Z",
+    "station": "governance",
+    "tool": "handoff",
+    "action": "builder -\u003e governance",
+    "details": "Handoff autônomo recebido: feat-65-03-subcomando-cli-attach-multiplexador pronto para Governança",
+    "status": "success"
+  },
+  {
+    "timestamp": "2026-11-01T11:14:05Z",
+    "station": "builder",
+    "tool": "portao_a",
+    "action": "go test -race ./... (PASS)",
+    "details": "Portão A 100% aprovado: liberado para Governança",
+    "status": "success"
+  },
+  {
+    "timestamp": "2026-11-01T11:14:03Z",
+    "station": "lider",
+    "tool": "orchestrate",
+    "action": "feat-65-02-orquestrador-handoff-continuo-portao-flx01",
+    "details": "Notificação ao Líder: Ciclo autônomo concluído com 100% de aprovação",
+    "status": "success"
+  },
+  {
+    "timestamp": "2026-11-01T11:14:03Z",
+    "station": "governance",
+    "tool": "governance",
+    "action": "audit (CONFORME)",
+    "details": "Auditoria da Governança aprovada: 0 violações",
+    "status": "success"
+  },
+  {
+    "timestamp": "2026-11-01T11:14:03Z",
+    "station": "governance",
+    "tool": "audit",
+    "action": "feat-65-02-orquestrador-handoff-continuo-portao-flx01",
+    "details": "Auditando conformidade constitucional",
+    "status": "running"
+  },
+  {
+    "timestamp": "2026-11-01T11:14:03Z",
+    "station": "builder",
+    "tool": "portao_a",
+    "action": "go test -race ./...",
+    "details": "Executando testes locais Portão A",
+    "status": "running"
+  },
+  {
+    "timestamp": "2026-11-01T11:14:03Z",
+    "station": "governance",
+    "tool": "handoff",
+    "action": "builder -\u003e governance",
+    "details": "Handoff autônomo recebido: feat-65-02-orquestrador-handoff-continuo-portao-flx01 pronto para Governança",
+    "status": "success"
+  },
+  {
+    "timestamp": "2026-11-01T11:14:03Z",
+    "station": "builder",
+    "tool": "portao_a",
+    "action": "go test -race ./... (PASS)",
+    "details": "Portão A 100% aprovado: liberado para Governança",
+    "status": "success"
+  },
+  {
+    "timestamp": "2026-11-01T11:14:02Z",
+    "station": "lider",
+    "tool": "orchestrate",
+    "action": "feat-65-01-nucleo-pool-sessoes-prewarming-heartbeat",
+    "details": "Notificação ao Líder: Ciclo autônomo concluído com 100% de aprovação",
+    "status": "success"
+  },
+  {
+    "timestamp": "2026-11-01T11:14:02Z",
+    "station": "governance",
+    "tool": "governance",
+    "action": "audit (CONFORME)",
+    "details": "Auditoria da Governança aprovada: 0 violações",
+    "status": "success"
+  },
+  {
+    "timestamp": "2026-11-01T11:14:02Z",
+    "station": "governance",
+    "tool": "audit",
+    "action": "feat-65-01-nucleo-pool-sessoes-prewarming-heartbeat",
+    "details": "Auditando conformidade constitucional",
+    "status": "running"
+  },
+  {
+    "timestamp": "2026-11-01T11:14:01Z",
+    "station": "builder",
+    "tool": "portao_a",
+    "action": "go test -race ./...",
+    "details": "Executando testes locais Portão A",
+    "status": "running"
+  },
+  {
+    "timestamp": "2026-11-01T11:14:01Z",
+    "station": "governance",
+    "tool": "handoff",
+    "action": "builder -\u003e governance",
+    "details": "Handoff autônomo recebido: feat-65-01-nucleo-pool-sessoes-prewarming-heartbeat pronto para Governança",
+    "status": "success"
+  },
+  {
+    "timestamp": "2026-11-01T11:14:01Z",
+    "station": "builder",
+    "tool": "portao_a",
+    "action": "go test -race ./... (PASS)",
+    "details": "Portão A 100% aprovado: liberado para Governança",
+    "status": "success"
+  },
+  {
+    "timestamp": "2026-11-01T11:13:59Z",
+    "station": "builder",
+    "tool": "portao_a",
+    "action": "go test -race ./...",
+    "details": "Executando testes locais Portão A",
+    "status": "running"
+  },
+  {
     "timestamp": "2026-11-01T03:16:13Z",
     "station": "lider",
     "tool": "orchestrate",
@@ -205,198 +397,6 @@
     "tool": "handoff",
     "action": "builder -\u003e governance",
     "details": "Handoff autônomo recebido: discovery-64-protocolo-acp-comunicacao-estacoes-studio pronto para Governança",
-    "status": "success"
-  },
-  {
-    "timestamp": "2026-11-01T01:46:50Z",
-    "station": "builder",
-    "tool": "portao_a",
-    "action": "go test -race ./... (PASS)",
-    "details": "Portão A 100% aprovado: liberado para Governança",
-    "status": "success"
-  },
-  {
-    "timestamp": "2026-11-01T01:46:49Z",
-    "station": "builder",
-    "tool": "portao_a",
-    "action": "go test -race ./...",
-    "details": "Executando testes locais Portão A",
-    "status": "running"
-  },
-  {
-    "timestamp": "2026-11-01T01:46:49Z",
-    "station": "builder",
-    "tool": "handoff",
-    "action": "planner -\u003e builder",
-    "details": "Handoff autônomo recebido: discovery-64-protocolo-acp-comunicacao-estacoes-studio pronto para o Builder",
-    "status": "success"
-  },
-  {
-    "timestamp": "2026-11-01T01:46:49Z",
-    "station": "planner",
-    "tool": "planner",
-    "action": "discovery-64-protocolo-acp-comunicacao-estacoes-studio",
-    "details": "Tarefas fatiadas e critérios determinísticos prontos",
-    "status": "success"
-  },
-  {
-    "timestamp": "2026-11-01T01:46:48Z",
-    "station": "planner",
-    "tool": "planner",
-    "action": "discovery-64-protocolo-acp-comunicacao-estacoes-studio",
-    "details": "Fatiando tarefas e critérios determinísticos",
-    "status": "running"
-  },
-  {
-    "timestamp": "2026-11-01T01:46:48Z",
-    "station": "planner",
-    "tool": "handoff",
-    "action": "receive sdd/discovery/discovery-64-protocolo-acp-comunicacao-estacoes-studio.md",
-    "details": "Handoff recebido de PM/Architect: especificação pronta para fatiamento",
-    "status": "success"
-  },
-  {
-    "timestamp": "2026-11-01T01:46:48Z",
-    "station": "pm-architect",
-    "tool": "human_gate",
-    "action": "approve sdd/discovery/discovery-64-protocolo-acp-comunicacao-estacoes-studio.md",
-    "details": "Portão FLX-01 Superado: Spec aprovada pelo humano",
-    "status": "success"
-  },
-  {
-    "timestamp": "2026-11-01T01:38:10Z",
-    "station": "pm-architect",
-    "tool": "gate_flx01",
-    "action": "Aguardando Aprovação Humana",
-    "details": "discovery-64 pronto para Portão FLX-01",
-    "status": "running"
-  },
-  {
-    "timestamp": "2026-11-01T00:56:58Z",
-    "station": "lider",
-    "tool": "orchestrate",
-    "action": "discovery-63-studio-navegavel-aprovacao-spec",
-    "details": "Notificação ao Líder: Ciclo autônomo concluído com 100% de aprovação",
-    "status": "success"
-  },
-  {
-    "timestamp": "2026-11-01T00:56:58Z",
-    "station": "governance",
-    "tool": "governance",
-    "action": "audit (CONFORME)",
-    "details": "Auditoria da Governança aprovada: 0 violações",
-    "status": "success"
-  },
-  {
-    "timestamp": "2026-11-01T00:56:58Z",
-    "station": "governance",
-    "tool": "audit",
-    "action": "discovery-63-studio-navegavel-aprovacao-spec",
-    "details": "Auditando conformidade constitucional",
-    "status": "running"
-  },
-  {
-    "timestamp": "2026-11-01T00:37:38Z",
-    "station": "governance",
-    "tool": "handoff",
-    "action": "builder -\u003e governance",
-    "details": "Handoff concluído: discovery-63-studio-navegavel-aprovacao-spec transferido para governance",
-    "status": "success"
-  },
-  {
-    "timestamp": "2026-11-01T00:37:26Z",
-    "station": "builder",
-    "tool": "portao_a",
-    "action": "go test -race ./... (PASS)",
-    "details": "Portão A 100% aprovado: liberado para Governança",
-    "status": "success"
-  },
-  {
-    "timestamp": "2026-11-01T00:37:25Z",
-    "station": "builder",
-    "tool": "run_command",
-    "action": "go test -v -race ./...",
-    "details": "Executando testes locais (Portão A)",
-    "status": "running"
-  },
-  {
-    "timestamp": "2026-11-01T00:37:24Z",
-    "station": "builder",
-    "tool": "portao_a",
-    "action": "go test -race ./... (PASS)",
-    "details": "Portão A 100% aprovado: liberado para Governança",
-    "status": "success"
-  },
-  {
-    "timestamp": "2026-11-01T00:37:23Z",
-    "station": "builder",
-    "tool": "run_command",
-    "action": "go test -v -race ./...",
-    "details": "Executando testes locais (Portão A)",
-    "status": "running"
-  },
-  {
-    "timestamp": "2026-11-01T00:24:09Z",
-    "station": "builder",
-    "tool": "handoff",
-    "action": "planner -\u003e builder",
-    "details": "Handoff concluído: discovery-63-studio-navegavel-aprovacao-spec transferido para builder",
-    "status": "success"
-  },
-  {
-    "timestamp": "2026-11-01T00:18:08Z",
-    "station": "governance",
-    "tool": "gate",
-    "action": "Auditoria Camada B",
-    "details": "Parecer emitido: 100% Conforme",
-    "status": "success"
-  },
-  {
-    "timestamp": "2026-10-31T23:44:45Z",
-    "station": "lider",
-    "tool": "handoff",
-    "action": "governance -\u003e lider",
-    "details": "Handoff concluído: feat-63-spec-aprovada transferido para lider",
-    "status": "success"
-  },
-  {
-    "timestamp": "2026-10-31T23:44:41Z",
-    "station": "lider",
-    "tool": "handoff",
-    "action": "governance -\u003e lider",
-    "details": "Handoff concluído: feat-63-03-visualizador-spec-e-portao-flx01-sse transferido para lider",
-    "status": "success"
-  },
-  {
-    "timestamp": "2026-10-31T23:44:36Z",
-    "station": "planner",
-    "tool": "handoff",
-    "action": "receive sdd/discovery/discovery-63-studio-navegavel-aprovacao-spec.md",
-    "details": "Handoff recebido de PM/Architect: especificação pronta para fatiamento",
-    "status": "success"
-  },
-  {
-    "timestamp": "2026-10-31T23:44:36Z",
-    "station": "pm-architect",
-    "tool": "human_gate",
-    "action": "approve sdd/discovery/discovery-63-studio-navegavel-aprovacao-spec.md",
-    "details": "Portão FLX-01 Superado: Spec aprovada pelo humano",
-    "status": "success"
-  },
-  {
-    "timestamp": "2026-10-31T23:32:25Z",
-    "station": "governance",
-    "tool": "handoff",
-    "action": "builder -\u003e governance",
-    "details": "Handoff concluído: feat-63-03-visualizador-spec-e-portao-flx01-sse transferido para governance",
-    "status": "success"
-  },
-  {
-    "timestamp": "2026-10-31T23:32:08Z",
-    "station": "builder",
-    "tool": "handoff",
-    "action": "planner -\u003e builder",
-    "details": "Handoff concluído: feat-63-03-visualizador-spec-e-portao-flx01-sse transferido para builder",
     "status": "success"
   }
 ]
