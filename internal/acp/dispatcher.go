@@ -35,13 +35,13 @@ type RPCDispatcher struct {
 
 // NewDispatcher instancia um despachador com versão padrão e métodos base registrados.
 func NewDispatcher() *RPCDispatcher {
-	return NewDispatcherWithVersion("3.2.1-beta")
+	return NewDispatcherWithVersion("3.2.2-beta")
 }
 
 // NewDispatcherWithVersion instancia o despachador com versão configurada.
 func NewDispatcherWithVersion(version string) *RPCDispatcher {
 	if version == "" {
-		version = "3.2.1-beta"
+		version = "3.2.2-beta"
 	}
 	sm := NewSessionManager()
 	d := &RPCDispatcher{
