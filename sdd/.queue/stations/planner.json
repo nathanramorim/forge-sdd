@@ -1,7 +1,7 @@
 {
   "station": "planner",
-  "version": 5,
-  "updated_at": "2026-10-31T23:44:36Z",
+  "version": 6,
+  "updated_at": "2026-11-01T00:24:09Z",
   "processed_keys": [
     "ec503d128bbbbda2fb438fcc4b01f1a7",
     "2b80c15568f148f27c1fdf262428b1ef",
@@ -20,7 +20,7 @@
       "input_contract": "Spec Aprovada (Portão FLX-01)",
       "output_contract": "plan-63-studio-navegavel-aprovacao-spec.md",
       "created_at": "2026-10-31T22:49:54Z",
-      "updated_at": "2026-10-31T23:18:45Z"
+      "updated_at": "2026-11-01T00:24:09Z"
     },
     {
       "id": "feat-63-03-visualizador-spec-e-portao-flx01-sse",
@@ -41,14 +41,14 @@
       "title": "Planejamento: discovery-63-studio-navegavel-aprovacao-spec.md",
       "station": "planner",
       "operation": "handoff",
-      "status": "queued",
+      "status": "approved",
       "artifact_path": "sdd/discovery/discovery-63-studio-navegavel-aprovacao-spec.md",
       "idempotency_key": "e582bbb0296db938eace2f94d3d67252",
       "attempt": 1,
       "input_contract": "Spec Aprovada (Portão FLX-01)",
       "output_contract": "Plano de Tarefas e Quebra de Features",
       "created_at": "2026-10-31T23:44:36Z",
-      "updated_at": "2026-10-31T23:44:36Z"
+      "updated_at": "2026-11-01T00:24:09Z"
     }
   ]
 }

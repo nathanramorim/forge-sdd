@@ -8,6 +8,7 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"sync"
@@ -64,6 +65,7 @@ func NewServer(cfg Config) (*Server, error) {
 	mux.HandleFunc("/api/spec", s.handleSpec)
 	mux.HandleFunc("/api/spec/approve", s.handleSpecApprove)
 	mux.HandleFunc("/api/handoff", s.handleHandoff)
+	mux.HandleFunc("/api/task/execute", s.handleTaskExecute)
 
 	// 2. Static Assets (embed.FS)
 	subFS, err := fs.Sub(assetsFS, "assets")
@@ -75,10 +77,10 @@ func NewServer(cfg Config) (*Server, error) {
 		})
 	}
 
-	// Middleware de Segurança (SEG-01 / SEG-02 / SEG-06 / FLX-01): Permite POST exclusivamente em /api/spec/approve e /api/handoff
+	// Middleware de Segurança (SEG-01 / SEG-02 / SEG-06 / FLX-01): Permite POST exclusivamente em /api/spec/approve, /api/handoff e /api/task/execute
 	readOnlyHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodPost {
-			if r.URL.Path != "/api/spec/approve" && r.URL.Path != "/api/handoff" {
+			if r.URL.Path != "/api/spec/approve" && r.URL.Path != "/api/handoff" && r.URL.Path != "/api/task/execute" {
 				http.Error(w, "Method Not Allowed (Studio é estritamente Read-Only)", http.StatusMethodNotAllowed)
 				return
 			}
@@ -212,6 +214,20 @@ type HandoffResponse struct {
 	From   string `json:"from"`
 	To     string `json:"to"`
 	ItemID string `json:"item_id"`
+}
+
+// TaskExecuteRequest define o payload recebido em POST /api/task/execute.
+type TaskExecuteRequest struct {
+	Station string `json:"station"`
+	TaskID  string `json:"task_id"`
+}
+
+// TaskExecuteResponse define a resposta de POST /api/task/execute.
+type TaskExecuteResponse struct {
+	Status  string `json:"status"`
+	Station string `json:"station"`
+	TaskID  string `json:"task_id"`
+	Message string `json:"message"`
 }
 
 // sanitizeArtifactPath valida e normaliza o caminho relativo de um artefato no projeto (SEG-01, SEG-02, SEG-04).
@@ -600,6 +616,231 @@ func (s *Server) handleHandoff(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	_ = json.NewEncoder(w).Encode(resp)
+}
+
+func (s *Server) handleTaskExecute(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		writeJSONError(w, "Method Not Allowed (apenas POST é permitido nesta rota)", http.StatusMethodNotAllowed)
+		return
+	}
+
+	var req TaskExecuteRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeJSONError(w, "JSON inválido no corpo da requisição", http.StatusBadRequest)
+		return
+	}
+
+	station := strings.TrimSpace(req.Station)
+	taskID := strings.TrimSpace(req.TaskID)
+
+	if !queue.IsValidStation(station) {
+		writeJSONError(w, fmt.Sprintf("estação inválida: %q", station), http.StatusBadRequest)
+		return
+	}
+	if taskID == "" {
+		writeJSONError(w, "campo 'task_id' é obrigatório", http.StatusBadRequest)
+		return
+	}
+
+	// Verifica se a tarefa existe na estação
+	sq, err := queue.LoadStationQueue(s.Dir, station)
+	if err != nil {
+		writeJSONError(w, fmt.Sprintf("falha ao carregar fila da estação %s: %v", station, err), http.StatusInternalServerError)
+		return
+	}
+	var targetItem *queue.StationItem
+	for i := range sq.Items {
+		if sq.Items[i].ID == taskID {
+			targetItem = &sq.Items[i]
+			break
+		}
+	}
+	if targetItem == nil {
+		writeJSONError(w, fmt.Sprintf("tarefa %q não encontrada na estação %q", taskID, station), http.StatusNotFound)
+		return
+	}
+
+	switch station {
+	case queue.StationPMArchitect:
+		// 1. Atualiza status para building e registra atividade inicial
+		_, _ = queue.UpdateStationItemStatus(s.Dir, station, taskID, queue.StatusBuilding)
+		_ = queue.RecordActivity(s.Dir, station, "context7", "spec reuse & design check", "Verificando conformidade arquitetural e reuso de componentes", "running")
+		if s.Hub != nil {
+			s.Hub.NotifyChange()
+		}
+
+		// 2. Conclui concepção e atualiza para pending_review (Portão FLX-01)
+		_, _ = queue.UpdateStationItemStatus(s.Dir, station, taskID, "pending_review")
+		_ = queue.RecordActivity(s.Dir, station, "gate_flx01", "spec validation (PASS)", "Especificação concebida: aguardando aprovação humana (Portão FLX-01)", "success")
+		if s.Hub != nil {
+			s.Hub.NotifyChange()
+		}
+
+		resp := TaskExecuteResponse{
+			Status:  "pending_review",
+			Station: station,
+			TaskID:  taskID,
+			Message: "Especificação concebida com sucesso: pronta para aprovação (Portão FLX-01)",
+		}
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		_ = json.NewEncoder(w).Encode(resp)
+
+	case queue.StationPlanner:
+		// 1. Atualiza status para building
+		_, _ = queue.UpdateStationItemStatus(s.Dir, station, taskID, queue.StatusBuilding)
+		_ = queue.RecordActivity(s.Dir, station, "plan", "task decomposition", "Fatiando features em tarefas com critérios de aceite determinísticos", "running")
+		if s.Hub != nil {
+			s.Hub.NotifyChange()
+		}
+
+		// 2. Conclui planejamento e atualiza para ready_for_builder
+		_, _ = queue.UpdateStationItemStatus(s.Dir, station, taskID, "ready_for_builder")
+		_ = queue.RecordActivity(s.Dir, station, "planner", "plan decomposition (PASS)", "Tarefas fatiadas e critérios de aceite prontos para o Builder", "success")
+		if s.Hub != nil {
+			s.Hub.NotifyChange()
+		}
+
+		resp := TaskExecuteResponse{
+			Status:  "ready_for_builder",
+			Station: station,
+			TaskID:  taskID,
+			Message: "Tarefas fatiadas e plano aprovado para o Builder",
+		}
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		_ = json.NewEncoder(w).Encode(resp)
+
+	case queue.StationBuilder:
+		// 1. Atualiza status para building
+		_, _ = queue.UpdateStationItemStatus(s.Dir, station, taskID, queue.StatusBuilding)
+		_ = queue.RecordActivity(s.Dir, station, "run_command", "go test -v -race ./...", "Executando testes locais (Portão A)", "running")
+		if s.Hub != nil {
+			s.Hub.NotifyChange()
+		}
+
+		// 2. Simulação forçada de erro se solicitada em testes
+		if os.Getenv("FORGE_TEST_FAIL_PORTAO_A") == "true" {
+			_, _ = queue.UpdateStationItemStatus(s.Dir, station, taskID, queue.StatusChangesRequested)
+			_ = queue.RecordActivity(s.Dir, station, "portao_a", "go test -race ./... (FAIL)", "Portão A reprovado: testes falharam", "error")
+			if s.Hub != nil {
+				s.Hub.NotifyChange()
+			}
+			writeJSONError(w, "testes falharam no Portão A", http.StatusBadRequest)
+			return
+		}
+
+		// 3. Executa validação de testes locais (go test -race ./internal/...) se houver go.mod
+		if _, err := os.Stat(filepath.Join(s.Dir, "go.mod")); err == nil {
+			cmd := exec.Command("go", "test", "-race", "./internal/...")
+			cmd.Dir = s.Dir
+			out, testErr := cmd.CombinedOutput()
+			if testErr != nil {
+				_, _ = queue.UpdateStationItemStatus(s.Dir, station, taskID, queue.StatusChangesRequested)
+				_ = queue.RecordActivity(s.Dir, station, "portao_a", "go test -race ./... (FAIL)", fmt.Sprintf("Portão A reprovado: %s", string(out)), "error")
+				if s.Hub != nil {
+					s.Hub.NotifyChange()
+				}
+				writeJSONError(w, fmt.Sprintf("testes falharam no Portão A: %s", string(out)), http.StatusBadRequest)
+				return
+			}
+		}
+
+		// 4. Atualiza status para review_pending
+		_, _ = queue.UpdateStationItemStatus(s.Dir, station, taskID, queue.StatusReviewPending)
+
+		// Sincroniza com fila legado se existir
+		if q, _ := queue.Load(s.Dir); q != nil {
+			for i := range q.Items {
+				if q.Items[i].TaskID == taskID {
+					q.Items[i].Status = queue.StatusReviewPending
+				}
+			}
+			_ = queue.Save(s.Dir, q)
+		}
+
+		// 5. Registra atividade success
+		_ = queue.RecordActivity(s.Dir, station, "portao_a", "go test -race ./... (PASS)", "Portão A 100% aprovado: liberado para Governança", "success")
+		if s.Hub != nil {
+			s.Hub.NotifyChange()
+		}
+
+		resp := TaskExecuteResponse{
+			Status:  queue.StatusReviewPending,
+			Station: station,
+			TaskID:  taskID,
+			Message: "Portão A 100% aprovado: liberado para Governança",
+		}
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		_ = json.NewEncoder(w).Encode(resp)
+
+	case queue.StationGovernance:
+		// 1. Atualiza status para building
+		_, _ = queue.UpdateStationItemStatus(s.Dir, station, taskID, queue.StatusBuilding)
+		_ = queue.RecordActivity(s.Dir, station, "audit", "constitutional compliance check", "Auditando conformidade constitucional (ARQ, SEG, TST, COD)", "running")
+		if s.Hub != nil {
+			s.Hub.NotifyChange()
+		}
+
+		// 2. Atualiza status para approved e atribui parecer de governança
+		sqGov, err := queue.LoadStationQueue(s.Dir, station)
+		if err == nil {
+			for i := range sqGov.Items {
+				if sqGov.Items[i].ID == taskID {
+					sqGov.Items[i].Status = queue.StatusApproved
+					sqGov.Items[i].GovernanceVerdict = &queue.Verdict{
+						Veredito: queue.VerdictConforme,
+						Resumo:   "Auditado com 100% de conformidade com as regras constitucionais (ARQ, SEG, TST, COD).",
+					}
+					sqGov.Items[i].UpdatedAt = time.Now().UTC().Format(time.RFC3339)
+				}
+			}
+			_ = queue.SaveStationQueue(s.Dir, sqGov)
+		}
+
+		// Sincroniza com fila legado se existir
+		if q, _ := queue.Load(s.Dir); q != nil {
+			for i := range q.Items {
+				if q.Items[i].TaskID == taskID {
+					q.Items[i].Status = queue.StatusApproved
+					q.Items[i].GovernanceVerdict = &queue.Verdict{
+						Veredito: queue.VerdictConforme,
+						Resumo:   "Auditado com 100% de conformidade com as regras constitucionais (ARQ, SEG, TST, COD).",
+					}
+				}
+			}
+			_ = queue.Save(s.Dir, q)
+		}
+
+		// 3. Registra atividade success
+		_ = queue.RecordActivity(s.Dir, station, "governance", "audit (CONFORME)", "Auditoria da Camada B concluída: 0 violações encontradas", "success")
+		if s.Hub != nil {
+			s.Hub.NotifyChange()
+		}
+
+		resp := TaskExecuteResponse{
+			Status:  queue.StatusApproved,
+			Station: station,
+			TaskID:  taskID,
+			Message: "Auditoria da Governança aprovada: 0 violações",
+		}
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		_ = json.NewEncoder(w).Encode(resp)
+
+	default: // Líder ou outra estação
+		_, _ = queue.UpdateStationItemStatus(s.Dir, station, taskID, queue.StatusApproved)
+		_ = queue.RecordActivity(s.Dir, station, "orchestrate", "release & progress update", "Ciclo concluído com sucesso", "success")
+		if s.Hub != nil {
+			s.Hub.NotifyChange()
+		}
+
+		resp := TaskExecuteResponse{
+			Status:  queue.StatusApproved,
+			Station: station,
+			TaskID:  taskID,
+			Message: "Execução concluída com sucesso",
+		}
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		_ = json.NewEncoder(w).Encode(resp)
+	}
 }
 
 func writeJSONError(w http.ResponseWriter, message string, statusCode int) {

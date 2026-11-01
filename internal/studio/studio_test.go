@@ -1,9 +1,11 @@
 package studio_test
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"net/http"
+	"os"
 	"strings"
 	"testing"
 	"time"
@@ -287,4 +289,215 @@ func TestStudioState_GovernanceRecentActivityActivation(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestStudioServer_TaskExecute(t *testing.T) {
+	tempDir := t.TempDir()
+
+	// 1. Enfileira tarefas de teste
+	_, _, err := queue.EnqueueStationItem(tempDir, queue.StationItem{
+		ID:        "builder-task-01",
+		Title:     "Recurso Builder",
+		Station:   queue.StationBuilder,
+		Operation: "build",
+		Status:    queue.StatusQueued,
+	})
+	if err != nil {
+		t.Fatalf("erro ao enfileirar task no builder: %v", err)
+	}
+
+	_, _, err = queue.EnqueueStationItem(tempDir, queue.StationItem{
+		ID:        "pm-task-01",
+		Title:     "Spec PM",
+		Station:   queue.StationPMArchitect,
+		Operation: "spec",
+		Status:    queue.StatusQueued,
+	})
+	if err != nil {
+		t.Fatalf("erro ao enfileirar task no pm-architect: %v", err)
+	}
+
+	_, _, err = queue.EnqueueStationItem(tempDir, queue.StationItem{
+		ID:        "planner-task-01",
+		Title:     "Plan Decomposition",
+		Station:   queue.StationPlanner,
+		Operation: "plan",
+		Status:    queue.StatusQueued,
+	})
+	if err != nil {
+		t.Fatalf("erro ao enfileirar task no planner: %v", err)
+	}
+
+	_, _, err = queue.EnqueueStationItem(tempDir, queue.StationItem{
+		ID:        "gov-task-01",
+		Title:     "Governance Review",
+		Station:   queue.StationGovernance,
+		Operation: "review",
+		Status:    queue.StatusQueued,
+	})
+	if err != nil {
+		t.Fatalf("erro ao enfileirar task no governance: %v", err)
+	}
+
+	srv, err := studio.NewServer(studio.Config{
+		Dir:  tempDir,
+		Host: "127.0.0.1",
+		Port: 0,
+	})
+	if err != nil {
+		t.Fatalf("erro ao inicializar servidor: %v", err)
+	}
+	if err := srv.Listen(); err != nil {
+		t.Fatalf("erro ao abrir porta: %v", err)
+	}
+	go func() {
+		_ = srv.Start()
+	}()
+	defer func() {
+		_ = srv.Stop()
+	}()
+
+	url := srv.URL()
+
+	// 2. Testa validações de entrada
+	t.Run("invalid_station", func(t *testing.T) {
+		body := bytes.NewBufferString(`{"station": "invalid", "task_id": "builder-task-01"}`)
+		resp, err := http.Post(url+"/api/task/execute", "application/json", body)
+		if err != nil {
+			t.Fatalf("erro na requisição: %v", err)
+		}
+		defer resp.Body.Close()
+		if resp.StatusCode != http.StatusBadRequest {
+			t.Errorf("esperado status 400, recebido %d", resp.StatusCode)
+		}
+	})
+
+	t.Run("missing_task_id", func(t *testing.T) {
+		body := bytes.NewBufferString(`{"station": "builder", "task_id": ""}`)
+		resp, err := http.Post(url+"/api/task/execute", "application/json", body)
+		if err != nil {
+			t.Fatalf("erro na requisição: %v", err)
+		}
+		defer resp.Body.Close()
+		if resp.StatusCode != http.StatusBadRequest {
+			t.Errorf("esperado status 400, recebido %d", resp.StatusCode)
+		}
+	})
+
+	t.Run("task_not_found", func(t *testing.T) {
+		body := bytes.NewBufferString(`{"station": "builder", "task_id": "non-existent"}`)
+		resp, err := http.Post(url+"/api/task/execute", "application/json", body)
+		if err != nil {
+			t.Fatalf("erro na requisição: %v", err)
+		}
+		defer resp.Body.Close()
+		if resp.StatusCode != http.StatusNotFound {
+			t.Errorf("esperado status 404, recebido %d", resp.StatusCode)
+		}
+	})
+
+	// 3. Testa execução com sucesso no Builder (Portão A)
+	t.Run("builder_execution_success", func(t *testing.T) {
+		body := bytes.NewBufferString(`{"station": "builder", "task_id": "builder-task-01"}`)
+		resp, err := http.Post(url+"/api/task/execute", "application/json", body)
+		if err != nil {
+			t.Fatalf("erro na requisição: %v", err)
+		}
+		defer resp.Body.Close()
+		if resp.StatusCode != http.StatusOK {
+			t.Fatalf("esperado status 200, recebido %d", resp.StatusCode)
+		}
+
+		var execResp studio.TaskExecuteResponse
+		if err := json.NewDecoder(resp.Body).Decode(&execResp); err != nil {
+			t.Fatalf("falha ao decodificar resposta: %v", err)
+		}
+		if execResp.Status != queue.StatusReviewPending {
+			t.Errorf("esperado status review_pending, recebido %s", execResp.Status)
+		}
+
+		// Verifica na fila da estação
+		sq, err := queue.LoadStationQueue(tempDir, queue.StationBuilder)
+		if err != nil {
+			t.Fatalf("erro ao carregar fila: %v", err)
+		}
+		if len(sq.Items) == 0 || sq.Items[0].Status != queue.StatusReviewPending {
+			t.Errorf("esperado item status review_pending no builder.json, recebido %v", sq.Items)
+		}
+
+		// Verifica atividades registradas
+		acts, err := queue.LoadActivities(tempDir)
+		if err != nil {
+			t.Fatalf("erro ao carregar atividades: %v", err)
+		}
+		hasPortaoA := false
+		for _, a := range acts {
+			if a.Tool == "portao_a" && a.Status == "success" {
+				hasPortaoA = true
+				break
+			}
+		}
+		if !hasPortaoA {
+			t.Errorf("esperado registro de atividade de sucesso para portao_a")
+		}
+	})
+
+	// 4. Testa execução nas outras estações (pm-architect, planner, governance)
+	t.Run("pm_architect_execution", func(t *testing.T) {
+		body := bytes.NewBufferString(`{"station": "pm-architect", "task_id": "pm-task-01"}`)
+		resp, err := http.Post(url+"/api/task/execute", "application/json", body)
+		if err != nil {
+			t.Fatalf("erro na requisição: %v", err)
+		}
+		defer resp.Body.Close()
+		if resp.StatusCode != http.StatusOK {
+			t.Fatalf("esperado status 200, recebido %d", resp.StatusCode)
+		}
+	})
+
+	t.Run("planner_execution", func(t *testing.T) {
+		body := bytes.NewBufferString(`{"station": "planner", "task_id": "planner-task-01"}`)
+		resp, err := http.Post(url+"/api/task/execute", "application/json", body)
+		if err != nil {
+			t.Fatalf("erro na requisição: %v", err)
+		}
+		defer resp.Body.Close()
+		if resp.StatusCode != http.StatusOK {
+			t.Fatalf("esperado status 200, recebido %d", resp.StatusCode)
+		}
+	})
+
+	t.Run("governance_execution", func(t *testing.T) {
+		body := bytes.NewBufferString(`{"station": "governance", "task_id": "gov-task-01"}`)
+		resp, err := http.Post(url+"/api/task/execute", "application/json", body)
+		if err != nil {
+			t.Fatalf("erro na requisição: %v", err)
+		}
+		defer resp.Body.Close()
+		if resp.StatusCode != http.StatusOK {
+			t.Fatalf("esperado status 200, recebido %d", resp.StatusCode)
+		}
+
+		// Verifica veredito
+		sq, _ := queue.LoadStationQueue(tempDir, queue.StationGovernance)
+		if len(sq.Items) == 0 || sq.Items[0].GovernanceVerdict == nil {
+			t.Errorf("esperado GovernanceVerdict populado na conclusão da governança")
+		}
+	})
+
+	// 5. Testa simulação de erro no Builder
+	t.Run("builder_execution_failure", func(t *testing.T) {
+		os.Setenv("FORGE_TEST_FAIL_PORTAO_A", "true")
+		defer os.Unsetenv("FORGE_TEST_FAIL_PORTAO_A")
+
+		body := bytes.NewBufferString(`{"station": "builder", "task_id": "builder-task-01"}`)
+		resp, err := http.Post(url+"/api/task/execute", "application/json", body)
+		if err != nil {
+			t.Fatalf("erro na requisição: %v", err)
+		}
+		defer resp.Body.Close()
+		if resp.StatusCode != http.StatusBadRequest {
+			t.Errorf("esperado status 400 em falha simulada, recebido %d", resp.StatusCode)
+		}
+	})
 }

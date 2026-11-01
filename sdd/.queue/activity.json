@@ -1,5 +1,53 @@
 [
   {
+    "timestamp": "2026-11-01T00:37:38Z",
+    "station": "governance",
+    "tool": "handoff",
+    "action": "builder -\u003e governance",
+    "details": "Handoff concluído: discovery-63-studio-navegavel-aprovacao-spec transferido para governance",
+    "status": "success"
+  },
+  {
+    "timestamp": "2026-11-01T00:37:26Z",
+    "station": "builder",
+    "tool": "portao_a",
+    "action": "go test -race ./... (PASS)",
+    "details": "Portão A 100% aprovado: liberado para Governança",
+    "status": "success"
+  },
+  {
+    "timestamp": "2026-11-01T00:37:25Z",
+    "station": "builder",
+    "tool": "run_command",
+    "action": "go test -v -race ./...",
+    "details": "Executando testes locais (Portão A)",
+    "status": "running"
+  },
+  {
+    "timestamp": "2026-11-01T00:37:24Z",
+    "station": "builder",
+    "tool": "portao_a",
+    "action": "go test -race ./... (PASS)",
+    "details": "Portão A 100% aprovado: liberado para Governança",
+    "status": "success"
+  },
+  {
+    "timestamp": "2026-11-01T00:37:23Z",
+    "station": "builder",
+    "tool": "run_command",
+    "action": "go test -v -race ./...",
+    "details": "Executando testes locais (Portão A)",
+    "status": "running"
+  },
+  {
+    "timestamp": "2026-11-01T00:24:09Z",
+    "station": "builder",
+    "tool": "handoff",
+    "action": "planner -\u003e builder",
+    "details": "Handoff concluído: discovery-63-studio-navegavel-aprovacao-spec transferido para builder",
+    "status": "success"
+  },
+  {
     "timestamp": "2026-11-01T00:18:08Z",
     "station": "governance",
     "tool": "gate",

@@ -153,3 +153,50 @@ func TestSyncLegacyQueue(t *testing.T) {
 		t.Errorf("esperado ID task-01, recebido %s", builderSQ.Items[0].ID)
 	}
 }
+
+func TestUpdateStationItemStatus(t *testing.T) {
+	tempDir := t.TempDir()
+
+	item := queue.StationItem{
+		ID:        "builder-task-01",
+		Title:     "Implementar recurso",
+		Station:   queue.StationBuilder,
+		Operation: "build",
+		Status:    queue.StatusQueued,
+	}
+
+	_, _, err := queue.EnqueueStationItem(tempDir, item)
+	if err != nil {
+		t.Fatalf("erro ao enfileirar: %v", err)
+	}
+
+	// Atualiza para building
+	updated, err := queue.UpdateStationItemStatus(tempDir, queue.StationBuilder, "builder-task-01", queue.StatusBuilding)
+	if err != nil {
+		t.Fatalf("erro ao atualizar status: %v", err)
+	}
+	if updated.Status != queue.StatusBuilding {
+		t.Errorf("esperado status building, recebido %s", updated.Status)
+	}
+
+	// Atualiza para review_pending
+	updated2, err := queue.UpdateStationItemStatus(tempDir, queue.StationBuilder, "builder-task-01", queue.StatusReviewPending)
+	if err != nil {
+		t.Fatalf("erro ao atualizar status 2: %v", err)
+	}
+	if updated2.Status != queue.StatusReviewPending {
+		t.Errorf("esperado status review_pending, recebido %s", updated2.Status)
+	}
+
+	// Testa erro em item inexistente
+	_, err = queue.UpdateStationItemStatus(tempDir, queue.StationBuilder, "non-existent", queue.StatusApproved)
+	if err == nil {
+		t.Errorf("esperado erro para item inexistente")
+	}
+
+	// Testa erro em estação inválida
+	_, err = queue.UpdateStationItemStatus(tempDir, "invalid-station", "builder-task-01", queue.StatusApproved)
+	if err == nil {
+		t.Errorf("esperado erro para estação inválida")
+	}
+}

@@ -477,6 +477,13 @@ function formatTaskStatus(status) {
         bg: 'rgba(242, 166, 90, 0.08)',
         border: 'rgba(242, 166, 90, 0.3)'
       };
+    case 'ready_for_builder':
+      return {
+        text: '📋 PRONTO PARA O BUILDER',
+        color: '#38c6e8',
+        bg: 'rgba(56, 198, 232, 0.08)',
+        border: 'rgba(56, 198, 232, 0.3)'
+      };
     case 'review_pending':
     case 'pending_review':
     case 'approval':
@@ -893,6 +900,41 @@ function handleHandoffClick(btn) {
   window.sendHandoff(from, to, taskId, title, artifactPath);
 }
 
+async function executeTask(station, taskId) {
+  try {
+    showToast(`⚡ Executando ciclo obrigatório da estação ${station}...`);
+
+    const res = await fetch('/api/task/execute', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        station: station,
+        task_id: taskId
+      })
+    });
+
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      alert(`Erro na execução: ${errData.error || res.statusText}`);
+      return null;
+    }
+
+    const data = await res.json();
+    showToast(`✓ Execução concluída: ${data.message || data.status}`);
+
+    if (currentMode === 'LIVE') {
+      fetch('/api/state')
+        .then(r => r.json())
+        .then(applySnapshot)
+        .catch(console.error);
+    }
+    return data;
+  } catch (err) {
+    alert(`Falha na execução da tarefa: ${err.message}`);
+    return null;
+  }
+}
+
 function renderMarkdown(md) {
   if (!md) return '';
   const lines = md.split('\n');
@@ -1088,6 +1130,7 @@ window.closeSpecViewer = closeSpecViewer;
 window.approveSpec = approveSpec;
 window.sendHandoff = sendHandoff;
 window.handleHandoffClick = handleHandoffClick;
+window.executeTask = executeTask;
 window.renderMarkdown = renderMarkdown;
 window.renderMarkdownToHtml = renderMarkdown;
 
@@ -1167,11 +1210,63 @@ function renderStationDrawerContent(st) {
 
       const statusInfo = formatTaskStatus(it.status);
 
+      const isQueued = (it.status === 'queued');
+      const isBuilding = (it.status === 'building' || it.status === 'working' || it.status === 'in_progress');
+
+      let executeBtnLabel = '⚡ Executar Tarefa nesta Estação';
+      let buildingLabel = 'Executando...';
+      if (st.id === 'builder') {
+        executeBtnLabel = '⚡ Executar no Builder (Portão A)';
+        buildingLabel = 'Executando Testes...';
+      } else if (st.id === 'pm-architect') {
+        executeBtnLabel = '⚡ Conceber & Validar Spec (FLX-01)';
+        buildingLabel = 'Concebendo Spec...';
+      } else if (st.id === 'planner') {
+        executeBtnLabel = '⚡ Fatiar Tarefas & Planejar';
+        buildingLabel = 'Planejando Tarefas...';
+      } else if (st.id === 'governance') {
+        executeBtnLabel = '⚡ Auditar Conformidade Constitucional';
+        buildingLabel = 'Auditando Regras...';
+      }
+
+      let canExecute = isQueued;
+      if (st.id === 'governance' && (it.status === 'queued' || it.status === 'review_pending')) {
+        canExecute = true;
+      }
+
+      let isHandoffAllowed = false;
+      let handoffLockTooltip = '🔒 A tarefa precisa ser executada e validada nesta estação antes do handoff';
+
+      if (st.id === 'pm-architect') {
+        isHandoffAllowed = (it.status === 'pending_review' || it.status === 'approval' || it.status === 'approved' || it.status === 'done');
+        if (!isHandoffAllowed) {
+          handoffLockTooltip = '🔒 Requer concepção e validação de spec (Portão FLX-01) antes do handoff';
+        }
+      } else if (st.id === 'planner') {
+        isHandoffAllowed = (it.status === 'ready_for_builder' || it.status === 'approved' || it.status === 'done');
+        if (!isHandoffAllowed) {
+          handoffLockTooltip = '🔒 Requer fatiamento de tarefas com critérios de aceite antes de enviar ao Builder';
+        }
+      } else if (st.id === 'builder') {
+        isHandoffAllowed = (it.status === 'review_pending' || it.status === 'approved' || it.status === 'done');
+        if (!isHandoffAllowed) {
+          handoffLockTooltip = '🔒 Requer execução e testes aprovados (Portão A) antes de enviar para Governança';
+        }
+      } else if (st.id === 'governance') {
+        isHandoffAllowed = (it.status === 'approved' || it.status === 'done');
+        if (!isHandoffAllowed) {
+          handoffLockTooltip = '🔒 Requer emissão de veredito de conformidade da Governança antes de enviar ao Líder';
+        }
+      } else {
+        isHandoffAllowed = (it.status === 'approved' || it.status === 'done');
+      }
+
       return `
         <div class="drawer-task-card ${isSelected ? 'selected' : ''}" onclick="selectTaskInDrawer('${escapeHtml(it.id)}')">
           <div class="drawer-task-header">
             <span class="drawer-task-id">${escapeHtml(it.id)}</span>
             <div style="display:flex;align-items:center;gap:6px;">
+              ${isBuilding ? `<span class="chip" style="font-size:10px;padding:3px 9px;font-weight:700;color:var(--warn);border-color:var(--warn);background:rgba(242,166,90,0.1);"><span class="pulse-dot"></span> ${escapeHtml(buildingLabel)}</span>` : ''}
               <span class="chip" style="font-size:10px;padding:2px 8px;">tentativa #${it.attempt || 1}</span>
               <span class="chip" style="font-size:10px;padding:3px 9px;font-weight:700;color:${statusInfo.color};border-color:${statusInfo.border};background:${statusInfo.bg};">${escapeHtml(statusInfo.text)}</span>
             </div>
@@ -1203,11 +1298,22 @@ function renderStationDrawerContent(st) {
             <button class="inspect-spec-btn ide-link-btn" onclick="event.stopPropagation(); openSpecViewer('${escapeHtml(it.artifact_path || it.id)}')" title="Ver especificação técnica detalhada">
               Ver Spec
             </button>
-            ${handoffTarget ? `
-              <button class="btn-handoff ide-link-btn" data-from="${escapeHtml(st.id)}" data-to="${escapeHtml(handoffTarget)}" data-id="${escapeHtml(it.id)}" data-title="${escapeHtml(it.title || it.id)}" data-artifact="${escapeHtml(it.artifact_path || '')}" onclick="event.stopPropagation(); handleHandoffClick(this)" title="Transferir tarefa e artefato para a próxima estação">
-                ${escapeHtml(handoffBtnLabel)}
+            ${canExecute ? `
+              <button class="btn-execute ide-link-btn" onclick="event.stopPropagation(); executeTask('${escapeHtml(st.id)}', '${escapeHtml(it.id)}')" title="Executar ciclo obrigatório na estação ${escapeHtml(st.name || st.id)}">
+                ${escapeHtml(executeBtnLabel)}
               </button>
             ` : ''}
+            ${handoffTarget ? (
+              isHandoffAllowed ? `
+                <button class="btn-handoff ide-link-btn ready" data-from="${escapeHtml(st.id)}" data-to="${escapeHtml(handoffTarget)}" data-id="${escapeHtml(it.id)}" data-title="${escapeHtml(it.title || it.id)}" data-artifact="${escapeHtml(it.artifact_path || '')}" onclick="event.stopPropagation(); handleHandoffClick(this)" title="Transferir tarefa e artefato para a próxima estação">
+                  ${escapeHtml(handoffBtnLabel)}
+                </button>
+              ` : `
+                <button class="btn-handoff ide-link-btn disabled" disabled data-from="${escapeHtml(st.id)}" data-to="${escapeHtml(handoffTarget)}" data-id="${escapeHtml(it.id)}" data-title="${escapeHtml(it.title || it.id)}" data-artifact="${escapeHtml(it.artifact_path || '')}" title="${escapeHtml(handoffLockTooltip)}" style="opacity:0.45;cursor:not-allowed;filter:grayscale(60%);">
+                  ${escapeHtml(handoffBtnLabel)}
+                </button>
+              `
+            ) : ''}
           </div>
         </div>
       `;
