@@ -201,3 +201,11 @@ main
 | 66-02 | ../discovery/66-telemetria-detalhada-inspecao-e-reconciliacao/features/feat-66-02-modelo-telemetria-e-reconciliador-atividades-orfas.md | feat/66-telemetria-detalhada-inspecao-e-reconciliacao | 66-02 | ready |
 | 66-03 | ../discovery/66-telemetria-detalhada-inspecao-e-reconciliacao/features/feat-66-03-ui-studio-modal-inspecao-passo-a-passo.md | feat/66-telemetria-detalhada-inspecao-e-reconciliacao | 66-03 | ready |
 | 66-04 | ../discovery/66-telemetria-detalhada-inspecao-e-reconciliacao/features/feat-66-04-integracao-studio-e2e-validacao-constitucional.md | feat/66-telemetria-detalhada-inspecao-e-reconciliacao | 66-04 | ready |
+| 68-01 | ../discovery/68-sessoes-acp-fisicas-multi-agente/features/feat-68-01-config-adaptadores-e-subcomando-config.md | feat/68-sessoes-acp-fisicas-multi-agente | 68-01 | approved |
+| 68-06 | ../discovery/68-sessoes-acp-fisicas-multi-agente/features/feat-68-06-preflight-requisitos-dos-agentes.md | feat/68-sessoes-acp-fisicas-multi-agente | 68-06 | approved |
+| 68-02 | ../discovery/68-sessoes-acp-fisicas-multi-agente/features/feat-68-02-process-runner-processo-filho-por-estacao.md | feat/68-sessoes-acp-fisicas-multi-agente | 68-02 | approved |
+| 68-03 | ../discovery/68-sessoes-acp-fisicas-multi-agente/features/feat-68-03-pool-warmup-fisico-e-status-conectadas.md | feat/68-sessoes-acp-fisicas-multi-agente | 68-03 | approved |
+| 68-03b | ../discovery/68-sessoes-acp-fisicas-multi-agente/features/feat-68-03b-restart-backoff-e-failure-history.md | feat/68-sessoes-acp-fisicas-multi-agente | 68-03b | approved |
+| 68-06b | ../discovery/68-sessoes-acp-fisicas-multi-agente/features/feat-68-06b-selecao-interativa-e-instalacao-confirmada.md | feat/68-sessoes-acp-fisicas-multi-agente | 68-06b | approved |
+| 68-04 | ../discovery/68-sessoes-acp-fisicas-multi-agente/features/feat-68-04-studio-chip-conectadas-e-modo-leitura.md | feat/68-sessoes-acp-fisicas-multi-agente | 68-04 | approved |
+| 68-05 | ../discovery/68-sessoes-acp-fisicas-multi-agente/features/feat-68-05-studio-painel-monitoramento-de-falhas.md | feat/68-sessoes-acp-fisicas-multi-agente | 68-05 | approved |

@@ -1,7 +1,7 @@
 {
   "station": "builder",
-  "version": 112,
-  "updated_at": "2026-11-01T12:58:23Z",
+  "version": 120,
+  "updated_at": "2026-11-01T19:57:41Z",
   "processed_keys": [
     "04dd6a4a482341b00be27e785371421d",
     "33d97bb9e86c646a0e20326c4747115e",
@@ -28,7 +28,15 @@
     "f60ab01c151c338c7e7cbc0cec3c54db",
     "c753da84447fcdd11e44e83c86630b37",
     "f00d8f6ae46d26b4d5fa1c2436b2f8a4",
-    "b5298a3e4be8096b4400e7b5e87156ee"
+    "b5298a3e4be8096b4400e7b5e87156ee",
+    "412e9ddfc0ec8a5e442fca0d417cac82",
+    "f58af05599e9faac3e2472b9632ace77",
+    "4386706710a685b756178003562e1f95",
+    "724148b1a888c7857f3064583d026af1",
+    "eddd1137d4d0a98eb47708ce00599f1b",
+    "861227d1c5343c0117e6aa7f5cbe858a",
+    "13121617c2c1b829b2ff4845f4e1310d",
+    "0ccb64607f24ee2bef8a35bf98052766"
   ],
   "items": [
     {
@@ -89,7 +97,7 @@
       "idempotency_key": "04dd6a4a482341b00be27e785371421d",
       "attempt": 1,
       "created_at": "2026-10-31T19:01:43Z",
-      "updated_at": "2026-11-01T12:58:23Z",
+      "updated_at": "2026-11-01T19:57:41Z",
       "governance_verdict": {
         "veredito": "conforme",
         "achados": [],
@@ -106,7 +114,7 @@
       "idempotency_key": "33d97bb9e86c646a0e20326c4747115e",
       "attempt": 1,
       "created_at": "2026-10-31T19:01:43Z",
-      "updated_at": "2026-11-01T12:58:23Z",
+      "updated_at": "2026-11-01T19:57:41Z",
       "governance_verdict": {
         "veredito": "conforme",
         "achados": [],
@@ -123,7 +131,7 @@
       "idempotency_key": "4bcb62262edb16a745df3830d3fe21b0",
       "attempt": 1,
       "created_at": "2026-10-31T19:01:43Z",
-      "updated_at": "2026-11-01T12:58:23Z",
+      "updated_at": "2026-11-01T19:57:41Z",
       "governance_verdict": {
         "veredito": "conforme",
         "achados": [],
@@ -140,7 +148,7 @@
       "idempotency_key": "3338ca18db625cfcd59b244b54aca114",
       "attempt": 1,
       "created_at": "2026-10-31T19:01:43Z",
-      "updated_at": "2026-11-01T12:58:23Z",
+      "updated_at": "2026-11-01T19:57:41Z",
       "governance_verdict": {
         "veredito": "conforme",
         "achados": [],
@@ -157,7 +165,7 @@
       "idempotency_key": "ad81c77044070e1045668ed22a0ec03d",
       "attempt": 1,
       "created_at": "2026-10-31T19:01:43Z",
-      "updated_at": "2026-11-01T12:58:23Z",
+      "updated_at": "2026-11-01T19:57:41Z",
       "governance_verdict": {
         "veredito": "conforme",
         "achados": [],
@@ -174,7 +182,7 @@
       "idempotency_key": "2fd406e026a1cd1de7ad6395d253dde9",
       "attempt": 1,
       "created_at": "2026-10-31T19:01:43Z",
-      "updated_at": "2026-11-01T12:58:23Z",
+      "updated_at": "2026-11-01T19:57:41Z",
       "governance_verdict": {
         "veredito": "conforme",
         "achados": [],
@@ -191,7 +199,7 @@
       "idempotency_key": "7e0c592e29a9582e986e721a7d147368",
       "attempt": 1,
       "created_at": "2026-10-31T19:01:43Z",
-      "updated_at": "2026-11-01T12:58:23Z",
+      "updated_at": "2026-11-01T19:57:41Z",
       "governance_verdict": {
         "veredito": "conforme",
         "achados": [],
@@ -208,7 +216,7 @@
       "idempotency_key": "03b73f4b171862db159ea3b237214565",
       "attempt": 1,
       "created_at": "2026-10-31T19:01:43Z",
-      "updated_at": "2026-11-01T12:58:23Z",
+      "updated_at": "2026-11-01T19:57:41Z",
       "governance_verdict": {
         "veredito": "conforme",
         "achados": [],
@@ -225,7 +233,7 @@
       "idempotency_key": "70f337bb9809011de85a3726a19b2790",
       "attempt": 1,
       "created_at": "2026-10-31T22:08:37Z",
-      "updated_at": "2026-11-01T12:58:23Z",
+      "updated_at": "2026-11-01T19:57:41Z",
       "governance_verdict": {
         "veredito": "conforme",
         "achados": [],
@@ -242,7 +250,7 @@
       "idempotency_key": "9891050b015ddf7235513ac7ed302c26",
       "attempt": 1,
       "created_at": "2026-10-31T22:08:37Z",
-      "updated_at": "2026-11-01T12:58:23Z",
+      "updated_at": "2026-11-01T19:57:41Z",
       "governance_verdict": {
         "veredito": "conforme",
         "achados": [],
@@ -259,7 +267,7 @@
       "idempotency_key": "27568114bf39dd36d87032c43c6aa5a2",
       "attempt": 1,
       "created_at": "2026-10-31T22:08:38Z",
-      "updated_at": "2026-11-01T12:58:23Z",
+      "updated_at": "2026-11-01T19:57:41Z",
       "governance_verdict": {
         "veredito": "conforme",
         "achados": [],
@@ -326,7 +334,7 @@
       "idempotency_key": "f7da640abccdf6425fea29d25b20e8e3",
       "attempt": 1,
       "created_at": "2026-11-01T02:07:14Z",
-      "updated_at": "2026-11-01T12:58:23Z"
+      "updated_at": "2026-11-01T19:57:41Z"
     },
     {
       "id": "discovery-65-prewarming-pool-sessoes-acp-estacoes",
@@ -366,7 +374,7 @@
       "idempotency_key": "401742645f4eec08aebd4509ecc999e6",
       "attempt": 0,
       "created_at": "2026-11-01T03:29:21Z",
-      "updated_at": "2026-11-01T12:58:23Z",
+      "updated_at": "2026-11-01T19:57:41Z",
       "governance_verdict": {
         "veredito": "conforme",
         "achados": null,
@@ -383,7 +391,7 @@
       "idempotency_key": "9a860ce97bf30bfa13d813f8b9de1806",
       "attempt": 0,
       "created_at": "2026-11-01T03:29:37Z",
-      "updated_at": "2026-11-01T12:58:23Z",
+      "updated_at": "2026-11-01T19:57:41Z",
       "governance_verdict": {
         "veredito": "conforme",
         "achados": null,
@@ -400,7 +408,7 @@
       "idempotency_key": "83b1cca875ccf1ed8e262efbdfceb5e9",
       "attempt": 0,
       "created_at": "2026-11-01T03:29:37Z",
-      "updated_at": "2026-11-01T12:58:23Z",
+      "updated_at": "2026-11-01T19:57:41Z",
       "governance_verdict": {
         "veredito": "conforme",
         "achados": null,
@@ -417,7 +425,7 @@
       "idempotency_key": "54002726f538a916de6ddc9b4c1c83dd",
       "attempt": 0,
       "created_at": "2026-11-01T03:29:37Z",
-      "updated_at": "2026-11-01T12:58:23Z",
+      "updated_at": "2026-11-01T19:57:41Z",
       "governance_verdict": {
         "veredito": "conforme",
         "achados": null,
@@ -479,6 +487,102 @@
       "output_contract": "Código Implementado e Testes Locais (Portão A)",
       "created_at": "2026-11-01T03:30:26Z",
       "updated_at": "2026-11-01T11:14:06Z"
+    },
+    {
+      "id": "68-01",
+      "title": "feat-68-01 — Configuração de Adaptadores ACP e Subcomando `forge-sdd config`",
+      "station": "builder",
+      "operation": "build",
+      "status": "queued",
+      "artifact_path": "sdd/discovery/68-sessoes-acp-fisicas-multi-agente/features/feat-68-01-config-adaptadores-e-subcomando-config.md",
+      "idempotency_key": "412e9ddfc0ec8a5e442fca0d417cac82",
+      "attempt": 0,
+      "created_at": "2026-11-01T19:57:30Z",
+      "updated_at": "2026-11-01T19:57:41Z"
+    },
+    {
+      "id": "68-06",
+      "title": "feat-68-06 — Detecção de Requisitos dos Agentes (`internal/preflight`) e Reuso em doctor/Studio",
+      "station": "builder",
+      "operation": "build",
+      "status": "queued",
+      "artifact_path": "sdd/discovery/68-sessoes-acp-fisicas-multi-agente/features/feat-68-06-preflight-requisitos-dos-agentes.md",
+      "idempotency_key": "f58af05599e9faac3e2472b9632ace77",
+      "attempt": 0,
+      "created_at": "2026-11-01T19:57:38Z",
+      "updated_at": "2026-11-01T19:57:41Z"
+    },
+    {
+      "id": "68-02",
+      "title": "feat-68-02 — ProcessRunner: Processo Filho Real por Estação",
+      "station": "builder",
+      "operation": "build",
+      "status": "queued",
+      "artifact_path": "sdd/discovery/68-sessoes-acp-fisicas-multi-agente/features/feat-68-02-process-runner-processo-filho-por-estacao.md",
+      "idempotency_key": "4386706710a685b756178003562e1f95",
+      "attempt": 0,
+      "created_at": "2026-11-01T19:57:38Z",
+      "updated_at": "2026-11-01T19:57:41Z"
+    },
+    {
+      "id": "68-03",
+      "title": "feat-68-03 — SessionPool com Warmup Físico, Falha Parcial e Status de Conectadas",
+      "station": "builder",
+      "operation": "build",
+      "status": "queued",
+      "artifact_path": "sdd/discovery/68-sessoes-acp-fisicas-multi-agente/features/feat-68-03-pool-warmup-fisico-e-status-conectadas.md",
+      "idempotency_key": "724148b1a888c7857f3064583d026af1",
+      "attempt": 0,
+      "created_at": "2026-11-01T19:57:39Z",
+      "updated_at": "2026-11-01T19:57:41Z"
+    },
+    {
+      "id": "68-03b",
+      "title": "feat-68-03b — Restart Automático com Backoff Exponencial e FailureHistory",
+      "station": "builder",
+      "operation": "build",
+      "status": "queued",
+      "artifact_path": "sdd/discovery/68-sessoes-acp-fisicas-multi-agente/features/feat-68-03b-restart-backoff-e-failure-history.md",
+      "idempotency_key": "eddd1137d4d0a98eb47708ce00599f1b",
+      "attempt": 0,
+      "created_at": "2026-11-01T19:57:39Z",
+      "updated_at": "2026-11-01T19:57:41Z"
+    },
+    {
+      "id": "68-06b",
+      "title": "feat-68-06b — Seleção Interativa de Agentes (init/update) e Instalação com Confirmação",
+      "station": "builder",
+      "operation": "build",
+      "status": "queued",
+      "artifact_path": "sdd/discovery/68-sessoes-acp-fisicas-multi-agente/features/feat-68-06b-selecao-interativa-e-instalacao-confirmada.md",
+      "idempotency_key": "861227d1c5343c0117e6aa7f5cbe858a",
+      "attempt": 0,
+      "created_at": "2026-11-01T19:57:40Z",
+      "updated_at": "2026-11-01T19:57:41Z"
+    },
+    {
+      "id": "68-04",
+      "title": "feat-68-04 — Studio: Chip \"x de 5 conectadas\", Estação em Erro e Modo Leitura",
+      "station": "builder",
+      "operation": "build",
+      "status": "queued",
+      "artifact_path": "sdd/discovery/68-sessoes-acp-fisicas-multi-agente/features/feat-68-04-studio-chip-conectadas-e-modo-leitura.md",
+      "idempotency_key": "13121617c2c1b829b2ff4845f4e1310d",
+      "attempt": 0,
+      "created_at": "2026-11-01T19:57:40Z",
+      "updated_at": "2026-11-01T19:57:41Z"
+    },
+    {
+      "id": "68-05",
+      "title": "feat-68-05 — Studio: Painel de Monitoramento de Falhas das Estações",
+      "station": "builder",
+      "operation": "build",
+      "status": "queued",
+      "artifact_path": "sdd/discovery/68-sessoes-acp-fisicas-multi-agente/features/feat-68-05-studio-painel-monitoramento-de-falhas.md",
+      "idempotency_key": "0ccb64607f24ee2bef8a35bf98052766",
+      "attempt": 0,
+      "created_at": "2026-11-01T19:57:41Z",
+      "updated_at": "2026-11-01T19:57:41Z"
     }
   ]
 }

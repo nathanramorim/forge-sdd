@@ -1,8 +1,8 @@
 {
-  "feature_id": "feat-65",
-  "branch": "feat/65-prewarming-pool-sessoes-acp-estacoes",
+  "feature_id": "feat-68",
+  "branch": "feat/68-sessoes-acp-fisicas-multi-agente",
   "spec_status": "approved",
-  "updated_at": "2026-11-01T12:58:23Z",
+  "updated_at": "2026-11-01T19:57:41Z",
   "items": [
     {
       "task_id": "feat-60-01-scaffold-astro-seo-dados-tipados",
@@ -281,6 +281,119 @@
         "achados": null,
         "resumo": "Auditado com 100% de conformidade com as regras constitucionais (ARQ, SEG, TST, COD)."
       }
+    },
+    {
+      "task_id": "68-01",
+      "title": "feat-68-01 — Configuração de Adaptadores ACP e Subcomando `forge-sdd config`",
+      "spec_path": "sdd/discovery/68-sessoes-acp-fisicas-multi-agente/features/feat-68-01-config-adaptadores-e-subcomando-config.md",
+      "status": "queued",
+      "rules": [
+        "ARQ-01",
+        "ARQ-03",
+        "ARQ-06",
+        "SEG-01",
+        "TST-02"
+      ],
+      "skills_used": [],
+      "attempts": 0
+    },
+    {
+      "task_id": "68-06",
+      "title": "feat-68-06 — Detecção de Requisitos dos Agentes (`internal/preflight`) e Reuso em doctor/Studio",
+      "spec_path": "sdd/discovery/68-sessoes-acp-fisicas-multi-agente/features/feat-68-06-preflight-requisitos-dos-agentes.md",
+      "status": "queued",
+      "rules": [
+        "SEG-01",
+        "SEG-03",
+        "DUP-03",
+        "TST-04"
+      ],
+      "skills_used": [],
+      "attempts": 0
+    },
+    {
+      "task_id": "68-02",
+      "title": "feat-68-02 — ProcessRunner: Processo Filho Real por Estação",
+      "spec_path": "sdd/discovery/68-sessoes-acp-fisicas-multi-agente/features/feat-68-02-process-runner-processo-filho-por-estacao.md",
+      "status": "queued",
+      "rules": [
+        "ARQ-04",
+        "SEG-03",
+        "SEG-05",
+        "COD-03",
+        "TST-04"
+      ],
+      "skills_used": [],
+      "attempts": 0
+    },
+    {
+      "task_id": "68-03",
+      "title": "feat-68-03 — SessionPool com Warmup Físico, Falha Parcial e Status de Conectadas",
+      "spec_path": "sdd/discovery/68-sessoes-acp-fisicas-multi-agente/features/feat-68-03-pool-warmup-fisico-e-status-conectadas.md",
+      "status": "queued",
+      "rules": [
+        "ARQ-11",
+        "DUP-03",
+        "COD-01",
+        "TST-03"
+      ],
+      "skills_used": [],
+      "attempts": 0
+    },
+    {
+      "task_id": "68-03b",
+      "title": "feat-68-03b — Restart Automático com Backoff Exponencial e FailureHistory",
+      "spec_path": "sdd/discovery/68-sessoes-acp-fisicas-multi-agente/features/feat-68-03b-restart-backoff-e-failure-history.md",
+      "status": "queued",
+      "rules": [
+        "ARQ-11",
+        "SEG-05",
+        "COD-01",
+        "TST-04"
+      ],
+      "skills_used": [],
+      "attempts": 0
+    },
+    {
+      "task_id": "68-06b",
+      "title": "feat-68-06b — Seleção Interativa de Agentes (init/update) e Instalação com Confirmação",
+      "spec_path": "sdd/discovery/68-sessoes-acp-fisicas-multi-agente/features/feat-68-06b-selecao-interativa-e-instalacao-confirmada.md",
+      "status": "queued",
+      "rules": [
+        "SEG-01",
+        "SEG-03",
+        "ARQ-05",
+        "TST-04"
+      ],
+      "skills_used": [],
+      "attempts": 0
+    },
+    {
+      "task_id": "68-04",
+      "title": "feat-68-04 — Studio: Chip \"x de 5 conectadas\", Estação em Erro e Modo Leitura",
+      "spec_path": "sdd/discovery/68-sessoes-acp-fisicas-multi-agente/features/feat-68-04-studio-chip-conectadas-e-modo-leitura.md",
+      "status": "queued",
+      "rules": [
+        "ARQ-10",
+        "FLX-04",
+        "TST-05"
+      ],
+      "skills_used": [],
+      "attempts": 0
+    },
+    {
+      "task_id": "68-05",
+      "title": "feat-68-05 — Studio: Painel de Monitoramento de Falhas das Estações",
+      "spec_path": "sdd/discovery/68-sessoes-acp-fisicas-multi-agente/features/feat-68-05-studio-painel-monitoramento-de-falhas.md",
+      "status": "queued",
+      "rules": [
+        "ARQ-03",
+        "ARQ-10",
+        "SEG-05",
+        "COD-05"
+      ],
+      "skills_used": [],
+      "attempts": 0
     }
   ]
 }
