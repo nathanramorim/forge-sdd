@@ -42,6 +42,11 @@
           <span id="headerNotificationCount" class="notification-badge mono">0</span>
         </button>
       </div>
+      <!-- Alternador de Visão Simples (Leigo) vs Técnica (Dev) -->
+      <div class="view-layer-toggle" id="viewLayerToggle" title="Alternar entre visão simples e técnica">
+        <button id="btnViewSimple" class="view-layer-btn active" onclick="setViewMode('simple')">VISÃO SIMPLES</button>
+        <button id="btnViewTech" class="view-layer-btn" onclick="setViewMode('tech')">VISÃO TÉCNICA</button>
+      </div>
       <div class="mode-toggle">
         <button id="btnLive" class="mode-btn active" onclick="setStudioMode('LIVE')">LIVE</button>
         <button id="btnDemo" class="mode-btn" onclick="setStudioMode('DEMO')">DEMO</button>
@@ -51,21 +56,66 @@
 
   <!-- Container Principal -->
   <main class="studio-wrap">
-    <!-- Trilho de Handoff Ativo (CA-06) -->
-    <section class="handoff-box" aria-label="Trilho de Handoff">
-      <div class="handoff-route">
-        <span class="handoff-pill mono" id="hoFrom">lider</span>
-        <div class="handoff-pipe" aria-hidden="true">
-          <div class="handoff-packet"></div>
+    <!-- Esteira Visual de Progresso do Ciclo (Substitui a faixa confusa por esteira contínua) -->
+    <section class="handoff-box pipeline-stepper" id="pipelineStepper" aria-label="Esteira Visual de Progresso e Handoff">
+      <div class="stepper-track" id="pipelineStepperTrack">
+        <div class="step-node active" id="step-node-lider" data-station="lider">
+          <div class="step-num">1</div>
+          <div class="step-info">
+            <span class="step-title">Coordenação</span>
+            <span class="step-subtitle simple-only">O Líder</span>
+            <span class="step-subtitle tech-only mono">lider</span>
+          </div>
+          <span class="step-state-badge" id="step-badge-lider">Disponível</span>
         </div>
-        <span class="handoff-pill mono" id="hoTo">pm-architect</span>
+        <div class="step-connector" id="conn-lider-pm"></div>
+        <div class="step-node" id="step-node-pm" data-station="pm-architect">
+          <div class="step-num">2</div>
+          <div class="step-info">
+            <span class="step-title">Planejamento</span>
+            <span class="step-subtitle simple-only">PM & Planejador</span>
+            <span class="step-subtitle tech-only mono">pm-architect</span>
+          </div>
+          <span class="step-state-badge" id="step-badge-pm">Disponível</span>
+        </div>
+        <div class="step-connector" id="conn-pm-builder"></div>
+        <div class="step-node" id="step-node-builder" data-station="builder">
+          <div class="step-num">3</div>
+          <div class="step-info">
+            <span class="step-title">Construção</span>
+            <span class="step-subtitle simple-only">Construtor</span>
+            <span class="step-subtitle tech-only mono">builder</span>
+          </div>
+          <span class="step-state-badge" id="step-badge-builder">Disponível</span>
+        </div>
+        <div class="step-connector" id="conn-builder-gov"></div>
+        <div class="step-node" id="step-node-gov" data-station="governance">
+          <div class="step-num">4</div>
+          <div class="step-info">
+            <span class="step-title">Qualidade</span>
+            <span class="step-subtitle simple-only">Auditor</span>
+            <span class="step-subtitle tech-only mono">governance</span>
+          </div>
+          <span class="step-state-badge" id="step-badge-gov">Aprovado</span>
+        </div>
       </div>
-      <div class="handoff-payload">
-        <b>Transição & Contrato</b>
-        <span id="hoPayload">Discovery & Especificação</span>
-      </div>
-      <div class="chip" id="hoGate">
-        <i style="--o:var(--ok)"></i>Portão Validado
+
+      <div class="stepper-footer">
+        <div class="handoff-route tech-only">
+          <span class="handoff-pill mono" id="hoFrom">lider</span>
+          <div class="handoff-pipe" aria-hidden="true">
+            <div class="handoff-packet"></div>
+          </div>
+          <span class="handoff-pill mono" id="hoTo">pm-architect</span>
+        </div>
+        <div class="handoff-payload">
+          <b class="simple-only">Foco Atual da Equipe</b>
+          <b class="tech-only">Transição & Contrato</b>
+          <span id="hoPayload">Discovery & Especificação</span>
+        </div>
+        <div class="chip" id="hoGate">
+          <i style="--o:var(--ok)"></i>Portão Validado
+        </div>
       </div>
     </section>
 

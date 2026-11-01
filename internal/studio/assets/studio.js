@@ -351,6 +351,73 @@ let currentFilteredActivities = [];
 let currentActivityIndex = -1;
 let consoleFilter = 'all';
 
+let currentViewMode = 'simple';
+try {
+  currentViewMode = localStorage.getItem('forge_studio_view_mode') || 'simple';
+} catch (_) {}
+
+function formatFriendlyState(mascotState) {
+  switch (mascotState) {
+    case 'working': return 'Trabalhando';
+    case 'thinking': return 'Planejando';
+    case 'searching': return 'Pesquisando';
+    case 'approval': return 'Aguardando Aprovação';
+    case 'error': return 'Atenção';
+    case 'done':
+    case 'finished': return 'Concluído';
+    case 'standby':
+    case 'idle':
+    case 'ready':
+    default:
+      return 'Disponível';
+  }
+}
+
+function formatFriendlyLogAction(act) {
+  if (!act) return 'Processando etapa';
+  const tool = (act.tool || '').toLowerCase();
+  const action = (act.action || '').toLowerCase();
+
+  if (tool === 'read_file') return 'Consultou documentação e arquivos de especificação';
+  if (tool === 'write_file' || tool === 'edit_file') return 'Atualizou arquivos e código da solução';
+  if (tool === 'run_command') return 'Executou comandos e testes automatizados';
+  if (tool === 'gate') return 'Validou critérios de qualidade e conformidade';
+  if (tool === 'audit') return 'Realizou auditoria de conformidade independente';
+  if (tool === 'handoff') return 'Transferiu a tarefa para a próxima etapa da esteira';
+  if (action.includes('orchestrate')) return 'Organizou ciclo de desenvolvimento e equipes';
+  if (action.includes('spec') || action.includes('discovery')) return 'Elaborou especificação e desenho arquitetural';
+  if (action.includes('plan')) return 'Fatiou especificação em tarefas estruturadas';
+  if (action.includes('build') || action.includes('code')) return 'Construiu código e suíte de testes';
+  return act.action || 'Executando atividade do projeto';
+}
+
+window.setViewMode = function(mode, save = true) {
+  currentViewMode = mode;
+  if (save) {
+    try {
+      localStorage.setItem('forge_studio_view_mode', mode);
+    } catch (_) {}
+  }
+  const btnSimple = document.getElementById('btnViewSimple');
+  const btnTech = document.getElementById('btnViewTech');
+  if (btnSimple && btnTech) {
+    if (mode === 'simple') {
+      btnSimple.classList.add('active');
+      btnTech.classList.remove('active');
+      document.body.classList.remove('view-tech');
+      document.body.classList.add('view-simple');
+    } else {
+      btnTech.classList.add('active');
+      btnSimple.classList.remove('active');
+      document.body.classList.remove('view-simple');
+      document.body.classList.add('view-tech');
+    }
+  }
+  if (lastSnapshot) {
+    applySnapshot(lastSnapshot);
+  }
+};
+
 window.filterConsole = function(station) {
   consoleFilter = station;
   document.querySelectorAll('#consoleFilterTabs .console-tab').forEach(tab => {
@@ -375,13 +442,15 @@ function renderConsoleLogs(activities) {
     return;
   }
 
+  const isSimple = (currentViewMode === 'simple');
+
   container.innerHTML = currentFilteredActivities.map((act, idx) => {
     const stMeta = {
-      'lider': { name: '01. LÍDER', color: '#f2a65a' },
-      'pm-architect': { name: '02. PM/ARQ', color: '#8aa4ff' },
-      'planner': { name: '03. PLAN', color: '#c9a7ff' },
-      'builder': { name: '04. BUILDER', color: '#4fd1b5' },
-      'governance': { name: '05. GOV', color: '#ff8a5c' }
+      'lider': { name: isSimple ? '01. COORDENADOR' : '01. LÍDER', color: '#f2a65a' },
+      'pm-architect': { name: isSimple ? '02. PLANEJADOR' : '02. PM/ARQ', color: '#8aa4ff' },
+      'planner': { name: isSimple ? '02. PLANEJADOR' : '03. PLAN', color: '#c9a7ff' },
+      'builder': { name: isSimple ? '03. CONSTRUTOR' : '04. BUILDER', color: '#4fd1b5' },
+      'governance': { name: isSimple ? '04. QUALIDADE' : '05. GOV', color: '#ff8a5c' }
     }[act.station] || { name: act.station, color: '#4f8ef7' };
 
     let timeStr = '--:--:--';
@@ -394,6 +463,7 @@ function renderConsoleLogs(activities) {
       }
     }
     const statusClass = (act.status === 'running' || act.status === 'working') ? 'running' : (act.status === 'error' ? 'error' : 'done');
+    const displayAction = isSimple ? formatFriendlyLogAction(act) : (act.action || '');
 
     return `
       <div class="log-row" role="button" tabindex="0" onclick="openActivityModal(${idx})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openActivityModal(${idx});}" title="Clique para ver detalhes do log e execução">
@@ -401,12 +471,12 @@ function renderConsoleLogs(activities) {
         <span class="log-station" style="color:${stMeta.color};">
           <span class="tool-chip-dot" style="--c:${stMeta.color};"></span>${escapeHtml(stMeta.name)}
         </span>
-        <span class="log-tool">${escapeHtml(act.tool || 'tool')}</span>
+        <span class="log-tool tech-only">${escapeHtml(act.tool || 'tool')}</span>
         <span class="log-action">
-          <b>${escapeHtml(act.action || '')}</b>
-          ${act.details ? `<span class="detail-hint">${escapeHtml(act.details)}</span>` : ''}
+          <b>${escapeHtml(displayAction)}</b>
+          ${act.details ? `<span class="detail-hint tech-only">${escapeHtml(act.details)}</span>` : ''}
         </span>
-        <span class="log-status ${statusClass}">${escapeHtml(act.status || 'done')}</span>
+        <span class="log-status ${statusClass}">${escapeHtml(isSimple ? (statusClass === 'running' ? 'Em Ação' : 'Concluído') : (act.status || 'done'))}</span>
         <span class="log-inspect-btn" title="Inspecionar"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg></span>
       </div>
     `;
@@ -2264,18 +2334,26 @@ function applySnapshot(snap) {
   currentActivities = snap.recent_activity || [];
   renderConsoleLogs(currentActivities);
 
-  // Handoff Bar
+  // Handoff Bar & Esteira de Progresso
   const ho = snap.last_handoff;
   if (ho) {
-    document.getElementById('hoFrom').textContent = ho.from_station;
-    document.getElementById('hoTo').textContent = ho.to_station;
+    const hoFromEl = document.getElementById('hoFrom');
+    const hoToEl = document.getElementById('hoTo');
+    if (hoFromEl) hoFromEl.textContent = ho.from_station;
+    if (hoToEl) hoToEl.textContent = ho.to_station;
     const isSpecHandoff = ho.from_station === 'pm-architect' || ho.to_station === 'pm-architect' || (ho.gate && ho.gate.includes('FLX-01'));
-    if (isSpecHandoff) {
-      document.getElementById('hoPayload').innerHTML = `${escapeHtml(ho.payload)} • <a href="javascript:void(0)" onclick="openSpecViewer('sdd/discovery/discovery-63-studio-navegavel-aprovacao-spec.md')" style="color:var(--accent);text-decoration:underline;font-weight:700;">Ver Spec (FLX-01)</a>`;
-    } else {
-      document.getElementById('hoPayload').textContent = ho.payload;
+    const hoPayloadEl = document.getElementById('hoPayload');
+    if (hoPayloadEl) {
+      if (isSpecHandoff) {
+        hoPayloadEl.innerHTML = `${escapeHtml(ho.payload)} • <a href="javascript:void(0)" onclick="openSpecViewer('sdd/discovery/discovery-63-studio-navegavel-aprovacao-spec.md')" style="color:var(--accent);text-decoration:underline;font-weight:700;">Ver Spec (FLX-01)</a>`;
+      } else {
+        hoPayloadEl.textContent = ho.payload;
+      }
     }
-    document.getElementById('hoGate').innerHTML = `<i></i>${ho.gate}`;
+    const hoGateEl = document.getElementById('hoGate');
+    if (hoGateEl) {
+      hoGateEl.innerHTML = `<i></i>${ho.gate}`;
+    }
 
     // Dispara animação entre os mascotes 3D caso haja nova transição detectada no snapshot (feat-67-03)
     const currentHandoffKey = `${ho.from_station}->${ho.to_station}:${ho.payload || ''}`;
@@ -2284,6 +2362,9 @@ function applySnapshot(snap) {
     }
     lastHandledHandoffKey = currentHandoffKey;
   }
+
+  // Atualiza Esteira Visual de Progresso do Ciclo (1. Coordenação -> 2. Planejamento -> 3. Construção -> 4. Qualidade)
+  updatePipelineStepper(snap);
 
   // Limpa elementos obsoletos de layouts anteriores se existirem no DOM
   const oldConception = document.getElementById('stage-conception-unified');
@@ -2297,13 +2378,14 @@ function applySnapshot(snap) {
 
   // Grid das 4 estações canônicas da esteira (unificando PM + Arquiteto + Planejador)
   const grid = document.getElementById('stationsGrid');
+  const isSimple = (currentViewMode === 'simple');
 
   const pmSt = snap.stations.find(s => s.id === 'pm-architect') || snap.stations[1] || {};
   const planSt = snap.stations.find(s => s.id === 'planner') || snap.stations[2] || {};
   const isConceptionActive = (snap.active_station === 'pm-architect' || snap.active_station === 'planner');
 
   let conceptionState = 'standby';
-  let conceptionFocus = 'Sessões iniciadas • Prontas para Discovery e Plano';
+  let conceptionFocus = isSimple ? 'Pronto para desenhar planos e dividir tarefas' : 'Sessões iniciadas • Prontas para Discovery e Plano';
   let conceptionExec = pmSt.executing_task || planSt.executing_task || null;
   let conceptionAction = pmSt.current_action || planSt.current_action || '';
   if (pmSt.mascot_state && pmSt.mascot_state !== 'idle' && pmSt.mascot_state !== 'standby') {
@@ -2317,12 +2399,32 @@ function applySnapshot(snap) {
   const conceptionItems = sortItemsNewestFirst([...(pmSt.items || []), ...(planSt.items || [])]);
   const conceptionTools = Array.from(new Set([...(pmSt.active_tools || ['read_file', 'write_file', 'context7']), ...(planSt.active_tools || ['gate', 'edit_file'])]));
 
+  const liderSt = snap.stations.find(s => s.id === 'lider') || snap.stations[0] || {};
+  const builderSt = snap.stations.find(s => s.id === 'builder') || snap.stations[3] || {};
+  const govSt = snap.stations.find(s => s.id === 'governance') || snap.stations[4] || {};
+
   const unifiedStations = [
-    snap.stations.find(s => s.id === 'lider') || snap.stations[0],
+    {
+      id: 'lider',
+      name: isSimple ? '01. Coordenador' : '01. O Líder',
+      role: isSimple ? 'Organiza os pedidos e direciona a equipe' : (liderSt.role || 'Orquestrador · Maestro do Ciclo'),
+      color: '#f2a65a',
+      mark: 'ring',
+      mascot_state: liderSt.mascot_state || 'standby',
+      current_focus: isSimple ? 'Pronto para receber pedidos e direcionar o ciclo' : (liderSt.current_focus || 'Sessão iniciada • Monitorando ciclo, filas e portões'),
+      executing_task: liderSt.executing_task || null,
+      current_action: liderSt.current_action || '',
+      active_tools: liderSt.active_tools || [],
+      input_contract: liderSt.input_contract || 'Demanda do Humano / Parecer da Governança',
+      output_contract: liderSt.output_contract || 'Demanda Estruturada → Estação 02',
+      version: liderSt.version || 0,
+      items: liderSt.items || [],
+      session_id: 'sess-01-lider'
+    },
     {
       id: 'pm-architect',
-      name: '02. PM, Arquiteto & Planejador',
-      role: 'Concepção da Spec & Fatiamento em Tarefas',
+      name: isSimple ? '02. Planejador' : '02. PM, Arquiteto & Planejador',
+      role: isSimple ? 'Desenha a solução técnica e divide em tarefas' : 'Concepção da Spec & Fatiamento em Tarefas',
       color: '#8aa4ff',
       mark: 'diamond',
       mascot_state: conceptionState,
@@ -2339,8 +2441,40 @@ function applySnapshot(snap) {
       pm_state: pmSt.mascot_state || 'standby',
       planner_state: planSt.mascot_state || 'standby'
     },
-    snap.stations.find(s => s.id === 'builder') || snap.stations[3],
-    snap.stations.find(s => s.id === 'governance') || snap.stations[4],
+    {
+      id: 'builder',
+      name: isSimple ? '03. Construtor' : '03. Fila de Builders',
+      role: isSimple ? 'Escreve o código e executa testes da solução' : (builderSt.role || 'Implementação em Contexto Isolado'),
+      color: '#4fd1b5',
+      mark: 'wave',
+      mascot_state: builderSt.mascot_state || 'standby',
+      current_focus: isSimple ? 'Pronto para construir novas funcionalidades' : (builderSt.current_focus || 'Sessão iniciada • Pronta para codificação e testes'),
+      executing_task: builderSt.executing_task || null,
+      current_action: builderSt.current_action || '',
+      active_tools: builderSt.active_tools || [],
+      input_contract: builderSt.input_contract || 'Task da Fila + Rules Mapeadas',
+      output_contract: builderSt.output_contract || 'Código + Testes + Portão A (PASS)',
+      version: builderSt.version || 0,
+      items: builderSt.items || [],
+      session_id: 'sess-04-builder'
+    },
+    {
+      id: 'governance',
+      name: isSimple ? '04. Controle de Qualidade' : '04. Analista de Governança',
+      role: isSimple ? 'Confere conformidade, regras e segurança' : (govSt.role || 'Auditoria Somente Leitura (Camada B)'),
+      color: '#ff8a5c',
+      mark: 'tri',
+      mascot_state: govSt.mascot_state || 'standby',
+      current_focus: isSimple ? 'Pronto para inspecionar regras e segurança' : (govSt.current_focus || 'Sessão iniciada • Pronta para inspeção de conformidade'),
+      executing_task: govSt.executing_task || null,
+      current_action: govSt.current_action || '',
+      active_tools: govSt.active_tools || [],
+      input_contract: govSt.input_contract || 'Diff + Spec + IDs da Constituição',
+      output_contract: govSt.output_contract || 'Laudo JSON → Líder (ou ↺ Builder)',
+      version: govSt.version || 0,
+      items: govSt.items || [],
+      session_id: 'sess-05-governance'
+    }
   ].filter(Boolean);
 
   unifiedStations.forEach((st, idx) => {
@@ -2358,7 +2492,7 @@ function applySnapshot(snap) {
     let toolStripHtml = '';
     if (tools.length > 0) {
       toolStripHtml = `
-        <div class="tool-strip">
+        <div class="tool-strip tech-only">
           ${tools.map((t, tIdx) => {
             const isToolRunning = tIdx === 0 && (st.mascot_state === 'working' || st.mascot_state === 'thinking' || st.mascot_state === 'searching' || st.mascot_state === 'approval');
             return `
@@ -2374,7 +2508,7 @@ function applySnapshot(snap) {
     let actionRowHtml = '';
     if (st.current_action) {
       actionRowHtml = `
-        <div class="executing-action-row" title="${escapeHtml(st.current_action)}">
+        <div class="executing-action-row tech-only" title="${escapeHtml(st.current_action)}">
           <span class="act-label">CMD:</span><b>${escapeHtml(st.current_action)}</b>
         </div>
       `;
@@ -2400,7 +2534,7 @@ function applySnapshot(snap) {
           <div class="executing-header">
             <span class="pulse-dot"></span>
             <span class="executing-label">${shortLabel}</span>
-            <span class="executing-id" title="${escapeHtml(execTask.id)}">${escapeHtml(execTask.id)}</span>
+            <span class="executing-id tech-only" title="${escapeHtml(execTask.id)}">${escapeHtml(execTask.id)}</span>
           </div>
           <div class="executing-title" title="${escapeHtml(execTask.title || st.current_focus)}">${escapeHtml(execTask.title || st.current_focus)}</div>
           ${actionRowHtml}
@@ -2425,9 +2559,10 @@ function applySnapshot(snap) {
           <div class="executing-header">
             <span class="idle-dot"></span>
             <span class="executing-label">STATUS</span>
-            <span class="executing-id" style="color:var(--muted);font-size:9.5px;">STANDBY</span>
+            <span class="executing-id tech-only" style="color:var(--muted);font-size:9.5px;">STANDBY</span>
+            <span class="executing-id simple-only" style="color:var(--ok);font-size:9.5px;">DISPONÍVEL</span>
           </div>
-          <div class="executing-title muted" title="${escapeHtml(st.current_focus || 'Sessão iniciada • Pronta para tarefas')}">${escapeHtml(st.current_focus || 'Sessão iniciada • Pronta para tarefas')}</div>
+          <div class="executing-title muted" title="${escapeHtml(st.current_focus || 'Pronto para receber tarefas')}">${escapeHtml(st.current_focus || 'Pronto para receber tarefas')}</div>
           ${actionRowHtml}
           ${toolStripHtml}
         </div>
@@ -2493,19 +2628,25 @@ function applySnapshot(snap) {
         <div class="conception-phases-strip stage-phase-badge">
           <div class="phase-pill ${st.pm_state !== 'standby' ? 'active' : ''}">
             <span class="phase-pill-step">1</span>
-            <span>Fase Concepção 1/2</span>
+            <span class="simple-only">Desenho da Solução</span>
+            <span class="tech-only">Fase Concepção 1/2</span>
           </div>
           <span class="phase-arrow">➔</span>
           <div class="phase-pill ${st.planner_state !== 'standby' ? 'active' : ''}">
             <span class="phase-pill-step">2</span>
-            <span>Fase Planejamento 2/2</span>
+            <span class="simple-only">Divisão em Tarefas</span>
+            <span class="tech-only">Fase Planejamento 2/2</span>
           </div>
         </div>
       `;
     }
 
+    const friendlyStateText = formatFriendlyState(st.mascot_state);
     const sessId = st.session_id || (st.id === 'lider' ? 'sess-01-lider' : (st.id === 'pm-architect' ? 'sess-02-pm / sess-03-planner' : (st.id === 'builder' ? 'sess-04-builder' : 'sess-05-governance')));
-    const sessionChipHtml = `<span class="session-badge" id="sess-badge-${st.id}"><span class="live-dot" style="display:inline-block;width:5px;height:5px;border-radius:50%;background:#3ecf8e;margin-right:4px;box-shadow:0 0 5px #3ecf8e;"></span>Sessão: ${escapeHtml(sessId)} (Pronta)</span>`;
+    const sessionChipHtml = `
+      <span class="session-badge tech-only" id="sess-badge-${st.id}"><span class="live-dot" style="display:inline-block;width:5px;height:5px;border-radius:50%;background:#3ecf8e;margin-right:4px;box-shadow:0 0 5px #3ecf8e;"></span>Sessão: ${escapeHtml(sessId)} (Pronta)</span>
+      <span class="simple-status-badge simple-only"><span class="live-dot" style="display:inline-block;width:5px;height:5px;border-radius:50%;background:#3ecf8e;margin-right:4px;box-shadow:0 0 5px #3ecf8e;"></span>${escapeHtml(friendlyStateText)}</span>
+    `;
 
     let card = document.getElementById(`station-card-${st.id}`);
     if (!card) {
@@ -2533,7 +2674,7 @@ function applySnapshot(snap) {
             <p class="role">${st.role}</p>
             <div id="station-badges-${st.id}" style="display:flex;align-items:center;gap:6px;margin-top:4px;flex-wrap:wrap;">
               ${sessionChipHtml}
-              <span class="chip" id="chip-${st.id}"><i style="--o:${st.color}"></i>${st.mascot_state}</span>
+              <span class="chip tech-only" id="chip-${st.id}"><i style="--o:${st.color}"></i>${st.mascot_state}</span>
               ${specBadgeHtml}
             </div>
             ${phaseBadgeHtml}
@@ -2542,7 +2683,7 @@ function applySnapshot(snap) {
 
         <div id="exec-wrap-${st.id}">${execHtml}</div>
 
-        <div class="io-strip">
+        <div class="io-strip tech-only">
           <div class="io-item"><span>Recebe</span><b>${st.input_contract}</b></div>
           <div class="io-item"><span>Entrega</span><b>${st.output_contract}</b></div>
         </div>
@@ -2550,7 +2691,7 @@ function applySnapshot(snap) {
         <div class="queue-items-box">
           <div class="queue-header-row">
             <span class="mono" style="font-size:10px;color:var(--muted);font-weight:700;">FILA</span>
-            <span id="queue-ver-${st.id}" class="chip mono" style="font-size:9px;padding:1px 5px;">v${st.version}</span>
+            <span id="queue-ver-${st.id}" class="chip mono tech-only" style="font-size:9px;padding:1px 5px;">v${st.version}</span>
           </div>
           <div id="queue-items-${st.id}">${itemsHtml}</div>
         </div>
@@ -2579,7 +2720,7 @@ function applySnapshot(snap) {
       if (badgesContainer) {
         badgesContainer.innerHTML = `
           ${sessionChipHtml}
-          <span class="chip" id="chip-${st.id}"><i style="--o:${st.color}"></i>${st.mascot_state}</span>
+          <span class="chip tech-only" id="chip-${st.id}"><i style="--o:${st.color}"></i>${st.mascot_state}</span>
           ${specBadgeHtml}
         `;
       } else {
@@ -2919,8 +3060,74 @@ function runDemoSimulation() {
   }, 2200);
 }
 
+// Atualiza nós e conectores da esteira contínua (1. Coordenação -> 2. Planejamento -> 3. Construção -> 4. Qualidade)
+function updatePipelineStepper(snap) {
+  if (!snap) return;
+  const active = snap.active_station || 'lider';
+  const nodes = {
+    'lider': document.getElementById('step-node-lider'),
+    'pm': document.getElementById('step-node-pm'),
+    'builder': document.getElementById('step-node-builder'),
+    'gov': document.getElementById('step-node-gov'),
+  };
+  const conns = {
+    'lider-pm': document.getElementById('conn-lider-pm'),
+    'pm-builder': document.getElementById('conn-pm-builder'),
+    'builder-gov': document.getElementById('conn-builder-gov'),
+  };
+  const badges = {
+    'lider': document.getElementById('step-badge-lider'),
+    'pm': document.getElementById('step-badge-pm'),
+    'builder': document.getElementById('step-badge-builder'),
+    'gov': document.getElementById('step-badge-gov'),
+  };
+
+  const stationOrder = ['lider', 'pm-architect', 'planner', 'builder', 'governance'];
+  let currentIdx = stationOrder.indexOf(active);
+  if (currentIdx === -1) currentIdx = 0;
+
+  // 1. Coordenação (Líder)
+  if (nodes.lider) {
+    nodes.lider.className = 'step-node ' + (active === 'lider' ? 'active' : (currentIdx > 0 ? 'completed' : ''));
+    if (badges.lider) badges.lider.textContent = (active === 'lider' ? 'Em Ação' : (currentIdx > 0 ? 'Concluído' : 'Disponível'));
+  }
+  if (conns['lider-pm']) {
+    conns['lider-pm'].className = 'step-connector ' + (currentIdx > 0 ? 'completed' : (active === 'lider' ? 'active' : ''));
+  }
+
+  // 2. Planejamento (PM & Arquiteto + Planejador)
+  const isPMActive = (active === 'pm-architect' || active === 'planner');
+  const isPMPassed = (currentIdx > 2);
+  if (nodes.pm) {
+    nodes.pm.className = 'step-node ' + (isPMActive ? 'active' : (isPMPassed ? 'completed' : ''));
+    if (badges.pm) badges.pm.textContent = (isPMActive ? 'Planejando' : (isPMPassed ? 'Concluído' : 'Disponível'));
+  }
+  if (conns['pm-builder']) {
+    conns['pm-builder'].className = 'step-connector ' + (isPMPassed ? 'completed' : (isPMActive ? 'active' : ''));
+  }
+
+  // 3. Construção (Builder)
+  const isBuilderActive = (active === 'builder');
+  const isBuilderPassed = (currentIdx > 3);
+  if (nodes.builder) {
+    nodes.builder.className = 'step-node ' + (isBuilderActive ? 'active' : (isBuilderPassed ? 'completed' : ''));
+    if (badges.builder) badges.builder.textContent = (isBuilderActive ? 'Construindo' : (isBuilderPassed ? 'Concluído' : 'Disponível'));
+  }
+  if (conns['builder-gov']) {
+    conns['builder-gov'].className = 'step-connector ' + (isBuilderPassed ? 'completed' : (isBuilderActive ? 'active' : ''));
+  }
+
+  // 4. Qualidade (Governança)
+  const isGovActive = (active === 'governance');
+  if (nodes.gov) {
+    nodes.gov.className = 'step-node ' + (isGovActive ? 'active' : '');
+    if (badges.gov) badges.gov.textContent = (isGovActive ? 'Auditando' : 'Aprovado');
+  }
+}
+
 // Inicialização
 document.addEventListener('DOMContentLoaded', () => {
+  setViewMode(currentViewMode, false);
   fetch('/api/state')
     .then(r => r.json())
     .then(applySnapshot)
