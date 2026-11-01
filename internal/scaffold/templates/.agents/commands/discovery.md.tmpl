@@ -16,15 +16,17 @@ O **Líder** (`.agents/roles/lider.md`) coordena a concepção junto ao **Produc
 **Nomenclatura e ID do Discovery:** Siga a lógica única descrita em `sdd/memory/naming-convention.md` (aplicada ao prefixo `discovery-`).
 
 **Entrega:**
-Gere três arquivos em `sdd/discovery/`:
-- `discovery-ID-<nome>.md`: Visão Produto/Negócio.
-- `criteria-ID-<nome>.md`: Visão Técnica/Engenharia (com `Modelo do módulo`, `O que já existe`, `Dependências novas` e C4 Mermaid).
-- `plan-ID-<nome>.md`: Roadmap preliminar, estimativa de quebra de tarefas/features e mapeamento de rules/IDs por task.
+Gere uma pasta autocontida para a iniciativa em `sdd/discovery/<id>-<nome>/`:
+- `discovery.md`: Visão Produto/Negócio.
+- `criteria.md`: Visão Técnica/Engenharia (com `Modelo do módulo`, `O que já existe`, `Dependências novas` e C4 Mermaid).
+- `plan.md`: Roadmap preliminar, estimativa de quebra de tarefas/features e mapeamento de rules/IDs por task.
+- `features/`: Subpasta reservada para as features atômicas fatiadas no comando `/split-features`.
+- `fixes/`: Subpasta reservada para correções correlacionadas geradas pelo comando `/novo-fix`.
 
 Mantenha o padrão Forge-SDD de escrita limpa e objetiva.
 
 Verifique `Nível de Linguagem` em `sdd/memory/constitution.md`: se `iniciante`, explique conceitos como "C4 Model" ou "critério de aceitação" com exemplos concretos e linguagem simples, sem alterar os critérios de aceitação em si.
 
-**Gravação de Métricas (determinística):** Se a telemetria estiver habilitada em `sdd/.sddrc`, execute `forge-sdd session record --feature "<discovery-ID-nome.md gerado>" --outcome approved --criterio-atendido=true` — garante telemetria mesmo quando a sessão não avança para `/split-features`.
+**Gravação de Métricas (determinística):** Se a telemetria estiver habilitada em `sdd/.sddrc`, execute `forge-sdd session record --feature "sdd/discovery/<id>-<nome>/discovery.md" --outcome approved --criterio-atendido=true` — garante telemetria mesmo quando a sessão não avança para `/split-features`.
 
-**Gate 1 (Revisão Obrigatória de Spec — `FLX-01`) e Handoff:** O **Líder** submete a Spec gerada à revisão humana. Após aprovação, gere o resumo para o próximo passo (`/split-features`), listando os arquivos criados e instruindo a quebrar as features dentro de uma subpasta de feature com o nome deste discovery (`sdd/features/feat-ID-<nome-do-discovery>/`) e enfileirá-las para o Builder.
+**Gate 1 (Revisão Obrigatória de Spec — `FLX-01`) e Handoff:** O **Líder** submete a Spec gerada à revisão humana. Após aprovação, gere o resumo para o próximo passo (`/split-features`), listando os arquivos criados e instruindo a quebrar as features diretamente na subpasta `sdd/discovery/<id>-<nome>/features/` e enfileirá-las para o Builder.

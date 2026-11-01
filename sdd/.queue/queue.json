@@ -1,8 +1,8 @@
 {
-  "feature_id": "feat-59-modulo-visual-estacoes-personagens",
-  "branch": "feat/59-modulo-visual-estacoes-personagens",
-  "spec_status": "reviewed",
-  "updated_at": "2026-10-31T19:11:41Z",
+  "feature_id": "feat-65",
+  "branch": "feat/65-prewarming-pool-sessoes-acp-estacoes",
+  "spec_status": "approved",
+  "updated_at": "2026-11-01T12:58:23Z",
   "items": [
     {
       "task_id": "feat-60-01-scaffold-astro-seo-dados-tipados",
@@ -155,6 +155,131 @@
         "veredito": "conforme",
         "achados": [],
         "resumo": "Conceitos de filas por estacao e modulo visual plugavel Forge Studio registrados em concepts.md. Fluxos e comandos documentados em FLOW.md e README.md. Historico de releases atualizado com a v3.0.1-beta.2 e templates sincronizados."
+      }
+    },
+    {
+      "task_id": "feat-63-01-api-spec-e-sanitizacao",
+      "title": "feat-63-01 — Endpoint de Leitura de Spec (`GET /api/spec`) e Sanitização Estrita contra Path Traversal",
+      "spec_path": "sdd/features/feat-63-studio-navegavel-aprovacao-spec/feat-63-01-api-spec-e-sanitizacao.md",
+      "status": "approved",
+      "rules": [],
+      "skills_used": [],
+      "attempts": 1,
+      "governance_verdict": {
+        "veredito": "conforme",
+        "achados": [],
+        "resumo": "Endpoint GET /api/spec implementado com sanitização estrita de path traversal e testes determinísticos com corrida aprovados."
+      }
+    },
+    {
+      "task_id": "feat-63-02-drawer-inspecao-estacoes-e-deep-link",
+      "title": "feat-63-02 — Componente Station Drawer (`.station-drawer`), Cartões Clicáveis e Deep-Link para IDE Local",
+      "spec_path": "sdd/features/feat-63-studio-navegavel-aprovacao-spec/feat-63-02-drawer-inspecao-estacoes-e-deep-link.md",
+      "status": "approved",
+      "rules": [],
+      "skills_used": [],
+      "attempts": 1,
+      "governance_verdict": {
+        "veredito": "conforme",
+        "achados": [],
+        "resumo": "Station Drawer (.station-drawer) e deep-links de IDE implementados com sucesso e aprovados pela Governança."
+      }
+    },
+    {
+      "task_id": "feat-63-03-visualizador-spec-e-portao-flx01-sse",
+      "title": "feat-63-03 — Visualizador de Spec Embutido, Aprovação Humana no Portão FLX-01 e Sincronização em Tempo Real via SSE",
+      "spec_path": "sdd/features/feat-63-studio-navegavel-aprovacao-spec/feat-63-03-visualizador-spec-e-portao-flx01-sse.md",
+      "status": "approved",
+      "rules": [],
+      "skills_used": [],
+      "attempts": 1,
+      "governance_verdict": {
+        "veredito": "conforme",
+        "achados": [],
+        "resumo": "Reavaliação da task feat-63-03 concluída com êxito. COD-01 sanado, ARQ, SEG, TST 100% conformes."
+      }
+    },
+    {
+      "task_id": "feat-64-01",
+      "title": "feat-64-01 — Núcleo do Protocolo ACP (internal/acp), Tipos JSON-RPC 2.0 e Subcomando CLI forge-sdd acp",
+      "spec_path": "sdd/features/feat-64-protocolo-acp-comunicacao-estacoes-studio/feat-64-01-nucleo-acp-rpc-stdio.md",
+      "status": "approved",
+      "rules": [
+        "ARQ-01",
+        "ARQ-03",
+        "ARQ-04",
+        "ARQ-06",
+        "ARQ-11",
+        "SEG-01",
+        "SEG-04",
+        "SEG-07",
+        "DUP-02",
+        "DUP-05",
+        "COD-01",
+        "COD-02",
+        "COD-03",
+        "TST-01",
+        "TST-03",
+        "TST-04",
+        "TST-05"
+      ],
+      "skills_used": [],
+      "attempts": 1
+    },
+    {
+      "task_id": "feat-65-01-nucleo-pool-sessoes-prewarming-heartbeat",
+      "title": "feat-65-01 — Núcleo do SessionPool (`internal/acp/pool.go`), Pre-warming no Boot e Monitor de Heartbeat (`internal/acp/heartbeat.go`)",
+      "spec_path": "sdd/features/feat-65-prewarming-pool-sessoes-acp-estacoes/feat-65-01-nucleo-pool-sessoes-prewarming-heartbeat.md",
+      "status": "approved",
+      "rules": [],
+      "skills_used": [],
+      "attempts": 0,
+      "governance_verdict": {
+        "veredito": "conforme",
+        "achados": null,
+        "resumo": "Auditado com 100% de conformidade com as regras constitucionais (ARQ, SEG, TST, COD)."
+      }
+    },
+    {
+      "task_id": "feat-65-02-orquestrador-handoff-continuo-portao-flx01",
+      "title": "feat-65-02 — Orquestrador de Handoff Contínuo (`internal/acp/orchestrator.go`), Despacho Automático de Filas e Integração com Portão FLX-01",
+      "spec_path": "sdd/features/feat-65-prewarming-pool-sessoes-acp-estacoes/feat-65-02-orquestrador-handoff-continuo-portao-flx01.md",
+      "status": "approved",
+      "rules": [],
+      "skills_used": [],
+      "attempts": 0,
+      "governance_verdict": {
+        "veredito": "conforme",
+        "achados": null,
+        "resumo": "Auditado com 100% de conformidade com as regras constitucionais (ARQ, SEG, TST, COD)."
+      }
+    },
+    {
+      "task_id": "feat-65-03-subcomando-cli-attach-multiplexador",
+      "title": "feat-65-03 — Subcomando CLI `forge-sdd attach` (`cmd/forge-sdd/attach.go`) e Multiplexador de Terminal (`internal/acp/attach.go`)",
+      "spec_path": "sdd/features/feat-65-prewarming-pool-sessoes-acp-estacoes/feat-65-03-subcomando-cli-attach-multiplexador.md",
+      "status": "approved",
+      "rules": [],
+      "skills_used": [],
+      "attempts": 0,
+      "governance_verdict": {
+        "veredito": "conforme",
+        "achados": null,
+        "resumo": "Auditado com 100% de conformidade com as regras constitucionais (ARQ, SEG, TST, COD)."
+      }
+    },
+    {
+      "task_id": "feat-65-04-integracao-studio-bootstrap-e2e",
+      "title": "feat-65-04 — Integração do Pool com Forge Studio (`internal/studio/server.go`), Atualização de Mascotes e Validação E2E",
+      "spec_path": "sdd/features/feat-65-prewarming-pool-sessoes-acp-estacoes/feat-65-04-integracao-studio-bootstrap-e2e.md",
+      "status": "approved",
+      "rules": [],
+      "skills_used": [],
+      "attempts": 0,
+      "governance_verdict": {
+        "veredito": "conforme",
+        "achados": null,
+        "resumo": "Auditado com 100% de conformidade com as regras constitucionais (ARQ, SEG, TST, COD)."
       }
     }
   ]
