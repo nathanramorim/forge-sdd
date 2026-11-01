@@ -1,5 +1,181 @@
 [
   {
+    "timestamp": "2026-11-01T03:16:13Z",
+    "station": "lider",
+    "tool": "orchestrate",
+    "action": "feat-64-01-nucleo-acp-rpc-stdio",
+    "details": "Notificação ao Líder: Ciclo autônomo concluído com 100% de aprovação",
+    "status": "success"
+  },
+  {
+    "timestamp": "2026-11-01T03:16:13Z",
+    "station": "governance",
+    "tool": "governance",
+    "action": "audit (CONFORME)",
+    "details": "Auditoria da Governança aprovada: 0 violações",
+    "status": "success"
+  },
+  {
+    "timestamp": "2026-11-01T03:16:13Z",
+    "station": "governance",
+    "tool": "audit",
+    "action": "feat-64-01-nucleo-acp-rpc-stdio",
+    "details": "Auditando conformidade constitucional",
+    "status": "running"
+  },
+  {
+    "timestamp": "2026-11-01T03:16:13Z",
+    "station": "governance",
+    "tool": "handoff",
+    "action": "builder -\u003e governance",
+    "details": "Handoff autônomo recebido: feat-64-01-nucleo-acp-rpc-stdio pronto para Governança",
+    "status": "success"
+  },
+  {
+    "timestamp": "2026-11-01T03:16:13Z",
+    "station": "builder",
+    "tool": "portao_a",
+    "action": "go test -race ./... (PASS)",
+    "details": "Portão A 100% aprovado: liberado para Governança",
+    "status": "success"
+  },
+  {
+    "timestamp": "2026-11-01T03:16:11Z",
+    "station": "builder",
+    "tool": "portao_a",
+    "action": "go test -race ./...",
+    "details": "Executando testes locais Portão A",
+    "status": "running"
+  },
+  {
+    "timestamp": "2026-11-01T03:16:11Z",
+    "station": "builder",
+    "tool": "handoff",
+    "action": "planner -\u003e builder",
+    "details": "Handoff autônomo recebido: feat-64-01-nucleo-acp-rpc-stdio pronto para o Builder",
+    "status": "success"
+  },
+  {
+    "timestamp": "2026-11-01T03:16:11Z",
+    "station": "planner",
+    "tool": "planner",
+    "action": "feat-64-01-nucleo-acp-rpc-stdio",
+    "details": "Tarefas fatiadas e critérios determinísticos prontos",
+    "status": "success"
+  },
+  {
+    "timestamp": "2026-11-01T03:16:11Z",
+    "station": "planner",
+    "tool": "planner",
+    "action": "feat-64-01-nucleo-acp-rpc-stdio",
+    "details": "Fatiando tarefas e critérios determinísticos",
+    "status": "running"
+  },
+  {
+    "timestamp": "2026-11-01T03:16:11Z",
+    "station": "planner",
+    "tool": "handoff",
+    "action": "receive sdd/features/feat-64-protocolo-acp-comunicacao-estacoes-studio/feat-64-01-nucleo-acp-rpc-stdio.md",
+    "details": "Handoff recebido de PM/Architect: especificação pronta para fatiamento",
+    "status": "success"
+  },
+  {
+    "timestamp": "2026-11-01T03:16:11Z",
+    "station": "pm-architect",
+    "tool": "human_gate",
+    "action": "approve sdd/features/feat-64-protocolo-acp-comunicacao-estacoes-studio/feat-64-01-nucleo-acp-rpc-stdio.md",
+    "details": "Portão FLX-01 Superado: Spec aprovada pelo humano",
+    "status": "success"
+  },
+  {
+    "timestamp": "2026-11-01T03:15:43Z",
+    "station": "lider",
+    "tool": "orchestrate",
+    "action": "discovery-65-prewarming-pool-sessoes-acp-estacoes",
+    "details": "Notificação ao Líder: Ciclo autônomo concluído com 100% de aprovação",
+    "status": "success"
+  },
+  {
+    "timestamp": "2026-11-01T03:15:43Z",
+    "station": "governance",
+    "tool": "governance",
+    "action": "audit (CONFORME)",
+    "details": "Auditoria da Governança aprovada: 0 violações",
+    "status": "success"
+  },
+  {
+    "timestamp": "2026-11-01T03:15:43Z",
+    "station": "governance",
+    "tool": "audit",
+    "action": "discovery-65-prewarming-pool-sessoes-acp-estacoes",
+    "details": "Auditando conformidade constitucional",
+    "status": "running"
+  },
+  {
+    "timestamp": "2026-11-01T03:15:43Z",
+    "station": "governance",
+    "tool": "handoff",
+    "action": "builder -\u003e governance",
+    "details": "Handoff autônomo recebido: discovery-65-prewarming-pool-sessoes-acp-estacoes pronto para Governança",
+    "status": "success"
+  },
+  {
+    "timestamp": "2026-11-01T03:15:43Z",
+    "station": "builder",
+    "tool": "portao_a",
+    "action": "go test -race ./... (PASS)",
+    "details": "Portão A 100% aprovado: liberado para Governança",
+    "status": "success"
+  },
+  {
+    "timestamp": "2026-11-01T03:15:40Z",
+    "station": "builder",
+    "tool": "portao_a",
+    "action": "go test -race ./...",
+    "details": "Executando testes locais Portão A",
+    "status": "running"
+  },
+  {
+    "timestamp": "2026-11-01T03:15:40Z",
+    "station": "builder",
+    "tool": "handoff",
+    "action": "planner -\u003e builder",
+    "details": "Handoff autônomo recebido: discovery-65-prewarming-pool-sessoes-acp-estacoes pronto para o Builder",
+    "status": "success"
+  },
+  {
+    "timestamp": "2026-11-01T03:15:40Z",
+    "station": "planner",
+    "tool": "planner",
+    "action": "discovery-65-prewarming-pool-sessoes-acp-estacoes",
+    "details": "Tarefas fatiadas e critérios determinísticos prontos",
+    "status": "success"
+  },
+  {
+    "timestamp": "2026-11-01T03:15:40Z",
+    "station": "planner",
+    "tool": "planner",
+    "action": "discovery-65-prewarming-pool-sessoes-acp-estacoes",
+    "details": "Fatiando tarefas e critérios determinísticos",
+    "status": "running"
+  },
+  {
+    "timestamp": "2026-11-01T03:15:40Z",
+    "station": "planner",
+    "tool": "handoff",
+    "action": "receive sdd/discovery/discovery-65-prewarming-pool-sessoes-acp-estacoes.md",
+    "details": "Handoff recebido de PM/Architect: especificação pronta para fatiamento",
+    "status": "success"
+  },
+  {
+    "timestamp": "2026-11-01T03:15:40Z",
+    "station": "pm-architect",
+    "tool": "human_gate",
+    "action": "approve sdd/discovery/discovery-65-prewarming-pool-sessoes-acp-estacoes.md",
+    "details": "Portão FLX-01 Superado: Spec aprovada pelo humano",
+    "status": "success"
+  },
+  {
     "timestamp": "2026-11-01T01:46:50Z",
     "station": "lider",
     "tool": "orchestrate",
@@ -222,181 +398,5 @@
     "action": "planner -\u003e builder",
     "details": "Handoff concluído: feat-63-03-visualizador-spec-e-portao-flx01-sse transferido para builder",
     "status": "success"
-  },
-  {
-    "timestamp": "2026-10-31T23:25:48Z",
-    "station": "governance",
-    "tool": "handoff",
-    "action": "builder -\u003e governance",
-    "details": "Handoff concluído: feat-63-spec-aprovada transferido para governance",
-    "status": "success"
-  },
-  {
-    "timestamp": "2026-10-31T23:24:57Z",
-    "station": "planner",
-    "tool": "handoff",
-    "action": "receive sdd/features/feat-63-studio-navegavel-aprovacao-spec/feat-63-03-visualizador-spec-e-portao-flx01-sse.md",
-    "details": "Handoff recebido de PM/Architect: especificação pronta para fatiamento",
-    "status": "success"
-  },
-  {
-    "timestamp": "2026-10-31T23:24:57Z",
-    "station": "pm-architect",
-    "tool": "human_gate",
-    "action": "approve sdd/features/feat-63-studio-navegavel-aprovacao-spec/feat-63-03-visualizador-spec-e-portao-flx01-sse.md",
-    "details": "Portão FLX-01 Superado: Spec aprovada pelo humano",
-    "status": "success"
-  },
-  {
-    "timestamp": "2026-10-31T23:18:45Z",
-    "station": "builder",
-    "tool": "handoff",
-    "action": "planner -\u003e builder",
-    "details": "Handoff concluído: feat-63-spec-aprovada transferido para builder",
-    "status": "success"
-  },
-  {
-    "timestamp": "2026-10-31T22:47:43Z",
-    "station": "pm-architect",
-    "tool": "human_gate",
-    "action": "approve sdd/discovery/discovery-63-studio-navegavel-aprovacao-spec.md",
-    "details": "Portão FLX-01 Superado: Spec aprovada pelo humano",
-    "status": "success"
-  },
-  {
-    "timestamp": "2026-10-31T22:35:50Z",
-    "station": "lider",
-    "tool": "orquestrador",
-    "action": "portao_flx01_destravado",
-    "details": "Spec aprovada pelo usuário. Transição para Estação 03 (Planejador) pronta.",
-    "status": "running"
-  },
-  {
-    "timestamp": "2026-10-31T22:35:45Z",
-    "station": "pm-architect",
-    "tool": "studio-ui",
-    "action": "aprovacao_portao_flx01",
-    "details": "Humano aprovou a spec discovery.md no Studio",
-    "status": "completed"
-  },
-  {
-    "timestamp": "2026-10-31T22:34:27Z",
-    "station": "pm-architect",
-    "tool": "human_gate",
-    "action": "approve sdd/features/feat-63-studio-navegavel-aprovacao-spec/discovery.md",
-    "details": "Portão FLX-01 Superado: Spec aprovada pelo humano",
-    "status": "success"
-  },
-  {
-    "timestamp": "2026-10-31T22:34:19Z",
-    "station": "pm-architect",
-    "tool": "human_gate",
-    "action": "approve sdd/features/feat-63-studio-navegavel-aprovacao-spec/discovery.md",
-    "details": "Portão FLX-01 Superado: Spec aprovada pelo humano",
-    "status": "success"
-  },
-  {
-    "timestamp": "2026-10-31T22:34:07Z",
-    "station": "pm-architect",
-    "tool": "human_gate",
-    "action": "approve sdd/features/feat-63-studio-navegavel-aprovacao-spec/discovery.md",
-    "details": "Portão FLX-01 Superado: Spec aprovada pelo humano",
-    "status": "success"
-  },
-  {
-    "timestamp": "2026-10-31T22:21:43Z",
-    "station": "lider",
-    "tool": "subagent",
-    "action": "despachando Builder para retrabalho da task 63-03",
-    "details": "Camada B solicitou correções: TestAPISpecApprove (TST-01) e handlers inline (COD-01)",
-    "status": "running"
-  },
-  {
-    "timestamp": "2026-10-31T22:20:26Z",
-    "station": "pm-architect",
-    "tool": "human_gate",
-    "action": "approve sdd/features/feat-63-studio-navegavel-aprovacao-spec/discovery.md",
-    "details": "Portão FLX-01 Superado: Spec aprovada pelo humano",
-    "status": "success"
-  },
-  {
-    "timestamp": "2026-10-31T22:12:51Z",
-    "station": "builder",
-    "tool": "edit_file",
-    "action": "implementando Spec Viewer, aprovação FLX-01 e sync SSE",
-    "details": "Escopo: index.html, studio.css, studio.js e server.go",
-    "status": "running"
-  },
-  {
-    "timestamp": "2026-10-31T22:12:50Z",
-    "station": "lider",
-    "tool": "subagent",
-    "action": "despachando Builder para feat-63-03",
-    "details": "Iniciando implementação do Visualizador de Spec, Aprovação FLX-01 e SSE",
-    "status": "done"
-  },
-  {
-    "timestamp": "2026-10-31T22:10:44Z",
-    "station": "builder",
-    "tool": "edit_file",
-    "action": "implementando station drawer e deep-links de IDE",
-    "details": "Escopo: index.html, studio.css, studio.js e assets_test.go",
-    "status": "running"
-  },
-  {
-    "timestamp": "2026-10-31T22:10:44Z",
-    "station": "lider",
-    "tool": "subagent",
-    "action": "despachando Builder para feat-63-02",
-    "details": "Iniciando implementação do Drawer de Inspeção e Deep-Links",
-    "status": "done"
-  },
-  {
-    "timestamp": "2026-10-31T22:09:00Z",
-    "station": "builder",
-    "tool": "edit_file",
-    "action": "implementando GET /api/spec e sanitização path traversal",
-    "details": "Escopo: internal/studio/server.go e server_test.go",
-    "status": "running"
-  },
-  {
-    "timestamp": "2026-10-31T22:08:59Z",
-    "station": "lider",
-    "tool": "subagent",
-    "action": "despachando Builder para feat-63-01",
-    "details": "Iniciando implementação da task feat-63-01 em contexto isolado",
-    "status": "done"
-  },
-  {
-    "timestamp": "2026-10-31T22:06:16Z",
-    "station": "lider",
-    "tool": "subagent",
-    "action": "despachando Planejador para fatiamento em tarefas P/M/G",
-    "details": "Subagente Estação 03 (Planejador) acionado com a Spec aprovada pelo humano",
-    "status": "running"
-  },
-  {
-    "timestamp": "2026-10-31T22:05:40Z",
-    "station": "lider",
-    "tool": "ask_question",
-    "action": "solicitando revisão humana da Spec (Portão FLX-01)",
-    "details": "Aguardando aprovação do humano para enfileirar tarefas",
-    "status": "running"
-  },
-  {
-    "timestamp": "2026-10-31T22:05:40Z",
-    "station": "pm-architect",
-    "tool": "write_file",
-    "action": "write_file discovery.md + criteria.md",
-    "details": "Spec feat-63 elaborada e submetida ao Portão FLX-01",
-    "status": "done"
-  },
-  {
-    "timestamp": "2026-10-31T21:58:11Z",
-    "station": "builder",
-    "tool": "edit_file",
-    "action": "edit_file internal/studio/state.go",
-    "details": "Separando responsabilidades canônicas: Builder assume código e testes",
-    "status": "running"
   }
 ]

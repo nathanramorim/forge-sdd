@@ -2,7 +2,7 @@
   "feature_id": "feat-64",
   "branch": "feat/64-protocolo-acp-comunicacao-estacoes-studio",
   "spec_status": "approved",
-  "updated_at": "2026-11-01T02:12:51Z",
+  "updated_at": "2026-11-01T03:16:13Z",
   "items": [
     {
       "task_id": "feat-60-01-scaffold-astro-seo-dados-tipados",
@@ -203,7 +203,7 @@
       "task_id": "feat-64-01",
       "title": "feat-64-01 — Núcleo do Protocolo ACP (internal/acp), Tipos JSON-RPC 2.0 e Subcomando CLI forge-sdd acp",
       "spec_path": "sdd/features/feat-64-protocolo-acp-comunicacao-estacoes-studio/feat-64-01-nucleo-acp-rpc-stdio.md",
-      "status": "review_pending",
+      "status": "approved",
       "rules": [
         "ARQ-01",
         "ARQ-03",

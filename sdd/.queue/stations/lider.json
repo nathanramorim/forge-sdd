@@ -1,11 +1,13 @@
 {
   "station": "lider",
-  "version": 8,
-  "updated_at": "2026-11-01T01:46:50Z",
+  "version": 12,
+  "updated_at": "2026-11-01T03:16:13Z",
   "processed_keys": [
     "a5e9e900175357b9e0c5526ad56536cd",
     "beaddb8f1491bb0d76b8f3fcce55299b",
-    "b6c119f0b5ae80029641bb5b624475f5"
+    "b6c119f0b5ae80029641bb5b624475f5",
+    "27bdfe9395cccbab329ab51c7fb389eb",
+    "61e46a48b99189a77be05b517aa1ecdb"
   ],
   "items": [
     {
@@ -49,6 +51,34 @@
       "output_contract": "Ciclo Concluído",
       "created_at": "2026-11-01T01:46:50Z",
       "updated_at": "2026-11-01T01:46:50Z"
+    },
+    {
+      "id": "discovery-65-prewarming-pool-sessoes-acp-estacoes",
+      "title": "Planejamento: discovery-65-prewarming-pool-sessoes-acp-estacoes.md",
+      "station": "lider",
+      "operation": "handoff",
+      "status": "approved",
+      "artifact_path": "sdd/discovery/discovery-65-prewarming-pool-sessoes-acp-estacoes.md",
+      "idempotency_key": "27bdfe9395cccbab329ab51c7fb389eb",
+      "attempt": 1,
+      "input_contract": "Parecer Conforme Portão B",
+      "output_contract": "Ciclo Concluído",
+      "created_at": "2026-11-01T03:15:43Z",
+      "updated_at": "2026-11-01T03:15:43Z"
+    },
+    {
+      "id": "feat-64-01-nucleo-acp-rpc-stdio",
+      "title": "Planejamento: feat-64-01-nucleo-acp-rpc-stdio.md",
+      "station": "lider",
+      "operation": "handoff",
+      "status": "approved",
+      "artifact_path": "sdd/features/feat-64-protocolo-acp-comunicacao-estacoes-studio/feat-64-01-nucleo-acp-rpc-stdio.md",
+      "idempotency_key": "61e46a48b99189a77be05b517aa1ecdb",
+      "attempt": 1,
+      "input_contract": "Parecer Conforme Portão B",
+      "output_contract": "Ciclo Concluído",
+      "created_at": "2026-11-01T03:16:13Z",
+      "updated_at": "2026-11-01T03:16:13Z"
     }
   ]
 }
