@@ -32,6 +32,8 @@ type StationDTO struct {
 	ActiveItems    int                 `json:"active_items"`
 	TotalItems     int                 `json:"total_items"`
 	Items          []queue.StationItem `json:"items"`
+	SessionID      string              `json:"session_id,omitempty"`
+	SessionState   string              `json:"session_state,omitempty"`
 }
 
 // ActiveTaskDTO descreve com precisão a tarefa em processamento por um agente.
@@ -44,18 +46,20 @@ type ActiveTaskDTO struct {
 
 // StudioSnapshot representa o estado consolidado determinístico do projeto.
 type StudioSnapshot struct {
-	ProjectName       string                `json:"project_name"`
-	ProjectDir        string                `json:"project_dir"`
-	Version           string                `json:"version"`
-	ActiveStation     string                `json:"active_station"`
-	ActiveStationIdx  int                   `json:"active_station_idx"`
-	LastHandoff       *HandoffDTO           `json:"last_handoff,omitempty"`
-	GovernanceVerdict *queue.Verdict        `json:"governance_verdict,omitempty"`
-	RecentActivity    []queue.ActivityItem  `json:"recent_activity,omitempty"`
-	StateHash         string                `json:"state_hash"`
-	UpdatedAt         string                `json:"updated_at"`
-	Stations          []StationDTO          `json:"stations"`
-	LegacyQueue       *queue.Queue          `json:"legacy_queue,omitempty"`
+	ProjectName         string                `json:"project_name"`
+	ProjectDir          string                `json:"project_dir"`
+	Version             string                `json:"version"`
+	ActiveStation       string                `json:"active_station"`
+	ActiveStationIdx    int                   `json:"active_station_idx"`
+	LastHandoff         *HandoffDTO           `json:"last_handoff,omitempty"`
+	GovernanceVerdict   *queue.Verdict        `json:"governance_verdict,omitempty"`
+	RecentActivity      []queue.ActivityItem  `json:"recent_activity,omitempty"`
+	StateHash           string                `json:"state_hash"`
+	UpdatedAt           string                `json:"updated_at"`
+	Stations            []StationDTO          `json:"stations"`
+	LegacyQueue         *queue.Queue          `json:"legacy_queue,omitempty"`
+	PoolWarmed          bool                  `json:"pool_warmed"`
+	ActiveSessionsCount int                   `json:"active_sessions_count"`
 }
 
 // HandoffDTO representa o bastão atual ou em trânsito.
@@ -92,52 +96,62 @@ func (a *Aggregator) GetSnapshot() (*StudioSnapshot, error) {
 			Role:           "Orquestrador · Maestro do Ciclo",
 			Color:          "#f2a65a",
 			Mark:           "ring",
-			MascotState:    "idle",
-			CurrentFocus:   "Orquestrando ciclo, monitorando filas e portões",
+			MascotState:    "standby",
+			SessionID:      "sess-01-lider",
+			SessionState:   "standby",
+			CurrentFocus:   "Sessão iniciada • Monitorando ciclo, filas e portões",
 			InputContract:  "Demanda do Humano / Parecer da Governança",
 			OutputContract: "Demanda Estruturada → Estação 02",
 		},
 		{
 			ID:             queue.StationPMArchitect,
-			Name:           "02. PM & Arquiteto",
+			Name:           "02A. Concepção (PM & Arquiteto)",
 			Role:           "Concepção & Planejamento · Fase 1 (Discovery & Arquitetura)",
 			Color:          "#8aa4ff",
 			Mark:           "diamond",
-			MascotState:    "idle",
-			CurrentFocus:   "Elaborando Discovery, Criteria e C4",
+			MascotState:    "standby",
+			SessionID:      "sess-02-pm",
+			SessionState:   "standby",
+			CurrentFocus:   "Sessão iniciada • Pronta para elaborar Discovery e C4",
 			InputContract:  "Demanda do Líder + Código Atual",
 			OutputContract: "discovery-<ID>-<nome>.md + criteria-<ID>-<nome>.md",
 		},
 		{
 			ID:             queue.StationPlanner,
-			Name:           "03. O Planejador",
+			Name:           "02B. Fatiamento (Planejador)",
 			Role:           "Concepção & Planejamento · Fase 2 (Fatiamento de Tarefas)",
 			Color:          "#c9a7ff",
 			Mark:           "bar",
-			MascotState:    "idle",
-			CurrentFocus:   "Quebrando Spec em Tasks P/M/G determinísticas",
+			MascotState:    "standby",
+			SessionID:      "sess-03-planner",
+			SessionState:   "standby",
+			CurrentFocus:   "Sessão iniciada • Pronta para quebrar Spec aprovada",
 			InputContract:  "Spec Aprovada (Portão FLX-01)",
 			OutputContract: "plan-<ID>-<nome>.md + tarefas enfileiradas",
 		},
 		{
 			ID:             queue.StationBuilder,
-			Name:           "04. Fila de Builders",
+			Name:           "03. Fila de Builders",
 			Role:           "Implementação em Contexto Isolado",
 			Color:          "#4fd1b5",
 			Mark:           "wave",
-			MascotState:    "idle",
-			CurrentFocus:   "Codificando e executando testes locais",
+			MascotState:    "standby",
+			SessionID:      "sess-04-builder",
+			SessionState:   "standby",
+			CurrentFocus:   "Sessão iniciada • Pronta para codificação e testes",
 			InputContract:  "Task da Fila + Rules Mapeadas",
 			OutputContract: "Código + Testes + Portão A (PASS)",
 		},
 		{
 			ID:             queue.StationGovernance,
-			Name:           "05. Analista de Governança",
+			Name:           "04. Analista de Governança",
 			Role:           "Auditoria Somente Leitura (Camada B)",
 			Color:          "#ff8a5c",
 			Mark:           "tri",
-			MascotState:    "idle",
-			CurrentFocus:   "Inspecionando conformidade arquitetural e segurança",
+			MascotState:    "standby",
+			SessionID:      "sess-05-governance",
+			SessionState:   "standby",
+			CurrentFocus:   "Sessão iniciada • Pronta para inspeção de conformidade",
 			InputContract:  "Diff + Spec + IDs da Constituição",
 			OutputContract: "Laudo JSON → Líder (ou ↺ Builder)",
 		},
@@ -360,9 +374,14 @@ func (a *Aggregator) GetSnapshot() (*StudioSnapshot, error) {
 	}
 
 	// Sincroniza estados em tempo real com o SessionPool se presente
+	poolWarmed := false
+	activeSessionsCount := len(stations)
 	if a.pool != nil {
+		poolWarmed = a.pool.IsWarmed()
 		for i, st := range stations {
 			if sess, ok := a.pool.GetSessionByStation(st.ID); ok {
+				stations[i].SessionID = sess.SessionID
+				stations[i].SessionState = string(sess.State)
 				switch sess.State {
 				case acp.SessionStateProcessing:
 					if st.ID == queue.StationPlanner {
@@ -381,6 +400,11 @@ func (a *Aggregator) GetSnapshot() (*StudioSnapshot, error) {
 					activeIdx = i
 					if sess.ActiveItemID != "" {
 						stations[i].CurrentFocus = "Aguardando Revisão Humana (FLX-01): " + sess.ActiveItemID
+					}
+				case acp.SessionStateStandby:
+					if stations[i].ExecutingTask == nil {
+						stations[i].MascotState = "standby"
+						stations[i].CurrentFocus = "Sessão iniciada • Pronta para receber comandos"
 					}
 				case acp.SessionStateError:
 					stations[i].MascotState = "error"
@@ -456,18 +480,20 @@ func (a *Aggregator) GetSnapshot() (*StudioSnapshot, error) {
 	}
 
 	return &StudioSnapshot{
-		ProjectName:       projectName,
-		ProjectDir:        filepath.ToSlash(absDir),
-		Version:           readProjectVersion(a.Dir),
-		ActiveStation:     activeStation,
-		ActiveStationIdx:  activeIdx,
-		LastHandoff:       handoff,
-		GovernanceVerdict: lastVerdict,
-		RecentActivity:    activities,
-		StateHash:         stateHash,
-		UpdatedAt:         now,
-		Stations:          stations,
-		LegacyQueue:       legacyQ,
+		ProjectName:         projectName,
+		ProjectDir:          filepath.ToSlash(absDir),
+		Version:             readProjectVersion(a.Dir),
+		ActiveStation:       activeStation,
+		ActiveStationIdx:    activeIdx,
+		LastHandoff:         handoff,
+		GovernanceVerdict:   lastVerdict,
+		RecentActivity:      activities,
+		StateHash:           stateHash,
+		UpdatedAt:           now,
+		Stations:            stations,
+		LegacyQueue:         legacyQ,
+		PoolWarmed:          poolWarmed,
+		ActiveSessionsCount: activeSessionsCount,
 	}, nil
 }
 

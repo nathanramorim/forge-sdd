@@ -309,6 +309,68 @@ main.studio-wrap {
   gap: 16px;
 }
 
+/* Container de Agrupamento Concepção & Planejamento (Fase 1 e Fase 2 Unificadas) */
+.stage-group-container {
+  grid-column: span 2;
+  background: rgba(138, 164, 255, 0.03);
+  border: 1px solid rgba(138, 164, 255, 0.28);
+  border-radius: var(--r-card);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  position: relative;
+}
+@media (max-width: 960px) {
+  .stage-group-container {
+    grid-column: span 1;
+  }
+}
+.stage-group-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(138, 164, 255, 0.16);
+  padding-bottom: 10px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.stage-group-title {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--fg);
+  margin: 2px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.stage-group-desc {
+  font-size: 11px;
+  color: var(--muted);
+  margin: 0;
+}
+.stage-subcards-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+@media (max-width: 600px) {
+  .stage-subcards-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.session-badge {
+  font-size: 9.5px;
+  padding: 2px 7px;
+  color: var(--ok);
+  border-color: rgba(62, 207, 142, 0.35);
+  background: rgba(62, 207, 142, 0.08);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
 .station-card {
   position: relative;
   background: var(--bg2);

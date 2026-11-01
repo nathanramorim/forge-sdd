@@ -3,6 +3,8 @@
 // Sincronização SSE em tempo real, Visualização do que cada agente está executando e Modo DEMO.
 
 const STATE_DEFS = {
+  standby:   { orb: '#3ecf8e', orbHex: 0x3ecf8e, eyes: 'round' },
+  ready:     { orb: '#3ecf8e', orbHex: 0x3ecf8e, eyes: 'round' },
   idle:      { orb: '#4f8ef7', orbHex: 0x4f8ef7, eyes: 'cap' },
   working:   { orb: '#f2a65a', orbHex: 0xf2a65a, eyes: 'round' },
   thinking:  { orb: '#c9a7ff', orbHex: 0xc9a7ff, eyes: 'round' },
@@ -2230,6 +2232,11 @@ function applySnapshot(snap) {
   document.getElementById('projectVersion').textContent = 'v' + (snap.version || '3.2.2-beta');
   document.getElementById('lastUpdate').textContent = new Date(snap.updated_at).toLocaleTimeString();
 
+  const poolCountEl = document.getElementById('sessionPoolCount');
+  if (poolCountEl) {
+    poolCountEl.textContent = String(snap.active_sessions_count || (snap.stations ? snap.stations.length : 5));
+  }
+
   // Atualiza telemetria de atividades
   currentActivities = snap.recent_activity || [];
   renderConsoleLogs(currentActivities);
@@ -2416,6 +2423,9 @@ function applySnapshot(snap) {
       phaseBadgeHtml = `<span class="chip mono stage-phase-badge" style="font-size:8.5px;padding:1px 5px;background:rgba(201,167,255,0.12);color:#c9a7ff;border-color:rgba(201,167,255,0.35);">Fase Planejamento 2/2</span>`;
     }
 
+    const sessId = st.session_id || (st.id === 'lider' ? 'sess-01-lider' : (st.id === 'pm-architect' ? 'sess-02-pm' : (st.id === 'planner' ? 'sess-03-planner' : (st.id === 'builder' ? 'sess-04-builder' : 'sess-05-governance'))));
+    const sessionChipHtml = `<span class="session-badge" id="sess-badge-${st.id}"><span class="live-dot" style="display:inline-block;width:5px;height:5px;border-radius:50%;background:#3ecf8e;margin-right:4px;box-shadow:0 0 5px #3ecf8e;"></span>Sessão: ${escapeHtml(sessId)} (Pronta)</span>`;
+
     let card = document.getElementById(`station-card-${st.id}`);
     if (!card) {
       card = document.createElement('div');
@@ -2441,6 +2451,7 @@ function applySnapshot(snap) {
             <h3>${st.name}</h3>
             <p class="role">${st.role}</p>
             <div id="station-badges-${st.id}" style="display:flex;align-items:center;gap:6px;margin-top:4px;flex-wrap:wrap;">
+              ${sessionChipHtml}
               <span class="chip" id="chip-${st.id}"><i style="--o:${st.color}"></i>${st.mascot_state}</span>
               ${phaseBadgeHtml}
               ${specBadgeHtml}
@@ -2463,7 +2474,41 @@ function applySnapshot(snap) {
           <div id="queue-items-${st.id}">${itemsHtml}</div>
         </div>
       `;
-      grid.appendChild(card);
+
+      if (st.id === 'pm-architect' || st.id === 'planner') {
+        let conceptionGroup = document.getElementById('stage-conception-unified');
+        if (!conceptionGroup) {
+          conceptionGroup = document.createElement('div');
+          conceptionGroup.id = 'stage-conception-unified';
+          conceptionGroup.className = 'stage-group-container';
+          conceptionGroup.innerHTML = `
+            <div class="stage-group-header">
+              <div>
+                <div class="stage-group-title">
+                  <span>02. Concepção & Planejamento (PM, Arquiteto & Planejador)</span>
+                  <span class="session-badge"><span class="live-dot" style="display:inline-block;width:5px;height:5px;border-radius:50%;background:#3ecf8e;margin-right:4px;"></span>Sessões Conectadas</span>
+                </div>
+                <p class="stage-group-desc">A especificação técnica é concebida pelo PM & Arquiteto, validada no Portão FLX-01 e fatiada pelo Planejador em tarefas nesta mesma etapa antes de ir para o Builder.</p>
+              </div>
+              <div style="display:flex;gap:6px;align-items:center;">
+                <span class="chip mono" style="font-size:9.5px;color:#8aa4ff;border-color:rgba(138,164,255,0.4);">Fase 1: Discovery</span>
+                <span style="color:var(--muted);font-size:10px;">➔</span>
+                <span class="chip mono" style="font-size:9.5px;color:#c9a7ff;border-color:rgba(201,167,255,0.4);">Fase 2: Fatiamento</span>
+              </div>
+            </div>
+            <div class="stage-subcards-grid" id="stageConceptionSubcards"></div>
+          `;
+          grid.appendChild(conceptionGroup);
+        }
+        const subGrid = conceptionGroup.querySelector('#stageConceptionSubcards');
+        if (subGrid && !subGrid.contains(card)) {
+          subGrid.appendChild(card);
+        }
+      } else {
+        if (!grid.contains(card)) {
+          grid.appendChild(card);
+        }
+      }
     } else {
       card.className = `station-card ${isActive ? 'active' : ''}`;
       card.style.setProperty('--c', st.color);
@@ -2484,6 +2529,7 @@ function applySnapshot(snap) {
       const badgesContainer = document.getElementById(`station-badges-${st.id}`);
       if (badgesContainer) {
         badgesContainer.innerHTML = `
+          ${sessionChipHtml}
           <span class="chip" id="chip-${st.id}"><i style="--o:${st.color}"></i>${st.mascot_state}</span>
           ${phaseBadgeHtml}
           ${specBadgeHtml}
@@ -2498,6 +2544,16 @@ function applySnapshot(snap) {
       if (queueVer) queueVer.textContent = `v${st.version}`;
       const queueItems = document.getElementById(`queue-items-${st.id}`);
       if (queueItems) queueItems.innerHTML = itemsHtml;
+
+      if (st.id === 'pm-architect' || st.id === 'planner') {
+        let conceptionGroup = document.getElementById('stage-conception-unified');
+        if (conceptionGroup) {
+          const subGrid = conceptionGroup.querySelector('#stageConceptionSubcards');
+          if (subGrid && !subGrid.contains(card)) {
+            subGrid.appendChild(card);
+          }
+        }
+      }
     }
 
     // Inicialização ou atualização do Mascote (Three.js 3D com fallback SVG)
