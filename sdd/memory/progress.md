@@ -2,22 +2,18 @@
 
 ## Status
 ```
-Feat 58 — Orquestração Autônoma v3.0 [x] done
-Fix 61 — Handoff Overlap + Instagram (@nathan.ramorim) [x] done
-Feat 60 — Site Oficial (forge-sdd.org) Astro SSG [x] done
-Fix 62 — Player de Vídeo Limpo [x] done
-Release v3.0.1-beta.1 — NPM & GitHub Releases [x] done
-Feat 59 — Forge Studio + Filas por Estação [x] 4/4 done
 Release v3.2.0-beta — NPM & GitHub Releases [x] done
-Release v3.2.1-beta — Three.js 3D Mascotes & Tarefa Ativa [x] done
-Feat 63 — Studio Navegável & Pipeline Autônomo [ ] em evolução
+Release v3.2.1-beta — Three.js 3D Mascotes [x] done
+Feat 63 — Studio Navegável & Pipeline [ ] em evolução
+Feat 64 — Protocolo ACP (4 tasks) [ ] 0/4 pronto
 ```
 
 ## Features ativas
-- `feat/63-studio-navegavel-aprovacao-spec`: Studio interativo, esteira autônoma e refinamento de UX.
+- `feat/64-protocolo-acp-comunicacao-estacoes-studio`: Protocolo ACP (JSON-RPC stdio/HTTP/SSE).
+- `feat/63-studio-navegavel-aprovacao-spec`: Studio interativo e refinamento de UX.
 
 ## Próximo passo
-**Próximo:** Continuar refinamentos da Feat 63 isoladamente na branch.
+**Próximo:** Enfileirar `feat-64-01` na Fila do Builder (`queue enqueue`) e iniciar implementação.
 **Bloqueios:** —
 
 > Histórico completo em `progress-log.md`
