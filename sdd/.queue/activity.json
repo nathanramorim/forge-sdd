@@ -1,5 +1,21 @@
 [
   {
+    "timestamp": "2026-11-01T12:39:39.923Z",
+    "station": "builder",
+    "tool": "run_command",
+    "action": "feat-66-01-estrutura-unificada-discovery-e-fixes",
+    "details": "Builder iniciando implementação da feat-66-01 (Estrutura Unificada de Discovery)",
+    "status": "running"
+  },
+  {
+    "timestamp": "2026-11-01T12:39:39.923Z",
+    "station": "planner",
+    "tool": "planner",
+    "action": "split-features: 66-telemetria-detalhada",
+    "details": "Fatiamento concluído: 4 subtarefas atômicas enfileiradas para o Builder",
+    "status": "success"
+  },
+  {
     "timestamp": "2026-11-01T12:27:43.597Z",
     "station": "pm-architect",
     "tool": "gate_flx01",
@@ -381,22 +397,6 @@
     "tool": "handoff",
     "action": "receive sdd/discovery/discovery-65-prewarming-pool-sessoes-acp-estacoes.md",
     "details": "Handoff recebido de PM/Architect: especificação pronta para fatiamento",
-    "status": "success"
-  },
-  {
-    "timestamp": "2026-11-01T03:15:40Z",
-    "station": "pm-architect",
-    "tool": "human_gate",
-    "action": "approve sdd/discovery/discovery-65-prewarming-pool-sessoes-acp-estacoes.md",
-    "details": "Portão FLX-01 Superado: Spec aprovada pelo humano",
-    "status": "success"
-  },
-  {
-    "timestamp": "2026-11-01T01:46:50Z",
-    "station": "lider",
-    "tool": "orchestrate",
-    "action": "discovery-64-protocolo-acp-comunicacao-estacoes-studio",
-    "details": "Notificação ao Líder: Ciclo autônomo concluído com 100% de aprovação",
     "status": "success"
   }
 ]

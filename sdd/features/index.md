@@ -197,3 +197,7 @@ main
 | 65-02 | feat-65-prewarming-pool-sessoes-acp-estacoes/feat-65-02-orquestrador-handoff-continuo-portao-flx01.md | feat/65-prewarming-pool-sessoes-acp-estacoes | 65-02 | ready |
 | 65-03 | feat-65-prewarming-pool-sessoes-acp-estacoes/feat-65-03-subcomando-cli-attach-multiplexador.md | feat/65-prewarming-pool-sessoes-acp-estacoes | 65-03 | ready |
 | 65-04 | feat-65-prewarming-pool-sessoes-acp-estacoes/feat-65-04-integracao-studio-bootstrap-e2e.md | feat/65-prewarming-pool-sessoes-acp-estacoes | 65-04 | ready |
+| 66-01 | ../discovery/66-telemetria-detalhada-inspecao-e-reconciliacao/features/feat-66-01-estrutura-unificada-discovery-e-fixes.md | feat/66-telemetria-detalhada-inspecao-e-reconciliacao | 66-01 | ready |
+| 66-02 | ../discovery/66-telemetria-detalhada-inspecao-e-reconciliacao/features/feat-66-02-modelo-telemetria-e-reconciliador-atividades-orfas.md | feat/66-telemetria-detalhada-inspecao-e-reconciliacao | 66-02 | ready |
+| 66-03 | ../discovery/66-telemetria-detalhada-inspecao-e-reconciliacao/features/feat-66-03-ui-studio-modal-inspecao-passo-a-passo.md | feat/66-telemetria-detalhada-inspecao-e-reconciliacao | 66-03 | ready |
+| 66-04 | ../discovery/66-telemetria-detalhada-inspecao-e-reconciliacao/features/feat-66-04-integracao-studio-e2e-validacao-constitucional.md | feat/66-telemetria-detalhada-inspecao-e-reconciliacao | 66-04 | ready |

@@ -1,14 +1,15 @@
 {
   "station": "planner",
-  "version": 18,
-  "updated_at": "2026-11-01T03:16:11Z",
+  "version": 20,
+  "updated_at": "2026-11-01T12:39:39.916Z",
   "processed_keys": [
     "ec503d128bbbbda2fb438fcc4b01f1a7",
     "2b80c15568f148f27c1fdf262428b1ef",
     "e582bbb0296db938eace2f94d3d67252",
     "d26b0285c97d512fb57ced91ae83e728",
     "dd4aa071ed5a04c4c84319a1602c71ef",
-    "d35763b4c9be6ab3d5c2d7d7ce6db05a"
+    "d35763b4c9be6ab3d5c2d7d7ce6db05a",
+    "3c71b2f047030d02cc831d2b1f187c94"
   ],
   "items": [
     {
@@ -94,6 +95,18 @@
       "output_contract": "Plano de Tarefas e Quebra de Features",
       "created_at": "2026-11-01T03:16:11Z",
       "updated_at": "2026-11-01T03:16:11Z"
+    },
+    {
+      "id": "feat-66-telemetria-detalhada-inspecao-e-reconciliacao",
+      "title": "Feature feat-66-telemetria-detalhada-inspecao-e-reconciliacao",
+      "station": "planner",
+      "operation": "handoff",
+      "status": "approved",
+      "artifact_path": "sdd/discovery/66-telemetria-detalhada-inspecao-e-reconciliacao/criteria.md",
+      "idempotency_key": "3c71b2f047030d02cc831d2b1f187c94",
+      "attempt": 1,
+      "created_at": "2026-11-01T12:37:10Z",
+      "updated_at": "2026-11-01T12:39:39.909Z"
     }
   ]
 }
