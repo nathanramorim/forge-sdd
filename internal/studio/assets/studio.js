@@ -1266,7 +1266,6 @@ function renderStationDrawerContent(st) {
           <div class="drawer-task-header">
             <span class="drawer-task-id">${escapeHtml(it.id)}</span>
             <div style="display:flex;align-items:center;gap:6px;">
-              ${isBuilding ? `<span class="chip autorun-running-chip"><span class="pulse-dot" style="background:#c4b5fd;"></span> ⚡ Auto-Run: Executando automaticamente</span>` : ''}
               ${isBuilding ? `<span class="chip" style="font-size:10px;padding:3px 9px;font-weight:700;color:var(--warn);border-color:var(--warn);background:rgba(242,166,90,0.1);"><span class="pulse-dot"></span> ${escapeHtml(buildingLabel)}</span>` : ''}
               <span class="chip" style="font-size:10px;padding:2px 8px;">tentativa #${it.attempt || 1}</span>
               <span class="chip" style="font-size:10px;padding:3px 9px;font-weight:700;color:${statusInfo.color};border-color:${statusInfo.border};background:${statusInfo.bg};">${escapeHtml(statusInfo.text)}</span>
@@ -1558,7 +1557,6 @@ function renderStationDrawerContent(st) {
             <i style="--o:${st.color}"></i>${escapeHtml(st.mascot_state.toUpperCase())}
           </span>
           <span class="chip mono" style="font-size:10px;padding:2px 8px;">Marca: ${escapeHtml(st.mark)}</span>
-          ${(activeItems || []).some(it => it.status === 'building' || it.status === 'working') ? `<span class="chip autorun-running-chip"><span class="pulse-dot" style="background:#c4b5fd;"></span> ⚡ Auto-Run: Executando automaticamente</span>` : ''}
         </div>
         <div class="drawer-station-name">
           <span>${escapeHtml(st.name)}</span>
@@ -1672,9 +1670,6 @@ function applySnapshot(snap) {
 
     // O QUE ESTÁ EXECUTANDO POR AGENTE (Destaque Principal Padronizado em Todos os Agentes)
     const execTask = st.executing_task;
-    const isBuildingAny = (st.items || []).some(it => it.status === 'building' || it.status === 'working');
-    const isStationRunning = isActive || isBuildingAny;
-    const autoRunBadgeHtml = isStationRunning ? `<span class="chip autorun-running-chip"><span class="pulse-dot" style="background:#c4b5fd;"></span> ⚡ Auto-Run: Executando automaticamente</span>` : '';
 
     let execHtml = '';
     if (execTask && (execTask.status === 'building' || execTask.status === 'in_progress' || execTask.status === 'review_pending' || execTask.status === 'changes_requested' || execTask.status === 'queued' || execTask.status === 'pending_review' || execTask.status === 'approval' || execTask.status === 'working')) {
@@ -1694,7 +1689,6 @@ function applySnapshot(snap) {
             <span class="pulse-dot"></span>
             <span class="executing-label">${shortLabel}</span>
             <span class="executing-id" title="${escapeHtml(execTask.id)}">${escapeHtml(execTask.id)}</span>
-            ${isStationRunning ? `<span class="autorun-card-badge">⚡ Auto-Run: Executando automaticamente</span>` : ''}
           </div>
           <div class="executing-title" title="${escapeHtml(execTask.title || st.current_focus)}">${escapeHtml(execTask.title || st.current_focus)}</div>
           ${actionRowHtml}
@@ -1707,7 +1701,6 @@ function applySnapshot(snap) {
           <div class="executing-header">
             <span class="pulse-dot"></span>
             <span class="executing-label">ATIVIDADE VIVA</span>
-            ${isStationRunning ? `<span class="autorun-card-badge">⚡ Auto-Run: Executando automaticamente</span>` : ''}
           </div>
           <div class="executing-title" title="${escapeHtml(st.current_focus || 'Processando etapa do ciclo')}">${escapeHtml(st.current_focus || 'Processando etapa do ciclo')}</div>
           ${actionRowHtml}
@@ -1814,7 +1807,6 @@ function applySnapshot(snap) {
             <p class="role">${st.role}</p>
             <div id="station-badges-${st.id}" style="display:flex;align-items:center;gap:6px;margin-top:4px;flex-wrap:wrap;">
               <span class="chip" id="chip-${st.id}"><i style="--o:${st.color}"></i>${st.mascot_state}</span>
-              ${autoRunBadgeHtml}
               ${specBadgeHtml}
             </div>
           </div>
@@ -1854,7 +1846,6 @@ function applySnapshot(snap) {
       if (badgesContainer) {
         badgesContainer.innerHTML = `
           <span class="chip" id="chip-${st.id}"><i style="--o:${st.color}"></i>${st.mascot_state}</span>
-          ${autoRunBadgeHtml}
           ${specBadgeHtml}
         `;
       } else {
