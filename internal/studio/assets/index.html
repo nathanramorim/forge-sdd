@@ -24,6 +24,9 @@
       <div class="chip live" id="statusChip">
         <i></i>LIVE SSE
       </div>
+      <div class="chip autorun-chip" id="autoRunChip">
+        <span class="autorun-bolt">⚡</span> MODO AUTÔNOMO
+      </div>
       <div class="mode-toggle">
         <button id="btnLive" class="mode-btn active" onclick="setStudioMode('LIVE')">LIVE</button>
         <button id="btnDemo" class="mode-btn" onclick="setStudioMode('DEMO')">DEMO</button>
@@ -78,9 +81,9 @@
     </section>
 
     <!-- Inspetor de Governança (CA-08) -->
-    <section class="gov-section" aria-label="Inspetor de Governança">
+    <section class="gov-section" id="govSection" aria-label="Inspetor de Governança">
       <div class="gov-panel">
-        <h3>Inspetor de Governança</h3>
+        <h3>Parecer da Auditoria (Camada B)</h3>
         <p style="color:var(--muted);font-size:12px;">Auditoria estrita em conformidade com as Camadas A (Gate determinístico) e B (Analista Read-Only).</p>
         <div class="gov-findings-list">
           <div class="finding-card conforme" id="govFindingCard">
@@ -90,19 +93,58 @@
         </div>
       </div>
       <div class="gov-panel">
-        <h3>Pilares Constitucionais (sdd/memory/constitution.md)</h3>
-        <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(130px, 1fr));gap:8px;margin-top:12px;">
-          <div class="chip mono" style="justify-content:center;">ARQ (1..4) OK</div>
-          <div class="chip mono" style="justify-content:center;">SEG (1..6) OK</div>
-          <div class="chip mono" style="justify-content:center;">DUP (1..5) OK</div>
-          <div class="chip mono" style="justify-content:center;">COD (1..5) OK</div>
-          <div class="chip mono" style="justify-content:center;">TST (1..5) OK</div>
-          <div class="chip mono" style="justify-content:center;">FLX (1..4) OK</div>
-          <div class="chip mono" style="justify-content:center;">GOV (1..5) OK</div>
+        <h3>Pilares Constitucionais Verificados</h3>
+        <p style="color:var(--muted);font-size:12px;">Garantias da Constituição do projeto (sdd/memory/constitution.md).</p>
+        <div id="govPillarsGrid" class="gov-pillars-grid">
+          <!-- Renderizado dinamicamente via studio.js -->
         </div>
       </div>
     </section>
   </main>
+
+  <!-- Drawer Lateral de Inspeção de Estação -->
+  <div id="drawerBackdrop" class="drawer-backdrop" onclick="closeStationDrawer()"></div>
+  <aside id="stationDrawer" class="station-drawer" aria-label="Painel de Inspeção da Estação"></aside>
+
+  <!-- Modal Visualizador de Spec Embutido (feat-63-03, Portão FLX-01) -->
+  <div id="specModalBackdrop" class="spec-modal-backdrop" onclick="closeSpecViewer()"></div>
+  <div id="specViewerModal" class="spec-viewer-modal" role="dialog" aria-modal="true" aria-labelledby="specModalTitle" aria-label="Visualizador de Especificação">
+    <div class="spec-modal-header">
+      <div class="spec-header-info">
+        <div class="spec-header-top-row">
+          <span class="chip mono" id="specStationBadge">02. PM & Arquiteto</span>
+          <span class="chip mono" id="specStatusBadge">Aguardando Revisão (FLX-01)</span>
+        </div>
+        <h2 id="specModalTitle">Especificação de Feature</h2>
+        <div class="spec-meta-row">
+          <span class="spec-path-label mono" id="specPathLabel">sdd/features/...</span>
+          <button id="specCopyPathBtn" class="copy-btn mono" onclick="copySpecPath()">Copiar Caminho</button>
+        </div>
+      </div>
+      <div class="spec-header-actions">
+        <a id="specVsCodeLink" href="#" class="btn-ide mono" title="Abrir no VS Code">VS Code</a>
+        <a id="specCursorLink" href="#" class="btn-ide cursor-btn mono" title="Abrir no Cursor">Cursor</a>
+        <button class="spec-close-btn" onclick="closeSpecViewer()" aria-label="Fechar Visualizador">&times;</button>
+      </div>
+    </div>
+    <div class="spec-modal-body" id="specModalBody">
+      <div class="markdown-body" id="specMarkdownContent">
+        <!-- Conteúdo Markdown formatado -->
+      </div>
+    </div>
+    <div class="spec-modal-footer">
+      <div class="spec-footer-info">
+        <span class="mono" id="specFileSize">0 bytes</span>
+        <span class="spec-gate-hint">Portão FLX-01 — Revisão Técnica & Conformidade Humana</span>
+      </div>
+      <div class="spec-footer-actions">
+        <button class="btn-secondary" onclick="closeSpecViewer()">Fechar</button>
+        <button id="btnApproveSpec" class="approve-spec-btn" onclick="handleApproveSpecClick()">
+          <span class="approve-icon">✓</span> Aprovar Spec (FLX-01)
+        </button>
+      </div>
+    </div>
+  </div>
 
   <!-- Rodapé -->
   <footer class="studio-foot">

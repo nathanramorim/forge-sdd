@@ -189,3 +189,11 @@ main
 | 59-02 | feat-59-modulo-visual-estacoes-personagens/feat-59-02-agregador-read-only-e-servidor-http-sse.md | feat/59-modulo-visual-estacoes-personagens | 59-02 | done |
 | 59-03 | feat-59-modulo-visual-estacoes-personagens/feat-59-03-interface-visual-embarcada-estacoes-e-governanca.md | feat/59-modulo-visual-estacoes-personagens | 59-03 | done |
 | 59-04 | feat-59-modulo-visual-estacoes-personagens/feat-59-04-integracao-estacoes-catalogo-e-documentacao.md | feat/59-modulo-visual-estacoes-personagens | 59-04 | done |
+| 64-01 | feat-64-protocolo-acp-comunicacao-estacoes-studio/feat-64-01-nucleo-acp-rpc-stdio.md | feat/64-protocolo-acp-comunicacao-estacoes-studio | 64-01 | ready |
+| 64-02 | feat-64-protocolo-acp-comunicacao-estacoes-studio/feat-64-02-sessoes-acp-filas-portao-flx01.md | feat/64-protocolo-acp-comunicacao-estacoes-studio | 64-02 | ready |
+| 64-03 | feat-64-protocolo-acp-comunicacao-estacoes-studio/feat-64-03-transporte-http-sse-studio.md | feat/64-protocolo-acp-comunicacao-estacoes-studio | 64-03 | ready |
+| 64-04 | feat-64-protocolo-acp-comunicacao-estacoes-studio/feat-64-04-exemplos-ide-docs-e2e.md | feat/64-protocolo-acp-comunicacao-estacoes-studio | 64-04 | ready |
+| 65-01 | feat-65-prewarming-pool-sessoes-acp-estacoes/feat-65-01-nucleo-pool-sessoes-prewarming-heartbeat.md | feat/65-prewarming-pool-sessoes-acp-estacoes | 65-01 | ready |
+| 65-02 | feat-65-prewarming-pool-sessoes-acp-estacoes/feat-65-02-orquestrador-handoff-continuo-portao-flx01.md | feat/65-prewarming-pool-sessoes-acp-estacoes | 65-02 | ready |
+| 65-03 | feat-65-prewarming-pool-sessoes-acp-estacoes/feat-65-03-subcomando-cli-attach-multiplexador.md | feat/65-prewarming-pool-sessoes-acp-estacoes | 65-03 | ready |
+| 65-04 | feat-65-prewarming-pool-sessoes-acp-estacoes/feat-65-04-integracao-studio-bootstrap-e2e.md | feat/65-prewarming-pool-sessoes-acp-estacoes | 65-04 | ready |

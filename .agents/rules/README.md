@@ -11,6 +11,7 @@ Estes arquivos detalham **como cumprir** na prática as regras da Constituição
 - `sdd-reuso-e-duplicacao.md` — Catálogo de conceitos, Reuse Check (`O que já existe`), Regra de Três (Auto-Skills) e fonte única (`DUP-01`, `DUP-02`, `DUP-05`, `DUP-10`, `GOV-04`).
 - `sdd-codigo-e-testes.md` — Responsabilidade única, `go vet`, higiene de `TODO(<id>)`, testes executáveis e golden files (`COD-01`, `COD-02`, `COD-04`, `COD-06`, `TST-01`, `TST-02`, `TST-05`).
 - `sdd-fluxo-e-portao.md` — Gate de Spec, branch única por subpasta, Portão A/B/C, ADRs, exceções temporárias e fim de onda (`FLX-01..03`, `FLX-05..08`, `GOV-01..03`).
+- `sdd-acp.md` — Protocolo ACP, envelopes JSON-RPC 2.0, ciclo de vida de sessões, streaming de eventos e homologação de portões (`ARQ-01`, `ARQ-06`, `SEG-01`, `SEG-02`, `SEG-04`, `COD-01`, `COD-03`, `FLX-01..03`, `TST-01`, `TST-05`).
 
 ## Convenção para Regras de Domínio do Projeto
 

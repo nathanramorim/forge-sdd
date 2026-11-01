@@ -226,6 +226,38 @@ func EnqueueStationItem(dir string, item StationItem) (*StationItem, bool, error
 	return &item, false, nil
 }
 
+// UpdateStationItemStatus atualiza o status de um item específico na fila da estação de forma atômica e thread-safe.
+func UpdateStationItemStatus(dir, station, itemID, newStatus string) (*StationItem, error) {
+	stationMutex.Lock()
+	defer stationMutex.Unlock()
+
+	if !IsValidStation(station) {
+		return nil, fmt.Errorf("estação inválida: %q", station)
+	}
+	if itemID == "" {
+		return nil, fmt.Errorf("ID do item não pode ser vazio")
+	}
+
+	sq, err := loadStationQueueLocked(dir, station)
+	if err != nil {
+		return nil, err
+	}
+
+	for idx, it := range sq.Items {
+		if it.ID == itemID {
+			sq.Items[idx].Status = newStatus
+			sq.Items[idx].UpdatedAt = time.Now().UTC().Format(time.RFC3339)
+			if err := saveStationQueueLocked(dir, sq); err != nil {
+				return nil, err
+			}
+			updated := sq.Items[idx]
+			return &updated, nil
+		}
+	}
+
+	return nil, fmt.Errorf("item %q não encontrado na estação %q", itemID, station)
+}
+
 // Handoff realiza a transição segura e idempotente de um artefato entre duas estações.
 // Conclui na estação de origem e enfileira na estação de destino.
 func Handoff(dir, fromStation, toStation, itemID, title, artifactPath, inputContract, outputContract, idempotencyKey string) (*StationItem, bool, error) {
@@ -240,16 +272,19 @@ func Handoff(dir, fromStation, toStation, itemID, title, artifactPath, inputCont
 		idempotencyKey = CalculateIdempotencyKey(toStation, itemID, "handoff-from-"+fromStation, artifactPath, 1)
 	}
 
-	// 1. Atualiza estação de origem (se tiver o item, marca como approved/concluído)
+	// 1. Atualiza estação de origem (marca qualquer item correspondente como approved/concluído)
 	fromSQ, err := loadStationQueueLocked(dir, fromStation)
 	if err == nil {
+		updatedFrom := false
 		for i, it := range fromSQ.Items {
-			if it.ID == itemID {
+			if it.ID == itemID || (artifactPath != "" && it.ArtifactPath == artifactPath) {
 				fromSQ.Items[i].Status = StatusApproved
 				fromSQ.Items[i].UpdatedAt = time.Now().UTC().Format(time.RFC3339)
-				_ = saveStationQueueLocked(dir, fromSQ)
-				break
+				updatedFrom = true
 			}
+		}
+		if updatedFrom {
+			_ = saveStationQueueLocked(dir, fromSQ)
 		}
 	}
 

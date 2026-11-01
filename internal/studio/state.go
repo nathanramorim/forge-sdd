@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/forge-sdd/cli/internal/acp"
 	"github.com/forge-sdd/cli/internal/queue"
 )
 
@@ -44,6 +45,7 @@ type ActiveTaskDTO struct {
 // StudioSnapshot representa o estado consolidado determinístico do projeto.
 type StudioSnapshot struct {
 	ProjectName       string                `json:"project_name"`
+	ProjectDir        string                `json:"project_dir"`
 	Version           string                `json:"version"`
 	ActiveStation     string                `json:"active_station"`
 	ActiveStationIdx  int                   `json:"active_station_idx"`
@@ -67,12 +69,18 @@ type HandoffDTO struct {
 
 // Aggregator lê passivamente o filesystem SDD e monta o StudioSnapshot.
 type Aggregator struct {
-	Dir string
+	Dir  string
+	pool *acp.SessionPool
 }
 
 // NewAggregator cria uma nova instância de leitura passiva sobre o diretório do projeto.
 func NewAggregator(dir string) *Aggregator {
 	return &Aggregator{Dir: dir}
+}
+
+// SetSessionPool associa um SessionPool ao Aggregator para sincronização de estados ao vivo.
+func (a *Aggregator) SetSessionPool(pool *acp.SessionPool) {
+	a.pool = pool
 }
 
 // GetSnapshot constrói o snapshot completo em modo somente-leitura.
@@ -98,7 +106,7 @@ func (a *Aggregator) GetSnapshot() (*StudioSnapshot, error) {
 			MascotState:    "idle",
 			CurrentFocus:   "Elaborando Discovery, Criteria e C4",
 			InputContract:  "Demanda do Líder + Código Atual",
-			OutputContract: "discovery.md + criteria.md",
+			OutputContract: "discovery-<ID>-<nome>.md + criteria-<ID>-<nome>.md",
 		},
 		{
 			ID:             queue.StationPlanner,
@@ -109,7 +117,7 @@ func (a *Aggregator) GetSnapshot() (*StudioSnapshot, error) {
 			MascotState:    "idle",
 			CurrentFocus:   "Quebrando Spec em Tasks P/M/G determinísticas",
 			InputContract:  "Spec Aprovada (Portão FLX-01)",
-			OutputContract: "plan.md + tarefas enfileiradas",
+			OutputContract: "plan-<ID>-<nome>.md + tarefas enfileiradas",
 		},
 		{
 			ID:             queue.StationBuilder,
@@ -147,8 +155,27 @@ func (a *Aggregator) GetSnapshot() (*StudioSnapshot, error) {
 			stations[i].Items = sq.Items
 
 			activeCount := 0
-			for _, it := range sq.Items {
-				if it.Status == queue.StatusBuilding {
+			var pendingApprovalItem *queue.StationItem
+			var queuedItem *queue.StationItem
+			for idxItem, it := range sq.Items {
+				if st.ID == queue.StationPMArchitect && (it.Status == "pending_review" || it.Status == "approval" || it.Status == "review_pending") {
+					pendingApprovalItem = &sq.Items[idxItem]
+				}
+				if it.Status == queue.StatusQueued && queuedItem == nil {
+					queuedItem = &sq.Items[idxItem]
+				}
+				if st.ID == queue.StationGovernance && (it.Status == queue.StatusReviewPending || it.Status == "in_progress" || it.Status == "running") {
+					stations[i].MascotState = "approval"
+					activeStation = st.ID
+					activeIdx = i
+					stations[i].CurrentFocus = "Auditando Conformidade: " + it.Title
+					stations[i].ExecutingTask = &ActiveTaskDTO{
+						ID:        it.ID,
+						Title:     it.Title,
+						Status:    "review_pending",
+						Operation: it.Operation,
+					}
+				} else if it.Status == queue.StatusBuilding {
 					stations[i].MascotState = "working"
 					activeStation = st.ID
 					activeIdx = i
@@ -169,12 +196,50 @@ func (a *Aggregator) GetSnapshot() (*StudioSnapshot, error) {
 						Operation: it.Operation,
 					}
 				}
-				if it.Status != queue.StatusApproved {
+				if it.Status != queue.StatusApproved && it.Status != "done" {
 					activeCount++
+				}
+			}
+			if st.ID == queue.StationPMArchitect && pendingApprovalItem != nil && stations[i].ExecutingTask == nil {
+				stations[i].MascotState = "approval"
+				activeStation = st.ID
+				activeIdx = i
+				stations[i].CurrentFocus = "Aguardando Revisão Humana (FLX-01): " + pendingApprovalItem.Title
+				stations[i].ExecutingTask = &ActiveTaskDTO{
+					ID:        pendingApprovalItem.ID,
+					Title:     pendingApprovalItem.Title,
+					Status:    "pending_review",
+					Operation: pendingApprovalItem.Operation,
+				}
+			}
+			if queuedItem != nil && stations[i].ExecutingTask == nil {
+				stations[i].ExecutingTask = &ActiveTaskDTO{
+					ID:        queuedItem.ID,
+					Title:     queuedItem.Title,
+					Status:    queuedItem.Status,
+					Operation: queuedItem.Operation,
 				}
 			}
 			stations[i].ActiveItems = activeCount
 		}
+	}
+
+	// Se a estação planner tiver tarefa em fila e nenhuma outra estação estiver em building, ativa o Planejador
+	hasBuildingStation := false
+	plannerIdx := -1
+	for idx, s := range stations {
+		if s.ID == queue.StationPlanner {
+			plannerIdx = idx
+		}
+		if s.ExecutingTask != nil && (s.ExecutingTask.Status == queue.StatusBuilding || s.ExecutingTask.Status == queue.StatusReviewPending) {
+			hasBuildingStation = true
+		}
+	}
+	if !hasBuildingStation && plannerIdx >= 0 && stations[plannerIdx].ExecutingTask != nil && stations[plannerIdx].ExecutingTask.Status == queue.StatusQueued {
+		stations[plannerIdx].MascotState = "thinking"
+		stations[plannerIdx].CurrentFocus = "Fila: " + stations[plannerIdx].ExecutingTask.Title
+		activeStation = queue.StationPlanner
+		activeIdx = plannerIdx
 	}
 
 	// Carrega legado se existir e vincula à estação ativa correspondente
@@ -212,6 +277,22 @@ func (a *Aggregator) GetSnapshot() (*StudioSnapshot, error) {
 						activeStation = queue.StationGovernance
 						activeIdx = gIdx
 					}
+				}
+			}
+		}
+
+		if (legacyQ.SpecStatus == "pending_review" || legacyQ.SpecStatus == "approval" || legacyQ.SpecStatus == "review_pending") {
+			for pmIdx, s := range stations {
+				if s.ID == queue.StationPMArchitect && stations[pmIdx].ExecutingTask == nil {
+					stations[pmIdx].MascotState = "approval"
+					stations[pmIdx].CurrentFocus = "Aguardando Revisão Humana (FLX-01)"
+					stations[pmIdx].ExecutingTask = &ActiveTaskDTO{
+						ID:     legacyQ.FeatureID,
+						Title:  "Aguardando Revisão Humana da Spec (FLX-01)",
+						Status: "pending_review",
+					}
+					activeStation = queue.StationPMArchitect
+					activeIdx = pmIdx
 				}
 			}
 		}
@@ -263,6 +344,51 @@ func (a *Aggregator) GetSnapshot() (*StudioSnapshot, error) {
 		}
 	}
 
+	// Se a atividade mais recente de Governança tiver status "running" ou "working",
+	// garante que a Governança seja ativada como a estação em foco
+	for i, st := range stations {
+		if st.ID == queue.StationGovernance && len(st.RecentActivity) > 0 {
+			latestGov := st.RecentActivity[0]
+			if latestGov.Status == "running" || latestGov.Status == "working" {
+				activeStation = queue.StationGovernance
+				activeIdx = i
+				stations[i].MascotState = "approval"
+				stations[i].CurrentFocus = "Auditoria Camada B em andamento"
+			}
+			break
+		}
+	}
+
+	// Sincroniza estados em tempo real com o SessionPool se presente
+	if a.pool != nil {
+		for i, st := range stations {
+			if sess, ok := a.pool.GetSessionByStation(st.ID); ok {
+				switch sess.State {
+				case acp.SessionStateProcessing:
+					if st.ID == queue.StationPlanner {
+						stations[i].MascotState = "thinking"
+					} else {
+						stations[i].MascotState = "working"
+					}
+					activeStation = st.ID
+					activeIdx = i
+					if sess.ActiveItemID != "" {
+						stations[i].CurrentFocus = "Executando: " + sess.ActiveItemID
+					}
+				case acp.SessionStateApprovalPending:
+					stations[i].MascotState = "approval"
+					activeStation = st.ID
+					activeIdx = i
+					if sess.ActiveItemID != "" {
+						stations[i].CurrentFocus = "Aguardando Revisão Humana (FLX-01): " + sess.ActiveItemID
+					}
+				case acp.SessionStateError:
+					stations[i].MascotState = "error"
+				}
+			}
+		}
+	}
+
 	handoff := &HandoffDTO{
 		FromStation: stations[activeIdx].ID,
 		ToStation:   stations[(activeIdx+1)%len(stations)].ID,
@@ -271,12 +397,27 @@ func (a *Aggregator) GetSnapshot() (*StudioSnapshot, error) {
 		IsLoop:      false,
 	}
 
+	if activeStation == queue.StationPMArchitect && stations[activeIdx].MascotState == "approval" {
+		handoff = &HandoffDTO{
+			FromStation: queue.StationPMArchitect,
+			ToStation:   queue.StationPlanner,
+			Payload:     "discovery.md + criteria.md",
+			Gate:        "Portão FLX-01 Bloqueado (Aguardando Aprovação Humana)",
+			IsLoop:      false,
+		}
+	}
+
 	now := time.Now().UTC().Format(time.RFC3339)
 
 	// Gera StateHash para SSE (versões combinadas)
 	hasher := sha256.New()
 	for _, st := range stations {
-		fmt.Fprintf(hasher, "%s:%d:%d;", st.ID, st.Version, st.ActiveItems)
+		fmt.Fprintf(hasher, "%s:%d:%d:%s;", st.ID, st.Version, st.ActiveItems, st.MascotState)
+	}
+	if a.pool != nil {
+		for _, s := range a.pool.ListSessions() {
+			fmt.Fprintf(hasher, "pool:%s:%s:%s;", s.Station, s.State, s.ActiveItemID)
+		}
 	}
 	if legacyQ != nil {
 		fmt.Fprintf(hasher, "%s:%s;", legacyQ.FeatureID, legacyQ.UpdatedAt)
@@ -291,8 +432,14 @@ func (a *Aggregator) GetSnapshot() (*StudioSnapshot, error) {
 		projectName = "forge-sdd"
 	}
 
+	absDir, err := filepath.Abs(a.Dir)
+	if err != nil {
+		absDir = a.Dir
+	}
+
 	return &StudioSnapshot{
 		ProjectName:       projectName,
+		ProjectDir:        filepath.ToSlash(absDir),
 		Version:           readProjectVersion(a.Dir),
 		ActiveStation:     activeStation,
 		ActiveStationIdx:  activeIdx,

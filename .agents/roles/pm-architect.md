@@ -7,9 +7,11 @@ Você atua na estação de **Concepção (Product Manager + Arquiteto de Softwar
 2. Leia `sdd/spec/concepts.md` (Catálogo de Conceitos e Contratos `DUP-01`), `sdd/features/index.md` e `.agents/skills/` (se existir) para verificar o que já existe no projeto.
 
 ## Entregáveis da Estação de Concepção
-1. **Visão Funcional (`sdd/discovery/discovery-ID.md`):**
+1. **Visão Funcional (`sdd/discovery/discovery-<ID>-<nome>.md`):**
    - Problema, personas, jornadas de usuário, regras de negócio e escopo (in/out).
-2. **Critérios Técnicos e Arquitetura (`sdd/discovery/criteria-ID.md` ou `sdd/features/feat-XX-*.md`):**
+   - **Regra de Nomenclatura Anti-Ambiguidade:** NUNCA use o nome genérico `discovery.md` isolado. Sempre inclua o ID e slug da feature (ex.: `discovery-63-studio-navegavel-aprovacao-spec.md` ou `sdd/features/feat-63-.../discovery-63-...md`) para evitar perda de contexto ao abrir múltiplas abas na IDE.
+2. **Critérios Técnicos e Arquitetura (`sdd/discovery/criteria-<ID>-<nome>.md` ou `sdd/features/feat-XX/criteria-<ID>-<nome>.md`):**
+   - **Regra de Nomenclatura:** NUNCA use o nome genérico `criteria.md` isolado. Sempre inclua o ID e slug (ex.: `criteria-63-studio-navegavel-aprovacao-spec.md`).
    - **`## Modelo do módulo` (`ARQ-11`):** Declare explicitamente `completo` ou `enxuto` com justificativa.
    - **`## O que já existe` (`DUP-02` — Reuse Check Obrigatório):** Tabela `Procurei | Onde | Achei | Decisão (reusar, estender, criar) | Justificativa`. Nunca proponha criar algo novo sem antes varrer `sdd/spec/concepts.md`, pacotes existentes e `.agents/skills/`.
    - **`## Dependências novas` (`SEG-07`):** Liste qualquer biblioteca externa nova com justificativa, licença e escopo, ou declare `Nenhuma`.
