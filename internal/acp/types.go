@@ -318,3 +318,27 @@ type PoolStatusResult struct {
 	Healthy  bool             `json:"healthy"`
 	Sessions []*PooledSession `json:"sessions"`
 }
+
+// SessionAttachParams define os parâmetros para anexação interativa a uma estação do pool (session/attach).
+type SessionAttachParams struct {
+	Station   string `json:"station,omitempty"`
+	SessionID string `json:"sessionId,omitempty"`
+}
+
+// SessionLogEntry representa uma entrada individual de log ou evento emitida por uma estação.
+type SessionLogEntry struct {
+	Timestamp string `json:"timestamp"`
+	Type      string `json:"type"`
+	Message   string `json:"message"`
+}
+
+// SessionAttachResult define o payload retornado pelo método RPC session/attach.
+type SessionAttachResult struct {
+	SessionID       string            `json:"sessionId"`
+	Station         string            `json:"station"`
+	State           SessionState      `json:"state"`
+	ActiveItemID    string            `json:"activeItemId,omitempty"`
+	AttachedClients int               `json:"attachedClients"`
+	History         []SessionLogEntry `json:"history,omitempty"`
+}
+

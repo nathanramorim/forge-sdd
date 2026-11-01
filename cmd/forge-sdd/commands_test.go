@@ -461,3 +461,42 @@ func TestACPCommand_Help(t *testing.T) {
 	assert.Contains(t, output, "Protocolo ACP")
 	assert.Contains(t, output, "--dir")
 }
+
+func TestAttachCmd_Validation(t *testing.T) {
+	tempDir := t.TempDir()
+
+	// 1. Falha quando executado sem argumentos de estação
+	rootCmd.SetArgs([]string{"attach"})
+	err := rootCmd.Execute()
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "requer exatamente 1 argumento")
+	assert.Contains(t, err.Error(), "builder")
+
+	// 2. Falha com erro claro ao passar estação inválida
+	rootCmd.SetArgs([]string{"attach", "devops"})
+	err = rootCmd.Execute()
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "estação inválida: \"devops\"")
+	assert.Contains(t, err.Error(), "lider, pm-architect, planner, builder, governance")
+
+	// 3. Sucesso ao executar com estação válida e comando "exit"
+	var outBuf bytes.Buffer
+	attachCmd.SetIn(strings.NewReader("exit\n"))
+	attachCmd.SetOut(&outBuf)
+	defer func() {
+		attachCmd.SetIn(nil)
+		attachCmd.SetOut(nil)
+	}()
+
+	rootCmd.SetArgs([]string{"attach", "builder", "--dir", tempDir})
+	err = rootCmd.Execute()
+	require.NoError(t, err, "execução com exit deve desconectar graciosamente sem erro")
+
+	output := outBuf.String()
+	assert.Contains(t, output, "🔌 FORGE-SDD ATTACH")
+	assert.Contains(t, output, "Estação: builder")
+	assert.Contains(t, output, "sess-04-builder")
+	assert.Contains(t, output, "🟢 Standby")
+	assert.Contains(t, output, "comando exit")
+}
+

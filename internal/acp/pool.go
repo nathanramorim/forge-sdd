@@ -371,6 +371,30 @@ func (p *SessionPool) RecordTelemetry(sessionID string) error {
 	return p.TouchSession(sessionID)
 }
 
+// IncrementAttachedClients incrementa de forma thread-safe o número de clientes anexados a uma estação.
+func (p *SessionPool) IncrementAttachedClients(station string) int {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	if s, ok := p.byStation[station]; ok {
+		s.AttachedClients++
+		return s.AttachedClients
+	}
+	return 0
+}
+
+// DecrementAttachedClients decrementa de forma thread-safe o número de clientes anexados a uma estação.
+func (p *SessionPool) DecrementAttachedClients(station string) int {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	if s, ok := p.byStation[station]; ok {
+		if s.AttachedClients > 0 {
+			s.AttachedClients--
+		}
+		return s.AttachedClients
+	}
+	return 0
+}
+
 // ListSessions retorna a lista ordenada com cópias defensivas das 5 sessões canônicas.
 func (p *SessionPool) ListSessions() []*PooledSession {
 	p.mu.RLock()

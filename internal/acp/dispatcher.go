@@ -5,8 +5,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 	"sync"
 	"time"
+
+	"github.com/forge-sdd/cli/internal/queue"
 )
 
 // HandlerFunc processa uma chamada RPC e retorna um resultado ou um erro canônico.
@@ -27,6 +30,7 @@ type RPCDispatcher struct {
 	sessionManager          *SessionManager
 	pool                    *SessionPool
 	orchestrator            *HandoffOrchestrator
+	attachBridge            *AttachBridge
 }
 
 // NewDispatcher instancia um despachador com versão padrão e métodos base registrados.
@@ -49,6 +53,7 @@ func NewDispatcherWithVersion(version string) *RPCDispatcher {
 	}
 	d.pool = NewSessionPool(sm, d)
 	d.orchestrator = NewHandoffOrchestrator(d.pool, ".", d)
+	d.attachBridge = NewAttachBridge(d.pool)
 
 	d.registerDefaultHandlers()
 	return d
@@ -177,6 +182,78 @@ func (d *RPCDispatcher) registerDefaultHandlers() {
 
 		return pool.Status(), nil
 	})
+
+	d.RegisterHandler("session/attach", func(ctx context.Context, params json.RawMessage) (any, *RPCError) {
+		var p SessionAttachParams
+		if len(params) > 0 {
+			if err := json.Unmarshal(params, &p); err != nil {
+				return nil, NewRPCError(CodeInvalidParams, fmt.Sprintf("invalid session/attach params: %v", err))
+			}
+		}
+
+		station := p.Station
+		if station == "" && p.SessionID != "" {
+			if d.pool != nil {
+				if sess, ok := d.pool.GetSession(p.SessionID); ok {
+					station = sess.Station
+				}
+			}
+			if station == "" {
+				for _, def := range CanonicalPoolSessions {
+					if def.ID == p.SessionID {
+						station = def.Station
+						break
+					}
+				}
+			}
+		}
+
+		if station == "" || !queue.IsValidStation(station) {
+			return nil, NewRPCError(CodeInvalidParams, fmt.Sprintf("estação inválida: %q. Estações canônicas válidas: %s", station, strings.Join(queue.CanonicalStations(), ", ")))
+		}
+
+		var sessionID string
+		var state SessionState = SessionStateStandby
+		var activeItemID string
+		var attachedClients int
+
+		pool := d.Pool()
+		if pool != nil {
+			if sess, ok := pool.GetSessionByStation(station); ok {
+				sessionID = sess.SessionID
+				state = sess.State
+				activeItemID = sess.ActiveItemID
+				attachedClients = sess.AttachedClients
+			}
+		}
+
+		if sessionID == "" {
+			for _, def := range CanonicalPoolSessions {
+				if def.Station == station {
+					sessionID = def.ID
+					break
+				}
+			}
+		}
+
+		bridge := d.AttachBridge()
+		var history []SessionLogEntry
+		if bridge != nil {
+			history = bridge.GetHistory(station)
+			if attachedClients == 0 {
+				attachedClients = bridge.AttachedClients(station)
+			}
+		}
+
+		return SessionAttachResult{
+			SessionID:       sessionID,
+			Station:         station,
+			State:           state,
+			ActiveItemID:    activeItemID,
+			AttachedClients: attachedClients,
+			History:         history,
+		}, nil
+	})
 }
 
 // RegisterHandler registra ou sobrescreve um handler para um método JSON-RPC (thread-safe).
@@ -260,6 +337,20 @@ func (d *RPCDispatcher) SetOrchestrator(o *HandoffOrchestrator) {
 	d.mu.Lock()
 	defer d.mu.Unlock()
 	d.orchestrator = o
+}
+
+// AttachBridge retorna o multiplexador de anexação de terminais às estações.
+func (d *RPCDispatcher) AttachBridge() *AttachBridge {
+	d.mu.RLock()
+	defer d.mu.RUnlock()
+	return d.attachBridge
+}
+
+// SetAttachBridge configura um AttachBridge customizado no despachador.
+func (d *RPCDispatcher) SetAttachBridge(ab *AttachBridge) {
+	d.mu.Lock()
+	defer d.mu.Unlock()
+	d.attachBridge = ab
 }
 
 // BroadcastSessionNotification emite uma notificação no canal unidirecional "session/notification".

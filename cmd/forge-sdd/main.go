@@ -393,6 +393,7 @@ func init() {
 	rootCmd.AddCommand(skillsCmd)
 	rootCmd.AddCommand(governanceCmd)
 	rootCmd.AddCommand(acpCmd)
+	rootCmd.AddCommand(attachCmd)
 }
 
 func main() {
