@@ -448,23 +448,57 @@ function openActivityModal(index) {
 
   // Comando
   const cmdCode = document.getElementById('actCommandCode');
-  const fullCmd = act.command || (act.args && act.args.length > 0 ? act.args.join(' ') : '') || act.details || act.action || '';
+  let fullCmd = act.command || (act.args && act.args.length > 0 ? act.args.join(' ') : '');
+  if (!fullCmd) {
+    if (act.tool === 'run_command' || act.tool === 'portao_a') {
+      fullCmd = act.action || '';
+    } else if (act.tool === 'audit' || act.tool === 'governance') {
+      fullCmd = `forge-sdd gate check && forge-sdd governance audit ${act.action || ''}`.trim();
+    } else if (act.tool === 'handoff') {
+      fullCmd = `forge-sdd queue handoff ${act.action || ''}`.trim();
+    } else if (act.tool === 'gate_flx01' || act.tool === 'human_gate') {
+      fullCmd = `forge-sdd gate approve ${act.action || ''}`.trim();
+    } else if (act.tool === 'plan' || act.tool === 'planner') {
+      fullCmd = `forge-sdd split-features ${act.action || ''}`.trim();
+    } else if (act.tool === 'context7' || act.tool === 'discovery') {
+      fullCmd = `forge-sdd discovery ${act.action || ''}`.trim();
+    } else {
+      fullCmd = act.action || '(Nenhum comando explícito)';
+    }
+  }
   if (cmdCode) {
     const codeEl = cmdCode.querySelector('code');
-    if (codeEl) codeEl.textContent = fullCmd || '(Nenhum comando explícito)';
+    if (codeEl) codeEl.textContent = fullCmd;
   }
 
   // Metadados
   const filePathEl = document.getElementById('actFilePath');
   if (filePathEl) {
-    filePathEl.textContent = act.file_path || act.filePath || '--';
-    filePathEl.title = act.file_path || act.filePath || '';
+    let fp = act.file_path || act.filePath || '';
+    if (!fp && act.action) {
+      if (act.action.includes('.md') || act.action.includes('.go') || act.action.includes('.json')) {
+        fp = act.action;
+      }
+    }
+    filePathEl.textContent = fp || '--';
+    filePathEl.title = fp || '';
   }
 
   const durationEl = document.getElementById('actDuration');
   if (durationEl) {
     if (act.duration_ms && act.duration_ms > 0) {
       durationEl.textContent = `${act.duration_ms} ms`;
+    } else if (act.timestamp && act.completed_at) {
+      try {
+        const diff = new Date(act.completed_at) - new Date(act.timestamp);
+        if (diff > 0) {
+          durationEl.textContent = `${diff} ms`;
+        } else {
+          durationEl.textContent = '< 1 ms';
+        }
+      } catch (e) {
+        durationEl.textContent = '--';
+      }
     } else {
       durationEl.textContent = '--';
     }
@@ -477,7 +511,13 @@ function openActivityModal(index) {
 
   const endTimeEl = document.getElementById('actEndTime');
   if (endTimeEl) {
-    endTimeEl.textContent = act.completed_at ? act.completed_at.replace('T', ' ').slice(0, 19) : '--';
+    if (act.completed_at) {
+      endTimeEl.textContent = act.completed_at.replace('T', ' ').slice(0, 19);
+    } else if (act.status === 'success' || act.status === 'done') {
+      endTimeEl.textContent = act.timestamp ? act.timestamp.replace('T', ' ').slice(0, 19) : '--';
+    } else {
+      endTimeEl.textContent = '-- (em andamento)';
+    }
   }
 
   // Saída / Output / Erro
@@ -496,8 +536,15 @@ function openActivityModal(index) {
         codeEl.textContent = act.output;
       } else {
         outTerminal.classList.remove('error-output');
-        if (outTitle) outTitle.textContent = 'Saída / Logs do Terminal';
-        codeEl.textContent = '(Nenhuma saída capturada no terminal)';
+        if (outTitle) outTitle.textContent = 'Detalhes da Operação';
+        let detailContent = `[STATUS: ${act.status.toUpperCase()}]\nEstação: ${stMeta.name}\nFerramenta: ${act.tool || 'tool'}`;
+        if (act.details) {
+          detailContent += `\nDetalhes: ${act.details}`;
+        }
+        if (act.action && act.action !== act.details) {
+          detailContent += `\nAção/Alvo: ${act.action}`;
+        }
+        codeEl.textContent = detailContent;
       }
     }
   }

@@ -79,6 +79,9 @@ func RecordActivityDetailed(dir string, item ActivityItem) error {
 	if item.Status != "running" && item.CompletedAt == "" {
 		item.CompletedAt = now
 	}
+	if item.DurationMs == 0 && item.CompletedAt != "" {
+		item.DurationMs = computeDuration(item.Timestamp, item.CompletedAt)
+	}
 
 	// Reconciliação automática: fecha atividades anteriores em 'running' da mesma estação
 	for i := range items {
@@ -86,6 +89,9 @@ func RecordActivityDetailed(dir string, item ActivityItem) error {
 			items[i].Status = "success"
 			if items[i].CompletedAt == "" {
 				items[i].CompletedAt = now
+			}
+			if items[i].DurationMs == 0 {
+				items[i].DurationMs = computeDuration(items[i].Timestamp, items[i].CompletedAt)
 			}
 		}
 	}
@@ -118,6 +124,9 @@ func ReconcileStationActivities(dir, station string) error {
 			if items[i].CompletedAt == "" {
 				items[i].CompletedAt = now
 			}
+			if items[i].DurationMs == 0 {
+				items[i].DurationMs = computeDuration(items[i].Timestamp, items[i].CompletedAt)
+			}
 			changed = true
 		}
 	}
@@ -147,6 +156,9 @@ func SanitizeOrphanActivities(dir string) (int, error) {
 			items[i].Status = "success"
 			if items[i].CompletedAt == "" {
 				items[i].CompletedAt = now
+			}
+			if items[i].DurationMs == 0 {
+				items[i].DurationMs = computeDuration(items[i].Timestamp, items[i].CompletedAt)
 			}
 			reconciled++
 		}
@@ -178,4 +190,13 @@ func LoadActivities(dir string) ([]ActivityItem, error) {
 		return nil, err
 	}
 	return items, nil
+}
+
+func computeDuration(startStr, endStr string) int64 {
+	t1, e1 := time.Parse(time.RFC3339, startStr)
+	t2, e2 := time.Parse(time.RFC3339, endStr)
+	if e1 == nil && e2 == nil && t2.After(t1) {
+		return t2.Sub(t1).Milliseconds()
+	}
+	return 0
 }

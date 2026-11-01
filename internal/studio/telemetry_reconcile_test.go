@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 	"time"
 
@@ -205,4 +206,49 @@ func TestStudioServer_ConcurrentActivityAndState(t *testing.T) {
 	case <-time.After(1 * time.Second):
 		// Sucesso
 	}
+}
+
+func TestStudioServer_TaskExecute_DetailedTelemetry(t *testing.T) {
+	tempDir := t.TempDir()
+
+	// Cria fila do Builder com uma tarefa
+	sq := &queue.StationQueue{
+		Station: queue.StationBuilder,
+		Version: 1,
+		Items: []queue.StationItem{
+			{
+				ID:           "task-builder-1",
+				Title:        "Implementar Testes",
+				Station:      queue.StationBuilder,
+				Status:       queue.StatusQueued,
+				ArtifactPath: "sdd/features/feat-01/task-01.md",
+			},
+		},
+	}
+	require.NoError(t, queue.SaveStationQueue(tempDir, sq))
+
+	srv, err := NewServer(Config{Dir: tempDir})
+	require.NoError(t, err)
+	defer srv.Stop()
+
+	// Executa a tarefa do Builder
+	body := strings.NewReader(`{"station":"builder","task_id":"task-builder-1"}`)
+	req := httptest.NewRequest(http.MethodPost, "/api/task/execute", body)
+	req.Header.Set("Content-Type", "application/json")
+	rec := httptest.NewRecorder()
+	srv.httpServer.Handler.ServeHTTP(rec, req)
+	require.Equal(t, http.StatusOK, rec.Code)
+
+	// Verifica se a atividade registrada contém Command, FilePath, Output e CompletedAt
+	activities, err := queue.LoadActivities(tempDir)
+	require.NoError(t, err)
+	require.NotEmpty(t, activities)
+
+	latest := activities[0]
+	assert.Equal(t, queue.StationBuilder, latest.Station)
+	assert.Equal(t, "success", latest.Status)
+	assert.Contains(t, latest.Command, "go test")
+	assert.Equal(t, "sdd/features/feat-01/task-01.md", latest.FilePath)
+	assert.NotEmpty(t, latest.Output)
+	assert.NotEmpty(t, latest.CompletedAt)
 }

@@ -6,14 +6,15 @@ Release v3.2.0-beta — NPM & GitHub Releases [x] done
 Release v3.2.1-beta — Three.js 3D Mascotes [x] done
 Feat 64 — Protocolo ACP (4 tasks) [x] 4/4 done
 Feat 65 — Pool de Sessões ACP & Standby [x] 4/4 done (PR #61)
-Feat 66 — Telemetria Detalhada & Reconciliação [x] 4/4 done
+Feat 66 — Telemetria Detalhada & Reconciliação [x] 4/4 done (PR #62)
+Fix 66 — Enriquecimento de Detalhes de Telemetria [x] done
 ```
 
 ## Features ativas
-- `feat/66-telemetria-detalhada-inspecao-e-reconciliacao`: Implementação completa das 4 subtarefas. Testes determinísticos com `-race` 100% aprovados.
+- `fix/66-telemetria-detalhes-execucao-e-output`: Correção implementada. Persistência detalhada de comandos, caminhos de arquivo, duração e logs de saída.
 
 ## Próximo passo
-**Próximo:** Submeter Pull Request e acionar auditoria da Estação 05 (Governança Camada B).
+**Próximo:** Validar auditoria de governança e atualizar PR.
 **Bloqueios:** Nenhum.
 
 > Histórico completo em `progress-log.md`
