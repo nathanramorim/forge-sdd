@@ -19,10 +19,33 @@
         <b id="projectName" style="color:var(--fg);">forge-sdd</b>
       </div>
       <div class="chip">
-        <span id="projectVersion">v3.2.1-beta</span>
+        <span id="projectVersion">v3.2.2-beta</span>
       </div>
       <div class="chip live" id="statusChip">
         <i></i>LIVE SSE
+      </div>
+      <div class="chip" id="sessionPoolChip" style="color:var(--ok);border-color:rgba(62,207,142,0.35);font-size:11px;" title="Todas as 5 sessões ACP canônicas estão pré-aquecidas e conectadas no boot">
+        <span class="live-dot" style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#3ecf8e;margin-right:5px;box-shadow:0 0 6px #3ecf8e;"></span>
+        <span id="sessionPoolCount">5</span> SESSÕES PRONTAS
+      </div>
+      <div class="chip autorun-chip" id="autoRunChip">
+        <svg class="autorun-bolt" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px;"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+        MODO AUTÔNOMO
+      </div>
+      <!-- Central de Notificações de Aprovação Humana (feat-67-02) -->
+      <div class="header-notification-wrap">
+        <button id="headerNotificationBell" class="notification-bell-btn" onclick="handleNotificationBellClick()" title="Nenhuma aprovação pendente no momento" aria-label="Notificações de Aprovação Humana">
+          <svg class="bell-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+          </svg>
+          <span id="headerNotificationCount" class="notification-badge mono">0</span>
+        </button>
+      </div>
+      <!-- Alternador de Visão Simples (Leigo) vs Técnica (Dev) -->
+      <div class="view-layer-toggle" id="viewLayerToggle" title="Alternar entre visão simples e técnica">
+        <button id="btnViewSimple" class="view-layer-btn active" onclick="setViewMode('simple')">VISÃO SIMPLES</button>
+        <button id="btnViewTech" class="view-layer-btn" onclick="setViewMode('tech')">VISÃO TÉCNICA</button>
       </div>
       <div class="mode-toggle">
         <button id="btnLive" class="mode-btn active" onclick="setStudioMode('LIVE')">LIVE</button>
@@ -33,21 +56,66 @@
 
   <!-- Container Principal -->
   <main class="studio-wrap">
-    <!-- Trilho de Handoff Ativo (CA-06) -->
-    <section class="handoff-box" aria-label="Trilho de Handoff">
-      <div class="handoff-route">
-        <span class="handoff-pill mono" id="hoFrom">lider</span>
-        <div class="handoff-pipe" aria-hidden="true">
-          <div class="handoff-packet"></div>
+    <!-- Esteira Visual de Progresso do Ciclo (Substitui a faixa confusa por esteira contínua) -->
+    <section class="handoff-box pipeline-stepper" id="pipelineStepper" aria-label="Esteira Visual de Progresso e Handoff">
+      <div class="stepper-track" id="pipelineStepperTrack">
+        <div class="step-node active" id="step-node-lider" data-station="lider">
+          <div class="step-num">1</div>
+          <div class="step-info">
+            <span class="step-title">Coordenação</span>
+            <span class="step-subtitle simple-only">O Líder</span>
+            <span class="step-subtitle tech-only mono">lider</span>
+          </div>
+          <span class="step-state-badge" id="step-badge-lider">Disponível</span>
         </div>
-        <span class="handoff-pill mono" id="hoTo">pm-architect</span>
+        <div class="step-connector" id="conn-lider-pm"></div>
+        <div class="step-node" id="step-node-pm" data-station="pm-architect">
+          <div class="step-num">2</div>
+          <div class="step-info">
+            <span class="step-title">Planejamento</span>
+            <span class="step-subtitle simple-only">PM & Planejador</span>
+            <span class="step-subtitle tech-only mono">pm-architect</span>
+          </div>
+          <span class="step-state-badge" id="step-badge-pm">Disponível</span>
+        </div>
+        <div class="step-connector" id="conn-pm-builder"></div>
+        <div class="step-node" id="step-node-builder" data-station="builder">
+          <div class="step-num">3</div>
+          <div class="step-info">
+            <span class="step-title">Construção</span>
+            <span class="step-subtitle simple-only">Construtor</span>
+            <span class="step-subtitle tech-only mono">builder</span>
+          </div>
+          <span class="step-state-badge" id="step-badge-builder">Disponível</span>
+        </div>
+        <div class="step-connector" id="conn-builder-gov"></div>
+        <div class="step-node" id="step-node-gov" data-station="governance">
+          <div class="step-num">4</div>
+          <div class="step-info">
+            <span class="step-title">Qualidade</span>
+            <span class="step-subtitle simple-only">Auditor</span>
+            <span class="step-subtitle tech-only mono">governance</span>
+          </div>
+          <span class="step-state-badge" id="step-badge-gov">Aprovado</span>
+        </div>
       </div>
-      <div class="handoff-payload">
-        <b>Transição & Contrato</b>
-        <span id="hoPayload">Discovery & Especificação</span>
-      </div>
-      <div class="chip" id="hoGate">
-        <i style="--o:var(--ok)"></i>Portão Validado
+
+      <div class="stepper-footer">
+        <div class="handoff-route tech-only">
+          <span class="handoff-pill mono" id="hoFrom">lider</span>
+          <div class="handoff-pipe" aria-hidden="true">
+            <div class="handoff-packet"></div>
+          </div>
+          <span class="handoff-pill mono" id="hoTo">pm-architect</span>
+        </div>
+        <div class="handoff-payload">
+          <b class="simple-only">Foco Atual da Equipe</b>
+          <b class="tech-only">Transição & Contrato</b>
+          <span id="hoPayload">Discovery & Especificação</span>
+        </div>
+        <div class="chip" id="hoGate">
+          <i style="--o:var(--ok)"></i>Portão Validado
+        </div>
       </div>
     </section>
 
@@ -78,31 +146,162 @@
     </section>
 
     <!-- Inspetor de Governança (CA-08) -->
-    <section class="gov-section" aria-label="Inspetor de Governança">
+    <section class="gov-section" id="govSection" aria-label="Inspetor de Governança">
       <div class="gov-panel">
-        <h3>Inspetor de Governança</h3>
-        <p style="color:var(--muted);font-size:12px;">Auditoria estrita em conformidade com as Camadas A (Gate determinístico) e B (Analista Read-Only).</p>
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <h3>Parecer da Auditoria Independente</h3>
+          <button id="btnToggleTechDetails" class="btn-toggle-tech mono" onclick="toggleTechnicalDetails()">Ver Detalhes Técnicos</button>
+        </div>
+        <p style="color:var(--muted);font-size:12px;">Auditoria estrita de conformidade realizada em modo somente-leitura.</p>
         <div class="gov-findings-list">
           <div class="finding-card conforme" id="govFindingCard">
-            <b>Portão de Governança Camada A & B</b>
+            <b>Auditoria de Conformidade e Qualidade</b>
             <p style="margin-top:4px;color:var(--muted);">Aguardando submissão ou inspeção ativa</p>
           </div>
         </div>
       </div>
       <div class="gov-panel">
-        <h3>Pilares Constitucionais (sdd/memory/constitution.md)</h3>
-        <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(130px, 1fr));gap:8px;margin-top:12px;">
-          <div class="chip mono" style="justify-content:center;">ARQ (1..4) OK</div>
-          <div class="chip mono" style="justify-content:center;">SEG (1..6) OK</div>
-          <div class="chip mono" style="justify-content:center;">DUP (1..5) OK</div>
-          <div class="chip mono" style="justify-content:center;">COD (1..5) OK</div>
-          <div class="chip mono" style="justify-content:center;">TST (1..5) OK</div>
-          <div class="chip mono" style="justify-content:center;">FLX (1..4) OK</div>
-          <div class="chip mono" style="justify-content:center;">GOV (1..5) OK</div>
+        <h3>Regras e Garantias Verificadas</h3>
+        <p style="color:var(--muted);font-size:12px;">Garantias de qualidade, segurança e arquitetura do projeto.</p>
+        <div id="govPillarsGrid" class="gov-pillars-grid">
+          <!-- Renderizado dinamicamente via studio.js -->
         </div>
       </div>
     </section>
   </main>
+
+  <!-- Drawer Lateral de Inspeção de Estação -->
+  <div id="drawerBackdrop" class="drawer-backdrop" onclick="closeStationDrawer()"></div>
+  <aside id="stationDrawer" class="station-drawer" aria-label="Painel de Inspeção da Estação"></aside>
+
+  <!-- Modal Visualizador de Spec Embutido (feat-63-03, Portão FLX-01) -->
+  <div id="specModalBackdrop" class="spec-modal-backdrop" onclick="closeSpecViewer()"></div>
+  <div id="specViewerModal" class="spec-viewer-modal" role="dialog" aria-modal="true" aria-labelledby="specModalTitle" aria-label="Visualizador de Especificação">
+    <div class="spec-modal-header">
+      <div class="spec-header-info">
+        <div class="spec-header-top-row">
+          <span class="chip mono" id="specStationBadge">02. PM & Arquiteto</span>
+          <span class="chip mono" id="specStatusBadge">Aguardando Revisão (FLX-01)</span>
+        </div>
+        <h2 id="specModalTitle">Especificação de Feature</h2>
+        <div class="spec-meta-row">
+          <span class="spec-path-label mono" id="specPathLabel">sdd/features/...</span>
+          <button id="specCopyPathBtn" class="copy-btn mono" onclick="copySpecPath()">Copiar Caminho</button>
+        </div>
+      </div>
+      <div class="spec-header-actions">
+        <a id="specVsCodeLink" href="#" class="btn-ide mono" title="Abrir no VS Code">VS Code</a>
+        <a id="specCursorLink" href="#" class="btn-ide cursor-btn mono" title="Abrir no Cursor">Cursor</a>
+        <button class="spec-close-btn" onclick="closeSpecViewer()" aria-label="Fechar Visualizador">&times;</button>
+      </div>
+    </div>
+    <div class="spec-modal-body" id="specModalBody">
+      <div class="markdown-body" id="specMarkdownContent">
+        <!-- Conteúdo Markdown formatado -->
+      </div>
+    </div>
+    <div class="spec-modal-footer">
+      <div class="spec-footer-info">
+        <span class="mono" id="specFileSize">0 bytes</span>
+        <span class="spec-gate-hint">Portão FLX-01 — Revisão Técnica & Conformidade Humana</span>
+      </div>
+      <div class="spec-footer-actions">
+        <button class="btn-secondary" onclick="closeSpecViewer()">Fechar</button>
+        <button id="btnApproveSpec" class="approve-spec-btn" onclick="handleApproveSpecClick()">
+          <span class="approve-icon">✓</span> Aprovar Spec (FLX-01)
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Inspeção Detalhada de Telemetria (feat-66-03) -->
+  <div id="activityModalBackdrop" class="activity-modal-backdrop" onclick="closeActivityModal()"></div>
+  <div id="activityModal" class="activity-modal" role="dialog" aria-modal="true" aria-labelledby="activityModalTitle" aria-label="Detalhes da Telemetria da Estação">
+    <div class="activity-modal-header">
+      <div class="activity-header-info">
+        <div class="activity-header-top-row">
+          <span class="chip mono" id="actStationBadge">04. Builder</span>
+          <span class="chip mono" id="actStatusBadge">running</span>
+          <span class="act-nav-hint mono">← → navegar • ESC fechar</span>
+        </div>
+        <h2 id="activityModalTitle">Inspeção de Atividade</h2>
+        <div class="act-meta-row">
+          <span class="act-tool-badge mono" id="actToolName">tool</span>
+          <span class="act-action-label mono" id="actActionDesc">Ação</span>
+        </div>
+      </div>
+      <div class="activity-header-actions">
+        <button class="activity-nav-btn mono" id="btnActPrev" onclick="navigateActivity(-1)" title="Evento anterior (Seta Esquerda)">‹ Anterior</button>
+        <button class="activity-nav-btn mono" id="btnActNext" onclick="navigateActivity(1)" title="Próximo evento (Seta Direita)">Próximo ›</button>
+        <button class="activity-close-btn" onclick="closeActivityModal()" aria-label="Fechar Detalhes">&times;</button>
+      </div>
+    </div>
+    <div class="activity-modal-body" id="activityModalBody">
+      <div class="act-section" id="actCommandSection">
+        <div class="act-section-header">
+          <span class="act-section-title">Comando Executado</span>
+          <button id="actCopyCmdBtn" class="copy-btn mono" onclick="copyActivityCommand()">Copiar Comando</button>
+        </div>
+        <pre class="act-terminal-code mono" id="actCommandCode"><code></code></pre>
+      </div>
+
+      <div class="act-meta-grid">
+        <div class="act-meta-item">
+          <span class="act-meta-label">Arquivo Afetado</span>
+          <span class="act-meta-val mono" id="actFilePath">--</span>
+        </div>
+        <div class="act-meta-item">
+          <span class="act-meta-label">Duração</span>
+          <span class="act-meta-val mono" id="actDuration">--</span>
+        </div>
+        <div class="act-meta-item">
+          <span class="act-meta-label">Início</span>
+          <span class="act-meta-val mono" id="actStartTime">--</span>
+        </div>
+        <div class="act-meta-item">
+          <span class="act-meta-label">Término</span>
+          <span class="act-meta-val mono" id="actEndTime">--</span>
+        </div>
+      </div>
+
+      <div class="act-section" id="actOutputSection">
+        <div class="act-terminal-window">
+          <div class="act-terminal-header">
+            <div class="act-term-controls">
+              <span class="act-term-dot act-dot-red"></span>
+              <span class="act-term-dot act-dot-yellow"></span>
+              <span class="act-term-dot act-dot-green"></span>
+            </div>
+            <div class="act-term-title-wrapper">
+              <span class="act-section-title mono" id="actOutputTitle">TERMINAL OUTPUT</span>
+            </div>
+            <div class="act-term-search-bar">
+              <div class="act-search-input-wrapper">
+                <input type="text" id="actSearchInput" class="act-search-input mono" placeholder="Buscar no log... (Enter para próximo)" oninput="handleActivitySearchInput(this.value)" onkeydown="handleActivitySearchKeydown(event)" autocomplete="off" spellcheck="false" />
+                <span class="act-search-count mono" id="actSearchCount"></span>
+              </div>
+              <div class="act-search-nav">
+                <button class="act-search-btn mono" id="btnSearchPrev" onclick="navigateSearchResult(-1)" title="Ocorrência anterior (Shift+Enter)">▲</button>
+                <button class="act-search-btn mono" id="btnSearchNext" onclick="navigateSearchResult(1)" title="Próxima ocorrência (Enter)">▼</button>
+              </div>
+              <button id="actCopyOutBtn" class="copy-btn mono act-term-copy-btn" onclick="copyActivityOutput()">Copiar Log</button>
+            </div>
+          </div>
+          <div class="act-terminal-body-wrap" id="actTerminalBodyWrap">
+            <pre class="act-terminal-output mono" id="actOutputTerminal"><code id="actOutputCode"></code></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="activity-modal-footer">
+      <div class="act-footer-info">
+        <span class="mono" id="actIndexIndicator">Evento 0 de 0</span>
+      </div>
+      <div class="act-footer-actions">
+        <button class="btn-secondary" onclick="closeActivityModal()">Fechar</button>
+      </div>
+    </div>
+  </div>
 
   <!-- Rodapé -->
   <footer class="studio-foot">

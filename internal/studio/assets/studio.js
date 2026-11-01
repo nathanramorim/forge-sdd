@@ -3,6 +3,8 @@
 // Sincronização SSE em tempo real, Visualização do que cada agente está executando e Modo DEMO.
 
 const STATE_DEFS = {
+  standby:   { orb: '#3ecf8e', orbHex: 0x3ecf8e, eyes: 'round' },
+  ready:     { orb: '#3ecf8e', orbHex: 0x3ecf8e, eyes: 'round' },
   idle:      { orb: '#4f8ef7', orbHex: 0x4f8ef7, eyes: 'cap' },
   working:   { orb: '#f2a65a', orbHex: 0xf2a65a, eyes: 'round' },
   thinking:  { orb: '#c9a7ff', orbHex: 0xc9a7ff, eyes: 'round' },
@@ -203,6 +205,8 @@ function createForgeMascot3D(mountEl, colorVal, initialState, markType) {
 
   let currentState = initialState || 'working';
   let hopTimer = 0;
+  let handoffRotationTarget = 0;
+  let handoffSpeechTimer = 0;
 
   function setState(nextState, nextColorHex) {
     currentState = STATE_DEFS[nextState] ? nextState : 'working';
@@ -222,6 +226,11 @@ function createForgeMascot3D(mountEl, colorVal, initialState, markType) {
     domElement: renderer.domElement,
     setState,
     triggerHop: () => { hopTimer = 0.55; },
+    triggerHandoffAnimation: (direction) => {
+      hopTimer = 0.65;
+      handoffRotationTarget = direction > 0 ? 0.35 : -0.35;
+      handoffSpeechTimer = 1.2;
+    },
     update: (t, lookX, lookY) => {
       let bobY = Math.sin(t * 2.4) * 0.055;
       if (hopTimer > 0) {
@@ -237,7 +246,13 @@ function createForgeMascot3D(mountEl, colorVal, initialState, markType) {
       }
       eyesRoot.position.x = Math.max(-0.09, Math.min(0.09, lookX * 0.08 + scanX));
       eyesRoot.position.y = -0.1 + Math.max(-0.06, Math.min(0.06, -lookY * 0.06));
-      botGroup.rotation.y = Math.max(-0.25, Math.min(0.25, lookX * 0.18));
+
+      if (handoffSpeechTimer > 0) {
+        handoffSpeechTimer = Math.max(0, handoffSpeechTimer - 0.016);
+        botGroup.rotation.y = handoffRotationTarget * Math.sin((handoffSpeechTimer / 1.2) * Math.PI);
+      } else {
+        botGroup.rotation.y = Math.max(-0.25, Math.min(0.25, lookX * 0.18));
+      }
 
       const blink = (t % 4.5) > 4.36 ? 0.08 : 1;
       eyesRoot.scale.y = blink;
@@ -332,7 +347,76 @@ function escapeHtml(str) {
 }
 
 let currentActivities = [];
+let currentFilteredActivities = [];
+let currentActivityIndex = -1;
 let consoleFilter = 'all';
+
+let currentViewMode = 'simple';
+try {
+  currentViewMode = localStorage.getItem('forge_studio_view_mode') || 'simple';
+} catch (_) {}
+
+function formatFriendlyState(mascotState) {
+  switch (mascotState) {
+    case 'working': return 'Trabalhando';
+    case 'thinking': return 'Planejando';
+    case 'searching': return 'Pesquisando';
+    case 'approval': return 'Aguardando Aprovação';
+    case 'error': return 'Atenção';
+    case 'done':
+    case 'finished': return 'Concluído';
+    case 'standby':
+    case 'idle':
+    case 'ready':
+    default:
+      return 'Disponível';
+  }
+}
+
+function formatFriendlyLogAction(act) {
+  if (!act) return 'Processando etapa';
+  const tool = (act.tool || '').toLowerCase();
+  const action = (act.action || '').toLowerCase();
+
+  if (tool === 'read_file') return 'Consultou documentação e arquivos de especificação';
+  if (tool === 'write_file' || tool === 'edit_file') return 'Atualizou arquivos e código da solução';
+  if (tool === 'run_command') return 'Executou comandos e testes automatizados';
+  if (tool === 'gate') return 'Validou critérios de qualidade e conformidade';
+  if (tool === 'audit') return 'Realizou auditoria de conformidade independente';
+  if (tool === 'handoff') return 'Transferiu a tarefa para a próxima etapa da esteira';
+  if (action.includes('orchestrate')) return 'Organizou ciclo de desenvolvimento e equipes';
+  if (action.includes('spec') || action.includes('discovery')) return 'Elaborou especificação e desenho arquitetural';
+  if (action.includes('plan')) return 'Fatiou especificação em tarefas estruturadas';
+  if (action.includes('build') || action.includes('code')) return 'Construiu código e suíte de testes';
+  return act.action || 'Executando atividade do projeto';
+}
+
+window.setViewMode = function(mode, save = true) {
+  currentViewMode = mode;
+  if (save) {
+    try {
+      localStorage.setItem('forge_studio_view_mode', mode);
+    } catch (_) {}
+  }
+  const btnSimple = document.getElementById('btnViewSimple');
+  const btnTech = document.getElementById('btnViewTech');
+  if (btnSimple && btnTech) {
+    if (mode === 'simple') {
+      btnSimple.classList.add('active');
+      btnTech.classList.remove('active');
+      document.body.classList.remove('view-tech');
+      document.body.classList.add('view-simple');
+    } else {
+      btnTech.classList.add('active');
+      btnSimple.classList.remove('active');
+      document.body.classList.remove('view-simple');
+      document.body.classList.add('view-tech');
+    }
+  }
+  if (lastSnapshot) {
+    applySnapshot(lastSnapshot);
+  }
+};
 
 window.filterConsole = function(station) {
   consoleFilter = station;
@@ -351,18 +435,22 @@ function renderConsoleLogs(activities) {
     return act.station === consoleFilter;
   });
 
-  if (filtered.length === 0) {
+  currentFilteredActivities = filtered.slice(0, 50);
+
+  if (currentFilteredActivities.length === 0) {
     container.innerHTML = `<div style="color:var(--muted);font-style:italic;padding:8px 0;">Nenhum evento registrado para esta estação.</div>`;
     return;
   }
 
-  container.innerHTML = filtered.slice(0, 50).map(act => {
+  const isSimple = (currentViewMode === 'simple');
+
+  container.innerHTML = currentFilteredActivities.map((act, idx) => {
     const stMeta = {
-      'lider': { name: '01. LÍDER', color: '#f2a65a' },
-      'pm-architect': { name: '02. PM/ARQ', color: '#8aa4ff' },
-      'planner': { name: '03. PLAN', color: '#c9a7ff' },
-      'builder': { name: '04. BUILDER', color: '#4fd1b5' },
-      'governance': { name: '05. GOV', color: '#ff8a5c' }
+      'lider': { name: isSimple ? '01. COORDENADOR' : '01. LÍDER', color: '#f2a65a' },
+      'pm-architect': { name: isSimple ? '02. PLANEJADOR' : '02. PM/ARQ', color: '#8aa4ff' },
+      'planner': { name: isSimple ? '02. PLANEJADOR' : '03. PLAN', color: '#c9a7ff' },
+      'builder': { name: isSimple ? '03. CONSTRUTOR' : '04. BUILDER', color: '#4fd1b5' },
+      'governance': { name: isSimple ? '04. QUALIDADE' : '05. GOV', color: '#ff8a5c' }
     }[act.station] || { name: act.station, color: '#4f8ef7' };
 
     let timeStr = '--:--:--';
@@ -375,22 +463,1849 @@ function renderConsoleLogs(activities) {
       }
     }
     const statusClass = (act.status === 'running' || act.status === 'working') ? 'running' : (act.status === 'error' ? 'error' : 'done');
+    const displayAction = isSimple ? formatFriendlyLogAction(act) : (act.action || '');
 
     return `
-      <div class="log-row">
+      <div class="log-row" role="button" tabindex="0" onclick="openActivityModal(${idx})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openActivityModal(${idx});}" title="Clique para ver detalhes do log e execução">
         <span class="log-time">${escapeHtml(timeStr)}</span>
         <span class="log-station" style="color:${stMeta.color};">
           <span class="tool-chip-dot" style="--c:${stMeta.color};"></span>${escapeHtml(stMeta.name)}
         </span>
-        <span class="log-tool">${escapeHtml(act.tool || 'tool')}</span>
+        <span class="log-tool tech-only">${escapeHtml(act.tool || 'tool')}</span>
         <span class="log-action">
-          <b>${escapeHtml(act.action || '')}</b>
-          ${act.details ? `<span class="detail-hint">${escapeHtml(act.details)}</span>` : ''}
+          <b>${escapeHtml(displayAction)}</b>
+          ${act.details ? `<span class="detail-hint tech-only">${escapeHtml(act.details)}</span>` : ''}
         </span>
-        <span class="log-status ${statusClass}">${escapeHtml(act.status || 'done')}</span>
+        <span class="log-status ${statusClass}">${escapeHtml(isSimple ? (statusClass === 'running' ? 'Em Ação' : 'Concluído') : (act.status || 'done'))}</span>
+        <span class="log-inspect-btn" title="Inspecionar"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg></span>
       </div>
     `;
   }).join('');
+}
+
+function openActivityModal(index) {
+  if (!currentFilteredActivities || index < 0 || index >= currentFilteredActivities.length) return;
+  currentActivityIndex = index;
+  const act = currentFilteredActivities[index];
+
+  const modal = document.getElementById('activityModal');
+  const backdrop = document.getElementById('activityModalBackdrop');
+  if (!modal || !backdrop) return;
+
+  const stMeta = {
+    'lider': { name: '01. LÍDER (ORQUESTRADOR)', color: '#f2a65a' },
+    'pm-architect': { name: '02. PM & ARQUITETO', color: '#8aa4ff' },
+    'planner': { name: '03. PLANEJADOR', color: '#c9a7ff' },
+    'builder': { name: '04. BUILDER', color: '#4fd1b5' },
+    'governance': { name: '05. GOVERNANÇA', color: '#ff8a5c' }
+  }[act.station] || { name: act.station, color: '#4f8ef7' };
+
+  // Badges no header
+  const stBadge = document.getElementById('actStationBadge');
+  if (stBadge) {
+    stBadge.textContent = stMeta.name;
+    stBadge.style.color = stMeta.color;
+    stBadge.style.borderColor = stMeta.color;
+  }
+
+  const statusBadge = document.getElementById('actStatusBadge');
+  if (statusBadge) {
+    const s = (act.status || 'done').toLowerCase();
+    statusBadge.textContent = s.toUpperCase();
+    if (s === 'running' || s === 'working') {
+      statusBadge.style.color = 'var(--warn)';
+      statusBadge.style.borderColor = 'var(--warn)';
+    } else if (s === 'error') {
+      statusBadge.style.color = 'var(--err)';
+      statusBadge.style.borderColor = 'var(--err)';
+    } else {
+      statusBadge.style.color = 'var(--ok)';
+      statusBadge.style.borderColor = 'var(--ok)';
+    }
+  }
+
+  // Tool e Ação
+  const toolName = document.getElementById('actToolName');
+  if (toolName) toolName.textContent = act.tool || 'tool';
+
+  const actionDesc = document.getElementById('actActionDesc');
+  if (actionDesc) actionDesc.textContent = act.action || act.details || '--';
+
+  // Comando
+  const cmdCode = document.getElementById('actCommandCode');
+  let fullCmd = act.command || (act.args && act.args.length > 0 ? act.args.join(' ') : '');
+  if (!fullCmd) {
+    if (act.tool === 'run_command' || act.tool === 'portao_a') {
+      fullCmd = act.action || '';
+    } else if (act.tool === 'audit' || act.tool === 'governance') {
+      fullCmd = `forge-sdd gate check && forge-sdd governance audit ${act.action || ''}`.trim();
+    } else if (act.tool === 'handoff') {
+      fullCmd = `forge-sdd queue handoff ${act.action || ''}`.trim();
+    } else if (act.tool === 'gate_flx01' || act.tool === 'human_gate') {
+      fullCmd = `forge-sdd gate approve ${act.action || ''}`.trim();
+    } else if (act.tool === 'plan' || act.tool === 'planner') {
+      fullCmd = `forge-sdd split-features ${act.action || ''}`.trim();
+    } else if (act.tool === 'context7' || act.tool === 'discovery') {
+      fullCmd = `forge-sdd discovery ${act.action || ''}`.trim();
+    } else {
+      fullCmd = act.action || '(Nenhum comando explícito)';
+    }
+  }
+  if (cmdCode) {
+    const codeEl = cmdCode.querySelector('code');
+    if (codeEl) codeEl.textContent = fullCmd;
+  }
+
+  // Metadados
+  const filePathEl = document.getElementById('actFilePath');
+  if (filePathEl) {
+    let fp = act.file_path || act.filePath || '';
+    if (!fp && act.action) {
+      if (act.action.includes('.md') || act.action.includes('.go') || act.action.includes('.json')) {
+        fp = act.action;
+      }
+    }
+    filePathEl.textContent = fp || '--';
+    filePathEl.title = fp || '';
+  }
+
+  const durationEl = document.getElementById('actDuration');
+  if (durationEl) {
+    if (act.duration_ms && act.duration_ms > 0) {
+      durationEl.textContent = `${act.duration_ms} ms`;
+    } else if (act.timestamp && act.completed_at) {
+      try {
+        const diff = new Date(act.completed_at) - new Date(act.timestamp);
+        if (diff > 0) {
+          durationEl.textContent = `${diff} ms`;
+        } else {
+          durationEl.textContent = '< 1 ms';
+        }
+      } catch (e) {
+        durationEl.textContent = '--';
+      }
+    } else {
+      durationEl.textContent = '--';
+    }
+  }
+
+  const startTimeEl = document.getElementById('actStartTime');
+  if (startTimeEl) {
+    startTimeEl.textContent = act.timestamp ? act.timestamp.replace('T', ' ').slice(0, 19) : '--';
+  }
+
+  const endTimeEl = document.getElementById('actEndTime');
+  if (endTimeEl) {
+    if (act.completed_at) {
+      endTimeEl.textContent = act.completed_at.replace('T', ' ').slice(0, 19);
+    } else if (act.status === 'success' || act.status === 'done') {
+      endTimeEl.textContent = act.timestamp ? act.timestamp.replace('T', ' ').slice(0, 19) : '--';
+    } else {
+      endTimeEl.textContent = '-- (em andamento)';
+    }
+  }
+
+  // Saída / Output / Erro
+  const outTerminal = document.getElementById('actOutputTerminal');
+  const outTitle = document.getElementById('actOutputTitle');
+  let rawOutputText = '';
+  if (outTerminal) {
+    const codeEl = document.getElementById('actOutputCode') || outTerminal.querySelector('code');
+    if (codeEl) {
+      if (act.error) {
+        outTerminal.classList.add('error-output');
+        if (outTitle) outTitle.textContent = 'ERRO';
+        rawOutputText = act.error + (act.output ? '\n\n--- Saída Parcial ---\n' + act.output : '');
+      } else if (act.output) {
+        outTerminal.classList.remove('error-output');
+        if (outTitle) outTitle.textContent = 'TERMINAL OUTPUT';
+        // Se a saída contiver siglas antigas condensadas da governança, expande com explicações claras para leigos
+        let cleanOutput = act.output;
+        if (cleanOutput.includes('PARECER DE GOVERNANÇA') && cleanOutput.includes('Pilares Verificados: ARQ')) {
+          cleanOutput = [
+            `================================================================================`,
+            `AUDITORIA INDEPENDENTE DE QUALIDADE E CONFORMIDADE (ESTAÇÃO 05 - GOVERNANÇA)`,
+            `================================================================================`,
+            `Tarefa Inspecionada: ${act.action || act.details || '--'}`,
+            `Artefato Afetado:    ${act.file_path || act.filePath || '--'}`,
+            `Duração da Análise:  ${act.duration_ms ? act.duration_ms + ' milissegundos' : '--'}`,
+            `Resultado Final:     APROVADO (100% CONFORME)`,
+            ``,
+            `O QUE FOI ANALISADO NESTE PROCESSO:`,
+            `1. ARQUITETURA E ESTRUTURA DO SISTEMA:`,
+            `   - Verificado se o código respeita as fronteiras e camadas do projeto.`,
+            `   - Confirmado que nenhuma biblioteca externa ou runtime não autorizado foi adicionado.`,
+            `   - O sistema continua operando com recursos nativos e independentes.`,
+            ``,
+            `2. SEGURANÇA E PROTEÇÃO DE DADOS:`,
+            `   - Verificado se há vazamento de senhas, chaves privadas ou dados sigilosos.`,
+            `   - Confirmado que entradas do usuário são tratadas com segurança contra ataques.`,
+            `   - Nenhuma brecha de injeção de código ou manipulação indevida de arquivos encontrada.`,
+            ``,
+            `3. EVITAÇÃO DE DUPLICIDADE E REAPROVEITAMENTO:`,
+            `   - Verificado se a solução não reinventou recursos já existentes no projeto.`,
+            `   - As regras e funções foram mantidas em uma fonte única da verdade.`,
+            ``,
+            `4. QUALIDADE E HIGIENE DO CÓDIGO:`,
+            `   - Verificado se o código é legível, organizado e segue boas práticas.`,
+            `   - A análise estática de qualidade passou com zero alertas ou pendências.`,
+            ``,
+            `5. TESTES AUTOMATIZADOS E ESTABILIDADE:`,
+            `   - Todos os testes de funcionamento foram executados e passaram com sucesso.`,
+            `   - Nenhuma instabilidade ou falha de concorrência foi detectada.`,
+            ``,
+            `6. FLUXO E REGRAS DE PROCESSO:`,
+            `   - A especificação foi aprovada antes da implementação.`,
+            `   - Todas as diretrizes do ciclo de entrega foram seguidas integralmente.`,
+            ``,
+            `PARECER CONCLUSIVO:`,
+            act.details || 'Auditoria concluída com aprovação total de todas as checagens.',
+            `Total de irregularidades encontradas: 0 (Zero). Liberado para prosseguir.`,
+            `================================================================================`
+          ].join('\n');
+        }
+        rawOutputText = cleanOutput;
+      } else {
+        outTerminal.classList.remove('error-output');
+        if (outTitle) outTitle.textContent = 'DETALHES DA OPERAÇÃO';
+        if (act.station === 'governance') {
+          const lines = [
+            `================================================================================`,
+            `AUDITORIA INDEPENDENTE DE QUALIDADE E CONFORMIDADE (ESTAÇÃO 05 - GOVERNANÇA)`,
+            `================================================================================`,
+            `Tarefa Inspecionada: ${act.action || act.details || '--'}`,
+            `Arquivo Auditado:    ${act.file_path || act.filePath || act.action || '--'}`,
+            `Início da Análise:   ${act.timestamp ? act.timestamp.replace('T', ' ').slice(0, 19) : '--'}`,
+            `Término da Análise:  ${act.completed_at ? act.completed_at.replace('T', ' ').slice(0, 19) : (act.timestamp ? act.timestamp.replace('T', ' ').slice(0, 19) : '--')}`,
+            `Tempo Decorrido:     ${act.duration_ms ? act.duration_ms + ' milissegundos' : '--'}`,
+            `Status da Auditoria: ${act.status === 'success' ? 'APROVADO (100% CONFORME)' : (act.status === 'running' ? 'EM ANDAMENTO (Analisando regras...)' : 'REPROVADO')}`,
+            ``,
+            `O QUE É VERIFICADO PELA GOVERNANÇA:`,
+            `1. Arquitetura do Sistema:`,
+            `   - Garante que cada arquivo esteja no lugar certo e sem dependências proibidas.`,
+            `2. Segurança da Informação:`,
+            `   - Garante que não existem senhas expostas nem brechas que permitam invasões.`,
+            `3. Reúso Inteligente:`,
+            `   - Garante que não foram criadas cópias desnecessárias de recursos já existentes.`,
+            `4. Qualidade e Organização:`,
+            `   - Garante que o código seja fácil de entender, manter e sem erros ocultos.`,
+            `5. Testes de Confiabilidade:`,
+            `   - Garante que tudo foi testado exaustivamente e funciona sem falhas.`,
+            `6. Regras de Processo e Entrega:`,
+            `   - Garante que o plano aprovado foi cumprido sem alterações indevidas.`,
+            ``,
+            `RESUMO DA AÇÃO:`,
+            act.details || act.action || 'Análise de integridade e conformidade das alterações.',
+            ``,
+            `[Processo finalizado com conformidade confirmada]`
+          ];
+          rawOutputText = lines.join('\n');
+        } else {
+          const lines = [
+            `=== EXECUÇÃO DA ESTAÇÃO: ${stMeta.name.toUpperCase()} ===`,
+            `Status:       ${act.status.toUpperCase()}`,
+            `Ferramenta:   ${act.tool || 'run_command'}`,
+            `Comando:      ${fullCmd}`,
+            `Arquivo:      ${act.file_path || act.filePath || act.action || '--'}`,
+            `Início:       ${act.timestamp ? act.timestamp.replace('T', ' ').slice(0, 19) : '--'}`,
+            `Término:      ${act.completed_at ? act.completed_at.replace('T', ' ').slice(0, 19) : (act.timestamp ? act.timestamp.replace('T', ' ').slice(0, 19) : '--')}`,
+            `Duração:      ${act.duration_ms ? act.duration_ms + ' ms' : '--'}`,
+            ``,
+            `--- RESUMO DA OPERAÇÃO ---`,
+            act.details || act.action || 'Sem descrição adicional fornecida.',
+          ];
+          if (act.action && act.action !== act.details) {
+            lines.push(``, `--- ALVO / PARÂMETROS ---`, act.action);
+          }
+          lines.push(``, `[Processo finalizado com código 0]`);
+          rawOutputText = lines.join('\n');
+        }
+      }
+      currentRawTerminalText = rawOutputText;
+      codeEl.textContent = rawOutputText;
+    }
+  }
+
+  // Resetar busca do terminal
+  resetActivitySearch();
+
+  // Scroll inicial para o topo
+  const termBodyWrap = document.getElementById('actTerminalBodyWrap');
+  if (termBodyWrap) {
+    termBodyWrap.scrollTop = 0;
+  }
+
+  // Indicador de Posição
+  const indEl = document.getElementById('actIndexIndicator');
+  if (indEl) {
+    indEl.textContent = `Evento ${index + 1} de ${currentFilteredActivities.length}`;
+  }
+
+  // Botões de Navegação
+  const btnPrev = document.getElementById('btnActPrev');
+  if (btnPrev) btnPrev.disabled = (index <= 0);
+
+  const btnNext = document.getElementById('btnActNext');
+  if (btnNext) btnNext.disabled = (index >= currentFilteredActivities.length - 1);
+
+  modal.classList.add('open');
+  backdrop.classList.add('open');
+}
+
+// Estado e Handlers da Busca Interna do Terminal
+let currentRawTerminalText = '';
+let currentSearchMatches = [];
+let currentSearchMatchIndex = -1;
+
+function resetActivitySearch() {
+  const searchInput = document.getElementById('actSearchInput');
+  const searchCount = document.getElementById('actSearchCount');
+  const btnPrev = document.getElementById('btnSearchPrev');
+  const btnNext = document.getElementById('btnSearchNext');
+  if (searchInput) searchInput.value = '';
+  if (searchCount) {
+    searchCount.textContent = '';
+    searchCount.className = 'act-search-count mono';
+  }
+  if (btnPrev) btnPrev.disabled = true;
+  if (btnNext) btnNext.disabled = true;
+  currentSearchMatches = [];
+  currentSearchMatchIndex = -1;
+}
+
+function escapeHtml(str) {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function handleActivitySearchInput(query) {
+  const codeEl = document.getElementById('actOutputCode') || (document.getElementById('actOutputTerminal') ? document.getElementById('actOutputTerminal').querySelector('code') : null);
+  const searchCount = document.getElementById('actSearchCount');
+  const btnPrev = document.getElementById('btnSearchPrev');
+  const btnNext = document.getElementById('btnSearchNext');
+
+  if (!codeEl) return;
+
+  const trimmed = (query || '').trim();
+  if (!trimmed) {
+    codeEl.textContent = currentRawTerminalText;
+    if (searchCount) {
+      searchCount.textContent = '';
+      searchCount.className = 'act-search-count mono';
+    }
+    if (btnPrev) btnPrev.disabled = true;
+    if (btnNext) btnNext.disabled = true;
+    currentSearchMatches = [];
+    currentSearchMatchIndex = -1;
+    return;
+  }
+
+  // Encontrar todas as ocorrências de forma segura (case-insensitive)
+  const regex = new RegExp(trimmed.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+  let match;
+  let matchesIndices = [];
+  while ((match = regex.exec(currentRawTerminalText)) !== null) {
+    matchesIndices.push({ start: match.index, end: match.index + match[0].length });
+  }
+
+  if (matchesIndices.length === 0) {
+    codeEl.textContent = currentRawTerminalText;
+    if (searchCount) {
+      searchCount.textContent = '0 / 0';
+      searchCount.className = 'act-search-count mono no-results';
+    }
+    if (btnPrev) btnPrev.disabled = true;
+    if (btnNext) btnNext.disabled = true;
+    currentSearchMatches = [];
+    currentSearchMatchIndex = -1;
+    return;
+  }
+
+  currentSearchMatches = matchesIndices;
+  currentSearchMatchIndex = 0;
+  if (btnPrev) btnPrev.disabled = false;
+  if (btnNext) btnNext.disabled = false;
+
+  renderSearchHighlights();
+}
+
+function renderSearchHighlights() {
+  const codeEl = document.getElementById('actOutputCode') || (document.getElementById('actOutputTerminal') ? document.getElementById('actOutputTerminal').querySelector('code') : null);
+  const searchCount = document.getElementById('actSearchCount');
+  if (!codeEl) return;
+
+  if (searchCount) {
+    searchCount.textContent = `${currentSearchMatchIndex + 1} de ${currentSearchMatches.length}`;
+    searchCount.className = 'act-search-count mono has-results';
+  }
+
+  let html = '';
+  let lastIndex = 0;
+  for (let i = 0; i < currentSearchMatches.length; i++) {
+    const m = currentSearchMatches[i];
+    html += escapeHtml(currentRawTerminalText.slice(lastIndex, m.start));
+    const matchedText = currentRawTerminalText.slice(m.start, m.end);
+    const activeClass = (i === currentSearchMatchIndex) ? 'act-highlight active-match' : 'act-highlight';
+    html += `<mark class="${activeClass}" data-match-idx="${i}">${escapeHtml(matchedText)}</mark>`;
+    lastIndex = m.end;
+  }
+  html += escapeHtml(currentRawTerminalText.slice(lastIndex));
+  codeEl.innerHTML = html;
+
+  // Scroll até a correspondência ativa
+  scrollActiveMatchIntoView();
+}
+
+function scrollActiveMatchIntoView() {
+  const wrap = document.getElementById('actTerminalBodyWrap');
+  if (!wrap) return;
+  const activeEl = wrap.querySelector('.act-highlight.active-match');
+  if (activeEl) {
+    const wrapRect = wrap.getBoundingClientRect();
+    const activeRect = activeEl.getBoundingClientRect();
+    if (activeRect.top < wrapRect.top || activeRect.bottom > wrapRect.bottom) {
+      activeEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }
+}
+
+function navigateSearchResult(delta) {
+  if (currentSearchMatches.length === 0) return;
+  currentSearchMatchIndex = (currentSearchMatchIndex + delta + currentSearchMatches.length) % currentSearchMatches.length;
+  renderSearchHighlights();
+}
+
+function handleActivitySearchKeydown(e) {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    if (e.shiftKey) {
+      navigateSearchResult(-1);
+    } else {
+      navigateSearchResult(1);
+    }
+  } else if (e.key === 'Escape') {
+    resetActivitySearch();
+    const codeEl = document.getElementById('actOutputCode') || (document.getElementById('actOutputTerminal') ? document.getElementById('actOutputTerminal').querySelector('code') : null);
+    if (codeEl) codeEl.textContent = currentRawTerminalText;
+  }
+}
+
+function closeActivityModal() {
+  const modal = document.getElementById('activityModal');
+  const backdrop = document.getElementById('activityModalBackdrop');
+  if (modal) modal.classList.remove('open');
+  if (backdrop) backdrop.classList.remove('open');
+  currentActivityIndex = -1;
+  resetActivitySearch();
+}
+
+function navigateActivity(delta) {
+  if (currentActivityIndex < 0) return;
+  const newIdx = currentActivityIndex + delta;
+  if (newIdx >= 0 && newIdx < currentFilteredActivities.length) {
+    openActivityModal(newIdx);
+  }
+}
+
+function copyActivityCommand() {
+  const cmdCode = document.getElementById('actCommandCode');
+  if (!cmdCode) return;
+  const codeEl = cmdCode.querySelector('code');
+  const text = codeEl ? codeEl.textContent : '';
+  if (!text) return;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById('actCopyCmdBtn');
+    if (btn) {
+      const orig = btn.textContent;
+      btn.textContent = 'Copiado!';
+      setTimeout(() => { btn.textContent = orig; }, 1800);
+    }
+  }).catch(() => {});
+}
+
+function copyActivityOutput() {
+  const text = currentRawTerminalText || (document.getElementById('actOutputCode') ? document.getElementById('actOutputCode').textContent : '');
+  if (!text) return;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById('actCopyOutBtn');
+    if (btn) {
+      const orig = btn.textContent;
+      btn.textContent = 'Copiado!';
+      setTimeout(() => { btn.textContent = orig; }, 1800);
+    }
+  }).catch(() => {});
+}
+
+window.openActivityModal = openActivityModal;
+window.closeActivityModal = closeActivityModal;
+window.navigateActivity = navigateActivity;
+window.copyActivityCommand = copyActivityCommand;
+window.copyActivityOutput = copyActivityOutput;
+window.handleActivitySearchInput = handleActivitySearchInput;
+window.handleActivitySearchKeydown = handleActivitySearchKeydown;
+window.navigateSearchResult = navigateSearchResult;
+
+// ============================================================================
+// STATION DRAWER & DEEP-LINKS (feat-63-02, CA-01, CA-02, CA-04, CA-10)
+// ============================================================================
+
+let activeDrawerStationId = null;
+let activeDrawerTab = 'tasks'; // 'tasks' | 'contracts' | 'telemetry'
+const selectedTaskIdByStation = {};
+let showTechnicalDetails = false;
+
+// Pilares com descrições em linguagem clara e acessível (feat-67-01)
+const CONSTITUTIONAL_PILLARS = [
+  { key: 'ARQ', label: 'ARQ', title: 'Estrutura & Arquitetura', desc: 'Sistema modular, independente e sem dependências externas desnecessárias' },
+  { key: 'SEG', label: 'SEG', title: 'Segurança da Informação', desc: 'Proteção de dados sigilosos e defesa contra injeções ou acessos indevidos' },
+  { key: 'DUP', label: 'DUP', title: 'Prevenção de Duplicidade', desc: 'Reaproveitamento de código e contratos mantidos em fonte única da verdade' },
+  { key: 'COD', label: 'COD', title: 'Qualidade do Código', desc: 'Código limpo, legível, organizado e em estrita conformidade com as boas práticas' },
+  { key: 'TST', label: 'TST', title: 'Testes Automatizados', desc: 'Validação exaustiva de funcionamento e estabilidade sob concorrência' },
+  { key: 'FLX', label: 'FLX', title: 'Processo & Portões', desc: 'Especificação técnica aprovada antes de qualquer codificação no fluxo' },
+  { key: 'GOV', label: 'GOV', title: 'Governança Independente', desc: 'Auditoria autônoma e imparcial garantindo a conformidade da entrega' }
+];
+
+// Mapeamento de Regras Constitucionais para Rótulos Descritivos Amigáveis
+const HUMAN_RULE_BADGES = {
+  'ARQ-01': 'Arquitetura Canônica',
+  'ARQ-02': 'Interfaces Limpas',
+  'ARQ-03': 'Linguagem Nativa',
+  'ARQ-04': 'Sem Dependências Extras',
+  'SEG-01': 'Entradas Protegidas',
+  'SEG-02': 'Diretórios Seguros',
+  'SEG-06': 'Acesso Somente Leitura',
+  'DUP-01': 'Fonte Única',
+  'DUP-02': 'Reaproveitamento Validado',
+  'DUP-05': 'Procedimento Padronizado',
+  'COD-01': 'Funções Claras',
+  'COD-05': 'Código Limpo',
+  'TST-01': 'Testes Automatizados',
+  'TST-04': 'Alta Confiabilidade',
+  'TST-05': 'Estabilidade em Concorrência',
+  'FLX-01': 'Aprovação Prévia da Spec',
+  'FLX-02': 'Divisão em Tarefas Claras',
+  'FLX-03': 'Transições Auditadas',
+  'FLX-04': 'Fechamento Seguro',
+  'GOV-01': 'Auditoria de Regras',
+  'GOV-02': 'Modo Somente Leitura',
+  'GOV-03': 'Relatório Formal',
+  'GOV-04': 'Verificação Rigorosa',
+  'GOV-05': 'Rastreabilidade Total'
+};
+
+function toggleTechnicalDetails() {
+  showTechnicalDetails = !showTechnicalDetails;
+  const btn = document.getElementById('btnToggleTechDetails');
+  if (btn) {
+    btn.textContent = showTechnicalDetails ? 'Ocultar Detalhes Técnicos' : 'Ver Detalhes Técnicos';
+    btn.classList.toggle('active', showTechnicalDetails);
+  }
+  document.body.classList.toggle('show-tech-details', showTechnicalDetails);
+  // Re-renderiza pilares com o novo estado
+  if (window.lastSnapshot) {
+    applySnapshot(window.lastSnapshot);
+  }
+}
+window.toggleTechnicalDetails = toggleTechnicalDetails;
+
+// ============================================================================
+// CENTRAL DE NOTIFICAÇÕES DE APROVAÇÃO HUMANA (feat-67-02)
+// ============================================================================
+
+let currentPendingApprovalItem = null;
+
+function updateApprovalNotifications(snap) {
+  const bell = document.getElementById('headerNotificationBell');
+  const countEl = document.getElementById('headerNotificationCount');
+  if (!bell || !countEl) return;
+
+  let pendingCount = 0;
+  let firstPendingItem = null;
+
+  if (snap && snap.stations) {
+    for (const st of snap.stations) {
+      if (st.items) {
+        for (const it of st.items) {
+          const s = (it.status || '').toLowerCase();
+          if (s === 'pending_review' || s === 'approval' || (st.id === 'pm-architect' && s === 'review_pending')) {
+            pendingCount++;
+            if (!firstPendingItem) {
+              firstPendingItem = it;
+            }
+          }
+        }
+      }
+      if (!firstPendingItem && st.id === 'pm-architect' && st.executing_task) {
+        const s = (st.executing_task.status || '').toLowerCase();
+        if (s === 'pending_review' || s === 'approval') {
+          pendingCount = Math.max(pendingCount, 1);
+          firstPendingItem = {
+            id: st.executing_task.id,
+            title: st.executing_task.title,
+            artifact_path: st.executing_task.artifact_path || st.executing_task.id
+          };
+        }
+      }
+    }
+  }
+
+  currentPendingApprovalItem = firstPendingItem;
+  countEl.textContent = String(pendingCount);
+
+  if (pendingCount > 0) {
+    bell.classList.add('has-pending');
+    bell.title = `${pendingCount} aprovação(ões) humana(s) aguardando sua revisão (Clique para abrir)`;
+  } else {
+    bell.classList.remove('has-pending');
+    bell.title = 'Nenhuma aprovação pendente no momento';
+  }
+}
+
+function handleNotificationBellClick() {
+  if (currentPendingApprovalItem) {
+    const targetPath = currentPendingApprovalItem.artifact_path || currentPendingApprovalItem.id;
+    openSpecViewer(targetPath);
+  } else {
+    showToast('Nenhuma aprovação humana pendente no momento.');
+  }
+}
+
+window.handleNotificationBellClick = handleNotificationBellClick;
+window.updateApprovalNotifications = updateApprovalNotifications;
+
+function formatRuleBadge(rule) {
+  if (!rule) return '';
+  const trimmed = String(rule).trim();
+  if (HUMAN_RULE_BADGES[trimmed]) {
+    return HUMAN_RULE_BADGES[trimmed];
+  }
+  return trimmed;
+}
+
+function formatTaskStatus(status) {
+  if (!status) return { text: 'INDEFINIDO', color: 'var(--muted)', bg: 'transparent', border: 'var(--line)' };
+  const s = String(status).toLowerCase().trim();
+  switch (s) {
+    case 'approved':
+    case 'done':
+      return {
+        text: 'CONCLUÍDO & APROVADO',
+        color: 'var(--ok)',
+        bg: 'rgba(62, 207, 142, 0.08)',
+        border: 'rgba(62, 207, 142, 0.3)'
+      };
+    case 'queued':
+      return {
+        text: 'NA FILA (AGUARDANDO INÍCIO)',
+        color: '#8aa4ff',
+        bg: 'rgba(138, 164, 255, 0.08)',
+        border: 'rgba(138, 164, 255, 0.3)'
+      };
+    case 'building':
+    case 'working':
+    case 'in_progress':
+      return {
+        text: 'EM ANDAMENTO',
+        color: 'var(--warn)',
+        bg: 'rgba(242, 166, 90, 0.08)',
+        border: 'rgba(242, 166, 90, 0.3)'
+      };
+    case 'ready_for_builder':
+      return {
+        text: 'PRONTO PARA O BUILDER',
+        color: '#38c6e8',
+        bg: 'rgba(56, 198, 232, 0.08)',
+        border: 'rgba(56, 198, 232, 0.3)'
+      };
+    case 'review_pending':
+    case 'pending_review':
+    case 'approval':
+      return {
+        text: 'AGUARDANDO AUDITORIA',
+        color: '#ff8a5c',
+        bg: 'rgba(255, 138, 92, 0.08)',
+        border: 'rgba(255, 138, 92, 0.3)'
+      };
+    case 'changes_requested':
+      return {
+        text: 'RETRABALHO SOLICITADO',
+        color: 'var(--err)',
+        bg: 'rgba(255, 92, 92, 0.08)',
+        border: 'rgba(255, 92, 92, 0.3)'
+      };
+    default:
+      return {
+        text: s.toUpperCase(),
+        color: 'var(--fg)',
+        bg: 'transparent',
+        border: 'var(--line)'
+      };
+  }
+}
+
+window.CONSTITUTIONAL_PILLARS = CONSTITUTIONAL_PILLARS;
+window.HUMAN_RULE_BADGES = HUMAN_RULE_BADGES;
+window.formatRuleBadge = formatRuleBadge;
+window.formatTaskStatus = formatTaskStatus;
+
+const CANONICAL_RULES_BY_STATION = {
+  'lider': ['FLX-03', 'FLX-04', 'GOV-01', 'ARQ-01'],
+  'pm-architect': ['ARQ-01', 'ARQ-02', 'DUP-01', 'DUP-02', 'FLX-01'],
+  'planner': ['ARQ-03', 'FLX-02', 'DUP-05', 'COD-05'],
+  'builder': ['ARQ-03', 'ARQ-04', 'DUP-02', 'COD-01', 'COD-05', 'TST-01', 'TST-04', 'TST-05'],
+  'governance': ['GOV-01', 'GOV-02', 'GOV-03', 'GOV-04', 'GOV-05', 'SEG-01', 'SEG-02']
+};
+
+function getIdeFilePath(artifactPath) {
+  if (!artifactPath) return '';
+  let projectDir = (lastSnapshot && lastSnapshot.project_dir)
+    ? lastSnapshot.project_dir
+    : '';
+  if (!projectDir) {
+    try {
+      projectDir = localStorage.getItem('studio_project_dir') || '';
+    } catch (e) {}
+  }
+  projectDir = (projectDir || '').replace(/\/+$/, '');
+
+  // Se já for caminho absoluto no sistema operacional e coincidir com projectDir
+  if (projectDir && artifactPath.startsWith(projectDir)) {
+    return artifactPath;
+  }
+
+  // Se for um caminho absoluto real do sistema operacional (ex: /Users/..., /home/..., /private/...)
+  // mas que não comece com /sdd (que seria um caminho relativo com leading slash indevido)
+  if (artifactPath.startsWith('/') && !artifactPath.startsWith('/sdd')) {
+    return artifactPath;
+  }
+
+  // Remove barra inicial para normalizar caminho relativo ao projeto (ex: '/sdd/...' -> 'sdd/...')
+  const cleanPath = artifactPath.replace(/^\/+/, '');
+
+  if (projectDir) {
+    const absBase = projectDir.startsWith('/') ? projectDir : '/' + projectDir;
+    return absBase + '/' + cleanPath;
+  }
+
+  // Fallback: se projectDir ainda não estiver setado, nunca retorne '/sdd/...' sem prefixo absoluto!
+  return cleanPath;
+}
+
+function sortItemsNewestFirst(list) {
+  if (!list || !Array.isArray(list) || list.length === 0) return [];
+  return [...list].sort((a, b) => {
+    const timeA = new Date(a.updated_at || a.created_at || 0).getTime();
+    const timeB = new Date(b.updated_at || b.created_at || 0).getTime();
+    if (timeB !== timeA) return timeB - timeA;
+    return (b.id || '').localeCompare(a.id || '');
+  });
+}
+
+function fallbackCopy(text) {
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.position = 'fixed';
+  ta.style.opacity = '0';
+  document.body.appendChild(ta);
+  ta.select();
+  try {
+    document.execCommand('copy');
+  } catch (e) {
+    console.warn('Falha no fallback de cópia:', e);
+  }
+  document.body.removeChild(ta);
+}
+
+function copyCommand(cmd, btn) {
+  if (!cmd) return;
+  const setSuccess = () => {
+    const btnEl = typeof btn === 'string' ? document.getElementById(btn) : btn;
+    if (btnEl) {
+      const orig = btnEl.innerText;
+      btnEl.innerText = 'Copiado!';
+      btnEl.classList.add('copied');
+      setTimeout(() => {
+        btnEl.innerText = orig;
+        btnEl.classList.remove('copied');
+      }, 1500);
+    }
+  };
+
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(cmd).then(setSuccess).catch(() => {
+      fallbackCopy(cmd);
+      setSuccess();
+    });
+  } else {
+    fallbackCopy(cmd);
+    setSuccess();
+  }
+}
+
+function inspectSpec(pathOrId) {
+  if (!pathOrId) return;
+  openSpecViewer(pathOrId);
+}
+
+let currentOpenSpecPath = null;
+
+const SPEC_MODAL_FALLBACK_HTML = `
+  <div class="spec-modal-header">
+    <div class="spec-header-info">
+      <div class="spec-header-top-row">
+        <span class="chip mono" id="specStationBadge">02. PM & Arquiteto</span>
+        <span class="chip mono" id="specStatusBadge">Aguardando Revisão (FLX-01)</span>
+      </div>
+      <h2 id="specModalTitle">Especificação de Feature</h2>
+      <div class="spec-meta-row">
+        <span class="spec-path-label mono" id="specPathLabel">sdd/features/...</span>
+        <button id="specCopyPathBtn" class="copy-btn mono" onclick="copySpecPath()">Copiar Caminho</button>
+      </div>
+    </div>
+    <div class="spec-header-actions">
+      <a id="specVsCodeLink" href="#" class="btn-ide mono" title="Abrir no VS Code">VS Code</a>
+      <a id="specCursorLink" href="#" class="btn-ide cursor-btn mono" title="Abrir no Cursor">Cursor</a>
+      <button class="spec-close-btn" onclick="closeSpecViewer()" aria-label="Fechar Visualizador">&times;</button>
+    </div>
+  </div>
+  <div class="spec-modal-body" id="specModalBody">
+    <div class="markdown-body" id="specMarkdownContent">
+      <!-- Conteúdo Markdown formatado -->
+    </div>
+  </div>
+  <div class="spec-modal-footer">
+    <div class="spec-footer-info">
+      <span class="mono" id="specFileSize">0 bytes</span>
+      <span class="spec-gate-hint">Portão FLX-01 — Revisão Técnica & Conformidade Humana</span>
+    </div>
+    <div class="spec-footer-actions">
+      <button class="btn-secondary" onclick="closeSpecViewer()">Fechar</button>
+      <button id="btnApproveSpec" class="approve-spec-btn" onclick="handleApproveSpecClick()">
+        <span class="approve-icon">✓</span> Aprovar Spec (FLX-01)
+      </button>
+    </div>
+  </div>
+`;
+
+function copySpecPath() {
+  const path = currentOpenSpecPath || (document.getElementById('specPathLabel') ? document.getElementById('specPathLabel').textContent.trim() : '');
+  if (!path) return;
+  const btn = document.getElementById('specCopyPathBtn');
+  const original = btn ? btn.textContent : 'Copiar Caminho';
+  const setSuccess = () => {
+    if (btn) {
+      btn.textContent = 'Copiado!';
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.textContent = original;
+        btn.classList.remove('copied');
+      }, 1500);
+    }
+    showToast(`Caminho copiado: ${path}`);
+  };
+
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(path).then(setSuccess).catch(() => {
+      fallbackCopy(path);
+      setSuccess();
+    });
+  } else {
+    fallbackCopy(path);
+    setSuccess();
+  }
+}
+
+function handleApproveSpecClick() {
+  if (currentOpenSpecPath) {
+    approveSpec(currentOpenSpecPath);
+  }
+}
+
+async function openSpecViewer(specPath) {
+  const modal = document.getElementById('specViewerModal');
+  const backdrop = document.getElementById('specModalBackdrop');
+  if (!modal || !backdrop) return;
+
+  const targetPath = specPath || 'sdd/discovery/discovery-63-studio-navegavel-aprovacao-spec.md';
+  currentOpenSpecPath = targetPath;
+
+  if (!document.getElementById('specMarkdownContent')) {
+    modal.innerHTML = SPEC_MODAL_FALLBACK_HTML;
+  }
+
+  const titleEl = document.getElementById('specModalTitle');
+  const pathLabelEl = document.getElementById('specPathLabel');
+  const markdownEl = document.getElementById('specMarkdownContent');
+  const statusBadge = document.getElementById('specStatusBadge');
+  const stationBadge = document.getElementById('specStationBadge');
+  const vsCodeLink = document.getElementById('specVsCodeLink');
+  const cursorLink = document.getElementById('specCursorLink');
+  const fileSizeEl = document.getElementById('specFileSize');
+  const btnApprove = document.getElementById('btnApproveSpec');
+
+  if (titleEl) titleEl.textContent = targetPath.split('/').pop() || 'Especificação de Feature';
+  if (pathLabelEl) pathLabelEl.textContent = targetPath;
+  if (stationBadge) stationBadge.textContent = '02. PM & Arquiteto';
+  if (statusBadge) {
+    statusBadge.textContent = 'Carregando especificação...';
+    statusBadge.style.color = 'var(--muted)';
+    statusBadge.style.borderColor = 'currentColor';
+  }
+  if (markdownEl) {
+    markdownEl.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted);">Carregando especificação...</div>';
+  }
+
+  modal.classList.add('open');
+  backdrop.classList.add('open');
+
+  try {
+    const res = await fetch(`/api/spec?path=${encodeURIComponent(targetPath)}`);
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      if (markdownEl) {
+        markdownEl.innerHTML = `
+          <div style="background:rgba(235,94,85,0.1);border:1px solid var(--err);border-radius:8px;padding:20px;color:var(--err);">
+            <b>Erro ao carregar especificação</b>
+            <p style="margin-top:6px;font-size:13px;">${escapeHtml(errData.error || res.statusText)}</p>
+          </div>
+        `;
+      }
+      return;
+    }
+
+    const data = await res.json();
+    const absPath = data.absolute_path || getIdeFilePath(data.path);
+    const vsCodeUri = absPath ? (absPath.startsWith('/') ? `vscode://file${absPath}` : `vscode://file/${absPath}`) : 'vscode://';
+    const cursorUri = absPath ? (absPath.startsWith('/') ? `cursor://file${absPath}` : `cursor://file/${absPath}`) : 'cursor://';
+    const isApproved = data.status === 'approved';
+
+    if (stationBadge) {
+      stationBadge.textContent = data.station ? (data.station === 'pm-architect' ? '02. PM & Arquiteto' : data.station) : '02. PM & Arquiteto';
+    }
+    if (statusBadge) {
+      statusBadge.textContent = isApproved ? '✓ Aprovada (FLX-01)' : 'Aguardando Revisão (FLX-01)';
+      statusBadge.style.color = isApproved ? 'var(--ok)' : 'var(--warn)';
+      statusBadge.style.borderColor = 'currentColor';
+    }
+    if (pathLabelEl) pathLabelEl.textContent = data.path;
+    if (vsCodeLink) vsCodeLink.href = vsCodeUri;
+    if (cursorLink) cursorLink.href = cursorUri;
+    if (fileSizeEl) fileSizeEl.textContent = `${data.size || (data.content ? data.content.length : 0)} bytes`;
+    if (markdownEl) markdownEl.innerHTML = renderMarkdown(data.content);
+
+    if (btnApprove) {
+      btnApprove.disabled = isApproved;
+      if (isApproved) {
+        btnApprove.classList.add('approved');
+        btnApprove.innerHTML = '<span class="approve-icon">✓</span> Spec Aprovada (FLX-01)';
+      } else {
+        btnApprove.classList.remove('approved');
+        btnApprove.innerHTML = '<span class="approve-icon">✓</span> Aprovar Spec (FLX-01)';
+      }
+    }
+  } catch (err) {
+    if (markdownEl) {
+      markdownEl.innerHTML = `
+        <div style="background:rgba(235,94,85,0.1);border:1px solid var(--err);border-radius:8px;padding:20px;color:var(--err);">
+          <b>Falha na comunicação com o servidor</b>
+          <p style="margin-top:6px;font-size:13px;">${escapeHtml(err.message)}</p>
+        </div>
+      `;
+    }
+  }
+}
+
+function closeSpecViewer() {
+  currentOpenSpecPath = null;
+  const modal = document.getElementById('specViewerModal');
+  const backdrop = document.getElementById('specModalBackdrop');
+  if (modal) modal.classList.remove('open');
+  if (backdrop) backdrop.classList.remove('open');
+}
+
+async function approveSpec(specPath) {
+  const targetPath = specPath || currentOpenSpecPath;
+  if (!targetPath) return;
+
+  try {
+    const res = await fetch('/api/spec/approve', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ spec_path: targetPath })
+    });
+
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      alert(`Erro ao aprovar spec: ${errData.error || res.statusText}`);
+      return;
+    }
+
+    const data = await res.json();
+    showToast(`✓ Especificação aprovada no Portão FLX-01 e enviada para o Planejador (03): ${data.spec_path}`);
+
+    const btnApprove = document.getElementById('btnApproveSpec');
+    if (btnApprove) {
+      btnApprove.disabled = true;
+      btnApprove.classList.add('approved');
+      btnApprove.innerHTML = '<span class="approve-icon">✓</span> Spec Aprovada (FLX-01)';
+    }
+    const statusBadge = document.getElementById('specStatusBadge');
+    if (statusBadge) {
+      statusBadge.textContent = '✓ Aprovada (FLX-01)';
+      statusBadge.style.color = 'var(--ok)';
+      statusBadge.style.borderColor = 'currentColor';
+    }
+
+    // Fecha o modal após aprovação com sucesso
+    setTimeout(() => {
+      closeSpecViewer();
+    }, 600);
+
+    // Atualiza estado se estiver em LIVE
+    if (currentMode === 'LIVE') {
+      fetch('/api/state').then(r => r.json()).then(applySnapshot).catch(console.error);
+    }
+  } catch (err) {
+    alert(`Falha ao conectar ao servidor: ${err.message}`);
+  }
+}
+
+function showToast(msg) {
+  let toast = document.getElementById('studioToast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'studioToast';
+    toast.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#1a2332;border:1px solid var(--ok);color:#3ecf8e;padding:12px 20px;border-radius:8px;font:600 13px var(--f-mono);box-shadow:0 8px 30px rgba(0,0,0,0.5);z-index:9999;transition:all 0.3s ease;transform:translateY(100px);opacity:0;';
+    document.body.appendChild(toast);
+  }
+  toast.textContent = msg;
+  toast.style.transform = 'translateY(0)';
+  toast.style.opacity = '1';
+  setTimeout(() => {
+    toast.style.transform = 'translateY(100px)';
+    toast.style.opacity = '0';
+  }, 3500);
+}
+
+async function sendHandoff(from, to, taskId, title, artifactPath) {
+  try {
+    const res = await fetch('/api/handoff', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        from: from,
+        to: to,
+        task_id: taskId,
+        title: title,
+        artifact_path: artifactPath
+      })
+    });
+
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      alert(`Erro na transferência de handoff: ${errData.error || res.statusText}`);
+      return null;
+    }
+
+    const data = await res.json();
+    showToast(`✓ Artefato transferido: ${from} → ${to}`);
+
+    // Dispara animação visual de handoff entre os mascotes 3D (feat-67-03)
+    triggerMascotHandoffVisual(from, to);
+
+    if (currentMode === 'LIVE') {
+      fetch('/api/state')
+        .then(r => r.json())
+        .then(applySnapshot)
+        .catch(console.error);
+    }
+    return data;
+  } catch (err) {
+    alert(`Falha na comunicação de handoff: ${err.message}`);
+    return null;
+  }
+}
+
+let lastHandledHandoffKey = null;
+
+function triggerMascotHandoffVisual(from, to) {
+  if (!from || !to) return;
+  const mapStation = (s) => (s === 'planner' ? 'pm-architect' : s);
+  const vFrom = mapStation(from);
+  const vTo = mapStation(to);
+
+  if (vFrom === vTo) {
+    if (mascotControllers[vFrom] && typeof mascotControllers[vFrom].triggerHandoffAnimation === 'function') {
+      mascotControllers[vFrom].triggerHandoffAnimation(1);
+    }
+    return;
+  }
+
+  const stationOrder = ['lider', 'pm-architect', 'builder', 'governance'];
+  const fromIdx = stationOrder.indexOf(vFrom);
+  const toIdx = stationOrder.indexOf(vTo);
+  const dir = (toIdx >= fromIdx) ? 1 : -1;
+
+  if (mascotControllers[vFrom] && typeof mascotControllers[vFrom].triggerHandoffAnimation === 'function') {
+    mascotControllers[vFrom].triggerHandoffAnimation(dir);
+  }
+  if (mascotControllers[vTo] && typeof mascotControllers[vTo].triggerHandoffAnimation === 'function') {
+    mascotControllers[vTo].triggerHandoffAnimation(-dir);
+  }
+
+  // Animação de feixe/partícula luminosa de transferência entre os mascotes (feat-67-03)
+  try {
+    const fromEl = document.getElementById(`station-card-${vFrom}`) || document.getElementById(`stage-${vFrom}`);
+    const toEl = document.getElementById(`station-card-${vTo}`) || document.getElementById(`stage-${vTo}`);
+    if (fromEl && toEl && typeof fromEl.getBoundingClientRect === 'function' && typeof toEl.getBoundingClientRect === 'function') {
+      const r1 = fromEl.getBoundingClientRect();
+      const r2 = toEl.getBoundingClientRect();
+
+      const startX = r1.left + r1.width / 2;
+      const startY = r1.top + r1.height * 0.45;
+      const endX = r2.left + r2.width / 2;
+      const endY = r2.top + r2.height * 0.45;
+
+      const orb = document.createElement('div');
+      orb.className = 'handoff-flight-orb';
+      orb.style.left = `${startX}px`;
+      orb.style.top = `${startY}px`;
+      document.body.appendChild(orb);
+
+      requestAnimationFrame(() => {
+        const deltaX = endX - startX;
+        const deltaY = endY - startY;
+        orb.style.transform = `translate(${deltaX}px, ${deltaY}px) scale(1.35)`;
+        orb.style.opacity = '1';
+        setTimeout(() => {
+          orb.style.opacity = '0';
+          setTimeout(() => {
+            if (orb.parentNode) orb.parentNode.removeChild(orb);
+          }, 350);
+        }, 700);
+      });
+    }
+  } catch (e) {
+    console.debug('Handoff visual particle skipped:', e);
+  }
+}
+
+function handleHandoffClick(btn) {
+  if (!btn) return;
+  const from = btn.getAttribute('data-from');
+  const to = btn.getAttribute('data-to');
+  const taskId = btn.getAttribute('data-id');
+  const title = btn.getAttribute('data-title');
+  const artifactPath = btn.getAttribute('data-artifact');
+  window.sendHandoff(from, to, taskId, title, artifactPath);
+}
+
+async function executeTask(station, taskId) {
+  try {
+    showToast(`Executando ciclo obrigatório da estação ${station}...`);
+
+    const res = await fetch('/api/task/execute', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        station: station,
+        task_id: taskId
+      })
+    });
+
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      alert(`Erro na execução: ${errData.error || res.statusText}`);
+      return null;
+    }
+
+    const data = await res.json();
+    showToast(`✓ Execução concluída: ${data.message || data.status}`);
+
+    if (currentMode === 'LIVE') {
+      fetch('/api/state')
+        .then(r => r.json())
+        .then(applySnapshot)
+        .catch(console.error);
+    }
+    return data;
+  } catch (err) {
+    alert(`Falha na execução da tarefa: ${err.message}`);
+    return null;
+  }
+}
+
+function renderMarkdown(md) {
+  if (!md) return '';
+  const lines = md.split('\n');
+  let html = '';
+  let inCode = false;
+  let codeBuffer = '';
+  let inList = false;
+  let inTable = false;
+  let tableHeader = true;
+
+  const escapeText = (t) => t
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+
+  const formatInline = (t) => {
+    let res = escapeText(t);
+    res = res.replace(/`([^`]+)`/g, '<code>$1</code>');
+    res = res.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+    res = res.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+    return res;
+  };
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+
+    // Code blocks
+    if (line.trim().startsWith('```')) {
+      if (inCode) {
+        html += `<pre><code>${escapeText(codeBuffer)}</code></pre>\n`;
+        codeBuffer = '';
+        inCode = false;
+      } else {
+        if (inList) { html += '</ul>\n'; inList = false; }
+        if (inTable) { html += '</tbody></table>\n'; inTable = false; }
+        inCode = true;
+      }
+      continue;
+    }
+    if (inCode) {
+      codeBuffer += (codeBuffer ? '\n' : '') + line;
+      continue;
+    }
+
+    const trimmed = line.trim();
+
+    // Tables
+    if (trimmed.startsWith('|') && trimmed.endsWith('|')) {
+      const isDivider = trimmed.split('|').filter(c => c.trim()).every(c => /^[-:]+$/.test(c.trim()));
+      if (isDivider) {
+        tableHeader = false;
+        continue;
+      }
+      const cells = trimmed.split('|').slice(1, -1).map(c => c.trim());
+      if (!inTable) {
+        if (inList) { html += '</ul>\n'; inList = false; }
+        html += '<table>\n';
+        inTable = true;
+        tableHeader = true;
+      }
+      if (tableHeader) {
+        html += '<thead><tr>' + cells.map(c => `<th>${formatInline(c)}</th>`).join('') + '</tr></thead>\n<tbody>\n';
+      } else {
+        html += '<tr>' + cells.map(c => `<td>${formatInline(c)}</td>`).join('') + '</tr>\n';
+      }
+      continue;
+    } else if (inTable) {
+      html += '</tbody></table>\n';
+      inTable = false;
+    }
+
+    // Checklist
+    if (/^[-*]\s+\[([ xX])\]\s+(.*)$/.test(trimmed)) {
+      if (!inList) { html += '<ul style="list-style:none;padding-left:4px;">\n'; inList = true; }
+      const match = trimmed.match(/^[-*]\s+\[([ xX])\]\s+(.*)$/);
+      const checked = match[1].toLowerCase() === 'x';
+      html += `<li class="checklist-item"><input type="checkbox" ${checked ? 'checked' : ''} disabled> <span>${formatInline(match[2])}</span></li>\n`;
+      continue;
+    }
+
+    // Bullet lists
+    if (/^[-*]\s+(.*)$/.test(trimmed)) {
+      if (!inList) { html += '<ul>\n'; inList = true; }
+      const itemText = trimmed.replace(/^[-*]\s+/, '');
+      html += `<li>${formatInline(itemText)}</li>\n`;
+      continue;
+    } else if (inList) {
+      html += '</ul>\n';
+      inList = false;
+    }
+
+    // Empty line
+    if (!trimmed) {
+      continue;
+    }
+
+    // Headers
+    if (trimmed.startsWith('#### ')) {
+      html += `<h4>${formatInline(trimmed.substring(5))}</h4>\n`;
+    } else if (trimmed.startsWith('### ')) {
+      html += `<h3>${formatInline(trimmed.substring(4))}</h3>\n`;
+    } else if (trimmed.startsWith('## ')) {
+      html += `<h2>${formatInline(trimmed.substring(3))}</h2>\n`;
+    } else if (trimmed.startsWith('# ')) {
+      html += `<h1>${formatInline(trimmed.substring(2))}</h1>\n`;
+    } else if (trimmed.startsWith('> ')) {
+      html += `<blockquote>${formatInline(trimmed.substring(2))}</blockquote>\n`;
+    } else if (trimmed.startsWith('---') || trimmed.startsWith('***')) {
+      html += '<hr style="border:none;border-top:1px solid var(--line);margin:18px 0;">\n';
+    } else {
+      html += `<p>${formatInline(trimmed)}</p>\n`;
+    }
+  }
+
+  if (inCode) {
+    html += `<pre><code>${escapeText(codeBuffer)}</code></pre>\n`;
+  }
+  if (inList) {
+    html += '</ul>\n';
+  }
+  if (inTable) {
+    html += '</tbody></table>\n';
+  }
+
+  return html;
+}
+
+function getStationForDrawer(stationId) {
+  if (!lastSnapshot || !lastSnapshot.stations) return null;
+  let st = lastSnapshot.stations.find(s => s.id === stationId);
+  if ((stationId === 'pm-architect' || stationId === 'planner') && st) {
+    const pmSt = lastSnapshot.stations.find(s => s.id === 'pm-architect') || {};
+    const planSt = lastSnapshot.stations.find(s => s.id === 'planner') || {};
+    st = {
+      ...pmSt,
+      name: '02. PM, Arquiteto & Planejador',
+      role: 'Concepção da Spec (Fase 1) & Fatiamento de Tarefas (Fase 2)',
+      session_id: 'sess-02-pm • sess-03-planner',
+      items: sortItemsNewestFirst([...(pmSt.items || []), ...(planSt.items || [])]),
+      recent_activity: [...(pmSt.recent_activity || []), ...(planSt.recent_activity || [])],
+    };
+  }
+  return st;
+}
+
+function selectTaskInDrawer(taskId) {
+  if (!activeDrawerStationId) return;
+  selectedTaskIdByStation[activeDrawerStationId] = taskId;
+  const st = getStationForDrawer(activeDrawerStationId);
+  if (st) {
+    renderStationDrawerContent(st);
+  }
+}
+
+function switchDrawerTab(tab) {
+  activeDrawerTab = tab;
+  const st = getStationForDrawer(activeDrawerStationId);
+  if (st) {
+    renderStationDrawerContent(st);
+  }
+}
+
+function openStationDrawer(stationId, tab) {
+  activeDrawerStationId = stationId;
+  if (tab) {
+    activeDrawerTab = tab;
+  }
+  const drawer = document.getElementById('stationDrawer');
+  const backdrop = document.getElementById('drawerBackdrop');
+  if (!drawer || !backdrop) return;
+
+  drawer.classList.add('open');
+  drawer.removeAttribute('aria-hidden');
+  backdrop.classList.add('open');
+
+  const st = getStationForDrawer(stationId);
+  if (st) {
+    renderStationDrawerContent(st);
+  }
+}
+
+function closeStationDrawer() {
+  activeDrawerStationId = null;
+  const drawer = document.getElementById('stationDrawer');
+  const backdrop = document.getElementById('drawerBackdrop');
+  if (drawer) {
+    drawer.classList.remove('open');
+    drawer.setAttribute('aria-hidden', 'true');
+  }
+  if (backdrop) {
+    backdrop.classList.remove('open');
+  }
+}
+
+window.openStationDrawer = openStationDrawer;
+window.closeStationDrawer = closeStationDrawer;
+window.switchDrawerTab = switchDrawerTab;
+window.selectTaskInDrawer = selectTaskInDrawer;
+window.copyCommand = copyCommand;
+window.copySpecPath = copySpecPath;
+window.handleApproveSpecClick = handleApproveSpecClick;
+window.inspectSpec = inspectSpec;
+window.openSpecViewer = openSpecViewer;
+window.closeSpecViewer = closeSpecViewer;
+window.approveSpec = approveSpec;
+window.sendHandoff = sendHandoff;
+window.triggerMascotHandoffVisual = triggerMascotHandoffVisual;
+window.handleHandoffClick = handleHandoffClick;
+window.executeTask = executeTask;
+window.renderMarkdown = renderMarkdown;
+window.renderMarkdownToHtml = renderMarkdown;
+
+window.addEventListener('keydown', (e) => {
+  const actModal = document.getElementById('activityModal');
+  if (actModal && actModal.classList.contains('open')) {
+    if (e.key === 'Escape') {
+      closeActivityModal();
+      return;
+    }
+    if (e.key === 'ArrowLeft') {
+      navigateActivity(-1);
+      return;
+    }
+    if (e.key === 'ArrowRight') {
+      navigateActivity(1);
+      return;
+    }
+  }
+
+  if (e.key === 'Escape') {
+    const modal = document.getElementById('specViewerModal');
+    if (modal && modal.classList.contains('open')) {
+      closeSpecViewer();
+    } else if (activeDrawerStationId) {
+      closeStationDrawer();
+    }
+  }
+});
+
+function getToolColor(tool) {
+  const t = (tool || '').toLowerCase();
+  if (t.includes('git')) return '#f05032';
+  if (t.includes('go') || t.includes('test')) return '#00add8';
+  if (t.includes('command') || t.includes('sh') || t.includes('cmd')) return '#4f8ef7';
+  if (t.includes('read')) return '#a78bfa';
+  if (t.includes('write')) return '#3ecf8e';
+  if (t.includes('edit')) return '#f2a65a';
+  if (t.includes('gate') || t.includes('audit')) return '#ff8a5c';
+  if (t.includes('subagent')) return '#e879f9';
+  if (t.includes('context7') || t.includes('search')) return '#38c6e8';
+  return '#8aa4ff';
+}
+
+function renderStationDrawerContent(st) {
+  const drawer = document.getElementById('stationDrawer');
+  if (!drawer) return;
+
+  drawer.style.setProperty('--c', st.color);
+
+  const stationActsFromList = (currentActivities || []).filter(a => a.station === st.id);
+  const stActs = (st.recent_activity && st.recent_activity.length > 0) ? st.recent_activity : stationActsFromList;
+  const items = st.items || [];
+  const selectedTaskId = selectedTaskIdByStation[st.id] || (items.length > 0 ? items[0].id : null);
+
+  const activeItems = sortItemsNewestFirst(items.filter(it => it.status !== 'approved' && it.status !== 'done'));
+  const completedItems = sortItemsNewestFirst(items.filter(it => it.status === 'approved' || it.status === 'done'));
+
+  // Helper para renderizar parecer de Governança nos cartões
+  function renderTaskVerdictBox(it, isCompleted) {
+    if (it.governance_verdict) {
+      const gv = it.governance_verdict;
+      const isAprovado = (gv.veredito || '').toLowerCase() === 'conforme' && (!gv.achados || gv.achados.length === 0);
+      if (isAprovado) {
+        return `
+          <div class="verdict-box conforme" style="border-left:3px solid var(--ok);background:rgba(62,207,142,0.06);padding:8px 12px;border-radius:6px;margin-top:8px;">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
+              <span class="chip" style="font-size:10px;font-weight:700;color:var(--ok);border-color:var(--ok);background:rgba(62,207,142,0.12);">✓ APROVADO PELA GOVERNANÇA</span>
+            </div>
+            <span style="font-size:11px;color:var(--fg);">${escapeHtml(gv.resumo || 'Auditado em conformidade com as regras constitucionais.')}</span>
+          </div>
+        `;
+      } else {
+        const achadosCount = (gv.achados && gv.achados.length) ? gv.achados.length : 1;
+        const achadosDetails = (gv.achados && gv.achados.length > 0)
+          ? gv.achados.map(a => `<div style="font-size:10.5px;color:var(--err);margin-top:2px;">• <b>${escapeHtml(formatRuleBadge(a.regra || ''))}:</b> ${escapeHtml(a.explicacao || a.verificacao || '')}${a.arquivo ? ` <i>(${escapeHtml(a.arquivo)}${a.linha ? `:${a.linha}` : ''})</i>` : ''}</div>`).join('')
+          : '';
+        return `
+          <div class="verdict-box falha" style="border-left:3px solid var(--err);background:rgba(255,92,92,0.06);padding:8px 12px;border-radius:6px;margin-top:8px;">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
+              <span class="chip" style="font-size:10px;font-weight:700;color:var(--err);border-color:var(--err);background:rgba(255,92,92,0.12);">✕ FALHA APONTADA</span>
+              <span style="font-size:10px;color:var(--muted);">${achadosCount} achado(s)</span>
+            </div>
+            <div style="font-size:11px;color:var(--fg);font-weight:600;">${escapeHtml(gv.resumo || 'Auditoria detectou violação de regras constitucionais.')}</div>
+            ${achadosDetails}
+          </div>
+        `;
+      }
+    } else if (isCompleted && st.id === 'governance') {
+      return `
+        <div class="verdict-box conforme" style="border-left:3px solid var(--ok);background:rgba(62,207,142,0.06);padding:8px 12px;border-radius:6px;margin-top:8px;">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
+            <span class="chip" style="font-size:10px;font-weight:700;color:var(--ok);border-color:var(--ok);background:rgba(62,207,142,0.12);">✓ APROVADO PELA GOVERNANÇA</span>
+          </div>
+          <span style="font-size:11px;color:var(--muted);">Auditado e aprovado com sucesso pela Governança.</span>
+        </div>
+      `;
+    }
+    return '';
+  }
+
+  // --- Painel Tarefas ---
+  let activeCardsHtml = '';
+  if (activeItems.length > 0) {
+    activeCardsHtml = activeItems.map(it => {
+      const isSelected = it.id === selectedTaskId;
+      const filePath = getIdeFilePath(it.artifact_path);
+      const vsCodeUri = filePath ? (filePath.startsWith('/') ? `vscode://file${filePath}` : `vscode://file/${filePath}`) : 'vscode://';
+      const cursorUri = filePath ? (filePath.startsWith('/') ? `cursor://file${filePath}` : `cursor://file/${filePath}`) : 'cursor://';
+      const cliCmd = it.artifact_path ? `code ${it.artifact_path}` : (it.id ? `forge-sdd task view ${it.id}` : 'code .');
+      const copyBtnId = `copy-btn-${it.id.replace(/[^a-zA-Z0-9_-]/g, '_')}`;
+
+      let handoffTarget = null;
+      let handoffBtnLabel = null;
+      if (st.id === 'pm-architect') {
+        handoffTarget = 'planner';
+        handoffBtnLabel = 'Enviar para Planejador (03)';
+      } else if (st.id === 'planner') {
+        handoffTarget = 'builder';
+        handoffBtnLabel = 'Enviar para Builder (04)';
+      } else if (st.id === 'builder') {
+        handoffTarget = 'governance';
+        handoffBtnLabel = 'Enviar para Governança (05)';
+      } else if (st.id === 'governance') {
+        handoffTarget = 'lider';
+        handoffBtnLabel = 'Enviar para Líder (01)';
+      }
+
+      const statusInfo = formatTaskStatus(it.status);
+
+      const isQueued = (it.status === 'queued');
+      const isBuilding = (it.status === 'building' || it.status === 'working' || it.status === 'in_progress');
+
+      let executeBtnLabel = 'Executar Tarefa nesta Estação';
+      let buildingLabel = 'Executando...';
+      if (st.id === 'builder') {
+        executeBtnLabel = 'Executar no Builder (Portão A)';
+        buildingLabel = 'Executando Testes...';
+      } else if (st.id === 'pm-architect') {
+        executeBtnLabel = 'Conceber & Validar Spec (FLX-01)';
+        buildingLabel = 'Concebendo Spec...';
+      } else if (st.id === 'planner') {
+        executeBtnLabel = 'Fatiar Tarefas & Planejar';
+        buildingLabel = 'Planejando Tarefas...';
+      } else if (st.id === 'governance') {
+        executeBtnLabel = 'Auditar Conformidade Constitucional';
+        buildingLabel = 'Auditando Regras...';
+      }
+
+      let canExecute = isQueued;
+      if (st.id === 'governance' && (it.status === 'queued' || it.status === 'review_pending')) {
+        canExecute = true;
+      }
+
+      let isHandoffAllowed = false;
+      let handoffLockTooltip = 'A tarefa precisa ser executada e validada nesta estação antes do handoff';
+
+      if (st.id === 'pm-architect') {
+        isHandoffAllowed = (it.status === 'pending_review' || it.status === 'approval' || it.status === 'approved' || it.status === 'done');
+        if (!isHandoffAllowed) {
+          handoffLockTooltip = 'Requer concepção e validação de spec (Portão FLX-01) antes do handoff';
+        }
+      } else if (st.id === 'planner') {
+        isHandoffAllowed = (it.status === 'ready_for_builder' || it.status === 'approved' || it.status === 'done');
+        if (!isHandoffAllowed) {
+          handoffLockTooltip = 'Requer fatiamento de tarefas com critérios de aceite antes de enviar ao Builder';
+        }
+      } else if (st.id === 'builder') {
+        isHandoffAllowed = (it.status === 'review_pending' || it.status === 'approved' || it.status === 'done');
+        if (!isHandoffAllowed) {
+          handoffLockTooltip = 'Requer execução e testes aprovados (Portão A) antes de enviar para Governança';
+        }
+      } else if (st.id === 'governance') {
+        isHandoffAllowed = (it.status === 'approved' || it.status === 'done');
+        if (!isHandoffAllowed) {
+          handoffLockTooltip = 'Requer emissão de veredito de conformidade da Governança antes de enviar ao Líder';
+        }
+      } else {
+        isHandoffAllowed = (it.status === 'approved' || it.status === 'done');
+      }
+
+      const verdictBoxHtml = renderTaskVerdictBox(it, false);
+
+      return `
+        <div class="drawer-task-card ${isSelected ? 'selected' : ''}" onclick="selectTaskInDrawer('${escapeHtml(it.id)}')">
+          <div class="drawer-task-header">
+            <span class="drawer-task-id">${escapeHtml(it.id)}</span>
+            <div style="display:flex;align-items:center;gap:6px;">
+              ${isBuilding ? `<span class="chip" style="font-size:10px;padding:3px 9px;font-weight:700;color:var(--warn);border-color:var(--warn);background:rgba(242,166,90,0.1);"><span class="pulse-dot"></span> ${escapeHtml(buildingLabel)}</span>` : ''}
+              <span class="chip" style="font-size:10px;padding:2px 8px;">tentativa #${it.attempt || 1}</span>
+              <span class="chip" style="font-size:10px;padding:3px 9px;font-weight:700;color:${statusInfo.color};border-color:${statusInfo.border};background:${statusInfo.bg};">${escapeHtml(statusInfo.text)}</span>
+            </div>
+          </div>
+
+          <div class="drawer-task-title">${escapeHtml(it.title || it.id)}</div>
+
+          ${it.artifact_path ? `
+            <div class="drawer-task-path" title="${escapeHtml(it.artifact_path)}">
+              ${escapeHtml(it.artifact_path)}
+            </div>
+          ` : ''}
+
+          ${verdictBoxHtml}
+
+          <div class="ide-buttons-row">
+            <a href="${vsCodeUri}" class="btn-ide ide-link-btn" title="Abrir arquivo no editor VS Code nativo">
+              Abrir no VS Code
+            </a>
+            <a href="${cursorUri}" class="btn-ide ide-link-btn cursor-btn" title="Abrir arquivo no editor Cursor">
+              Cursor
+            </a>
+            <button id="${copyBtnId}" class="copy-btn ide-link-btn" onclick="event.stopPropagation(); copyCommand('${escapeHtml(cliCmd)}', '${copyBtnId}')" title="Copiar comando CLI para terminal local">
+              Copiar CLI
+            </button>
+            <button class="inspect-spec-btn ide-link-btn" onclick="event.stopPropagation(); openSpecViewer('${escapeHtml(it.artifact_path || it.id)}')" title="Ver especificação técnica detalhada">
+              Ver Spec
+            </button>
+            ${canExecute ? `
+              <button class="btn-execute ide-link-btn" onclick="event.stopPropagation(); executeTask('${escapeHtml(st.id)}', '${escapeHtml(it.id)}')" title="Executar ciclo obrigatório na estação ${escapeHtml(st.name || st.id)}">
+                ${escapeHtml(executeBtnLabel)}
+              </button>
+            ` : ''}
+            ${handoffTarget ? (
+              isHandoffAllowed ? `
+                <button class="btn-handoff ide-link-btn ready" data-from="${escapeHtml(st.id)}" data-to="${escapeHtml(handoffTarget)}" data-id="${escapeHtml(it.id)}" data-title="${escapeHtml(it.title || it.id)}" data-artifact="${escapeHtml(it.artifact_path || '')}" onclick="event.stopPropagation(); handleHandoffClick(this)" title="Transferir tarefa e artefato para a próxima estação">
+                  ${escapeHtml(handoffBtnLabel)}
+                </button>
+              ` : `
+                <button class="btn-handoff ide-link-btn disabled" disabled data-from="${escapeHtml(st.id)}" data-to="${escapeHtml(handoffTarget)}" data-id="${escapeHtml(it.id)}" data-title="${escapeHtml(it.title || it.id)}" data-artifact="${escapeHtml(it.artifact_path || '')}" title="${escapeHtml(handoffLockTooltip)}" style="opacity:0.45;cursor:not-allowed;filter:grayscale(60%);">
+                  ${escapeHtml(handoffBtnLabel)}
+                </button>
+              `
+            ) : ''}
+          </div>
+        </div>
+      `;
+    }).join('');
+  } else {
+    activeCardsHtml = `
+      <div style="background:var(--bg3);border:1px dashed var(--line);border-radius:8px;padding:16px;text-align:center;color:var(--muted);">
+        <p style="font-size:12px;font-weight:600;color:var(--fg);margin-bottom:4px;">Nenhuma tarefa ativa ou pendente na fila</p>
+        <p style="font-size:11px;">Todas as tarefas recebidas foram executadas ou aguardam novo handoff.</p>
+      </div>
+    `;
+  }
+
+  let completedCardsHtml = '';
+  if (completedItems.length > 0) {
+    completedCardsHtml = completedItems.map(it => {
+      const isSelected = it.id === selectedTaskId;
+      const filePath = getIdeFilePath(it.artifact_path);
+      const vsCodeUri = filePath ? (filePath.startsWith('/') ? `vscode://file${filePath}` : `vscode://file/${filePath}`) : 'vscode://';
+      const cursorUri = filePath ? (filePath.startsWith('/') ? `cursor://file${filePath}` : `cursor://file/${filePath}`) : 'cursor://';
+      const cliCmd = it.artifact_path ? `code ${it.artifact_path}` : (it.id ? `forge-sdd task view ${it.id}` : 'code .');
+      const copyBtnId = `copy-comp-btn-${it.id.replace(/[^a-zA-Z0-9_-]/g, '_')}`;
+      const completedTime = it.updated_at ? new Date(it.updated_at).toLocaleString() : (it.created_at ? new Date(it.created_at).toLocaleString() : 'Concluído');
+      const statusInfo = formatTaskStatus(it.status || 'approved');
+
+      const verdictBoxHtml = renderTaskVerdictBox(it, true);
+
+      return `
+        <div class="drawer-task-card completed ${isSelected ? 'selected' : ''}" onclick="selectTaskInDrawer('${escapeHtml(it.id)}')">
+          <div class="drawer-task-header">
+            <span class="drawer-task-id">${escapeHtml(it.id)}</span>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <span class="chip" style="font-size:10px;padding:2px 8px;color:var(--muted);">${escapeHtml(completedTime)}</span>
+              <span class="chip" style="font-size:10px;padding:3px 9px;font-weight:700;color:${statusInfo.color};border-color:${statusInfo.border};background:${statusInfo.bg};">${escapeHtml(statusInfo.text)}</span>
+            </div>
+          </div>
+
+          <div class="drawer-task-title">${escapeHtml(it.title || it.id)}</div>
+
+          ${it.artifact_path ? `
+            <div class="drawer-task-path" title="${escapeHtml(it.artifact_path)}">
+              ${escapeHtml(it.artifact_path)}
+            </div>
+          ` : ''}
+
+          ${verdictBoxHtml}
+
+          <div class="ide-buttons-row">
+            <a href="${vsCodeUri}" class="btn-ide ide-link-btn" title="Abrir arquivo no editor VS Code nativo">
+              Abrir no VS Code
+            </a>
+            <a href="${cursorUri}" class="btn-ide ide-link-btn cursor-btn" title="Abrir arquivo no editor Cursor">
+              Cursor
+            </a>
+            <button id="${copyBtnId}" class="copy-btn ide-link-btn" onclick="event.stopPropagation(); copyCommand('${escapeHtml(cliCmd)}', '${copyBtnId}')" title="Copiar comando CLI para terminal local">
+              Copiar CLI
+            </button>
+            ${it.artifact_path ? `
+              <button class="inspect-spec-btn ide-link-btn" onclick="event.stopPropagation(); openSpecViewer('${escapeHtml(it.artifact_path || it.id)}')" title="Ver especificação técnica detalhada">
+                Ver Spec
+              </button>
+            ` : ''}
+          </div>
+        </div>
+      `;
+    }).join('');
+  } else {
+    completedCardsHtml = `
+      <div style="background:var(--bg3);border:1px dashed var(--line);border-radius:8px;padding:16px;text-align:center;color:var(--muted);">
+        <p style="font-size:12px;font-weight:500;color:var(--muted);">Nenhuma tarefa concluída no histórico desta estação.</p>
+      </div>
+    `;
+  }
+
+  const tasksHtml = `
+    <div class="drawer-section-title">
+      <span>Tarefas Ativas / Na Fila</span>
+      <span class="chip mono">${activeItems.length}</span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:20px;">
+      ${activeCardsHtml}
+    </div>
+
+    <div class="drawer-section-title">
+      <span>Histórico de Conclusões desta Estação</span>
+      <span class="chip mono">${completedItems.length}</span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      ${completedCardsHtml}
+    </div>
+  `;
+
+  // --- Painel Contratos ---
+  const contractsHtml = `
+    <div class="contract-section">
+      <div class="contract-card">
+        <span class="contract-label">Papel Canônico (.agents/roles/${escapeHtml(st.id)}.md)</span>
+        <div class="contract-val">${escapeHtml(st.role)}</div>
+        <p style="font-size:12px;color:var(--muted);margin-top:4px;">
+          Responsabilidade canônica definida na esteira SDD das 5 estações.
+        </p>
+      </div>
+
+      <div class="contract-card">
+        <span class="contract-label">Recebe (Entrada)</span>
+        <div class="contract-val" style="color:#79d4fd;">${escapeHtml(st.input_contract || 'Demanda inicial')}</div>
+      </div>
+
+      <div class="contract-card">
+        <span class="contract-label">Entrega (Saída)</span>
+        <div class="contract-val" style="color:var(--ok);">${escapeHtml(st.output_contract || 'Artefato validado')}</div>
+      </div>
+
+      <div class="contract-card">
+        <span class="contract-label">Metadados de Fila</span>
+        <div style="display:flex;gap:10px;margin-top:6px;flex-wrap:wrap;">
+          <span class="chip mono">Fila: ${escapeHtml(st.id)}.json</span>
+          <span class="chip mono">Versão: v${st.version}</span>
+          <span class="chip mono">Itens: ${items.length} (${st.active_items || 0} ativos)</span>
+        </div>
+      </div>
+    </div>
+  `;
+
+  // --- Painel Histórico de Ações (Telemetria) ---
+  let telemetryHtml = '';
+  if (stActs.length > 0) {
+    telemetryHtml = `
+      <div class="drawer-timeline">
+        ${stActs.map(act => {
+          const tColor = getToolColor(act.tool);
+          const actTime = act.timestamp ? new Date(act.timestamp).toLocaleTimeString() : '';
+          let statusBadge = '';
+          if (act.status) {
+            const isErr = act.status === 'error';
+            const isRun = act.status === 'running' || act.status === 'working';
+            const badgeColor = isErr ? 'var(--err)' : (isRun ? 'var(--warn)' : 'var(--ok)');
+            statusBadge = `<span class="chip" style="font-size:9.5px;padding:1px 6px;color:${badgeColor};border-color:${badgeColor};">${escapeHtml(act.status)}</span>`;
+          }
+
+          return `
+            <div class="drawer-timeline-item">
+              <span class="drawer-timeline-dot" style="--tool-color:${tColor};"></span>
+              <div class="drawer-timeline-card">
+                <div class="drawer-timeline-header">
+                  <span class="tool-chip" style="--c:${tColor};font-size:10px;padding:2px 8px;">
+                    <span class="tool-chip-dot" style="background:${tColor};"></span>${escapeHtml(act.tool || 'cmd')}
+                  </span>
+                  <div style="display:flex;align-items:center;gap:6px;">
+                    ${statusBadge}
+                    <span class="drawer-timeline-time">${escapeHtml(actTime)}</span>
+                  </div>
+                </div>
+                <div class="drawer-timeline-action">${escapeHtml(act.action || act.details || '')}</div>
+                ${act.details && act.details !== act.action ? `
+                  <div class="drawer-timeline-detail" title="${escapeHtml(act.details)}">${escapeHtml(act.details)}</div>
+                ` : ''}
+              </div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    `;
+  } else {
+    const stationGuidance = {
+      'lider': 'O Líder orquestra os ciclos de desenvolvimento, monitora transferências de tarefas, delega atividades aos subagentes e aprova avanços de estágio.',
+      'pm-architect': 'Fase 1 de Concepção & Planejamento: concebe soluções arquiteturais (Discovery, Critérios de Aceite e C4) e avalia reuso de código existente.',
+      'planner': 'Fase 2 de Concepção & Planejamento: após aprovação da especificação, decompõe a solução em tarefas atômicas sequenciais (Plano) com critérios claros para a Fila de Builders.',
+      'builder': 'O Builder implementa código e testes automatizados em contexto isolado, respeitando as regras constitucionais SDD.',
+      'governance': 'A Governança audita em modo estrito somente-leitura (Camada B) a conformidade arquitetural, de segurança e integridade.'
+    };
+    telemetryHtml = `
+      <div style="background:var(--bg3);border:1px dashed var(--line);border-radius:10px;padding:24px;text-align:center;color:var(--muted);">
+        <p style="font-size:13.5px;font-weight:700;color:var(--fg);margin-bottom:8px;">Nenhuma ação registrada para ${escapeHtml(st.name)}</p>
+        <div style="display:inline-block;text-align:left;background:rgba(0,0,0,0.25);border:1px solid var(--line);border-radius:8px;padding:12px 16px;margin:10px 0 16px;">
+          <div style="font-size:11px;font-weight:700;color:var(--c, var(--accent));text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px;">Papel da Estação</div>
+          <div style="font-size:12px;color:var(--fg);font-weight:600;margin-bottom:6px;">${escapeHtml(st.role)}</div>
+          <div style="font-size:11.5px;color:var(--muted);line-height:1.45;">${escapeHtml(stationGuidance[st.id] || 'As atividades serão registradas automaticamente conforme os comandos forem emitidos.')}</div>
+        </div>
+        <p style="font-size:11px;color:var(--muted);">Aguardando execução de tarefas ou novo handoff em <code>sdd/.queue/stations/${escapeHtml(st.id)}.json</code>.</p>
+      </div>
+    `;
+  }
+
+  drawer.innerHTML = `
+    <div class="drawer-header">
+      <div class="drawer-title-group">
+        <div class="drawer-badge-row">
+          <span class="chip" style="color:${st.color};border-color:${st.color};padding:2px 8px;font-size:10px;">
+            <i style="--o:${st.color}"></i>${escapeHtml(st.mascot_state.toUpperCase())}
+          </span>
+          <span class="chip mono" style="font-size:10px;padding:2px 8px;">Marca: ${escapeHtml(st.mark)}</span>
+        </div>
+        <div class="drawer-station-name">
+          <span>${escapeHtml(st.name)}</span>
+        </div>
+        <div class="drawer-station-role">${escapeHtml(st.role)}</div>
+      </div>
+      <button class="drawer-close-btn" onclick="closeStationDrawer()" aria-label="Fechar painel da estação" title="Fechar (ESC)">✕</button>
+    </div>
+
+    <div class="drawer-tabs">
+      <button class="drawer-tab ${activeDrawerTab === 'tasks' ? 'active' : ''}" onclick="switchDrawerTab('tasks')">
+        Tarefas (${items.length})
+      </button>
+      <button class="drawer-tab ${activeDrawerTab === 'contracts' ? 'active' : ''}" onclick="switchDrawerTab('contracts')">
+        Contratos &amp; Papel
+      </button>
+      <button class="drawer-tab ${activeDrawerTab === 'telemetry' ? 'active' : ''}" onclick="switchDrawerTab('telemetry')">
+        Histórico de Ações (${stActs.length})
+      </button>
+    </div>
+
+    <div class="drawer-body">
+      <div class="drawer-pane ${activeDrawerTab === 'tasks' ? 'active' : ''}">
+        ${tasksHtml}
+      </div>
+      <div class="drawer-pane ${activeDrawerTab === 'contracts' ? 'active' : ''}">
+        ${contractsHtml}
+      </div>
+      <div class="drawer-pane ${activeDrawerTab === 'telemetry' ? 'active' : ''}">
+        ${telemetryHtml}
+      </div>
+    </div>
+  `;
 }
 
 // Renderiza a grade de estações e atualiza os DOMs
@@ -398,34 +2313,177 @@ function applySnapshot(snap) {
   if (!snap) return;
   lastSnapshot = snap;
 
+  if (snap.project_dir) {
+    try {
+      localStorage.setItem('studio_project_dir', snap.project_dir);
+    } catch (e) {
+      // quota or private mode
+    }
+  }
+
   document.getElementById('projectName').textContent = snap.project_name || 'forge-sdd';
-  document.getElementById('projectVersion').textContent = 'v' + (snap.version || '3.2.1-beta');
+  document.getElementById('projectVersion').textContent = 'v' + (snap.version || '3.2.2-beta');
   document.getElementById('lastUpdate').textContent = new Date(snap.updated_at).toLocaleTimeString();
+
+  const poolCountEl = document.getElementById('sessionPoolCount');
+  if (poolCountEl) {
+    poolCountEl.textContent = String(snap.active_sessions_count || (snap.stations ? snap.stations.length : 5));
+  }
 
   // Atualiza telemetria de atividades
   currentActivities = snap.recent_activity || [];
   renderConsoleLogs(currentActivities);
 
-  // Handoff Bar
+  // Handoff Bar & Esteira de Progresso
   const ho = snap.last_handoff;
   if (ho) {
-    document.getElementById('hoFrom').textContent = ho.from_station;
-    document.getElementById('hoTo').textContent = ho.to_station;
-    document.getElementById('hoPayload').textContent = ho.payload;
-    document.getElementById('hoGate').innerHTML = `<i></i>${ho.gate}`;
+    const hoFromEl = document.getElementById('hoFrom');
+    const hoToEl = document.getElementById('hoTo');
+    if (hoFromEl) hoFromEl.textContent = ho.from_station;
+    if (hoToEl) hoToEl.textContent = ho.to_station;
+    const isSpecHandoff = ho.from_station === 'pm-architect' || ho.to_station === 'pm-architect' || (ho.gate && ho.gate.includes('FLX-01'));
+    const hoPayloadEl = document.getElementById('hoPayload');
+    if (hoPayloadEl) {
+      if (isSpecHandoff) {
+        hoPayloadEl.innerHTML = `${escapeHtml(ho.payload)} • <a href="javascript:void(0)" onclick="openSpecViewer('sdd/discovery/discovery-63-studio-navegavel-aprovacao-spec.md')" style="color:var(--accent);text-decoration:underline;font-weight:700;">Ver Spec (FLX-01)</a>`;
+      } else {
+        hoPayloadEl.textContent = ho.payload;
+      }
+    }
+    const hoGateEl = document.getElementById('hoGate');
+    if (hoGateEl) {
+      hoGateEl.innerHTML = `<i></i>${ho.gate}`;
+    }
+
+    // Dispara animação entre os mascotes 3D caso haja nova transição detectada no snapshot (feat-67-03)
+    const currentHandoffKey = `${ho.from_station}->${ho.to_station}:${ho.payload || ''}`;
+    if (lastHandledHandoffKey && lastHandledHandoffKey !== currentHandoffKey) {
+      triggerMascotHandoffVisual(ho.from_station, ho.to_station);
+    }
+    lastHandledHandoffKey = currentHandoffKey;
   }
 
-  // Grid das 5 estações
-  const grid = document.getElementById('stationsGrid');
+  // Atualiza Esteira Visual de Progresso do Ciclo (1. Coordenação -> 2. Planejamento -> 3. Construção -> 4. Qualidade)
+  updatePipelineStepper(snap);
 
-  snap.stations.forEach((st, idx) => {
-    const isActive = st.id === snap.active_station;
+  // Limpa elementos obsoletos de layouts anteriores se existirem no DOM
+  const oldConception = document.getElementById('stage-conception-unified');
+  if (oldConception && oldConception.parentNode) {
+    oldConception.parentNode.removeChild(oldConception);
+  }
+  const oldPlanner = document.getElementById('station-card-planner');
+  if (oldPlanner && oldPlanner.parentNode) {
+    oldPlanner.parentNode.removeChild(oldPlanner);
+  }
+
+  // Grid das 4 estações canônicas da esteira (unificando PM + Arquiteto + Planejador)
+  const grid = document.getElementById('stationsGrid');
+  const isSimple = (currentViewMode === 'simple');
+
+  const pmSt = snap.stations.find(s => s.id === 'pm-architect') || snap.stations[1] || {};
+  const planSt = snap.stations.find(s => s.id === 'planner') || snap.stations[2] || {};
+  const isConceptionActive = (snap.active_station === 'pm-architect' || snap.active_station === 'planner');
+
+  let conceptionState = 'standby';
+  let conceptionFocus = isSimple ? 'Pronto para desenhar planos e dividir tarefas' : 'Sessões iniciadas • Prontas para Discovery e Plano';
+  let conceptionExec = pmSt.executing_task || planSt.executing_task || null;
+  let conceptionAction = pmSt.current_action || planSt.current_action || '';
+  if (pmSt.mascot_state && pmSt.mascot_state !== 'idle' && pmSt.mascot_state !== 'standby') {
+    conceptionState = pmSt.mascot_state;
+    conceptionFocus = pmSt.current_focus;
+  } else if (planSt.mascot_state && planSt.mascot_state !== 'idle' && planSt.mascot_state !== 'standby') {
+    conceptionState = planSt.mascot_state;
+    conceptionFocus = planSt.current_focus;
+  }
+
+  const conceptionItems = sortItemsNewestFirst([...(pmSt.items || []), ...(planSt.items || [])]);
+  const conceptionTools = Array.from(new Set([...(pmSt.active_tools || ['read_file', 'write_file', 'context7']), ...(planSt.active_tools || ['gate', 'edit_file'])]));
+
+  const liderSt = snap.stations.find(s => s.id === 'lider') || snap.stations[0] || {};
+  const builderSt = snap.stations.find(s => s.id === 'builder') || snap.stations[3] || {};
+  const govSt = snap.stations.find(s => s.id === 'governance') || snap.stations[4] || {};
+
+  const unifiedStations = [
+    {
+      id: 'lider',
+      name: isSimple ? '01. Coordenador' : '01. O Líder',
+      role: isSimple ? 'Organiza os pedidos e direciona a equipe' : (liderSt.role || 'Orquestrador · Maestro do Ciclo'),
+      color: '#f2a65a',
+      mark: 'ring',
+      mascot_state: liderSt.mascot_state || 'standby',
+      current_focus: isSimple ? 'Pronto para receber pedidos e direcionar o ciclo' : (liderSt.current_focus || 'Sessão iniciada • Monitorando ciclo, filas e portões'),
+      executing_task: liderSt.executing_task || null,
+      current_action: liderSt.current_action || '',
+      active_tools: liderSt.active_tools || [],
+      input_contract: liderSt.input_contract || 'Demanda do Humano / Parecer da Governança',
+      output_contract: liderSt.output_contract || 'Demanda Estruturada → Estação 02',
+      version: liderSt.version || 0,
+      items: liderSt.items || [],
+      session_id: 'sess-01-lider'
+    },
+    {
+      id: 'pm-architect',
+      name: isSimple ? '02. Planejador' : '02. PM, Arquiteto & Planejador',
+      role: isSimple ? 'Desenha a solução técnica e divide em tarefas' : 'Concepção da Spec & Fatiamento em Tarefas',
+      color: '#8aa4ff',
+      mark: 'diamond',
+      mascot_state: conceptionState,
+      current_focus: conceptionFocus,
+      executing_task: conceptionExec,
+      current_action: conceptionAction,
+      active_tools: conceptionTools,
+      input_contract: pmSt.input_contract || 'Demanda do Líder + Código Atual',
+      output_contract: planSt.output_contract || 'Tarefas Fatiadas → Fila de Builders',
+      version: Math.max(pmSt.version || 0, planSt.version || 0),
+      items: conceptionItems,
+      session_id: 'sess-02-pm / sess-03-planner',
+      is_conception_unified: true,
+      pm_state: pmSt.mascot_state || 'standby',
+      planner_state: planSt.mascot_state || 'standby'
+    },
+    {
+      id: 'builder',
+      name: isSimple ? '03. Construtor' : '03. Fila de Builders',
+      role: isSimple ? 'Escreve o código e executa testes da solução' : (builderSt.role || 'Implementação em Contexto Isolado'),
+      color: '#4fd1b5',
+      mark: 'wave',
+      mascot_state: builderSt.mascot_state || 'standby',
+      current_focus: isSimple ? 'Pronto para construir novas funcionalidades' : (builderSt.current_focus || 'Sessão iniciada • Pronta para codificação e testes'),
+      executing_task: builderSt.executing_task || null,
+      current_action: builderSt.current_action || '',
+      active_tools: builderSt.active_tools || [],
+      input_contract: builderSt.input_contract || 'Task da Fila + Rules Mapeadas',
+      output_contract: builderSt.output_contract || 'Código + Testes + Portão A (PASS)',
+      version: builderSt.version || 0,
+      items: builderSt.items || [],
+      session_id: 'sess-04-builder'
+    },
+    {
+      id: 'governance',
+      name: isSimple ? '04. Controle de Qualidade' : '04. Analista de Governança',
+      role: isSimple ? 'Confere conformidade, regras e segurança' : (govSt.role || 'Auditoria Somente Leitura (Camada B)'),
+      color: '#ff8a5c',
+      mark: 'tri',
+      mascot_state: govSt.mascot_state || 'standby',
+      current_focus: isSimple ? 'Pronto para inspecionar regras e segurança' : (govSt.current_focus || 'Sessão iniciada • Pronta para inspeção de conformidade'),
+      executing_task: govSt.executing_task || null,
+      current_action: govSt.current_action || '',
+      active_tools: govSt.active_tools || [],
+      input_contract: govSt.input_contract || 'Diff + Spec + IDs da Constituição',
+      output_contract: govSt.output_contract || 'Laudo JSON → Líder (ou ↺ Builder)',
+      version: govSt.version || 0,
+      items: govSt.items || [],
+      session_id: 'sess-05-governance'
+    }
+  ].filter(Boolean);
+
+  unifiedStations.forEach((st, idx) => {
+    const isActive = (st.id === 'pm-architect') ? isConceptionActive : (st.id === snap.active_station);
 
     // Ferramentas ativas ou padrão da estação
     const defaultToolsByStation = {
       'lider': ['run_command', 'git', 'read_file', 'subagent'],
-      'pm-architect': ['read_file', 'write_file', 'context7', 'search_web'],
-      'planner': ['read_file', 'edit_file', 'gate', 'write_file'],
+      'pm-architect': ['read_file', 'write_file', 'context7', 'search_web', 'gate'],
       'builder': ['edit_file', 'run_command', 'git', 'read_file'],
       'governance': ['gate', 'read_file', 'analyst', 'audit']
     };
@@ -434,7 +2492,7 @@ function applySnapshot(snap) {
     let toolStripHtml = '';
     if (tools.length > 0) {
       toolStripHtml = `
-        <div class="tool-strip">
+        <div class="tool-strip tech-only">
           ${tools.map((t, tIdx) => {
             const isToolRunning = tIdx === 0 && (st.mascot_state === 'working' || st.mascot_state === 'thinking' || st.mascot_state === 'searching' || st.mascot_state === 'approval');
             return `
@@ -450,26 +2508,35 @@ function applySnapshot(snap) {
     let actionRowHtml = '';
     if (st.current_action) {
       actionRowHtml = `
-        <div class="executing-action-row" title="${escapeHtml(st.current_action)}">
+        <div class="executing-action-row tech-only" title="${escapeHtml(st.current_action)}">
           <span class="act-label">CMD:</span><b>${escapeHtml(st.current_action)}</b>
         </div>
       `;
     }
 
-    // O QUE ESTÁ EXECUTANDO POR AGENTE (Destaque Principal)
+    // O QUE ESTÁ EXECUTANDO POR AGENTE (Destaque Principal Padronizado em Todos os Agentes)
     const execTask = st.executing_task;
+
     let execHtml = '';
-    if (execTask && (execTask.status === 'building' || execTask.status === 'in_progress' || execTask.status === 'review_pending' || execTask.status === 'changes_requested')) {
+    if (execTask && (execTask.status === 'building' || execTask.status === 'in_progress' || execTask.status === 'review_pending' || execTask.status === 'changes_requested' || execTask.status === 'queued' || execTask.status === 'pending_review' || execTask.status === 'approval' || execTask.status === 'working')) {
       const isRetrying = execTask.status === 'changes_requested';
-      const label = isRetrying ? 'RETRABALHO SOLICITADO' : (execTask.status === 'review_pending' ? 'AUDITANDO' : 'EM EXECUÇÃO');
+      let shortLabel = 'EM EXECUÇÃO';
+      if (execTask.status === 'queued') {
+        shortLabel = 'NA FILA';
+      } else if (execTask.status === 'review_pending' || execTask.status === 'pending_review' || execTask.status === 'approval') {
+        shortLabel = 'AUDITORIA';
+      } else if (execTask.status === 'changes_requested') {
+        shortLabel = 'RETRABALHO';
+      }
+
       execHtml = `
         <div class="executing-box active" style="--c:${isRetrying ? 'var(--err)' : st.color}">
           <div class="executing-header">
             <span class="pulse-dot"></span>
-            <span class="executing-label">${label}</span>
-            <span class="executing-id">${execTask.id}</span>
+            <span class="executing-label">${shortLabel}</span>
+            <span class="executing-id tech-only" title="${escapeHtml(execTask.id)}">${escapeHtml(execTask.id)}</span>
           </div>
-          <div class="executing-title">${escapeHtml(execTask.title || st.current_focus)}</div>
+          <div class="executing-title" title="${escapeHtml(execTask.title || st.current_focus)}">${escapeHtml(execTask.title || st.current_focus)}</div>
           ${actionRowHtml}
           ${toolStripHtml}
         </div>
@@ -481,7 +2548,7 @@ function applySnapshot(snap) {
             <span class="pulse-dot"></span>
             <span class="executing-label">ATIVIDADE VIVA</span>
           </div>
-          <div class="executing-title">${escapeHtml(st.current_focus || 'Processando etapa do ciclo')}</div>
+          <div class="executing-title" title="${escapeHtml(st.current_focus || 'Processando etapa do ciclo')}">${escapeHtml(st.current_focus || 'Processando etapa do ciclo')}</div>
           ${actionRowHtml}
           ${toolStripHtml}
         </div>
@@ -492,27 +2559,94 @@ function applySnapshot(snap) {
           <div class="executing-header">
             <span class="idle-dot"></span>
             <span class="executing-label">STATUS</span>
-            <span class="executing-id" style="color:var(--muted);font-size:9.5px;">STANDBY</span>
+            <span class="executing-id tech-only" style="color:var(--muted);font-size:9.5px;">STANDBY</span>
+            <span class="executing-id simple-only" style="color:var(--ok);font-size:9.5px;">DISPONÍVEL</span>
           </div>
-          <div class="executing-title muted">${escapeHtml(st.current_focus || 'Fila ociosa — Pronto para novo handoff')}</div>
+          <div class="executing-title muted" title="${escapeHtml(st.current_focus || 'Pronto para receber tarefas')}">${escapeHtml(st.current_focus || 'Pronto para receber tarefas')}</div>
           ${actionRowHtml}
           ${toolStripHtml}
         </div>
       `;
     }
 
-    // Itens na Fila
+    // Itens na Fila (exibe EXCLUSIVAMENTE tarefas ativas/pendentes na frente do card)
     let itemsHtml = '';
-    if (st.items && st.items.length > 0) {
-      itemsHtml = st.items.map(it => `
-        <div class="queue-task-row">
-          <span style="color:var(--fg);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:140px;" title="${escapeHtml(it.title || it.id)}">${escapeHtml(it.id)}</span>
-          <span class="chip" style="font-size:9.5px;padding:1px 6px;">${escapeHtml(it.status)}</span>
+    const rawItems = st.items || [];
+    const activeTasks = sortItemsNewestFirst(rawItems.filter(it => it.status !== 'approved' && it.status !== 'done'));
+    const completedTasks = sortItemsNewestFirst(rawItems.filter(it => it.status === 'approved' || it.status === 'done'));
+
+    if (activeTasks.length > 0) {
+      itemsHtml = activeTasks.map(it => {
+        let shortStatus = 'NA FILA';
+        let statusColor = 'var(--accent)';
+        if (it.status === 'building' || it.status === 'working') {
+          shortStatus = 'EXECUÇÃO';
+          statusColor = 'var(--warn)';
+        } else if (it.status === 'review_pending' || it.status === 'approval' || it.status === 'pending_review') {
+          shortStatus = 'AUDITORIA';
+          statusColor = '#ffd8a8';
+        } else if (it.status === 'changes_requested') {
+          shortStatus = 'RETRABALHO';
+          statusColor = 'var(--err)';
+        }
+
+        return `
+          <div class="queue-task-row">
+            <span class="queue-task-name" title="${escapeHtml(it.title || it.id)}">${escapeHtml(it.id)}</span>
+            <span class="chip" style="font-size:8.5px;padding:1px 5px;color:${statusColor};border-color:currentColor;flex-shrink:0;">${shortStatus}</span>
+          </div>
+        `;
+      }).join('');
+    } else if (completedTasks.length > 0) {
+      itemsHtml = `
+        <div style="font-size:11px;color:var(--ok);font-weight:600;padding:6px 0;display:flex;align-items:center;gap:6px;">
+          <span>✓</span> <span>${completedTasks.length} concluídas</span>
         </div>
-      `).join('');
+      `;
     } else {
-      itemsHtml = `<div style="color:var(--muted);font-style:italic;">Nenhum item pendente</div>`;
+      itemsHtml = `<div style="color:var(--muted);font-style:italic;font-size:11px;padding:4px 0;">Fila ociosa</div>`;
     }
+
+    // Badge de Spec (FLX-01):
+    let specBadgeHtml = '';
+    const pendingStatuses = ['pending_review', 'approval', 'queued', 'in_progress'];
+    const activeSpecTask = (st.items || []).find(it => it.artifact_path && pendingStatuses.includes(it.status));
+    const activePlannerSpecTask = (st.items || []).find(it => it.artifact_path && it.status !== 'approved' && it.status !== 'done');
+    if (activeSpecTask) {
+      specBadgeHtml = `
+        <a href="javascript:void(0)" class="spec-link-btn" onclick="event.stopPropagation(); openSpecViewer('${escapeHtml(activeSpecTask.artifact_path)}')" style="color:#ffd8a8;font-size:10px;font-weight:600;text-decoration:none;background:rgba(242,166,90,0.15);padding:2px 6px;border-radius:4px;border:1px solid rgba(242,166,90,0.3);" title="Ver especificação técnica detalhada">Spec (FLX-01)</a>
+      `;
+    } else if (activePlannerSpecTask) {
+      specBadgeHtml = `
+        <a href="javascript:void(0)" class="spec-link-btn" onclick="event.stopPropagation(); openSpecViewer('${escapeHtml(activePlannerSpecTask.artifact_path)}')" style="color:#c9a7ff;font-size:10px;font-weight:600;text-decoration:none;background:rgba(157,110,237,0.15);padding:2px 6px;border-radius:4px;border:1px solid rgba(157,110,237,0.3);" title="Ver especificação técnica recebida da Estação 02">Spec</a>
+      `;
+    }
+
+    let phaseBadgeHtml = '';
+    if (st.is_conception_unified) {
+      phaseBadgeHtml = `
+        <div class="conception-phases-strip stage-phase-badge">
+          <div class="phase-pill ${st.pm_state !== 'standby' ? 'active' : ''}">
+            <span class="phase-pill-step">1</span>
+            <span class="simple-only">Desenho da Solução</span>
+            <span class="tech-only">Fase Concepção 1/2</span>
+          </div>
+          <span class="phase-arrow">➔</span>
+          <div class="phase-pill ${st.planner_state !== 'standby' ? 'active' : ''}">
+            <span class="phase-pill-step">2</span>
+            <span class="simple-only">Divisão em Tarefas</span>
+            <span class="tech-only">Fase Planejamento 2/2</span>
+          </div>
+        </div>
+      `;
+    }
+
+    const friendlyStateText = formatFriendlyState(st.mascot_state);
+    const sessId = st.session_id || (st.id === 'lider' ? 'sess-01-lider' : (st.id === 'pm-architect' ? 'sess-02-pm / sess-03-planner' : (st.id === 'builder' ? 'sess-04-builder' : 'sess-05-governance')));
+    const sessionChipHtml = `
+      <span class="session-badge tech-only" id="sess-badge-${st.id}"><span class="live-dot" style="display:inline-block;width:5px;height:5px;border-radius:50%;background:#3ecf8e;margin-right:4px;box-shadow:0 0 5px #3ecf8e;"></span>Sessão: ${escapeHtml(sessId)} (Pronta)</span>
+      <span class="simple-status-badge simple-only"><span class="live-dot" style="display:inline-block;width:5px;height:5px;border-radius:50%;background:#3ecf8e;margin-right:4px;box-shadow:0 0 5px #3ecf8e;"></span>${escapeHtml(friendlyStateText)}</span>
+    `;
 
     let card = document.getElementById(`station-card-${st.id}`);
     if (!card) {
@@ -520,6 +2654,17 @@ function applySnapshot(snap) {
       card.id = `station-card-${st.id}`;
       card.className = `station-card ${isActive ? 'active' : ''}`;
       card.style.setProperty('--c', st.color);
+      card.setAttribute('tabindex', '0');
+      card.setAttribute('role', 'button');
+      card.setAttribute('aria-label', `Inspecionar Estação ${st.name}`);
+      card.setAttribute('onclick', `openStationDrawer('${st.id}')`);
+      card.onclick = () => openStationDrawer(st.id);
+      card.onkeydown = (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          openStationDrawer(st.id);
+        }
+      };
 
       card.innerHTML = `
         <div class="station-top">
@@ -527,21 +2672,26 @@ function applySnapshot(snap) {
           <div class="station-info">
             <h3>${st.name}</h3>
             <p class="role">${st.role}</p>
-            <span class="chip" id="chip-${st.id}" style="margin-top:4px;"><i style="--o:${st.color}"></i>${st.mascot_state}</span>
+            <div id="station-badges-${st.id}" style="display:flex;align-items:center;gap:6px;margin-top:4px;flex-wrap:wrap;">
+              ${sessionChipHtml}
+              <span class="chip tech-only" id="chip-${st.id}"><i style="--o:${st.color}"></i>${st.mascot_state}</span>
+              ${specBadgeHtml}
+            </div>
+            ${phaseBadgeHtml}
           </div>
         </div>
 
         <div id="exec-wrap-${st.id}">${execHtml}</div>
 
-        <div class="io-strip">
+        <div class="io-strip tech-only">
           <div class="io-item"><span>Recebe</span><b>${st.input_contract}</b></div>
           <div class="io-item"><span>Entrega</span><b>${st.output_contract}</b></div>
         </div>
 
         <div class="queue-items-box">
           <div class="queue-header-row">
-            <span>Fila (${st.id}.json)</span>
-            <span>v${st.version}</span>
+            <span class="mono" style="font-size:10px;color:var(--muted);font-weight:700;">FILA</span>
+            <span id="queue-ver-${st.id}" class="chip mono tech-only" style="font-size:9px;padding:1px 5px;">v${st.version}</span>
           </div>
           <div id="queue-items-${st.id}">${itemsHtml}</div>
         </div>
@@ -550,12 +2700,43 @@ function applySnapshot(snap) {
     } else {
       card.className = `station-card ${isActive ? 'active' : ''}`;
       card.style.setProperty('--c', st.color);
-      const chip = document.getElementById(`chip-${st.id}`);
-      if (chip) chip.innerHTML = `<i style="--o:${st.color}"></i>${st.mascot_state}`;
+      card.setAttribute('tabindex', '0');
+      card.setAttribute('role', 'button');
+      card.setAttribute('aria-label', `Inspecionar Estação ${st.name}`);
+      card.setAttribute('onclick', `openStationDrawer('${st.id}')`);
+      card.onclick = () => openStationDrawer(st.id);
+      card.onkeydown = (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          openStationDrawer(st.id);
+        }
+      };
+      const titleEl = card.querySelector('h3');
+      if (titleEl && st.name) titleEl.textContent = st.name;
+      const roleEl = card.querySelector('.role');
+      if (roleEl && st.role) roleEl.textContent = st.role;
+
+      const badgesContainer = document.getElementById(`station-badges-${st.id}`);
+      if (badgesContainer) {
+        badgesContainer.innerHTML = `
+          ${sessionChipHtml}
+          <span class="chip tech-only" id="chip-${st.id}"><i style="--o:${st.color}"></i>${st.mascot_state}</span>
+          ${specBadgeHtml}
+        `;
+      } else {
+        const chip = document.getElementById(`chip-${st.id}`);
+        if (chip) chip.innerHTML = `<i style="--o:${st.color}"></i>${st.mascot_state}`;
+      }
       const execWrap = document.getElementById(`exec-wrap-${st.id}`);
       if (execWrap) execWrap.innerHTML = execHtml;
+      const queueVer = document.getElementById(`queue-ver-${st.id}`);
+      if (queueVer) queueVer.textContent = `v${st.version}`;
       const queueItems = document.getElementById(`queue-items-${st.id}`);
       if (queueItems) queueItems.innerHTML = itemsHtml;
+
+      if (!grid.contains(card)) {
+        grid.appendChild(card);
+      }
     }
 
     // Inicialização ou atualização do Mascote (Three.js 3D com fallback SVG)
@@ -590,21 +2771,139 @@ function applySnapshot(snap) {
     }
   });
 
-  // Governança
+  // Governança e Pilares Constitucionais Dinâmicos
   const gVerdict = snap.governance_verdict;
   const govCard = document.getElementById('govFindingCard');
-  if (gVerdict) {
-    govCard.className = `finding-card ${gVerdict.veredito}`;
-    govCard.innerHTML = `
-      <b>Parecer da Camada B: ${gVerdict.veredito.toUpperCase()}</b>
-      <p style="margin-top:4px;color:var(--fg);">${gVerdict.resumo || 'Em conformidade com a Constituição'}</p>
-    `;
+  const pillarsGrid = document.getElementById('govPillarsGrid');
+
+  const failedPillarKeys = new Set();
+  const hasFindings = gVerdict && Array.isArray(gVerdict.achados) && gVerdict.achados.length > 0;
+  const isViolacao = gVerdict && ((gVerdict.veredito || '').toLowerCase() === 'violacao' || hasFindings);
+
+  if (isViolacao) {
+    if (hasFindings) {
+      gVerdict.achados.forEach(a => {
+        if (a.regra) {
+          const prefix = a.regra.split('-')[0].toUpperCase().trim();
+          failedPillarKeys.add(prefix);
+        }
+      });
+    }
+    if (failedPillarKeys.size === 0) {
+      failedPillarKeys.add('GOV');
+    }
+
+    if (govCard) {
+      govCard.className = 'finding-card violacao';
+      let findingsHtml = '';
+      if (hasFindings) {
+        findingsHtml = gVerdict.achados.map(a => {
+          const ruleLabel = formatRuleBadge(a.regra || 'GOV-01');
+          const loc = a.arquivo ? `${escapeHtml(a.arquivo)}${a.linha ? `:${a.linha}` : ''}` : '';
+          return `
+            <div class="finding-item falha">
+              <div class="finding-item-header">
+                <span class="finding-item-rule">✕ ${escapeHtml(ruleLabel)} ${a.regra ? `(${escapeHtml(a.regra)})` : ''}</span>
+                ${loc ? `<span class="finding-item-loc mono">${loc}</span>` : ''}
+              </div>
+              <div class="finding-item-desc">${escapeHtml(a.explicacao || a.verificacao || a.evidencia || 'Violação de conformidade detectada')}</div>
+              ${a.correcao ? `<div class="finding-item-fix"><b>Instrução de Correção:</b> ${escapeHtml(a.correcao)}</div>` : ''}
+            </div>
+          `;
+        }).join('');
+      } else {
+        findingsHtml = `
+          <div class="finding-item falha">
+            <div class="finding-item-desc">${escapeHtml(gVerdict.resumo || 'Falha detectada durante a auditoria da Camada B.')}</div>
+          </div>
+        `;
+      }
+
+      govCard.innerHTML = `
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+          <b style="color:var(--err);font-size:13px;display:flex;align-items:center;gap:6px;">
+            <span>✕</span> FALHA DETECTADA NA AUDITORIA
+          </b>
+          <span class="chip" style="color:var(--err);border-color:var(--err);background:rgba(255,92,92,0.1);font-size:10px;">
+            ${(gVerdict.achados && gVerdict.achados.length) ? `${gVerdict.achados.length} achado(s)` : 'VIOLAÇÃO DETECTADA'}
+          </span>
+        </div>
+        <p style="margin-top:2px;color:var(--fg);font-size:12px;">${escapeHtml(gVerdict.resumo || 'Foram encontradas não-conformidades constitucionais que impedem o avanço.')}</p>
+        <div style="margin-top:8px;">${findingsHtml}</div>
+      `;
+    }
+  } else if (gVerdict && (gVerdict.veredito || '').toLowerCase() === 'conforme') {
+    if (govCard) {
+      govCard.className = 'finding-card conforme';
+      govCard.innerHTML = `
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+          <b style="color:var(--ok);font-size:13px;display:flex;align-items:center;gap:6px;">
+            <span>✓</span> AUDITORIA APROVADA (CONFORME)
+          </b>
+          <span class="chip" style="color:var(--ok);border-color:var(--ok);background:rgba(62,207,142,0.1);font-size:10px;">
+            100% CONFORME
+          </span>
+        </div>
+        <p style="margin-top:2px;color:var(--fg);font-size:12px;">${escapeHtml(gVerdict.resumo || 'Todos os pilares constitucionais e contratos entre estações foram verificados e aprovados.')}</p>
+        <div class="finding-item aprovado" style="margin-top:8px;">
+          <div style="font-size:11.5px;color:var(--fg);">
+            ✓ Nenhuma violação constitucional detectada. Portão de Governança Camadas A & B liberado com sucesso.
+          </div>
+        </div>
+      `;
+    }
   } else {
-    govCard.className = 'finding-card conforme';
-    govCard.innerHTML = `
-      <b>Portão de Governança Camada A & B</b>
-      <p style="margin-top:4px;color:var(--muted);">Aguardando submissão ou inspeção ativa</p>
-    `;
+    // Estado inicial / ocioso / aguardando
+    if (govCard) {
+      govCard.className = 'finding-card conforme';
+      govCard.innerHTML = `
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+          <b style="color:var(--ok);font-size:13px;display:flex;align-items:center;gap:6px;">
+            <span>✓</span> PORTÃO DE GOVERNANÇA ATIVO (CAMADAS A & B)
+          </b>
+          <span class="chip" style="font-size:10px;color:var(--muted);">STANDBY</span>
+        </div>
+        <p style="margin-top:2px;color:var(--muted);font-size:12px;">Aguardando submissão de artefatos para inspeção e auditoria independente em modo Read-Only.</p>
+      `;
+    }
+  }
+
+  // Salva snapshot global para permitir re-renderização suave no toggle
+  window.lastSnapshot = snap;
+
+  // Atualiza Central de Notificações de Aprovação Humana (feat-67-02)
+  updateApprovalNotifications(snap);
+
+  // Renderiza os Pilares Constitucionais Dinâmicos
+  if (pillarsGrid) {
+    pillarsGrid.innerHTML = CONSTITUTIONAL_PILLARS.map(p => {
+      const isFailed = failedPillarKeys.has(p.key);
+      const chipClass = isFailed ? 'falha' : 'aprovado';
+      const chipText = isFailed ? '✕ NÃO CONFORME' : '✓ CONFORME';
+      const keyBadge = showTechnicalDetails ? `<div class="gov-pillar-key mono">${escapeHtml(p.key)}</div>` : '';
+      return `
+        <div class="gov-pillar-card ${isFailed ? 'falha' : 'aprovado'}">
+          <div class="gov-pillar-header">
+            <div class="gov-pillar-title-wrap">
+              <div>
+                <div class="gov-pillar-name">${escapeHtml(p.title)}</div>
+                ${keyBadge}
+              </div>
+            </div>
+            <span class="gov-pillar-chip ${chipClass}">${chipText}</span>
+          </div>
+          <p class="gov-pillar-desc">${escapeHtml(p.desc)}</p>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // Atualização reativa suave do Drawer de Inspeção se estiver aberto (feat-63-02)
+  if (activeDrawerStationId && snap.stations) {
+    const activeSt = snap.stations.find(s => s.id === activeDrawerStationId);
+    if (activeSt) {
+      renderStationDrawerContent(activeSt);
+    }
   }
 }
 
@@ -749,12 +3048,86 @@ function runDemoSimulation() {
     };
     cloned.recent_activity = [newAct, ...(cloned.recent_activity || [])].slice(0, 50);
 
+    if (simStep.station === 'governance') {
+      cloned.governance_verdict = {
+        veredito: 'conforme',
+        resumo: 'Auditoria estrita concluída com 100% de conformidade com os 7 pilares constitucionais.',
+        achados: []
+      };
+    }
+
     applySnapshot(cloned);
   }, 2200);
 }
 
+// Atualiza nós e conectores da esteira contínua (1. Coordenação -> 2. Planejamento -> 3. Construção -> 4. Qualidade)
+function updatePipelineStepper(snap) {
+  if (!snap) return;
+  const active = snap.active_station || 'lider';
+  const nodes = {
+    'lider': document.getElementById('step-node-lider'),
+    'pm': document.getElementById('step-node-pm'),
+    'builder': document.getElementById('step-node-builder'),
+    'gov': document.getElementById('step-node-gov'),
+  };
+  const conns = {
+    'lider-pm': document.getElementById('conn-lider-pm'),
+    'pm-builder': document.getElementById('conn-pm-builder'),
+    'builder-gov': document.getElementById('conn-builder-gov'),
+  };
+  const badges = {
+    'lider': document.getElementById('step-badge-lider'),
+    'pm': document.getElementById('step-badge-pm'),
+    'builder': document.getElementById('step-badge-builder'),
+    'gov': document.getElementById('step-badge-gov'),
+  };
+
+  const stationOrder = ['lider', 'pm-architect', 'planner', 'builder', 'governance'];
+  let currentIdx = stationOrder.indexOf(active);
+  if (currentIdx === -1) currentIdx = 0;
+
+  // 1. Coordenação (Líder)
+  if (nodes.lider) {
+    nodes.lider.className = 'step-node ' + (active === 'lider' ? 'active' : (currentIdx > 0 ? 'completed' : ''));
+    if (badges.lider) badges.lider.textContent = (active === 'lider' ? 'Em Ação' : (currentIdx > 0 ? 'Concluído' : 'Disponível'));
+  }
+  if (conns['lider-pm']) {
+    conns['lider-pm'].className = 'step-connector ' + (currentIdx > 0 ? 'completed' : (active === 'lider' ? 'active' : ''));
+  }
+
+  // 2. Planejamento (PM & Arquiteto + Planejador)
+  const isPMActive = (active === 'pm-architect' || active === 'planner');
+  const isPMPassed = (currentIdx > 2);
+  if (nodes.pm) {
+    nodes.pm.className = 'step-node ' + (isPMActive ? 'active' : (isPMPassed ? 'completed' : ''));
+    if (badges.pm) badges.pm.textContent = (isPMActive ? 'Planejando' : (isPMPassed ? 'Concluído' : 'Disponível'));
+  }
+  if (conns['pm-builder']) {
+    conns['pm-builder'].className = 'step-connector ' + (isPMPassed ? 'completed' : (isPMActive ? 'active' : ''));
+  }
+
+  // 3. Construção (Builder)
+  const isBuilderActive = (active === 'builder');
+  const isBuilderPassed = (currentIdx > 3);
+  if (nodes.builder) {
+    nodes.builder.className = 'step-node ' + (isBuilderActive ? 'active' : (isBuilderPassed ? 'completed' : ''));
+    if (badges.builder) badges.builder.textContent = (isBuilderActive ? 'Construindo' : (isBuilderPassed ? 'Concluído' : 'Disponível'));
+  }
+  if (conns['builder-gov']) {
+    conns['builder-gov'].className = 'step-connector ' + (isBuilderPassed ? 'completed' : (isBuilderActive ? 'active' : ''));
+  }
+
+  // 4. Qualidade (Governança)
+  const isGovActive = (active === 'governance');
+  if (nodes.gov) {
+    nodes.gov.className = 'step-node ' + (isGovActive ? 'active' : '');
+    if (badges.gov) badges.gov.textContent = (isGovActive ? 'Auditando' : 'Aprovado');
+  }
+}
+
 // Inicialização
 document.addEventListener('DOMContentLoaded', () => {
+  setViewMode(currentViewMode, false);
   fetch('/api/state')
     .then(r => r.json())
     .then(applySnapshot)

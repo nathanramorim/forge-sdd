@@ -197,7 +197,11 @@ inconsistências de configuração dos agentes de IA e progresso das features.`,
 				if relErr != nil {
 					rel = path
 				}
-				switch classifyNamingConvention(d.Name()) {
+				name := d.Name()
+				if name == "discovery.md" || name == "criteria.md" || name == "plan.md" {
+					name = filepath.Base(filepath.Dir(path))
+				}
+				switch classifyNamingConvention(name) {
 				case "sequencial":
 					sequentialFiles = append(sequentialFiles, rel)
 				case "hash":

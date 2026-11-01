@@ -173,7 +173,7 @@ func Defaults() Config {
 		DB:               "none",
 		Telemetry:        true,
 		Lang:             "pt-BR",
-		SddVersion:       "3.2.1-beta",
+		SddVersion:       "3.2.2-beta",
 		DryRun:           false,
 		Agents:           []string{AgentCopilot},
 		NamingConvention: "sequencial",
@@ -266,8 +266,8 @@ func FetchNpmVersions() (latest string, beta string, err error) {
 	return latest, beta, nil
 }
 
-var sequentialIDRe = regexp.MustCompile(`^(?:feat|fix|discovery|criteria|plan)-(\d{2})(?:[-.]|$)`)
-var hashIDRe = regexp.MustCompile(`^(?:feat|fix|discovery|criteria|plan)-([0-9a-f]{4})(?:[-.]|$)`)
+var sequentialIDRe = regexp.MustCompile(`^(?:(?:feat|fix|discovery|criteria|plan)-)?(\d{2})(?:[-.]|$)`)
+var hashIDRe = regexp.MustCompile(`^(?:(?:feat|fix|discovery|criteria|plan)-)?([0-9a-f]{4})(?:[-.]|$)`)
 
 // ClassifyNamingConvention identifica se o nome de um arquivo de feature/discovery/fix
 // segue a convenção sequencial (feat-NN/fix-NN) ou por hash de 4 dígitos (feat-xxxx/fix-xxxx).
@@ -293,7 +293,11 @@ func DetectNamingConvention(targetDir string) string {
 			if err != nil || d.IsDir() || !strings.HasSuffix(d.Name(), ".md") {
 				return nil
 			}
-			switch ClassifyNamingConvention(d.Name()) {
+			name := d.Name()
+			if name == "discovery.md" || name == "criteria.md" || name == "plan.md" {
+				name = filepath.Base(filepath.Dir(path))
+			}
+			switch ClassifyNamingConvention(name) {
 			case "sequencial":
 				seqCount++
 			case "hash":

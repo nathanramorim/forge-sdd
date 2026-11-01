@@ -237,16 +237,32 @@ var queueStationsCmd = &cobra.Command{
 	},
 }
 
-var queueLogCmd = &cobra.Command{
-	Use:   "log",
-	Short: "Registra atomicamente a execução de uma tool/ação por uma estação",
+var queueActivityCmd = &cobra.Command{
+	Use:     "activity",
+	Aliases: []string{"log"},
+	Short:   "Registra ou higieniza o histórico de atividades e telemetria",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		dir, _ := cmd.Flags().GetString("dir")
+		sanitize, _ := cmd.Flags().GetBool("sanitize")
+		if sanitize {
+			count, err := queue.SanitizeOrphanActivities(dir)
+			if err != nil {
+				return err
+			}
+			fmt.Printf("✓ %d atividades órfãs reconciliadas para 'success'\n", count)
+			return nil
+		}
+
 		station, _ := cmd.Flags().GetString("station")
 		tool, _ := cmd.Flags().GetString("tool")
 		action, _ := cmd.Flags().GetString("action")
 		details, _ := cmd.Flags().GetString("details")
 		status, _ := cmd.Flags().GetString("status")
+		command, _ := cmd.Flags().GetString("command")
+		filePath, _ := cmd.Flags().GetString("file-path")
+		output, _ := cmd.Flags().GetString("output")
+		errMsg, _ := cmd.Flags().GetString("error")
+		durationMs, _ := cmd.Flags().GetInt64("duration")
 
 		if station == "" {
 			station = queue.StationLider
@@ -258,13 +274,33 @@ var queueLogCmd = &cobra.Command{
 			return fmt.Errorf("--tool é obrigatório (ex: run_command, read_file, edit_file, gate, git)")
 		}
 
-		if err := queue.RecordActivity(dir, station, tool, action, details, status); err != nil {
-			return err
+		if command != "" || filePath != "" || output != "" || errMsg != "" || durationMs > 0 {
+			item := queue.ActivityItem{
+				Station:    station,
+				Tool:       tool,
+				Action:     action,
+				Details:    details,
+				Status:     status,
+				Command:    command,
+				FilePath:   filePath,
+				Output:     output,
+				Error:      errMsg,
+				DurationMs: durationMs,
+			}
+			if err := queue.RecordActivityDetailed(dir, item); err != nil {
+				return err
+			}
+		} else {
+			if err := queue.RecordActivity(dir, station, tool, action, details, status); err != nil {
+				return err
+			}
 		}
 		fmt.Printf("✓ Atividade registrada para estação '%s': tool=%s\n", station, tool)
 		return nil
 	},
 }
+
+var queueLogCmd = queueActivityCmd
 
 func init() {
 	queueHandoffCmd.Flags().String("dir", ".", "Diretório alvo do projeto Forge-SDD")
@@ -302,12 +338,18 @@ func init() {
 
 	queuePanelCmd.Flags().String("dir", ".", "Diretório alvo do projeto Forge-SDD")
 
-	queueLogCmd.Flags().String("dir", ".", "Diretório alvo do projeto Forge-SDD")
-	queueLogCmd.Flags().String("station", "lider", "Estação responsável (lider, pm-architect, planner, builder, governance)")
-	queueLogCmd.Flags().String("tool", "", "Nome da ferramenta executada (run_command, read_file, edit_file, gate, git, etc)")
-	queueLogCmd.Flags().String("action", "", "Argumento, comando ou arquivo operado")
-	queueLogCmd.Flags().String("details", "", "Descrição resumida da intenção da operação")
-	queueLogCmd.Flags().String("status", "success", "Status da execução: running, success, error")
+	queueActivityCmd.Flags().String("dir", ".", "Diretório alvo do projeto Forge-SDD")
+	queueActivityCmd.Flags().String("station", "lider", "Estação responsável (lider, pm-architect, planner, builder, governance)")
+	queueActivityCmd.Flags().String("tool", "", "Nome da ferramenta executada (run_command, read_file, edit_file, gate, git, etc)")
+	queueActivityCmd.Flags().String("action", "", "Argumento, comando ou arquivo operado")
+	queueActivityCmd.Flags().String("details", "", "Descrição resumida da intenção da operação")
+	queueActivityCmd.Flags().String("status", "success", "Status da execução: running, success, error")
+	queueActivityCmd.Flags().Bool("sanitize", false, "Reconcilia e encerra atividades órfãs pendentes em 'running'")
+	queueActivityCmd.Flags().String("command", "", "Comando completo executado")
+	queueActivityCmd.Flags().String("file-path", "", "Caminho do arquivo afetado")
+	queueActivityCmd.Flags().String("output", "", "Saída de texto capturada")
+	queueActivityCmd.Flags().String("error", "", "Mensagem de erro capturada")
+	queueActivityCmd.Flags().Int64("duration", 0, "Duração da execução em milissegundos")
 
 	queueCmd.AddCommand(queueEnqueueCmd)
 	queueCmd.AddCommand(queueNextCmd)
@@ -317,5 +359,5 @@ func init() {
 	queueCmd.AddCommand(queuePanelCmd)
 	queueCmd.AddCommand(queueHandoffCmd)
 	queueCmd.AddCommand(queueStationsCmd)
-	queueCmd.AddCommand(queueLogCmd)
+	queueCmd.AddCommand(queueActivityCmd)
 }
