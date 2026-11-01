@@ -1463,23 +1463,34 @@ async function sendHandoff(from, to, taskId, title, artifactPath) {
 let lastHandledHandoffKey = null;
 
 function triggerMascotHandoffVisual(from, to) {
-  if (!from || !to || from === to) return;
-  const stationOrder = ['lider', 'pm-architect', 'planner', 'builder', 'governance'];
-  const fromIdx = stationOrder.indexOf(from);
-  const toIdx = stationOrder.indexOf(to);
+  if (!from || !to) return;
+  const mapStation = (s) => (s === 'planner' ? 'pm-architect' : s);
+  const vFrom = mapStation(from);
+  const vTo = mapStation(to);
+
+  if (vFrom === vTo) {
+    if (mascotControllers[vFrom] && typeof mascotControllers[vFrom].triggerHandoffAnimation === 'function') {
+      mascotControllers[vFrom].triggerHandoffAnimation(1);
+    }
+    return;
+  }
+
+  const stationOrder = ['lider', 'pm-architect', 'builder', 'governance'];
+  const fromIdx = stationOrder.indexOf(vFrom);
+  const toIdx = stationOrder.indexOf(vTo);
   const dir = (toIdx >= fromIdx) ? 1 : -1;
 
-  if (mascotControllers[from] && typeof mascotControllers[from].triggerHandoffAnimation === 'function') {
-    mascotControllers[from].triggerHandoffAnimation(dir);
+  if (mascotControllers[vFrom] && typeof mascotControllers[vFrom].triggerHandoffAnimation === 'function') {
+    mascotControllers[vFrom].triggerHandoffAnimation(dir);
   }
-  if (mascotControllers[to] && typeof mascotControllers[to].triggerHandoffAnimation === 'function') {
-    mascotControllers[to].triggerHandoffAnimation(-dir);
+  if (mascotControllers[vTo] && typeof mascotControllers[vTo].triggerHandoffAnimation === 'function') {
+    mascotControllers[vTo].triggerHandoffAnimation(-dir);
   }
 
   // Animação de feixe/partícula luminosa de transferência entre os mascotes (feat-67-03)
   try {
-    const fromEl = document.getElementById(`stage-${from}`) || document.getElementById(`station-${from}`);
-    const toEl = document.getElementById(`stage-${to}`) || document.getElementById(`station-${to}`);
+    const fromEl = document.getElementById(`station-card-${vFrom}`) || document.getElementById(`stage-${vFrom}`);
+    const toEl = document.getElementById(`station-card-${vTo}`) || document.getElementById(`stage-${vTo}`);
     if (fromEl && toEl && typeof fromEl.getBoundingClientRect === 'function' && typeof toEl.getBoundingClientRect === 'function') {
       const r1 = fromEl.getBoundingClientRect();
       const r2 = toEl.getBoundingClientRect();
@@ -1685,24 +1696,38 @@ function renderMarkdown(md) {
   return html;
 }
 
+function getStationForDrawer(stationId) {
+  if (!lastSnapshot || !lastSnapshot.stations) return null;
+  let st = lastSnapshot.stations.find(s => s.id === stationId);
+  if ((stationId === 'pm-architect' || stationId === 'planner') && st) {
+    const pmSt = lastSnapshot.stations.find(s => s.id === 'pm-architect') || {};
+    const planSt = lastSnapshot.stations.find(s => s.id === 'planner') || {};
+    st = {
+      ...pmSt,
+      name: '02. PM, Arquiteto & Planejador',
+      role: 'Concepção da Spec (Fase 1) & Fatiamento de Tarefas (Fase 2)',
+      session_id: 'sess-02-pm • sess-03-planner',
+      items: sortItemsNewestFirst([...(pmSt.items || []), ...(planSt.items || [])]),
+      recent_activity: [...(pmSt.recent_activity || []), ...(planSt.recent_activity || [])],
+    };
+  }
+  return st;
+}
+
 function selectTaskInDrawer(taskId) {
   if (!activeDrawerStationId) return;
   selectedTaskIdByStation[activeDrawerStationId] = taskId;
-  if (lastSnapshot && lastSnapshot.stations) {
-    const st = lastSnapshot.stations.find(s => s.id === activeDrawerStationId);
-    if (st) {
-      renderStationDrawerContent(st);
-    }
+  const st = getStationForDrawer(activeDrawerStationId);
+  if (st) {
+    renderStationDrawerContent(st);
   }
 }
 
 function switchDrawerTab(tab) {
   activeDrawerTab = tab;
-  if (activeDrawerStationId && lastSnapshot && lastSnapshot.stations) {
-    const st = lastSnapshot.stations.find(s => s.id === activeDrawerStationId);
-    if (st) {
-      renderStationDrawerContent(st);
-    }
+  const st = getStationForDrawer(activeDrawerStationId);
+  if (st) {
+    renderStationDrawerContent(st);
   }
 }
 
@@ -1719,11 +1744,9 @@ function openStationDrawer(stationId, tab) {
   drawer.removeAttribute('aria-hidden');
   backdrop.classList.add('open');
 
-  if (lastSnapshot && lastSnapshot.stations) {
-    const st = lastSnapshot.stations.find(s => s.id === stationId);
-    if (st) {
-      renderStationDrawerContent(st);
-    }
+  const st = getStationForDrawer(stationId);
+  if (st) {
+    renderStationDrawerContent(st);
   }
 }
 
@@ -2262,17 +2285,71 @@ function applySnapshot(snap) {
     lastHandledHandoffKey = currentHandoffKey;
   }
 
-  // Grid das 5 estações
+  // Limpa elementos obsoletos de layouts anteriores se existirem no DOM
+  const oldConception = document.getElementById('stage-conception-unified');
+  if (oldConception && oldConception.parentNode) {
+    oldConception.parentNode.removeChild(oldConception);
+  }
+  const oldPlanner = document.getElementById('station-card-planner');
+  if (oldPlanner && oldPlanner.parentNode) {
+    oldPlanner.parentNode.removeChild(oldPlanner);
+  }
+
+  // Grid das 4 estações canônicas da esteira (unificando PM + Arquiteto + Planejador)
   const grid = document.getElementById('stationsGrid');
 
-  snap.stations.forEach((st, idx) => {
-    const isActive = st.id === snap.active_station;
+  const pmSt = snap.stations.find(s => s.id === 'pm-architect') || snap.stations[1] || {};
+  const planSt = snap.stations.find(s => s.id === 'planner') || snap.stations[2] || {};
+  const isConceptionActive = (snap.active_station === 'pm-architect' || snap.active_station === 'planner');
+
+  let conceptionState = 'standby';
+  let conceptionFocus = 'Sessões iniciadas • Prontas para Discovery e Plano';
+  let conceptionExec = pmSt.executing_task || planSt.executing_task || null;
+  let conceptionAction = pmSt.current_action || planSt.current_action || '';
+  if (pmSt.mascot_state && pmSt.mascot_state !== 'idle' && pmSt.mascot_state !== 'standby') {
+    conceptionState = pmSt.mascot_state;
+    conceptionFocus = pmSt.current_focus;
+  } else if (planSt.mascot_state && planSt.mascot_state !== 'idle' && planSt.mascot_state !== 'standby') {
+    conceptionState = planSt.mascot_state;
+    conceptionFocus = planSt.current_focus;
+  }
+
+  const conceptionItems = sortItemsNewestFirst([...(pmSt.items || []), ...(planSt.items || [])]);
+  const conceptionTools = Array.from(new Set([...(pmSt.active_tools || ['read_file', 'write_file', 'context7']), ...(planSt.active_tools || ['gate', 'edit_file'])]));
+
+  const unifiedStations = [
+    snap.stations.find(s => s.id === 'lider') || snap.stations[0],
+    {
+      id: 'pm-architect',
+      name: '02. PM, Arquiteto & Planejador',
+      role: 'Concepção da Spec & Fatiamento em Tarefas',
+      color: '#8aa4ff',
+      mark: 'diamond',
+      mascot_state: conceptionState,
+      current_focus: conceptionFocus,
+      executing_task: conceptionExec,
+      current_action: conceptionAction,
+      active_tools: conceptionTools,
+      input_contract: pmSt.input_contract || 'Demanda do Líder + Código Atual',
+      output_contract: planSt.output_contract || 'Tarefas Fatiadas → Fila de Builders',
+      version: Math.max(pmSt.version || 0, planSt.version || 0),
+      items: conceptionItems,
+      session_id: 'sess-02-pm / sess-03-planner',
+      is_conception_unified: true,
+      pm_state: pmSt.mascot_state || 'standby',
+      planner_state: planSt.mascot_state || 'standby'
+    },
+    snap.stations.find(s => s.id === 'builder') || snap.stations[3],
+    snap.stations.find(s => s.id === 'governance') || snap.stations[4],
+  ].filter(Boolean);
+
+  unifiedStations.forEach((st, idx) => {
+    const isActive = (st.id === 'pm-architect') ? isConceptionActive : (st.id === snap.active_station);
 
     // Ferramentas ativas ou padrão da estação
     const defaultToolsByStation = {
       'lider': ['run_command', 'git', 'read_file', 'subagent'],
-      'pm-architect': ['read_file', 'write_file', 'context7', 'search_web'],
-      'planner': ['read_file', 'edit_file', 'gate', 'write_file'],
+      'pm-architect': ['read_file', 'write_file', 'context7', 'search_web', 'gate'],
       'builder': ['edit_file', 'run_command', 'git', 'read_file'],
       'governance': ['gate', 'read_file', 'analyst', 'audit']
     };
@@ -2350,7 +2427,7 @@ function applySnapshot(snap) {
             <span class="executing-label">STATUS</span>
             <span class="executing-id" style="color:var(--muted);font-size:9.5px;">STANDBY</span>
           </div>
-          <div class="executing-title muted" title="${escapeHtml(st.current_focus || 'Fila ociosa — Pronto para novo handoff')}">${escapeHtml(st.current_focus || 'Fila ociosa — Pronto para novo handoff')}</div>
+          <div class="executing-title muted" title="${escapeHtml(st.current_focus || 'Sessão iniciada • Pronta para tarefas')}">${escapeHtml(st.current_focus || 'Sessão iniciada • Pronta para tarefas')}</div>
           ${actionRowHtml}
           ${toolStripHtml}
         </div>
@@ -2396,34 +2473,38 @@ function applySnapshot(snap) {
     }
 
     // Badge de Spec (FLX-01):
-    // Na Estação 02 (PM & Arquiteto): exibido APENAS se houver tarefa com status ativo/pendente ('pending_review', 'approval', 'queued', 'in_progress') e artifact_path.
-    // Na Estação 03 (Planejador): se houver spec ativa recebida por handoff (status !== 'approved' && status !== 'done' com artifact_path), exibir badge discreto.
     let specBadgeHtml = '';
-    if (st.id === 'pm-architect') {
-      const pendingStatuses = ['pending_review', 'approval', 'queued', 'in_progress'];
-      const activeSpecTask = (st.items || []).find(it => it.artifact_path && pendingStatuses.includes(it.status));
-      if (activeSpecTask) {
-        specBadgeHtml = `
-          <a href="javascript:void(0)" class="spec-link-btn" onclick="event.stopPropagation(); openSpecViewer('${escapeHtml(activeSpecTask.artifact_path)}')" style="color:#ffd8a8;font-size:10px;font-weight:600;text-decoration:none;background:rgba(242,166,90,0.15);padding:2px 6px;border-radius:4px;border:1px solid rgba(242,166,90,0.3);" title="Ver especificação técnica detalhada">Spec (FLX-01)</a>
-        `;
-      }
-    } else if (st.id === 'planner') {
-      const activePlannerSpecTask = (st.items || []).find(it => it.artifact_path && it.status !== 'approved' && it.status !== 'done');
-      if (activePlannerSpecTask) {
-        specBadgeHtml = `
-          <a href="javascript:void(0)" class="spec-link-btn" onclick="event.stopPropagation(); openSpecViewer('${escapeHtml(activePlannerSpecTask.artifact_path)}')" style="color:#c9a7ff;font-size:10px;font-weight:600;text-decoration:none;background:rgba(157,110,237,0.15);padding:2px 6px;border-radius:4px;border:1px solid rgba(157,110,237,0.3);" title="Ver especificação técnica recebida da Estação 02">Spec</a>
-        `;
-      }
+    const pendingStatuses = ['pending_review', 'approval', 'queued', 'in_progress'];
+    const activeSpecTask = (st.items || []).find(it => it.artifact_path && pendingStatuses.includes(it.status));
+    const activePlannerSpecTask = (st.items || []).find(it => it.artifact_path && it.status !== 'approved' && it.status !== 'done');
+    if (activeSpecTask) {
+      specBadgeHtml = `
+        <a href="javascript:void(0)" class="spec-link-btn" onclick="event.stopPropagation(); openSpecViewer('${escapeHtml(activeSpecTask.artifact_path)}')" style="color:#ffd8a8;font-size:10px;font-weight:600;text-decoration:none;background:rgba(242,166,90,0.15);padding:2px 6px;border-radius:4px;border:1px solid rgba(242,166,90,0.3);" title="Ver especificação técnica detalhada">Spec (FLX-01)</a>
+      `;
+    } else if (activePlannerSpecTask) {
+      specBadgeHtml = `
+        <a href="javascript:void(0)" class="spec-link-btn" onclick="event.stopPropagation(); openSpecViewer('${escapeHtml(activePlannerSpecTask.artifact_path)}')" style="color:#c9a7ff;font-size:10px;font-weight:600;text-decoration:none;background:rgba(157,110,237,0.15);padding:2px 6px;border-radius:4px;border:1px solid rgba(157,110,237,0.3);" title="Ver especificação técnica recebida da Estação 02">Spec</a>
+      `;
     }
 
     let phaseBadgeHtml = '';
-    if (st.id === 'pm-architect') {
-      phaseBadgeHtml = `<span class="chip mono stage-phase-badge" style="font-size:8.5px;padding:1px 5px;background:rgba(138,164,255,0.12);color:#8aa4ff;border-color:rgba(138,164,255,0.35);">Fase Concepção 1/2</span>`;
-    } else if (st.id === 'planner') {
-      phaseBadgeHtml = `<span class="chip mono stage-phase-badge" style="font-size:8.5px;padding:1px 5px;background:rgba(201,167,255,0.12);color:#c9a7ff;border-color:rgba(201,167,255,0.35);">Fase Planejamento 2/2</span>`;
+    if (st.is_conception_unified) {
+      phaseBadgeHtml = `
+        <div class="conception-phases-strip stage-phase-badge">
+          <div class="phase-pill ${st.pm_state !== 'standby' ? 'active' : ''}">
+            <span class="phase-pill-step">1</span>
+            <span>Fase Concepção 1/2</span>
+          </div>
+          <span class="phase-arrow">➔</span>
+          <div class="phase-pill ${st.planner_state !== 'standby' ? 'active' : ''}">
+            <span class="phase-pill-step">2</span>
+            <span>Fase Planejamento 2/2</span>
+          </div>
+        </div>
+      `;
     }
 
-    const sessId = st.session_id || (st.id === 'lider' ? 'sess-01-lider' : (st.id === 'pm-architect' ? 'sess-02-pm' : (st.id === 'planner' ? 'sess-03-planner' : (st.id === 'builder' ? 'sess-04-builder' : 'sess-05-governance'))));
+    const sessId = st.session_id || (st.id === 'lider' ? 'sess-01-lider' : (st.id === 'pm-architect' ? 'sess-02-pm / sess-03-planner' : (st.id === 'builder' ? 'sess-04-builder' : 'sess-05-governance')));
     const sessionChipHtml = `<span class="session-badge" id="sess-badge-${st.id}"><span class="live-dot" style="display:inline-block;width:5px;height:5px;border-radius:50%;background:#3ecf8e;margin-right:4px;box-shadow:0 0 5px #3ecf8e;"></span>Sessão: ${escapeHtml(sessId)} (Pronta)</span>`;
 
     let card = document.getElementById(`station-card-${st.id}`);
@@ -2453,9 +2534,9 @@ function applySnapshot(snap) {
             <div id="station-badges-${st.id}" style="display:flex;align-items:center;gap:6px;margin-top:4px;flex-wrap:wrap;">
               ${sessionChipHtml}
               <span class="chip" id="chip-${st.id}"><i style="--o:${st.color}"></i>${st.mascot_state}</span>
-              ${phaseBadgeHtml}
               ${specBadgeHtml}
             </div>
+            ${phaseBadgeHtml}
           </div>
         </div>
 
@@ -2474,41 +2555,7 @@ function applySnapshot(snap) {
           <div id="queue-items-${st.id}">${itemsHtml}</div>
         </div>
       `;
-
-      if (st.id === 'pm-architect' || st.id === 'planner') {
-        let conceptionGroup = document.getElementById('stage-conception-unified');
-        if (!conceptionGroup) {
-          conceptionGroup = document.createElement('div');
-          conceptionGroup.id = 'stage-conception-unified';
-          conceptionGroup.className = 'stage-group-container';
-          conceptionGroup.innerHTML = `
-            <div class="stage-group-header">
-              <div>
-                <div class="stage-group-title">
-                  <span>02. Concepção & Planejamento (PM, Arquiteto & Planejador)</span>
-                  <span class="session-badge"><span class="live-dot" style="display:inline-block;width:5px;height:5px;border-radius:50%;background:#3ecf8e;margin-right:4px;"></span>Sessões Conectadas</span>
-                </div>
-                <p class="stage-group-desc">A especificação técnica é concebida pelo PM & Arquiteto, validada no Portão FLX-01 e fatiada pelo Planejador em tarefas nesta mesma etapa antes de ir para o Builder.</p>
-              </div>
-              <div style="display:flex;gap:6px;align-items:center;">
-                <span class="chip mono" style="font-size:9.5px;color:#8aa4ff;border-color:rgba(138,164,255,0.4);">Fase 1: Discovery</span>
-                <span style="color:var(--muted);font-size:10px;">➔</span>
-                <span class="chip mono" style="font-size:9.5px;color:#c9a7ff;border-color:rgba(201,167,255,0.4);">Fase 2: Fatiamento</span>
-              </div>
-            </div>
-            <div class="stage-subcards-grid" id="stageConceptionSubcards"></div>
-          `;
-          grid.appendChild(conceptionGroup);
-        }
-        const subGrid = conceptionGroup.querySelector('#stageConceptionSubcards');
-        if (subGrid && !subGrid.contains(card)) {
-          subGrid.appendChild(card);
-        }
-      } else {
-        if (!grid.contains(card)) {
-          grid.appendChild(card);
-        }
-      }
+      grid.appendChild(card);
     } else {
       card.className = `station-card ${isActive ? 'active' : ''}`;
       card.style.setProperty('--c', st.color);
@@ -2523,6 +2570,8 @@ function applySnapshot(snap) {
           openStationDrawer(st.id);
         }
       };
+      const titleEl = card.querySelector('h3');
+      if (titleEl && st.name) titleEl.textContent = st.name;
       const roleEl = card.querySelector('.role');
       if (roleEl && st.role) roleEl.textContent = st.role;
 
@@ -2531,7 +2580,6 @@ function applySnapshot(snap) {
         badgesContainer.innerHTML = `
           ${sessionChipHtml}
           <span class="chip" id="chip-${st.id}"><i style="--o:${st.color}"></i>${st.mascot_state}</span>
-          ${phaseBadgeHtml}
           ${specBadgeHtml}
         `;
       } else {
@@ -2545,14 +2593,8 @@ function applySnapshot(snap) {
       const queueItems = document.getElementById(`queue-items-${st.id}`);
       if (queueItems) queueItems.innerHTML = itemsHtml;
 
-      if (st.id === 'pm-architect' || st.id === 'planner') {
-        let conceptionGroup = document.getElementById('stage-conception-unified');
-        if (conceptionGroup) {
-          const subGrid = conceptionGroup.querySelector('#stageConceptionSubcards');
-          if (subGrid && !subGrid.contains(card)) {
-            subGrid.appendChild(card);
-          }
-        }
+      if (!grid.contains(card)) {
+        grid.appendChild(card);
       }
     }
 
