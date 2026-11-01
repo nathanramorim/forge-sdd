@@ -37,6 +37,7 @@ type SessionPool struct {
 	workspaceDir    string
 	warmed          bool
 	heartbeat       *HeartbeatMonitor
+	orchestrator    *HandoffOrchestrator
 }
 
 // NewSessionPool instancia um SessionPool configurado com SessionManager e RPCDispatcher opcionais.
@@ -74,6 +75,20 @@ func (p *SessionPool) SetHeartbeatMonitor(hm *HeartbeatMonitor) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 	p.heartbeat = hm
+}
+
+// Orchestrator retorna o HandoffOrchestrator vinculado ao pool.
+func (p *SessionPool) Orchestrator() *HandoffOrchestrator {
+	p.mu.RLock()
+	defer p.mu.RUnlock()
+	return p.orchestrator
+}
+
+// SetOrchestrator atribui o HandoffOrchestrator ao pool.
+func (p *SessionPool) SetOrchestrator(o *HandoffOrchestrator) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	p.orchestrator = o
 }
 
 // StartHeartbeat inicia o monitor de batimentos em background.

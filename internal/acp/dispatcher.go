@@ -26,6 +26,7 @@ type RPCDispatcher struct {
 	initialized             bool
 	sessionManager          *SessionManager
 	pool                    *SessionPool
+	orchestrator            *HandoffOrchestrator
 }
 
 // NewDispatcher instancia um despachador com versão padrão e métodos base registrados.
@@ -47,6 +48,7 @@ func NewDispatcherWithVersion(version string) *RPCDispatcher {
 		sessionManager:          sm,
 	}
 	d.pool = NewSessionPool(sm, d)
+	d.orchestrator = NewHandoffOrchestrator(d.pool, ".", d)
 
 	d.registerDefaultHandlers()
 	return d
@@ -241,6 +243,23 @@ func (d *RPCDispatcher) SetPool(pool *SessionPool) {
 	d.mu.Lock()
 	defer d.mu.Unlock()
 	d.pool = pool
+	if d.orchestrator != nil {
+		d.orchestrator.SetPool(pool)
+	}
+}
+
+// Orchestrator retorna o HandoffOrchestrator das 5 estações do ACP.
+func (d *RPCDispatcher) Orchestrator() *HandoffOrchestrator {
+	d.mu.RLock()
+	defer d.mu.RUnlock()
+	return d.orchestrator
+}
+
+// SetOrchestrator atribui um HandoffOrchestrator customizado ao despachador.
+func (d *RPCDispatcher) SetOrchestrator(o *HandoffOrchestrator) {
+	d.mu.Lock()
+	defer d.mu.Unlock()
+	d.orchestrator = o
 }
 
 // BroadcastSessionNotification emite uma notificação no canal unidirecional "session/notification".
