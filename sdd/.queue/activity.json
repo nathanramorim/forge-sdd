@@ -1,5 +1,29 @@
 [
   {
+    "timestamp": "2026-11-01T12:27:43.597Z",
+    "station": "pm-architect",
+    "tool": "gate_flx01",
+    "action": "approve sdd/discovery/discovery-66-telemetria-detalhada-inspecao-e-reconciliacao.md",
+    "details": "Portão FLX-01: Especificação concebida aguardando aprovação humana",
+    "status": "success"
+  },
+  {
+    "timestamp": "2026-11-01T12:27:43.597Z",
+    "station": "lider",
+    "tool": "orchestrate",
+    "action": "handoff lider -> pm-architect",
+    "details": "Demanda do usuário recebida: criação da Feature 66 despachada para Concepção",
+    "status": "success"
+  },
+  {
+    "timestamp": "2026-11-01T12:24:54.454Z",
+    "station": "pm-architect",
+    "tool": "discovery",
+    "action": "feat-66-telemetria-detalhada-inspecao-e-reconciliacao",
+    "details": "Discovery e critérios técnicos concluídos (100% PASS)",
+    "status": "success"
+  },
+  {
     "timestamp": "2026-11-01T11:14:06Z",
     "station": "lider",
     "tool": "orchestrate",
@@ -21,13 +45,13 @@
     "tool": "audit",
     "action": "feat-65-04-integracao-studio-bootstrap-e2e",
     "details": "Auditando conformidade constitucional",
-    "status": "running"
+    "status": "success"
   },
   {
     "timestamp": "2026-11-01T11:14:06Z",
     "station": "governance",
     "tool": "handoff",
-    "action": "builder -\u003e governance",
+    "action": "builder -> governance",
     "details": "Handoff autônomo recebido: feat-65-04-integracao-studio-bootstrap-e2e pronto para Governança",
     "status": "success"
   },
@@ -61,7 +85,7 @@
     "tool": "audit",
     "action": "feat-65-03-subcomando-cli-attach-multiplexador",
     "details": "Auditando conformidade constitucional",
-    "status": "running"
+    "status": "success"
   },
   {
     "timestamp": "2026-11-01T11:14:05Z",
@@ -69,13 +93,13 @@
     "tool": "portao_a",
     "action": "go test -race ./...",
     "details": "Executando testes locais Portão A",
-    "status": "running"
+    "status": "success"
   },
   {
     "timestamp": "2026-11-01T11:14:05Z",
     "station": "governance",
     "tool": "handoff",
-    "action": "builder -\u003e governance",
+    "action": "builder -> governance",
     "details": "Handoff autônomo recebido: feat-65-03-subcomando-cli-attach-multiplexador pronto para Governança",
     "status": "success"
   },
@@ -109,7 +133,7 @@
     "tool": "audit",
     "action": "feat-65-02-orquestrador-handoff-continuo-portao-flx01",
     "details": "Auditando conformidade constitucional",
-    "status": "running"
+    "status": "success"
   },
   {
     "timestamp": "2026-11-01T11:14:03Z",
@@ -117,13 +141,13 @@
     "tool": "portao_a",
     "action": "go test -race ./...",
     "details": "Executando testes locais Portão A",
-    "status": "running"
+    "status": "success"
   },
   {
     "timestamp": "2026-11-01T11:14:03Z",
     "station": "governance",
     "tool": "handoff",
-    "action": "builder -\u003e governance",
+    "action": "builder -> governance",
     "details": "Handoff autônomo recebido: feat-65-02-orquestrador-handoff-continuo-portao-flx01 pronto para Governança",
     "status": "success"
   },
@@ -157,7 +181,7 @@
     "tool": "audit",
     "action": "feat-65-01-nucleo-pool-sessoes-prewarming-heartbeat",
     "details": "Auditando conformidade constitucional",
-    "status": "running"
+    "status": "success"
   },
   {
     "timestamp": "2026-11-01T11:14:01Z",
@@ -165,13 +189,13 @@
     "tool": "portao_a",
     "action": "go test -race ./...",
     "details": "Executando testes locais Portão A",
-    "status": "running"
+    "status": "success"
   },
   {
     "timestamp": "2026-11-01T11:14:01Z",
     "station": "governance",
     "tool": "handoff",
-    "action": "builder -\u003e governance",
+    "action": "builder -> governance",
     "details": "Handoff autônomo recebido: feat-65-01-nucleo-pool-sessoes-prewarming-heartbeat pronto para Governança",
     "status": "success"
   },
@@ -189,7 +213,7 @@
     "tool": "portao_a",
     "action": "go test -race ./...",
     "details": "Executando testes locais Portão A",
-    "status": "running"
+    "status": "success"
   },
   {
     "timestamp": "2026-11-01T03:16:13Z",
@@ -213,13 +237,13 @@
     "tool": "audit",
     "action": "feat-64-01-nucleo-acp-rpc-stdio",
     "details": "Auditando conformidade constitucional",
-    "status": "running"
+    "status": "success"
   },
   {
     "timestamp": "2026-11-01T03:16:13Z",
     "station": "governance",
     "tool": "handoff",
-    "action": "builder -\u003e governance",
+    "action": "builder -> governance",
     "details": "Handoff autônomo recebido: feat-64-01-nucleo-acp-rpc-stdio pronto para Governança",
     "status": "success"
   },
@@ -237,13 +261,13 @@
     "tool": "portao_a",
     "action": "go test -race ./...",
     "details": "Executando testes locais Portão A",
-    "status": "running"
+    "status": "success"
   },
   {
     "timestamp": "2026-11-01T03:16:11Z",
     "station": "builder",
     "tool": "handoff",
-    "action": "planner -\u003e builder",
+    "action": "planner -> builder",
     "details": "Handoff autônomo recebido: feat-64-01-nucleo-acp-rpc-stdio pronto para o Builder",
     "status": "success"
   },
@@ -261,7 +285,7 @@
     "tool": "planner",
     "action": "feat-64-01-nucleo-acp-rpc-stdio",
     "details": "Fatiando tarefas e critérios determinísticos",
-    "status": "running"
+    "status": "success"
   },
   {
     "timestamp": "2026-11-01T03:16:11Z",
@@ -301,13 +325,13 @@
     "tool": "audit",
     "action": "discovery-65-prewarming-pool-sessoes-acp-estacoes",
     "details": "Auditando conformidade constitucional",
-    "status": "running"
+    "status": "success"
   },
   {
     "timestamp": "2026-11-01T03:15:43Z",
     "station": "governance",
     "tool": "handoff",
-    "action": "builder -\u003e governance",
+    "action": "builder -> governance",
     "details": "Handoff autônomo recebido: discovery-65-prewarming-pool-sessoes-acp-estacoes pronto para Governança",
     "status": "success"
   },
@@ -325,13 +349,13 @@
     "tool": "portao_a",
     "action": "go test -race ./...",
     "details": "Executando testes locais Portão A",
-    "status": "running"
+    "status": "success"
   },
   {
     "timestamp": "2026-11-01T03:15:40Z",
     "station": "builder",
     "tool": "handoff",
-    "action": "planner -\u003e builder",
+    "action": "planner -> builder",
     "details": "Handoff autônomo recebido: discovery-65-prewarming-pool-sessoes-acp-estacoes pronto para o Builder",
     "status": "success"
   },
@@ -349,7 +373,7 @@
     "tool": "planner",
     "action": "discovery-65-prewarming-pool-sessoes-acp-estacoes",
     "details": "Fatiando tarefas e critérios determinísticos",
-    "status": "running"
+    "status": "success"
   },
   {
     "timestamp": "2026-11-01T03:15:40Z",
@@ -373,30 +397,6 @@
     "tool": "orchestrate",
     "action": "discovery-64-protocolo-acp-comunicacao-estacoes-studio",
     "details": "Notificação ao Líder: Ciclo autônomo concluído com 100% de aprovação",
-    "status": "success"
-  },
-  {
-    "timestamp": "2026-11-01T01:46:50Z",
-    "station": "governance",
-    "tool": "governance",
-    "action": "audit (CONFORME)",
-    "details": "Auditoria da Governança aprovada: 0 violações",
-    "status": "success"
-  },
-  {
-    "timestamp": "2026-11-01T01:46:50Z",
-    "station": "governance",
-    "tool": "audit",
-    "action": "discovery-64-protocolo-acp-comunicacao-estacoes-studio",
-    "details": "Auditando conformidade constitucional",
-    "status": "running"
-  },
-  {
-    "timestamp": "2026-11-01T01:46:50Z",
-    "station": "governance",
-    "tool": "handoff",
-    "action": "builder -\u003e governance",
-    "details": "Handoff autônomo recebido: discovery-64-protocolo-acp-comunicacao-estacoes-studio pronto para Governança",
     "status": "success"
   }
 ]
