@@ -27,6 +27,13 @@
       <div class="chip autorun-chip" id="autoRunChip">
         <span class="autorun-bolt">⚡</span> MODO AUTÔNOMO
       </div>
+      <!-- Central de Notificações de Aprovação Humana (feat-67-02) -->
+      <div class="header-notification-wrap">
+        <button id="headerNotificationBell" class="notification-bell-btn" onclick="handleNotificationBellClick()" title="Nenhuma aprovação pendente no momento" aria-label="Notificações de Aprovação Humana">
+          <span class="bell-icon">🔔</span>
+          <span id="headerNotificationCount" class="notification-badge mono">0</span>
+        </button>
+      </div>
       <div class="mode-toggle">
         <button id="btnLive" class="mode-btn active" onclick="setStudioMode('LIVE')">LIVE</button>
         <button id="btnDemo" class="mode-btn" onclick="setStudioMode('DEMO')">DEMO</button>

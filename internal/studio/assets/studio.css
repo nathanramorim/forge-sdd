@@ -122,6 +122,86 @@ header.studio-header {
   100% { transform: scale(1.2); opacity: 1; filter: drop-shadow(0 0 8px #fde047); }
 }
 
+/* Central de Notificações de Aprovação Humana (feat-67-02) */
+.header-notification-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.notification-bell-btn {
+  background: var(--bg2);
+  border: 1px solid var(--line);
+  color: var(--muted);
+  border-radius: 8px;
+  padding: 5px 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+  position: relative;
+}
+
+.notification-bell-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--fg);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.notification-bell-btn .bell-icon {
+  font-size: 13px;
+  line-height: 1;
+  opacity: 0.8;
+}
+
+.notification-badge {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 10px;
+  background: var(--bg3);
+  color: var(--muted);
+  border: 1px solid var(--line);
+  transition: all 0.2s ease;
+}
+
+/* Estado Ativo: Quando há aprovação humana pendente */
+.notification-bell-btn.has-pending {
+  background: rgba(255, 138, 92, 0.12);
+  border-color: #ff8a5c;
+  color: #ff8a5c;
+  animation: bellNotificationPulse 2s infinite ease-in-out;
+}
+
+.notification-bell-btn.has-pending .notification-badge {
+  background: #ff8a5c;
+  color: #0d1117;
+  border-color: #ff8a5c;
+  box-shadow: 0 0 8px rgba(255, 138, 92, 0.6);
+}
+
+.notification-bell-btn.has-pending .bell-icon {
+  opacity: 1;
+  animation: bellShake 1.8s infinite ease-in-out;
+}
+
+@keyframes bellNotificationPulse {
+  0% { box-shadow: 0 0 0 0 rgba(255, 138, 92, 0.4); }
+  70% { box-shadow: 0 0 0 8px rgba(255, 138, 92, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(255, 138, 92, 0); }
+}
+
+@keyframes bellShake {
+  0%, 100% { transform: rotate(0); }
+  15% { transform: rotate(14deg); }
+  30% { transform: rotate(-14deg); }
+  45% { transform: rotate(8deg); }
+  60% { transform: rotate(-8deg); }
+  75% { transform: rotate(0); }
+}
+
 .mode-toggle {
   display: inline-flex;
   padding: 2px;

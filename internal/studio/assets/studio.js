@@ -926,6 +926,71 @@ function toggleTechnicalDetails() {
   }
 }
 window.toggleTechnicalDetails = toggleTechnicalDetails;
+
+// ============================================================================
+// CENTRAL DE NOTIFICAÇÕES DE APROVAÇÃO HUMANA (feat-67-02)
+// ============================================================================
+
+let currentPendingApprovalItem = null;
+
+function updateApprovalNotifications(snap) {
+  const bell = document.getElementById('headerNotificationBell');
+  const countEl = document.getElementById('headerNotificationCount');
+  if (!bell || !countEl) return;
+
+  let pendingCount = 0;
+  let firstPendingItem = null;
+
+  if (snap && snap.stations) {
+    for (const st of snap.stations) {
+      if (st.items) {
+        for (const it of st.items) {
+          const s = (it.status || '').toLowerCase();
+          if (s === 'pending_review' || s === 'approval' || (st.id === 'pm-architect' && s === 'review_pending')) {
+            pendingCount++;
+            if (!firstPendingItem) {
+              firstPendingItem = it;
+            }
+          }
+        }
+      }
+      if (!firstPendingItem && st.id === 'pm-architect' && st.executing_task) {
+        const s = (st.executing_task.status || '').toLowerCase();
+        if (s === 'pending_review' || s === 'approval') {
+          pendingCount = Math.max(pendingCount, 1);
+          firstPendingItem = {
+            id: st.executing_task.id,
+            title: st.executing_task.title,
+            artifact_path: st.executing_task.artifact_path || st.executing_task.id
+          };
+        }
+      }
+    }
+  }
+
+  currentPendingApprovalItem = firstPendingItem;
+  countEl.textContent = String(pendingCount);
+
+  if (pendingCount > 0) {
+    bell.classList.add('has-pending');
+    bell.title = `${pendingCount} aprovação(ões) humana(s) aguardando sua revisão (Clique para abrir)`;
+  } else {
+    bell.classList.remove('has-pending');
+    bell.title = 'Nenhuma aprovação pendente no momento';
+  }
+}
+
+function handleNotificationBellClick() {
+  if (currentPendingApprovalItem) {
+    const targetPath = currentPendingApprovalItem.artifact_path || currentPendingApprovalItem.id;
+    openSpecViewer(targetPath);
+  } else {
+    showToast('Nenhuma aprovação humana pendente no momento.');
+  }
+}
+
+window.handleNotificationBellClick = handleNotificationBellClick;
+window.updateApprovalNotifications = updateApprovalNotifications;
   'GOV-05': '🔗 Rastreabilidade Total'
 };
 
@@ -2479,6 +2544,9 @@ function applySnapshot(snap) {
 
   // Salva snapshot global para permitir re-renderização suave no toggle
   window.lastSnapshot = snap;
+
+  // Atualiza Central de Notificações de Aprovação Humana (feat-67-02)
+  updateApprovalNotifications(snap);
 
   // Renderiza os Pilares Constitucionais Dinâmicos
   if (pillarsGrid) {

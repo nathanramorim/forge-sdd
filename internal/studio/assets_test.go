@@ -517,3 +517,44 @@ func TestStudioActivityModalContract(t *testing.T) {
 		}
 	}
 }
+
+func TestStudioNotificationBellContract(t *testing.T) {
+	// 1. Validar HTML
+	htmlData, err := assetsFS.ReadFile("assets/index.html")
+	if err != nil {
+		t.Fatalf("falha ao ler assets/index.html: %v", err)
+	}
+	htmlStr := string(htmlData)
+	if !strings.Contains(htmlStr, `id="headerNotificationBell"`) {
+		t.Errorf("index.html está faltando elemento #headerNotificationBell")
+	}
+	if !strings.Contains(htmlStr, `id="headerNotificationCount"`) {
+		t.Errorf("index.html está faltando elemento #headerNotificationCount")
+	}
+
+	// 2. Validar CSS
+	cssData, err := assetsFS.ReadFile("assets/studio.css")
+	if err != nil {
+		t.Fatalf("falha ao ler assets/studio.css: %v", err)
+	}
+	cssStr := string(cssData)
+	if !strings.Contains(cssStr, ".notification-bell-btn") {
+		t.Errorf("studio.css está faltando .notification-bell-btn")
+	}
+	if !strings.Contains(cssStr, ".notification-bell-btn.has-pending") {
+		t.Errorf("studio.css está faltando .notification-bell-btn.has-pending")
+	}
+
+	// 3. Validar JS
+	jsData, err := assetsFS.ReadFile("assets/studio.js")
+	if err != nil {
+		t.Fatalf("falha ao ler assets/studio.js: %v", err)
+	}
+	jsStr := string(jsData)
+	if !strings.Contains(jsStr, "updateApprovalNotifications") {
+		t.Errorf("studio.js está faltando função updateApprovalNotifications")
+	}
+	if !strings.Contains(jsStr, "handleNotificationBellClick") {
+		t.Errorf("studio.js está faltando função handleNotificationBellClick")
+	}
+}
