@@ -1,5 +1,93 @@
 [
   {
+    "timestamp": "2026-11-01T01:46:50Z",
+    "station": "lider",
+    "tool": "orchestrate",
+    "action": "discovery-64-protocolo-acp-comunicacao-estacoes-studio",
+    "details": "Notificação ao Líder: Ciclo autônomo concluído com 100% de aprovação",
+    "status": "success"
+  },
+  {
+    "timestamp": "2026-11-01T01:46:50Z",
+    "station": "governance",
+    "tool": "governance",
+    "action": "audit (CONFORME)",
+    "details": "Auditoria da Governança aprovada: 0 violações",
+    "status": "success"
+  },
+  {
+    "timestamp": "2026-11-01T01:46:50Z",
+    "station": "governance",
+    "tool": "audit",
+    "action": "discovery-64-protocolo-acp-comunicacao-estacoes-studio",
+    "details": "Auditando conformidade constitucional",
+    "status": "running"
+  },
+  {
+    "timestamp": "2026-11-01T01:46:50Z",
+    "station": "governance",
+    "tool": "handoff",
+    "action": "builder -\u003e governance",
+    "details": "Handoff autônomo recebido: discovery-64-protocolo-acp-comunicacao-estacoes-studio pronto para Governança",
+    "status": "success"
+  },
+  {
+    "timestamp": "2026-11-01T01:46:50Z",
+    "station": "builder",
+    "tool": "portao_a",
+    "action": "go test -race ./... (PASS)",
+    "details": "Portão A 100% aprovado: liberado para Governança",
+    "status": "success"
+  },
+  {
+    "timestamp": "2026-11-01T01:46:49Z",
+    "station": "builder",
+    "tool": "portao_a",
+    "action": "go test -race ./...",
+    "details": "Executando testes locais Portão A",
+    "status": "running"
+  },
+  {
+    "timestamp": "2026-11-01T01:46:49Z",
+    "station": "builder",
+    "tool": "handoff",
+    "action": "planner -\u003e builder",
+    "details": "Handoff autônomo recebido: discovery-64-protocolo-acp-comunicacao-estacoes-studio pronto para o Builder",
+    "status": "success"
+  },
+  {
+    "timestamp": "2026-11-01T01:46:49Z",
+    "station": "planner",
+    "tool": "planner",
+    "action": "discovery-64-protocolo-acp-comunicacao-estacoes-studio",
+    "details": "Tarefas fatiadas e critérios determinísticos prontos",
+    "status": "success"
+  },
+  {
+    "timestamp": "2026-11-01T01:46:48Z",
+    "station": "planner",
+    "tool": "planner",
+    "action": "discovery-64-protocolo-acp-comunicacao-estacoes-studio",
+    "details": "Fatiando tarefas e critérios determinísticos",
+    "status": "running"
+  },
+  {
+    "timestamp": "2026-11-01T01:46:48Z",
+    "station": "planner",
+    "tool": "handoff",
+    "action": "receive sdd/discovery/discovery-64-protocolo-acp-comunicacao-estacoes-studio.md",
+    "details": "Handoff recebido de PM/Architect: especificação pronta para fatiamento",
+    "status": "success"
+  },
+  {
+    "timestamp": "2026-11-01T01:46:48Z",
+    "station": "pm-architect",
+    "tool": "human_gate",
+    "action": "approve sdd/discovery/discovery-64-protocolo-acp-comunicacao-estacoes-studio.md",
+    "details": "Portão FLX-01 Superado: Spec aprovada pelo humano",
+    "status": "success"
+  },
+  {
     "timestamp": "2026-11-01T01:38:10Z",
     "station": "pm-architect",
     "tool": "gate_flx01",
@@ -310,61 +398,5 @@
     "action": "edit_file internal/studio/state.go",
     "details": "Separando responsabilidades canônicas: Builder assume código e testes",
     "status": "running"
-  },
-  {
-    "timestamp": "2026-10-31T21:58:10Z",
-    "station": "lider",
-    "tool": "subagent",
-    "action": "despachando demanda de telemetria ao Builder",
-    "details": "Orquestração concluída: Estação 04 (Builder) ativada para implementação",
-    "status": "done"
-  },
-  {
-    "timestamp": "2026-10-31T21:56:12Z",
-    "station": "lider",
-    "tool": "subagent",
-    "action": "coordenando transição e visualização do studio",
-    "details": "Sincronizando telemetria com Safari WebGL/Three.js",
-    "status": "running"
-  },
-  {
-    "timestamp": "2026-10-31T21:56:12Z",
-    "station": "governance",
-    "tool": "gate",
-    "action": "gate FLX-01",
-    "details": "Portão Determinístico: 7 pilares constitucionais conformes",
-    "status": "done"
-  },
-  {
-    "timestamp": "2026-10-31T21:56:12Z",
-    "station": "builder",
-    "tool": "run_command",
-    "action": "go test -race ./internal/...",
-    "details": "Suíte de testes validada com 100% PASS",
-    "status": "done"
-  },
-  {
-    "timestamp": "2026-10-31T21:56:11Z",
-    "station": "builder",
-    "tool": "edit_file",
-    "action": "edit_file internal/studio/assets/studio.js",
-    "details": "Implementando telemetria viva de micro-ações e tools",
-    "status": "done"
-  },
-  {
-    "timestamp": "2026-10-31T21:56:11Z",
-    "station": "lider",
-    "tool": "read_file",
-    "action": "read_file sdd/memory/progress.md",
-    "details": "Orçamento do progresso: 512B \u003c= 1KB",
-    "status": "done"
-  },
-  {
-    "timestamp": "2026-10-31T21:56:10Z",
-    "station": "lider",
-    "tool": "run_command",
-    "action": "git status",
-    "details": "Verificando integridade da árvore git e sincronizando ponteiros de onda",
-    "status": "done"
   }
 ]

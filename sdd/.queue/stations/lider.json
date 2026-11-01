@@ -1,10 +1,11 @@
 {
   "station": "lider",
-  "version": 6,
-  "updated_at": "2026-11-01T00:56:58Z",
+  "version": 8,
+  "updated_at": "2026-11-01T01:46:50Z",
   "processed_keys": [
     "a5e9e900175357b9e0c5526ad56536cd",
-    "beaddb8f1491bb0d76b8f3fcce55299b"
+    "beaddb8f1491bb0d76b8f3fcce55299b",
+    "b6c119f0b5ae80029641bb5b624475f5"
   ],
   "items": [
     {
@@ -34,6 +35,20 @@
       "output_contract": "Ciclo Concluído",
       "created_at": "2026-11-01T00:56:58Z",
       "updated_at": "2026-11-01T00:56:58Z"
+    },
+    {
+      "id": "discovery-64-protocolo-acp-comunicacao-estacoes-studio",
+      "title": "Planejamento: discovery-64-protocolo-acp-comunicacao-estacoes-studio.md",
+      "station": "lider",
+      "operation": "handoff",
+      "status": "approved",
+      "artifact_path": "sdd/discovery/discovery-64-protocolo-acp-comunicacao-estacoes-studio.md",
+      "idempotency_key": "b6c119f0b5ae80029641bb5b624475f5",
+      "attempt": 1,
+      "input_contract": "Parecer Conforme Portão B",
+      "output_contract": "Ciclo Concluído",
+      "created_at": "2026-11-01T01:46:50Z",
+      "updated_at": "2026-11-01T01:46:50Z"
     }
   ]
 }

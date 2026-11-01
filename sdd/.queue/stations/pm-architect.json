@@ -1,7 +1,7 @@
 {
   "station": "pm-architect",
-  "version": 12,
-  "updated_at": "2026-11-01T01:35:00Z",
+  "version": 14,
+  "updated_at": "2026-11-01T01:46:48Z",
   "processed_keys": [
     "4f75dcab0bf602fa1ad48a3bb48a0a98",
     "a5e9e900175357b9e0c5526ad56536cd",
@@ -11,17 +11,17 @@
   "items": [
     {
       "id": "feat-64-protocolo-acp-comunicacao-estacoes-studio",
-      "title": "Concepção & Spec: discovery-64-protocolo-acp-comunicacao-estacoes-studio.md",
+      "title": "Concepção \u0026 Spec: discovery-64-protocolo-acp-comunicacao-estacoes-studio.md",
       "station": "pm-architect",
       "operation": "discovery",
-      "status": "pending_review",
+      "status": "approved",
       "artifact_path": "sdd/discovery/discovery-64-protocolo-acp-comunicacao-estacoes-studio.md",
       "idempotency_key": "acp64-discovery-spec-flx01",
       "attempt": 1,
       "input_contract": "Demanda do Humano / Líder",
       "output_contract": "discovery-64-protocolo-acp-comunicacao-estacoes-studio.md (Portão FLX-01)",
       "created_at": "2026-11-01T01:35:00Z",
-      "updated_at": "2026-11-01T01:35:00Z"
+      "updated_at": "2026-11-01T01:46:48Z"
     },
     {
       "id": "feat-63-concepcao-spec",

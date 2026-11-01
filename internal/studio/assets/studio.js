@@ -1173,6 +1173,49 @@ function renderStationDrawerContent(st) {
   const activeItems = sortItemsNewestFirst(items.filter(it => it.status !== 'approved' && it.status !== 'done'));
   const completedItems = sortItemsNewestFirst(items.filter(it => it.status === 'approved' || it.status === 'done'));
 
+  // Helper para renderizar parecer de Governança nos cartões
+  function renderTaskVerdictBox(it, isCompleted) {
+    if (it.governance_verdict) {
+      const gv = it.governance_verdict;
+      const isAprovado = (gv.veredito || '').toLowerCase() === 'conforme' && (!gv.achados || gv.achados.length === 0);
+      if (isAprovado) {
+        return `
+          <div class="verdict-box conforme" style="border-left:3px solid var(--ok);background:rgba(62,207,142,0.06);padding:8px 12px;border-radius:6px;margin-top:8px;">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
+              <span class="chip" style="font-size:10px;font-weight:700;color:var(--ok);border-color:var(--ok);background:rgba(62,207,142,0.12);">✓ APROVADO PELA GOVERNANÇA</span>
+            </div>
+            <span style="font-size:11px;color:var(--fg);">${escapeHtml(gv.resumo || 'Auditado em conformidade com as regras constitucionais.')}</span>
+          </div>
+        `;
+      } else {
+        const achadosCount = (gv.achados && gv.achados.length) ? gv.achados.length : 1;
+        const achadosDetails = (gv.achados && gv.achados.length > 0)
+          ? gv.achados.map(a => `<div style="font-size:10.5px;color:var(--err);margin-top:2px;">• <b>${escapeHtml(formatRuleBadge(a.regra || ''))}:</b> ${escapeHtml(a.explicacao || a.verificacao || '')}${a.arquivo ? ` <i>(${escapeHtml(a.arquivo)}${a.linha ? `:${a.linha}` : ''})</i>` : ''}</div>`).join('')
+          : '';
+        return `
+          <div class="verdict-box falha" style="border-left:3px solid var(--err);background:rgba(255,92,92,0.06);padding:8px 12px;border-radius:6px;margin-top:8px;">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
+              <span class="chip" style="font-size:10px;font-weight:700;color:var(--err);border-color:var(--err);background:rgba(255,92,92,0.12);">✕ FALHA APONTADA</span>
+              <span style="font-size:10px;color:var(--muted);">${achadosCount} achado(s)</span>
+            </div>
+            <div style="font-size:11px;color:var(--fg);font-weight:600;">${escapeHtml(gv.resumo || 'Auditoria detectou violação de regras constitucionais.')}</div>
+            ${achadosDetails}
+          </div>
+        `;
+      }
+    } else if (isCompleted && st.id === 'governance') {
+      return `
+        <div class="verdict-box conforme" style="border-left:3px solid var(--ok);background:rgba(62,207,142,0.06);padding:8px 12px;border-radius:6px;margin-top:8px;">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
+            <span class="chip" style="font-size:10px;font-weight:700;color:var(--ok);border-color:var(--ok);background:rgba(62,207,142,0.12);">✓ APROVADO PELA GOVERNANÇA</span>
+          </div>
+          <span style="font-size:11px;color:var(--muted);">Auditado e aprovado com sucesso pela Governança.</span>
+        </div>
+      `;
+    }
+    return '';
+  }
+
   // --- Painel Tarefas ---
   let activeCardsHtml = '';
   if (activeItems.length > 0) {
@@ -1183,14 +1226,6 @@ function renderStationDrawerContent(st) {
       const cursorUri = filePath ? (filePath.startsWith('/') ? `cursor://file${filePath}` : `cursor://file/${filePath}`) : 'cursor://';
       const cliCmd = it.artifact_path ? `code ${it.artifact_path}` : (it.id ? `forge-sdd task view ${it.id}` : 'code .');
       const copyBtnId = `copy-btn-${it.id.replace(/[^a-zA-Z0-9_-]/g, '_')}`;
-
-      let rules = [];
-      if (it.metadata && it.metadata.rules) {
-        rules = it.metadata.rules.split(',').map(r => r.trim()).filter(Boolean);
-      }
-      if (rules.length === 0) {
-        rules = CANONICAL_RULES_BY_STATION[st.id] || ['ARQ-03', 'DUP-02'];
-      }
 
       let handoffTarget = null;
       let handoffBtnLabel = null;
@@ -1261,6 +1296,8 @@ function renderStationDrawerContent(st) {
         isHandoffAllowed = (it.status === 'approved' || it.status === 'done');
       }
 
+      const verdictBoxHtml = renderTaskVerdictBox(it, false);
+
       return `
         <div class="drawer-task-card ${isSelected ? 'selected' : ''}" onclick="selectTaskInDrawer('${escapeHtml(it.id)}')">
           <div class="drawer-task-header">
@@ -1280,10 +1317,7 @@ function renderStationDrawerContent(st) {
             </div>
           ` : ''}
 
-          <div class="rules-strip" title="Pilares Constitucionais Mapeados">
-            <span style="font-size:10px;color:var(--muted);font-weight:600;">Regras:</span>
-            ${rules.map(r => `<span class="rule-chip" title="${escapeHtml(r)}">${escapeHtml(formatRuleBadge(r))}</span>`).join('')}
-          </div>
+          ${verdictBoxHtml}
 
           <div class="ide-buttons-row">
             <a href="${vsCodeUri}" class="btn-ide ide-link-btn" title="Abrir arquivo no editor VS Code nativo">
@@ -1339,53 +1373,7 @@ function renderStationDrawerContent(st) {
       const completedTime = it.updated_at ? new Date(it.updated_at).toLocaleString() : (it.created_at ? new Date(it.created_at).toLocaleString() : 'Concluído');
       const statusInfo = formatTaskStatus(it.status || 'approved');
 
-      let compRules = [];
-      if (it.metadata && it.metadata.rules) {
-        compRules = it.metadata.rules.split(',').map(r => r.trim()).filter(Boolean);
-      }
-      if (compRules.length === 0) {
-        compRules = CANONICAL_RULES_BY_STATION[st.id] || ['ARQ-03', 'DUP-02'];
-      }
-
-      let verdictBoxHtml = '';
-      if (it.governance_verdict) {
-        const gv = it.governance_verdict;
-        const isAprovado = (gv.veredito || '').toLowerCase() === 'conforme' && (!gv.achados || gv.achados.length === 0);
-        if (isAprovado) {
-          verdictBoxHtml = `
-            <div class="verdict-box conforme" style="border-left:3px solid var(--ok);background:rgba(62,207,142,0.06);padding:8px 12px;border-radius:6px;margin-top:8px;">
-              <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
-                <span class="chip" style="font-size:10px;font-weight:700;color:var(--ok);border-color:var(--ok);background:rgba(62,207,142,0.12);">✓ APROVADO PELA GOVERNANÇA</span>
-              </div>
-              <span style="font-size:11px;color:var(--fg);">${escapeHtml(gv.resumo || 'Auditado em conformidade com as regras constitucionais.')}</span>
-            </div>
-          `;
-        } else {
-          const achadosCount = (gv.achados && gv.achados.length) ? gv.achados.length : 1;
-          const achadosDetails = (gv.achados && gv.achados.length > 0)
-            ? gv.achados.map(a => `<div style="font-size:10.5px;color:var(--err);margin-top:2px;">• <b>${escapeHtml(formatRuleBadge(a.regra || ''))}:</b> ${escapeHtml(a.explicacao || a.verificacao || '')}${a.arquivo ? ` <i>(${escapeHtml(a.arquivo)}${a.linha ? `:${a.linha}` : ''})</i>` : ''}</div>`).join('')
-            : '';
-          verdictBoxHtml = `
-            <div class="verdict-box falha" style="border-left:3px solid var(--err);background:rgba(255,92,92,0.06);padding:8px 12px;border-radius:6px;margin-top:8px;">
-              <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
-                <span class="chip" style="font-size:10px;font-weight:700;color:var(--err);border-color:var(--err);background:rgba(255,92,92,0.12);">✕ FALHA APONTADA</span>
-                <span style="font-size:10px;color:var(--muted);">${achadosCount} achado(s)</span>
-              </div>
-              <div style="font-size:11px;color:var(--fg);font-weight:600;">${escapeHtml(gv.resumo || 'Auditoria detectou violação de regras constitucionais.')}</div>
-              ${achadosDetails}
-            </div>
-          `;
-        }
-      } else {
-        verdictBoxHtml = `
-          <div class="verdict-box conforme" style="border-left:3px solid var(--ok);background:rgba(62,207,142,0.06);padding:8px 12px;border-radius:6px;margin-top:8px;">
-            <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
-              <span class="chip" style="font-size:10px;font-weight:700;color:var(--ok);border-color:var(--ok);background:rgba(62,207,142,0.12);">✓ APROVADO PELA GOVERNANÇA</span>
-            </div>
-            <span style="font-size:11px;color:var(--muted);">Executado e finalizado com sucesso pela estação ${escapeHtml(st.name)}.</span>
-          </div>
-        `;
-      }
+      const verdictBoxHtml = renderTaskVerdictBox(it, true);
 
       return `
         <div class="drawer-task-card completed ${isSelected ? 'selected' : ''}" onclick="selectTaskInDrawer('${escapeHtml(it.id)}')">
@@ -1404,11 +1392,6 @@ function renderStationDrawerContent(st) {
               📄 ${escapeHtml(it.artifact_path)}
             </div>
           ` : ''}
-
-          <div class="rules-strip" title="Pilares Constitucionais Mapeados">
-            <span style="font-size:10px;color:var(--muted);font-weight:600;">Regras:</span>
-            ${compRules.map(r => `<span class="rule-chip" title="${escapeHtml(r)}">${escapeHtml(formatRuleBadge(r))}</span>`).join('')}
-          </div>
 
           ${verdictBoxHtml}
 

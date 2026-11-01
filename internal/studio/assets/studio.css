@@ -1145,26 +1145,6 @@ footer.studio-foot {
   border-radius: 4px;
 }
 
-/* Rules / Pilares Constitucionais */
-.rules-strip {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex-wrap: wrap;
-}
-.rule-chip {
-  font-family: var(--f-mono);
-  font-size: 10px;
-  font-weight: 600;
-  padding: 2px 6px;
-  border-radius: 4px;
-  background: rgba(79, 142, 247, 0.12);
-  border: 1px solid rgba(79, 142, 247, 0.3);
-  color: #8bb6f8;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
 /* Botões de Ação para IDE e Spec (CA-04, CA-10) */
 .ide-buttons-row {
   display: flex;

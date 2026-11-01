@@ -341,6 +341,11 @@ func TestStudioGovernanceAndPillars(t *testing.T) {
 			t.Errorf("studio.js não contém recurso/termo obrigatório: %s", req)
 		}
 	}
+
+	// Garantir que as tarefas das estações não renderizem .rules-strip nos cartões
+	if strings.Contains(jsStr, "rules-strip") || strings.Contains(jsStr, "rule-chip") {
+		t.Errorf("studio.js não deve renderizar .rules-strip ou .rule-chip nos cartões de tarefas")
+	}
 }
 
 func TestStudioBadgeReactivityAndIdeSecurity(t *testing.T) {

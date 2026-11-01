@@ -1,11 +1,12 @@
 {
   "station": "planner",
-  "version": 6,
-  "updated_at": "2026-11-01T00:24:09Z",
+  "version": 10,
+  "updated_at": "2026-11-01T01:46:49Z",
   "processed_keys": [
     "ec503d128bbbbda2fb438fcc4b01f1a7",
     "2b80c15568f148f27c1fdf262428b1ef",
-    "e582bbb0296db938eace2f94d3d67252"
+    "e582bbb0296db938eace2f94d3d67252",
+    "d26b0285c97d512fb57ced91ae83e728"
   ],
   "items": [
     {
@@ -49,6 +50,20 @@
       "output_contract": "Plano de Tarefas e Quebra de Features",
       "created_at": "2026-10-31T23:44:36Z",
       "updated_at": "2026-11-01T00:24:09Z"
+    },
+    {
+      "id": "discovery-64-protocolo-acp-comunicacao-estacoes-studio",
+      "title": "Planejamento: discovery-64-protocolo-acp-comunicacao-estacoes-studio.md",
+      "station": "planner",
+      "operation": "handoff",
+      "status": "approved",
+      "artifact_path": "sdd/discovery/discovery-64-protocolo-acp-comunicacao-estacoes-studio.md",
+      "idempotency_key": "d26b0285c97d512fb57ced91ae83e728",
+      "attempt": 1,
+      "input_contract": "Spec Aprovada (Portão FLX-01)",
+      "output_contract": "Plano de Tarefas e Quebra de Features",
+      "created_at": "2026-11-01T01:46:48Z",
+      "updated_at": "2026-11-01T01:46:49Z"
     }
   ]
 }
