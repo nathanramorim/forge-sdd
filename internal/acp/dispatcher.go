@@ -24,6 +24,7 @@ type RPCDispatcher struct {
 	notificationSubscribers []chan Notification
 	serverVersion           string
 	initialized             bool
+	sessionManager          *SessionManager
 }
 
 // NewDispatcher instancia um despachador com versão padrão e métodos base registrados.
@@ -41,6 +42,7 @@ func NewDispatcherWithVersion(version string) *RPCDispatcher {
 		notificationHandlers:    make(map[string]NotificationHandlerFunc),
 		notificationSubscribers: make([]chan Notification, 0),
 		serverVersion:           version,
+		sessionManager:          NewSessionManager(),
 	}
 
 	d.registerDefaultHandlers()
@@ -48,7 +50,7 @@ func NewDispatcherWithVersion(version string) *RPCDispatcher {
 }
 
 // registerDefaultHandlers registra os métodos canônicos do protocolo ACP:
-// initialize, session/new, session/load, session/cancel.
+// initialize, session/new, session/load, session/cancel, session/prompt, gate/approve.
 func (d *RPCDispatcher) registerDefaultHandlers() {
 	d.RegisterHandler("initialize", func(ctx context.Context, params json.RawMessage) (any, *RPCError) {
 		var initParams InitializeParams
@@ -85,11 +87,15 @@ func (d *RPCDispatcher) registerDefaultHandlers() {
 			}
 		}
 
-		sessionID := fmt.Sprintf("session-%d", time.Now().UnixNano())
+		sess, err := d.sessionManager.CreateSession(p)
+		if err != nil {
+			return nil, NewRPCError(CodeInvalidParams, fmt.Sprintf("invalid session/new: %v", err))
+		}
+
 		return SessionResult{
-			SessionID:    sessionID,
-			Status:       "active",
-			WorkspaceDir: p.WorkspaceDir,
+			SessionID:    sess.ID,
+			Status:       sess.Status,
+			WorkspaceDir: sess.WorkspaceDir,
 		}, nil
 	})
 
@@ -99,9 +105,15 @@ func (d *RPCDispatcher) registerDefaultHandlers() {
 			return nil, NewRPCError(CodeInvalidParams, "sessionId is required")
 		}
 
+		sess, ok := d.sessionManager.GetSession(p.SessionID)
+		if !ok {
+			return nil, NewRPCError(CodeInvalidParams, fmt.Sprintf("session %q not found", p.SessionID))
+		}
+
 		return SessionResult{
-			SessionID: p.SessionID,
-			Status:    "loaded",
+			SessionID:    sess.ID,
+			Status:       "loaded",
+			WorkspaceDir: sess.WorkspaceDir,
 		}, nil
 	})
 
@@ -111,10 +123,24 @@ func (d *RPCDispatcher) registerDefaultHandlers() {
 			return nil, NewRPCError(CodeInvalidParams, "sessionId is required")
 		}
 
+		sess, err := d.sessionManager.CancelSession(p.SessionID, p.Reason)
+		if err != nil {
+			return nil, NewRPCError(CodeInvalidParams, err.Error())
+		}
+
 		return SessionResult{
-			SessionID: p.SessionID,
-			Status:    "cancelled",
+			SessionID:    sess.ID,
+			Status:       sess.Status,
+			WorkspaceDir: sess.WorkspaceDir,
 		}, nil
+	})
+
+	d.RegisterHandler("session/prompt", func(ctx context.Context, params json.RawMessage) (any, *RPCError) {
+		return HandleSessionPrompt(ctx, d, params)
+	})
+
+	d.RegisterHandler("gate/approve", func(ctx context.Context, params json.RawMessage) (any, *RPCError) {
+		return HandleGateApprove(ctx, d, params)
 	})
 }
 
@@ -151,6 +177,28 @@ func (d *RPCDispatcher) ServerVersion() string {
 	d.mu.RLock()
 	defer d.mu.RUnlock()
 	return d.serverVersion
+}
+
+// SessionManager retorna o gerenciador de sessões ativas do ACP.
+func (d *RPCDispatcher) SessionManager() *SessionManager {
+	d.mu.RLock()
+	defer d.mu.RUnlock()
+	return d.sessionManager
+}
+
+// SetSessionManager configura um gerenciador de sessões customizado no despachador.
+func (d *RPCDispatcher) SetSessionManager(sm *SessionManager) {
+	d.mu.Lock()
+	defer d.mu.Unlock()
+	d.sessionManager = sm
+}
+
+// BroadcastSessionNotification emite uma notificação no canal unidirecional "session/notification".
+func (d *RPCDispatcher) BroadcastSessionNotification(n SessionNotification) {
+	if n.Timestamp == "" {
+		n.Timestamp = time.Now().UTC().Format(time.RFC3339)
+	}
+	d.BroadcastNotification(NewNotification("session/notification", n))
 }
 
 // SubscribeNotifications inscreve um canal para receber notificações emitidas pelo dispatcher.

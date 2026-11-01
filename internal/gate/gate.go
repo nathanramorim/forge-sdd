@@ -117,6 +117,37 @@ func RunChecks(dir string, opts Options) ([]CheckResult, error) {
 	return results, nil
 }
 
+// ValidateFLX01 executa as verificações determinísticas P-02 (existência da Spec) e P-03 (tabela de reuso DUP-02)
+// para homologação determinística do Portão FLX-01 (Spec antes do código).
+func ValidateFLX01(dir, specPath string) ([]CheckResult, bool) {
+	p02, specContent := checkP02SpecExists(dir, specPath)
+	if !p02.Passed {
+		p03 := CheckResult{
+			ID:          "P-03",
+			Rule:        "DUP-02",
+			Passed:      false,
+			Evidence:    fmt.Sprintf("spec %q ausente; impossível validar seção '## O que já existe'", specPath),
+			Remediation: "Criar o arquivo de Spec e preencher a seção '## O que já existe' com tabela de decisões (reusar, estender ou criar).",
+		}
+		return []CheckResult{p02, p03}, false
+	}
+	p03 := checkP03ReuseTable(specPath, specContent)
+	results := []CheckResult{p02, p03}
+	return results, !HasFailures(results)
+}
+
+// ValidateFLX01WithBranch valida P-01 (se branch não for vazia), P-02 e P-03 para o Portão FLX-01.
+func ValidateFLX01WithBranch(dir, specPath, branch string) ([]CheckResult, bool) {
+	var results []CheckResult
+	if strings.TrimSpace(branch) != "" {
+		p01 := checkP01Branch(branch)
+		results = append(results, p01)
+	}
+	flxChecks, _ := ValidateFLX01(dir, specPath)
+	results = append(results, flxChecks...)
+	return results, !HasFailures(results)
+}
+
 func checkP01Branch(branch string) CheckResult {
 	b := strings.TrimSpace(branch)
 	if b == "main" || b == "master" {

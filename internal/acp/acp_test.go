@@ -254,9 +254,10 @@ func TestACPNotifications(t *testing.T) {
 // TestACPSessionBaseMethods valida os métodos canônicos session/new, session/load, session/cancel.
 func TestACPSessionBaseMethods(t *testing.T) {
 	dispatcher := acp.NewDispatcher()
+	tmpDir := t.TempDir()
 
 	// session/new
-	newReq := []byte(`{"jsonrpc": "2.0", "id": 10, "method": "session/new", "params": {"workspaceDir": "/tmp/test", "feature": "feat-64"}}`)
+	newReq := []byte(fmt.Sprintf(`{"jsonrpc": "2.0", "id": 10, "method": "session/new", "params": {"workspaceDir": %q, "feature": "feat-64"}}`, tmpDir))
 	resp := dispatcher.Dispatch(context.Background(), newReq)
 	require.NotNil(t, resp)
 	require.Nil(t, resp.Error)
@@ -265,7 +266,7 @@ func TestACPSessionBaseMethods(t *testing.T) {
 	require.True(t, ok)
 	assert.NotEmpty(t, res.SessionID)
 	assert.Equal(t, "active", res.Status)
-	assert.Equal(t, "/tmp/test", res.WorkspaceDir)
+	assert.Equal(t, tmpDir, res.WorkspaceDir)
 
 	// session/load
 	loadReq := []byte(fmt.Sprintf(`{"jsonrpc": "2.0", "id": 11, "method": "session/load", "params": {"sessionId": %q}}`, res.SessionID))
