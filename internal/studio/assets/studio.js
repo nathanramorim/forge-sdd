@@ -871,43 +871,61 @@ window.navigateSearchResult = navigateSearchResult;
 let activeDrawerStationId = null;
 let activeDrawerTab = 'tasks'; // 'tasks' | 'contracts' | 'telemetry'
 const selectedTaskIdByStation = {};
+let showTechnicalDetails = false;
 
-// Pilares Constitucionais com descrições em linguagem clara
+// Pilares com descrições em linguagem clara e acessível (feat-67-01)
 const CONSTITUTIONAL_PILLARS = [
-  { key: 'ARQ', title: 'Arquitetura Limpa', desc: 'Go stdlib pura, zero npm runtime em produção', icon: '🏗️' },
-  { key: 'SEG', title: 'Segurança & Escopo', desc: 'Sanitização de path traversal e proteção read-only', icon: '🛡️' },
-  { key: 'DUP', title: 'Fonte Única da Verdade', desc: 'Zero duplicação de spec/código (DUP-01/02)', icon: '🧬' },
-  { key: 'COD', title: 'Qualidade de Código & DOM', desc: 'Sem handlers órfãos nem ReferenceError (COD-01)', icon: '🧹' },
-  { key: 'TST', title: 'Testes & Concorrência', desc: '100% PASS determinístico com detecção de data race (-race)', icon: '🧪' },
-  { key: 'FLX', title: 'Portões & Validação Humana', desc: 'Portão FLX-01 aprovado pelo humano e transições fluidas', icon: '🚪' },
-  { key: 'GOV', title: 'Governança Estrita', desc: 'Auditoria independente da Camada B em modo Read-Only', icon: '⚖️' }
+  { key: 'ARQ', label: 'ARQ', title: 'Estrutura & Arquitetura', desc: 'Sistema modular, independente e sem dependências externas desnecessárias' },
+  { key: 'SEG', label: 'SEG', title: 'Segurança da Informação', desc: 'Proteção de dados sigilosos e defesa contra injeções ou acessos indevidos' },
+  { key: 'DUP', label: 'DUP', title: 'Prevenção de Duplicidade', desc: 'Reaproveitamento de código e contratos mantidos em fonte única da verdade' },
+  { key: 'COD', label: 'COD', title: 'Qualidade do Código', desc: 'Código limpo, legível, organizado e em estrita conformidade com as boas práticas' },
+  { key: 'TST', label: 'TST', title: 'Testes Automatizados', desc: 'Validação exaustiva de funcionamento e estabilidade sob concorrência' },
+  { key: 'FLX', label: 'FLX', title: 'Processo & Portões', desc: 'Especificação técnica aprovada antes de qualquer codificação no fluxo' },
+  { key: 'GOV', label: 'GOV', title: 'Governança Independente', desc: 'Auditoria autônoma e imparcial garantindo a conformidade da entrega' }
 ];
 
-// Mapeamento de Regras Constitucionais para Badges Humanizados
+// Mapeamento de Regras Constitucionais para Rótulos Descritivos Amigáveis
 const HUMAN_RULE_BADGES = {
-  'ARQ-01': '🏛️ Arquitetura Canônica',
-  'ARQ-02': '📐 C4 & Interfaces Limpas',
-  'ARQ-03': '📦 Stdlib Go Pura',
-  'ARQ-04': '⚡ Zero NPM Runtime',
-  'SEG-01': '🛡️ Sem Traversal',
-  'SEG-02': '🔒 Sandbox Estrito',
-  'SEG-06': '🔒 Restrito Read-Only',
-  'DUP-01': '🧬 Fonte Única',
-  'DUP-02': '🔍 Reuse Check',
-  'DUP-05': '📑 Template Padronizado',
-  'COD-01': '🧹 DOM & Handlers OK',
-  'COD-05': '✨ Clean Code & Linters',
-  'TST-01': '🧪 Testes com -race',
-  'TST-04': '🎯 Cobertura Mínima',
-  'TST-05': '⏱️ Determinismo & Timeout',
-  'FLX-01': '🚪 Portão FLX-01 Aprovado',
-  'FLX-02': '📋 Decomposição em Fatias',
-  'FLX-03': '🔄 Handoffs Auditados',
-  'FLX-04': '🏁 Encerramento Controlado',
-  'GOV-01': '⚖️ Governança Camada B',
-  'GOV-02': '🛡️ Read-Only Enforced',
-  'GOV-03': '📝 Emissão de Laudo JSON',
-  'GOV-04': '🚦 Zero Falsos-Positivos',
+  'ARQ-01': 'Arquitetura Canônica',
+  'ARQ-02': 'Interfaces Limpas',
+  'ARQ-03': 'Linguagem Nativa',
+  'ARQ-04': 'Sem Dependências Extras',
+  'SEG-01': 'Entradas Protegidas',
+  'SEG-02': 'Diretórios Seguros',
+  'SEG-06': 'Acesso Somente Leitura',
+  'DUP-01': 'Fonte Única',
+  'DUP-02': 'Reaproveitamento Validado',
+  'DUP-05': 'Procedimento Padronizado',
+  'COD-01': 'Funções Claras',
+  'COD-05': 'Código Limpo',
+  'TST-01': 'Testes Automatizados',
+  'TST-04': 'Alta Confiabilidade',
+  'TST-05': 'Estabilidade em Concorrência',
+  'FLX-01': 'Aprovação Prévia da Spec',
+  'FLX-02': 'Divisão em Tarefas Claras',
+  'FLX-03': 'Transições Auditadas',
+  'FLX-04': 'Fechamento Seguro',
+  'GOV-01': 'Auditoria de Regras',
+  'GOV-02': 'Modo Somente Leitura',
+  'GOV-03': 'Relatório Formal',
+  'GOV-04': 'Verificação Rigorosa',
+  'GOV-05': 'Rastreabilidade Total'
+};
+
+function toggleTechnicalDetails() {
+  showTechnicalDetails = !showTechnicalDetails;
+  const btn = document.getElementById('btnToggleTechDetails');
+  if (btn) {
+    btn.textContent = showTechnicalDetails ? 'Ocultar Detalhes Técnicos' : 'Ver Detalhes Técnicos';
+    btn.classList.toggle('active', showTechnicalDetails);
+  }
+  document.body.classList.toggle('show-tech-details', showTechnicalDetails);
+  // Re-renderiza pilares com o novo estado
+  if (window.lastSnapshot) {
+    applySnapshot(window.lastSnapshot);
+  }
+}
+window.toggleTechnicalDetails = toggleTechnicalDetails;
   'GOV-05': '🔗 Rastreabilidade Total'
 };
 
@@ -2459,20 +2477,23 @@ function applySnapshot(snap) {
     }
   }
 
+  // Salva snapshot global para permitir re-renderização suave no toggle
+  window.lastSnapshot = snap;
+
   // Renderiza os Pilares Constitucionais Dinâmicos
   if (pillarsGrid) {
     pillarsGrid.innerHTML = CONSTITUTIONAL_PILLARS.map(p => {
       const isFailed = failedPillarKeys.has(p.key);
       const chipClass = isFailed ? 'falha' : 'aprovado';
-      const chipText = isFailed ? '✕ FALHOU' : '✓ APROVADO';
+      const chipText = isFailed ? '✕ NÃO CONFORME' : '✓ CONFORME';
+      const keyBadge = showTechnicalDetails ? `<div class="gov-pillar-key mono">${escapeHtml(p.key)}</div>` : '';
       return `
         <div class="gov-pillar-card ${isFailed ? 'falha' : 'aprovado'}">
           <div class="gov-pillar-header">
             <div class="gov-pillar-title-wrap">
-              <span class="gov-pillar-icon">${p.icon}</span>
               <div>
                 <div class="gov-pillar-name">${escapeHtml(p.title)}</div>
-                <div class="gov-pillar-key mono">${escapeHtml(p.key)}</div>
+                ${keyBadge}
               </div>
             </div>
             <span class="gov-pillar-chip ${chipClass}">${chipText}</span>

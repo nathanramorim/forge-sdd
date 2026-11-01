@@ -285,8 +285,9 @@ func TestStudioGovernanceAndPillars(t *testing.T) {
 		`id="govSection"`,
 		`id="govFindingCard"`,
 		`id="govPillarsGrid"`,
-		`Parecer da Auditoria (Camada B)`,
-		`Pilares Constitucionais Verificados`,
+		`id="btnToggleTechDetails"`,
+		`Parecer da Auditoria Independente`,
+		`Regras e Garantias Verificadas`,
 	}
 	for _, req := range requiredHTML {
 		if !strings.Contains(htmlStr, req) {
@@ -306,6 +307,7 @@ func TestStudioGovernanceAndPillars(t *testing.T) {
 		".gov-pillar-card.falha",
 		".gov-pillar-card.aprovado",
 		".gov-pillar-chip",
+		".btn-toggle-tech",
 		".finding-item.aprovado",
 		".finding-item.falha",
 	}
@@ -326,6 +328,7 @@ func TestStudioGovernanceAndPillars(t *testing.T) {
 		"HUMAN_RULE_BADGES",
 		"formatRuleBadge",
 		"formatTaskStatus",
+		"toggleTechnicalDetails",
 		"govPillarsGrid",
 		"govFindingCard",
 		"FALHA DETECTADA NA AUDITORIA",

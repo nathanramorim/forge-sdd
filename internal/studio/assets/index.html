@@ -83,18 +83,21 @@
     <!-- Inspetor de Governança (CA-08) -->
     <section class="gov-section" id="govSection" aria-label="Inspetor de Governança">
       <div class="gov-panel">
-        <h3>Parecer da Auditoria (Camada B)</h3>
-        <p style="color:var(--muted);font-size:12px;">Auditoria estrita em conformidade com as Camadas A (Gate determinístico) e B (Analista Read-Only).</p>
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <h3>Parecer da Auditoria Independente</h3>
+          <button id="btnToggleTechDetails" class="btn-toggle-tech mono" onclick="toggleTechnicalDetails()">Ver Detalhes Técnicos</button>
+        </div>
+        <p style="color:var(--muted);font-size:12px;">Auditoria estrita de conformidade realizada em modo somente-leitura.</p>
         <div class="gov-findings-list">
           <div class="finding-card conforme" id="govFindingCard">
-            <b>Portão de Governança Camada A & B</b>
+            <b>Auditoria de Conformidade e Qualidade</b>
             <p style="margin-top:4px;color:var(--muted);">Aguardando submissão ou inspeção ativa</p>
           </div>
         </div>
       </div>
       <div class="gov-panel">
-        <h3>Pilares Constitucionais Verificados</h3>
-        <p style="color:var(--muted);font-size:12px;">Garantias da Constituição do projeto (sdd/memory/constitution.md).</p>
+        <h3>Regras e Garantias Verificadas</h3>
+        <p style="color:var(--muted);font-size:12px;">Garantias de qualidade, segurança e arquitetura do projeto.</p>
         <div id="govPillarsGrid" class="gov-pillars-grid">
           <!-- Renderizado dinamicamente via studio.js -->
         </div>
