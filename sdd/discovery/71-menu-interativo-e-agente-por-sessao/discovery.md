@@ -1,6 +1,6 @@
 # Discovery 71 — Menu Navegável e Agente por Sessão do Pipeline (v4.2.0)
 
-Status: `FLX-01` pendente. Nenhum código alterado.
+Status: `FLX-01` aprovado em 2026-11-13 (decisões 1 a 4 aceitas); fatiado em 5 features. Nenhum código alterado.
 
 ## Problema
 Na 4.1.0-beta o pipeline abre as três sessões com **uma única CLI para todas** (`--cli` ou `forge.json`), só `claude` ou `agy`, e quem usa Gemini, Copilot ou Codex não consegue iniciar o fluxo. Além disso:

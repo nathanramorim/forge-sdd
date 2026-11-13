@@ -1,0 +1,88 @@
+{
+  "feature_id": "feat-71",
+  "branch": "feat/71-menu-interativo-e-agente-por-sessao",
+  "spec_status": "reviewed",
+  "updated_at": "2026-11-13T23:40:01Z",
+  "items": [
+    {
+      "task_id": "71-01",
+      "title": "feat-71-01 — Perfis por Agente e `sessions` em `forge.json`",
+      "spec_path": "sdd/discovery/71-menu-interativo-e-agente-por-sessao/features/feat-71-01-perfis-por-agente-e-sessions.md",
+      "status": "queued",
+      "rules": [
+        "ARQ-01",
+        "ARQ-02",
+        "DUP-01",
+        "SEG-03",
+        "SEG-04",
+        "TST-02",
+        "TST-03"
+      ],
+      "skills_used": [],
+      "attempts": 0
+    },
+    {
+      "task_id": "71-02",
+      "title": "feat-71-02 — Launcher e Worker por Sessão",
+      "spec_path": "sdd/discovery/71-menu-interativo-e-agente-por-sessao/features/feat-71-02-launcher-e-worker-por-sessao.md",
+      "status": "queued",
+      "rules": [
+        "SEG-01",
+        "SEG-03",
+        "SEG-05",
+        "COD-01",
+        "COD-03",
+        "TST-04"
+      ],
+      "skills_used": [],
+      "attempts": 0
+    },
+    {
+      "task_id": "71-03",
+      "title": "feat-71-03 — Checagem de Agente Antes de Abrir (`Preflight`)",
+      "spec_path": "sdd/discovery/71-menu-interativo-e-agente-por-sessao/features/feat-71-03-checagem-de-agente-antes-de-abrir.md",
+      "status": "queued",
+      "rules": [
+        "SEG-01",
+        "DUP-01",
+        "ARQ-03",
+        "TST-02",
+        "TST-03"
+      ],
+      "skills_used": [],
+      "attempts": 0
+    },
+    {
+      "task_id": "71-04",
+      "title": "feat-71-04 — Menu Navegável e Seletor de Agente",
+      "spec_path": "sdd/discovery/71-menu-interativo-e-agente-por-sessao/features/feat-71-04-menu-navegavel-e-seletor.md",
+      "status": "queued",
+      "rules": [
+        "ARQ-01",
+        "ARQ-02",
+        "DUP-01",
+        "COD-01",
+        "COD-03",
+        "TST-04"
+      ],
+      "skills_used": [],
+      "attempts": 0
+    },
+    {
+      "task_id": "71-05",
+      "title": "feat-71-05 — Docs, Scaffold e Release 4.2.0",
+      "spec_path": "sdd/discovery/71-menu-interativo-e-agente-por-sessao/features/feat-71-05-docs-scaffold-e-release.md",
+      "status": "queued",
+      "rules": [
+        "DUP-10",
+        "FLX-05",
+        "FLX-07",
+        "GOV-01",
+        "TST-02",
+        "TST-05"
+      ],
+      "skills_used": [],
+      "attempts": 0
+    }
+  ]
+}

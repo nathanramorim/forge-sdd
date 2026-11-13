@@ -1,6 +1,6 @@
 # Plano de Discovery 71 — Menu Navegável e Agente por Sessão (v4.2.0)
 
-Branch única `feat/71-menu-interativo-e-agente-por-sessao` (`FLX-02`), em worktree `../forge-sdd-71`, criada a partir da `feat/70`. O PR mira `feat/70` até ela ser mesclada. Pasta de execução: `sdd/discovery/71-menu-interativo-e-agente-por-sessao/features/`. Status: `FLX-01` pendente.
+Branch única `feat/71-menu-interativo-e-agente-por-sessao` (`FLX-02`), em worktree `../forge-sdd-71`, criada a partir da `feat/70`. O PR mira `feat/70` até ela ser mesclada. Pasta de execução: `sdd/discovery/71-menu-interativo-e-agente-por-sessao/features/`. Status: `FLX-01` aprovado; fatiada em 5 tasks e enfileiradas.
 
 ## Ordem e dependências
 `71-01 -> 71-02 -> 71-04`; `71-01 -> 71-03 -> 71-04`; `71-05` depende de `71-02`, `71-03` e `71-04`.

@@ -2,13 +2,12 @@
 
 ## Status
 ```
-discovery, criteria e plan escritos (5 tasks previstas)
-FLX-01 pendente: aprovar e fatiar
+FLX-01 aprovado; 5 tasks (71-01..71-05) enfileiradas
 Nenhum codigo alterado
 ```
 
 ## Proximo passo
-Aprovar o Gate 1 (decisoes 1 a 4 do discovery.md) e rodar o split em features/ e a fila.
+Implementar a fila: 71-01 primeiro; 71-02 e 71-03 podem andar em paralelo depois dela.
 
 ## A confirmar
-Flags de permissao e nome de sessao do gemini, copilot e codex (pesquisadas, nao testadas); Codex le AGENTS.md, o scaffold gera OPENAI.md.
+Flags de permissao e nome de sessao de gemini, copilot e codex (pesquisadas, nao testadas); Codex le AGENTS.md, o scaffold gera OPENAI.md (71-03).
