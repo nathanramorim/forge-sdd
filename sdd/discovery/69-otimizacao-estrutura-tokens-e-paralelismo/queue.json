@@ -2,7 +2,7 @@
   "feature_id": "feat-69",
   "branch": "feat/69-otimizacao-estrutura-tokens-e-paralelismo",
   "spec_status": "reviewed",
-  "updated_at": "2026-11-13T17:15:24Z",
+  "updated_at": "2026-11-13T17:22:09Z",
   "items": [
     {
       "task_id": "69-01",
@@ -116,7 +116,7 @@
       "task_id": "69-05",
       "title": "feat-69-05 — Migração do Legado e Templates no Novo Layout",
       "spec_path": "sdd/discovery/69-otimizacao-estrutura-tokens-e-paralelismo/features/feat-69-05-migracao-do-legado-e-templates.md",
-      "status": "queued",
+      "status": "review_pending",
       "rules": [
         "ARQ-03",
         "ARQ-05",
@@ -125,7 +125,7 @@
         "GOV-01"
       ],
       "skills_used": [],
-      "attempts": 0
+      "attempts": 1
     },
     {
       "task_id": "69-07",

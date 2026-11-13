@@ -17,6 +17,7 @@ func runRoot(t *testing.T, args ...string) (string, error) {
 	_ = statusCmd.Flags().Set("all-branches", "false")
 	_ = nextIDCmd.Flags().Set("kind", "discovery")
 	_ = nextIDCmd.Flags().Set("workitem", "")
+	_ = updateCmd.Flags().Set("dry-run", "false")
 	var out bytes.Buffer
 	rootCmd.SetOut(&out)
 	rootCmd.SetErr(&out)

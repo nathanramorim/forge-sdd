@@ -34,9 +34,9 @@
 
 ## Escopo
 1. `queue.json` e `status.md` ficam em `sdd/discovery/<id>-<nome>/`; `Load`/`Save`/`Enqueue` resolvem pela iniciativa ativa.
-2. `sdd/.runtime/` recebe atividade e filas por estação; `.gitignore` e o scaffold passam a incluí-lo.
+2. `sdd/.runtime/` recebe atividade e filas por estação; o `.gitignore` deste repositório o ignora e o scaffold de projetos novos cria `sdd/.runtime/.gitignore` (entregue na 69-05).
 3. `status.md`: no máximo 1.024 bytes, com seções `Status`, `Próximo passo` e `A confirmar`. P-21 valida este arquivo; sem iniciativa ativa, P-21 passa com observação.
-4. Remover `sdd/memory/progress.md` e `sdd/features/index.md` do fluxo escrito pelos comandos; a visão geral vem de 69-04.
+4. Remover `sdd/memory/progress.md` e `sdd/features/index.md` do fluxo escrito pelos comandos; a visão geral vem de 69-04. Adiado: os comandos viram skills na 69-06 e os arquivos são arquivados na 69-05.
 
 ## Critérios de Aceitação Executáveis
 ```bash

@@ -105,8 +105,25 @@ func Run(cfg config.Config, targetDir string) ([]string, error) {
 
 	if !cfg.DryRun {
 		cleanObsoleteFiles(targetDir)
+		if err := applyStructureUpgrade(cfg, targetDir); err != nil {
+			return created, err
+		}
 	}
 	return created, nil
+}
+
+// applyStructureUpgrade move o legado de sdd/ para sdd/archive/ (com backup) e remove os
+// artefatos de agente obsoletos idênticos ao template anterior. Idempotente: sem legado, não faz nada.
+func applyStructureUpgrade(cfg config.Config, targetDir string) error {
+	plan, err := PlanLayoutMigration(targetDir)
+	if err != nil {
+		return err
+	}
+	if _, err := ApplyLayoutMigration(targetDir, plan); err != nil {
+		return err
+	}
+	_, err = RemoveObsoleteAgentArtifacts(targetDir, cfg)
+	return err
 }
 
 // renderDir percorre fsys a partir de root, renderiza cada template e escreve em targetDir.

@@ -153,39 +153,45 @@ inconsistências de configuração dos agentes de IA e progresso das features.`,
 		} else if fileExists(progressPath) {
 			fmt.Println("  ✓ Painel de Progresso (sdd/memory/progress.md) ativo.")
 		} else {
-			fmt.Println("  ✗ Painel de Progresso (sdd/memory/progress.md) não encontrado!")
+			fmt.Println("  ℹ Sem iniciativa ativa na branch atual: o status.md não se aplica (veja `forge-sdd status`).")
 		}
 
-		// 5. Varredura de features
-		featuresDir := layout.Features(targetDir)
+		// 5. Varredura de features: tasks das iniciativas (sdd/discovery/<id>-<nome>/features/) e,
+		// em projetos ainda não migrados, a raiz legada sdd/features/.
+		sddRoot := layout.Root(targetDir)
 		var activeFeatures []string
-		err = filepath.WalkDir(featuresDir, func(path string, d os.DirEntry, err error) error {
-			if err != nil {
-				return err
+		scannedAny := false
+		for _, root := range []string{layout.Discovery(targetDir), layout.Features(targetDir)} {
+			if _, statErr := os.Stat(root); statErr != nil {
+				continue
 			}
-			if !d.IsDir() && strings.HasSuffix(d.Name(), ".md") {
-				if strings.HasPrefix(d.Name(), "feat-") || strings.HasPrefix(d.Name(), "task-") {
-					relPath, err := filepath.Rel(featuresDir, path)
-					if err == nil {
-						activeFeatures = append(activeFeatures, relPath)
-					} else {
-						activeFeatures = append(activeFeatures, d.Name())
-					}
+			scannedAny = true
+			_ = filepath.WalkDir(root, func(path string, d os.DirEntry, err error) error {
+				if err != nil || d.IsDir() || !strings.HasSuffix(d.Name(), ".md") {
+					return nil
 				}
-			}
-			return nil
-		})
+				if !strings.HasPrefix(d.Name(), "feat-") && !strings.HasPrefix(d.Name(), "task-") {
+					return nil
+				}
+				rel, relErr := filepath.Rel(sddRoot, path)
+				if relErr != nil {
+					rel = d.Name()
+				}
+				activeFeatures = append(activeFeatures, filepath.ToSlash(rel))
+				return nil
+			})
+		}
 
-		if err == nil {
+		if scannedAny {
 			fmt.Printf("\n📋 Features Registradas: %d cadastrada(s)\n", len(activeFeatures))
 			if len(activeFeatures) > 0 {
 				fmt.Println("  Caminhos:")
 				for _, feat := range activeFeatures {
-					fmt.Printf("   - sdd/features/%s\n", feat)
+					fmt.Printf("   - sdd/%s\n", feat)
 				}
 			}
 		} else {
-			fmt.Println("\n⚠️  Diretório sdd/features não encontrado ou inacessível.")
+			fmt.Println("\n⚠️  Diretório sdd/discovery não encontrado ou inacessível.")
 		}
 
 		// 6. Detecção de deriva de convenção de nomenclatura (sequencial feat-NN vs hash feat-xxxx)
@@ -213,7 +219,7 @@ inconsistências de configuração dos agentes de IA e progresso das features.`,
 				return nil
 			})
 		}
-		scanConventionDir(featuresDir)
+		scanConventionDir(layout.Features(targetDir))
 		scanConventionDir(layout.Discovery(targetDir))
 
 		if len(sequentialFiles) > 0 && len(hashFiles) > 0 {

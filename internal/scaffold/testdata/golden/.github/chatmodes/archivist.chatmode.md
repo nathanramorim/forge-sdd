@@ -1,5 +1,5 @@
 ---
-description: "Archivist do demo: mantém progress.md <= 1 KB e apoia a revisão de fim de onda (GOV-03)."
+description: "Archivist do demo: mantém o status.md da iniciativa <= 1 KB e apoia a revisão de fim de onda (GOV-03)."
 tools: [read_file, edit_file]
 ---
 

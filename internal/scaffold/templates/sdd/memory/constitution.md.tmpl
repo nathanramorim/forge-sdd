@@ -36,9 +36,9 @@ Consulte `sdd/memory/mcps.md` para o status real de cada MCP configurado (`ativo
 10. Superfície pública do sistema expõe contratos explícitos (`ARQ-06`)
 11. Versões Beta (`-beta`) não podem ser mescladas na `main`; a tag é criada diretamente na branch de feature e o PR correspondente deve ser mantido aberto para estabilização antes de promover para oficial. (`FLX-07`)
 12. Documentação e Release Notes atualizados a cada entrega relevante, com destaques reais em `sdd/releases/history.md`. (`FLX-07`)
-13. Agrupamento em Subpastas: Quando houver quebra de features grandes em subfeatures/tasks, os arquivos individuais devem ser agrupados dentro de uma subpasta com o nome da feature (`sdd/features/feat-XX-nome/task-YY.md`). (`FLX-02`)
+13. Agrupamento em Subpastas: Quando houver quebra de features grandes em subfeatures/tasks, os arquivos individuais devem ser agrupados dentro de uma subpasta com o nome da feature (`sdd/discovery/<id>-<nome>/features/feat-<id>-<nn>-<nome>.md`). (`FLX-02`)
 14. Telemetria Incondicional de Sessão: As métricas de sessão devem ser gravadas na fase `Close` (`sdd/.metrics/session-<ISO8601>.json`) com o caminho relativo completo da feature/task. (`FLX-04`)
-15. Feature quebrada em subpasta (`sdd/features/<prefixo>-ID-<nome>/`) usa uma única branch agrupando todas as subtarefas — nunca uma branch por subtarefa. Antes de criar a branch, pergunte a branch de partida (default `main`) e verifique (`git branch --list <prefixo>/ID-*`) se já existe uma branch da mesma feature/fix a retomar. (`FLX-02`)
+15. Iniciativa (`sdd/discovery/<id>-<nome>/`) usa uma única branch agrupando todas as subtarefas — nunca uma branch por subtarefa. Antes de criar a branch, pergunte a branch de partida (default `main`) e verifique (`git branch --list <prefixo>/ID-*`) se já existe uma branch da mesma feature/fix a retomar. (`FLX-02`)
 
 <!-- forge-sdd-governanca:inicio versao=3.0.0-beta -->
 ## IDs Canônicos da Constituição (O Quê e Por Quê)

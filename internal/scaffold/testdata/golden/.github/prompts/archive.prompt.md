@@ -1,5 +1,5 @@
 ---
-description: "Compacta progress.md de demo quando exceder 1 KB"
+description: "Compacta o status.md da iniciativa de demo quando exceder 1 KB"
 agent: agent
 ---
 
