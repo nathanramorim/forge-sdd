@@ -730,7 +730,7 @@ func isTableHeader(cells []string) bool {
 // Orçamentos de contexto em bytes (feat 69-07). Mantê-los pequenos é o que reduz o consumo de
 // tokens: o corpo das instruções vive nas skills e nas references, não nos adaptadores.
 const (
-	MaxInstructionBytes = 1536 // CLAUDE.md, GEMINI.md, OPENAI.md, copilot-instructions.md
+	MaxInstructionBytes = 1536 // CLAUDE.md, GEMINI.md, OPENAI.md, AGENTS.md, copilot-instructions.md
 	MaxSkillBytes       = 2048 // SKILL.md de cada skill de estação (sdd-*)
 	MaxAdapterBytes     = 300  // adaptadores de comando por ferramenta
 	MaxRoleAdapterBytes = 420  // definições de subagente e chatmodes por ferramenta
@@ -766,6 +766,7 @@ var budgetGroups = []budgetGroup{
 	{"CLAUDE.md", MaxInstructionBytes, false},
 	{"GEMINI.md", MaxInstructionBytes, false},
 	{"OPENAI.md", MaxInstructionBytes, false},
+	{"AGENTS.md", MaxInstructionBytes, false},
 	{".github/copilot-instructions.md", MaxInstructionBytes, false},
 	{"sdd/memory/constitution.md", MaxConstitutionSize, false},
 }

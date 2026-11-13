@@ -2,7 +2,7 @@
   "feature_id": "feat-71",
   "branch": "feat/71-menu-interativo-e-agente-por-sessao",
   "spec_status": "reviewed",
-  "updated_at": "2026-11-13T23:53:37Z",
+  "updated_at": "2026-11-13T23:56:41Z",
   "items": [
     {
       "task_id": "71-01",
@@ -41,7 +41,7 @@
       "task_id": "71-03",
       "title": "feat-71-03 — Checagem de Agente Antes de Abrir (`Preflight`)",
       "spec_path": "sdd/discovery/71-menu-interativo-e-agente-por-sessao/features/feat-71-03-checagem-de-agente-antes-de-abrir.md",
-      "status": "queued",
+      "status": "review_pending",
       "rules": [
         "SEG-01",
         "DUP-01",
@@ -50,7 +50,7 @@
         "TST-03"
       ],
       "skills_used": [],
-      "attempts": 0
+      "attempts": 1
     },
     {
       "task_id": "71-04",

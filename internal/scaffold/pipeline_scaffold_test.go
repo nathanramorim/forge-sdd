@@ -122,3 +122,27 @@ func TestPipeline_CheatSheetListaInboxEOcultaAliases(t *testing.T) {
 	assert.NotContains(t, names, "/implement")
 	assert.NotContains(t, names, "/proxima-feature")
 }
+
+func TestScaffold_OpenAIGeraAGENTSmdEPreservaODoUsuario(t *testing.T) {
+	dir := t.TempDir()
+	cfg := config.Config{Project: "demo", Stack: "go", DB: "none", Lang: "pt-BR", Agents: []string{config.AgentOpenAI}, SddVersion: "4.2.0-beta"}
+	_, err := Run(cfg, dir)
+	require.NoError(t, err)
+	agents, err := os.ReadFile(filepath.Join(dir, "AGENTS.md"))
+	require.NoError(t, err)
+	assert.True(t, strings.HasPrefix(string(agents), "# AGENTS.md — demo"))
+	assert.LessOrEqual(t, len(agents), 1536)
+	openai, _ := os.ReadFile(filepath.Join(dir, "OPENAI.md"))
+	assert.Contains(t, string(openai), "AGENTS.md", "OPENAI.md vira ponteiro, sem duplicar o conteúdo")
+	assert.True(t, IsGeneratedAgentsMD(filepath.Join(dir, "AGENTS.md")))
+
+	// Um AGENTS.md do usuário nunca é sobrescrito.
+	own := "# Meu AGENTS.md\nregras do time\n"
+	dir2 := t.TempDir()
+	require.NoError(t, os.WriteFile(filepath.Join(dir2, "AGENTS.md"), []byte(own), 0o644))
+	_, err = Run(cfg, dir2)
+	require.NoError(t, err)
+	got, _ := os.ReadFile(filepath.Join(dir2, "AGENTS.md"))
+	assert.Equal(t, own, string(got))
+	assert.False(t, IsGeneratedAgentsMD(filepath.Join(dir2, "AGENTS.md")))
+}

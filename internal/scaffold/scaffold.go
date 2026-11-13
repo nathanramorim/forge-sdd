@@ -299,8 +299,24 @@ func shouldPreserve(dest string, targetDir string) bool {
 		return true
 	}
 
+	// AGENTS.md é um arquivo neutro que muitos projetos já têm: só é atualizado se foi gerado pelo
+	// forge-sdd (cabeçalho "# AGENTS.md — "); um arquivo do usuário nunca é sobrescrito.
+	if rel == "AGENTS.md" {
+		return !IsGeneratedAgentsMD(dest)
+	}
+
 	// Arquivos fora de sdd/ (configurações e instruções de agente) devem ser atualizados
 	return false
+}
+
+// IsGeneratedAgentsMD diz se o AGENTS.md foi gerado pelo scaffold (primeira linha conhecida).
+func IsGeneratedAgentsMD(path string) bool {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return false
+	}
+	first, _, _ := strings.Cut(string(data), "\n")
+	return strings.HasPrefix(first, "# AGENTS.md — ")
 }
 
 // cleanObsoleteFiles remove arquivos de templates descontinuados ou obsoletos.

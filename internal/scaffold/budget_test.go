@@ -97,7 +97,7 @@ func TestAdaptadoresEInstrucoesRaizRespeitamOrcamento(t *testing.T) {
 		}
 	}
 
-	for _, f := range []string{"CLAUDE.md", "GEMINI.md", "OPENAI.md", filepath.Join(".github", "copilot-instructions.md")} {
+	for _, f := range []string{"CLAUDE.md", "GEMINI.md", "OPENAI.md", "AGENTS.md", filepath.Join(".github", "copilot-instructions.md")} {
 		assert.LessOrEqual(t, sizeOf(t, filepath.Join(dir, f)), maxInstructionBytes, f)
 	}
 }
@@ -211,7 +211,7 @@ func TestInstrucoesRaizComNomeDeProjetoLongoRespeitamOrcamento(t *testing.T) {
 	}
 	_, err := Run(cfg, dir)
 	require.NoError(t, err)
-	for _, f := range []string{"CLAUDE.md", "GEMINI.md", "OPENAI.md", filepath.Join(".github", "copilot-instructions.md")} {
+	for _, f := range []string{"CLAUDE.md", "GEMINI.md", "OPENAI.md", "AGENTS.md", filepath.Join(".github", "copilot-instructions.md")} {
 		assert.LessOrEqual(t, sizeOf(t, filepath.Join(dir, f)), maxInstructionBytes, f)
 	}
 }
