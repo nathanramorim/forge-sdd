@@ -40,6 +40,20 @@ npx @nathanramorim/forge-sdd@latest init
 npx @nathanramorim/forge-sdd@latest init . --agent copilot,gemini --name meu-projeto
 ```
 
+## 🧵 Pipeline multi-sessão: comece em 3 passos (v4.1.0-beta)
+
+Você conversa numa sessão enquanto outras duas constroem e revisam. Depois de instalar:
+
+```bash
+npm install -g @nathanramorim/forge-sdd@beta   # versão com o pipeline
+forge-sdd pipeline init                        # 1. ativa o modo (cria .forge/config/forge.json)
+forge-sdd up --cli claude                      # 2. abre 3 terminais: forge-discovery, forge-builder, forge-reviewer
+# 3. na sessão forge-discovery:
+/implementar nome-da-feature
+```
+
+O Builder constrói em paralelo e abre o PR; o Reviewer confere ADRs e rules e devolve com feedback (até 3 vezes); quando estiver conforme, você é avisado na sessão de Discovery e aprova. O `init` e o `update` já mostram esse passo a passo, e o guia fica no projeto em `.forge/LEIA-ME.md`. Guia completo: [docs/pipeline.md](docs/pipeline.md).
+
 ## Orquestração Independente, Portão de Governança (A/B/C), Constituição por IDs e Auto-Skills (v3.0.0-beta)
 
 > **De um agente solitário para uma esteira de 5 especialistas trabalhando em paralelo por você.**

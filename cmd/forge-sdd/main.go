@@ -355,6 +355,22 @@ func printSummaryReport(cfg config.Config, targetDir string, fileCount int) {
 	fmt.Println("  1. Abra o projeto no VS Code ou sua IDE de preferência")
 	fmt.Println("  2. Aceite as extensões recomendadas (Copilot, MCP, etc.)")
 	fmt.Println("  3. Rode /discovery com a sua primeira demanda (ou forge-sdd status para ver as iniciativas)")
+	printPipelineHint(targetDir)
+}
+
+// printPipelineHint mostra como iniciar o pipeline multi-sessão logo depois da instalação. Com o modo
+// já ativo (forge.json existe), só lembra de abrir as sessões.
+func printPipelineHint(targetDir string) {
+	if _, found, err := config.LoadForgeConfig(targetDir); err == nil && found {
+		fmt.Println("\nPipeline multi-sessão ATIVO: forge-sdd up abre forge-discovery, forge-builder e forge-reviewer.")
+		fmt.Println("  Guia: .forge/LEIA-ME.md")
+		return
+	}
+	fmt.Println("\nQuer que o Builder e o Reviewer trabalhem em outras sessões enquanto você conversa? (opcional)")
+	fmt.Println("  1. forge-sdd pipeline init      ativa o modo (cria .forge/config/forge.json)")
+	fmt.Println("  2. forge-sdd up --cli claude    abre 3 terminais: forge-discovery, forge-builder, forge-reviewer")
+	fmt.Println("  3. /implementar <feature>       na sessão forge-discovery: valida o card e despacha")
+	fmt.Println("  Guia rápido: .forge/LEIA-ME.md")
 }
 
 func printTutorialHint() {
