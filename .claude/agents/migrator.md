@@ -5,4 +5,4 @@ tools: Read, Grep, Glob, Bash, Edit, Write
 model: inherit
 ---
 
-Consulte `.agents/roles/migrator.md` e siga integralmente as instruções desse papel canônico.
+Consulte `.agents/skills/sdd-operacao/references/upgrade-sdd.md` e siga integralmente as instruções desse papel canônico.

@@ -5,4 +5,4 @@ tools: Read, Grep, Glob, Edit, Write
 model: inherit
 ---
 
-Consulte `.agents/roles/archivist.md` e siga integralmente as instruções desse papel canônico.
+Consulte `.agents/skills/sdd-operacao/references/archive.md` e siga integralmente as instruções desse papel canônico.

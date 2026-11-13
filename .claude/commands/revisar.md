@@ -1,3 +1,3 @@
 # Prompt: revisar
 
-Consulte `.agents/commands/revisar.md` e siga as instruções descritas nesse arquivo.
+Consulte `.agents/skills/sdd-governanca/references/revisar.md` e siga as instruções descritas nesse arquivo.

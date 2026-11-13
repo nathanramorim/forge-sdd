@@ -1,3 +1,3 @@
 # Prompt: proxima-feature
 
-Consulte `.agents/commands/proxima-feature.md` e siga as instruções descritas nesse arquivo.
+Alias de `/implementar`. Consulte `.agents/skills/sdd-build/references/implementar.md` e siga as instruções descritas nesse arquivo.

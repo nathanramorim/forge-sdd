@@ -1,3 +1,3 @@
 # Skill: Builder
 
-Consulte `.agents/roles/builder.md` e siga integralmente as instruções desse papel canônico.
+Consulte `.agents/skills/sdd-build/SKILL.md` e siga integralmente as instruções desse papel canônico.

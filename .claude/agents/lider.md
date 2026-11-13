@@ -5,4 +5,4 @@ tools: Read, Grep, Glob, Bash, Edit, Write
 model: inherit
 ---
 
-Consulte `.agents/roles/lider.md` e siga integralmente as instruções desse papel canônico.
+Consulte `.agents/skills/sdd-operacao/references/lider.md` e siga integralmente as instruções desse papel canônico.

@@ -2,7 +2,7 @@
   "feature_id": "feat-69",
   "branch": "feat/69-otimizacao-estrutura-tokens-e-paralelismo",
   "spec_status": "reviewed",
-  "updated_at": "2026-11-13T17:06:36Z",
+  "updated_at": "2026-11-13T17:15:24Z",
   "items": [
     {
       "task_id": "69-01",
@@ -101,7 +101,7 @@
       "task_id": "69-06",
       "title": "feat-69-06 — Skills por Estação",
       "spec_path": "sdd/discovery/69-otimizacao-estrutura-tokens-e-paralelismo/features/feat-69-06-skills-por-estacao.md",
-      "status": "building",
+      "status": "review_pending",
       "rules": [
         "DUP-05",
         "DUP-06",
