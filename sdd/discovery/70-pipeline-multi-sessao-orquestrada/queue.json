@@ -2,7 +2,7 @@
   "feature_id": "feat-70",
   "branch": "feat/70-pipeline-multi-sessao-orquestrada",
   "spec_status": "reviewed",
-  "updated_at": "2026-11-13T21:29:59Z",
+  "updated_at": "2026-11-13T21:35:02Z",
   "items": [
     {
       "task_id": "70-01",
@@ -101,7 +101,7 @@
       "task_id": "70-07",
       "title": "feat-70-07 — Launcher, Scaffold, Skills, ADR 0004 e Release 4.1.0",
       "spec_path": "sdd/discovery/70-pipeline-multi-sessao-orquestrada/features/feat-70-07-launcher-scaffold-docs-e-release.md",
-      "status": "queued",
+      "status": "review_pending",
       "rules": [
         "DUP-10",
         "FLX-05",
@@ -111,7 +111,7 @@
         "TST-05"
       ],
       "skills_used": [],
-      "attempts": 0
+      "attempts": 1
     }
   ]
 }

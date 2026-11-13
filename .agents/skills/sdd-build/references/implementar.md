@@ -2,6 +2,10 @@
 
 **Uso:** `/implementar` (executa a fila da iniciativa da branch atual) ou `/implementar <nome-da-feature>`.
 
+## Modo
+- **Pipeline** (existe `.forge/config/forge.json`): `/implementar <feature>` (alias `/implement`) **não constrói nesta sessão**. Consulte o card da feature pelo MCP do gerenciador de projeto, grave `card-evidence.json` na pasta da iniciativa (`provider`, `id`, `url`, `status`, `feature` e `checked_at` em RFC3339) e rode `forge-sdd dispatch <feature>`. Se o gate listar pendências, repasse-as ao usuário e pare. Se passar, mova o card para `pm_mcp.status_on_implement` pelo MCP e confirme o job enfileirado; o Builder e o Reviewer rodam nas outras sessões (`forge-up`).
+- **Sessão única** (sem `forge.json`): o fluxo abaixo, o da 4.0.0-beta.
+
 ## 1. Resolver o alvo e reportar o plano
 - **Sem argumento:** use a iniciativa da branch atual (`forge-sdd status`).
 - **Com argumento:** procure `sdd/discovery/*<nome>*`. Se houver mais de uma correspondência, liste e pergunte. Use `forge-sdd status --all-branches` para achar iniciativas que vivem em outra branch.

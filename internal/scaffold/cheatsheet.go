@@ -26,6 +26,8 @@ var commandOrder = []string{
 	"doctor",
 	"upgrade-sdd",
 	"c4-architecture",
+	"inbox",
+	"implement",
 }
 
 // CommandInfo descreve um comando SDD para exibição no cheat-sheet do CLI.
@@ -64,7 +66,7 @@ func agentPromptSuffix(agent string) string {
 
 // aliasCommands são comandos mantidos só por compatibilidade: têm adaptador, mas não
 // aparecem no cheat-sheet (o comando canônico já aparece).
-var aliasCommands = map[string]bool{"proxima-feature": true}
+var aliasCommands = map[string]bool{"proxima-feature": true, "implement": true}
 
 // commandSkill mapeia cada comando à skill de estação dona da sua referência canônica
 // (.agents/skills/<skill>/references/<comando>.md), onde a descrição real ("**Uso:**") vive.
@@ -83,6 +85,7 @@ var commandSkill = map[string]string{
 	"archive":         "sdd-operacao",
 	"upgrade-sdd":     "sdd-operacao",
 	"tutorial":        "sdd-operacao",
+	"inbox":           "sdd-operacao",
 }
 
 // canonicalCommandPath devolve o caminho embutido da referência canônica de um comando.

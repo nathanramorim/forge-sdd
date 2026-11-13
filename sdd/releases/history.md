@@ -4,6 +4,30 @@ Este arquivo registra o histórico de entregas de produto deste projeto.
 
 ## Entregas
 
+### Versão 4.1.0 — Pipeline Multi-Sessão: Discovery, Builder e Reviewer em Terminais Separados (Beta)
+
+Compatível com a 4.0.0-beta: **sem `.forge/config/forge.json` nada muda**. O pipeline só liga com `forge-sdd pipeline init` (Discovery 70, features `70-01` a `70-07`).
+
+*   **Três sessões que se falam por uma fila local:** `forge-discovery` (você conversa e decide), `forge-builder` e `forge-reviewer` (workers em laço) trocam jobs em `.forge/runtime/queues`. A reivindicação é atômica, com lease e recuperação de jobs presos; `high` (rework) passa na frente de `normal`.
+*   **`/implementar <feature>` com gate pré-build:** confirma spec e quebra prontas, ADRs, rules e IDs existentes e, pelo MCP do seu gerenciador (ClickUp, GitHub Projects, Azure DevOps ou Jira), que **já existe um card**. Sem card o despacho é bloqueado e as pendências são listadas; com card, o status é movido e o job entra na fila do Builder.
+*   **Builder paralelo:** planeja ondas de tarefas independentes pelo cabeçalho `**Depende de:**`, executa em paralelo (subagentes e `git worktree`) até `max_parallel_tasks`, valida build, lint e testes e abre o PR ligado ao card.
+*   **Reviewer com ciclo de correção limitado:** confere o PR contra spec, ADRs, rules e padrões. Não conforme: devolve ao Builder com feedback estruturado (`pr_rework`, prioridade alta) até `max_rework_attempts`; no limite, ou em dúvida, escala para você. Conforme: move o card e avisa.
+*   **Notificação onde você está:** o PR revisado chega ao inbox da sessão Discovery (hook no Claude, `/inbox` no Gemini e no agy) com o link, e opcionalmente toast do sistema, e-mail, webhook e comentário no card. Segredos só por variável de ambiente.
+*   **`forge-up`:** `.forge/forge-up.sh` (macOS, Linux, WSL e Git Bash) e `.forge/forge-up.ps1` (Windows) abrem as três sessões nomeadas, com `claude` ou `agy`.
+
+**Prévia dos comandos**
+```bash
+forge-sdd pipeline init                       # ativa o modo pipeline (forge.json e notifications.json)
+.forge/forge-up.sh --cli claude               # abre as três sessões (ou .forge\forge-up.ps1)
+forge-sdd dispatch auth-oauth                 # gate pré-build e despacho
+forge-sdd worker --role builder               # sessão forge-builder
+forge-sdd bus review --id <job> --verdict-file v.json   # aplica o veredito do Reviewer
+forge-sdd inbox                               # PR revisado pronto para aprovação
+```
+No chat: `/implementar` e `/implement` (despacho), `/inbox` (para Claude em `.claude/commands/`, Gemini em `.gemini/prompts/` e Copilot em `.github/prompts/`) e o agente `reviewer`.
+
+**Observações:** os argumentos da CLI `agy` em modo não interativo estão no perfil `cli_profiles.agy` de `forge.json` e precisam ser confirmados no seu ambiente; a abertura real dos terminais depende do sistema (`forge-sdd up --dry-run` mostra os comandos).
+
 ### Versão 4.0.0-beta — Estrutura por Iniciativa, Skills por Estação e Orçamento de Contexto (Beta, mudança incompatível)
 
 Primeira versão da linha 4.x. **Contém mudanças incompatíveis** (veja "Como migrar"). Reestrutura o fluxo para trabalhar com várias frentes em paralelo sem conflito de arquivos de estado e para consumir muito menos contexto por comando (Discovery 69, features `69-01` a `69-07`).
