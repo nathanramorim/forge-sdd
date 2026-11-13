@@ -2,7 +2,7 @@
   "feature_id": "feat-70",
   "branch": "feat/70-pipeline-multi-sessao-orquestrada",
   "spec_status": "reviewed",
-  "updated_at": "2026-11-13T21:19:52Z",
+  "updated_at": "2026-11-13T21:22:50Z",
   "items": [
     {
       "task_id": "70-01",
@@ -57,7 +57,7 @@
       "task_id": "70-03",
       "title": "feat-70-03 — Gate Pré-Build, `dispatch` e `/implementar` por Modo",
       "spec_path": "sdd/discovery/70-pipeline-multi-sessao-orquestrada/features/feat-70-03-gate-pre-build-e-implementar-por-modo.md",
-      "status": "queued",
+      "status": "review_pending",
       "rules": [
         "FLX-01",
         "FLX-08",
@@ -66,7 +66,7 @@
         "TST-03"
       ],
       "skills_used": [],
-      "attempts": 0
+      "attempts": 1
     },
     {
       "task_id": "70-04",
