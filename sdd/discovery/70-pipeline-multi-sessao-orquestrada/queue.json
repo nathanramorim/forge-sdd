@@ -2,7 +2,7 @@
   "feature_id": "feat-70",
   "branch": "feat/70-pipeline-multi-sessao-orquestrada",
   "spec_status": "reviewed",
-  "updated_at": "2026-11-13T21:14:17Z",
+  "updated_at": "2026-11-13T21:17:19Z",
   "items": [
     {
       "task_id": "70-01",
@@ -26,7 +26,7 @@
       "task_id": "70-02",
       "title": "feat-70-02 — Barramento de Jobs (`internal/bus`, `forge-sdd bus`)",
       "spec_path": "sdd/discovery/70-pipeline-multi-sessao-orquestrada/features/feat-70-02-barramento-de-jobs.md",
-      "status": "queued",
+      "status": "review_pending",
       "rules": [
         "ARQ-01",
         "SEG-01",
@@ -36,7 +36,7 @@
         "TST-04"
       ],
       "skills_used": [],
-      "attempts": 0
+      "attempts": 1
     },
     {
       "task_id": "70-06",
