@@ -22,6 +22,7 @@ func printUpgradePlan(w io.Writer, targetDir string, cfg config.Config) (bool, e
 
 	if len(migration.Moves) > 0 {
 		fmt.Fprintln(w, "Migração do layout (legado para sdd/archive/, com backup em sdd/backups/):")
+		fmt.Fprintln(w, "  atenção: todo o conteúdo de sdd/features/ é arquivado, inclusive features em andamento; confira antes de aplicar.")
 		for _, m := range migration.Moves {
 			fmt.Fprintf(w, "  mover   %s -> %s\n", m.From, m.To)
 		}

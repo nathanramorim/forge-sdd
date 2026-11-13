@@ -20,7 +20,7 @@ import (
 func setupTestWorkspace(t *testing.T) string {
 	t.Helper()
 	tempDir := t.TempDir()
-	require.NoError(t, os.MkdirAll(filepath.Join(tempDir, "sdd", ".queue", "stations"), 0o755))
+	require.NoError(t, os.MkdirAll(filepath.Join(tempDir, "sdd", ".runtime", "stations"), 0o755))
 	require.NoError(t, os.MkdirAll(filepath.Join(tempDir, "sdd", "features", "feat-65"), 0o755))
 	return tempDir
 }

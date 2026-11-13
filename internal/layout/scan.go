@@ -118,15 +118,18 @@ const maxStateFileBytes = 64 * 1024
 // de refs não confiáveis não injete sequências de terminal nem quebre a saída (SEG-01).
 func sanitizeText(s string) string {
 	return strings.Map(func(r rune) rune {
-		if r < 0x20 || r == 0x7f || (r >= 0x80 && r <= 0x9f) {
+		switch {
+		case r < 0x20 || r == 0x7f || (r >= 0x80 && r <= 0x9f):
 			return ' '
+		case (r >= 0x202a && r <= 0x202e) || (r >= 0x2066 && r <= 0x2069) || r == 0x200e || r == 0x200f:
+			return ' ' // controles de direção bidi (CVE-2021-42574)
 		}
 		return r
 	}, s)
 }
 
 func buildInitiative(id, branch string, status, queue []byte) InitiativeInfo {
-	it := InitiativeInfo{ID: id, Branch: branch, Tasks: map[string]int{}}
+	it := InitiativeInfo{ID: id, Branch: sanitizeText(branch), Tasks: map[string]int{}}
 	it.Status, it.Next = summarizeStatus(string(status))
 	var q struct {
 		Items []struct {
@@ -191,6 +194,8 @@ var errNotRepo = errors.New("não é um repositório git")
 
 func gitOut(dir string, args ...string) (string, error) {
 	cmd := exec.Command("git", append([]string{"-C", dir}, args...)...)
+	// Mensagens em inglês: a detecção de "não é um repositório" não pode depender do idioma do git.
+	cmd.Env = append(os.Environ(), "LC_ALL=C", "LANGUAGE=C")
 	var stderr bytes.Buffer
 	cmd.Stderr = &stderr
 	out, err := cmd.Output()

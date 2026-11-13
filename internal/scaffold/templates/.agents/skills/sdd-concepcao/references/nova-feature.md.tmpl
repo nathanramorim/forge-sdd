@@ -1,6 +1,6 @@
 # Comando: nova-feature
 
-**Uso:** `/nova-feature <descrição>`.
+**Uso:** `/nova-feature <descrição>`; com `fix: <descrição>` vira correção (prefixo `fix/`, fluxo de `novo-fix`).
 
 1. **Clarify:** `sdd/memory/clarify.md`.
 2. **Branch primeiro (`FLX-02`, Regra 15):** pergunte a branch de partida (padrão `main`); rode `git branch --list feat/*` e pergunte se retoma uma existente; só então `git checkout -b feat/<id>-<nome>`. Uma branch cobre toda a pasta da iniciativa.

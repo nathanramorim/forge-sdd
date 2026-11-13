@@ -267,3 +267,29 @@ func TestErrosDoGitSaoPropagadosForaDoNotARepo(t *testing.T) {
 	require.Error(t, err, "falha real do git não pode virar 'sem refs'")
 	assert.NotErrorIs(t, err, errNotRepo)
 }
+
+func TestSanitizeText_RemoveControleEBidi(t *testing.T) {
+	in := "ok\x1b[31m\u202eabc\u2066d\u009b e\u200f"
+	out := sanitizeText(in)
+	for _, r := range out {
+		assert.False(t, r < 0x20 || (r >= 0x80 && r <= 0x9f) || (r >= 0x202a && r <= 0x202e) || (r >= 0x2066 && r <= 0x2069) || r == 0x200e || r == 0x200f, "%q", r)
+	}
+	assert.Contains(t, out, "abc")
+}
+
+func TestListInitiatives_NomeDeRefComBidiEhSanitizado(t *testing.T) {
+	dir := t.TempDir()
+	testutil.InitRepo(t, dir, "main")
+	branch := "feat/70-x\u202e"
+	git(t, dir, "checkout", "-q", "-b", branch)
+	writeFile(t, dir, "sdd/discovery/70-x/status.md", "## Status\nok\n")
+	git(t, dir, "add", "-A")
+	git(t, dir, "commit", "-q", "-m", "x")
+	git(t, dir, "checkout", "-q", "main")
+
+	all, err := ListInitiatives(dir, true)
+	require.NoError(t, err)
+	for _, it := range all {
+		assert.NotContains(t, it.Branch, "\u202e")
+	}
+}

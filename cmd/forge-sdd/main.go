@@ -354,7 +354,7 @@ func printSummaryReport(cfg config.Config, targetDir string, fileCount int) {
 	fmt.Println("\nPróximos passos:")
 	fmt.Println("  1. Abra o projeto no VS Code ou sua IDE de preferência")
 	fmt.Println("  2. Aceite as extensões recomendadas (Copilot, MCP, etc.)")
-	fmt.Println("  3. Leia sdd/memory/progress.md para começar a codificar!")
+	fmt.Println("  3. Rode /discovery com a sua primeira demanda (ou forge-sdd status para ver as iniciativas)")
 }
 
 func printTutorialHint() {

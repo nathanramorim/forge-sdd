@@ -2,7 +2,7 @@
   "feature_id": "feat-69",
   "branch": "feat/69-otimizacao-estrutura-tokens-e-paralelismo",
   "spec_status": "reviewed",
-  "updated_at": "2026-11-13T17:34:41Z",
+  "updated_at": "2026-11-13T17:35:19Z",
   "items": [
     {
       "task_id": "69-01",
@@ -53,7 +53,7 @@
       "task_id": "69-02",
       "title": "feat-69-02 — Pacote `internal/layout`: Dono dos Caminhos da Iniciativa",
       "spec_path": "sdd/discovery/69-otimizacao-estrutura-tokens-e-paralelismo/features/feat-69-02-pacote-layout-caminhos-da-iniciativa.md",
-      "status": "review_pending",
+      "status": "approved",
       "rules": [
         "ARQ-01",
         "ARQ-02",
@@ -63,13 +63,18 @@
         "TST-03"
       ],
       "skills_used": [],
-      "attempts": 1
+      "attempts": 1,
+      "governance_verdict": {
+        "veredito": "conforme",
+        "achados": [],
+        "resumo": "Camada A verde em f74ef66. Achados da rodada 1 corrigidos: linha Branch atual do Reuse Check, literais trocados por constantes do layout, layout registrado em concepts.md e helper de git de teste extraido para internal/testutil. Sem achados novos."
+      }
     },
     {
       "task_id": "69-03",
       "title": "feat-69-03 — Fila e Status por Iniciativa",
       "spec_path": "sdd/discovery/69-otimizacao-estrutura-tokens-e-paralelismo/features/feat-69-03-fila-e-status-por-iniciativa.md",
-      "status": "review_pending",
+      "status": "approved",
       "rules": [
         "COD-01",
         "DUP-04",
@@ -80,13 +85,30 @@
         "TST-04"
       ],
       "skills_used": [],
-      "attempts": 1
+      "attempts": 1,
+      "governance_verdict": {
+        "veredito": "conforme",
+        "achados": [
+          {
+            "verificacao": "S-03",
+            "regra": "COD-04",
+            "classificacao": "duvida",
+            "severidade": "baixa",
+            "arquivo": "internal/acp/orchestrator_test.go",
+            "linha": 23,
+            "evidencia": "os.MkdirAll(filepath.Join(tempDir, \"sdd\", \".queue\", \"stations\"), 0o755)",
+            "explicacao": "Fixture e comentarios ainda citam o caminho antigo; inofensivo.",
+            "correcao": "Limpar ao tocar os arquivos (feito na rodada seguinte)."
+          }
+        ],
+        "resumo": "Achados da rodada 1 atendidos: scaffold cria sdd/.runtime/.gitignore com teste, teste de heranca cria a beta a partir da alfa, ha controle negativo com CONFLICT na fila global, Enqueue recusa branch de outra iniciativa e o escopo 4 esta registrado como adiado."
+      }
     },
     {
       "task_id": "69-04",
       "title": "feat-69-04 — Subcomandos `status` e `next-id`",
       "spec_path": "sdd/discovery/69-otimizacao-estrutura-tokens-e-paralelismo/features/feat-69-04-subcomandos-status-e-next-id.md",
-      "status": "review_pending",
+      "status": "approved",
       "rules": [
         "ARQ-06",
         "ARQ-10",
@@ -95,7 +117,35 @@
         "TST-04"
       ],
       "skills_used": [],
-      "attempts": 1
+      "attempts": 1,
+      "governance_verdict": {
+        "veredito": "conforme",
+        "achados": [
+          {
+            "verificacao": "S-05",
+            "regra": "COD-03",
+            "classificacao": "duvida",
+            "severidade": "baixa",
+            "arquivo": "internal/layout/scan.go",
+            "linha": 0,
+            "evidencia": "strings.Contains(msg, \"not a git repository\")",
+            "explicacao": "Depende da mensagem em ingles do git.",
+            "correcao": "Executar o git com LC_ALL=C (feito na rodada seguinte)."
+          },
+          {
+            "verificacao": "S-04",
+            "regra": "SEG-01",
+            "classificacao": "duvida",
+            "severidade": "baixa",
+            "arquivo": "internal/layout/scan.go",
+            "linha": 0,
+            "evidencia": "bucket[id] = buildInitiative(id, ref, ...)",
+            "explicacao": "O nome da ref e impresso sem remover C1 nem bidi.",
+            "correcao": "Passar o nome da ref por sanitizeText (feito na rodada seguinte)."
+          }
+        ],
+        "resumo": "Violacoes da rodada 1 resolvidas: sanitizacao de texto de refs, limite de 64 KB por blob, next-id recursivo, erros reais do git propagados, .sddrc invalido falha e workitem normalizado com checagem de uso."
+      }
     },
     {
       "task_id": "69-06",

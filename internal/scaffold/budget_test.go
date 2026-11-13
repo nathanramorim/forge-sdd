@@ -197,3 +197,21 @@ func TestScaffoldGeradoPassaNoOrcamentoDoPortao(t *testing.T) {
 	}
 	t.Fatal("P-24 ausente do relatório do portão")
 }
+
+// Nomes de projeto longos não podem estourar o orçamento das instruções raiz.
+func TestInstrucoesRaizComNomeDeProjetoLongoRespeitamOrcamento(t *testing.T) {
+	dir := t.TempDir()
+	cfg := config.Config{
+		Project:    strings.Repeat("projeto-com-nome-bem-longo-", 2)[:50],
+		Stack:      "typescript",
+		DB:         "postgres",
+		Lang:       "pt-BR",
+		SddVersion: "4.0.0-beta",
+		Agents:     []string{config.AgentClaude, config.AgentGemini, config.AgentCopilot, config.AgentOpenAI},
+	}
+	_, err := Run(cfg, dir)
+	require.NoError(t, err)
+	for _, f := range []string{"CLAUDE.md", "GEMINI.md", "OPENAI.md", filepath.Join(".github", "copilot-instructions.md")} {
+		assert.LessOrEqual(t, sizeOf(t, filepath.Join(dir, f)), maxInstructionBytes, f)
+	}
+}

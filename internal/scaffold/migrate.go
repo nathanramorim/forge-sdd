@@ -9,6 +9,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"regexp"
 	"sort"
 	"strings"
 	"text/template"
@@ -47,6 +48,9 @@ var legacyDiscoveryPrefixes = []string{"discovery-", "criteria-", "plan-"}
 // destinos já existentes e arquivos fora do padrão são preservados e reportados (SEG-02).
 func PlanLayoutMigration(targetDir string) (LayoutPlan, error) {
 	var plan LayoutPlan
+	if err := refuseSymlinkedRoots(targetDir); err != nil {
+		return plan, err
+	}
 
 	// 1. Discoveries soltos: sdd/discovery/{discovery,criteria,plan}-*.md.
 	discoveryDir := layout.Discovery(targetDir)
@@ -87,6 +91,25 @@ func PlanLayoutMigration(targetDir string) (LayoutPlan, error) {
 
 	sort.Slice(plan.Moves, func(i, j int) bool { return plan.Moves[i].From < plan.Moves[j].From })
 	return plan, nil
+}
+
+// refuseSymlinkedRoots recusa a migração quando uma das pastas envolvidas é link simbólico: o
+// Lstat de cada entrada não basta, porque mover arquivos de um diretório-pai ligado a fora do
+// projeto leria e removeria conteúdo de fora (SEG-02).
+func refuseSymlinkedRoots(targetDir string) error {
+	for _, dir := range []string{
+		layout.Root(targetDir),
+		layout.Discovery(targetDir),
+		layout.Features(targetDir),
+		layout.Archive(targetDir),
+		filepath.Join(layout.Root(targetDir), "backups"),
+	} {
+		if info, err := os.Lstat(dir); err == nil && info.Mode()&os.ModeSymlink != 0 {
+			rel, _ := filepath.Rel(targetDir, dir)
+			return fmt.Errorf("migração recusada: %s é link simbólico (SEG-02); resolva o link e rode novamente", filepath.ToSlash(rel))
+		}
+	}
+	return nil
 }
 
 func isLegacyDiscoveryFile(name string) bool {
@@ -156,6 +179,9 @@ func unsafeEntry(src string) string {
 func ApplyLayoutMigration(targetDir string, plan LayoutPlan) (string, error) {
 	if plan.Empty() {
 		return "", nil
+	}
+	if err := refuseSymlinkedRoots(targetDir); err != nil {
+		return "", err
 	}
 	backupRoot := filepath.Join(layout.Root(targetDir), "backups", time.Now().UTC().Format("20060102T150405Z"))
 
@@ -280,6 +306,12 @@ func PlanObsoleteAgentArtifacts(targetDir string, cfg config.Config) (ObsoletePl
 	for _, tmplPath := range keys {
 		rel := artifacts[tmplPath]
 		abs := filepath.Join(targetDir, filepath.FromSlash(rel))
+		if parentIsSymlink(targetDir, rel) {
+			if _, err := os.Lstat(abs); err == nil {
+				plan.Preserve = append(plan.Preserve, rel) // pasta-pai é link: nunca tocar (SEG-02)
+			}
+			continue
+		}
 		info, err := os.Lstat(abs)
 		if err != nil {
 			continue // não existe no projeto
@@ -297,21 +329,60 @@ func PlanObsoleteAgentArtifacts(targetDir string, cfg config.Config) (ObsoletePl
 		if err != nil {
 			return plan, err
 		}
-		tmpl, err := template.New(tmplPath).Parse(string(raw))
+		matches, err := matchesLegacyTemplate(tmplPath, string(raw), cfg, onDisk)
 		if err != nil {
-			return plan, fmt.Errorf("template legado %s: %w", tmplPath, err)
+			return plan, err
 		}
-		var buf bytes.Buffer
-		if err := tmpl.Execute(&buf, cfg); err != nil {
-			return plan, fmt.Errorf("renderizar template legado %s: %w", tmplPath, err)
-		}
-		if bytes.Equal(onDisk, buf.Bytes()) {
+		if matches {
 			plan.Remove = append(plan.Remove, rel)
 		} else {
 			plan.Preserve = append(plan.Preserve, rel)
 		}
 	}
 	return plan, nil
+}
+
+// parentIsSymlink informa se algum diretório do caminho relativo rel (sem o arquivo) é link simbólico.
+func parentIsSymlink(targetDir, rel string) bool {
+	cur := targetDir
+	parts := strings.Split(path.Dir(rel), "/")
+	for _, part := range parts {
+		if part == "." || part == "" {
+			continue
+		}
+		cur = filepath.Join(cur, part)
+		if info, err := os.Lstat(cur); err == nil && info.Mode()&os.ModeSymlink != 0 {
+			return true
+		}
+	}
+	return false
+}
+
+// stackSentinel marca onde o campo Stack foi renderizado: o .sddrc não guarda a stack, então um
+// arquivo gerado no init (com stack) e um regenerado no update (sem stack) devem casar com o
+// mesmo template. Project continua exato.
+const stackSentinel = "\x00STACK\x00"
+
+// matchesLegacyTemplate informa se content é exatamente o que o template legado renderiza para cfg,
+// aceitando qualquer valor (inclusive vazio) no campo Stack.
+func matchesLegacyTemplate(name, raw string, cfg config.Config, content []byte) (bool, error) {
+	tmpl, err := template.New(name).Parse(raw)
+	if err != nil {
+		return false, fmt.Errorf("template legado %s: %w", name, err)
+	}
+	wild := cfg
+	wild.Stack = stackSentinel
+	var buf bytes.Buffer
+	if err := tmpl.Execute(&buf, wild); err != nil {
+		return false, fmt.Errorf("renderizar template legado %s: %w", name, err)
+	}
+	pattern := regexp.QuoteMeta(buf.String())
+	pattern = strings.ReplaceAll(pattern, regexp.QuoteMeta(stackSentinel), `[^\n]*`)
+	re, err := regexp.Compile(`\A` + pattern + `\z`)
+	if err != nil {
+		return false, fmt.Errorf("padrão do template legado %s: %w", name, err)
+	}
+	return re.Match(content), nil
 }
 
 // RemoveObsoleteAgentArtifacts remove os artefatos idênticos ao template anterior e, se as

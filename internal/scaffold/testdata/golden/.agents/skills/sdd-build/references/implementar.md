@@ -19,5 +19,5 @@ Para cada task em ordem de dependência:
 
 ## 4. Fechamento
 - Atualize `status.md` da iniciativa (até 1 KB) e escreva a release note no topo de `sdd/releases/history.md` (seção `## Entregas`).
-- `git push origin <branch>`; consulte `VCS / Work Item System` na Constitution: `github` usa `gh pr create --fill` (versões `-beta` não mesclam em `main`), `azure-devops` usa `az repos pr create`, `nenhum` só informa a branch pronta.
-- Telemetria por task: `forge-sdd session record --feature "<spec>" --phase "<id>" --agent-path "lider,builder,governance" --outcome approved|rejected|blocked --criterio-atendido=true|false --tokens-input <n> --tokens-output <n> --model "<modelo>" --files-touched "<arquivos>"`. Sessão interrompida: `--outcome blocked --criterio-atendido=false`.
+- `git push origin <branch>` (sem `gh`, informe o link da branch); consulte `VCS / Work Item System` na Constitution: `github` usa `gh pr create --fill` (versões `-beta` não mesclam em `main`), `azure-devops` usa `az repos pr create`, `nenhum` só informa a branch pronta.
+- Telemetria por task: `forge-sdd session record --feature "<spec>" --phase "<id>" --agent-path "lider,builder,governance" --outcome approved|rejected|blocked --criterio-atendido=true|false --tokens-input <n> --tokens-output <n> --turns <n> --duration-seconds <n> --model "<modelo>" --files-touched "<arquivos>"`. Estime os tokens de forma realista (1 token ≈ 4 caracteres) e nunca zerados se houve interação. Sessão interrompida, cancelada ou com timeout: `--outcome blocked --criterio-atendido=false`.

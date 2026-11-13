@@ -1,5 +1,5 @@
 ---
-description: "Compacta progress.md de forge-sdd quando exceder 1 KB"
+description: "Compacta o status.md da iniciativa de forge-sdd quando exceder 1 KB"
 agent: agent
 ---
 

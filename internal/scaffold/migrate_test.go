@@ -282,3 +282,109 @@ func TestProjetoMigrado_DuasIniciativasParalelasMesclamSemConflito(t *testing.T)
 	out := testutil.Git(t, dir, "merge", "--no-edit", "feat/71-beta")
 	assert.NotContains(t, out, "CONFLICT")
 }
+
+// PoC da revisão: sdd/features como link simbólico para fora do projeto não pode ser migrado.
+func TestMigrateLayout_RecusaDiretorioPaiLigadoAForaDoProjeto(t *testing.T) {
+	for _, linked := range []string{"features", "discovery"} {
+		dir := t.TempDir()
+		outside := t.TempDir()
+		testutil.WriteFile(t, outside, "notes.md", "conteudo de fora do projeto")
+		testutil.WriteFile(t, outside, "discovery-01-fora.md", "fora")
+		require.NoError(t, os.MkdirAll(filepath.Join(dir, "sdd"), 0o755))
+		require.NoError(t, os.Symlink(outside, filepath.Join(dir, "sdd", linked)))
+
+		_, err := PlanLayoutMigration(dir)
+		require.Error(t, err, "sdd/%s ligado a fora deve recusar o plano", linked)
+		assert.Contains(t, err.Error(), "link simbólico")
+
+		_, err = ApplyLayoutMigration(dir, LayoutPlan{Moves: []Move{{From: "sdd/" + linked + "/notes.md", To: "sdd/archive/" + linked + "/notes.md"}}})
+		require.Error(t, err, "aplicar também recusa")
+
+		assert.FileExists(t, filepath.Join(outside, "notes.md"), "o arquivo de fora permanece")
+		assert.NoDirExists(t, filepath.Join(dir, "sdd", "archive"))
+		assert.NoDirExists(t, filepath.Join(dir, "sdd", "backups"))
+
+		// Run (update) propaga o erro e não grava nada na área ligada.
+		_, err = Run(migrateCfg(), dir)
+		require.Error(t, err)
+		assert.FileExists(t, filepath.Join(outside, "notes.md"))
+	}
+}
+
+func TestMigrateLayout_RecusaBackupsELinkSimbolicoNaRaiz(t *testing.T) {
+	dir := t.TempDir()
+	outside := t.TempDir()
+	testutil.WriteFile(t, dir, "sdd/features/feat-01.md", "f1")
+	require.NoError(t, os.Symlink(outside, filepath.Join(dir, "sdd", "backups")))
+	_, err := PlanLayoutMigration(dir)
+	require.Error(t, err, "sdd/backups ligado a fora deixaria o backup escapar do projeto")
+	assert.FileExists(t, filepath.Join(dir, "sdd", "features", "feat-01.md"))
+	entries, _ := os.ReadDir(outside)
+	assert.Empty(t, entries)
+}
+
+func TestObsoleteArtifacts_PastaPaiLigadaNaoEhTocada(t *testing.T) {
+	cfg := migrateCfg()
+	dir := t.TempDir()
+	outside := t.TempDir()
+	testutil.WriteFile(t, outside, "discovery.md", legacyRendered(t, "commands", "discovery", cfg))
+	require.NoError(t, os.MkdirAll(filepath.Join(dir, ".agents"), 0o755))
+	require.NoError(t, os.Symlink(outside, filepath.Join(dir, ".agents", "commands")))
+
+	plan, err := RemoveObsoleteAgentArtifacts(dir, cfg)
+	require.NoError(t, err)
+	assert.Empty(t, plan.Remove)
+	assert.Contains(t, plan.Preserve, ".agents/commands/discovery.md")
+	assert.FileExists(t, filepath.Join(outside, "discovery.md"), "arquivo fora do projeto não pode ser removido")
+}
+
+func TestObsoleteArtifacts_ArquivoQueEhLinkSimbolicoEhPreservado(t *testing.T) {
+	cfg := migrateCfg()
+	dir := t.TempDir()
+	outside := t.TempDir()
+	testutil.WriteFile(t, outside, "alvo.md", legacyRendered(t, "commands", "status", cfg))
+	require.NoError(t, os.MkdirAll(filepath.Join(dir, ".agents", "commands"), 0o755))
+	require.NoError(t, os.Symlink(filepath.Join(outside, "alvo.md"), filepath.Join(dir, ".agents", "commands", "status.md")))
+
+	plan, err := RemoveObsoleteAgentArtifacts(dir, cfg)
+	require.NoError(t, err)
+	assert.Empty(t, plan.Remove)
+	assert.Contains(t, plan.Preserve, ".agents/commands/status.md")
+	assert.FileExists(t, filepath.Join(outside, "alvo.md"))
+}
+
+// O .sddrc não guarda a stack: um arquivo gerado no init (com stack) deve casar com o plano
+// feito a partir de rc.ToConfig() (sem stack).
+func TestObsoleteArtifacts_StackDiferenteDaConfigDoPlanoAindaCasa(t *testing.T) {
+	generated := migrateCfg() // Stack "go", como no init
+	dir := fixtureV3(t, generated)
+	planned := generated
+	planned.Stack = "" // como em rc.ToConfig()
+
+	plan, err := PlanObsoleteAgentArtifacts(dir, planned)
+	require.NoError(t, err)
+	assert.ElementsMatch(t, []string{".agents/commands/discovery.md", ".agents/commands/status.md"}, plan.Remove)
+
+	// Project é comparado de forma exata nos templates que o usam (papéis); editar uma linha impede a remoção.
+	testutil.WriteFile(t, dir, ".agents/roles/archivist.md", legacyRendered(t, "roles", "archivist", generated))
+	other := generated
+	other.Project = "outro"
+	plan, err = PlanObsoleteAgentArtifacts(dir, other)
+	require.NoError(t, err)
+	assert.Contains(t, plan.Preserve, ".agents/roles/archivist.md", "Project diferente não casa")
+	plan, err = PlanObsoleteAgentArtifacts(dir, planned)
+	require.NoError(t, err)
+	assert.Contains(t, plan.Remove, ".agents/roles/archivist.md")
+
+	testutil.WriteFile(t, dir, ".agents/commands/status.md", legacyRendered(t, "commands", "status", generated)+"linha extra\n")
+	plan, err = PlanObsoleteAgentArtifacts(dir, planned)
+	require.NoError(t, err)
+	assert.Contains(t, plan.Preserve, ".agents/commands/status.md")
+}
+
+func TestRun_CriaGitignoreDeBackupsEPlanoAvisaSobreFeaturesEmAndamento(t *testing.T) {
+	dir := t.TempDir()
+	_, err := Run(migrateCfg(), dir)
+	require.NoError(t, err)
+	assert.FileExists(t, filepath.Join(dir, "sdd", "backups", ".gitignore"))
+}
