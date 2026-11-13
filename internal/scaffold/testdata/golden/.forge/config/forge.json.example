@@ -1,6 +1,26 @@
 {
   "cli": "claude",
+  "permissions": "project",
+  "allow_commands": [
+    "git",
+    "gh",
+    "forge-sdd"
+  ],
   "cli_profiles": {
+    "agy": {
+      "command": "agy",
+      "args": [
+        "--agent",
+        "{agent}",
+        "-i",
+        "{prompt}"
+      ],
+      "interactive_args": [
+        "--agent",
+        "{agent}",
+        "-i"
+      ]
+    },
     "claude": {
       "command": "claude",
       "args": [
@@ -9,14 +29,52 @@
         "--agent",
         "{agent}",
         "-n",
+        "{name}",
+        "{permissions}"
+      ],
+      "interactive_args": [
+        "-n",
+        "{name}",
+        "--agent",
+        "{agent}"
+      ]
+    },
+    "codex": {
+      "command": "codex",
+      "args": [
+        "exec",
+        "{permissions}",
+        "{prompt}"
+      ],
+      "interactive_args": [
+        "{prompt}"
+      ]
+    },
+    "copilot": {
+      "command": "copilot",
+      "args": [
+        "-p",
+        "{prompt}",
+        "-n",
+        "{name}",
+        "--no-ask-user",
+        "{permissions}"
+      ],
+      "interactive_args": [
+        "-i",
+        "{prompt}",
+        "-n",
         "{name}"
       ]
     },
-    "agy": {
-      "command": "agy",
+    "gemini": {
+      "command": "gemini",
       "args": [
-        "--agent",
-        "{agent}",
+        "-p",
+        "{prompt}",
+        "{permissions}"
+      ],
+      "interactive_args": [
         "-i",
         "{prompt}"
       ]
