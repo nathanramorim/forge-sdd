@@ -1,0 +1,117 @@
+{
+  "feature_id": "feat-70",
+  "branch": "feat/70-pipeline-multi-sessao-orquestrada",
+  "spec_status": "reviewed",
+  "updated_at": "2026-11-13T21:10:36Z",
+  "items": [
+    {
+      "task_id": "70-01",
+      "title": "feat-70-01 — Layout e Configuração do Forge (`.forge/`)",
+      "spec_path": "sdd/discovery/70-pipeline-multi-sessao-orquestrada/features/feat-70-01-layout-e-configuracao-do-forge.md",
+      "status": "queued",
+      "rules": [
+        "ARQ-01",
+        "ARQ-02",
+        "DUP-01",
+        "DUP-04",
+        "SEG-01",
+        "SEG-04",
+        "TST-02",
+        "TST-03"
+      ],
+      "skills_used": [],
+      "attempts": 0
+    },
+    {
+      "task_id": "70-02",
+      "title": "feat-70-02 — Barramento de Jobs (`internal/bus`, `forge-sdd bus`)",
+      "spec_path": "sdd/discovery/70-pipeline-multi-sessao-orquestrada/features/feat-70-02-barramento-de-jobs.md",
+      "status": "queued",
+      "rules": [
+        "ARQ-01",
+        "SEG-01",
+        "SEG-02",
+        "COD-03",
+        "TST-03",
+        "TST-04"
+      ],
+      "skills_used": [],
+      "attempts": 0
+    },
+    {
+      "task_id": "70-06",
+      "title": "feat-70-06 — Notificações e Inbox (`internal/notify`, `forge-sdd inbox`)",
+      "spec_path": "sdd/discovery/70-pipeline-multi-sessao-orquestrada/features/feat-70-06-notificacoes-e-inbox.md",
+      "status": "queued",
+      "rules": [
+        "SEG-02",
+        "SEG-04",
+        "SEG-05",
+        "ARQ-10",
+        "TST-04"
+      ],
+      "skills_used": [],
+      "attempts": 0
+    },
+    {
+      "task_id": "70-03",
+      "title": "feat-70-03 — Gate Pré-Build, `dispatch` e `/implementar` por Modo",
+      "spec_path": "sdd/discovery/70-pipeline-multi-sessao-orquestrada/features/feat-70-03-gate-pre-build-e-implementar-por-modo.md",
+      "status": "queued",
+      "rules": [
+        "FLX-01",
+        "FLX-08",
+        "DUP-02",
+        "SEG-01",
+        "TST-03"
+      ],
+      "skills_used": [],
+      "attempts": 0
+    },
+    {
+      "task_id": "70-04",
+      "title": "feat-70-04 — Worker, Runner de CLI e Builder Paralelo",
+      "spec_path": "sdd/discovery/70-pipeline-multi-sessao-orquestrada/features/feat-70-04-worker-e-builder-paralelo.md",
+      "status": "queued",
+      "rules": [
+        "SEG-03",
+        "SEG-05",
+        "COD-01",
+        "COD-03",
+        "TST-04"
+      ],
+      "skills_used": [],
+      "attempts": 0
+    },
+    {
+      "task_id": "70-05",
+      "title": "feat-70-05 — Reviewer: Veredito, Rework e Anti-Loop",
+      "spec_path": "sdd/discovery/70-pipeline-multi-sessao-orquestrada/features/feat-70-05-reviewer-e-anti-loop.md",
+      "status": "queued",
+      "rules": [
+        "FLX-06",
+        "FLX-08",
+        "SEG-06",
+        "TST-03"
+      ],
+      "skills_used": [],
+      "attempts": 0
+    },
+    {
+      "task_id": "70-07",
+      "title": "feat-70-07 — Launcher, Scaffold, Skills, ADR 0004 e Release 4.1.0",
+      "spec_path": "sdd/discovery/70-pipeline-multi-sessao-orquestrada/features/feat-70-07-launcher-scaffold-docs-e-release.md",
+      "status": "queued",
+      "rules": [
+        "DUP-10",
+        "FLX-05",
+        "FLX-07",
+        "GOV-01",
+        "TST-02",
+        "TST-05"
+      ],
+      "skills_used": [],
+      "attempts": 0
+    }
+  ]
+}

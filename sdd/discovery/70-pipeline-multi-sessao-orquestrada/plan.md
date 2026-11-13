@@ -1,6 +1,6 @@
 # Plano de Discovery 70 — Pipeline Multi-Sessão Orquestrada (v4.1.0)
 
-Branch única `feat/70-pipeline-multi-sessao-orquestrada` (`FLX-02`), em worktree `../forge-sdd-70`, criada a partir da `feat/69` (que contém a 4.0.0-beta). O PR mira `feat/69` até ela ser mesclada. Pasta de execução: `sdd/discovery/70-pipeline-multi-sessao-orquestrada/features/`. Status: aguardando `FLX-01`; nada enfileirado.
+Branch única `feat/70-pipeline-multi-sessao-orquestrada` (`FLX-02`), em worktree `../forge-sdd-70`, criada a partir da `feat/69` (que contém a 4.0.0-beta). O PR mira `feat/69` até ela ser mesclada. Pasta de execução: `sdd/discovery/70-pipeline-multi-sessao-orquestrada/features/`. Status: `FLX-01` aprovado; fatiada em 7 tasks e enfileiradas.
 
 ## Ordem e dependências
 `70-01 -> 70-02 -> 70-03 -> 70-04 -> 70-05 -> 70-07`; `70-01 -> 70-06 -> 70-07`; `70-06` pode andar em paralelo a `70-02` e `70-03`.
@@ -21,6 +21,9 @@ Rule of 7: 7 tasks em três ondas lógicas (base, motor, entrega). A Governança
 
 ## Critério final
 `go build ./... && go vet ./... && go test -race ./...` e `forge-sdd gate` sem falhas, mais `go test ./internal/pipeline -run TestE2E_PipelineCompleto`.
+
+## Decisões FLX-01 incorporadas (2026-11-13)
+Decisões 1 a 5 do `discovery.md` aceitas como propostas. Acréscimo do fatiamento: o launcher fica em `forge-sdd up` (Go) com `forge-up.sh` e `forge-up.ps1` como envoltórios finos (D-8, `criteria.md`), e o scaffold entrega só arquivos `.example`, de modo que o modo pipeline nunca é ativado sem `forge-sdd pipeline init`. `duvida` do Reviewer escala para a pessoa, sem rework automático.
 
 ## Medição
 Registrar no PR o conjunto de leitura por job (spec, IDs, rules) frente ao fluxo de sessão única, em bytes, como foi feito no ADR 0003.

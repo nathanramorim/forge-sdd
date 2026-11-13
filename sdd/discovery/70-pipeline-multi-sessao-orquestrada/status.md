@@ -2,12 +2,12 @@
 
 ## Status
 ```
-70 Pipeline multi-sessao [ ] aguardando FLX-01
+70-01..70-07 [~] FLX-01 aprovado, 7 tasks na fila
 Base: feat/69 (4.0.0-beta); worktree ../forge-sdd-70
 ```
 
 ## Proximo passo
-Revisao humana da spec (Gate 1, FLX-01) e depois `/split-features` (7 tasks).
+Builder: 70-01, 70-02, 70-06, 70-03, 70-04, 70-05, 70-07 (`/implementar`).
 
 ## A confirmar
-Decisoes em aberto 1 a 5 em discovery.md (forge.json x .sddrc, agente reviewer, diretorio de ADRs, versao 4.1.0, base do PR).
+Flags headless do agy (perfil configuravel, a confirmar). PR da 70 mira feat/69; tag v4.1.0-beta na branch antes da mescla (Regra 11).

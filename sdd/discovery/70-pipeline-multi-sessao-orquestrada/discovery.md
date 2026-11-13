@@ -1,6 +1,6 @@
 # Discovery 70 — Pipeline Multi-Sessão Orquestrada (v4.1.0)
 
-Status: aguardando Gate 1 (`FLX-01`). Nenhum código alterado.
+Status: `FLX-01` aprovado em 2026-11-13; fatiado em 7 features. Nenhum código alterado.
 
 ## Problema
 Hoje uma sessão só faz tudo: concebe, implementa e revisa. Isso tem três custos:
@@ -59,8 +59,8 @@ A divisão de responsabilidade que torna isso testável: **o que é decisão de 
 | Terminais por SO não testáveis em CI | Testes cobrem a geração dos comandos de abertura por SO; a abertura real é verificada manualmente. |
 
 ## Decisões em aberto para o Gate 1
-1. **`forge.json` vs `.sddrc`:** a spec nomeia `.forge/config/forge.json`; proposta: manter, com `internal/config` como único dono dos dois arquivos de configuração (`DUP-01`).
-2. **Agente `reviewer`:** definição própria, somente leitura sobre o repositório, com `gh` para comentar no PR quando `comment_on_pr` estiver ligado; proposta: manter `governance` para a Camada B das tasks e criar `reviewer` para PRs.
-3. **ADRs:** a spec cita `docs/adr/`; neste projeto elas ficam em `sdd/spec/adr/`. Proposta: diretórios de ADR configuráveis, padrão `sdd/spec/adr`.
-4. **Versão:** `4.1.0` (minor, sem quebra por causa do modo). Confirmar.
-5. **Escopo do PR de 4.1.0:** PR contra `feat/69` até ela ser mesclada.
+1. *(aceita)* **`forge.json` vs `.sddrc`:** a spec nomeia `.forge/config/forge.json`; proposta: manter, com `internal/config` como único dono dos dois arquivos de configuração (`DUP-01`).
+2. *(aceita)* **Agente `reviewer`:** definição própria, somente leitura sobre o repositório, com `gh` para comentar no PR quando `comment_on_pr` estiver ligado; proposta: manter `governance` para a Camada B das tasks e criar `reviewer` para PRs.
+3. *(aceita)* **ADRs:** a spec cita `docs/adr/`; neste projeto elas ficam em `sdd/spec/adr/`. Proposta: diretórios de ADR configuráveis, padrão `sdd/spec/adr`.
+4. *(aceita)* **Versão:** `4.1.0` (minor, sem quebra por causa do modo). Confirmar.
+5. *(aceita)* **Escopo do PR de 4.1.0:** PR contra `feat/69` até ela ser mesclada.

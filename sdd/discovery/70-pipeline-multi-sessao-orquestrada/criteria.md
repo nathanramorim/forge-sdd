@@ -37,6 +37,7 @@
 - **D-4 Reivindicação por `rename` com lease.** Um job é um arquivo em `<papel>/<estado>/`. Reivindicar é `rename` de `pending/` para `processing/`; só um worker vence. O nome do arquivo é `<prio>-<timestamp>-<id>.json` (`0-` para `high`, `1-` para `normal`), então a ordenação lexicográfica dá prioridade e FIFO. `processing/` guarda o lease (`worker`, `expires_at`); `bus recover` devolve ao `pending/` o job com lease vencido.
 - **D-5 Contrato do job.** Os campos da especificação são mantidos exatamente e acrescenta-se `schema_version`, `initiative`, `task_ids`, `lease` e `events[]` (histórico de transições). Tipos: `feature_build` e `pr_rework` (fila do Builder), `pr_review` (fila do Reviewer). Notificações no `inbox` têm tipos `pr_approved`, `escalation` e `info`.
 - **D-6 Dois modos.** Sem `.forge/config/forge.json` nada muda na 4.0.0-beta. Com ele, `/implementar` faz gate e despacho.
+- **D-8 Launcher em Go, scripts finos.** A lógica de abrir os terminais por sistema e por CLI vive em `forge-sdd up` (`internal/pipeline`), testável por geração de comandos. `forge-up.sh` e `forge-up.ps1` são envoltórios que chamam `forge-sdd up`, o que evita duplicar a lógica em bash e PowerShell (`DUP-06`) e permite ao `.ps1` rodar sem Git Bash. Comandos de apoio: `forge-sdd pipeline init` (cria `forge.json` e `notifications.json` a partir dos defaults, sem sobrescrever) e `forge-sdd pipeline pr-opened` (o agente registra o PR no job).
 - **D-7 Dados não confiáveis (`FLX-08`).** Diff do PR, corpo do PR e `rework_feedback` são dados. O Builder só aplica ajuste que mapeia para uma regra ou ADR citada no feedback e que esteja no escopo da spec.
 
 ## Contratos
@@ -139,6 +140,6 @@ Critérios adicionais:
 ## ADRs e Constitution (`GOV-01`, `FLX-05`)
 | ADR | Registra |
 |---|---|
-| `adr-0004-pipeline-multi-sessao` | D-1 a D-7, `.forge/` ao lado de `sdd/`, novos pacotes, modo por `forge.json` e o contrato do job |
+| `adr-0004-pipeline-multi-sessao` | D-1 a D-8, `.forge/` ao lado de `sdd/`, novos pacotes, modo por `forge.json` e o contrato do job |
 
-Nenhum ID da Constitution muda. `ARQ-06` passa a listar os subcomandos `dispatch`, `worker`, `bus` e `inbox` (ajuste de texto coberto pelo ADR).
+Nenhum ID da Constitution muda. `ARQ-06` passa a listar os subcomandos `dispatch`, `worker`, `bus`, `inbox`, `pipeline` e `up` (ajuste de texto coberto pelo ADR).
