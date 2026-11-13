@@ -11,3 +11,4 @@ Builder: 69-06 (skills por estacao e /implementar), depois 69-05, 69-07; revisao
 
 ## A confirmar
 Bump 4.0.0-beta no PR de release; PR da 69 mira feat/68.
+Ao mesclar a 68: `internal/config/sddrc_io.go` (nao commitado na 68) monta caminhos `sdd/` a mao; trocar por `internal/layout` no PR de merge.

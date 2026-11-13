@@ -40,7 +40,8 @@ Hoje 14 discoveries ficam soltos (42 arquivos) e `sdd/features/` tem 115 arquivo
 2. Pastas de iniciativa que já existem (66, 67, 68, 69) permanecem no lugar.
 3. Idempotente: segunda execução não altera nada. `--dry-run` lista os movimentos e não escreve (`ARQ-05`).
 4. Templates e goldens passam a gerar o layout novo; remover `sdd/features/` e `memory/progress.md` do scaffold.
-5. ADR `adr-0002-layout-e-estado-por-iniciativa.md`; revisar texto das Regras 13 e 15 e de `FLX-02` na ADR (a edição da Constitution fica na 69-07).
+5. **Limpeza de artefatos obsoletos no `update`** (consequência da 69-06): o `update` hoje não remove arquivos que saíram dos templates, e um projeto atualizado ficaria com comandos e papéis antigos ao lado das skills, duplicando instruções e custo de tokens. Manter no scaffold uma lista explícita de caminhos obsoletos (`.agents/commands/*.md`, `.agents/roles/*.md` e os adaptadores antigos de `.claude/`, `.gemini/` e `.github/`) e removê-los apenas quando o conteúdo for idêntico ao do template da versão anterior ou carregar marcador gerenciado; arquivo modificado pelo usuário é preservado e listado no relatório (`SEG-02`). `--dry-run` imprime as remoções sem executar (`ARQ-05`).
+6. ADR `adr-0002-layout-e-estado-por-iniciativa.md`; revisar texto das Regras 13 e 15 e de `FLX-02` na ADR (a edição da Constitution fica na 69-07).
 
 ## Critérios de Aceitação Executáveis
 ```bash
@@ -51,3 +52,4 @@ go test ./internal/scaffold -run 'TestMigrate|TestGolden'
 - `update` real move o legado, cria backup e a segunda execução não muda nada.
 - Violações (`TST-03`): arquivo de domínio do usuário fora do padrão não é movido; destino já existente não é sobrescrito; link simbólico para fora do projeto é recusado (`SEG-02`).
 - Merge de duas branches com iniciativas distintas, no fixture migrado, termina sem conflito.
+- Fixture v3 com `.agents/commands/` e `.agents/roles/` intactos: o `update` remove os idênticos aos templates antigos, preserva o arquivo editado pelo usuário e é idempotente.
