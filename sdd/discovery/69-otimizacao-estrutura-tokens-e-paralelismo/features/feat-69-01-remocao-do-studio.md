@@ -11,13 +11,13 @@ O Studio (`internal/studio`, 5.262 linhas, `three.min.js`) não será usado e cu
 
 ## Modelo do módulo
 - **Modelo:** `enxuto` (remoção, sem módulo novo).
-- **Justificativa:** o único importador de `internal/studio` é `cmd/forge-sdd/studio.go`; remover os dois não deixa símbolo órfão (`ARQ-02`, `ARQ-11`, `COD-04`).
+- **Justificativa:** os importadores de `internal/studio` são `cmd/forge-sdd/studio.go` e o teste `internal/acp/e2e_pool_test.go`; remover o pacote e reescrever o teste não deixa símbolo órfão (`ARQ-02`, `ARQ-11`, `COD-04`).
 
 ## O que já existe (Reuse Check — `DUP-02`)
 
 | Procurei | Onde | Achei | Decisão | Justificativa |
 |---|---|---|---|---|
-| Pacote e comando do Studio | `internal/studio/**`, `cmd/forge-sdd/studio.go` | 9 arquivos Go e assets; único importador é `studio.go` | remover | Decisão do usuário (discovery 69); `COD-04` |
+| Pacote e comando do Studio | `internal/studio/**`, `cmd/forge-sdd/studio.go`, `internal/acp/e2e_pool_test.go` | 9 arquivos Go e assets; importadores: `studio.go` e o teste E2E do `acp` | remover (teste E2E: reescrever sobre `acp.NewHTTPHandler`) | Decisão do usuário (discovery 69); `COD-04` |
 | Chamadas ao pool | `internal/studio/server.go` | `pool.Warmup`, `StartHeartbeat`, `SanitizeOrphanActivities`, `ReconcileStationActivities` | estender | `forge-sdd acp` passa a iniciar heartbeat e a sanear atividades órfãs |
 | Warmup fora do Studio | `cmd/forge-sdd/attach.go:52`, `internal/acp/dispatcher.go:169` | Já chamam `Warmup` | reusar | Permanecem como estão |
 | Citações ao Studio | `internal/scaffold/templates/**`, goldens, `README.md`, `sdd/FLOW.md` §8, `docs/manual-forge-studio.md`, `sdd/spec/**`, `.agents/**` | Mencionam o comando e a interface | remover | Editar templates e regenerar goldens (`TST-02`) |
@@ -49,3 +49,4 @@ test ! -d internal/studio && test ! -f cmd/forge-sdd/studio.go
 - Teste novo em `cmd/forge-sdd`: iniciar o servidor `acp` com contexto cancelável inicia o heartbeat e o encerra sem goroutine remanescente.
 - `sdd/spec/concepts.md` não cita `internal/studio` nem `acp.HTTPTransport`.
 - ADR 0001 existe e referencia `GOV-01`.
+- Decisão registrada no ADR: o `acp` não aquece o pool no boot (sob demanda via `pool/warmup` ou `attach`).

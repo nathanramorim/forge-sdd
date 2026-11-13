@@ -115,7 +115,7 @@ O protocolo ACP no forge-sdd suporta dois modos de transporte:
 | Transporte | Canal de Comunicação | Cenário de Uso | Comando / Endpoint |
 |---|---|---|---|
 | **stdio** (Padrão) | `os.Stdin` / `os.Stdout` via pipes | IDEs locais (Zed, Cursor, VS Code) e scripts CLI | `forge-sdd acp` |
-| **HTTP + SSE** | HTTP POST + Server-Sent Events | Dashboards web e serviços desacoplados | POST `/acp`<br/>GET `/acp/events` |
+| **HTTP + SSE** | HTTP POST + Server-Sent Events | Disponível apenas como `acp.NewHTTPHandler` na biblioteca; nenhum comando o expõe hoje | — |
 
 ---
 

@@ -25,7 +25,10 @@ func TestStartACPBackground_SanitizaOrfasEEncerraSemTravar(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	stop := startACPBackground(ctx, dir, dispatcher.Pool())
+	pool := dispatcher.Pool()
+	require.NotNil(t, pool)
+	stop := startACPBackground(ctx, dir, pool)
+	require.True(t, pool.HeartbeatMonitor().IsRunning(), "heartbeat deve estar ativo após o boot")
 
 	items, err := queue.LoadActivities(dir)
 	require.NoError(t, err)
@@ -42,6 +45,7 @@ func TestStartACPBackground_SanitizaOrfasEEncerraSemTravar(t *testing.T) {
 	case <-time.After(3 * time.Second):
 		t.Fatal("encerramento do heartbeat travou")
 	}
+	assert.False(t, pool.HeartbeatMonitor().IsRunning(), "heartbeat deve parar após o encerramento")
 }
 
 func TestStartACPBackground_PoolNuloNaoQuebra(t *testing.T) {

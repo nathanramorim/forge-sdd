@@ -2,7 +2,7 @@
 
 - **Data:** 2026-11-13
 - **Status:** `aprovado`
-- **Regras afetadas (IDs da constitution):** `ARQ-06`, `DUP-01`, `COD-04`
+- **Regras afetadas (IDs da constitution):** `ARQ-06`, `DUP-01`, `COD-04` (e `GOV-01`, que exige este ADR para mudanças de contrato; nenhuma regra da Constitution foi alterada)
 - **Autor / Responsável:** Líder (decisão do dono do produto no discovery 69)
 
 ## Contexto
@@ -17,7 +17,7 @@ O Forge Studio (`internal/studio`, cerca de 5,2 mil linhas Go mais `three.min.js
 
 ## Decisão
 
-Opção 2. `internal/studio`, `cmd/forge-sdd/studio.go` e `docs/manual-forge-studio.md` foram removidos, junto com as citações em README, `FLOW.md`, rule ACP, papel do Líder, templates e goldens. O servidor `forge-sdd acp` passa a higienizar atividades órfãs e a manter o heartbeat do pool. As tasks 68-04 e 68-05, que existiam só para o Studio, foram canceladas. Nenhum ID da Constitution foi criado ou alterado; `ARQ-06` já não listava `studio`.
+Opção 2. `internal/studio`, `cmd/forge-sdd/studio.go` e `docs/manual-forge-studio.md` foram removidos, junto com as citações em README, `FLOW.md`, rule ACP, papel do Líder, templates e goldens. O servidor `forge-sdd acp` passa a higienizar atividades órfãs e a manter o heartbeat do pool. As tasks 68-04 e 68-05, que existiam só para o Studio, foram canceladas. Nenhum ID da Constitution foi criado ou alterado (`GOV-01`: sem mudança de regra); `ARQ-06` já não listava `studio`. O Studio fazia `pool.Warmup` no boot; o servidor `forge-sdd acp` **não** aquece o pool sozinho: o aquecimento é sob demanda, pelo RPC `pool/warmup` ou pelo `forge-sdd attach`. Motivo: o `acp` é um servidor stdio iniciado por cada IDE, e a feat 68 passa a criar processos físicos no warmup, o que não deve acontecer a cada conexão.
 
 ## Consequências
 
