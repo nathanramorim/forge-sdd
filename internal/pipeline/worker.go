@@ -143,7 +143,7 @@ func processJob(ctx context.Context, opts WorkerOptions, cfg config.ForgeConfig,
 	res, runErr := opts.Runner.Run(ctx, RunSpec{
 		Agent:   opts.Role,
 		Name:    opts.Name,
-		Prompt:  BuildPrompt(opts.Role, job, filepath.ToSlash(rel)),
+		Prompt:  workerPrompt(opts.Role, job, filepath.ToSlash(rel), cfg),
 		Dir:     opts.Dir,
 		Timeout: timeout,
 	}, out)
@@ -210,7 +210,9 @@ func verifyHandoff(opts WorkerOptions, jobID string) string {
 			return "não foi possível concluir o job: " + err.Error()
 		}
 	case layout.RoleReviewer:
-		if e.State == layout.StateProcessing {
+		// Só o veredito aplicado por `bus review` conta: um `bus complete` solto fecha o job sem
+		// notificar nem devolver ao Builder.
+		if e.State != layout.StateDone || actionFromNote(e.Job) == "" {
 			return "o agente terminou sem aplicar o veredito (forge-sdd bus review)"
 		}
 	}
@@ -223,4 +225,12 @@ func reviewJobID(id string) string {
 		r = id[:80-len("-review")] + "-review"
 	}
 	return strings.TrimRight(r, "-.")
+}
+
+func workerPrompt(role string, job bus.Job, rel string, cfg config.ForgeConfig) string {
+	p := BuildPrompt(role, job, rel)
+	if role == layout.RoleBuilder {
+		p += "\n" + BuilderHints(cfg.Builder, job)
+	}
+	return p
 }

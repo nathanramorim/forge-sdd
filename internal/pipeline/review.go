@@ -83,6 +83,7 @@ func ApplyVerdict(dir, jobID, worker string, v queue.Verdict, deps notify.Deps, 
 			Type: notify.TypePRApproved, Title: "PR pronto: " + job.Feature,
 			Message: "PR revisado, sem inconformidades e pronto para aprovação final.\n" + oneLine(v.Resumo, 600),
 			PRURL:   *job.PR.URL, CardURL: job.Card.URL, Feature: job.Feature, JobID: job.ID,
+			ID: job.ID + "-aprovado", // determinístico: reaplicar não duplica o inbox
 		}
 		out, err := notify.Dispatch(dir, ncfg, n, deps)
 		if err != nil {
@@ -126,7 +127,7 @@ func ApplyVerdict(dir, jobID, worker string, v queue.Verdict, deps notify.Deps, 
 			title = "Confirmação humana necessária: " + job.Feature
 			msg = "O Reviewer ficou em dúvida e não devolveu o PR automaticamente. Confirme o que precisa ser decidido.\n" + oneLine(v.Resumo, 600)
 		}
-		n := notify.Notification{Type: notify.TypeEscalation, Title: title, Message: msg, PRURL: *job.PR.URL, CardURL: job.Card.URL, Feature: job.Feature, JobID: job.ID}
+		n := notify.Notification{ID: job.ID + "-escalado", Type: notify.TypeEscalation, Title: title, Message: msg, PRURL: *job.PR.URL, CardURL: job.Card.URL, Feature: job.Feature, JobID: job.ID}
 		out, err := notify.Dispatch(dir, ncfg, n, deps)
 		if err != nil {
 			return nil, err
@@ -142,27 +143,31 @@ func ApplyVerdict(dir, jobID, worker string, v queue.Verdict, deps notify.Deps, 
 	return res, nil
 }
 
+// validateVerdict aplica o contrato único do veredito (queue.ValidateVerdict, DUP-06) e as regras
+// extras do pipeline: dúvida e violação exigem achado, e conforme não pode trazer violação.
 func validateVerdict(v queue.Verdict) error {
-	switch v.Veredito {
-	case "conforme", "violacao", "duvida":
-	default:
-		return fmt.Errorf("veredito %q inválido (use conforme, violacao ou duvida)", v.Veredito)
-	}
-	if v.Veredito != "conforme" && len(v.Achados) == 0 {
-		return fmt.Errorf("veredito %s exige ao menos um achado", v.Veredito)
+	if err := queue.ValidateVerdict(v); err != nil {
+		return err
 	}
 	violations := 0
-	for i, f := range v.Achados {
-		if f.Classificacao == "violacao" {
+	for _, f := range v.Achados {
+		if f.Classificacao == queue.VerdictViolacao {
 			violations++
-			// Regra de ouro: violação só com evidência literal (arquivo, linha, evidência e regra).
-			if strings.TrimSpace(f.Arquivo) == "" || f.Linha <= 0 || strings.TrimSpace(f.Evidencia) == "" || strings.TrimSpace(f.Regra) == "" {
-				return fmt.Errorf("achado %d: violação exige arquivo, linha, evidência literal e regra", i+1)
-			}
 		}
 	}
-	if v.Veredito == "violacao" && violations == 0 {
-		return errors.New("veredito violacao exige ao menos um achado classificado como violacao")
+	switch v.Veredito {
+	case queue.VerdictConforme:
+		if violations > 0 {
+			return errors.New("veredito conforme não pode trazer achado classificado como violacao")
+		}
+	case queue.VerdictViolacao:
+		if violations == 0 {
+			return errors.New("veredito violacao exige ao menos um achado classificado como violacao")
+		}
+	default:
+		if len(v.Achados) == 0 {
+			return fmt.Errorf("veredito %s exige ao menos um achado", v.Veredito)
+		}
 	}
 	return nil
 }

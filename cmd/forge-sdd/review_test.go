@@ -46,6 +46,7 @@ func writeVerdict(t *testing.T, v queue.Verdict) string {
 func resetReviewFlags() { _ = busReviewCmd.Flags().Set("worker", "") }
 
 func TestBusReviewCLI_ReworkEIdempotencia(t *testing.T) {
+	t.Setenv("FORGE_WORKER", "forge-reviewer")
 	dir := reviewFixture(t, 1)
 	resetReviewFlags()
 	vf := writeVerdict(t, queue.Verdict{Veredito: "violacao", Resumo: "r", Achados: []queue.Finding{
@@ -64,6 +65,7 @@ func TestBusReviewCLI_ReworkEIdempotencia(t *testing.T) {
 }
 
 func TestBusReviewCLI_AprovacaoEViolacoes(t *testing.T) {
+	t.Setenv("FORGE_WORKER", "forge-reviewer")
 	dir := reviewFixture(t, 1)
 	resetReviewFlags()
 	_, err := runRoot(t, "bus", "review", "--dir", dir, "--id", "job-1-review", "--verdict-file", filepath.Join(dir, "nao-existe.json"))

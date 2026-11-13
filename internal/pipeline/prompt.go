@@ -2,6 +2,7 @@ package pipeline
 
 import (
 	"fmt"
+	"github.com/forge-sdd/cli/internal/config"
 	"strings"
 
 	"github.com/forge-sdd/cli/internal/bus"
@@ -72,4 +73,21 @@ func feedbackBlock(items []bus.Feedback) string {
 		}
 	}
 	return strings.ReplaceAll(b.String(), "```", "'''")
+}
+
+// BuilderHints acrescenta ao prompt do Builder as opções de forge.json que mudam o procedimento:
+// testes antes do PR e worktree por tarefa.
+func BuilderHints(cfg config.BuilderConfig, job bus.Job) string {
+	var b strings.Builder
+	if cfg.RunTestsBeforePR {
+		b.WriteString("Obrigatório: build, lint, typecheck e testes devem passar antes de abrir ou atualizar o PR.\n")
+	} else {
+		b.WriteString("Rodar a suíte completa antes do PR está desligado em forge.json (builder.run_tests_before_pr); rode ao menos os testes dos pacotes alterados.\n")
+	}
+	if cfg.UseGitWorktrees {
+		fmt.Fprintf(&b, "Para tarefas independentes em paralelo (até %d), isole cada uma com `forge-sdd pipeline worktree add --id %s --task <task>` e remova ao fim, inclusive em falha, com `forge-sdd pipeline worktree remove --id %s --task <task>`.\n", cfg.MaxParallelTasks, job.ID, job.ID)
+	} else {
+		fmt.Fprintf(&b, "Worktrees por tarefa estão desligados (builder.use_git_worktrees); paralelize só com subagentes (até %d) em arquivos disjuntos.\n", cfg.MaxParallelTasks)
+	}
+	return b.String()
 }

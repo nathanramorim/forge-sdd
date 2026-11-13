@@ -306,6 +306,9 @@ func readInboxFile(p string) (InboxItem, bool) {
 	n.Message = Sanitize(n.Message, maxMessageBytes, true)
 	n.PRURL = Sanitize(n.PRURL, maxFieldBytes, false)
 	n.PMComment = Sanitize(n.PMComment, maxMessageBytes, true)
+	n.CardURL = Sanitize(n.CardURL, maxFieldBytes, false)
+	n.Feature = Sanitize(n.Feature, 100, false)
+	n.JobID = Sanitize(n.JobID, 100, false)
 	return InboxItem{Notification: n, Path: p}, true
 }
 
@@ -439,7 +442,11 @@ func appleScriptString(s string) string {
 	return `"` + s + `"`
 }
 
-func psSingle(s string) string { return strings.ReplaceAll(s, "'", "''") }
+// psSingle duplica as aspas simples do PowerShell, inclusive as tipográficas (U+2018 a U+201B), que
+// ele também trata como delimitador.
+func psSingle(s string) string {
+	return strings.NewReplacer("'", "''", "\u2018", "''", "\u2019", "''", "\u201a", "''", "\u201b", "''").Replace(s)
+}
 
 // ---- webhook ----
 

@@ -128,13 +128,24 @@ func TestWorker_ReviewerSemVereditoFalha(t *testing.T) {
 	dir = workerProject(t)
 	seedJob(t, dir, layout.RoleReviewer, "pr-2", bus.TypePRReview, bus.PriorityNormal, now)
 	runOnce(t, dir, layout.RoleReviewer, &fakeRunner{fn: func(RunSpec) (RunResult, error) {
-		_, err := bus.Complete(dir, layout.RoleReviewer, "pr-2", "forge-reviewer", "veredito aplicado", now)
+		_, err := bus.Complete(dir, layout.RoleReviewer, "pr-2", "forge-reviewer", "aprovado: PR sem inconformidades", now)
 		return RunResult{}, err
 	}}, nil)
 	done, _ := bus.List(dir, layout.RoleReviewer, layout.StateDone)
 	assert.Len(t, done, 1)
 	failed, _ = bus.List(dir, layout.RoleReviewer, layout.StateFailed)
 	assert.Empty(t, failed)
+
+	// Um `bus complete` solto fecha o job sem veredito: não conta como sucesso.
+	dir = workerProject(t)
+	seedJob(t, dir, layout.RoleReviewer, "pr-3", bus.TypePRReview, bus.PriorityNormal, now)
+	var outcomes []string
+	out := runOnce(t, dir, layout.RoleReviewer, &fakeRunner{fn: func(RunSpec) (RunResult, error) {
+		_, err := bus.Complete(dir, layout.RoleReviewer, "pr-3", "forge-reviewer", "feito", now)
+		return RunResult{}, err
+	}}, func(j bus.Job, o string) { outcomes = append(outcomes, o) })
+	assert.Equal(t, []string{OutcomeFailed}, outcomes)
+	assert.Contains(t, out, "sem aplicar o veredito")
 }
 
 func TestWorker_ProcessaReworkAntesDeNormalEInformaFeedbackComoDadoNaoConfiavel(t *testing.T) {

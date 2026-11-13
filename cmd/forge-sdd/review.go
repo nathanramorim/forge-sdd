@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -31,14 +32,16 @@ Aplicar duas vezes o mesmo veredito não repete efeitos.`,
 			dir = "."
 		}
 		id, _ := cmd.Flags().GetString("id")
-		worker, _ := cmd.Flags().GetString("worker")
+		worker := workerFromFlags(cmd)
 		file, _ := cmd.Flags().GetString("verdict-file")
 		raw, err := readLimited(cmd, file)
 		if err != nil {
 			return err
 		}
 		var v queue.Verdict
-		if err := json.Unmarshal(raw, &v); err != nil {
+		dec := json.NewDecoder(bytes.NewReader(raw))
+		dec.DisallowUnknownFields()
+		if err := dec.Decode(&v); err != nil {
 			return fmt.Errorf("veredito inválido: %w", err)
 		}
 		res, err := pipeline.ApplyVerdict(dir, id, worker, v, notify.Deps{}, time.Now())
@@ -113,6 +116,6 @@ func init() {
 	_ = busReviewCmd.MarkFlagRequired("id")
 	busReviewCmd.Flags().String("verdict-file", "", "Arquivo JSON do veredito (ou - para stdin)")
 	_ = busReviewCmd.MarkFlagRequired("verdict-file")
-	busReviewCmd.Flags().String("worker", "", "Worker dono do lease (opcional)")
+	busReviewCmd.Flags().String("worker", "", "Worker dono do lease (padrão: variável FORGE_WORKER, definida pelo worker)")
 	busCmd.AddCommand(busReviewCmd)
 }

@@ -237,6 +237,7 @@ func RunAgents(cfg config.Config, agents []string, targetDir string) ([]string, 
 	}
 	if !cfg.DryRun {
 		cleanObsoleteFiles(targetDir)
+		installClaudeInboxHook(agents, targetDir)
 	}
 	return created, nil
 }

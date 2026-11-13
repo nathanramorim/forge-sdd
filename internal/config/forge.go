@@ -133,8 +133,7 @@ func (c ForgeConfig) Validate() error {
 	if c.CLI != CLIClaude && c.CLI != CLIAgy {
 		return fmt.Errorf("cli %q inválido (use claude ou agy)", c.CLI)
 	}
-	profile, ok := c.CLIProfiles[c.CLI]
-	if !ok {
+	if _, ok := c.CLIProfiles[c.CLI]; !ok {
 		return fmt.Errorf("cli_profiles sem perfil para %q", c.CLI)
 	}
 	for name, p := range c.CLIProfiles {
@@ -142,7 +141,6 @@ func (c ForgeConfig) Validate() error {
 			return err
 		}
 	}
-	_ = profile
 	if c.Builder.MaxParallelTasks < 1 || c.Builder.MaxParallelTasks > 8 {
 		return fmt.Errorf("builder.max_parallel_tasks %d fora da faixa 1 a 8", c.Builder.MaxParallelTasks)
 	}
@@ -321,10 +319,11 @@ func (n NotificationsConfig) Validate() error {
 				return fmt.Errorf("channels.email.to: %q inválido", to)
 			}
 		}
-		for field, v := range map[string]string{"user_env": e.UserEnv, "password_env": e.PasswordEnv} {
-			if v != "" && !envNameRe.MatchString(v) {
-				return fmt.Errorf("channels.email.%s deve ser o NOME de uma variável de ambiente, não o valor (SEG-04)", field)
-			}
+	}
+	// SEG-04: vale também com o canal desligado, para nenhum segredo literal ficar versionado.
+	for field, v := range map[string]string{"user_env": e.UserEnv, "password_env": e.PasswordEnv} {
+		if v != "" && !envNameRe.MatchString(v) {
+			return fmt.Errorf("channels.email.%s deve ser o NOME de uma variável de ambiente, não o valor (SEG-04)", field)
 		}
 	}
 	w := n.Channels.Webhook

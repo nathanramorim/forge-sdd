@@ -40,7 +40,7 @@ func TestLoadForgeConfig_PadroesEArquivoParcial(t *testing.T) {
 
 func TestLoadForgeConfig_Violacoes(t *testing.T) {
 	bad := map[string]string{
-		"campo desconhecido":      `{"cli":"claude","api_key":"sk-aaaaaaaaaaaaaaaaaaaa"}`,
+		"campo desconhecido":      `{"cli":"claude","api_key":"<SEU_TOKEN_AQUI>"}`,
 		"cli inválido":            `{"cli":"gpt"}`,
 		"paralelismo zero":        `{"builder":{"max_parallel_tasks":0,"job_timeout_minutes":60}}`,
 		"paralelismo acima":       `{"builder":{"max_parallel_tasks":9,"job_timeout_minutes":60}}`,
@@ -66,7 +66,7 @@ func TestLoadForgeConfig_Violacoes(t *testing.T) {
 		_, found, err := LoadForgeConfig(dir)
 		require.Error(t, err, name)
 		assert.True(t, found, name)
-		assert.NotContains(t, err.Error(), "sk-aaaa", "%s: o erro não deve repetir o segredo", name)
+		assert.NotContains(t, err.Error(), "SEU_TOKEN_AQUI", "%s: o erro não deve repetir o segredo", name)
 	}
 }
 

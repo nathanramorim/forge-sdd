@@ -214,13 +214,15 @@ func TestReview_Violacoes(t *testing.T) {
 	deps, _ := notifyDeps(nil)
 	dir := reviewProject(t, 1)
 	bad := map[string]queue.Verdict{
-		"veredito inválido":       {Veredito: "talvez"},
-		"violação sem achado":     {Veredito: "violacao"},
-		"violação sem evidência":  {Veredito: "violacao", Achados: []queue.Finding{{Classificacao: "violacao", Regra: "ARQ-01", Arquivo: "a.go", Linha: 1}}},
-		"violação sem linha":      {Veredito: "violacao", Achados: []queue.Finding{{Classificacao: "violacao", Regra: "ARQ-01", Arquivo: "a.go", Evidencia: "x"}}},
-		"violação sem regra":      {Veredito: "violacao", Achados: []queue.Finding{{Classificacao: "violacao", Arquivo: "a.go", Linha: 1, Evidencia: "x"}}},
-		"violacao só com dúvidas": {Veredito: "violacao", Achados: []queue.Finding{{Classificacao: "duvida", Regra: "ARQ-01", Arquivo: "a.go", Linha: 1, Evidencia: "x"}}},
-		"dúvida sem achado":       {Veredito: "duvida"},
+		"veredito inválido":       {Veredito: "talvez", Resumo: "x"},
+		"violação sem achado":     {Veredito: "violacao", Resumo: "x"},
+		"violação sem evidência":  {Veredito: "violacao", Resumo: "x", Achados: []queue.Finding{{Classificacao: "violacao", Regra: "ARQ-01", Arquivo: "a.go", Linha: 1}}},
+		"violação sem linha":      {Veredito: "violacao", Resumo: "x", Achados: []queue.Finding{{Classificacao: "violacao", Regra: "ARQ-01", Arquivo: "a.go", Evidencia: "x"}}},
+		"violação sem regra":      {Veredito: "violacao", Resumo: "x", Achados: []queue.Finding{{Classificacao: "violacao", Arquivo: "a.go", Linha: 1, Evidencia: "x"}}},
+		"violacao só com dúvidas": {Veredito: "violacao", Resumo: "x", Achados: []queue.Finding{{Classificacao: "duvida", Regra: "ARQ-01", Arquivo: "a.go", Linha: 1, Evidencia: "x"}}},
+		"dúvida sem achado":       {Veredito: "duvida", Resumo: "x"},
+		"conforme sem resumo":     {Veredito: "conforme"},
+		"conforme com violação":   {Veredito: "conforme", Resumo: "x", Achados: []queue.Finding{{Classificacao: "violacao", Regra: "ARQ-01", Arquivo: "a.go", Linha: 1, Evidencia: "x"}}},
 	}
 	for name, v := range bad {
 		_, err := ApplyVerdict(dir, "job-1-review", "forge-reviewer", v, deps, now)
@@ -232,15 +234,15 @@ func TestReview_Violacoes(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, layout.StateProcessing, e.State, "o job continua em processing para um veredito válido")
 
-	_, err = ApplyVerdict(dir, "nao-existe", "w", queue.Verdict{Veredito: "conforme"}, deps, now)
+	_, err = ApplyVerdict(dir, "nao-existe", "w", queue.Verdict{Veredito: "conforme", Resumo: "ok"}, deps, now)
 	assert.ErrorIs(t, err, bus.ErrNotFound)
-	_, err = ApplyVerdict(t.TempDir(), "x", "w", queue.Verdict{Veredito: "conforme"}, deps, now)
+	_, err = ApplyVerdict(t.TempDir(), "x", "w", queue.Verdict{Veredito: "conforme", Resumo: "ok"}, deps, now)
 	assert.ErrorIs(t, err, ErrNotPipelineMode)
 
 	// Job do tipo errado e job ainda em pending não recebem veredito.
 	dir2 := workerProject(t)
 	seedJob(t, dir2, layout.RoleReviewer, "pr-pend", bus.TypePRReview, bus.PriorityNormal, now)
-	_, err = ApplyVerdict(dir2, "pr-pend", "w", queue.Verdict{Veredito: "conforme"}, deps, now)
+	_, err = ApplyVerdict(dir2, "pr-pend", "w", queue.Verdict{Veredito: "conforme", Resumo: "ok"}, deps, now)
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "pending")
 }

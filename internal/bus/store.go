@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io/fs"
+	"net/url"
 	"os"
 	"path/filepath"
 	"sort"
@@ -243,7 +244,12 @@ func Claim(dir, role, worker string, ttl time.Duration, now time.Time) (*Entry, 
 			}
 			return nil, fmt.Errorf("reivindicar %s: %w", name, err)
 		}
-		_ = os.Chtimes(dst, now, now) // o rename preserva o mtime antigo; a janela até o lease começa agora
+		// O rename preserva o mtime antigo; a janela até o lease começa agora. Se falhar, devolve o
+		// job a pending em vez de deixar o Recover vê-lo como abandonado enquanto é gravado.
+		if err := os.Chtimes(dst, now, now); err != nil {
+			_ = os.Rename(dst, src)
+			return nil, fmt.Errorf("reivindicar %s: %w", name, err)
+		}
 
 		job, rerr := readJob(dst)
 		if rerr != nil {
@@ -271,8 +277,9 @@ func ownEntry(dir, role, id, worker string) (*Entry, error) {
 	if e.State != layout.StateProcessing {
 		return nil, fmt.Errorf("%w: %s está em %s, não em processing", ErrNotFound, id, e.State)
 	}
-	if worker != "" && e.Job.Lease != nil && e.Job.Lease.Worker != worker {
-		return nil, fmt.Errorf("%w: %s", ErrNotOwner, id)
+	// O dono do lease é sempre exigido: worker vazio ou lease ausente não dão posse (SEG-01).
+	if worker == "" || e.Job.Lease == nil || e.Job.Lease.Worker != worker {
+		return nil, fmt.Errorf("%w: %s (informe o worker dono do lease)", ErrNotOwner, id)
 	}
 	return e, nil
 }
@@ -417,13 +424,13 @@ func UpdatePR(dir, role, id, worker string, number int, prURL, branch string, no
 	if err != nil {
 		return nil, err
 	}
+	if err := checkPRURL(prURL); err != nil {
+		return nil, fmt.Errorf("%w: %v", ErrInvalidJob, err)
+	}
 	e.Job.PR.Number = &number
 	e.Job.PR.URL = &prURL
 	if branch != "" {
 		e.Job.PR.Branch = branch
-	}
-	if !strings.HasPrefix(prURL, "https://") && !strings.HasPrefix(prURL, "http://") {
-		return nil, fmt.Errorf("%w: pr.url %q deve ser http(s)", ErrInvalidJob, prURL)
 	}
 	if err := e.Job.Validate(role); err != nil {
 		return nil, err
@@ -442,4 +449,17 @@ func Get(dir, role, id string) (*Job, string, error) {
 		return nil, "", err
 	}
 	return &e.Job, e.State, nil
+}
+
+// checkPRURL aceita só URL http(s) com host, sem userinfo, espaços ou caracteres de controle: o valor
+// vai para o prompt do Reviewer, o inbox e o contexto da sessão Discovery (FLX-08).
+func checkPRURL(raw string) error {
+	if len(raw) > 512 || strings.ContainsAny(raw, " \t\r\n\x00\x1b") {
+		return fmt.Errorf("pr.url inválida")
+	}
+	u, err := url.Parse(raw)
+	if err != nil || (u.Scheme != "https" && u.Scheme != "http") || u.Host == "" || u.User != nil {
+		return fmt.Errorf("pr.url %q deve ser http(s) com host e sem credenciais", truncate(raw, 60))
+	}
+	return nil
 }

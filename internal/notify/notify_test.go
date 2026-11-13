@@ -431,3 +431,8 @@ func TestHookFormato_CompactoESemNada(t *testing.T) {
 	assert.Contains(t, out, "1 notificação(ões) não lida(s)")
 	assert.Contains(t, out, "https://x/pull/3")
 }
+
+func TestPsSingle_DuplicaAspasTipograficas(t *testing.T) {
+	assert.Equal(t, "a''b''c''d''e", psSingle("a'b\u2018c\u2019d\u201ae"))
+	assert.Equal(t, "x''", psSingle("x\u201b"))
+}

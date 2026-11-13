@@ -35,6 +35,7 @@ func claimedJob(t *testing.T, dir string) {
 }
 
 func TestPipelinePROpened_RegistraEValida(t *testing.T) {
+	t.Setenv("FORGE_WORKER", "forge-builder")
 	dir := t.TempDir()
 	resetWorkerFlags()
 	claimedJob(t, dir)
@@ -54,6 +55,8 @@ func TestPipelinePROpened_RegistraEValida(t *testing.T) {
 		"número inválido":  {"--number", "0", "--url", "https://x/1"},
 		"branch com opção": {"--number", "1", "--url", "https://x/1", "--branch", "--upload-pack=x"},
 		"worker alheio":    {"--number", "1", "--url", "https://x/1", "--worker", "outro"},
+		"url com espaço":   {"--number", "1", "--url", "https://x/a b"},
+		"url com userinfo": {"--number", "1", "--url", "https://u:p@x/1"},
 	} {
 		resetWorkerFlags()
 		_, err := runRoot(t, append([]string{"pipeline", "pr-opened", "--dir", dir, "--id", "job-1"}, args...)...)
@@ -101,4 +104,13 @@ func TestWorkerCLI_OnceSemJobsSaiELimpo(t *testing.T) {
 	resetWorkerFlags()
 	_, err = runRoot(t, "worker", "--dir", dir, "--role", "discovery", "--once")
 	require.Error(t, err)
+}
+
+func TestPipelinePROpened_SemWorkerERecusado(t *testing.T) {
+	t.Setenv("FORGE_WORKER", "")
+	dir := t.TempDir()
+	resetWorkerFlags()
+	claimedJob(t, dir)
+	_, err := runRoot(t, "pipeline", "pr-opened", "--dir", dir, "--id", "job-1", "--number", "1", "--url", "https://x/1")
+	require.Error(t, err, "sem worker nem FORGE_WORKER o dono do lease não é provado")
 }

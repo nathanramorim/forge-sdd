@@ -31,6 +31,8 @@ const CardEvidenceFile = "card-evidence.json"
 var (
 	featureSlugRe = regexp.MustCompile(`^[a-z0-9][a-z0-9-]{0,80}$`)
 	adrTokenRe    = regexp.MustCompile(`\badr-[0-9]{4}[a-z0-9-]*`)
+	adrSpacedRe   = regexp.MustCompile(`\badr ([0-9]{4})\b`)
+	ruleNameRe    = regexp.MustCompile(`\bsdd-[a-z0-9-]+\.md\b`)
 	taskIDRe      = regexp.MustCompile(`^feat-([a-z0-9]+)-([0-9]{2}[a-z]?)`)
 	sectionRe     = regexp.MustCompile(`(?m)^##\s+(.+?)\s*$`)
 	requiredSecs  = []string{"modelo do módulo", "o que já existe", "dependências novas", "rules e ids da constituição aplicáveis", "critérios de aceitação executáveis"}
@@ -142,8 +144,14 @@ func Dispatch(dir, feature string, opts DispatchOptions) (*DispatchResult, error
 		for _, r := range pack.Rules {
 			rulesSet[r.Path] = true
 		}
-		for _, tok := range adrTokensIn(sectionBody(string(data), "rules e ids da constituição aplicáveis")) {
+		rulesSection := sectionBody(string(data), "rules e ids da constituição aplicáveis")
+		for _, tok := range adrTokensIn(rulesSection) {
 			adrCited[tok] = true
+		}
+		for _, name := range ruleNameRe.FindAllString(rulesSection, -1) {
+			if _, err := os.Stat(filepath.Join(dir, ".agents", "rules", name)); err != nil {
+				res.Pending = append(res.Pending, fmt.Sprintf("%s: a rule %s citada não existe em .agents/rules/", trel, name))
+			}
 		}
 	}
 	for _, f := range []string{"criteria.md"} {
@@ -319,6 +327,7 @@ func sectionBody(content, name string) string {
 func adrTokensIn(text string) []string {
 	seen := map[string]bool{}
 	var out []string
+	text = adrSpacedRe.ReplaceAllString(strings.ToLower(text), "adr-$1")
 	for _, m := range adrTokenRe.FindAllString(text, -1) {
 		m = strings.TrimRight(m, "-.")
 		if !seen[m] {
@@ -342,7 +351,7 @@ func findADR(dir string, adrDirs []string, token string) (string, bool) {
 				continue
 			}
 			base := strings.TrimSuffix(n, ".md")
-			if base == token || strings.HasPrefix(base, token+"-") || strings.HasPrefix(token, base) {
+			if base == token || strings.HasPrefix(base, token+"-") {
 				return filepath.ToSlash(filepath.Join(d, n)), true
 			}
 		}

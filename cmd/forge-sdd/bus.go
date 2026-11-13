@@ -86,7 +86,7 @@ var busClaimCmd = &cobra.Command{
 	Args:  cobra.NoArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		dir, role := busArgs(cmd)
-		worker, _ := cmd.Flags().GetString("worker")
+		worker := workerFromFlags(cmd)
 		ttl, _ := cmd.Flags().GetDuration("ttl")
 		e, err := bus.Claim(dir, role, worker, ttl, time.Now())
 		if errors.Is(err, bus.ErrEmpty) {
@@ -107,7 +107,7 @@ var busCompleteCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		dir, role := busArgs(cmd)
 		id, _ := cmd.Flags().GetString("id")
-		worker, _ := cmd.Flags().GetString("worker")
+		worker := workerFromFlags(cmd)
 		note, _ := cmd.Flags().GetString("note")
 		e, err := bus.Complete(dir, role, id, worker, note, time.Now())
 		if err != nil {
@@ -125,7 +125,7 @@ var busFailCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		dir, role := busArgs(cmd)
 		id, _ := cmd.Flags().GetString("id")
-		worker, _ := cmd.Flags().GetString("worker")
+		worker := workerFromFlags(cmd)
 		reason, _ := cmd.Flags().GetString("reason")
 		e, err := bus.Fail(dir, role, id, worker, reason, time.Now())
 		if err != nil {
@@ -220,9 +220,9 @@ func init() {
 		c.Flags().String("id", "", "ID do job")
 		_ = c.MarkFlagRequired("id")
 	}
-	busCompleteCmd.Flags().String("worker", "", "Worker dono do lease")
+	busCompleteCmd.Flags().String("worker", "", "Worker dono do lease (padrão: variável FORGE_WORKER, definida pelo worker)")
 	busCompleteCmd.Flags().String("note", "", "Observação registrada no histórico")
-	busFailCmd.Flags().String("worker", "", "Worker dono do lease")
+	busFailCmd.Flags().String("worker", "", "Worker dono do lease (padrão: variável FORGE_WORKER, definida pelo worker)")
 	busFailCmd.Flags().String("reason", "", "Motivo da falha")
 	busListCmd.Flags().String("state", layout.StatePending, "Estado: pending, processing, done ou failed")
 	busListCmd.Flags().Bool("json", false, "Saída em JSON")

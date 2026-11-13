@@ -87,7 +87,7 @@ func (r ExecRunner) Run(ctx context.Context, spec RunSpec, out io.Writer) (RunRe
 	cmd.Dir = spec.Dir
 	cmd.Stdout = out
 	cmd.Stderr = out
-	cmd.Env = os.Environ()
+	cmd.Env = append(os.Environ(), "FORGE_WORKER="+spec.Name)
 	cmd.WaitDelay = 10 * time.Second
 	err = cmd.Run()
 	res := RunResult{}

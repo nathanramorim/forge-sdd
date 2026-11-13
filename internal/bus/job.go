@@ -140,6 +140,9 @@ func (j *Job) Validate(role string) error {
 	if j.SchemaVersion != SchemaVersion {
 		return bad("schema_version %d não suportada (esperado %d)", j.SchemaVersion, SchemaVersion)
 	}
+	if !j.CreatedAt.IsZero() && (j.CreatedAt.Year() < 2000 || j.CreatedAt.After(time.Now().Add(24*time.Hour))) {
+		return bad("created_at %s fora da faixa aceita", j.CreatedAt.Format(time.RFC3339))
+	}
 	if !idRe.MatchString(j.ID) {
 		return bad("id %q fora do padrão ^[a-z0-9][a-z0-9._-]{0,80}$", j.ID)
 	}

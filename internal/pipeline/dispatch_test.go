@@ -167,6 +167,7 @@ func TestDispatch_SemCardBloqueia(t *testing.T) {
 		"ID inexistente na Constituição": {func(dir string) {
 			testutil.WriteFile(t, dir, base+"/features/feat-77-01-autenticacao.md", strings.Replace(taskSpec, "`ARQ-01`", "`ARQ-99`", 1))
 		}, "ARQ-99"},
+		"rule citada não existe (outra rule cobre)": {func(dir string) { _ = os.Remove(filepath.Join(dir, ".agents/rules/sdd-seguranca.md")) }, "sdd-seguranca.md citada não existe"},
 		"nenhuma rule cobre os IDs": {func(dir string) {
 			_ = os.Remove(filepath.Join(dir, ".agents/rules/sdd-seguranca.md"))
 			_ = os.Remove(filepath.Join(dir, ".agents/rules/sdd-arquitetura.md"))

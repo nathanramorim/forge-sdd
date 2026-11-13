@@ -365,3 +365,32 @@ func TestFind_AcheEmQualquerEstado(t *testing.T) {
 	_, err = Find(dir, layout.RoleBuilder, "pr-9")
 	assert.ErrorIs(t, err, ErrNotFound, "cada papel tem a própria fila")
 }
+
+func TestOwnership_WorkerVazioOuLeaseAusenteNaoConcluem(t *testing.T) {
+	dir := t.TempDir()
+	_, _, err := Enqueue(dir, layout.RoleBuilder, newJob("job-own", TypeFeatureBuild, PriorityNormal), t0)
+	require.NoError(t, err)
+	_, err = Claim(dir, layout.RoleBuilder, "w1", time.Minute, t0)
+	require.NoError(t, err)
+	_, err = Complete(dir, layout.RoleBuilder, "job-own", "", "x", t0)
+	assert.ErrorIs(t, err, ErrNotOwner, "worker vazio não prova posse")
+	_, err = Fail(dir, layout.RoleBuilder, "job-own", "", "x", t0)
+	assert.ErrorIs(t, err, ErrNotOwner)
+	_, err = UpdatePR(dir, layout.RoleBuilder, "job-own", "", 1, "https://x/1", "", t0)
+	assert.ErrorIs(t, err, ErrNotOwner)
+	for _, bad := range []string{"https://x/a b", "https://u:p@x/1", "http://", "ftp://x/1", "https://x/\x1b[2J"} {
+		_, err = UpdatePR(dir, layout.RoleBuilder, "job-own", "w1", 1, bad, "", t0)
+		assert.ErrorIs(t, err, ErrInvalidJob, bad)
+	}
+}
+
+func TestEnqueue_CreatedAtForaDaFaixaERecusado(t *testing.T) {
+	dir := t.TempDir()
+	j := newJob("job-data", TypeFeatureBuild, PriorityNormal)
+	j.CreatedAt = time.Date(1969, 1, 1, 0, 0, 0, 0, time.UTC)
+	_, _, err := Enqueue(dir, layout.RoleBuilder, j, t0)
+	assert.ErrorIs(t, err, ErrInvalidJob)
+	j.CreatedAt = time.Now().Add(10 * 365 * 24 * time.Hour)
+	_, _, err = Enqueue(dir, layout.RoleBuilder, j, t0)
+	assert.ErrorIs(t, err, ErrInvalidJob)
+}

@@ -79,7 +79,7 @@ var pipelinePROpenedCmd = &cobra.Command{
 			dir = "."
 		}
 		id, _ := cmd.Flags().GetString("id")
-		worker, _ := cmd.Flags().GetString("worker")
+		worker := workerFromFlags(cmd)
 		number, _ := cmd.Flags().GetInt("number")
 		url, _ := cmd.Flags().GetString("url")
 		branch, _ := cmd.Flags().GetString("branch")
@@ -134,7 +134,7 @@ func init() {
 	pipelinePROpenedCmd.Flags().String("dir", ".", "Diretório alvo do projeto Forge-SDD")
 	pipelinePROpenedCmd.Flags().String("id", "", "ID do job em processamento")
 	_ = pipelinePROpenedCmd.MarkFlagRequired("id")
-	pipelinePROpenedCmd.Flags().String("worker", "", "Worker dono do lease (opcional)")
+	pipelinePROpenedCmd.Flags().String("worker", "", "Worker dono do lease (padrão: variável FORGE_WORKER, definida pelo worker)")
 	pipelinePROpenedCmd.Flags().Int("number", 0, "Número do PR")
 	_ = pipelinePROpenedCmd.MarkFlagRequired("number")
 	pipelinePROpenedCmd.Flags().String("url", "", "URL do PR")
@@ -146,4 +146,53 @@ func init() {
 	busPlanCmd.Flags().String("id", "", "ID do job")
 	_ = busPlanCmd.MarkFlagRequired("id")
 	busCmd.AddCommand(busPlanCmd)
+}
+
+// workerFromFlags devolve o worker dono do lease: --worker ou, quando o agente roda sob o worker do
+// Forge, a variável FORGE_WORKER (SEG-01: o dono do lease é sempre exigido).
+func workerFromFlags(cmd *cobra.Command) string {
+	if w, _ := cmd.Flags().GetString("worker"); w != "" {
+		return w
+	}
+	return os.Getenv("FORGE_WORKER")
+}
+
+var pipelineWorktreeCmd = &cobra.Command{
+	Use:   "worktree <add|remove>",
+	Short: "Cria ou remove o worktree isolado de uma tarefa do Builder",
+	Long: `Cria .forge/runtime/worktrees/<job>/<task> em uma branch forge/<job>-<task> (add) ou remove
+o worktree e a branch auxiliar (remove). Usado pelo Builder quando builder.use_git_worktrees está ligado.`,
+	Args:      cobra.ExactArgs(1),
+	ValidArgs: []string{"add", "remove"},
+	RunE: func(cmd *cobra.Command, args []string) error {
+		dir, _ := cmd.Flags().GetString("dir")
+		id, _ := cmd.Flags().GetString("id")
+		task, _ := cmd.Flags().GetString("task")
+		base, _ := cmd.Flags().GetString("base")
+		switch args[0] {
+		case "add":
+			if base == "" {
+				base = "HEAD"
+			}
+			path, err := pipeline.CreateWorktree(dir, id, task, base)
+			if err != nil {
+				return err
+			}
+			fmt.Fprintln(cmd.OutOrStdout(), path)
+			return nil
+		case "remove":
+			return pipeline.RemoveWorktree(dir, id, task)
+		}
+		return fmt.Errorf("ação %q inválida (use add ou remove)", args[0])
+	},
+}
+
+func init() {
+	pipelineWorktreeCmd.Flags().String("dir", ".", "Diretório alvo do projeto Forge-SDD")
+	pipelineWorktreeCmd.Flags().String("id", "", "ID do job")
+	_ = pipelineWorktreeCmd.MarkFlagRequired("id")
+	pipelineWorktreeCmd.Flags().String("task", "", "ID da tarefa")
+	_ = pipelineWorktreeCmd.MarkFlagRequired("task")
+	pipelineWorktreeCmd.Flags().String("base", "", "Ref base (padrão HEAD)")
+	pipelineCmd.AddCommand(pipelineWorktreeCmd)
 }
