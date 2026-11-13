@@ -60,9 +60,9 @@ func BuildContext(dir, specPath string, extraIDs []string, station string) (Cont
 		return pack, fmt.Errorf("contexto: estação inválida %q (use concepcao, planejamento, build, governanca ou operacao)", station)
 	}
 
-	resolved := specPath
-	if !filepath.IsAbs(specPath) {
-		resolved = filepath.Join(dir, specPath)
+	resolved, err := confineToDir(dir, specPath)
+	if err != nil {
+		return pack, err
 	}
 	spec, err := os.ReadFile(resolved)
 	if err != nil {
@@ -108,6 +108,32 @@ func BuildContext(dir, specPath string, extraIDs []string, station string) (Cont
 	pack.Rules = applicableRules(dir, ids, pack.Spec)
 	pack.Skills = applicableSkills(dir, station, pack.Spec)
 	return pack, nil
+}
+
+// confineToDir resolve p relativo a dir e recusa caminho absoluto, ".." e links simbólicos que
+// levem para fora de dir (SEG-01): o spec_path vem de queue.json, que é versionado e vem de outras branches.
+func confineToDir(dir, p string) (string, error) {
+	if filepath.IsAbs(p) {
+		return "", fmt.Errorf("contexto: caminho absoluto %q recusado; use um caminho relativo ao projeto (SEG-01)", p)
+	}
+	joined := filepath.Join(dir, p)
+	rel, err := filepath.Rel(dir, joined)
+	if err != nil || rel == ".." || strings.HasPrefix(rel, ".."+string(filepath.Separator)) {
+		return "", fmt.Errorf("contexto: caminho %q sai do projeto (SEG-01)", p)
+	}
+	realDir, err := filepath.EvalSymlinks(dir)
+	if err != nil {
+		return "", fmt.Errorf("contexto: resolver %q: %w", dir, err)
+	}
+	realFile, err := filepath.EvalSymlinks(joined)
+	if err != nil {
+		return "", fmt.Errorf("contexto: ler spec %q: %w", p, err)
+	}
+	back, err := filepath.Rel(realDir, realFile)
+	if err != nil || back == ".." || strings.HasPrefix(back, ".."+string(filepath.Separator)) {
+		return "", fmt.Errorf("contexto: %q aponta para fora do projeto por link simbólico (SEG-01)", p)
+	}
+	return joined, nil
 }
 
 func applicableRules(dir string, ids []string, spec string) []ContextRule {
@@ -165,11 +191,17 @@ func applicableSkills(dir, station, spec string) []string {
 		if sk.Status != skills.StatusApproved || sk.Scope == skills.ScopeCore {
 			continue
 		}
-		if strings.Contains(spec, sk.Name) {
+		if mentionsWord(spec, sk.Name) {
 			out = append(out, ".agents/skills/"+sk.Name+"/SKILL.md")
 		}
 	}
 	return out
+}
+
+// mentionsWord informa se name aparece em text como palavra inteira (sem casar prefixos de outros nomes).
+func mentionsWord(text, name string) bool {
+	re, err := regexp.Compile(`(^|[^a-zA-Z0-9-])` + regexp.QuoteMeta(name) + `($|[^a-zA-Z0-9-])`)
+	return err == nil && re.MatchString(text)
 }
 
 // Render formata o contexto para leitura por agente ou pessoa.

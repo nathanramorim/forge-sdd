@@ -740,26 +740,45 @@ const (
 type budgetGroup struct {
 	pattern string
 	limit   int
+	// managed marca arquivos gerados pelo forge-sdd (reprovam o check); os demais pertencem ao
+	// projeto e só geram aviso, para o P-24 não bloquear o que o usuário personalizou.
+	managed bool
+}
+
+// managedAdapterNames são os comandos e papéis que o scaffold gera; só eles contam como adaptadores gerenciados.
+var managedAdapterNames = map[string]bool{
+	"archive": true, "c4-architecture": true, "constitution": true, "discovery": true, "doctor": true,
+	"nova-feature": true, "novo-fix": true, "implementar": true, "proxima-feature": true, "revisar": true,
+	"split-features": true, "status": true, "tutorial": true, "upgrade-sdd": true,
+	"archivist": true, "builder": true, "governance": true, "lider": true, "migrator": true,
+	"orquestrador": true, "pm-architect": true, "planner": true, "revisor": true, "specifier": true,
 }
 
 // budgetGroups lista o que P-24 mede; padrões relativos a dir, no formato de filepath.Glob.
 var budgetGroups = []budgetGroup{
-	{"CLAUDE.md", MaxInstructionBytes},
-	{"GEMINI.md", MaxInstructionBytes},
-	{"OPENAI.md", MaxInstructionBytes},
-	{".github/copilot-instructions.md", MaxInstructionBytes},
-	{".agents/skills/sdd-*/SKILL.md", MaxSkillBytes},
-	{".claude/commands/*.md", MaxAdapterBytes},
-	{".gemini/prompts/*.md", MaxAdapterBytes},
-	{".github/prompts/*.md", MaxAdapterBytes},
-	{".claude/agents/*.md", MaxRoleAdapterBytes},
-	{".gemini/skills/*.md", MaxRoleAdapterBytes},
-	{".github/chatmodes/*.md", MaxRoleAdapterBytes},
-	{"sdd/memory/constitution.md", MaxConstitutionSize},
+	{".agents/skills/sdd-*/SKILL.md", MaxSkillBytes, true},
+	{".claude/commands/*.md", MaxAdapterBytes, true},
+	{".gemini/prompts/*.md", MaxAdapterBytes, true},
+	{".github/prompts/*.md", MaxAdapterBytes, true},
+	{".claude/agents/*.md", MaxRoleAdapterBytes, true},
+	{".gemini/skills/*.md", MaxRoleAdapterBytes, true},
+	{".github/chatmodes/*.md", MaxRoleAdapterBytes, true},
+	{"CLAUDE.md", MaxInstructionBytes, false},
+	{"GEMINI.md", MaxInstructionBytes, false},
+	{"OPENAI.md", MaxInstructionBytes, false},
+	{".github/copilot-instructions.md", MaxInstructionBytes, false},
+	{"sdd/memory/constitution.md", MaxConstitutionSize, false},
+}
+
+// adapterBaseName reduz "x.prompt.md" e "x.chatmode.md" a "x".
+func adapterBaseName(file string) string {
+	name := strings.TrimSuffix(file, ".md")
+	name = strings.TrimSuffix(name, ".prompt")
+	return strings.TrimSuffix(name, ".chatmode")
 }
 
 func checkP24ContextBudgets(dir string) CheckResult {
-	var offenders []string
+	var failures, warnings []string
 	checked := 0
 	for _, g := range budgetGroups {
 		matches, err := filepath.Glob(filepath.Join(dir, filepath.FromSlash(g.pattern)))
@@ -771,26 +790,35 @@ func checkP24ContextBudgets(dir string) CheckResult {
 			if err != nil || info.IsDir() {
 				continue
 			}
+			isAdapter := strings.HasPrefix(g.pattern, ".claude/") || strings.HasPrefix(g.pattern, ".gemini/") || (strings.HasPrefix(g.pattern, ".github/") && !strings.Contains(g.pattern, "copilot"))
+			if isAdapter && !managedAdapterNames[adapterBaseName(filepath.Base(m))] {
+				continue // comando ou subagente do próprio projeto: fora do orçamento
+			}
 			checked++
-			if info.Size() > int64(g.limit) {
-				rel, _ := filepath.Rel(dir, m)
-				offenders = append(offenders, fmt.Sprintf("%s (%d/%d bytes)", filepath.ToSlash(rel), info.Size(), g.limit))
+			if info.Size() <= int64(g.limit) {
+				continue
+			}
+			rel, _ := filepath.Rel(dir, m)
+			entry := fmt.Sprintf("%s (%d/%d bytes)", filepath.ToSlash(rel), info.Size(), g.limit)
+			if g.managed {
+				failures = append(failures, entry)
+			} else {
+				warnings = append(warnings, entry)
 			}
 		}
 	}
-	if len(offenders) > 0 {
+	if len(failures) > 0 {
 		return CheckResult{
 			ID:          "P-24",
 			Rule:        "DUP-10 / Orçamento de contexto",
 			Passed:      false,
-			Evidence:    "acima do orçamento: " + strings.Join(offenders, "; "),
-			Remediation: "Mover o detalhe para references/ da skill de estação e manter o adaptador ou a instrução raiz como ponteiro.",
+			Evidence:    "acima do orçamento: " + strings.Join(failures, "; "),
+			Remediation: "Mover o detalhe para references/ da skill de estação e manter o adaptador como ponteiro.",
 		}
 	}
-	return CheckResult{
-		ID:       "P-24",
-		Rule:     "DUP-10 / Orçamento de contexto",
-		Passed:   true,
-		Evidence: fmt.Sprintf("%d arquivo(s) de instrução, skill e adaptador dentro do orçamento", checked),
+	evidence := fmt.Sprintf("%d arquivo(s) de instrução, skill e adaptador medidos, dentro do orçamento", checked)
+	if len(warnings) > 0 {
+		evidence = "aviso (arquivos do projeto, não bloqueiam): " + strings.Join(warnings, "; ")
 	}
+	return CheckResult{ID: "P-24", Rule: "DUP-10 / Orçamento de contexto", Passed: true, Evidence: evidence}
 }

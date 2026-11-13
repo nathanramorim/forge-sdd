@@ -102,3 +102,37 @@ func TestBuildContext_Violacoes(t *testing.T) {
 	require.Error(t, err)
 	assert.True(t, strings.Contains(err.Error(), "constitution"))
 }
+
+func TestBuildContext_ConfinaOCaminhoDaSpecAoProjeto(t *testing.T) {
+	dir := ctxProject(t)
+	outside := t.TempDir()
+	testutil.WriteFile(t, outside, "segredo.md", "SEG-04 conteudo de fora do projeto")
+	testutil.WriteFile(t, dir, "spec.md", "# Spec\n")
+	require.NoError(t, os.Symlink(filepath.Join(outside, "segredo.md"), filepath.Join(dir, "link.md")))
+
+	for name, p := range map[string]string{
+		"absoluto":       filepath.Join(outside, "segredo.md"),
+		"com ..":         "../" + filepath.Base(outside) + "/segredo.md",
+		"muitos ..":      "../../../../../../../../etc/hosts",
+		"link simbólico": "link.md",
+	} {
+		_, err := BuildContext(dir, p, nil, "build")
+		require.Error(t, err, name)
+		assert.NotContains(t, err.Error(), "conteudo de fora", name)
+	}
+
+	// Caminho relativo legítimo, mesmo com ".." interno que permanece no projeto.
+	testutil.WriteFile(t, dir, "sdd/discovery/70-x/features/a.md", "# Spec\n")
+	_, err := BuildContext(dir, "sdd/discovery/70-x/../70-x/features/a.md", nil, "build")
+	require.NoError(t, err)
+}
+
+func TestBuildContext_SkillDeNomeCurtoNaoCasaPrefixo(t *testing.T) {
+	dir := ctxProject(t)
+	testutil.WriteFile(t, dir, ".agents/skills/go/SKILL.md", "---\nname: go\ndescription: d\nstatus: approved\norigin: manual\n---\n")
+	testutil.WriteFile(t, dir, "spec.md", "# Spec\nUsa golang e a minha-skill.\n")
+	pack, err := BuildContext(dir, "spec.md", nil, "build")
+	require.NoError(t, err)
+	assert.NotContains(t, pack.Skills, ".agents/skills/go/SKILL.md", "'go' não deve casar dentro de 'golang'")
+	assert.Contains(t, pack.Skills, ".agents/skills/minha-skill/SKILL.md")
+}

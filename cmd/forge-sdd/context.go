@@ -18,7 +18,8 @@ var contextCmd = &cobra.Command{
 a spec, só as linhas dos IDs que ela cita, os arquivos de .agents/rules/ que cobrem esses
 IDs e as skills aplicáveis (a da estação mais as skills aprovadas citadas na spec).
 
-O argumento é o ID de uma task da fila da iniciativa ativa ou o caminho de uma spec.
+O argumento é o ID de uma task da fila da iniciativa da branch atual ou o caminho de uma spec relativo ao projeto
+(fora de uma branch de iniciativa, informe o caminho da spec).
 ID citado e inexistente na Constitution é erro. Somente leitura.`,
 	Args: cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -48,7 +49,7 @@ func resolveContextTarget(dir, arg string) (specPath string, extraIDs []string, 
 		candidate = filepath.Join(dir, arg)
 	}
 	if info, statErr := os.Stat(candidate); statErr == nil && !info.IsDir() {
-		return arg, nil, nil
+		return arg, nil, nil // BuildContext confina o caminho ao projeto
 	}
 
 	q, err := queue.Load(dir)
