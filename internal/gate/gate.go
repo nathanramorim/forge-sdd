@@ -751,7 +751,7 @@ var managedAdapterNames = map[string]bool{
 	"nova-feature": true, "novo-fix": true, "implementar": true, "proxima-feature": true, "revisar": true,
 	"split-features": true, "status": true, "tutorial": true, "upgrade-sdd": true,
 	"archivist": true, "builder": true, "governance": true, "lider": true, "migrator": true,
-	"orquestrador": true, "pm-architect": true, "planner": true, "revisor": true, "specifier": true,
+	"orquestrador": true, "pm-architect": true, "planner": true, "revisor": true, "specifier": true, "reviewer": true,
 }
 
 // budgetGroups lista o que P-24 mede; padrões relativos a dir, no formato de filepath.Glob.

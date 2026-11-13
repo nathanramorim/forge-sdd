@@ -23,6 +23,7 @@ func runRoot(t *testing.T, args ...string) (string, error) {
 	_ = dispatchCmd.Flags().Set("card-evidence", "")
 	_ = dispatchCmd.Flags().Set("dry-run", "false")
 	resetWorkerFlags()
+	resetReviewFlags()
 	var out bytes.Buffer
 	rootCmd.SetOut(&out)
 	rootCmd.SetErr(&out)
