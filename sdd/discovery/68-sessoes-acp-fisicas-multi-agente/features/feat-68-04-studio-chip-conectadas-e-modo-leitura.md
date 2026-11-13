@@ -4,7 +4,7 @@
 **Fase:** 68-04-studio-chip-conectadas-e-modo-leitura
 **Tamanho:** `M`
 **Depende de:** feat-68-03, feat-68-06
-**Status:** `approved` (FLX-01 aprovado)
+**Status:** `cancelled` (discovery 69: o Forge Studio foi removido do produto; task fora da fila)
 
 ## Contexto & Motivação
 Substitui o chip fixo "5 SESSÕES PRONTAS" por contagem real vinda de `pool/status`: "x de 5 conectadas" (pt-BR). Estações sem conexão aparecem em erro com motivo. O boot do Studio nunca bloqueia: warmup com timeout, falha parcial ou total mantém o Studio em modo leitura (telemetria, fila e specs navegáveis; ações que exigem agente ficam desabilitadas com aviso).

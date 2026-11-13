@@ -12,7 +12,7 @@ import (
 
 var queueCmd = &cobra.Command{
 	Use:   "queue",
-	Short: "Gerencia a fila determinística do Builder (sdd/.queue/queue.json)",
+	Short: "Gerencia a fila determinística do Builder (queue.json da iniciativa ativa)",
 	Long:  `Subcomando para enfileirar, consumir, completar, revisar e exibir o painel executivo da fila de tarefas do Builder.`,
 }
 

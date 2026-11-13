@@ -6,11 +6,13 @@ import (
 	"fmt"
 	"io/fs"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 	"text/template"
 
 	"github.com/forge-sdd/cli/internal/config"
+	"github.com/forge-sdd/cli/internal/layout"
 )
 
 //go:embed all:templates
@@ -104,8 +106,25 @@ func Run(cfg config.Config, targetDir string) ([]string, error) {
 
 	if !cfg.DryRun {
 		cleanObsoleteFiles(targetDir)
+		if err := applyStructureUpgrade(cfg, targetDir); err != nil {
+			return created, err
+		}
 	}
 	return created, nil
+}
+
+// applyStructureUpgrade move o legado de sdd/ para sdd/archive/ (com backup) e remove os
+// artefatos de agente obsoletos idênticos ao template anterior. Idempotente: sem legado, não faz nada.
+func applyStructureUpgrade(cfg config.Config, targetDir string) error {
+	plan, err := PlanLayoutMigration(targetDir)
+	if err != nil {
+		return err
+	}
+	if _, err := ApplyLayoutMigration(targetDir, plan); err != nil {
+		return err
+	}
+	_, err = RemoveObsoleteAgentArtifacts(targetDir, cfg)
+	return err
 }
 
 // renderDir percorre fsys a partir de root, renderiza cada template e escreve em targetDir.
@@ -219,7 +238,7 @@ func UpdateSddrc(cfg config.Config, targetDir string) error {
 	if err := tmpl.Execute(&buf, cfg); err != nil {
 		return fmt.Errorf("render template %s: %w", tmplPath, err)
 	}
-	dest := filepath.Join(targetDir, "sdd", ".sddrc")
+	dest := layout.Sddrc(targetDir)
 	return os.WriteFile(dest, buf.Bytes(), 0644)
 }
 
@@ -240,7 +259,7 @@ func shouldPreserve(dest string, targetDir string) bool {
 	// Regras de preservação de domínio sob a pasta sdd/
 	if strings.HasPrefix(rel, "sdd/") {
 		// Exceções estruturais que DEVEM ser atualizadas/sobrescritas:
-		if rel == "sdd/.sdd-version" || rel == "sdd/.sddrc" {
+		if rel == path.Join(layout.SddDirName, layout.VersionFileName) || rel == path.Join(layout.SddDirName, layout.SddrcFileName) {
 			return false
 		}
 		// Todo o restante do domínio (memory, spec, features, releases, README, HOWTO, plan) é preservado
@@ -249,9 +268,13 @@ func shouldPreserve(dest string, targetDir string) bool {
 
 	// .agents/rules/ é conteúdo do usuário (regras de domínio livres) — nunca sobrescrito
 	// uma vez criado, mesmo espírito de preservação de domínio usado em sdd/.
-	// .agents/commands/ (corpo canônico dos comandos) NÃO entra aqui: é gerado pelo
-	// forge-sdd e deve continuar sendo atualizado a cada init/update, como qualquer
-	// outro arquivo de configuração de agente.
+	// As skills de estação (.agents/skills/sdd-*) são geradas pelo forge-sdd e devem
+	// continuar sendo atualizadas a cada init/update, como qualquer outro arquivo de
+	// configuração de agente. Já as demais skills (aprovadas ou propostas pelo usuário
+	// ou pela governança) e as rules pertencem ao projeto e nunca são sobrescritas.
+	if strings.HasPrefix(rel, ".agents/skills/sdd-") {
+		return false
+	}
 	if strings.HasPrefix(rel, ".agents/rules/") || strings.HasPrefix(rel, ".agents/skills/") {
 		return true
 	}

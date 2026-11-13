@@ -1,5 +1,5 @@
 ---
-description: Como operar, estender e integrar o Protocolo ACP (Agent Client Protocol) para comunicação entre IDEs, Studio e as 5 estações SDD.
+description: Como operar, estender e integrar o Protocolo ACP (Agent Client Protocol) para comunicação entre IDEs e as 5 estações SDD.
 globs: ["internal/acp/**", "cmd/forge-sdd/acp.go", "docs/acp-*.md"]
 regras: [ARQ-01, ARQ-06, SEG-01, SEG-02, SEG-04, COD-01, COD-03, FLX-01, FLX-02, FLX-03, GOV-04, TST-01, TST-05]
 ---
@@ -55,14 +55,14 @@ Procedimentos operacionais para implementar, operar e estender o Protocolo ACP n
 - **Despacho via `session/prompt`:**
   - Recebe `sessionId`, `prompt`, `station` (opcional, padrão: `concepcao` / `StationPMArchitect`), `operation` e metadados.
   - Valida a existência da sessão ativa e o nome da estação contra o enum canônico de estações (`queue.IsValidStation`).
-  - Enfileira a demanda diretamente na fila determinística correspondente via `queue.EnqueueStationItem`, garantindo atomicidade na gravação do arquivo `sdd/.queue/stations/<station>.json`.
+  - Enfileira a demanda diretamente na fila determinística correspondente via `queue.EnqueueStationItem`, garantindo atomicidade na gravação do arquivo `sdd/.runtime/stations/<station>.json`.
   - Emite automaticamente uma notificação `prompt_enqueued` para os assinantes conectados.
 
 ## 5. Notificações de Streaming Assíncrono (`session/notification`)
 
 - **Canal Unidirecional de Streaming:**
   - O despachador mantém inscrições thread-safe (`SubscribeNotifications`, `UnsubscribeNotifications`, `BroadcastSessionNotification`).
-  - As notificações são transmitidas sem bloqueio para todos os canais de saída ativos (linha stdio ou conexão HTTP SSE no Studio).
+  - As notificações são transmitidas sem bloqueio para todos os canais de saída ativos (linha stdio ou conexão HTTP SSE).
   - Tipos canônicos de eventos emitidos:
     - `prompt_enqueued`: confirmação de enfileiramento de item.
     - `station_state`: alteração de status operacional de uma estação.
@@ -73,7 +73,7 @@ Procedimentos operacionais para implementar, operar e estender o Protocolo ACP n
 ## 6. Homologação do Portão FLX-01 e Handoff Determinístico (`FLX-01`, `FLX-02`, `FLX-03`)
 
 - **Execução do Portão via `gate/approve`:**
-  - O cliente externo (IDE ou Studio) solicita a aprovação do Portão FLX-01 fornecendo `specPath`, `sessionId` ou `workspaceDir`, e a branch associada.
+  - O cliente externo (IDE ou cliente externo) solicita a aprovação do Portão FLX-01 fornecendo `specPath`, `sessionId` ou `workspaceDir`, e a branch associada.
   - O método aciona a verificação canônica em `internal/gate` (`gate.ValidateFLX01WithBranch`), reaproveitando integralmente os checks `P-01`, `P-02` e `P-03`.
   - Se algum critério falhar (ex: branch apontando para `main`, arquivo de spec inexistente, ou tabela de reuso ausente), o servidor responde com erro `-32001` acompanhado do detalhamento das evidências violadas.
   - Em caso de aprovação:

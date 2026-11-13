@@ -1,3 +1,3 @@
 # Skill: Orquestrador (Líder)
 
-Consulte `.agents/roles/lider.md` e siga integralmente as instruções desse papel canônico.
+Consulte `.agents/skills/sdd-operacao/references/lider.md` e siga integralmente as instruções desse papel canônico.

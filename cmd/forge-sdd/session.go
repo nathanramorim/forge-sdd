@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/forge-sdd/cli/internal/config"
+	"github.com/forge-sdd/cli/internal/layout"
 	"github.com/spf13/cobra"
 )
 
@@ -121,7 +122,7 @@ e retorna sucesso (silencioso, por design).`,
 // segundo, um sufixo numérico (-2, -3, ...) é anexado para nunca sobrescrever
 // silenciosamente uma telemetria já gravada.
 func WriteSessionMetrics(targetDir string, metrics sessionMetrics, at time.Time) (string, error) {
-	metricsDir := filepath.Join(targetDir, "sdd", ".metrics")
+	metricsDir := layout.Metrics(targetDir)
 	if err := os.MkdirAll(metricsDir, 0o755); err != nil {
 		return "", fmt.Errorf("falha ao criar sdd/.metrics: %w", err)
 	}
@@ -170,7 +171,7 @@ var sessionFilenameRe = regexp.MustCompile(`^session-(\d{4}-\d{2}-\d{2}T\d{6}Z)(
 // AggregateSessionMetrics e pelo comando `report` (feat-55-02) — evita
 // duplicar o parsing de arquivo.
 func readSessionFiles(targetDir string) ([]sessionFileEntry, error) {
-	metricsDir := filepath.Join(targetDir, "sdd", ".metrics")
+	metricsDir := layout.Metrics(targetDir)
 
 	entries, err := os.ReadDir(metricsDir)
 	if err != nil {

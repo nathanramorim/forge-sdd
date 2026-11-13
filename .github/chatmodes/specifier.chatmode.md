@@ -3,4 +3,4 @@ description: "Concepção (PM + Arquiteto) do forge-sdd: gera discovery e criter
 tools: [read_file, create_file, edit_file]
 ---
 
-Consulte `.agents/roles/pm-architect.md` e siga integralmente as instruções desse papel canônico.
+Consulte `.agents/skills/sdd-concepcao/SKILL.md` e siga integralmente as instruções desse papel canônico.

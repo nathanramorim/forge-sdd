@@ -12,8 +12,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// version é injetada via ldflags: -X main.version=3.2.2-beta
-var version = "3.2.2-beta"
+// version é injetada via ldflags: -X main.version=4.0.0-beta
+var version = "4.0.0-beta"
 
 var rootCmd = &cobra.Command{
 	Use:   "forge-sdd",
@@ -190,6 +190,14 @@ func runUpdateFlow(cmd *cobra.Command, targetDir string) error {
 	}
 
 	yes, _ := cmd.Flags().GetBool("yes")
+	dryRun, _ := cmd.Flags().GetBool("dry-run")
+	if dryRun {
+		// Plano da atualização de estrutura: não consulta o NPM, não pergunta nada e não grava.
+		planCfg := rc.ToConfig()
+		fmt.Fprintf(cmd.OutOrStdout(), "[DRY-RUN] Nada será gravado. Plano para %s:\n", targetDir)
+		_, err := printUpgradePlan(cmd.OutOrStdout(), targetDir, planCfg)
+		return err
+	}
 	upgradeFlag, _ := cmd.Flags().GetBool("upgrade")
 	versionFlag, _ := cmd.Flags().GetString("version")
 
@@ -274,6 +282,9 @@ func runUpdateFlow(cmd *cobra.Command, targetDir string) error {
 
 	if targetVersion != "" {
 		baseCfg.SddVersion = targetVersion
+		if _, err := printUpgradePlan(cmd.OutOrStdout(), targetDir, baseCfg); err != nil {
+			return err
+		}
 		created, err = scaffold.Run(baseCfg, targetDir)
 		if err != nil {
 			return fmt.Errorf("upgrade falhou: %w", err)
@@ -343,7 +354,7 @@ func printSummaryReport(cfg config.Config, targetDir string, fileCount int) {
 	fmt.Println("\nPróximos passos:")
 	fmt.Println("  1. Abra o projeto no VS Code ou sua IDE de preferência")
 	fmt.Println("  2. Aceite as extensões recomendadas (Copilot, MCP, etc.)")
-	fmt.Println("  3. Leia sdd/memory/progress.md para começar a codificar!")
+	fmt.Println("  3. Rode /discovery com a sua primeira demanda (ou forge-sdd status para ver as iniciativas)")
 }
 
 func printTutorialHint() {
@@ -376,6 +387,7 @@ func init() {
 	rootCmd.AddCommand(initCmd)
 
 	updateCmd.Flags().Bool("yes", false, "Pular prompts e usar flags")
+	updateCmd.Flags().Bool("dry-run", false, "Mostrar a migração de layout e a limpeza de obsoletos sem gravar nada")
 	updateCmd.Flags().String("agent", "", "Agente(s) a adicionar: copilot, claude, gemini, openai (csv)")
 	updateCmd.Flags().Bool("upgrade", false, "Atualizar estrutura para a versão mais recente do binário")
 	updateCmd.Flags().String("version", "", "Atualizar estrutura para uma versão específica (ex: 2.4.0)")

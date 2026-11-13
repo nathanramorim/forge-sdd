@@ -3,10 +3,10 @@ package main
 import (
 	"fmt"
 	"os"
-	"path/filepath"
 	"time"
 
 	"github.com/forge-sdd/cli/internal/governance"
+	"github.com/forge-sdd/cli/internal/layout"
 	"github.com/spf13/cobra"
 )
 
@@ -34,7 +34,7 @@ var governanceApplyBlockCmd = &cobra.Command{
 			return fmt.Errorf("ler block-file: %w", err)
 		}
 
-		constPath := filepath.Join(dir, "sdd", "memory", "constitution.md")
+		constPath := layout.Constitution(dir)
 		existing, err := os.ReadFile(constPath)
 		if err != nil {
 			return fmt.Errorf("ler %s: %w", constPath, err)

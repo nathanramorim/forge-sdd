@@ -1,0 +1,211 @@
+# Index de Features — forge-sdd
+
+## Dependency graph
+
+```
+main
+└─ feat/foundation
+   └─ feat/templates-embed
+      └─ feat/init-interactive
+         └─ feat/init-flags
+            └─ feat/dry-run
+               └─ feat/versioning
+                  └─ feat/self-test
+                     └─ feat/release
+            └─ feat/npx
+               └─ feat/multi-agent
+                  └─ feat/unify-agent-structures
+                     └─ feat/npm-release-and-deploy
+                        └─ feat/update-readmes-multiagent
+                           └─ feat/discovery-command
+                              └─ feat/sdd-guardrails
+                           └─ feat/constitution-command
+                              └─ feat/unified-onboarding-docs
+                                 └─ feat/sdd-handoffs
+                                 └─ feat/c4-model-mermaid
+                                    └─ feat/advanced-discovery-and-c4-refinement
+                                       └─ feat/install-skill-from-url
+                                          └─ feat/smart-upgrade-detection
+                                          └─ feat/agent-specific-mcp-config
+                                          └─ feat/automated-handoff-flow
+                                        └─ feat/landing-page  (paralela)
+                                        └─ feat/open-source-readme (paralela)
+                                        └─ feat/upgrade-node-ci (paralela)
+                                        └─ feat/dev-flow-guide (paralela)
+                                           └─ feat/remove-homebrew
+                                              └─ feat/fix-branch-pr-flow
+                                                  └─ feat/upgrade-preserves-domain
+                                                     └─ feat/product-release-notes
+                                                         └─ feat/sync-wiki-documentation
+                                                             └─ feat/update-agent-prompts
+                                                                 └─ feat/publish-1.6.0
+                                                                     └─ feat/cli-detect-existing
+                                                                         └─ feat/cli-doctor-destroy
+                                                                             └─ feat/cli-init-refinement
+                                                                                 └─ feat/cli-nested-features-discovery
+                                                                                     └─ feat/release-v1.7.0
+                                                                                         └─ fix/telemetry-metrics-nested
+                                                                                             └─ feat/cli-shortcut-and-welcome
+                                                                                                 └─ feat/5ae2-cheat-sheet-init
+                                                                                                     └─ feat/5ae2-status-prescritivo
+                                                                                                     └─ feat/5ae2-doctor-deriva-convencao
+                                                                                                     └─ feat/5ae2-tutorial-guiado (paralela)
+                                                                                                     └─ feat/5ae2-gate-graduacao-autopilot (paralela)
+                                                                                                     └─ feat/5ae2-spike-subagentes-nativos (paralela)
+                                                                                                     └─ feat/5ae2-modo-iniciante (paralela)
+                                                                                                         └─ feat/01-telemetria-code-enforced
+                                                                                                             └─ feat/01-agregador-telemetria
+                                                                                                             └─ feat/01-lessons-artefato
+                                                                                                                 └─ feat/01-consulta-lessons-builder-revisor
+                                                                                                             └─ feat/01-ferramentas-configuraveis-constitution (paralela)
+                                                                                                             └─ feat/01-lifecycle-unico
+                                                                                                             └─ feat/01-reducao-duplicacao-naming
+                                                                                                             └─ feat/01-auditoria-comandos-sobrepostos
+                                                                                                                 └─ feat/02-agent-rules-scaffold
+                                                                                                                     └─ feat/02-agent-rules-referencia-nos-agentes
+                                                                                                                     └─ feat/02-agent-commands-fonte-unica
+                                                                                                                         └─ feat/02-migracao-update-agent
+                                                                                                                         └─ feat/02-branch-unica-por-pasta-feature
+                                                                                                                             └─ feat/02-pergunta-branch-partida-retomada
+                                                                                                                                 └─ feat/02-release-v2.2.0-beta
+                                                                                     └─ feat/03-ergonomia-de-comandos-e-sincronizacao
+                                                                                         └─ feat/55-telemetria-cobertura-total-e-relatorio
+                                                                                             └─ feat/58-orquestracao-autonoma-governanca-skills
+                                                                                                 └─ fix/61-lp-handoff-overlap-e-link-instagram
+                                                                                                     └─ feat/60-site-estatico-seo-performance
+            ```
+
+                                       ## Janelas de paralelismo
+                                       feat-5ae2-04, feat-5ae2-05, feat-5ae2-06 e feat-5ae2-07 podem ser desenvolvidas em paralelo entre si após feat-5ae2-03 (não têm dependência direta entre elas).
+                                       feat-01-05 (ferramentas configuráveis) é independente da cadeia de telemetria e pode ser desenvolvida em paralelo a feat-01-01..04. feat-01-06, feat-01-07 e feat-01-08 não dependem entre si e podem ser paralelas, mas são priorizadas por último (maior superfície de revisão).
+                                       feat-02-01 e feat-02-02 são de baixo risco (pasta nova, sem migração) e podem entrar na mesma branch/PR. feat-02-03 (maior superfície: 12 comandos × 3 agentes) depende só de feat-02-01/02 e deve isolar um comando piloto (`/discovery`) antes de converter os demais. feat-02-04 depende de feat-02-01 e feat-02-03. feat-02-05 e feat-02-06 dependem de feat-02-03 (corpo canônico) e podem ser uma feature só ou duas, a critério do revisor. feat-02-07 fecha o pacote e depende de todas as anteriores.
+                                       feat-03-01 (correção de nome do adaptador Claude) é pré-requisito de feat-03-02 (migração em `update`); ambas podem entrar na mesma branch/PR (baixo risco combinado). feat-03-03 (sincronização remota em `/status`), feat-03-04 (clarify) e feat-03-05 (confirmação de subagente) são independentes entre si e de feat-03-01/02 — podem ser paralelas. feat-03-04 e feat-03-05 compartilham a mesma preocupação ("quando interromper o usuário com uma pergunta") e podem ser unificadas a critério do revisor. feat-03-06 fecha o pacote e depende de todas as anteriores.
+                                       feat-55-01 (classificação de tipo de sessão) é pré-requisito de feat-55-02 (comando `report`, que agrupa por tipo). feat-55-03/04/05/06 (cobertura de telemetria em `/discovery`, `/split-features`, `/nova-feature`, `/archive`) são independentes entre si e de feat-55-01/02 — mesmo padrão de "um comando por task" de feat-02-03/feat-03, podem ser todas paralelas. feat-55-07 fecha o pacote e depende de todas as anteriores.
+                                       feat-58-01 (Constituição por IDs + Rules + Templates) e feat-58-02 (Papéis das 5 estações) não dependem entre si e podem rodar em paralelo. feat-58-04 (Fila Go + Portão Camada A) e feat-58-06 (Motor de Auto-Skills) também são pacotes Go independentes (`internal/queue`+`internal/gate` vs `internal/skills`) e podem rodar em paralelo antes de feat-58-05 e feat-58-07 (`v3.0.0-beta`).
+                                       feat-60-01 estabelece o scaffold Astro 5 em `/site`, `global.css`, SEO Head e os contratos de dados tipados em `site/src/data/`; a seguir, `feat-60-02` (componentes `.astro` pré-renderizados no build + fallback SVG em `site/src/components/`) e `feat-60-03` (hidratação `interactions.ts` + motor 3D `mascot-3d.ts` em `site/src/scripts/`) operam sobre diretórios distintos, encerrando em `feat-60-04` (Cloudflare Workers `wrangler.jsonc`, `_headers` e suite determinística `verify-build.mjs`).
+
+                                       ## Índice
+
+                                       | # | Arquivo | Branch | Fase | Status |
+                                       |---|---------|--------|------|--------|
+                                       | 00 | feat-00-foundation.md | feat/foundation | 0 | done |
+                                       | 01 | feat-01-templates-embed.md | feat/templates-embed | 1 | done |
+                                       | 02 | feat-02-init-interactive.md | feat/init-interactive | 2 | todo |
+                                       | 03 | feat-03-init-flags.md | feat/init-flags | 3 | todo |
+                                       | 04 | feat-04-dry-run.md | feat/dry-run | 4 | todo |
+                                       | 05 | feat-05-versioning.md | feat/versioning | 5 | todo |
+                                       | 06 | feat-06-self-test.md | feat/self-test | 6 | todo |
+                                       | 07 | feat-07-release.md | feat/release | 7 | done |
+                                       | 08 | feat-08-npx.md | feat/npx | 8 | done |
+                                       | 09 | feat-09-multi-agent.md | feat/multi-agent | 9 | done |
+                                       | 10 | feat-10-landing-page.md | feat/landing-page | 10 | done |
+                                       | 11 | feat-11-unify-agent-structures.md | feat/unify-agent-structures | 11 | done |
+                                       | 14 | feat-14-discovery-command.md | feat/discovery-command | 14 | done |
+                                       | 16 | feat-16-constitution-command.md | feat/constitution-command | 16 | done |
+                                       | 17 | feat-17-unified-onboarding-docs.md | feat/unified-onboarding-docs | 17 | done |
+                                       | 18 | feat-18-sdd-handoffs.md | feat/sdd-handoffs | 18 | done |
+                                       | 19 | feat-19-c4-model-mermaid.md | feat/c4-model-mermaid | 19 | done |
+                                       | 21 | feat-21-install-skill-from-url.md | feat/install-skill-from-url | 21 | done |
+                                       | 22 | feat-22-smart-upgrade-detection.md | feat/smart-upgrade-detection | 22 | done |
+                                       | 23 | feat-23-agent-specific-mcp-config.md | feat/agent-specific-mcp-config | 23 | done |
+| 24 | feat-24-automated-handoff-flow.md | feat/automated-handoff-flow | 24 | done |
+| 26 | feat-26-open-source-readme.md | feat/open-source-readme | 26 | done |
+| 27 | feat-27-upgrade-node-ci.md | feat/upgrade-node-ci | 27 | done |
+| 28 | feat-28-dev-flow-guide.md | feat/dev-flow-guide | 28 | done |
+                                         | 29 | feat-29-remove-homebrew.md | feat/remove-homebrew | 29 | done |
+                                         | 30 | feat-30-fix-branch-pr-flow.md | feat/fix-branch-pr-flow | 30 | done |
+                                         | 31 | feat-31-upgrade-preserves-domain.md | feat/upgrade-preserves-domain | 31 | done |
+| 32 | feat-32-product-release-notes.md | feat/product-release-notes | 32 | done |
+| 33 | feat-33-lp-wiki-sync.md | feat/sync-wiki-documentation | 33 | done |
+| 34 | feat-34-update-agent-prompts.md | feat/update-agent-prompts | 34 | done |
+| 35 | feat-35-remove-install-skill.md | feat/remove-install-skill | 35 | done |
+| 36 | feat-36-structured-documentation.md | feat/structured-documentation | 36 | done |
+| 37 | feat-37-publish-1.6.0.md | feat/publish-1.6.0 | 37 | done |
+| 38 | feat-38-cli-detect-existing.md | feat/cli-detect-existing | 38 | done |
+| 39 | feat-39-cli-doctor-destroy.md | feat/cli-doctor-destroy | 39 | done |
+| 40 | feat-40-cli-init-refinement.md | feat/cli-init-refinement | 40 | done |
+| 41 | feat-41-nested-features-discovery.md | feat/cli-nested-features-discovery | 41 | done |
+| 42 | feat-42-release-v1.7.0.md | feat/release-v1.7.0 | 42 | done |
+| 43a2 | feat-43a2-telemetry-metrics-nested.md | fix/telemetry-metrics-nested | 43a2 | done |
+| 43 | feat-43-cli-shortcut-and-welcome.md | feat/cli-shortcut-and-welcome | 1.9.0-beta | done |
+| 5ae2-01 | feat-5ae2-curva-aprendizado-agentes-ia/feat-5ae2-01-cheat-sheet-init.md | feat/5ae2-cheat-sheet-init | 5ae2-01 | done |
+| 5ae2-02 | feat-5ae2-curva-aprendizado-agentes-ia/feat-5ae2-02-status-prescritivo.md | feat/5ae2-status-prescritivo | 5ae2-02 | done |
+| 5ae2-03 | feat-5ae2-curva-aprendizado-agentes-ia/feat-5ae2-03-doctor-deriva-convencao.md | feat/5ae2-doctor-deriva-convencao | 5ae2-03 | done |
+| 5ae2-04 | feat-5ae2-curva-aprendizado-agentes-ia/feat-5ae2-04-tutorial-guiado.md | feat/5ae2-tutorial-guiado | 5ae2-04 | done |
+| 5ae2-05 | feat-5ae2-curva-aprendizado-agentes-ia/feat-5ae2-05-gate-graduacao-autopilot.md | feat/5ae2-gate-graduacao-autopilot | 5ae2-05 | done |
+| 5ae2-06 | feat-5ae2-curva-aprendizado-agentes-ia/feat-5ae2-06-spike-subagentes-nativos.md | feat/5ae2-spike-subagentes-nativos | 5ae2-06 | done |
+| 5ae2-07 | feat-5ae2-curva-aprendizado-agentes-ia/feat-5ae2-07-modo-iniciante.md | feat/5ae2-modo-iniciante | 5ae2-07 | done |
+| 5ae2-08 | feat-5ae2-curva-aprendizado-agentes-ia/fix-5ae2-08-naming-telemetry-tokens.md | fix/naming-telemetry-tokens | 5ae2-08 | done |
+| 45 | fix-45-update-beta-version-detection.md | fix/update-beta-version-detection | 45 | done |
+| 46 | fix-46-doctor-metrics-path.md | fix/update-beta-version-detection | 46 | done |
+| 47 | fix-47-naming-convention-update-flag.md | fix/naming-convention-not-applied-on-update | 47 | done |
+| 48 | fix-48-novo-fix-missing-copilot-agent.md | fix/novo-fix-missing-copilot-agent | 48 | done |
+| 50 | fix-50-telemetry-recording-gemini-only.md | fix/telemetry-recording-gemini-only | 50 | done |
+| 01-01 | feat-01-simplificacao-e-aprendizado-continuo/feat-01-01-telemetria-code-enforced.md | feat/01-telemetria-code-enforced | 01-01 | done |
+| 01-02 | feat-01-simplificacao-e-aprendizado-continuo/feat-01-02-agregador-telemetria.md | feat/01-agregador-telemetria | 01-02 | done |
+| 01-03 | feat-01-simplificacao-e-aprendizado-continuo/feat-01-03-lessons-artefato.md | feat/01-lessons-artefato | 01-03 | done |
+| 01-04 | feat-01-simplificacao-e-aprendizado-continuo/feat-01-04-consulta-lessons-builder-revisor.md | feat/01-consulta-lessons-builder-revisor | 01-04 | done |
+| 01-05 | feat-01-simplificacao-e-aprendizado-continuo/feat-01-05-ferramentas-configuraveis-constitution.md | feat/01-ferramentas-configuraveis-constitution | 01-05 | done |
+| 01-06 | feat-01-simplificacao-e-aprendizado-continuo/feat-01-06-lifecycle-unico.md | feat/01-lifecycle-unico | 01-06 | done |
+| 01-07 | feat-01-simplificacao-e-aprendizado-continuo/feat-01-07-reducao-duplicacao-naming.md | feat/01-reducao-duplicacao-naming | 01-07 | done |
+| 01-08 | feat-01-simplificacao-e-aprendizado-continuo/feat-01-08-auditoria-comandos-sobrepostos.md | feat/01-auditoria-comandos-sobrepostos | 01-08 | done |
+| 02-01 | feat-02-agent-rules-e-branch-por-feature/feat-02-01-agent-rules-scaffold.md | feat/02-agent-rules-scaffold | 02-01 | done |
+| 02-02 | feat-02-agent-rules-e-branch-por-feature/feat-02-02-agent-rules-referencia-nos-agentes.md | feat/02-agent-rules-referencia-nos-agentes | 02-02 | done |
+| 02-03 | feat-02-agent-rules-e-branch-por-feature/feat-02-03-agent-commands-fonte-unica.md | feat/02-agent-commands-fonte-unica | 02-03 | done |
+| 02-04 | feat-02-agent-rules-e-branch-por-feature/feat-02-04-migracao-update-agent.md | feat/02-migracao-update-agent | 02-04 | done |
+| 02-05 | feat-02-agent-rules-e-branch-por-feature/feat-02-05-branch-unica-por-pasta-feature.md | feat/02-branch-unica-por-pasta-feature | 02-05 | done |
+| 02-06 | feat-02-agent-rules-e-branch-por-feature/feat-02-06-pergunta-branch-partida-retomada.md | feat/02-pergunta-branch-partida-retomada | 02-06 | done |
+| 02-07 | feat-02-agent-rules-e-branch-por-feature/feat-02-07-release-v2.2.0-beta.md | feat/02-release-v2.2.0-beta | 02-07 | done |
+| 51 | feat-51-politica-releases-branches.md | feat/51-politica-releases-branches | 51 | done |
+| 03-01 | feat-03-ergonomia-de-comandos-e-sincronizacao/feat-03-01-correcao-nome-adaptador-claude.md | feat/03-ergonomia-de-comandos-e-sincronizacao | 03-01 | done |
+| 03-02 | feat-03-ergonomia-de-comandos-e-sincronizacao/feat-03-02-migracao-update-adaptador-claude.md | feat/03-ergonomia-de-comandos-e-sincronizacao | 03-02 | done |
+| 03-03 | feat-03-ergonomia-de-comandos-e-sincronizacao/feat-03-03-sincronizacao-remota-status.md | feat/03-ergonomia-de-comandos-e-sincronizacao | 03-03 | done |
+| 03-04 | feat-03-ergonomia-de-comandos-e-sincronizacao/feat-03-04-clarify-nova-feature-novo-fix-discovery.md | feat/03-ergonomia-de-comandos-e-sincronizacao | 03-04 | done |
+| 03-05 | feat-03-ergonomia-de-comandos-e-sincronizacao/feat-03-05-confirmacao-delegacao-subagente.md | feat/03-ergonomia-de-comandos-e-sincronizacao | 03-05 | done |
+| 03-06 | feat-03-ergonomia-de-comandos-e-sincronizacao/feat-03-06-documentacao-e-release.md | feat/03-ergonomia-de-comandos-e-sincronizacao | 03-06 | done |
+| 52 | fix-52-rename-agent-dir-para-agents.md | claude/agent-folder-rename-forge-ww8abl | 52 | done |
+| 54 | fix-54-npm-publish-latest-tag-404.md | fix/54-npm-publish-latest-tag-404 | 54 | done |
+| 55-01 | feat-55-telemetria-cobertura-total-e-relatorio/feat-55-01-classificacao-tipo-sessao.md | feat/55-telemetria-cobertura-total-e-relatorio | 55-01 | done |
+| 55-02 | feat-55-telemetria-cobertura-total-e-relatorio/feat-55-02-comando-report.md | feat/55-telemetria-cobertura-total-e-relatorio | 55-02 | done |
+| 55-03 | feat-55-telemetria-cobertura-total-e-relatorio/feat-55-03-telemetria-discovery.md | feat/55-telemetria-cobertura-total-e-relatorio | 55-03 | done |
+| 55-04 | feat-55-telemetria-cobertura-total-e-relatorio/feat-55-04-telemetria-split-features.md | feat/55-telemetria-cobertura-total-e-relatorio | 55-04 | done |
+| 55-05 | feat-55-telemetria-cobertura-total-e-relatorio/feat-55-05-telemetria-nova-feature.md | feat/55-telemetria-cobertura-total-e-relatorio | 55-05 | done |
+| 55-06 | feat-55-telemetria-cobertura-total-e-relatorio/feat-55-06-telemetria-archive.md | feat/55-telemetria-cobertura-total-e-relatorio | 55-06 | done |
+| 55-07 | feat-55-telemetria-cobertura-total-e-relatorio/feat-55-07-documentacao-report.md | feat/55-telemetria-cobertura-total-e-relatorio | 55-07 | done |
+| 58-01 | feat-58-orquestracao-autonoma-governanca-skills/feat-58-01-constituicao-ids-rules-e-templates-governanca.md | feat/58-orquestracao-autonoma-governanca-skills | 58-01 | done |
+| 58-02 | feat-58-orquestracao-autonoma-governanca-skills/feat-58-02-papeis-canonicos-5-estacoes-e-adaptadores.md | feat/58-orquestracao-autonoma-governanca-skills | 58-02 | done |
+| 58-03 | feat-58-orquestracao-autonoma-governanca-skills/feat-58-03-fluxo-concepcao-reuse-check-e-planejador.md | feat/58-orquestracao-autonoma-governanca-skills | 58-03 | done |
+| 58-04 | feat-58-orquestracao-autonoma-governanca-skills/feat-58-04-motor-fila-builder-e-portao-camada-a.md | feat/58-orquestracao-autonoma-governanca-skills | 58-04 | done |
+| 58-05 | feat-58-orquestracao-autonoma-governanca-skills/feat-58-05-analista-governanca-camada-b-e-painel-lider.md | feat/58-orquestracao-autonoma-governanca-skills | 58-05 | done |
+| 58-06 | feat-58-orquestracao-autonoma-governanca-skills/feat-58-06-motor-auto-skills-regra-de-tres.md | feat/58-orquestracao-autonoma-governanca-skills | 58-06 | done |
+| 58-07 | feat-58-orquestracao-autonoma-governanca-skills/feat-58-07-importador-governanca-update-docs-e-release-v3-beta.md | feat/58-orquestracao-autonoma-governanca-skills | 58-07 | done |
+| 61 | fix-61-lp-handoff-overlap-e-link-instagram.md | fix/61-lp-handoff-overlap-e-link-instagram | 61 | done |
+| 60-01 | feat-60-site-estatico-seo-performance/feat-60-01-scaffold-astro-seo-dados-tipados.md | feat/60-site-estatico-seo-performance | 60-01 | done |
+| 60-02 | feat-60-site-estatico-seo-performance/feat-60-02-componentes-ssg-pre-renderizados-fallback-svg.md | feat/60-site-estatico-seo-performance | 60-02 | done |
+| 60-03 | feat-60-site-estatico-seo-performance/feat-60-03-hidratacao-interacoes-motor-3d-otimizado.md | feat/60-site-estatico-seo-performance | 60-03 | done |
+| 60-04 | feat-60-site-estatico-seo-performance/feat-60-04-cloudflare-workers-testes-seo-fidelidade.md | feat/60-site-estatico-seo-performance | 60-04 | done |
+| 62 | fix-62-remover-metadados-player-video.md | fix/62-remover-metadados-player-video | 62 | done |
+| 59-01 | feat-59-modulo-visual-estacoes-personagens/feat-59-01-filas-por-estacao-idempotencia-escrita-atomica.md | feat/59-modulo-visual-estacoes-personagens | 59-01 | done |
+| 59-02 | feat-59-modulo-visual-estacoes-personagens/feat-59-02-agregador-read-only-e-servidor-http-sse.md | feat/59-modulo-visual-estacoes-personagens | 59-02 | done |
+| 59-03 | feat-59-modulo-visual-estacoes-personagens/feat-59-03-interface-visual-embarcada-estacoes-e-governanca.md | feat/59-modulo-visual-estacoes-personagens | 59-03 | done |
+| 59-04 | feat-59-modulo-visual-estacoes-personagens/feat-59-04-integracao-estacoes-catalogo-e-documentacao.md | feat/59-modulo-visual-estacoes-personagens | 59-04 | done |
+| 64-01 | feat-64-protocolo-acp-comunicacao-estacoes-studio/feat-64-01-nucleo-acp-rpc-stdio.md | feat/64-protocolo-acp-comunicacao-estacoes-studio | 64-01 | ready |
+| 64-02 | feat-64-protocolo-acp-comunicacao-estacoes-studio/feat-64-02-sessoes-acp-filas-portao-flx01.md | feat/64-protocolo-acp-comunicacao-estacoes-studio | 64-02 | ready |
+| 64-03 | feat-64-protocolo-acp-comunicacao-estacoes-studio/feat-64-03-transporte-http-sse-studio.md | feat/64-protocolo-acp-comunicacao-estacoes-studio | 64-03 | ready |
+| 64-04 | feat-64-protocolo-acp-comunicacao-estacoes-studio/feat-64-04-exemplos-ide-docs-e2e.md | feat/64-protocolo-acp-comunicacao-estacoes-studio | 64-04 | ready |
+| 65-01 | feat-65-prewarming-pool-sessoes-acp-estacoes/feat-65-01-nucleo-pool-sessoes-prewarming-heartbeat.md | feat/65-prewarming-pool-sessoes-acp-estacoes | 65-01 | ready |
+| 65-02 | feat-65-prewarming-pool-sessoes-acp-estacoes/feat-65-02-orquestrador-handoff-continuo-portao-flx01.md | feat/65-prewarming-pool-sessoes-acp-estacoes | 65-02 | ready |
+| 65-03 | feat-65-prewarming-pool-sessoes-acp-estacoes/feat-65-03-subcomando-cli-attach-multiplexador.md | feat/65-prewarming-pool-sessoes-acp-estacoes | 65-03 | ready |
+| 65-04 | feat-65-prewarming-pool-sessoes-acp-estacoes/feat-65-04-integracao-studio-bootstrap-e2e.md | feat/65-prewarming-pool-sessoes-acp-estacoes | 65-04 | ready |
+| 66-01 | ../discovery/66-telemetria-detalhada-inspecao-e-reconciliacao/features/feat-66-01-estrutura-unificada-discovery-e-fixes.md | feat/66-telemetria-detalhada-inspecao-e-reconciliacao | 66-01 | ready |
+| 66-02 | ../discovery/66-telemetria-detalhada-inspecao-e-reconciliacao/features/feat-66-02-modelo-telemetria-e-reconciliador-atividades-orfas.md | feat/66-telemetria-detalhada-inspecao-e-reconciliacao | 66-02 | ready |
+| 66-03 | ../discovery/66-telemetria-detalhada-inspecao-e-reconciliacao/features/feat-66-03-ui-studio-modal-inspecao-passo-a-passo.md | feat/66-telemetria-detalhada-inspecao-e-reconciliacao | 66-03 | ready |
+| 66-04 | ../discovery/66-telemetria-detalhada-inspecao-e-reconciliacao/features/feat-66-04-integracao-studio-e2e-validacao-constitucional.md | feat/66-telemetria-detalhada-inspecao-e-reconciliacao | 66-04 | ready |
+| 68-01 | ../discovery/68-sessoes-acp-fisicas-multi-agente/features/feat-68-01-config-adaptadores-e-subcomando-config.md | feat/68-sessoes-acp-fisicas-multi-agente | 68-01 | approved |
+| 68-06 | ../discovery/68-sessoes-acp-fisicas-multi-agente/features/feat-68-06-preflight-requisitos-dos-agentes.md | feat/68-sessoes-acp-fisicas-multi-agente | 68-06 | approved |
+| 68-02 | ../discovery/68-sessoes-acp-fisicas-multi-agente/features/feat-68-02-process-runner-processo-filho-por-estacao.md | feat/68-sessoes-acp-fisicas-multi-agente | 68-02 | approved |
+| 68-03 | ../discovery/68-sessoes-acp-fisicas-multi-agente/features/feat-68-03-pool-warmup-fisico-e-status-conectadas.md | feat/68-sessoes-acp-fisicas-multi-agente | 68-03 | approved |
+| 68-03b | ../discovery/68-sessoes-acp-fisicas-multi-agente/features/feat-68-03b-restart-backoff-e-failure-history.md | feat/68-sessoes-acp-fisicas-multi-agente | 68-03b | approved |
+| 68-06b | ../discovery/68-sessoes-acp-fisicas-multi-agente/features/feat-68-06b-selecao-interativa-e-instalacao-confirmada.md | feat/68-sessoes-acp-fisicas-multi-agente | 68-06b | approved |
+| 68-04 | ../discovery/68-sessoes-acp-fisicas-multi-agente/features/feat-68-04-studio-chip-conectadas-e-modo-leitura.md | feat/68-sessoes-acp-fisicas-multi-agente | 68-04 | cancelled |
+| 68-05 | ../discovery/68-sessoes-acp-fisicas-multi-agente/features/feat-68-05-studio-painel-monitoramento-de-falhas.md | feat/68-sessoes-acp-fisicas-multi-agente | 68-05 | cancelled |

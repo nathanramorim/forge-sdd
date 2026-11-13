@@ -3,6 +3,7 @@ package gate
 import (
 	"errors"
 	"fmt"
+	"github.com/forge-sdd/cli/internal/layout"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -113,6 +114,9 @@ func RunChecks(dir string, opts Options) ([]CheckResult, error) {
 
 	// P-23 (GOV-04): .agents/rules/*.md referenciam IDs existentes na constitution e sem cópia literal
 	results = append(results, checkP23RulesGovernance(dir))
+
+	// P-24 (DUP-10): orçamento de contexto de instruções, skills e adaptadores
+	results = append(results, checkP24ContextBudgets(dir))
 
 	return results, nil
 }
@@ -382,7 +386,7 @@ func isScannableTextFile(name string) bool {
 	case ".go", ".md", ".json", ".yaml", ".yml", ".toml", ".env", ".sh", ".txt", ".js", ".ts", ".py", ".tmpl":
 		return true
 	}
-	return strings.HasPrefix(name, ".env") || name == ".sddrc"
+	return strings.HasPrefix(name, ".env") || name == layout.SddrcFileName
 }
 
 func checkP20ConstitutionException(dir, prBodyPath, prBodyText string, now time.Time) CheckResult {
@@ -482,24 +486,44 @@ func checkP20ConstitutionException(dir, prBodyPath, prBodyText string, now time.
 }
 
 func checkP21ProgressBudget(dir string) CheckResult {
-	progressPath := filepath.Join(dir, "sdd", "memory", "progress.md")
-	info, err := os.Stat(progressPath)
+	const rule = "Regra 14 / Orçamento"
+
+	// Estado por iniciativa (feat 69-03): status.md da iniciativa da branch atual.
+	// Sem iniciativa ativa, cai no progress.md global legado, se existir.
+	statusPath, hasInitiative := layout.StatusPath(dir)
+	label := "status.md da iniciativa"
+	target := statusPath
+	if !hasInitiative {
+		legacy := layout.Progress(dir)
+		if _, err := os.Stat(legacy); err != nil {
+			return CheckResult{
+				ID:       "P-21",
+				Rule:     rule,
+				Passed:   true,
+				Evidence: "observação: sem iniciativa ativa na branch atual e sem progress.md legado; orçamento de status não aplicável",
+			}
+		}
+		label = "sdd/memory/progress.md"
+		target = legacy
+	}
+
+	info, err := os.Stat(target)
 	if err != nil {
 		if errors.Is(err, os.ErrNotExist) {
 			return CheckResult{
 				ID:          "P-21",
-				Rule:        "Regra 14 / Orçamento",
+				Rule:        rule,
 				Passed:      false,
-				Evidence:    "arquivo sdd/memory/progress.md não encontrado",
-				Remediation: "Criar ou restaurar sdd/memory/progress.md com no máximo 1024 bytes.",
+				Evidence:    fmt.Sprintf("arquivo %s não encontrado (%s)", label, target),
+				Remediation: fmt.Sprintf("Criar %s com no máximo %d bytes.", label, MaxProgressBytes),
 			}
 		}
 		return CheckResult{
 			ID:          "P-21",
-			Rule:        "Regra 14 / Orçamento",
+			Rule:        rule,
 			Passed:      false,
-			Evidence:    fmt.Sprintf("erro ao verificar sdd/memory/progress.md: %v", err),
-			Remediation: "Verificar permissões de leitura em sdd/memory/progress.md.",
+			Evidence:    fmt.Sprintf("erro ao verificar %s: %v", label, err),
+			Remediation: fmt.Sprintf("Verificar permissões de leitura em %s.", label),
 		}
 	}
 
@@ -507,19 +531,18 @@ func checkP21ProgressBudget(dir string) CheckResult {
 	if size > MaxProgressBytes {
 		return CheckResult{
 			ID:          "P-21",
-			Rule:        "Regra 14 / Orçamento",
+			Rule:        rule,
 			Passed:      false,
-			Evidence:    fmt.Sprintf("sdd/memory/progress.md possui %d bytes (limite máximo: %d bytes)", size, MaxProgressBytes),
-			Remediation: "Arquivar entradas concluídas em sdd/memory/progress-log.md para manter progress.md <= 1024 bytes.",
+			Evidence:    fmt.Sprintf("%s possui %d bytes (limite máximo: %d bytes)", label, size, MaxProgressBytes),
+			Remediation: fmt.Sprintf("Enxugar %s e mover o histórico para progress-log.md para manter <= %d bytes.", label, MaxProgressBytes),
 		}
 	}
 
 	return CheckResult{
-		ID:          "P-21",
-		Rule:        "Regra 14 / Orçamento",
-		Passed:      true,
-		Evidence:    fmt.Sprintf("sdd/memory/progress.md dentro do orçamento (%d/%d bytes)", size, MaxProgressBytes),
-		Remediation: "",
+		ID:       "P-21",
+		Rule:     rule,
+		Passed:   true,
+		Evidence: fmt.Sprintf("%s dentro do orçamento (%d/%d bytes)", label, size, MaxProgressBytes),
 	}
 }
 
@@ -545,7 +568,7 @@ func checkP23RulesGovernance(dir string) CheckResult {
 		}
 	}
 
-	constitutionPath := filepath.Join(dir, "sdd", "memory", "constitution.md")
+	constitutionPath := layout.Constitution(dir)
 	constData, err := os.ReadFile(constitutionPath)
 	if err != nil {
 		return CheckResult{
@@ -702,4 +725,100 @@ func isTableSeparator(cells []string) bool {
 func isTableHeader(cells []string) bool {
 	first := strings.ToLower(cells[0])
 	return strings.Contains(first, "procurei") || strings.Contains(first, "item") || strings.Contains(first, "componente")
+}
+
+// Orçamentos de contexto em bytes (feat 69-07). Mantê-los pequenos é o que reduz o consumo de
+// tokens: o corpo das instruções vive nas skills e nas references, não nos adaptadores.
+const (
+	MaxInstructionBytes = 1536 // CLAUDE.md, GEMINI.md, OPENAI.md, copilot-instructions.md
+	MaxSkillBytes       = 2048 // SKILL.md de cada skill de estação (sdd-*)
+	MaxAdapterBytes     = 300  // adaptadores de comando por ferramenta
+	MaxRoleAdapterBytes = 420  // definições de subagente e chatmodes por ferramenta
+	MaxConstitutionSize = 9216 // sdd/memory/constitution.md
+)
+
+type budgetGroup struct {
+	pattern string
+	limit   int
+	// managed marca arquivos gerados pelo forge-sdd (reprovam o check); os demais pertencem ao
+	// projeto e só geram aviso, para o P-24 não bloquear o que o usuário personalizou.
+	managed bool
+}
+
+// managedAdapterNames são os comandos e papéis que o scaffold gera; só eles contam como adaptadores gerenciados.
+var managedAdapterNames = map[string]bool{
+	"archive": true, "c4-architecture": true, "constitution": true, "discovery": true, "doctor": true,
+	"nova-feature": true, "novo-fix": true, "implementar": true, "proxima-feature": true, "revisar": true,
+	"split-features": true, "status": true, "tutorial": true, "upgrade-sdd": true,
+	"archivist": true, "builder": true, "governance": true, "lider": true, "migrator": true,
+	"orquestrador": true, "pm-architect": true, "planner": true, "revisor": true, "specifier": true,
+}
+
+// budgetGroups lista o que P-24 mede; padrões relativos a dir, no formato de filepath.Glob.
+var budgetGroups = []budgetGroup{
+	{".agents/skills/sdd-*/SKILL.md", MaxSkillBytes, true},
+	{".claude/commands/*.md", MaxAdapterBytes, true},
+	{".gemini/prompts/*.md", MaxAdapterBytes, true},
+	{".github/prompts/*.md", MaxAdapterBytes, true},
+	{".claude/agents/*.md", MaxRoleAdapterBytes, true},
+	{".gemini/skills/*.md", MaxRoleAdapterBytes, true},
+	{".github/chatmodes/*.md", MaxRoleAdapterBytes, true},
+	{"CLAUDE.md", MaxInstructionBytes, false},
+	{"GEMINI.md", MaxInstructionBytes, false},
+	{"OPENAI.md", MaxInstructionBytes, false},
+	{".github/copilot-instructions.md", MaxInstructionBytes, false},
+	{"sdd/memory/constitution.md", MaxConstitutionSize, false},
+}
+
+// adapterBaseName reduz "x.prompt.md" e "x.chatmode.md" a "x".
+func adapterBaseName(file string) string {
+	name := strings.TrimSuffix(file, ".md")
+	name = strings.TrimSuffix(name, ".prompt")
+	return strings.TrimSuffix(name, ".chatmode")
+}
+
+func checkP24ContextBudgets(dir string) CheckResult {
+	var failures, warnings []string
+	checked := 0
+	for _, g := range budgetGroups {
+		matches, err := filepath.Glob(filepath.Join(dir, filepath.FromSlash(g.pattern)))
+		if err != nil {
+			continue
+		}
+		for _, m := range matches {
+			info, err := os.Stat(m)
+			if err != nil || info.IsDir() {
+				continue
+			}
+			isAdapter := strings.HasPrefix(g.pattern, ".claude/") || strings.HasPrefix(g.pattern, ".gemini/") || (strings.HasPrefix(g.pattern, ".github/") && !strings.Contains(g.pattern, "copilot"))
+			if isAdapter && !managedAdapterNames[adapterBaseName(filepath.Base(m))] {
+				continue // comando ou subagente do próprio projeto: fora do orçamento
+			}
+			checked++
+			if info.Size() <= int64(g.limit) {
+				continue
+			}
+			rel, _ := filepath.Rel(dir, m)
+			entry := fmt.Sprintf("%s (%d/%d bytes)", filepath.ToSlash(rel), info.Size(), g.limit)
+			if g.managed {
+				failures = append(failures, entry)
+			} else {
+				warnings = append(warnings, entry)
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return CheckResult{
+			ID:          "P-24",
+			Rule:        "DUP-10 / Orçamento de contexto",
+			Passed:      false,
+			Evidence:    "acima do orçamento: " + strings.Join(failures, "; "),
+			Remediation: "Mover o detalhe para references/ da skill de estação e manter o adaptador como ponteiro.",
+		}
+	}
+	evidence := fmt.Sprintf("%d arquivo(s) de instrução, skill e adaptador medidos, dentro do orçamento", checked)
+	if len(warnings) > 0 {
+		evidence = "aviso (arquivos do projeto, não bloqueiam): " + strings.Join(warnings, "; ")
+	}
+	return CheckResult{ID: "P-24", Rule: "DUP-10 / Orçamento de contexto", Passed: true, Evidence: evidence}
 }

@@ -1,6 +1,6 @@
 ## Spec / Tarefa (`FLX-01`, `FLX-03`)
 
-- **Feature / Task:** `sdd/features/feat-XX-...`
+- **Feature / Task:** `sdd/discovery/<id>-<nome>/features/feat-...`
 - **Discovery / Criteria (se aplicável):** `sdd/discovery/criteria-XX-...`
 - **ADR relacionada (se alterar arquitetura ou constitution `FLX-05`, `GOV-01`):** `N/A`
 

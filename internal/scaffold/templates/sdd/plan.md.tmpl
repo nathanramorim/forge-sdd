@@ -4,7 +4,7 @@
 
 | Fase | Feature | Entrega | Critério resumido |
 |------|---------|---------|-------------------|
-| 0 | feat-00-foundation | [descrever] | [comando] |
+| 0 | [iniciativa em sdd/discovery/<id>-<nome>] | [descrever] | [comando] |
 
 ## Dependências externas
 ```

@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/forge-sdd/cli/internal/layout"
 	"github.com/spf13/cobra"
 )
 
@@ -32,13 +33,13 @@ sdd/.metrics/, preservando a função didática da metodologia para quem ainda e
 			minCycles = defaultAutopilotMinCycles
 		}
 
-		flagPath := filepath.Join(targetDir, "sdd", ".sdd-auto-pilot")
+		flagPath := layout.AutoPilot(targetDir)
 		if fileExists(flagPath) {
 			fmt.Println("✓ Modo autopilot já está ativado (sdd/.sdd-auto-pilot presente).")
 			return nil
 		}
 
-		approved, err := countApprovedCycles(filepath.Join(targetDir, "sdd", ".metrics"))
+		approved, err := countApprovedCycles(layout.Metrics(targetDir))
 		if err != nil {
 			return fmt.Errorf("falha ao ler sdd/.metrics: %w", err)
 		}

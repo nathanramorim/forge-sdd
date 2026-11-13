@@ -18,6 +18,7 @@ var commandOrder = []string{
 	"split-features",
 	"nova-feature",
 	"novo-fix",
+	"implementar",
 	"proxima-feature",
 	"revisar",
 	"status",
@@ -61,13 +62,37 @@ func agentPromptSuffix(agent string) string {
 	return ".prompt.md.tmpl"
 }
 
-// canonicalCommandDir/canonicalCommandSuffix apontam para a fonte única dos
-// comandos (.agents/commands/), onde a descrição real ("**Uso:**") vive. Os
-// templates por agente em agentPromptDir viraram adaptadores de uma linha que
-// só redirecionam para cá — extrair a descrição deles pegaria o texto do
-// redirect em vez do uso real do comando.
-const canonicalCommandDir = "templates/.agents/commands"
-const canonicalCommandSuffix = ".md.tmpl"
+// aliasCommands são comandos mantidos só por compatibilidade: têm adaptador, mas não
+// aparecem no cheat-sheet (o comando canônico já aparece).
+var aliasCommands = map[string]bool{"proxima-feature": true}
+
+// commandSkill mapeia cada comando à skill de estação dona da sua referência canônica
+// (.agents/skills/<skill>/references/<comando>.md), onde a descrição real ("**Uso:**") vive.
+// Os adaptadores por agente só redirecionam para lá.
+var commandSkill = map[string]string{
+	"constitution":    "sdd-concepcao",
+	"discovery":       "sdd-concepcao",
+	"nova-feature":    "sdd-concepcao",
+	"novo-fix":        "sdd-concepcao",
+	"c4-architecture": "sdd-concepcao",
+	"split-features":  "sdd-planejamento",
+	"implementar":     "sdd-build",
+	"revisar":         "sdd-governanca",
+	"status":          "sdd-operacao",
+	"doctor":          "sdd-operacao",
+	"archive":         "sdd-operacao",
+	"upgrade-sdd":     "sdd-operacao",
+	"tutorial":        "sdd-operacao",
+}
+
+// canonicalCommandPath devolve o caminho embutido da referência canônica de um comando.
+func canonicalCommandPath(cmdName string) (string, bool) {
+	skill, ok := commandSkill[cmdName]
+	if !ok {
+		return "", false
+	}
+	return "templates/.agents/skills/" + skill + "/references/" + cmdName + ".md.tmpl", true
+}
 
 var frontMatterDescRe = regexp.MustCompile(`(?m)^description:\s*"?([^"\n]+)"?\s*$`)
 var usoLineRe = regexp.MustCompile(`^\*\*Uso:\*\*\s*(.+)$`)
@@ -145,6 +170,9 @@ func CommandCheatSheet(cfg config.Config) []CommandInfo {
 
 	var result []CommandInfo
 	for _, cmdName := range commandOrder {
+		if aliasCommands[cmdName] {
+			continue
+		}
 		for _, agent := range agents {
 			dir := agentPromptDir(agent)
 			if dir == "" {
@@ -153,7 +181,11 @@ func CommandCheatSheet(cfg config.Config) []CommandInfo {
 			if _, err := templatesFS.ReadFile(dir + "/" + cmdName + agentPromptSuffix(agent)); err != nil {
 				continue
 			}
-			data, err := templatesFS.ReadFile(canonicalCommandDir + "/" + cmdName + canonicalCommandSuffix)
+			canonical, ok := canonicalCommandPath(cmdName)
+			if !ok {
+				continue
+			}
+			data, err := templatesFS.ReadFile(canonical)
 			if err != nil {
 				continue
 			}

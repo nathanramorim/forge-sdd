@@ -1,3 +1,3 @@
 # Prompt: constitution
 
-Consulte `.agents/commands/constitution.md` e siga as instruções descritas nesse arquivo.
+Consulte `.agents/skills/sdd-concepcao/references/constitution.md` e siga as instruções descritas nesse arquivo.

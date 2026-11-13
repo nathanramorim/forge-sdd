@@ -14,7 +14,7 @@ Procedimentos práticos para atender aos IDs `SEG-01`, `SEG-02`, `SEG-04`, `SEG-
   - Valide flags obrigatórias, enums permitidos (ex.: modo `observacao` vs `bloqueio`, agentes suportados) e schemas JSON antes de iniciar mutações em arquivos.
   - Rejeite identificadores ou slugs que contenham `..`, separadores de diretório inesperados ou caracteres de controle.
 - **Preservação de domínio (`SEG-02`):**
-  - Toda escrita gerada por `init`, `update` ou importação de governança deve construir caminhos com `filepath.Join(targetDir, ...)` e respeitar `shouldPreserve` para artefatos de memória (`sdd/memory/`), specs (`sdd/spec/`), features (`sdd/features/`) e regras customizadas do usuário em `.agents/rules/`.
+  - Toda escrita gerada por `init`, `update` ou importação de governança deve construir caminhos com `filepath.Join(targetDir, ...)` e respeitar `shouldPreserve` para artefatos de memória (`sdd/memory/`), specs (`sdd/spec/`), iniciativas (`sdd/discovery/`) e regras customizadas do usuário em `.agents/rules/`.
 
 ## 2. Prevenção de Vazamento de Segredos e Dados Sensíveis (`SEG-04`, `SEG-05`)
 

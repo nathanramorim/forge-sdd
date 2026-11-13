@@ -4,7 +4,7 @@
 **Fase:** 68-05
 **Tamanho:** `M`
 **Depende de:** `feat-68-03b`, `feat-68-04`
-**Status:** `approved` (FLX-01 aprovado)
+**Status:** `cancelled` (discovery 69: o Forge Studio foi removido do produto; task fora da fila)
 
 ## Contexto & Motivação
 Com restart automático (68-03), o operador precisa entender por que uma estação caiu. Esta task expõe o histórico de falhas por estação em endpoint de leitura no Studio e um painel em pt-BR, sem emojis e sem dependências.

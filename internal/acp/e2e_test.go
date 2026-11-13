@@ -240,7 +240,7 @@ func TestACPEndToEnd(t *testing.T) {
 	require.NotNil(t, promptResult.Item)
 	assert.Equal(t, "Elaborar arquitetura inicial para feat-e2e-demo", promptResult.Item.Title)
 
-	// Valida persistência da fila da Estação 02 no filesystem (sdd/.queue/stations/pm-architect.json)
+	// Valida persistência da fila da Estação 02 no filesystem (sdd/.runtime/stations/pm-architect.json)
 	pmQueue, err := queue.LoadStationQueue(wsDir, queue.StationPMArchitect)
 	require.NoError(t, err)
 	assert.NotEmpty(t, pmQueue.Items)

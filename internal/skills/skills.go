@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/forge-sdd/cli/internal/config"
+	"github.com/forge-sdd/cli/internal/layout"
 )
 
 const (
@@ -18,6 +19,10 @@ const (
 	StatusApproved = "approved"
 	// OriginAutoGovernance identifica skills extraídas pelo motor de governança.
 	OriginAutoGovernance = "auto-governance"
+	// ScopeCore marca as skills de estação (sdd-*) geradas pelo forge-sdd. Elas são
+	// acessadas pelos adaptadores dos comandos e não são copiadas para .claude/skills
+	// nem .gemini/skills pelo Sync (DUP-10: uma fonte, sem cópia do corpo).
+	ScopeCore = "core"
 	// ManagedSkillMarker identifica adaptadores gerados automaticamente por forge-sdd skills sync,
 	// permitindo preservar skills manuais criadas diretamente pelo usuário em .claude/skills ou .gemini/skills.
 	ManagedSkillMarker = "<!-- forge-sdd:managed-skill -->"
@@ -31,6 +36,7 @@ type SkillInfo struct {
 	Description string
 	Status      string
 	Origin      string
+	Scope       string
 	Body        string
 	Path        string
 }
@@ -98,6 +104,9 @@ func Approve(dir, slug string, agents []string) ([]string, error) {
 	}
 
 	info := parseSkillFile(slug, skillPath, string(data))
+	if info.Scope == ScopeCore {
+		return nil, fmt.Errorf("skill %q é de núcleo (scope: core) e gerenciada pelo forge-sdd; atualize-a com forge-sdd update", slug)
+	}
 	info.Status = StatusApproved
 	if info.Origin == "" {
 		info.Origin = OriginAutoGovernance
@@ -135,7 +144,7 @@ func Sync(dir string, agents []string) ([]string, error) {
 
 	var synced []string
 	for _, sk := range skillsList {
-		if sk.Status != StatusApproved {
+		if sk.Status != StatusApproved || sk.Scope == ScopeCore {
 			continue
 		}
 		for _, agent := range agents {
@@ -294,6 +303,8 @@ func parseSkillFile(fallbackSlug, path, content string) SkillInfo {
 					if val != "" {
 						info.Origin = val
 					}
+				case "scope":
+					info.Scope = val
 				}
 			}
 		}
@@ -321,7 +332,7 @@ const defaultIndexTemplate = `# Skills Index
 `
 
 func upsertIndex(dir, slug, description, status, relPath string) error {
-	skillsDir := filepath.Join(dir, "sdd", "skills")
+	skillsDir := layout.Skills(dir)
 	if err := os.MkdirAll(skillsDir, 0o755); err != nil {
 		return fmt.Errorf("falha ao criar %s: %w", skillsDir, err)
 	}

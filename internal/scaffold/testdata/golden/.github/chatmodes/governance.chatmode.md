@@ -3,4 +3,4 @@ description: "Analista de Governança (Revisor Semântico Camada B — Read-Only
 tools: [read_file, run_in_terminal]
 ---
 
-Consulte `.agents/roles/governance.md` e siga integralmente as instruções desse papel canônico.
+Consulte `.agents/skills/sdd-governanca/SKILL.md` e siga integralmente as instruções desse papel canônico.

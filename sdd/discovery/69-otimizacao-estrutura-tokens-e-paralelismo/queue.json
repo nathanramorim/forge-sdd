@@ -1,0 +1,236 @@
+{
+  "feature_id": "feat-69",
+  "branch": "feat/69-otimizacao-estrutura-tokens-e-paralelismo",
+  "spec_status": "reviewed",
+  "updated_at": "2026-11-13T17:45:14Z",
+  "items": [
+    {
+      "task_id": "69-01",
+      "title": "feat-69-01 — Remoção do Forge Studio",
+      "spec_path": "sdd/discovery/69-otimizacao-estrutura-tokens-e-paralelismo/features/feat-69-01-remocao-do-studio.md",
+      "status": "approved",
+      "rules": [
+        "ARQ-01",
+        "ARQ-02",
+        "ARQ-06",
+        "COD-04",
+        "DUP-01",
+        "TST-02",
+        "FLX-05"
+      ],
+      "skills_used": [],
+      "attempts": 1,
+      "governance_verdict": {
+        "veredito": "conforme",
+        "achados": [
+          {
+            "verificacao": "S-01",
+            "regra": "ARQ-10",
+            "classificacao": "duvida",
+            "severidade": "baixa",
+            "arquivo": "cmd/forge-sdd/acp.go",
+            "linha": 56,
+            "evidencia": "if state == acp.SessionStateStandby { _ = queue.ReconcileStationActivities(dir, station) }",
+            "explicacao": "Listener que reconcilia atividades ao voltar para standby fica em cmd/; previsto na spec, logica pesada em internal/queue. Aceito pelo Lider.",
+            "correcao": ""
+          },
+          {
+            "verificacao": "S-05",
+            "regra": "FLX-03",
+            "classificacao": "duvida",
+            "severidade": "baixa",
+            "arquivo": ".agents/roles/pm-architect.md",
+            "linha": 12,
+            "evidencia": "`discovery-63-studio-navegavel-aprovacao-spec.md`",
+            "explicacao": "Slug de exemplo com a palavra studio mantido; resolvido na 69-06 quando os papeis viram skills.",
+            "correcao": ""
+          }
+        ],
+        "resumo": "Camada A verde (build, vet, test -race, gate). Cinco achados da primeira revisao (ADR sem GOV-01, spec com importador impreciso, decisao de warmup, teste de heartbeat, docs HTTP) corrigidos e reverificados em c1e9d72. Restam duas duvidas baixas aceitas."
+      }
+    },
+    {
+      "task_id": "69-02",
+      "title": "feat-69-02 — Pacote `internal/layout`: Dono dos Caminhos da Iniciativa",
+      "spec_path": "sdd/discovery/69-otimizacao-estrutura-tokens-e-paralelismo/features/feat-69-02-pacote-layout-caminhos-da-iniciativa.md",
+      "status": "approved",
+      "rules": [
+        "ARQ-01",
+        "ARQ-02",
+        "DUP-04",
+        "SEG-01",
+        "SEG-03",
+        "TST-03"
+      ],
+      "skills_used": [],
+      "attempts": 1,
+      "governance_verdict": {
+        "veredito": "conforme",
+        "achados": [],
+        "resumo": "Camada A verde em f74ef66. Achados da rodada 1 corrigidos: linha Branch atual do Reuse Check, literais trocados por constantes do layout, layout registrado em concepts.md e helper de git de teste extraido para internal/testutil. Sem achados novos."
+      }
+    },
+    {
+      "task_id": "69-03",
+      "title": "feat-69-03 — Fila e Status por Iniciativa",
+      "spec_path": "sdd/discovery/69-otimizacao-estrutura-tokens-e-paralelismo/features/feat-69-03-fila-e-status-por-iniciativa.md",
+      "status": "approved",
+      "rules": [
+        "COD-01",
+        "DUP-04",
+        "FLX-02",
+        "FLX-04",
+        "FLX-06",
+        "TST-03",
+        "TST-04"
+      ],
+      "skills_used": [],
+      "attempts": 1,
+      "governance_verdict": {
+        "veredito": "conforme",
+        "achados": [
+          {
+            "verificacao": "S-03",
+            "regra": "COD-04",
+            "classificacao": "duvida",
+            "severidade": "baixa",
+            "arquivo": "internal/acp/orchestrator_test.go",
+            "linha": 23,
+            "evidencia": "os.MkdirAll(filepath.Join(tempDir, \"sdd\", \".queue\", \"stations\"), 0o755)",
+            "explicacao": "Fixture e comentarios ainda citam o caminho antigo; inofensivo.",
+            "correcao": "Limpar ao tocar os arquivos (feito na rodada seguinte)."
+          }
+        ],
+        "resumo": "Achados da rodada 1 atendidos: scaffold cria sdd/.runtime/.gitignore com teste, teste de heranca cria a beta a partir da alfa, ha controle negativo com CONFLICT na fila global, Enqueue recusa branch de outra iniciativa e o escopo 4 esta registrado como adiado."
+      }
+    },
+    {
+      "task_id": "69-04",
+      "title": "feat-69-04 — Subcomandos `status` e `next-id`",
+      "spec_path": "sdd/discovery/69-otimizacao-estrutura-tokens-e-paralelismo/features/feat-69-04-subcomandos-status-e-next-id.md",
+      "status": "approved",
+      "rules": [
+        "ARQ-06",
+        "ARQ-10",
+        "SEG-03",
+        "TST-03",
+        "TST-04"
+      ],
+      "skills_used": [],
+      "attempts": 1,
+      "governance_verdict": {
+        "veredito": "conforme",
+        "achados": [
+          {
+            "verificacao": "S-05",
+            "regra": "COD-03",
+            "classificacao": "duvida",
+            "severidade": "baixa",
+            "arquivo": "internal/layout/scan.go",
+            "linha": 0,
+            "evidencia": "strings.Contains(msg, \"not a git repository\")",
+            "explicacao": "Depende da mensagem em ingles do git.",
+            "correcao": "Executar o git com LC_ALL=C (feito na rodada seguinte)."
+          },
+          {
+            "verificacao": "S-04",
+            "regra": "SEG-01",
+            "classificacao": "duvida",
+            "severidade": "baixa",
+            "arquivo": "internal/layout/scan.go",
+            "linha": 0,
+            "evidencia": "bucket[id] = buildInitiative(id, ref, ...)",
+            "explicacao": "O nome da ref e impresso sem remover C1 nem bidi.",
+            "correcao": "Passar o nome da ref por sanitizeText (feito na rodada seguinte)."
+          }
+        ],
+        "resumo": "Violacoes da rodada 1 resolvidas: sanitizacao de texto de refs, limite de 64 KB por blob, next-id recursivo, erros reais do git propagados, .sddrc invalido falha e workitem normalizado com checagem de uso."
+      }
+    },
+    {
+      "task_id": "69-06",
+      "title": "feat-69-06 — Skills por Estação",
+      "spec_path": "sdd/discovery/69-otimizacao-estrutura-tokens-e-paralelismo/features/feat-69-06-skills-por-estacao.md",
+      "status": "approved",
+      "rules": [
+        "DUP-05",
+        "DUP-06",
+        "DUP-10",
+        "GOV-04",
+        "TST-02"
+      ],
+      "skills_used": [],
+      "attempts": 1,
+      "governance_verdict": {
+        "veredito": "conforme",
+        "achados": [
+          {
+            "verificacao": "S-05",
+            "regra": "FLX-03",
+            "classificacao": "duvida",
+            "severidade": "baixa",
+            "arquivo": ".github/prompts/c4-architecture.prompt.md",
+            "linha": 1,
+            "evidencia": "502 bytes, arquivo nao gerado pelo scaffold",
+            "explicacao": "Residuo do repositorio que estourava o orcamento de adaptador.",
+            "correcao": "Removido no commit ebe4998."
+          }
+        ],
+        "resumo": "Camada A verde. Instrucoes raiz de 1.354 a 1.375 bytes e teste com nome de projeto de 50 caracteres; skill de governanca restaurou vetores de injecao, descricao, exemplo do S-01 e as sete verificacoes com tools somente leitura intacto; implementar, nova-feature e instrucoes raiz restauraram detalhes; edicao de DUP-10 e sobrescrita de sdd-* cobertas pelo ADR 0003."
+      }
+    },
+    {
+      "task_id": "69-05",
+      "title": "feat-69-05 — Migração do Legado e Templates no Novo Layout",
+      "spec_path": "sdd/discovery/69-otimizacao-estrutura-tokens-e-paralelismo/features/feat-69-05-migracao-do-legado-e-templates.md",
+      "status": "approved",
+      "rules": [
+        "ARQ-03",
+        "ARQ-05",
+        "SEG-02",
+        "TST-02",
+        "GOV-01"
+      ],
+      "skills_used": [],
+      "attempts": 1,
+      "governance_verdict": {
+        "veredito": "conforme",
+        "achados": [],
+        "resumo": "Camada A verde em 6aeafe2. SEG-02: o PoC de link simbolico em sdd/features foi repetido e o update (dry-run e real) recusa sem tocar fora do projeto; refuseSymlinkedRoots e parentIsSymlink cobertos por testes. A comparacao de obsoletos aceita qualquer Stack e mantem Project exato. Mensagem do init, backups/.gitignore e aviso do dry-run corrigidos. Limite de legacy/ documentado no ADR 0002."
+      }
+    },
+    {
+      "task_id": "69-07",
+      "title": "feat-69-07 — Orçamento de Contexto e Constitution Enxuta",
+      "spec_path": "sdd/discovery/69-otimizacao-estrutura-tokens-e-paralelismo/features/feat-69-07-orcamento-de-contexto-e-constitution.md",
+      "status": "approved",
+      "rules": [
+        "ARQ-06",
+        "GOV-01",
+        "GOV-04",
+        "FLX-06",
+        "TST-01",
+        "TST-05"
+      ],
+      "skills_used": [],
+      "attempts": 1,
+      "governance_verdict": {
+        "veredito": "conforme",
+        "achados": [
+          {
+            "verificacao": "S-05",
+            "regra": "SEG-02",
+            "classificacao": "duvida",
+            "severidade": "baixa",
+            "arquivo": "internal/gate/gate.go",
+            "linha": 0,
+            "evidencia": "if isAdapter \u0026\u0026 !managedAdapterNames[adapterBaseName(filepath.Base(m))] { continue }",
+            "explicacao": "Adaptador com nome gerenciado personalizado pelo usuario acima de 300 bytes passa a reprovar o P-24; caso residual aceito.",
+            "correcao": "Aceito: adaptadores gerenciados nao devem ser editados (documentado no ADR 0003 sobre sdd-* sobrescritos)."
+          }
+        ],
+        "resumo": "Camada A verde em ebe4998. SEG-01 corrigido e reverificado por PoC (absoluto, .., link simbolico recusados, relativo legitimo funciona). P-24 so reprova arquivos gerados e passa no proprio repositorio. ADR 0003 cobre a reescrita dos IDs e a medicao (65.934 B e 31.680 B reproduzidos; Builder cerca de 59%). 45 IDs fixados por teste."
+      }
+    }
+  ]
+}

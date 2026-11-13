@@ -49,7 +49,7 @@ Use esta trilha para trazer a inteligência do SDD para um codebase que já poss
 |---------|-------------|
 | `/status` | Toda vez que abrir o chat para ver onde parou. |
 | `/doctor` | Se sentir que o agente está "perdido" ou esquecendo regras. |
-| `/archive` | Quando o chat ficar lento ou o agente avisar que o `progress.md` está grande. |
+| `/archive` | Quando o chat ficar lento ou o agente avisar que o `status.md` da iniciativa está grande. |
 | `/revisar` | Sempre que o agente terminar de codar, antes de fazer o merge. |
 
 ---
@@ -57,4 +57,4 @@ Use esta trilha para trazer a inteligência do SDD para um codebase que já poss
 ## 🛠️ Ciclo de Vida da Sessão
 
 Todo trabalho segue o ciclo **READ-MIN -> PLAN -> ACT -> WRITE -> CLOSE**.
-O agente **sempre** lê o `progress.md` primeiro. Nunca pule essa etapa!
+O agente **sempre** lê o `status.md` da iniciativa primeiro (`forge-sdd status`). Nunca pule essa etapa!

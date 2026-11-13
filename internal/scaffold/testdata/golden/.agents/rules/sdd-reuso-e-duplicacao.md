@@ -20,7 +20,7 @@ Passos práticos para cumprir `DUP-01`, `DUP-02`, `DUP-05`, `DUP-10` e `GOV-04` 
 ## 2. Fonte Única para Artefatos de Agentes e Rules (`DUP-10`, `GOV-04`)
 
 - **Corpo canônico em `.agents/` (`DUP-10`):**
-  - Comandos residem em `.agents/commands/<cmd>.md`, papéis em `.agents/roles/<papel>.md`, regras de domínio em `.agents/rules/<regra>.md` e skills em `.agents/skills/<slug>/SKILL.md`.
+  - Instruções de estação residem em `.agents/skills/sdd-<estação>/` (`SKILL.md` e `references/`), regras de domínio em `.agents/rules/<regra>.md` e demais skills em `.agents/skills/<slug>/SKILL.md`.
   - Os arquivos em `.claude/`, `.gemini/` e `.github/` devem funcionar apenas como adaptadores finos que apontam para o arquivo canônico em `.agents/`, evitando editar o mesmo prompt em três lugares diferentes.
 - **Referência por ID nas Rules (`GOV-04`):**
   - Ao criar ou editar qualquer arquivo em `.agents/rules/*.md`, declare no frontmatter YAML a chave `regras: [ID-01, ID-02]` com IDs presentes em `sdd/memory/constitution.md`.

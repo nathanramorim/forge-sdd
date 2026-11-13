@@ -1,60 +1,24 @@
 # CLAUDE.md — forge-sdd
 
-## Contexto do projeto
-forge-sdd — stack principal: .
+forge-sdd: stack go. Fluxo por feature em `sdd/FLOW.md`.
 
-## Lifecycle (todo agente)
-_Protocolo por comando. O pipeline por feature (Discovery → ... → PR) está em `sdd/FLOW.md` — fonte única da verdade._
+## Ciclo por comando
+1. **READ-MIN:** `forge-sdd status`; Builder e Governança leem também `sdd/memory/lessons.md`.
+2. **PLAN:** reporte a intenção, aguarde confirmação e pergunte se vai para um subagente.
+3. **ACT:** siga a skill da estação em `.agents/skills/sdd-*`, só a referência do comando.
+4. **WRITE:** apenas arquivos do escopo.
+5. **CLOSE:** atualize o `status.md` da iniciativa e grave telemetria (`forge-sdd session record`).
 
-1. **READ-MIN:** ler `sdd/memory/progress.md` (Builder e Analista de Governança também leem `sdd/memory/lessons.md` — padrões de erro já corrigidos, antes de implementar/revisar)
-2. **PLAN:** reportar intenção, aguardar confirmação — e perguntar objetivamente se a atividade deve ser delegada a um subagente (varredura/pesquisa extensa tende a "sim"; edição pontual e pequena tende a "não"; decisão final é sempre do usuário). Em ferramentas sem esse conceito, item não aplicável.
-3. **ACT:** executar no escopo do papel canônico em `.agents/roles/` (ou via subagente em `.claude/agents/`)
-4. **WRITE:** editar apenas arquivos do escopo
-5. **CLOSE** (Líder / Orquestrador): atualizar progress, gravar telemetria em `sdd/.metrics/session-<ISO8601>.json` (se `telemetry.enabled`), archive se necessário
+## Onde está cada coisa
+- `sdd/memory/constitution.md`: regras por ID; leia só os IDs da tarefa (`forge-sdd context`).
+- `sdd/discovery/<id>-<nome>/`: discovery, criteria, plan, status, queue, features e fixes.
+- `.agents/rules/`: como cumprir a Constitution. `.agents/skills/sdd-*`: as 5 estações.
 
-## Arquivos críticos
-- `sdd/memory/progress.md` — estado ativo (leia primeiro a cada sessão)
-- `sdd/memory/constitution.md` — regras imutáveis numeradas por IDs (`ARQ-*`, `SEG-*`, `DUP-*`, `COD-*`, `TST-*`, `FLX-*`, `GOV-*`)
-- `sdd/features/feat-XX-*.md` (ou aninhados em subpastas) — tarefa atual
-- `.agents/rules/*.md` — regras de domínio do projeto ("o como cumprir" da Constitution, carregadas sob demanda por task). Antes de agir sobre código ou design, consulte os arquivos relevantes à tarefa corrente.
-- `.agents/roles/*.md` — fonte única dos papéis das 5 estações (adaptados em `.claude/agents/*.md`).
-
-## Papéis Canônicos e 5 Estações (`.agents/roles/` → `.claude/agents/`)
-- **Líder (Orquestrador):** `.agents/roles/lider.md` (`.claude/agents/lider.md`) — coordena as estações, gerencia gates humanos e apresenta o Painel Executivo.
-- **Concepção (PM + Arquiteto):** `.agents/roles/pm-architect.md` (`.claude/agents/pm-architect.md`) — gera `discovery` e `criteria` com Reuse Check (`DUP-02`) e diagramas C4 Mermaid.
-- **Planejador (`Plan`):** `.agents/roles/planner.md` (`.claude/agents/planner.md`) — transforma a Spec revisada (`FLX-01`) em `plan` e tasks mapeando rules e IDs da Constituição.
-- **Fila do Builder:** `.agents/roles/builder.md` (`.claude/agents/builder.md`) — consome tasks de `sdd/.queue/queue.json` em contexto isolado e valida a Camada A (`forge-sdd gate`).
-- **Analista de Governança (Camada B Read-Only):** `.agents/roles/governance.md` (`.claude/agents/governance.md`) — revisor semântico blindado contra prompt injection (`FLX-08`), verifica `S-01..S-07` e emite parecer JSON com evidência.
-- **Apoio:** `.agents/roles/archivist.md` e `.agents/roles/migrator.md`.
-
-## MCPs
-O Claude Desktop utiliza a configuração global em `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) ou `%APPDATA%\Claude\claude_desktop_config.json` (Windows).
-Recomenda-se configurar os seguintes MCPs:
-- **context7** (`npx -y @upstash/context7-mcp`)
-- **git** (`uvx mcp-server-git --repository <caminho-do-projeto>`)
-
-## Orçamentos
-- `progress.md` ≤ 1 KB
-- Resposta de planejamento ≤ 500 tokens — detalhe vai para `sdd/skills/`
+## Comandos
+`/discovery`, `/split-features`, `/implementar [feature]`, `/revisar`, `/status`, `/nova-feature`, `/novo-fix`, `/archive`, `/doctor`, `/upgrade-sdd`, `/constitution`, `/c4-architecture`, `/tutorial` (`.claude/commands/`, `.claude/agents/`).
 
 ## Regras
-- Nunca commite direto em `main`
-- Consulte `sdd/memory/constitution.md` antes de decisões arquiteturais
-- Use ferramentas de leitura antes de editar qualquer arquivo
-- Siga rigorosamente a responsabilidade única por estação (PM/Arquiteto concebe, Planejador planeja, Builder implementa, Governança audita em modo read-only)
-- Ao quebrar features em tasks ou discovery em features, agrupar arquivos em subpastas sob `sdd/features/` (a pasta da feature gerada pelo discovery deve refletir o nome do discovery).
-
-## Comandos Customizados
-Este projeto define comandos em `.claude/commands/`. Use-os para tarefas recorrentes:
-- `/status` -> `.claude/commands/status.md`
-- `/proxima-feature` -> `.claude/commands/proxima-feature.md`
-- `/nova-feature` -> `.claude/commands/nova-feature.md`
-- `/novo-fix` -> `.claude/commands/novo-fix.md`
-- `/revisar` -> `.claude/commands/revisar.md`
-- `/archive` -> `.claude/commands/archive.md`
-- `/doctor` -> `.claude/commands/doctor.md`
-- `/upgrade-sdd` -> `.claude/commands/upgrade-sdd.md`
-- `/discovery` -> `.claude/commands/discovery.md`
-- `/constitution` -> `.claude/commands/constitution.md`
-- `/c4-architecture` -> `.claude/commands/c4-architecture.md`
-- `/split-features` -> `.claude/commands/split-features.md`
+- Nunca commite em `main`; uma branch por iniciativa.
+- Uma estação, uma responsabilidade; a Governança só lê.
+- Respostas de planejamento até 500 tokens; o detalhe vai para as skills.
+- MCPs `context7` e `git` (estado em `sdd/memory/mcps.md`).

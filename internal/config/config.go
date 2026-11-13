@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/forge-sdd/cli/internal/layout"
 	"github.com/spf13/cobra"
 )
 
@@ -31,14 +32,14 @@ var validAgents = map[string]bool{
 
 // Sddrc representa o conteúdo persistido em sdd/.sddrc.
 type Sddrc struct {
-	Project          string   `json:"project"`
-	Version          string   `json:"version"`
-	Lang             string   `json:"lang"`
-	Agents           []string `json:"agents"`
-	Telemetry        struct {
+	Project   string   `json:"project"`
+	Version   string   `json:"version"`
+	Lang      string   `json:"lang"`
+	Agents    []string `json:"agents"`
+	Telemetry struct {
 		Enabled bool `json:"enabled"`
 	} `json:"telemetry"`
-	NamingConvention string   `json:"naming_convention"`
+	NamingConvention string `json:"naming_convention"`
 }
 
 // ToConfig converte Sddrc em Config para reuso nos comandos de scaffold.
@@ -55,7 +56,7 @@ func (r Sddrc) ToConfig() Config {
 
 // ReadSddrc lê e parseia sdd/.sddrc no diretório alvo.
 func ReadSddrc(targetDir string) (Sddrc, error) {
-	path := filepath.Join(targetDir, "sdd", ".sddrc")
+	path := layout.Sddrc(targetDir)
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return Sddrc{}, fmt.Errorf("sdd/.sddrc não encontrado em %s (execute forge-sdd init primeiro): %w", targetDir, err)
@@ -101,7 +102,7 @@ func FilterNewAgents(existing, candidates []string) []string {
 
 // ReadProjectVersion lê a versão registrada em sdd/.sdd-version.
 func ReadProjectVersion(targetDir string) (string, error) {
-	path := filepath.Join(targetDir, "sdd", ".sdd-version")
+	path := layout.Version(targetDir)
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return "", fmt.Errorf("sdd/.sdd-version não encontrado: %w", err)
@@ -173,7 +174,7 @@ func Defaults() Config {
 		DB:               "none",
 		Telemetry:        true,
 		Lang:             "pt-BR",
-		SddVersion:       "3.2.2-beta",
+		SddVersion:       "4.0.0-beta",
 		DryRun:           false,
 		Agents:           []string{AgentCopilot},
 		NamingConvention: "sequencial",
@@ -220,7 +221,7 @@ func FromFlags(cmd *cobra.Command) Config {
 
 // DetectProject verifica se o diretório já contém um projeto Forge-SDD.
 func DetectProject(dir string) bool {
-	path := filepath.Join(dir, "sdd", ".sddrc")
+	path := layout.Sddrc(dir)
 	_, err := os.Stat(path)
 	return err == nil
 }
@@ -284,8 +285,8 @@ func ClassifyNamingConvention(name string) string {
 
 // DetectNamingConvention varre o diretório e tenta inferir a convenção com base nos arquivos.
 func DetectNamingConvention(targetDir string) string {
-	featuresDir := filepath.Join(targetDir, "sdd", "features")
-	discoveryDir := filepath.Join(targetDir, "sdd", "discovery")
+	featuresDir := layout.Features(targetDir)
+	discoveryDir := layout.Discovery(targetDir)
 
 	var seqCount, hashCount int
 	scanDir := func(dir string) {
@@ -337,4 +338,3 @@ func ResolveUpgradeTarget(latest, beta string) string {
 		return latest
 	}
 }
-

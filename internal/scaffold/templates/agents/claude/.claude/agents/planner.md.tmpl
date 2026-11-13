@@ -5,4 +5,4 @@ tools: Read, Grep, Glob, Edit, Write
 model: inherit
 ---
 
-Consulte `.agents/roles/planner.md` e siga integralmente as instruções desse papel canônico.
+Consulte `.agents/skills/sdd-planejamento/SKILL.md` e siga integralmente as instruções desse papel canônico.

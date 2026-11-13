@@ -1,61 +1,24 @@
 # GEMINI.md — forge-sdd
 
-## Contexto do projeto
-forge-sdd — stack principal: .
+forge-sdd: stack go. Fluxo por feature em `sdd/FLOW.md`.
 
-## Lifecycle (todo agente)
-_Protocolo por comando. O pipeline por feature (Discovery → ... → PR) está em `sdd/FLOW.md` — fonte única da verdade._
+## Ciclo por comando
+1. **READ-MIN:** `forge-sdd status`; Builder e Governança leem também `sdd/memory/lessons.md`.
+2. **PLAN:** reporte a intenção, aguarde confirmação e pergunte se vai para um subagente.
+3. **ACT:** siga a skill da estação em `.agents/skills/sdd-*`, só a referência do comando.
+4. **WRITE:** apenas arquivos do escopo.
+5. **CLOSE:** atualize o `status.md` da iniciativa e grave telemetria (`forge-sdd session record`).
 
-1. **READ-MIN:** ler `sdd/memory/progress.md` (Builder e Analista de Governança também leem `sdd/memory/lessons.md` — padrões de erro já corrigidos, antes de implementar/revisar)
-2. **PLAN:** reportar intenção, aguardar confirmação — e perguntar objetivamente se a atividade deve ser delegada a um subagente (varredura/pesquisa extensa tende a "sim"; edição pontual e pequena tende a "não"; decisão final é sempre do usuário). Em ferramentas sem esse conceito, item não aplicável.
-3. **ACT:** executar no escopo do papel canônico em `.agents/roles/` (adaptado em `.gemini/skills/`)
-4. **WRITE:** editar apenas arquivos do escopo
-5. **CLOSE** (Líder / Orquestrador): atualizar progress, métricas, archive se necessário
+## Onde está cada coisa
+- `sdd/memory/constitution.md`: regras por ID; leia só os IDs da tarefa (`forge-sdd context`).
+- `sdd/discovery/<id>-<nome>/`: discovery, criteria, plan, status, queue, features e fixes.
+- `.agents/rules/`: como cumprir a Constitution. `.agents/skills/sdd-*`: as 5 estações.
 
-## Arquivos críticos
-- `sdd/memory/progress.md` — estado ativo (leia primeiro a cada sessão)
-- `sdd/memory/constitution.md` — regras imutáveis numeradas por IDs (`ARQ-*`, `SEG-*`, `DUP-*`, `COD-*`, `TST-*`, `FLX-*`, `GOV-*`)
-- `sdd/features/feat-XX-*.md` — tarefa atual
-- `.agents/rules/*.md` — regras de domínio do projeto (design system, arquitetura, acessibilidade, ...). Antes de agir sobre código ou design, consulte os arquivos relevantes à tarefa corrente.
-- `.agents/roles/*.md` — fonte única dos papéis das 5 estações.
-
-## MCPs
-- O Gemini utiliza as configurações de MCP em `.gemini/mcp.json`.
-- **context7** — obrigatório antes de qualquer `go get` ou uso de lib externa, desde que `sdd/memory/mcps.md` o liste como `ativo`; se `indisponível`, use a documentação oficial da lib em vez de assumir resposta do MCP.
-- **git** — consultar status antes de iniciar/encerrar feature.
-
-## Orçamentos
-- `progress.md` ≤ 1 KB
-- Resposta de planejamento ≤ 500 tokens — detalhe vai para `sdd/skills/`
+## Comandos
+`/discovery`, `/split-features`, `/implementar [feature]`, `/revisar`, `/status`, `/nova-feature`, `/novo-fix`, `/archive`, `/doctor`, `/upgrade-sdd`, `/constitution`, `/c4-architecture`, `/tutorial` (`.gemini/prompts/`, `.gemini/skills/`).
 
 ## Regras
-- Nunca commite direto em `main`
-- Consulte `sdd/memory/constitution.md` antes de decisões arquiteturais
-- Use ferramentas de leitura antes de editar qualquer arquivo
-- Siga rigorosamente a responsabilidade única por estação (PM/Arquiteto concebe, Planejador planeja, Builder implementa, Governança audita em modo read-only)
-
-## Skills & Papéis (5 Estações — `.agents/roles/`)
-Este projeto define os papéis canônicos em `.agents/roles/` com adaptadores em `.gemini/skills/`. Carregue a instrução correspondente ao iniciar uma estação:
-- **Líder (Orquestrador):** `.gemini/skills/orquestrador.chatmode.md` → `.agents/roles/lider.md`
-- **Concepção (PM + Arquiteto):** `.gemini/skills/specifier.chatmode.md` / `.gemini/skills/c4-architecture.chatmode.md` → `.agents/roles/pm-architect.md`
-- **Planejador (`Plan`):** `.gemini/skills/planner.chatmode.md` → `.agents/roles/planner.md`
-- **Fila do Builder:** `.gemini/skills/builder.chatmode.md` → `.agents/roles/builder.md`
-- **Analista de Governança (Camada B Read-Only):** `.gemini/skills/governance.chatmode.md` / `.gemini/skills/revisor.chatmode.md` → `.agents/roles/governance.md`
-- **Archivist:** `.gemini/skills/archivist.chatmode.md` → `.agents/roles/archivist.md`
-- **Migrator:** `.gemini/skills/migrator.chatmode.md` → `.agents/roles/migrator.md`
-
-## Prompts (Comandos)
-Para executar uma tarefa, peça pelo nome do comando ou utilize uma das frases de exemplo. Eu consultarei a instrução correspondente em `.gemini/prompts/`:
-
-- **Status:** "rodar o status", "qual o progresso?" → `status.prompt.md`
-- **Próxima Feature:** "iniciar próxima tarefa", "proxima-feature" → `proxima-feature.prompt.md`
-- **Nova Feature:** "criar nova feature [descrição]", "nova-feature" → `nova-feature.prompt.md`
-- **Novo Fix:** "criar fix para [descrição do bug]", "novo-fix" → `novo-fix.prompt.md`
-- **Revisar:** "validar feature", "rodar o revisar" → `revisar.prompt.md`
-- **Discovery:** "discovery [ideia]", "fazer discovery de..." → `discovery.prompt.md`
-- **Constitution:** "alinhar arquitetura", "rodar constitution" → `constitution.prompt.md`
-- **C4 Architecture:** "gerar diagrama C4", "desenhar arquitetura" → `c4-architecture.prompt.md`
-- **Split Features:** "quebrar plano em features", "split-features" → `split-features.prompt.md`
-- **Doctor:** "check-up do projeto", "rodar doctor" → `doctor.prompt.md`
-- **Archive:** "limpar progresso", "rodar archive" → `archive.prompt.md`
-- **Upgrade:** "atualizar sdd para vX", "upgrade-sdd" → `upgrade-sdd.prompt.md`
+- Nunca commite em `main`; uma branch por iniciativa.
+- Uma estação, uma responsabilidade; a Governança só lê.
+- Respostas de planejamento até 500 tokens; o detalhe vai para as skills.
+- MCPs em `.gemini/mcp.json` (`context7`, `git`); estado em `sdd/memory/mcps.md`.
