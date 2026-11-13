@@ -284,6 +284,13 @@ func ownEntry(dir, role, id, worker string) (*Entry, error) {
 	return e, nil
 }
 
+// CheckOwner confere, sem efeito colateral, que o job está em processing e que worker é o dono do
+// lease. Quem aplica efeitos externos (notificar, enfileirar) chama antes de agir.
+func CheckOwner(dir, role, id, worker string) error {
+	_, err := ownEntry(dir, role, id, worker)
+	return err
+}
+
 func move(dir, role string, e *Entry, to, by, note string, now time.Time) (*Entry, error) {
 	e.Job.Lease = nil
 	e.Job.addEvent(now, to, by, note)

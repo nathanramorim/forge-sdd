@@ -285,3 +285,27 @@ func TestReviewerAgent_SomenteLeituraNosTemplates(t *testing.T) {
 }
 
 var _ = config.DefaultForgeConfig
+
+func TestNotificationID_LimiteDeTamanho(t *testing.T) {
+	long := strings.Repeat("a", 80)
+	id := notificationID(long, "aprovado")
+	assert.LessOrEqual(t, len(id), 80)
+	assert.True(t, strings.HasSuffix(id, "-aprovado"))
+	assert.Equal(t, id, notificationID(long, "aprovado"), "determinístico")
+	assert.NotEqual(t, id, notificationID(strings.Repeat("a", 79)+"b", "aprovado"), "jobs distintos não colidem")
+	assert.Equal(t, "job-1-aprovado", notificationID("job-1", "aprovado"))
+}
+
+func TestReview_SemPosseNaoTemEfeitosColaterais(t *testing.T) {
+	deps, _ := notifyDeps(nil)
+	dir := reviewProject(t, 1)
+	_, err := ApplyVerdict(dir, "job-1-review", "", queue.Verdict{Veredito: "conforme", Resumo: "ok"}, deps, now)
+	assert.ErrorIs(t, err, bus.ErrNotOwner)
+	items, _ := notify.ListInbox(dir, false)
+	assert.Empty(t, items, "sem posse, nada é notificado")
+	v := queue.Verdict{Veredito: "violacao", Resumo: "x", Achados: []queue.Finding{{Classificacao: "violacao", Regra: "ARQ-01", Arquivo: "a.go", Linha: 1, Evidencia: "x"}}}
+	_, err = ApplyVerdict(dir, "job-1-review", "outro", v, deps, now)
+	assert.ErrorIs(t, err, bus.ErrNotOwner)
+	pend, _ := bus.List(dir, layout.RoleBuilder, layout.StatePending)
+	assert.Empty(t, pend, "sem posse, nenhum rework é enfileirado")
+}

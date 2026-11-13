@@ -1,6 +1,8 @@
 package pipeline
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"strings"
@@ -74,6 +76,12 @@ func ApplyVerdict(dir, jobID, worker string, v queue.Verdict, deps notify.Deps, 
 		return nil, fmt.Errorf("%w: o job %s não tem PR registrado", bus.ErrInvalidJob, jobID)
 	}
 
+	// A posse vem antes de qualquer efeito (notificar, enfileirar): sem ela, cada tentativa repetiria
+	// webhook e e-mail antes de falhar em Complete.
+	if err := bus.CheckOwner(dir, layout.RoleReviewer, jobID, worker); err != nil {
+		return nil, err
+	}
+
 	res := &ReviewResult{}
 	switch {
 	case v.Veredito == "conforme":
@@ -83,7 +91,7 @@ func ApplyVerdict(dir, jobID, worker string, v queue.Verdict, deps notify.Deps, 
 			Type: notify.TypePRApproved, Title: "PR pronto: " + job.Feature,
 			Message: "PR revisado, sem inconformidades e pronto para aprovação final.\n" + oneLine(v.Resumo, 600),
 			PRURL:   *job.PR.URL, CardURL: job.Card.URL, Feature: job.Feature, JobID: job.ID,
-			ID: job.ID + "-aprovado", // determinístico: reaplicar não duplica o inbox
+			ID: notificationID(job.ID, "aprovado"), // determinístico: reaplicar não duplica o inbox
 		}
 		out, err := notify.Dispatch(dir, ncfg, n, deps)
 		if err != nil {
@@ -127,7 +135,7 @@ func ApplyVerdict(dir, jobID, worker string, v queue.Verdict, deps notify.Deps, 
 			title = "Confirmação humana necessária: " + job.Feature
 			msg = "O Reviewer ficou em dúvida e não devolveu o PR automaticamente. Confirme o que precisa ser decidido.\n" + oneLine(v.Resumo, 600)
 		}
-		n := notify.Notification{ID: job.ID + "-escalado", Type: notify.TypeEscalation, Title: title, Message: msg, PRURL: *job.PR.URL, CardURL: job.Card.URL, Feature: job.Feature, JobID: job.ID}
+		n := notify.Notification{ID: notificationID(job.ID, "escalado"), Type: notify.TypeEscalation, Title: title, Message: msg, PRURL: *job.PR.URL, CardURL: job.Card.URL, Feature: job.Feature, JobID: job.ID}
 		out, err := notify.Dispatch(dir, ncfg, n, deps)
 		if err != nil {
 			return nil, err
@@ -247,4 +255,15 @@ func FeedbackMarkdown(job bus.Job, items []bus.Feedback) string {
 		}
 	}
 	return b.String()
+}
+
+// notificationID deriva um ID determinístico e válido para o inbox (até 80 caracteres): job IDs
+// longos são truncados e recebem um hash curto para não colidirem.
+func notificationID(jobID, suffix string) string {
+	id := jobID + "-" + suffix
+	if len(id) <= 80 {
+		return id
+	}
+	sum := sha256.Sum256([]byte(jobID))
+	return jobID[:60] + "-" + hex.EncodeToString(sum[:4]) + "-" + suffix
 }
