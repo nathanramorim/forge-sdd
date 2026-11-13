@@ -4,6 +4,32 @@ Este arquivo registra o histórico de entregas de produto deste projeto.
 
 ## Entregas
 
+### Versão 4.0.0-beta — Estrutura por Iniciativa, Skills por Estação e Orçamento de Contexto (Beta, mudança incompatível)
+
+Primeira versão da linha 4.x. **Contém mudanças incompatíveis** (veja "Como migrar"). Reestrutura o fluxo para trabalhar com várias frentes em paralelo sem conflito de arquivos de estado e para consumir muito menos contexto por comando (Discovery 69, features `69-01` a `69-07`).
+
+*   **Estado por iniciativa, sem conflito entre branches (`forge-sdd status`, `forge-sdd next-id`):** tudo de uma demanda vive em `sdd/discovery/<id>-<nome>/` (`discovery.md`, `criteria.md`, `plan.md`, `status.md`, `queue.json`, `features/` e `fixes/`). O `index.md` e o `progress.md` globais saem do fluxo; a visão geral é calculada na leitura e `--all-branches` enxerga frentes ainda não mescladas. `next-id` consulta todas as branches e não repete número. O estado de execução fica em `sdd/.runtime/`, fora do git.
+*   **5 skills por estação e o comando `/implementar [feature]`:** os 13 comandos e 7 papéis viram `sdd-concepcao`, `sdd-planejamento`, `sdd-build`, `sdd-governanca` e `sdd-operacao` em `.agents/skills/`, com referências carregadas sob demanda e adaptadores finos para Claude, Gemini e Copilot. `/implementar` executa a fila da iniciativa da branch atual ou a feature indicada (`/proxima-feature` continua como alias).
+*   **Menos contexto por comando:** o conjunto de leitura do `/discovery` cai de cerca de 66 KB para 22 KB e o do Builder de cerca de 32 KB para cerca de 13 KB (medido em bytes, ADR 0003). `forge-sdd context <task>` entrega só a spec, os IDs citados da Constituição, as rules e as skills da task. O check `P-24` do gate verifica os orçamentos.
+*   **Migração segura (`forge-sdd update --dry-run`):** o `update` move discoveries soltos e `sdd/features/` para `sdd/archive/` com backup em `sdd/backups/`, sem sobrescrever e recusando links simbólicos, e remove comandos e papéis antigos só quando idênticos ao template anterior.
+*   **Constituição enxuta:** cada regra escrita uma vez, por ID (45 IDs preservados), em até 9 KB. ADRs 0001, 0002 e 0003 registram as decisões.
+
+**Prévia dos comandos**
+```bash
+forge-sdd status --all-branches      # iniciativas de todas as branches
+forge-sdd next-id                    # próximo ID sem colidir com outras branches
+forge-sdd context <task>             # contexto mínimo de uma task
+forge-sdd update --dry-run           # plano da migração, sem gravar
+```
+No chat: `/implementar` (para Claude em `.claude/commands/`, Gemini em `.gemini/prompts/` e Copilot em `.github/prompts/`).
+
+**Mudanças incompatíveis**
+*   O **Forge Studio foi removido**: o comando `forge-sdd studio` não existe mais. O ACP (`forge-sdd acp`) permanece e passa a manter o heartbeat do pool.
+*   `.agents/commands/` e `.agents/roles/` deixam de existir (viraram skills); `sdd/features/`, `sdd/memory/progress.md` e a fila global `sdd/.queue/` deixam de ser o fluxo.
+*   A fila e o status passam a ficar na pasta da iniciativa; `sdd/.queue/{activity,stations}` migram para `sdd/.runtime/`.
+
+**Como migrar:** rode `forge-sdd update --dry-run` para ver o plano e `forge-sdd update --upgrade` para aplicar. Arquivos de comando ou papel que você editou são preservados e listados.
+
 ### Versão 3.2.1-beta — Mascotes 3D Three.js no Studio e Visualização de Tarefa Ativa por Agente (Beta)
 
 Atualização incremental da linha v3.2 (versão 3.2.1-beta) trazendo melhorias visuais e ergonômicas ao **Forge Studio**:
