@@ -3,4 +3,4 @@ description: "Archivist do demo: mantém progress.md <= 1 KB e apoia a revisão 
 tools: [read_file, edit_file]
 ---
 
-Consulte `.agents/roles/archivist.md` e siga integralmente as instruções desse papel canônico.
+Consulte `.agents/skills/sdd-operacao/references/archive.md` e siga integralmente as instruções desse papel canônico.

@@ -141,3 +141,51 @@ func TestListReturnsProposedAndApprovedSkillsSorted(t *testing.T) {
 	assert.Equal(t, StatusProposed, items[1].Status)
 	assert.Equal(t, "Descrição Zeta", items[1].Description)
 }
+
+func writeCoreSkill(t *testing.T, dir, slug string) {
+	t.Helper()
+	p := filepath.Join(dir, ".agents", "skills", slug)
+	require.NoError(t, os.MkdirAll(p, 0o755))
+	content := "---\nname: " + slug + "\ndescription: Estação de teste\nstatus: approved\norigin: forge-sdd-core\nscope: core\n---\n\n# Skill: " + slug + "\n\nCorpo.\n"
+	require.NoError(t, os.WriteFile(filepath.Join(p, "SKILL.md"), []byte(content), 0o644))
+}
+
+func TestSync_IgnoraSkillsDeNucleoEEhIdempotente(t *testing.T) {
+	dir := t.TempDir()
+	writeCoreSkill(t, dir, "sdd-teste")
+
+	// Skill comum aprovada continua sendo sincronizada.
+	_, err := Propose(dir, "minha-skill", "Skill comum", "Passo 1.")
+	require.NoError(t, err)
+	_, err = Approve(dir, "minha-skill", []string{"claude"})
+	require.NoError(t, err)
+
+	assert.NoFileExists(t, filepath.Join(dir, ".claude", "skills", "sdd-teste", "SKILL.md"), "skill de núcleo não deve ser copiada")
+	assert.FileExists(t, filepath.Join(dir, ".claude", "skills", "minha-skill", "SKILL.md"))
+
+	first, err := os.ReadFile(filepath.Join(dir, ".claude", "skills", "minha-skill", "SKILL.md"))
+	require.NoError(t, err)
+	_, err = Sync(dir, []string{"claude"})
+	require.NoError(t, err)
+	second, err := os.ReadFile(filepath.Join(dir, ".claude", "skills", "minha-skill", "SKILL.md"))
+	require.NoError(t, err)
+	assert.Equal(t, string(first), string(second), "segunda sincronização não deve alterar o adaptador")
+}
+
+func TestApprove_RecusaSkillDeNucleo(t *testing.T) {
+	dir := t.TempDir()
+	writeCoreSkill(t, dir, "sdd-teste")
+	_, err := Approve(dir, "sdd-teste", []string{"claude"})
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "núcleo")
+}
+
+func TestList_LeEscopoDaSkill(t *testing.T) {
+	dir := t.TempDir()
+	writeCoreSkill(t, dir, "sdd-teste")
+	list, err := List(dir)
+	require.NoError(t, err)
+	require.Len(t, list, 1)
+	assert.Equal(t, ScopeCore, list[0].Scope)
+	assert.Equal(t, StatusApproved, list[0].Status)
+}

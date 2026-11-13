@@ -5,4 +5,4 @@ tools: Read, Grep, Glob, Bash
 model: inherit
 ---
 
-Consulte `.agents/roles/governance.md` e siga integralmente as instruções desse papel canônico.
+Consulte `.agents/skills/sdd-governanca/SKILL.md` e siga integralmente as instruções desse papel canônico.

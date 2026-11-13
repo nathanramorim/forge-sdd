@@ -41,7 +41,7 @@
 1. Criar em `.agents/skills/`: `sdd-concepcao` (discovery, nova-feature, novo-fix, c4-architecture, constitution + `pm-architect`), `sdd-planejamento` (split-features + `planner`), `sdd-build` (proxima-feature + `builder`), `sdd-governanca` (revisar + `governance`) e `sdd-operacao` (status, doctor, archive, upgrade-sdd, tutorial + `lider`, `archivist`, `migrator`).
 2. Cada `SKILL.md` ≤ 2.048 bytes com gatilho, passos e links; detalhe em `references/` carregado sob demanda.
 3. Remover `.agents/commands/` e `.agents/roles/`; manter `.agents/rules/` e `.agents/skills/novo-subcomando-cli-sdd`.
-4. Adaptadores por ferramenta ≤ 300 bytes, sem repetir o corpo; `CLAUDE.md`, `GEMINI.md` e `copilot-instructions.md` ≤ 1.536 bytes.
+4. Adaptadores de comando por ferramenta ≤ 300 bytes e definições de papel (`.claude/agents`, chatmodes) ≤ 420 bytes, ambos sem repetir o corpo; `CLAUDE.md`, `GEMINI.md`, `OPENAI.md` e `copilot-instructions.md` renderizados ≤ 1.536 bytes. Os adaptadores de comando e as definições de subagente/chatmode (inclusive o `tools:` somente leitura da Governança) mantêm formato e local de cada ferramenta; só o destino do ponteiro muda.
 5. Atualizar templates embutidos e goldens; `forge-sdd skills sync` gera os adaptadores.
 6. **Comando `/implementar [nome-da-feature]`** na skill `sdd-build`, que substitui `/proxima-feature` (o nome antigo fica como alias de uma linha no adaptador, sem corpo, por `DUP-10`):
    - **Sem argumento:** executa a fila da iniciativa da branch atual. Para cada task em ordem de dependência: `forge-sdd queue next`, implementa, roda os critérios da spec e `forge-sdd gate`, `forge-sdd queue complete`, e passa a task à Governança; para ao esgotar a fila ou ao falhar o portão.
@@ -54,10 +54,11 @@
 go build ./... && go vet ./... && go test -race ./internal/skills/... ./internal/scaffold/...
 test ! -d .agents/commands && test ! -d .agents/roles
 for s in sdd-concepcao sdd-planejamento sdd-build sdd-governanca sdd-operacao; do test "$(wc -c < .agents/skills/$s/SKILL.md)" -le 2048; done
-forge-sdd skills sync && forge-sdd skills sync && git diff --quiet
+go test ./internal/skills/... ./internal/scaffold/... -run 'Sync|Orcamento|Legados|Apontam'
 ```
 - Segunda execução do `sync` não altera arquivos (idempotência).
 - Existe o adaptador `implementar` em cada ferramenta (≤ 300 bytes) apontando para `sdd-build`; `proxima-feature` é apenas alias. `grep -c 'queue next' .agents/skills/sdd-build/SKILL.md` ≥ 1 e o `SKILL.md` descreve os modos com e sem argumento.
-- Teste: nenhum adaptador excede 300 bytes nem contém bloco de instruções repetido (`DUP-10`).
+- Teste (`budget_test.go`): nenhum adaptador excede o orçamento, nenhum arquivo gerado cita `.agents/commands/` ou `.agents/roles/` e todo ponteiro `.agents/skills/...` aponta para arquivo existente (`DUP-10`).
+- Skills de estação têm `scope: core`: o `Sync` não as copia para `.claude/skills` nem `.gemini/skills`, e `skills approve` as recusa. As demais skills em `.agents/skills/` seguem preservadas no `update`; só `sdd-*` é regenerada.
 - Check P-23 continua passando (rules intactas).
 - Violações (`TST-03`): skill sem frontmatter, rule citada inexistente e `SKILL.md` acima do limite falham.

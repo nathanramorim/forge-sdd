@@ -250,9 +250,13 @@ func shouldPreserve(dest string, targetDir string) bool {
 
 	// .agents/rules/ é conteúdo do usuário (regras de domínio livres) — nunca sobrescrito
 	// uma vez criado, mesmo espírito de preservação de domínio usado em sdd/.
-	// .agents/commands/ (corpo canônico dos comandos) NÃO entra aqui: é gerado pelo
-	// forge-sdd e deve continuar sendo atualizado a cada init/update, como qualquer
-	// outro arquivo de configuração de agente.
+	// As skills de estação (.agents/skills/sdd-*) são geradas pelo forge-sdd e devem
+	// continuar sendo atualizadas a cada init/update, como qualquer outro arquivo de
+	// configuração de agente. Já as demais skills (aprovadas ou propostas pelo usuário
+	// ou pela governança) e as rules pertencem ao projeto e nunca são sobrescritas.
+	if strings.HasPrefix(rel, ".agents/skills/sdd-") {
+		return false
+	}
 	if strings.HasPrefix(rel, ".agents/rules/") || strings.HasPrefix(rel, ".agents/skills/") {
 		return true
 	}

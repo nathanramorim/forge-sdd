@@ -1,39 +1,24 @@
 # Copilot Instructions — demo
 
-## Contexto
-demo — stack principal: go.
+demo: stack go. Fluxo por feature em `sdd/FLOW.md`.
 
-## Lifecycle (todo agente)
-_Protocolo por comando. O pipeline por feature (Discovery → ... → PR) está em `sdd/FLOW.md` — fonte única da verdade._
+## Ciclo por comando
+1. **READ-MIN:** `forge-sdd status` e, para Builder e Governança, `sdd/memory/lessons.md`.
+2. **PLAN:** reporte a intenção, aguarde confirmação e pergunte se a atividade vai para um subagente (decisão do usuário).
+3. **ACT:** siga a skill da estação em `.agents/skills/sdd-*`, carregando só a referência do comando.
+4. **WRITE:** apenas arquivos do escopo.
+5. **CLOSE:** atualize o `status.md` da iniciativa e grave telemetria (`forge-sdd session record`, se `telemetry.enabled`).
 
-1. **READ-MIN:** ler `sdd/memory/progress.md` (Builder e Analista de Governança também leem `sdd/memory/lessons.md` — padrões de erro já corrigidos, antes de implementar/revisar)
-2. **PLAN:** reportar intenção, aguardar confirmação — e perguntar objetivamente se a atividade deve ser delegada a um subagente (varredura/pesquisa extensa tende a "sim"; edição pontual e pequena tende a "não"; decisão final é sempre do usuário). Em ferramentas sem esse conceito, item não aplicável.
-3. **ACT:** executar no escopo do papel canônico em `.agents/roles/` (adaptado em `.github/chatmodes/`)
-4. **WRITE:** editar apenas arquivos do escopo
-5. **CLOSE** (Líder / Orquestrador): atualizar progress, métricas, archive se necessário
+## Onde está cada coisa
+- `sdd/memory/constitution.md`: regras por ID (`ARQ`, `SEG`, `DUP`, `COD`, `TST`, `FLX`, `GOV`); leia só os IDs da tarefa.
+- `sdd/discovery/<id>-<nome>/`: discovery, criteria, plan, status, queue, features e fixes.
+- `.agents/rules/*.md`: como cumprir a Constitution, por tarefa.
+- `.agents/skills/sdd-*`: concepcao, planejamento, build, governanca e operacao.
 
-## Arquivos críticos
-- `sdd/memory/progress.md` — estado ativo
-- `sdd/memory/constitution.md` — regras imutáveis numeradas por IDs (`ARQ-*`, `SEG-*`, `DUP-*`, `COD-*`, `TST-*`, `FLX-*`, `GOV-*`)
-- `sdd/features/feat-XX-*.md` (ou aninhados em subpastas) — tarefa atual
-- `.agents/rules/*.md` — regras de domínio do projeto (design system, arquitetura, acessibilidade, ...). Antes de agir sobre código ou design, consulte os arquivos relevantes à tarefa corrente.
-- `.agents/roles/*.md` — fonte única dos papéis das 5 estações (Líder, Concepção PM/Arquiteto, Planejador, Fila do Builder e Analista de Governança).
-
-## Papéis Canônicos e 5 Estações (`.agents/roles/` → `.github/chatmodes/`)
-- **Líder (Orquestrador):** `.github/chatmodes/orquestrador.chatmode.md` → `.agents/roles/lider.md`
-- **Concepção (PM + Arquiteto):** `.github/chatmodes/specifier.chatmode.md` / `.github/chatmodes/c4-architecture.chatmode.md` → `.agents/roles/pm-architect.md`
-- **Planejador (`Plan`):** `.github/chatmodes/planner.chatmode.md` → `.agents/roles/planner.md`
-- **Fila do Builder:** `.github/chatmodes/builder.chatmode.md` → `.agents/roles/builder.md`
-- **Analista de Governança (Camada B Read-Only):** `.github/chatmodes/governance.chatmode.md` / `.github/chatmodes/revisor.chatmode.md` → `.agents/roles/governance.md`
-- **Archivist / Migrator:** `.github/chatmodes/archivist.chatmode.md` e `.github/chatmodes/migrator.chatmode.md`
-
-## MCPs
-- **context7** — obrigatório antes de lib externa, desde que `sdd/memory/mcps.md` o liste como `ativo`; se `indisponível`, use a documentação oficial da lib em vez de assumir resposta do MCP
-- **git** — status antes de iniciar/encerrar feature
-
-## Orçamentos
-- `progress.md` ≤ 1 KB → exceder dispara `/archive`
-- `chatmode` ≤ 500 tokens → detalhe vai para `skills/`
+## Comandos
+`/discovery`, `/split-features`, `/implementar [feature]`, `/revisar`, `/status`, `/nova-feature`, `/novo-fix`, `/archive`, `/doctor`, `/upgrade-sdd`, `/constitution`, `/c4-architecture`, `/tutorial`. Adaptadores em `.github/prompts/` e `.github/chatmodes/`.
 
 ## Regras
-- Ao quebrar features em tasks ou discovery em features, agrupar arquivos em subpastas sob `sdd/features/` (a pasta da feature gerada pelo discovery deve refletir o nome do discovery).
+- Nunca commite em `main`; uma branch por iniciativa.
+- Uma estação, uma responsabilidade: PM/Arquiteto concebe, Planejador planeja, Builder implementa, Governança audita só leitura.
+- MCPs `context7` e `git`; estado real em `sdd/memory/mcps.md`.

@@ -71,7 +71,7 @@ As regras abaixo indexam as decisões invioláveis do projeto por IDs estáveis.
 - **DUP-04:** Constantes, contratos e schemas compartilham definição única.
 - **DUP-05:** Regra de Três — na terceira repetição de um mesmo padrão técnico ou procedimento operacional, extrair abstração compartilhada ou propor Auto-Skill em `.agents/skills/`.
 - **DUP-06:** Regras de negócio e validações residem em um único ponto, sem cópia entre camadas.
-- **DUP-10:** Fonte única da verdade para instruções e artefatos de agentes (`.agents/commands/`, `.agents/roles/`, `.agents/rules/`, `.agents/skills/`).
+- **DUP-10:** Fonte única da verdade para instruções e artefatos de agentes (`.agents/skills/` e `.agents/rules/`), com adaptadores finos por ferramenta sem duplicar o corpo das instruções.
 
 ### Código e Testes (`COD` / `TST`)
 - **COD-01:** Responsabilidade única por módulo, arquivo, função e estação de agente.
