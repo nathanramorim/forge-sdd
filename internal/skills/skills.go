@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/forge-sdd/cli/internal/config"
+	"github.com/forge-sdd/cli/internal/layout"
 )
 
 const (
@@ -321,7 +322,7 @@ const defaultIndexTemplate = `# Skills Index
 `
 
 func upsertIndex(dir, slug, description, status, relPath string) error {
-	skillsDir := filepath.Join(dir, "sdd", "skills")
+	skillsDir := layout.Skills(dir)
 	if err := os.MkdirAll(skillsDir, 0o755); err != nil {
 		return fmt.Errorf("falha ao criar %s: %w", skillsDir, err)
 	}

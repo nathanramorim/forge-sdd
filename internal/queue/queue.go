@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/forge-sdd/cli/internal/layout"
 	"os"
 	"path/filepath"
 	"strings"
@@ -74,7 +75,7 @@ type CandidateSkill struct {
 
 // QueueFilePath retorna o caminho de persistência da fila no diretório alvo.
 func QueueFilePath(dir string) string {
-	return filepath.Join(dir, "sdd", ".queue", "queue.json")
+	return layout.QueueFile(dir)
 }
 
 // Load lê a fila a partir de <dir>/sdd/.queue/queue.json.

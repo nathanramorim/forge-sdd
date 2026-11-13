@@ -11,6 +11,7 @@ import (
 	"text/template"
 
 	"github.com/forge-sdd/cli/internal/config"
+	"github.com/forge-sdd/cli/internal/layout"
 )
 
 //go:embed all:templates
@@ -219,7 +220,7 @@ func UpdateSddrc(cfg config.Config, targetDir string) error {
 	if err := tmpl.Execute(&buf, cfg); err != nil {
 		return fmt.Errorf("render template %s: %w", tmplPath, err)
 	}
-	dest := filepath.Join(targetDir, "sdd", ".sddrc")
+	dest := layout.Sddrc(targetDir)
 	return os.WriteFile(dest, buf.Bytes(), 0644)
 }
 

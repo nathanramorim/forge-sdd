@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/forge-sdd/cli/internal/layout"
 	"os"
 	"path/filepath"
 	"strings"
@@ -15,11 +16,11 @@ import (
 
 // Constantes com as 5 estações canônicas de trabalho.
 const (
-	StationLider        = "lider"
-	StationPMArchitect  = "pm-architect"
-	StationPlanner      = "planner"
-	StationBuilder      = "builder"
-	StationGovernance   = "governance"
+	StationLider       = "lider"
+	StationPMArchitect = "pm-architect"
+	StationPlanner     = "planner"
+	StationBuilder     = "builder"
+	StationGovernance  = "governance"
 )
 
 // CanonicalStations retorna a lista ordenada das 5 estações.
@@ -74,7 +75,7 @@ var stationMutex sync.RWMutex
 
 // StationsDir retorna o diretório das 5 filas de estações.
 func StationsDir(dir string) string {
-	return filepath.Join(dir, "sdd", ".queue", "stations")
+	return layout.StationsDir(dir)
 }
 
 // StationQueueFilePath retorna o caminho completo do arquivo da estação.

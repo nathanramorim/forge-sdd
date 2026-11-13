@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/forge-sdd/cli/internal/config"
+	"github.com/forge-sdd/cli/internal/layout"
 	"github.com/forge-sdd/cli/internal/scaffold"
 	"github.com/spf13/cobra"
 )
@@ -32,8 +33,8 @@ inconsistências de configuração dos agentes de IA e progresso das features.`,
 
 		fmt.Printf("🩺 Iniciando diagnóstico da metodologia em '%s'...\n\n", targetDir)
 
-		sddrcPath := filepath.Join(targetDir, "sdd", ".sddrc")
-		versionPath := filepath.Join(targetDir, "sdd", ".sdd-version")
+		sddrcPath := layout.Sddrc(targetDir)
+		versionPath := layout.Version(targetDir)
 
 		hasSddrc := fileExists(sddrcPath)
 		hasVersion := fileExists(versionPath)
@@ -138,8 +139,8 @@ inconsistências de configuração dos agentes de IA e progresso das features.`,
 
 		// 4. Verificação de arquivos essenciais de metodologia
 		fmt.Println("\n📁 Arquivos de Metodologia:")
-		constitutionPath := filepath.Join(targetDir, "sdd", "memory", "constitution.md")
-		progressPath := filepath.Join(targetDir, "sdd", "memory", "progress.md")
+		constitutionPath := layout.Constitution(targetDir)
+		progressPath := layout.Progress(targetDir)
 
 		if fileExists(constitutionPath) {
 			fmt.Println("  ✓ Constituição (sdd/memory/constitution.md) ativa.")
@@ -154,7 +155,7 @@ inconsistências de configuração dos agentes de IA e progresso das features.`,
 		}
 
 		// 5. Varredura de features
-		featuresDir := filepath.Join(targetDir, "sdd", "features")
+		featuresDir := layout.Features(targetDir)
 		var activeFeatures []string
 		err = filepath.WalkDir(featuresDir, func(path string, d os.DirEntry, err error) error {
 			if err != nil {
@@ -211,7 +212,7 @@ inconsistências de configuração dos agentes de IA e progresso das features.`,
 			})
 		}
 		scanConventionDir(featuresDir)
-		scanConventionDir(filepath.Join(targetDir, "sdd", "discovery"))
+		scanConventionDir(layout.Discovery(targetDir))
 
 		if len(sequentialFiles) > 0 && len(hashFiles) > 0 {
 			fmt.Println("  ⚠️  Deriva de convenção detectada: nomenclatura sequencial (feat-NN/fix-NN) e por hash (feat-xxxx/fix-xxxx) coexistem no projeto.")

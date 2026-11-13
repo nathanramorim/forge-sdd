@@ -3,8 +3,8 @@ package queue
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/forge-sdd/cli/internal/layout"
 	"os"
-	"path/filepath"
 	"sync"
 	"time"
 )
@@ -102,7 +102,7 @@ func RecordActivityDetailed(dir string, item ActivityItem) error {
 		newItems = newItems[:50]
 	}
 
-	actPath := filepath.Join(dir, "sdd", ".queue", "activity.json")
+	actPath := layout.ActivityFile(dir)
 	return WriteJSONAtomic(actPath, newItems, 0o644)
 }
 
@@ -135,7 +135,7 @@ func ReconcileStationActivities(dir, station string) error {
 		return nil
 	}
 
-	actPath := filepath.Join(dir, "sdd", ".queue", "activity.json")
+	actPath := layout.ActivityFile(dir)
 	return WriteJSONAtomic(actPath, items, 0o644)
 }
 
@@ -168,7 +168,7 @@ func SanitizeOrphanActivities(dir string) (int, error) {
 		return 0, nil
 	}
 
-	actPath := filepath.Join(dir, "sdd", ".queue", "activity.json")
+	actPath := layout.ActivityFile(dir)
 	if err := WriteJSONAtomic(actPath, items, 0o644); err != nil {
 		return 0, err
 	}
@@ -177,7 +177,7 @@ func SanitizeOrphanActivities(dir string) (int, error) {
 
 // LoadActivities lê os registros recentes de atividade de sdd/.queue/activity.json.
 func LoadActivities(dir string) ([]ActivityItem, error) {
-	actPath := filepath.Join(dir, "sdd", ".queue", "activity.json")
+	actPath := layout.ActivityFile(dir)
 	data, err := os.ReadFile(actPath)
 	if err != nil {
 		if os.IsNotExist(err) {

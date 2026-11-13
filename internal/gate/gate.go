@@ -3,6 +3,7 @@ package gate
 import (
 	"errors"
 	"fmt"
+	"github.com/forge-sdd/cli/internal/layout"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -482,7 +483,7 @@ func checkP20ConstitutionException(dir, prBodyPath, prBodyText string, now time.
 }
 
 func checkP21ProgressBudget(dir string) CheckResult {
-	progressPath := filepath.Join(dir, "sdd", "memory", "progress.md")
+	progressPath := layout.Progress(dir)
 	info, err := os.Stat(progressPath)
 	if err != nil {
 		if errors.Is(err, os.ErrNotExist) {
@@ -545,7 +546,7 @@ func checkP23RulesGovernance(dir string) CheckResult {
 		}
 	}
 
-	constitutionPath := filepath.Join(dir, "sdd", "memory", "constitution.md")
+	constitutionPath := layout.Constitution(dir)
 	constData, err := os.ReadFile(constitutionPath)
 	if err != nil {
 		return CheckResult{

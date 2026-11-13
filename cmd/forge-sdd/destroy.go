@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/forge-sdd/cli/internal/layout"
 	"github.com/forge-sdd/cli/internal/survey"
 	"github.com/spf13/cobra"
 )
@@ -24,7 +25,7 @@ dos agentes de IA (CLAUDE.md, GEMINI.md, .claude/, .gemini/, etc.) instalados no
 		destroyYes, _ := cmd.Flags().GetBool("yes")
 		destroyDryRun, _ := cmd.Flags().GetBool("dry-run")
 
-		sddrcPath := filepath.Join(targetDir, "sdd", ".sddrc")
+		sddrcPath := layout.Sddrc(targetDir)
 		if _, err := os.Stat(sddrcPath); os.IsNotExist(err) {
 			fmt.Printf("ℹ️  Nenhuma estrutura Forge-SDD activa encontrada em '%s'.\n", targetDir)
 			return nil
@@ -47,7 +48,7 @@ dos agentes de IA (CLAUDE.md, GEMINI.md, .claude/, .gemini/, etc.) instalados no
 		}
 
 		pathsToRemove := []string{
-			filepath.Join(targetDir, "sdd"),
+			layout.Root(targetDir),
 			filepath.Join(targetDir, "CLAUDE.md"),
 			filepath.Join(targetDir, ".claude"),
 			filepath.Join(targetDir, "GEMINI.md"),
