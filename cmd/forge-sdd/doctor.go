@@ -148,7 +148,9 @@ inconsistências de configuração dos agentes de IA e progresso das features.`,
 			fmt.Println("  ✗ Constituição (sdd/memory/constitution.md) não encontrada!")
 		}
 
-		if fileExists(progressPath) {
+		if _, hasStatus := layout.StatusPath(targetDir); hasStatus {
+			fmt.Println("  ✓ Status da iniciativa (status.md) ativo.")
+		} else if fileExists(progressPath) {
 			fmt.Println("  ✓ Painel de Progresso (sdd/memory/progress.md) ativo.")
 		} else {
 			fmt.Println("  ✗ Painel de Progresso (sdd/memory/progress.md) não encontrado!")

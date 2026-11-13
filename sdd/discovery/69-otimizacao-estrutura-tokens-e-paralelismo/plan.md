@@ -23,7 +23,7 @@ Ordem de fila sugerida: 69-01, 69-02, 69-03, 69-04, 69-06, 69-05, 69-07.
 |---|---|---|
 | `sdd-concepcao` | `discovery`, `nova-feature`, `novo-fix`, `c4-architecture`, `constitution` | `pm-architect` |
 | `sdd-planejamento` | `split-features` | `planner` |
-| `sdd-build` | `proxima-feature` | `builder` |
+| `sdd-build` | `proxima-feature` (vira `/implementar [nome-da-feature]`, alias `proxima-feature`) | `builder` |
 | `sdd-governanca` | `revisar` | `governance` |
 | `sdd-operacao` | `status`, `doctor`, `archive`, `upgrade-sdd`, `tutorial` | `lider`, `archivist`, `migrator` |
 

@@ -75,10 +75,10 @@ type CandidateSkill struct {
 
 // QueueFilePath retorna o caminho de persistência da fila no diretório alvo.
 func QueueFilePath(dir string) string {
-	return layout.QueueFile(dir)
+	return layout.QueuePath(dir)
 }
 
-// Load lê a fila a partir de <dir>/sdd/.queue/queue.json.
+// Load lê a fila da iniciativa ativa (sdd/discovery/<id>/queue.json) ou, sem iniciativa, de sdd/.queue/queue.json.
 // Se o arquivo não existir, retorna uma fila vazia inicializada.
 func Load(dir string) (*Queue, error) {
 	path := QueueFilePath(dir)
@@ -106,7 +106,7 @@ func Load(dir string) (*Queue, error) {
 	return &q, nil
 }
 
-// Save persiste a fila em <dir>/sdd/.queue/queue.json atualizando UpdatedAt de forma atômica
+// Save persiste a fila (no caminho de QueueFilePath) atualizando UpdatedAt de forma atômica
 // e sincronizando as filas das estações builder.json e governance.json.
 func Save(dir string, q *Queue) error {
 	path := QueueFilePath(dir)

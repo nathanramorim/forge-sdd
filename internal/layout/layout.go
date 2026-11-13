@@ -9,6 +9,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"os"
 	"os/exec"
 	"path/filepath"
 	"regexp"
@@ -91,14 +92,50 @@ func Runtime(dir string) string { return filepath.Join(Root(dir), RuntimeDirName
 // QueueDir devolve sdd/.queue.
 func QueueDir(dir string) string { return filepath.Join(Root(dir), QueueDirName) }
 
-// QueueFile devolve sdd/.queue/queue.json.
-func QueueFile(dir string) string { return filepath.Join(QueueDir(dir), QueueFileName) }
+// LegacyQueueFile devolve sdd/.queue/queue.json, a fila global usada antes da feat 69-03.
+// Só é usada quando a branch atual não aponta para uma iniciativa existente.
+func LegacyQueueFile(dir string) string { return filepath.Join(QueueDir(dir), QueueFileName) }
 
-// StationsDir devolve sdd/.queue/stations.
-func StationsDir(dir string) string { return filepath.Join(QueueDir(dir), StationsDirName) }
+// StationsDir devolve sdd/.runtime/stations (estado de execução, fora do git).
+func StationsDir(dir string) string { return filepath.Join(Runtime(dir), StationsDirName) }
 
-// ActivityFile devolve sdd/.queue/activity.json.
-func ActivityFile(dir string) string { return filepath.Join(QueueDir(dir), ActivityFileName) }
+// ActivityFile devolve sdd/.runtime/activity.json (estado de execução, fora do git).
+func ActivityFile(dir string) string { return filepath.Join(Runtime(dir), ActivityFileName) }
+
+// ActiveInitiative devolve o id e a pasta da iniciativa da branch atual, desde que a pasta
+// exista em sdd/discovery. Sem git, branch fora do padrão ou pasta ausente devolve ok=false.
+func ActiveInitiative(dir string) (id, path string, ok bool) {
+	id, found, err := Current(dir)
+	if err != nil || !found {
+		return "", "", false
+	}
+	path, err = Initiative(dir, id)
+	if err != nil {
+		return "", "", false
+	}
+	if info, err := os.Stat(path); err != nil || !info.IsDir() {
+		return "", "", false
+	}
+	return id, path, true
+}
+
+// QueuePath devolve a fila do Builder da iniciativa ativa (sdd/discovery/<id>/queue.json) e,
+// sem iniciativa ativa, a fila legada sdd/.queue/queue.json.
+func QueuePath(dir string) string {
+	if _, path, ok := ActiveInitiative(dir); ok {
+		return filepath.Join(path, QueueFileName)
+	}
+	return LegacyQueueFile(dir)
+}
+
+// StatusPath devolve o status.md da iniciativa ativa. ok=false indica que não há iniciativa ativa.
+func StatusPath(dir string) (path string, ok bool) {
+	_, base, ok := ActiveInitiative(dir)
+	if !ok {
+		return "", false
+	}
+	return filepath.Join(base, StatusFileName), true
+}
 
 // ValidInitiative informa se id tem o formato <id>-<nome> aceito pelo layout.
 func ValidInitiative(id string) bool { return initiativeSlug.MatchString(id) }

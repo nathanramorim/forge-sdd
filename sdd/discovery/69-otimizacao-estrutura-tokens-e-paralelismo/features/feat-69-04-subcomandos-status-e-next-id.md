@@ -36,7 +36,8 @@ Sem `index.md` e `progress.md` globais, a visão geral precisa ser calculada, e 
 ## Escopo
 1. `forge-sdd status [--all-branches]`: tabela iniciativa, branch, status e próximo passo; com `--all-branches`, lê `status.md` de cada ref sem fazer checkout.
 2. `forge-sdd next-id [--kind discovery|fix]`: devolve o próximo ID considerando pastas locais e de todas as refs; respeita `naming_convention` (`sequencial`, `hash`, `workitem`).
-3. Registrar ambos em `main.go` e atualizar `ARQ-06` apenas na ADR 0003 (69-07), sem editar a Constitution aqui.
+3. A saída de `status` inclui, por iniciativa, a branch e a contagem de tasks na fila por situação, o que permite ao `/implementar <nome>` (69-06) resolver nome, branch e fila sem varrer arquivos.
+4. Registrar ambos em `main.go` e atualizar `ARQ-06` apenas na ADR 0003 (69-07), sem editar a Constitution aqui.
 
 ## Critérios de Aceitação Executáveis
 ```bash
@@ -44,6 +45,6 @@ go build ./... && go vet ./... && go test -race ./cmd/forge-sdd/... ./internal/l
 forge-sdd status --help && forge-sdd next-id --help
 ```
 - Repositório git temporário (`TST-04`): pasta `70-x` existente só em outra branch faz `next-id` devolver `71` (ou superior).
-- `status --all-branches` lista iniciativas de branches não mescladas.
+- `status --all-branches` lista iniciativas de branches não mescladas e mostra, por iniciativa, a branch e a contagem de tasks por situação.
 - Violações (`TST-03`): ref com nome malicioso (`--upload-pack=...`, `;`), repositório sem commits e branch destacada falham com erro enriquecido, sem panic.
 - `--dry-run` não existe nestes comandos porque são somente leitura; nenhum escreve em disco.

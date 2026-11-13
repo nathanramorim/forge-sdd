@@ -483,24 +483,44 @@ func checkP20ConstitutionException(dir, prBodyPath, prBodyText string, now time.
 }
 
 func checkP21ProgressBudget(dir string) CheckResult {
-	progressPath := layout.Progress(dir)
-	info, err := os.Stat(progressPath)
+	const rule = "Regra 14 / Orçamento"
+
+	// Estado por iniciativa (feat 69-03): status.md da iniciativa da branch atual.
+	// Sem iniciativa ativa, cai no progress.md global legado, se existir.
+	statusPath, hasInitiative := layout.StatusPath(dir)
+	label := "status.md da iniciativa"
+	target := statusPath
+	if !hasInitiative {
+		legacy := layout.Progress(dir)
+		if _, err := os.Stat(legacy); err != nil {
+			return CheckResult{
+				ID:       "P-21",
+				Rule:     rule,
+				Passed:   true,
+				Evidence: "observação: sem iniciativa ativa na branch atual e sem progress.md legado; orçamento de status não aplicável",
+			}
+		}
+		label = "sdd/memory/progress.md"
+		target = legacy
+	}
+
+	info, err := os.Stat(target)
 	if err != nil {
 		if errors.Is(err, os.ErrNotExist) {
 			return CheckResult{
 				ID:          "P-21",
-				Rule:        "Regra 14 / Orçamento",
+				Rule:        rule,
 				Passed:      false,
-				Evidence:    "arquivo sdd/memory/progress.md não encontrado",
-				Remediation: "Criar ou restaurar sdd/memory/progress.md com no máximo 1024 bytes.",
+				Evidence:    fmt.Sprintf("arquivo %s não encontrado (%s)", label, target),
+				Remediation: fmt.Sprintf("Criar %s com no máximo %d bytes.", label, MaxProgressBytes),
 			}
 		}
 		return CheckResult{
 			ID:          "P-21",
-			Rule:        "Regra 14 / Orçamento",
+			Rule:        rule,
 			Passed:      false,
-			Evidence:    fmt.Sprintf("erro ao verificar sdd/memory/progress.md: %v", err),
-			Remediation: "Verificar permissões de leitura em sdd/memory/progress.md.",
+			Evidence:    fmt.Sprintf("erro ao verificar %s: %v", label, err),
+			Remediation: fmt.Sprintf("Verificar permissões de leitura em %s.", label),
 		}
 	}
 
@@ -508,19 +528,18 @@ func checkP21ProgressBudget(dir string) CheckResult {
 	if size > MaxProgressBytes {
 		return CheckResult{
 			ID:          "P-21",
-			Rule:        "Regra 14 / Orçamento",
+			Rule:        rule,
 			Passed:      false,
-			Evidence:    fmt.Sprintf("sdd/memory/progress.md possui %d bytes (limite máximo: %d bytes)", size, MaxProgressBytes),
-			Remediation: "Arquivar entradas concluídas em sdd/memory/progress-log.md para manter progress.md <= 1024 bytes.",
+			Evidence:    fmt.Sprintf("%s possui %d bytes (limite máximo: %d bytes)", label, size, MaxProgressBytes),
+			Remediation: fmt.Sprintf("Enxugar %s e mover o histórico para progress-log.md para manter <= %d bytes.", label, MaxProgressBytes),
 		}
 	}
 
 	return CheckResult{
-		ID:          "P-21",
-		Rule:        "Regra 14 / Orçamento",
-		Passed:      true,
-		Evidence:    fmt.Sprintf("sdd/memory/progress.md dentro do orçamento (%d/%d bytes)", size, MaxProgressBytes),
-		Remediation: "",
+		ID:       "P-21",
+		Rule:     rule,
+		Passed:   true,
+		Evidence: fmt.Sprintf("%s dentro do orçamento (%d/%d bytes)", label, size, MaxProgressBytes),
 	}
 }
 

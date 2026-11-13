@@ -2,13 +2,13 @@
   "feature_id": "feat-69",
   "branch": "feat/69-otimizacao-estrutura-tokens-e-paralelismo",
   "spec_status": "reviewed",
-  "updated_at": "2026-11-13T16:55:37Z",
+  "updated_at": "2026-11-13T16:59:45Z",
   "items": [
     {
       "task_id": "69-01",
       "title": "feat-69-01 — Remoção do Forge Studio",
       "spec_path": "sdd/discovery/69-otimizacao-estrutura-tokens-e-paralelismo/features/feat-69-01-remocao-do-studio.md",
-      "status": "review_pending",
+      "status": "approved",
       "rules": [
         "ARQ-01",
         "ARQ-02",
@@ -19,7 +19,35 @@
         "FLX-05"
       ],
       "skills_used": [],
-      "attempts": 1
+      "attempts": 1,
+      "governance_verdict": {
+        "veredito": "conforme",
+        "achados": [
+          {
+            "verificacao": "S-01",
+            "regra": "ARQ-10",
+            "classificacao": "duvida",
+            "severidade": "baixa",
+            "arquivo": "cmd/forge-sdd/acp.go",
+            "linha": 56,
+            "evidencia": "if state == acp.SessionStateStandby { _ = queue.ReconcileStationActivities(dir, station) }",
+            "explicacao": "Listener que reconcilia atividades ao voltar para standby fica em cmd/; previsto na spec, logica pesada em internal/queue. Aceito pelo Lider.",
+            "correcao": ""
+          },
+          {
+            "verificacao": "S-05",
+            "regra": "FLX-03",
+            "classificacao": "duvida",
+            "severidade": "baixa",
+            "arquivo": ".agents/roles/pm-architect.md",
+            "linha": 12,
+            "evidencia": "`discovery-63-studio-navegavel-aprovacao-spec.md`",
+            "explicacao": "Slug de exemplo com a palavra studio mantido; resolvido na 69-06 quando os papeis viram skills.",
+            "correcao": ""
+          }
+        ],
+        "resumo": "Camada A verde (build, vet, test -race, gate). Cinco achados da primeira revisao (ADR sem GOV-01, spec com importador impreciso, decisao de warmup, teste de heartbeat, docs HTTP) corrigidos e reverificados em c1e9d72. Restam duas duvidas baixas aceitas."
+      }
     },
     {
       "task_id": "69-02",
@@ -41,7 +69,7 @@
       "task_id": "69-03",
       "title": "feat-69-03 — Fila e Status por Iniciativa",
       "spec_path": "sdd/discovery/69-otimizacao-estrutura-tokens-e-paralelismo/features/feat-69-03-fila-e-status-por-iniciativa.md",
-      "status": "queued",
+      "status": "review_pending",
       "rules": [
         "COD-01",
         "DUP-04",
@@ -52,7 +80,7 @@
         "TST-04"
       ],
       "skills_used": [],
-      "attempts": 0
+      "attempts": 1
     },
     {
       "task_id": "69-04",

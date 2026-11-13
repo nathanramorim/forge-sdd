@@ -43,6 +43,11 @@
 3. Remover `.agents/commands/` e `.agents/roles/`; manter `.agents/rules/` e `.agents/skills/novo-subcomando-cli-sdd`.
 4. Adaptadores por ferramenta ≤ 300 bytes, sem repetir o corpo; `CLAUDE.md`, `GEMINI.md` e `copilot-instructions.md` ≤ 1.536 bytes.
 5. Atualizar templates embutidos e goldens; `forge-sdd skills sync` gera os adaptadores.
+6. **Comando `/implementar [nome-da-feature]`** na skill `sdd-build`, que substitui `/proxima-feature` (o nome antigo fica como alias de uma linha no adaptador, sem corpo, por `DUP-10`):
+   - **Sem argumento:** executa a fila da iniciativa da branch atual. Para cada task em ordem de dependência: `forge-sdd queue next`, implementa, roda os critérios da spec e `forge-sdd gate`, `forge-sdd queue complete`, e passa a task à Governança; para ao esgotar a fila ou ao falhar o portão.
+   - **Com argumento:** resolve o nome contra `sdd/discovery/*<nome>*` (e, no legado, `sdd/archive/`). Se houver mais de uma correspondência, lista e pergunta. Confirma a branch única da iniciativa (`Regra 15`: pergunta o ponto de partida e reaproveita branch existente) antes de executar a fila dela.
+   - Antes de iniciar, o comando reporta o plano (iniciativa, branch, tasks na fila) e aguarda confirmação (`CLAUDE.md`, passo PLAN); `--yes` dispensa a confirmação em modo autônomo.
+   - Grava telemetria ao fechar cada task (`forge-sdd session record`).
 
 ## Critérios de Aceitação Executáveis
 ```bash
@@ -52,6 +57,7 @@ for s in sdd-concepcao sdd-planejamento sdd-build sdd-governanca sdd-operacao; d
 forge-sdd skills sync && forge-sdd skills sync && git diff --quiet
 ```
 - Segunda execução do `sync` não altera arquivos (idempotência).
+- Existe o adaptador `implementar` em cada ferramenta (≤ 300 bytes) apontando para `sdd-build`; `proxima-feature` é apenas alias. `grep -c 'queue next' .agents/skills/sdd-build/SKILL.md` ≥ 1 e o `SKILL.md` descreve os modos com e sem argumento.
 - Teste: nenhum adaptador excede 300 bytes nem contém bloco de instruções repetido (`DUP-10`).
 - Check P-23 continua passando (rules intactas).
 - Violações (`TST-03`): skill sem frontmatter, rule citada inexistente e `SKILL.md` acima do limite falham.
