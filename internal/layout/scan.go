@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path"
 	"path/filepath"
 	"regexp"
 	"sort"
@@ -32,7 +33,10 @@ type InitiativeInfo struct {
 // ListInitiatives devolve as iniciativas de dir. Sem allBranches lê apenas a árvore de
 // trabalho; com allBranches une as de todas as branches locais e remotas, sem checkout.
 func ListInitiatives(dir string, allBranches bool) ([]InitiativeInfo, error) {
-	current, _, _ := Current(dir)
+	current, _, curErr := Current(dir)
+	if curErr != nil && !errors.Is(curErr, errNotRepo) {
+		return nil, curErr
+	}
 	workTree := map[string]InitiativeInfo{}
 
 	entries, err := os.ReadDir(Discovery(dir))
@@ -104,6 +108,23 @@ func ListInitiatives(dir string, allBranches bool) ([]InitiativeInfo, error) {
 
 func hasKey(m map[string]InitiativeInfo, k string) bool { _, ok := m[k]; return ok }
 
+// statusKeyRe limita as chaves de situação lidas de queue.json (dado não confiável, SEG-01).
+var statusKeyRe = regexp.MustCompile(`^[a-z][a-z_]{0,31}$`)
+
+// maxStateFileBytes é o limite de leitura de status.md e queue.json vindos de refs (SEG-01).
+const maxStateFileBytes = 64 * 1024
+
+// sanitizeText troca caracteres de controle (inclusive ESC e C1) por espaço, para que texto lido
+// de refs não confiáveis não injete sequências de terminal nem quebre a saída (SEG-01).
+func sanitizeText(s string) string {
+	return strings.Map(func(r rune) rune {
+		if r < 0x20 || r == 0x7f || (r >= 0x80 && r <= 0x9f) {
+			return ' '
+		}
+		return r
+	}, s)
+}
+
 func buildInitiative(id, branch string, status, queue []byte) InitiativeInfo {
 	it := InitiativeInfo{ID: id, Branch: branch, Tasks: map[string]int{}}
 	it.Status, it.Next = summarizeStatus(string(status))
@@ -114,7 +135,11 @@ func buildInitiative(id, branch string, status, queue []byte) InitiativeInfo {
 	}
 	if json.Unmarshal(queue, &q) == nil {
 		for _, item := range q.Items {
-			it.Tasks[item.Status]++
+			key := item.Status
+			if !statusKeyRe.MatchString(key) {
+				key = "outro"
+			}
+			it.Tasks[key]++
 		}
 	}
 	return it
@@ -147,7 +172,7 @@ func summarizeStatus(text string) (status, next string) {
 			next = trimmed
 		}
 	}
-	return truncate(strings.Join(parts, " | "), 100), truncate(next, 100)
+	return truncate(sanitizeText(strings.Join(parts, " | ")), 100), truncate(sanitizeText(next), 100)
 }
 
 func truncate(s string, n int) string {
@@ -160,13 +185,21 @@ func truncate(s string, n int) string {
 
 // ---- git (somente leitura, argv explícito: SEG-03) ----
 
+// errNotRepo identifica a falha "não é um repositório git", que o chamador pode tratar como
+// ausência de refs; qualquer outra falha do git deve ser propagada.
+var errNotRepo = errors.New("não é um repositório git")
+
 func gitOut(dir string, args ...string) (string, error) {
 	cmd := exec.Command("git", append([]string{"-C", dir}, args...)...)
 	var stderr bytes.Buffer
 	cmd.Stderr = &stderr
 	out, err := cmd.Output()
 	if err != nil {
-		return "", fmt.Errorf("layout: git %s: %w (%s)", strings.Join(args, " "), err, strings.TrimSpace(stderr.String()))
+		msg := strings.TrimSpace(stderr.String())
+		if strings.Contains(msg, "not a git repository") {
+			return "", fmt.Errorf("layout: git %s: %w (%s)", strings.Join(args, " "), errNotRepo, msg)
+		}
+		return "", fmt.Errorf("layout: git %s: %w (%s)", strings.Join(args, " "), err, msg)
 	}
 	return string(out), nil
 }
@@ -202,7 +235,7 @@ func listRefs(dir string) ([]string, error) {
 
 // idsInRef lista as pastas <id>-<nome> de sdd/discovery em ref.
 func idsInRef(dir, ref string) ([]string, error) {
-	names, err := namesInRef(dir, ref, SddDirName+"/"+DiscoveryDirName+"/")
+	names, err := namesInRef(dir, ref, path.Join(SddDirName, DiscoveryDirName)+"/")
 	if err != nil {
 		return nil, err
 	}
@@ -235,9 +268,40 @@ func namesInRef(dir, ref, path string) ([]string, error) {
 	return names, nil
 }
 
+// treeNamesInRef devolve o nome base de todas as entradas (arquivos e pastas, recursivo) de paths em ref.
+func treeNamesInRef(dir, ref string, paths ...string) ([]string, error) {
+	if !safeRef(ref) {
+		return nil, fmt.Errorf("layout: ref inválida %q", ref)
+	}
+	args := append([]string{"ls-tree", "-r", "-t", "--name-only", ref, "--"}, paths...)
+	out, err := gitOut(dir, args...)
+	if err != nil {
+		return nil, err
+	}
+	var names []string
+	for _, line := range strings.Split(out, "\n") {
+		if line = strings.TrimSpace(line); line != "" {
+			names = append(names, path.Base(line))
+		}
+	}
+	return names, nil
+}
+
+// gitShow lê um arquivo de ref, recusando blobs acima de maxStateFileBytes (SEG-01).
 func gitShow(dir, ref, path string) (string, error) {
 	if !safeRef(ref) {
 		return "", fmt.Errorf("layout: ref inválida %q", ref)
+	}
+	sizeOut, err := gitOut(dir, "cat-file", "-s", ref+":"+path)
+	if err != nil {
+		return "", err
+	}
+	size, convErr := strconv.ParseInt(strings.TrimSpace(sizeOut), 10, 64)
+	if convErr != nil {
+		return "", fmt.Errorf("layout: tamanho inválido de %s:%s: %w", ref, path, convErr)
+	}
+	if size > maxStateFileBytes {
+		return "", fmt.Errorf("layout: %s:%s tem %d bytes (limite %d)", ref, path, size, maxStateFileBytes)
 	}
 	return gitOut(dir, "show", ref+":"+path)
 }
@@ -263,7 +327,7 @@ func refOwnsInitiative(ref, id string) bool {
 
 var (
 	leadingNumber = regexp.MustCompile(`^(?:(?:discovery|criteria|plan|feat|fix)-)?([0-9]{1,6})(?:[^0-9]|$)`)
-	workitemID    = regexp.MustCompile(`^[A-Za-z0-9]{1,32}$`)
+	workitemID    = regexp.MustCompile(`^[a-z0-9]{1,32}$`)
 )
 
 // NextID calcula o próximo identificador conforme a convenção de nomes ("sequencial", "hash"
@@ -277,10 +341,16 @@ func NextID(dir, convention, workitem string) (string, error) {
 
 	switch convention {
 	case "workitem":
-		if !workitemID.MatchString(workitem) {
+		id := strings.ToLower(workitem)
+		if !workitemID.MatchString(id) {
 			return "", fmt.Errorf("layout: convenção workitem exige --workitem alfanumérico (até 32 caracteres), recebido %q", workitem)
 		}
-		return workitem, nil
+		for _, n := range known {
+			if tok, _, ok := strings.Cut(stripKind(n), "-"); ok && tok == id {
+				return "", fmt.Errorf("layout: workitem %q já está em uso por %q", id, n)
+			}
+		}
+		return id, nil
 	case "hash":
 		taken := map[string]bool{}
 		for _, n := range known {
@@ -332,17 +402,23 @@ func knownNames(dir string) ([]string, error) {
 			seen[n] = true
 		}
 	}
+	// Percorre recursivamente: fixes e features aninhados em pastas de iniciativa também contam.
 	for _, d := range []string{Discovery(dir), Features(dir), Archive(dir)} {
-		entries, err := os.ReadDir(d)
-		if err != nil {
+		if _, err := os.Stat(d); err != nil {
 			continue
 		}
-		for _, e := range entries {
-			add(e.Name())
-		}
+		_ = filepath.WalkDir(d, func(p string, e os.DirEntry, err error) error {
+			if err == nil && p != d {
+				add(e.Name())
+			}
+			return nil
+		})
 	}
 	refs, err := listRefs(dir)
 	if err != nil {
+		if !errors.Is(err, errNotRepo) {
+			return nil, err // falha real do git: não arriscar um ID colidente
+		}
 		// Fora de um repositório git só a árvore de trabalho vale.
 		var names []string
 		for n := range seen {
@@ -354,12 +430,13 @@ func knownNames(dir string) ([]string, error) {
 		if id, ok := idOfRef(ref); ok {
 			add(id)
 		}
-		for _, p := range []string{"sdd/discovery/", "sdd/features/", "sdd/archive/"} {
-			if names, err := namesInRef(dir, ref, p); err == nil {
-				for _, n := range names {
-					add(n)
-				}
-			}
+		names, err := treeNamesInRef(dir, ref,
+			path.Join(SddDirName, DiscoveryDirName), path.Join(SddDirName, FeaturesDirName), path.Join(SddDirName, ArchiveDirName))
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range names {
+			add(n)
 		}
 	}
 	out := make([]string, 0, len(seen))

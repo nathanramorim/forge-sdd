@@ -1,8 +1,10 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"io"
+	"os"
 	"sort"
 	"strings"
 
@@ -98,8 +100,16 @@ Somente leitura: não cria arquivos nem branches.`,
 		workitem, _ := cmd.Flags().GetString("workitem")
 
 		convention := "sequencial"
-		if rc, err := config.ReadSddrc(dir); err == nil && rc.NamingConvention != "" {
-			convention = rc.NamingConvention
+		rc, rcErr := config.ReadSddrc(dir)
+		switch {
+		case rcErr == nil:
+			if rc.NamingConvention != "" {
+				convention = rc.NamingConvention
+			}
+		case errors.Is(rcErr, os.ErrNotExist):
+			// sem .sddrc: usa o padrão sequencial
+		default:
+			return rcErr // .sddrc inválido: não adivinhar a convenção
 		}
 		id, err := layout.NextID(dir, convention, workitem)
 		if err != nil {

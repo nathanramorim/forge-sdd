@@ -19,7 +19,7 @@ Sem `index.md` e `progress.md` globais, a visão geral precisa ser calculada, e 
 |---|---|---|---|---|
 | Subcomando `status` | `cmd/forge-sdd/*.go`; `ARQ-06` | Listado em `ARQ-06`, não registrado; existe `queue panel` | criar `status` | Substitui `index.md` e `progress.md` na leitura |
 | Próximo ID | `sdd/memory/naming-convention.md` | Regra em prosa, olha só a árvore local; modos `sequencial`, `hash`, `workitem` | criar `next-id` | Implementa os três modos consultando todas as refs |
-| Leitura de refs | `internal/gate` | `git` com argv explícito | reusar o padrão | `git for-each-ref`, `git show <ref>:<path>` (`SEG-03`) |
+| Leitura de refs | `internal/layout` (69-02) | `layout.CurrentBranch` já executa git com argv explícito; o gate não executa git | estender | `git for-each-ref`, `git ls-tree`, `git cat-file`, `git show <ref>:<path>` com ref validada (`SEG-01`, `SEG-03`) |
 | Caminhos e iniciativa | `internal/layout` (69-02) | `FromBranch`, `Status` | reusar | Única fonte |
 | Procedimento | `.agents/skills/novo-subcomando-cli-sdd` | Aprovado em `sdd/skills/index.md` | reusar | `DUP-05` |
 | Config de naming | `internal/config` (`naming_convention`) | Lê `.sddrc` | reusar | Define o modo de `next-id` |
@@ -44,7 +44,8 @@ Sem `index.md` e `progress.md` globais, a visão geral precisa ser calculada, e 
 go build ./... && go vet ./... && go test -race ./cmd/forge-sdd/... ./internal/layout/...
 forge-sdd status --help && forge-sdd next-id --help
 ```
-- Repositório git temporário (`TST-04`): pasta `70-x` existente só em outra branch faz `next-id` devolver `71` (ou superior).
+- Repositório git temporário (`TST-04`): pasta `70-x` existente só em outra branch faz `next-id` devolver `71` (ou superior); um `fix-70-*.md` aninhado em `fixes/` de outra branch também conta.
+- Texto lido de refs é tratado como não confiável: caracteres de controle são removidos, chaves de situação fora de `^[a-z][a-z_]{0,31}$` viram `outro` e arquivos acima de 64 KB não são lidos (`SEG-01`).
 - `status --all-branches` lista iniciativas de branches não mescladas e mostra, por iniciativa, a branch e a contagem de tasks por situação.
-- Violações (`TST-03`): ref com nome malicioso (`--upload-pack=...`, `;`), repositório sem commits e branch destacada falham com erro enriquecido, sem panic.
+- Violações (`TST-03`): ref com nome malicioso (`--upload-pack=...`, `;`) é recusada; falha real do git (por exemplo diretório inexistente) sobe como erro enriquecido, e só "não é um repositório git" cai em árvore de trabalho; `.sddrc` inválido falha em vez de assumir `sequencial`. Repositório sem commits devolve lista vazia e HEAD destacado significa "sem iniciativa ativa"; nenhum dos dois entra em panic.
 - `--dry-run` não existe nestes comandos porque são somente leitura; nenhum escreve em disco.

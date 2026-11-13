@@ -24,7 +24,7 @@ const (
 	VerdictDuvida   = "duvida"
 )
 
-// Queue representa a fila persistida em sdd/.queue/queue.json.
+// Queue representa a fila persistida em sdd/discovery/<id>/queue.json (ou na fila legada sdd/.queue/queue.json).
 type Queue struct {
 	FeatureID  string      `json:"feature_id"`
 	Branch     string      `json:"branch"`
@@ -228,6 +228,11 @@ func Enqueue(dir, featureID, branch, taskID, title, specPath string, rules []str
 		q.FeatureID = featureID
 	}
 	if branch != "" {
+		if id, ok := layout.FromBranch(branch); ok {
+			if activeID, _, active := layout.ActiveInitiative(dir); active && activeID != id {
+				return fmt.Errorf("a branch %q pertence à iniciativa %q, mas a branch atual é da iniciativa %q; troque de branch antes de enfileirar", branch, id, activeID)
+			}
+		}
 		q.Branch = branch
 	}
 	if q.SpecStatus == "" {

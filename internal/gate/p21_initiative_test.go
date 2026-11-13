@@ -2,11 +2,11 @@ package gate
 
 import (
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strings"
 	"testing"
 
+	"github.com/forge-sdd/cli/internal/testutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -14,13 +14,7 @@ import (
 // gitInitiative cria um repositório git na branch indicada e a pasta da iniciativa correspondente.
 func gitInitiative(t *testing.T, dir, branch, initiative string) string {
 	t.Helper()
-	for _, args := range [][]string{
-		{"init", "-q", "-b", branch},
-		{"-c", "user.email=t@t", "-c", "user.name=t", "commit", "-q", "--allow-empty", "-m", "init"},
-	} {
-		out, err := exec.Command("git", append([]string{"-C", dir}, args...)...).CombinedOutput()
-		require.NoError(t, err, string(out))
-	}
+	testutil.InitRepo(t, dir, branch)
 	base := filepath.Join(dir, "sdd", "discovery", initiative)
 	require.NoError(t, os.MkdirAll(base, 0o755))
 	return filepath.Join(base, "status.md")

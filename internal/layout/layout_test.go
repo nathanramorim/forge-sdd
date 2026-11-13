@@ -1,10 +1,10 @@
 package layout
 
 import (
-	"os/exec"
 	"path/filepath"
 	"testing"
 
+	"github.com/forge-sdd/cli/internal/testutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -84,13 +84,7 @@ func TestFromBranch(t *testing.T) {
 func gitInit(t *testing.T, branch string) string {
 	t.Helper()
 	dir := t.TempDir()
-	for _, args := range [][]string{
-		{"init", "-q", "-b", branch},
-		{"-c", "user.email=t@t", "-c", "user.name=t", "commit", "-q", "--allow-empty", "-m", "init"},
-	} {
-		out, err := exec.Command("git", append([]string{"-C", dir}, args...)...).CombinedOutput()
-		require.NoError(t, err, string(out))
-	}
+	testutil.InitRepo(t, dir, branch)
 	return dir
 }
 
@@ -110,8 +104,7 @@ func TestCurrent(t *testing.T) {
 
 func TestCurrent_HeadDestacadoEForaDeRepositorio(t *testing.T) {
 	dir := gitInit(t, "feat/69-teste-de-layout")
-	out, err := exec.Command("git", "-C", dir, "checkout", "-q", "--detach").CombinedOutput()
-	require.NoError(t, err, string(out))
+	testutil.Git(t, dir, "checkout", "-q", "--detach")
 	id, ok, err := Current(dir)
 	require.NoError(t, err)
 	assert.False(t, ok)

@@ -383,7 +383,7 @@ func isScannableTextFile(name string) bool {
 	case ".go", ".md", ".json", ".yaml", ".yml", ".toml", ".env", ".sh", ".txt", ".js", ".ts", ".py", ".tmpl":
 		return true
 	}
-	return strings.HasPrefix(name, ".env") || name == ".sddrc"
+	return strings.HasPrefix(name, ".env") || name == layout.SddrcFileName
 }
 
 func checkP20ConstitutionException(dir, prBodyPath, prBodyText string, now time.Time) CheckResult {

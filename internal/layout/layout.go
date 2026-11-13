@@ -6,11 +6,9 @@
 package layout
 
 import (
-	"bytes"
 	"errors"
 	"fmt"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -207,12 +205,9 @@ func Current(dir string) (id string, ok bool, err error) {
 
 // CurrentBranch devolve o nome da branch atual (vazio em HEAD destacado).
 func CurrentBranch(dir string) (string, error) {
-	cmd := exec.Command("git", "-C", dir, "branch", "--show-current")
-	var stderr bytes.Buffer
-	cmd.Stderr = &stderr
-	out, err := cmd.Output()
+	out, err := gitOut(dir, "branch", "--show-current")
 	if err != nil {
-		return "", fmt.Errorf("layout: consultar branch atual em %q: %w (%s)", dir, err, strings.TrimSpace(stderr.String()))
+		return "", err
 	}
-	return strings.TrimSpace(string(out)), nil
+	return strings.TrimSpace(out), nil
 }

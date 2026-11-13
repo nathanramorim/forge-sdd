@@ -18,7 +18,7 @@ O caminho `sdd/...` é montado com `filepath.Join(dir, "sdd", ...)` em 15 arquiv
 | Procurei | Onde | Achei | Decisão | Justificativa |
 |---|---|---|---|---|
 | Caminhos `sdd/` literais | `cmd/forge-sdd/{lessons,destroy,autopilot,session,governance,doctor}.go`, `internal/{config,queue,gate,skills,scaffold}` | 15 arquivos montam o caminho à mão | criar `internal/layout` e migrar | Definição única de nomes canônicos (`DUP-04`) |
-| Branch atual | `internal/gate/gate.go` (P-01) | Já lê a branch com `git` | reusar o padrão | argv explícito, sem shell (`SEG-03`) |
+| Branch atual | `internal/gate/gate.go` (P-01), `cmd/forge-sdd/gate.go` | O gate não executa git: recebe a branch pela flag `--branch` | criar | `layout.CurrentBranch` é o primeiro executor de git do repositório; argv explícito, sem shell (`SEG-03`) |
 | Validação de caminho | `internal/config` (`shouldPreserve`), `acp.ValidateWorkspace` | Confinamento de diretório | reusar o padrão | Resolução da iniciativa rejeita `..` e caminho absoluto (`SEG-01`) |
 | Convenção de branch | `sdd/memory/naming-convention.md` | `<prefixo>/<id>-<nome>` | reusar | Mapeia direto para `sdd/discovery/<id>-<nome>/` |
 | Constantes de nomes | `internal/queue`, `internal/config` | `.queue`, `.metrics`, `.sddrc` repetidos | estender | Pacote `layout` exporta as constantes |

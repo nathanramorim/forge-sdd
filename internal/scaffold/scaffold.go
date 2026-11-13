@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/fs"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 	"text/template"
@@ -258,7 +259,7 @@ func shouldPreserve(dest string, targetDir string) bool {
 	// Regras de preservação de domínio sob a pasta sdd/
 	if strings.HasPrefix(rel, "sdd/") {
 		// Exceções estruturais que DEVEM ser atualizadas/sobrescritas:
-		if rel == "sdd/.sdd-version" || rel == "sdd/.sddrc" {
+		if rel == path.Join(layout.SddDirName, layout.VersionFileName) || rel == path.Join(layout.SddDirName, layout.SddrcFileName) {
 			return false
 		}
 		// Todo o restante do domínio (memory, spec, features, releases, README, HOWTO, plan) é preservado

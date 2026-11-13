@@ -3,10 +3,10 @@ package main
 import (
 	"bytes"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"testing"
 
+	"github.com/forge-sdd/cli/internal/testutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -30,9 +30,7 @@ func runRoot(t *testing.T, args ...string) (string, error) {
 
 func gitT(t *testing.T, dir string, args ...string) {
 	t.Helper()
-	full := append([]string{"-C", dir, "-c", "user.email=t@t", "-c", "user.name=t"}, args...)
-	out, err := exec.Command("git", full...).CombinedOutput()
-	require.NoError(t, err, string(out))
+	testutil.Git(t, dir, args...)
 }
 
 func TestStatusENextID_ComIniciativaEmOutraBranch(t *testing.T) {
@@ -89,4 +87,13 @@ func TestNextID_KindInvalidoEWorkitemSemValor(t *testing.T) {
 	out, err := runRoot(t, "next-id", "--dir", dir, "--workitem", "1024")
 	require.NoError(t, err)
 	assert.Equal(t, "1024\n", out)
+}
+
+func TestNextID_SddrcInvalidoFalhaEmVezDeAdivinhar(t *testing.T) {
+	dir := t.TempDir()
+	require.NoError(t, os.MkdirAll(filepath.Join(dir, "sdd"), 0o755))
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "sdd", ".sddrc"), []byte("{quebrado"), 0o644))
+	_, err := runRoot(t, "next-id", "--dir", dir)
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "inválido")
 }

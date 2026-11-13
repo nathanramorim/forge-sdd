@@ -55,7 +55,7 @@ Procedimentos operacionais para implementar, operar e estender o Protocolo ACP n
 - **Despacho via `session/prompt`:**
   - Recebe `sessionId`, `prompt`, `station` (opcional, padrão: `concepcao` / `StationPMArchitect`), `operation` e metadados.
   - Valida a existência da sessão ativa e o nome da estação contra o enum canônico de estações (`queue.IsValidStation`).
-  - Enfileira a demanda diretamente na fila determinística correspondente via `queue.EnqueueStationItem`, garantindo atomicidade na gravação do arquivo `sdd/.queue/stations/<station>.json`.
+  - Enfileira a demanda diretamente na fila determinística correspondente via `queue.EnqueueStationItem`, garantindo atomicidade na gravação do arquivo `sdd/.runtime/stations/<station>.json`.
   - Emite automaticamente uma notificação `prompt_enqueued` para os assinantes conectados.
 
 ## 5. Notificações de Streaming Assíncrono (`session/notification`)

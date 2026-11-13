@@ -62,7 +62,7 @@ type StationItem struct {
 	Metadata          map[string]string `json:"metadata,omitempty"`
 }
 
-// StationQueue representa a fila persistida em sdd/.queue/stations/<station>.json.
+// StationQueue representa a fila persistida em sdd/.runtime/stations/<station>.json.
 type StationQueue struct {
 	Station       string        `json:"station"`
 	Version       int64         `json:"version"`

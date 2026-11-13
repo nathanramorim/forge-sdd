@@ -175,7 +175,7 @@ func SanitizeOrphanActivities(dir string) (int, error) {
 	return reconciled, nil
 }
 
-// LoadActivities lê os registros recentes de atividade de sdd/.queue/activity.json.
+// LoadActivities lê os registros recentes de atividade de sdd/.runtime/activity.json.
 func LoadActivities(dir string) ([]ActivityItem, error) {
 	actPath := layout.ActivityFile(dir)
 	data, err := os.ReadFile(actPath)
