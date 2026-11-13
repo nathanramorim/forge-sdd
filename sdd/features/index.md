@@ -207,5 +207,5 @@ main
 | 68-03 | ../discovery/68-sessoes-acp-fisicas-multi-agente/features/feat-68-03-pool-warmup-fisico-e-status-conectadas.md | feat/68-sessoes-acp-fisicas-multi-agente | 68-03 | approved |
 | 68-03b | ../discovery/68-sessoes-acp-fisicas-multi-agente/features/feat-68-03b-restart-backoff-e-failure-history.md | feat/68-sessoes-acp-fisicas-multi-agente | 68-03b | approved |
 | 68-06b | ../discovery/68-sessoes-acp-fisicas-multi-agente/features/feat-68-06b-selecao-interativa-e-instalacao-confirmada.md | feat/68-sessoes-acp-fisicas-multi-agente | 68-06b | approved |
-| 68-04 | ../discovery/68-sessoes-acp-fisicas-multi-agente/features/feat-68-04-studio-chip-conectadas-e-modo-leitura.md | feat/68-sessoes-acp-fisicas-multi-agente | 68-04 | approved |
-| 68-05 | ../discovery/68-sessoes-acp-fisicas-multi-agente/features/feat-68-05-studio-painel-monitoramento-de-falhas.md | feat/68-sessoes-acp-fisicas-multi-agente | 68-05 | approved |
+| 68-04 | ../discovery/68-sessoes-acp-fisicas-multi-agente/features/feat-68-04-studio-chip-conectadas-e-modo-leitura.md | feat/68-sessoes-acp-fisicas-multi-agente | 68-04 | cancelled |
+| 68-05 | ../discovery/68-sessoes-acp-fisicas-multi-agente/features/feat-68-05-studio-painel-monitoramento-de-falhas.md | feat/68-sessoes-acp-fisicas-multi-agente | 68-05 | cancelled |

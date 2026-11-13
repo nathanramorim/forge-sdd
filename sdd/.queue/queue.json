@@ -367,33 +367,6 @@
       ],
       "skills_used": [],
       "attempts": 0
-    },
-    {
-      "task_id": "68-04",
-      "title": "feat-68-04 — Studio: Chip \"x de 5 conectadas\", Estação em Erro e Modo Leitura",
-      "spec_path": "sdd/discovery/68-sessoes-acp-fisicas-multi-agente/features/feat-68-04-studio-chip-conectadas-e-modo-leitura.md",
-      "status": "queued",
-      "rules": [
-        "ARQ-10",
-        "FLX-04",
-        "TST-05"
-      ],
-      "skills_used": [],
-      "attempts": 0
-    },
-    {
-      "task_id": "68-05",
-      "title": "feat-68-05 — Studio: Painel de Monitoramento de Falhas das Estações",
-      "spec_path": "sdd/discovery/68-sessoes-acp-fisicas-multi-agente/features/feat-68-05-studio-painel-monitoramento-de-falhas.md",
-      "status": "queued",
-      "rules": [
-        "ARQ-03",
-        "ARQ-10",
-        "SEG-05",
-        "COD-05"
-      ],
-      "skills_used": [],
-      "attempts": 0
     }
   ]
 }

@@ -1,12 +1,12 @@
-# feat-68-06 — Detecção de Requisitos dos Agentes (`internal/preflight`) e Reuso em doctor/Studio
+# feat-68-06 — Detecção de Requisitos dos Agentes (`internal/preflight`) e Reuso em doctor e no `acp`/`attach`
 
 **Branch:** `feat/68-sessoes-acp-fisicas-multi-agente`
 **Fase:** 68-06
 **Tamanho:** `M`
-**Depende de:** `feat-68-01` (config `acp.*` e presets). Alimenta `feat-68-03`, `feat-68-04` e `feat-68-06b`.
+**Depende de:** `feat-68-01` (config `acp.*` e presets). Alimenta `feat-68-03` e `feat-68-06b`.
 **Status:** `approved` (FLX-01 aprovado)
 
-> Fatiamento: esta task entrega apenas a detecção reutilizável (`Check`/`Plan`, relatório, doctor e aviso do Studio). Seleção interativa, instalação com confirmação e `--yes` estão em `feat-68-06b`.
+> Fatiamento: esta task entrega apenas a detecção reutilizável (`Check`/`Plan`, relatório, doctor e aviso no boot do `forge-sdd acp`/`attach`). Seleção interativa, instalação com confirmação e `--yes` estão em `feat-68-06b`.
 
 ## Contexto & Motivação
 Os adaptadores ACP exigem CLIs e runtimes (por exemplo `npx` para `claude-agent-acp` e `codex-acp`). Hoje nada verifica isso, e uma estação falharia em runtime sem explicação. O preflight pergunta quais agentes o usuário vai usar (sem instalar todos), detecta o que falta, mostra o comando exato de instalação e só executa com confirmação explícita.
@@ -18,8 +18,8 @@ Os adaptadores ACP exigem CLIs e runtimes (por exemplo `npx` para `claude-agent-
    - `--yes`: executa as instalações definidas no preset sem perguntar (uso em CI).
    - Não interativo sem `--yes`: apenas reporta o que falta e como instalar; nunca executa.
    - `--dry-run`: nunca executa (`ARQ-05`).
-4. **Reuso:** a mesma função de checagem é usada por `forge-sdd doctor` (relatório) e pelo boot do Studio (aviso claro de requisito ausente; nunca bloqueia o boot; modo leitura).
-5. **Chip:** `N` do chip "x de N conectadas" passa a ser o número de estações com agente habilitado/configurado (ajuste em 68-03/68-04). Estação sem agente habilitado aparece como "não configurada", não como erro.
+4. **Reuso:** a mesma função de checagem é usada por `forge-sdd doctor` (relatório) e pelo boot do `forge-sdd acp`/`attach` (aviso claro de requisito ausente em stderr; nunca bloqueia o boot).
+5. **Chip:** `N` do chip "x de N conectadas" passa a ser o número de estações com agente habilitado/configurado (ajuste em 68-03). Estação sem agente habilitado aparece como "não configurada", não como erro.
 
 ## Modelo do módulo
 - **Modelo:** `enxuto`.
@@ -33,7 +33,7 @@ Os adaptadores ACP exigem CLIs e runtimes (por exemplo `npx` para `claude-agent-
 | Fluxo init/update e `--yes` | `cmd/forge-sdd/main.go` | `--yes`, `--dry-run`, seleção de `--agent` (agentes de scaffold) | estender | Encaixar o preflight após a seleção; não confundir `agents` do scaffold com agentes ACP |
 | Doctor | `cmd/forge-sdd/doctor.go`, `internal/*` | Relatório de saúde do projeto | estender | Nova seção "Requisitos dos agentes" chamando a função única |
 | Config e presets | `internal/config` (68-01) | Bloco `acp.*`, presets embutidos | estender | Acrescentar `enabledAgents`, `requires`, `versionArgs`, `install` nos presets |
-| Boot do Studio | `internal/studio/server.go` | Warmup sem diagnóstico | estender | Chamar a checagem e expor aviso (68-04) |
+| Boot do `acp`/`attach` | `cmd/forge-sdd/attach.go`, `internal/acp/dispatcher.go` | Warmup sem diagnóstico | estender | Chamar a checagem e emitir aviso |
 | Checagem de requisitos | `internal/` | Inexistente | criar | Pacote `internal/preflight` com `Check`, `Plan`, `Install` (`DUP-03`: um único dono) |
 | Execução de comandos externos | `internal/gate` (git/go) | Padrão de argv explícito | reusar padrão | `exec.Command` sem shell (`SEG-03`) |
 
@@ -58,4 +58,4 @@ Com `LookPath`, executor e prompt injetáveis (fakes, sem rede, `TST-04`):
 - `npx` ausente para claude/codex: reporta Node/npx como requisito faltante.
 - Preset com `install.command` contendo metacaracteres de shell é rejeitado.
 - Seleção grava `acp.enabledAgents`; `Status` do pool e o chip usam N = estações habilitadas.
-- `doctor` e boot do Studio chamam a mesma função (teste de que não há segunda implementação) e o Studio sobe com requisito ausente.
+- `doctor` e boot do `acp`/`attach` chamam a mesma função (teste de que não há segunda implementação) e o boot segue com requisito ausente.
