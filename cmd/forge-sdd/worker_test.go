@@ -19,6 +19,11 @@ func resetWorkerFlags() {
 	_ = pipelinePROpenedCmd.Flags().Set("branch", "")
 	_ = workerCmd.Flags().Set("once", "false")
 	_ = workerCmd.Flags().Set("name", "")
+	_ = workerCmd.Flags().Set("cli", "")
+	for _, f := range []string{"cli", "discovery", "builder", "reviewer"} {
+		_ = upCmd.Flags().Set(f, "")
+	}
+	_ = upCmd.Flags().Set("dry-run", "false")
 }
 
 func claimedJob(t *testing.T, dir string) {

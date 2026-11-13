@@ -137,7 +137,7 @@ func strictDecode(data []byte, v any) error {
 
 // Validate confere os limites e formatos do pipeline (SEG-01).
 func (c ForgeConfig) Validate() error {
-	if !knownCLI(c.CLI) {
+	if !KnownCLI(c.CLI) {
 		return fmt.Errorf("cli %q inválido (use %s ou agy)", c.CLI, strings.Join(OfferedCLIs(), ", "))
 	}
 	if _, ok := c.CLIProfiles[c.CLI]; !ok {

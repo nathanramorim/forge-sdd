@@ -5,6 +5,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/forge-sdd/cli/internal/config"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -142,4 +143,62 @@ func TestLauncher_Violacoes(t *testing.T) {
 	_, err = LaunchPlan(lenv("plan9", nil, nil), "claude")
 	assert.Error(t, err)
 	assert.Error(t, Launch([]LaunchCommand{{Title: "x"}}))
+}
+
+func TestSessions_AgentePorSessao(t *testing.T) {
+	cfg := config.DefaultForgeConfig()
+	cfg.Sessions = map[string]string{config.SessionRoleDiscovery: config.CLIClaude, config.SessionRoleBuilder: config.CLICodex, config.SessionRoleReviewer: config.CLIGemini}
+	for _, goos := range []string{"darwin", "linux", "windows"} {
+		env := lenv(goos, map[string]bool{"wt.exe": true, "gnome-terminal": true}, nil)
+		if goos == "windows" {
+			env.Dir, env.Bin = `C:\work\proj`, `C:\f\forge-sdd.exe`
+		}
+		ss, err := SessionsFor(env, cfg)
+		require.NoError(t, err, goos)
+		require.Len(t, ss, 3)
+		assert.Contains(t, ss[0].Inner, "claude -n forge-discovery --agent lider", goos)
+		assert.Contains(t, ss[1].Inner, "worker --role builder --name forge-builder --cli codex", goos)
+		assert.Contains(t, ss[2].Inner, "worker --role reviewer --name forge-reviewer --cli gemini", goos)
+		plan, err := LaunchPlanFor(env, cfg)
+		require.NoError(t, err, goos)
+		require.Len(t, plan, 3, goos)
+	}
+}
+
+func TestSessions_DiscoveryInterativaPorCLI(t *testing.T) {
+	want := map[string]string{
+		config.CLIClaude:  "claude -n forge-discovery --agent lider",
+		config.CLIGemini:  "gemini -i 'Voce e a sessao forge-discovery",
+		config.CLICopilot: "copilot -i 'Voce e a sessao forge-discovery",
+		config.CLICodex:   "codex 'Voce e a sessao forge-discovery",
+		config.CLIAgy:     "agy --agent lider -i",
+	}
+	for cli, w := range want {
+		cfg := config.DefaultForgeConfig()
+		cfg.Sessions = map[string]string{config.SessionRoleDiscovery: cli}
+		ss, err := SessionsFor(lenv("linux", nil, nil), cfg)
+		require.NoError(t, err, cli)
+		assert.Contains(t, ss[0].Inner, w, cli)
+		assert.NotContains(t, ss[0].Inner, "{", "marcadores resolvidos: %s", cli)
+	}
+	// No Windows o prompt vai entre aspas duplas e o comando não ganha metacaracteres.
+	cfg := config.DefaultForgeConfig()
+	cfg.Sessions = map[string]string{config.SessionRoleDiscovery: config.CLIGemini}
+	env := lenv("windows", map[string]bool{"wt.exe": true}, nil)
+	env.Dir, env.Bin = `C:\work\proj`, `C:\f\forge-sdd.exe`
+	ss, err := SessionsFor(env, cfg)
+	require.NoError(t, err)
+	assert.Contains(t, ss[0].Inner, `gemini -i "Voce e a sessao forge-discovery`)
+}
+
+func TestSessions_AgenteInvalidoERecusado(t *testing.T) {
+	cfg := config.DefaultForgeConfig()
+	cfg.Sessions = map[string]string{config.SessionRoleBuilder: "gpt"}
+	_, err := SessionsFor(lenv("linux", nil, nil), cfg)
+	assert.Error(t, err)
+	cfg = config.DefaultForgeConfig()
+	delete(cfg.CLIProfiles, config.CLICodex)
+	cfg.Sessions = map[string]string{config.SessionRoleReviewer: config.CLICodex}
+	_, err = SessionsFor(lenv("linux", nil, nil), cfg)
+	assert.Error(t, err, "sem perfil não abre")
 }

@@ -2,7 +2,7 @@
   "feature_id": "feat-71",
   "branch": "feat/71-menu-interativo-e-agente-por-sessao",
   "spec_status": "reviewed",
-  "updated_at": "2026-11-13T23:50:32Z",
+  "updated_at": "2026-11-13T23:53:37Z",
   "items": [
     {
       "task_id": "71-01",
@@ -25,7 +25,7 @@
       "task_id": "71-02",
       "title": "feat-71-02 — Launcher e Worker por Sessão",
       "spec_path": "sdd/discovery/71-menu-interativo-e-agente-por-sessao/features/feat-71-02-launcher-e-worker-por-sessao.md",
-      "status": "queued",
+      "status": "review_pending",
       "rules": [
         "SEG-01",
         "SEG-03",
@@ -35,7 +35,7 @@
         "TST-04"
       ],
       "skills_used": [],
-      "attempts": 0
+      "attempts": 1
     },
     {
       "task_id": "71-03",

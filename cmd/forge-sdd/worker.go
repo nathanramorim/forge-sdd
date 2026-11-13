@@ -21,7 +21,7 @@ var workerCmd = &cobra.Command{
 	Short: "Worker de fila do pipeline: reivindica jobs e executa o agente (builder ou reviewer)",
 	Long: `Laço de longa duração para uma sessão do pipeline. Mostra "Aguardando jobs na fila..." quando
 ocioso; para cada job reivindicado invoca o agente de forma não interativa com o perfil da CLI de
-forge.json (claude ou agy), renova o lease, grava o log em .forge/runtime/logs e fecha o job.
+forge.json (claude, gemini, copilot, codex ou agy), do agente da sessão (sessions) ou de --cli, renova o lease, grava o log em .forge/runtime/logs e fecha o job.
 
 Builder: exige que o agente registre o PR (forge-sdd pipeline pr-opened); então enfileira a revisão.
 Reviewer: exige que o agente aplique o veredito (forge-sdd bus review).`,
@@ -35,11 +35,12 @@ Reviewer: exige que o agente aplique o veredito (forge-sdd bus review).`,
 		name, _ := cmd.Flags().GetString("name")
 		once, _ := cmd.Flags().GetBool("once")
 		poll, _ := cmd.Flags().GetDuration("poll")
+		cli, _ := cmd.Flags().GetString("cli")
 
 		ctx, cancel := signal.NotifyContext(cmd.Context(), os.Interrupt, syscall.SIGTERM)
 		defer cancel()
 		return pipeline.RunWorker(ctx, pipeline.WorkerOptions{
-			Dir: dir, Role: role, Name: name, Once: once, Poll: poll,
+			Dir: dir, Role: role, Name: name, CLI: cli, Once: once, Poll: poll,
 			Out:       cmd.OutOrStdout(),
 			OnJobDone: recordJobTelemetry(dir, role),
 		})
@@ -127,6 +128,7 @@ func init() {
 	workerCmd.Flags().String("role", "", "Papel do worker: builder ou reviewer")
 	_ = workerCmd.MarkFlagRequired("role")
 	workerCmd.Flags().String("name", "", "Nome da sessão (padrão: forge-<papel>)")
+	workerCmd.Flags().String("cli", "", "Agente desta sessão: claude, gemini, copilot ou codex (padrão: sessions de forge.json)")
 	workerCmd.Flags().Bool("once", false, "Sai quando a fila esvazia")
 	workerCmd.Flags().Duration("poll", 5*time.Second, "Intervalo de consulta da fila")
 	rootCmd.AddCommand(workerCmd)

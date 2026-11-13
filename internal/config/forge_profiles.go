@@ -44,7 +44,8 @@ func SessionRoles() []string {
 	return []string{SessionRoleDiscovery, SessionRoleBuilder, SessionRoleReviewer}
 }
 
-func knownCLI(cli string) bool { return cli == CLIAgy || contains(OfferedCLIs(), cli) }
+// KnownCLI diz se o agente é aceito em forge.json (os oferecidos mais o agy da 4.1).
+func KnownCLI(cli string) bool { return cli == CLIAgy || contains(OfferedCLIs(), cli) }
 
 var allowCommandRe = regexp.MustCompile(`^[A-Za-z0-9][A-Za-z0-9._-]{0,40}$`)
 
@@ -162,7 +163,7 @@ func (c ForgeConfig) validateSessions() error {
 		if !contains(SessionRoles(), role) {
 			return fmt.Errorf("sessions: papel %q desconhecido (use discovery, builder ou reviewer)", role)
 		}
-		if !knownCLI(cli) {
+		if !KnownCLI(cli) {
 			return fmt.Errorf("sessions.%s: agente %q inválido (use %s)", role, cli, strings.Join(OfferedCLIs(), ", "))
 		}
 		if _, ok := c.CLIProfiles[cli]; !ok {
