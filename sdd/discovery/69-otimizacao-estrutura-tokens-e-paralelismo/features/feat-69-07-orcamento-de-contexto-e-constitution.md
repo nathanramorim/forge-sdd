@@ -36,8 +36,8 @@ Um `/discovery` obriga a ler cerca de 65 KB e o Builder cerca de 35 KB por task.
 
 ## Escopo
 1. `forge-sdd context <task>`: imprime a spec da task, as linhas dos IDs citados (extraídas da Constitution) e os caminhos das rules e da skill aplicáveis.
-2. Constitution: remover a duplicação entre as Regras 0 a 15 e os IDs, mantendo cada regra uma vez; ≤ 9 KB; corrigir o mapa de rules (incluir `sdd-acp.md`) e `ARQ-06`.
-3. Checks de gate em modo `observacao`: instruções raiz ≤ 1.536 bytes, `SKILL.md` ≤ 2.048 bytes, adaptadores ≤ 300 bytes.
+2. Constitution: remover a duplicação entre as Regras 0 a 15 e os IDs, mantendo cada regra uma vez; ≤ 9 KB; corrigir `ARQ-06`. O mapa rule para IDs deixa de ser tabela e aponta o frontmatter das rules (fonte única, `DUP-06`), o que resolve a omissão de `sdd-acp.md` na origem.
+3. Check `P-24` do gate (a Camada A inteira roda em `observacao` ou `bloqueio`): instruções raiz ≤ 1.536 bytes, `SKILL.md` de estação ≤ 2.048, adaptadores de comando ≤ 300, definições de subagente e chatmode ≤ 420 e Constitution ≤ 9.216.
 4. `TestContextBudget`: soma dos arquivos de leitura de `/discovery` ≤ 22 KB e do Builder ≤ 15 KB nos templates.
 5. Corrigir `sdd/spec/concepts.md` (pacotes e tipos inexistentes) e registrar tudo em `sdd/spec/adr/adr-0003-skills-por-estacao-e-orcamento.md` (`GOV-01`).
 6. Medir: rodar `forge-sdd report` antes e depois e registrar os números no PR.

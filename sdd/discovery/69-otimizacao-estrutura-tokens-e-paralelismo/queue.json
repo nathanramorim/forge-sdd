@@ -2,7 +2,7 @@
   "feature_id": "feat-69",
   "branch": "feat/69-otimizacao-estrutura-tokens-e-paralelismo",
   "spec_status": "reviewed",
-  "updated_at": "2026-11-13T17:22:09Z",
+  "updated_at": "2026-11-13T17:34:41Z",
   "items": [
     {
       "task_id": "69-01",
@@ -131,7 +131,7 @@
       "task_id": "69-07",
       "title": "feat-69-07 — Orçamento de Contexto e Constitution Enxuta",
       "spec_path": "sdd/discovery/69-otimizacao-estrutura-tokens-e-paralelismo/features/feat-69-07-orcamento-de-contexto-e-constitution.md",
-      "status": "queued",
+      "status": "review_pending",
       "rules": [
         "ARQ-06",
         "GOV-01",
@@ -141,7 +141,7 @@
         "TST-05"
       ],
       "skills_used": [],
-      "attempts": 0
+      "attempts": 1
     }
   ]
 }

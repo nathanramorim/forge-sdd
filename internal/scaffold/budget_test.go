@@ -7,15 +7,26 @@ import (
 	"testing"
 
 	"github.com/forge-sdd/cli/internal/config"
+	"github.com/forge-sdd/cli/internal/gate"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
+// Os orçamentos têm definição única em gate (DUP-04): o portão e estes testes medem o mesmo limite.
 const (
-	maxSkillBytes       = 2048
-	maxAdapterBytes     = 300
-	maxRoleAdapterBytes = 420
-	maxInstructionBytes = 1536
+	maxSkillBytes       = gate.MaxSkillBytes
+	maxAdapterBytes     = gate.MaxAdapterBytes
+	maxRoleAdapterBytes = gate.MaxRoleAdapterBytes
+	maxInstructionBytes = gate.MaxInstructionBytes
+)
+
+// Orçamento do conjunto de leitura de cada comando, em bytes (feat 69-07). Mede o que um agente lê
+// no projeto gerado: instrução raiz, adaptador, skill, referência e memória. A Constitution entra
+// inteira no /discovery (não há task para filtrar IDs); o Builder a recebe filtrada por
+// `forge-sdd context`, por isso fica fora do conjunto dele.
+const (
+	maxDiscoveryReadSet = 22 * 1024
+	maxBuilderReadSet   = 15 * 1024
 )
 
 func renderAllAgents(t *testing.T) string {
@@ -130,4 +141,59 @@ func TestAdaptadoresApontamParaArquivosQueExistem(t *testing.T) {
 		return nil
 	})
 	require.NoError(t, err)
+}
+
+func readSetSize(t *testing.T, dir string, files ...string) int {
+	t.Helper()
+	total := 0
+	for _, f := range files {
+		total += sizeOf(t, filepath.Join(dir, filepath.FromSlash(f)))
+	}
+	return total
+}
+
+func TestContextBudget_ConjuntoDeLeituraPorComando(t *testing.T) {
+	dir := renderAllAgents(t)
+
+	discovery := readSetSize(t, dir,
+		"CLAUDE.md",
+		".claude/commands/discovery.md",
+		".agents/skills/sdd-concepcao/SKILL.md",
+		".agents/skills/sdd-concepcao/references/discovery.md",
+		"sdd/memory/clarify.md",
+		"sdd/memory/naming-convention.md",
+		"sdd/memory/constitution.md",
+		"sdd/memory/lessons.md",
+		"sdd/spec/concepts.md",
+	)
+	assert.LessOrEqual(t, discovery, maxDiscoveryReadSet, "conjunto de leitura de /discovery acima do orçamento")
+
+	builder := readSetSize(t, dir,
+		"CLAUDE.md",
+		".claude/commands/implementar.md",
+		".agents/skills/sdd-build/SKILL.md",
+		".agents/skills/sdd-build/references/implementar.md",
+		"sdd/memory/lessons.md",
+	)
+	assert.LessOrEqual(t, builder, maxBuilderReadSet, "conjunto de leitura do Builder acima do orçamento")
+
+	t.Logf("conjunto de leitura: /discovery=%d bytes (limite %d), /implementar=%d bytes (limite %d)", discovery, maxDiscoveryReadSet, builder, maxBuilderReadSet)
+}
+
+func TestContextBudget_ConstitutionDoScaffoldDentroDoLimite(t *testing.T) {
+	dir := renderAllAgents(t)
+	assert.LessOrEqual(t, sizeOf(t, filepath.Join(dir, "sdd", "memory", "constitution.md")), gate.MaxConstitutionSize)
+}
+
+func TestScaffoldGeradoPassaNoOrcamentoDoPortao(t *testing.T) {
+	dir := renderAllAgents(t)
+	results, err := gate.RunChecks(dir, gate.Options{})
+	require.NoError(t, err)
+	for _, r := range results {
+		if r.ID == "P-24" {
+			assert.True(t, r.Passed, r.Evidence)
+			return
+		}
+	}
+	t.Fatal("P-24 ausente do relatório do portão")
 }

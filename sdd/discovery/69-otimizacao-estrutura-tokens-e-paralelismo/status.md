@@ -2,13 +2,13 @@
 
 ## Status
 ```
-69-01 [x] approved   69-02/03/04 [~] review (achados a corrigir)
-69-05/06 [~] review   69-07 [ ] queued
+69-01 [x] approved   69-02..69-07 [~] review_pending
+Governanca Camada B: 69-02..06 em reverificacao
 ```
 
 ## Proximo passo
-Corrigir achados da governanca de 69-02 a 69-04; Builder: 69-07; depois governanca de 69-05 a 69-07.
+Registrar pareceres da governanca (69-02 a 69-06), revisar 69-07 e abrir o PR contra feat/68.
 
 ## A confirmar
 Bump 4.0.0-beta no PR de release; PR da 69 mira feat/68.
-Ao mesclar a 68: `internal/config/sddrc_io.go` (nao commitado na 68) monta caminhos `sdd/` a mao; trocar por `internal/layout`.
+Ao mesclar a 68: `internal/config/sddrc_io.go` usa caminhos `sdd/` a mao; trocar por `internal/layout`.

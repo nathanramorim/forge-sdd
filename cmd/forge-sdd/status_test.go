@@ -18,6 +18,7 @@ func runRoot(t *testing.T, args ...string) (string, error) {
 	_ = nextIDCmd.Flags().Set("kind", "discovery")
 	_ = nextIDCmd.Flags().Set("workitem", "")
 	_ = updateCmd.Flags().Set("dry-run", "false")
+	_ = contextCmd.Flags().Set("station", "build")
 	var out bytes.Buffer
 	rootCmd.SetOut(&out)
 	rootCmd.SetErr(&out)
@@ -96,4 +97,26 @@ func TestNextID_SddrcInvalidoFalhaEmVezDeAdivinhar(t *testing.T) {
 	_, err := runRoot(t, "next-id", "--dir", dir)
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "inválido")
+}
+
+func TestContext_PorTaskIDEPorCaminho(t *testing.T) {
+	dir := t.TempDir()
+	testutil.WriteFile(t, dir, "sdd/memory/constitution.md", "- **ARQ-01:** Fronteiras.\n- **TST-01:** Executável.\n")
+	testutil.WriteFile(t, dir, ".agents/skills/sdd-build/SKILL.md", "---\nname: sdd-build\nstatus: approved\nscope: core\n---\n")
+	testutil.WriteFile(t, dir, "sdd/discovery/70-x/features/feat-70-01.md", "# Spec\nCita ARQ-01.\n")
+	testutil.WriteFile(t, dir, "sdd/.queue/queue.json", `{"items":[{"task_id":"70-01","spec_path":"sdd/discovery/70-x/features/feat-70-01.md","status":"queued","rules":["TST-01"]}]}`)
+
+	out, err := runRoot(t, "context", "70-01", "--dir", dir)
+	require.NoError(t, err)
+	assert.Contains(t, out, "- **ARQ-01:** Fronteiras.")
+	assert.Contains(t, out, "- **TST-01:** Executável.", "IDs da fila também entram")
+	assert.Contains(t, out, ".agents/skills/sdd-build/SKILL.md")
+
+	out, err = runRoot(t, "context", "sdd/discovery/70-x/features/feat-70-01.md", "--dir", dir)
+	require.NoError(t, err)
+	assert.Contains(t, out, "ARQ-01")
+
+	_, err = runRoot(t, "context", "99-99", "--dir", dir)
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "70-01", "o erro lista as tasks disponíveis")
 }

@@ -36,9 +36,9 @@ Consulte `sdd/memory/mcps.md` para o status real de cada MCP configurado (`ativo
 10. Superfície pública do sistema expõe contratos explícitos (`ARQ-06`)
 11. Versões Beta (`-beta`) não podem ser mescladas na `main`; a tag é criada diretamente na branch de feature e o PR correspondente deve ser mantido aberto para estabilização antes de promover para oficial. (`FLX-07`)
 12. Documentação e Release Notes atualizados a cada entrega relevante, com destaques reais em `sdd/releases/history.md`. (`FLX-07`)
-13. Agrupamento em Subpastas: Quando houver quebra de features grandes em subfeatures/tasks, os arquivos individuais devem ser agrupados dentro de uma subpasta com o nome da feature (`sdd/discovery/<id>-<nome>/features/feat-<id>-<nn>-<nome>.md`). (`FLX-02`)
-14. Telemetria Incondicional de Sessão: As métricas de sessão devem ser gravadas na fase `Close` (`sdd/.metrics/session-<ISO8601>.json`) com o caminho relativo completo da feature/task. (`FLX-04`)
-15. Iniciativa (`sdd/discovery/<id>-<nome>/`) usa uma única branch agrupando todas as subtarefas — nunca uma branch por subtarefa. Antes de criar a branch, pergunte a branch de partida (default `main`) e verifique (`git branch --list <prefixo>/ID-*`) se já existe uma branch da mesma feature/fix a retomar. (`FLX-02`)
+13. As tasks de uma iniciativa ficam em `sdd/discovery/<id>-<nome>/features/`. (`FLX-02`)
+14. A telemetria da sessão é gravada no `Close`, com o caminho completo da feature ou task. (`FLX-04`)
+15. Uma branch por iniciativa (`<prefixo>/<id>-<nome>`), nunca por task: pergunte o ponto de partida (padrão `main`) e verifique se há branch a retomar. (`FLX-02`)
 
 <!-- forge-sdd-governanca:inicio versao=3.0.0-beta -->
 ## IDs Canônicos da Constituição (O Quê e Por Quê)
@@ -102,15 +102,9 @@ As regras abaixo indexam as decisões invioláveis do projeto por IDs estáveis.
 - **GOV-03:** Revisão de Fim de Onda — no fechamento de uma onda/feature, registrar aprendizados em `sdd/memory/lessons.md` e extrair padrões recorrentes como Auto-Skills em `.agents/skills/`.
 - **GOV-04:** Separação Constitution vs. Rules — os arquivos em `.agents/rules/*.md` citam os IDs no frontmatter (`regras: [...]`) e explicam **como cumprir**, sem jamais reescrever o texto desta Constituição.
 
-## Mapa de Roteamento para `.agents/rules/`
+## Roteamento para `.agents/rules/`
 
-| Arquivo de Rule | Escopo (`globs`) | IDs da Constituição Cobertos |
-|-----------------|------------------|------------------------------|
-| `.agents/rules/sdd-arquitetura.md` | `cmd/**`, `internal/**`, `sdd/spec/**` | `ARQ-01`, `ARQ-02`, `ARQ-03`, `ARQ-04`, `ARQ-05`, `ARQ-06`, `ARQ-11` |
-| `.agents/rules/sdd-seguranca.md` | `**/*` | `SEG-01`, `SEG-02`, `SEG-04`, `SEG-05`, `SEG-07` |
-| `.agents/rules/sdd-reuso-e-duplicacao.md` | `sdd/**`, `internal/**`, `.agents/**` | `DUP-01`, `DUP-02`, `DUP-05`, `DUP-10`, `GOV-04` |
-| `.agents/rules/sdd-codigo-e-testes.md` | `**/*.go`, `**/*_test.go` | `COD-01`, `COD-02`, `COD-04`, `COD-06`, `TST-01`, `TST-02`, `TST-05` |
-| `.agents/rules/sdd-fluxo-e-portao.md` | `sdd/**`, `.github/**` | `FLX-01`, `FLX-02`, `FLX-03`, `FLX-05`, `FLX-06`, `FLX-07`, `FLX-08`, `GOV-01`, `GOV-02`, `GOV-03` |
+A relação entre cada rule, o escopo (`globs`) e os IDs que ela cobre (`regras`) vive no frontmatter de cada arquivo de `.agents/rules/`, fonte única (`DUP-06`). `forge-sdd context <task>` resolve as rules de uma task.
 
 ### Divergências conhecidas
 

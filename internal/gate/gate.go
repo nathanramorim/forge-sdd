@@ -115,6 +115,9 @@ func RunChecks(dir string, opts Options) ([]CheckResult, error) {
 	// P-23 (GOV-04): .agents/rules/*.md referenciam IDs existentes na constitution e sem cópia literal
 	results = append(results, checkP23RulesGovernance(dir))
 
+	// P-24 (DUP-10): orçamento de contexto de instruções, skills e adaptadores
+	results = append(results, checkP24ContextBudgets(dir))
+
 	return results, nil
 }
 
@@ -722,4 +725,72 @@ func isTableSeparator(cells []string) bool {
 func isTableHeader(cells []string) bool {
 	first := strings.ToLower(cells[0])
 	return strings.Contains(first, "procurei") || strings.Contains(first, "item") || strings.Contains(first, "componente")
+}
+
+// Orçamentos de contexto em bytes (feat 69-07). Mantê-los pequenos é o que reduz o consumo de
+// tokens: o corpo das instruções vive nas skills e nas references, não nos adaptadores.
+const (
+	MaxInstructionBytes = 1536 // CLAUDE.md, GEMINI.md, OPENAI.md, copilot-instructions.md
+	MaxSkillBytes       = 2048 // SKILL.md de cada skill de estação (sdd-*)
+	MaxAdapterBytes     = 300  // adaptadores de comando por ferramenta
+	MaxRoleAdapterBytes = 420  // definições de subagente e chatmodes por ferramenta
+	MaxConstitutionSize = 9216 // sdd/memory/constitution.md
+)
+
+type budgetGroup struct {
+	pattern string
+	limit   int
+}
+
+// budgetGroups lista o que P-24 mede; padrões relativos a dir, no formato de filepath.Glob.
+var budgetGroups = []budgetGroup{
+	{"CLAUDE.md", MaxInstructionBytes},
+	{"GEMINI.md", MaxInstructionBytes},
+	{"OPENAI.md", MaxInstructionBytes},
+	{".github/copilot-instructions.md", MaxInstructionBytes},
+	{".agents/skills/sdd-*/SKILL.md", MaxSkillBytes},
+	{".claude/commands/*.md", MaxAdapterBytes},
+	{".gemini/prompts/*.md", MaxAdapterBytes},
+	{".github/prompts/*.md", MaxAdapterBytes},
+	{".claude/agents/*.md", MaxRoleAdapterBytes},
+	{".gemini/skills/*.md", MaxRoleAdapterBytes},
+	{".github/chatmodes/*.md", MaxRoleAdapterBytes},
+	{"sdd/memory/constitution.md", MaxConstitutionSize},
+}
+
+func checkP24ContextBudgets(dir string) CheckResult {
+	var offenders []string
+	checked := 0
+	for _, g := range budgetGroups {
+		matches, err := filepath.Glob(filepath.Join(dir, filepath.FromSlash(g.pattern)))
+		if err != nil {
+			continue
+		}
+		for _, m := range matches {
+			info, err := os.Stat(m)
+			if err != nil || info.IsDir() {
+				continue
+			}
+			checked++
+			if info.Size() > int64(g.limit) {
+				rel, _ := filepath.Rel(dir, m)
+				offenders = append(offenders, fmt.Sprintf("%s (%d/%d bytes)", filepath.ToSlash(rel), info.Size(), g.limit))
+			}
+		}
+	}
+	if len(offenders) > 0 {
+		return CheckResult{
+			ID:          "P-24",
+			Rule:        "DUP-10 / Orçamento de contexto",
+			Passed:      false,
+			Evidence:    "acima do orçamento: " + strings.Join(offenders, "; "),
+			Remediation: "Mover o detalhe para references/ da skill de estação e manter o adaptador ou a instrução raiz como ponteiro.",
+		}
+	}
+	return CheckResult{
+		ID:       "P-24",
+		Rule:     "DUP-10 / Orçamento de contexto",
+		Passed:   true,
+		Evidence: fmt.Sprintf("%d arquivo(s) de instrução, skill e adaptador dentro do orçamento", checked),
+	}
 }
