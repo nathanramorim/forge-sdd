@@ -2,7 +2,7 @@
   "feature_id": "feat-70",
   "branch": "feat/70-pipeline-multi-sessao-orquestrada",
   "spec_status": "reviewed",
-  "updated_at": "2026-11-13T21:22:50Z",
+  "updated_at": "2026-11-13T21:27:30Z",
   "items": [
     {
       "task_id": "70-01",
@@ -72,7 +72,7 @@
       "task_id": "70-04",
       "title": "feat-70-04 — Worker, Runner de CLI e Builder Paralelo",
       "spec_path": "sdd/discovery/70-pipeline-multi-sessao-orquestrada/features/feat-70-04-worker-e-builder-paralelo.md",
-      "status": "queued",
+      "status": "review_pending",
       "rules": [
         "SEG-03",
         "SEG-05",
@@ -81,7 +81,7 @@
         "TST-04"
       ],
       "skills_used": [],
-      "attempts": 0
+      "attempts": 1
     },
     {
       "task_id": "70-05",

@@ -409,3 +409,37 @@ func List(dir, role, state string) ([]Entry, error) {
 	}
 	return out, nil
 }
+
+// UpdatePR registra o PR aberto pelo Builder no job em processing (pr-opened). Os valores passam
+// pela mesma validação do contrato antes de serem gravados.
+func UpdatePR(dir, role, id, worker string, number int, prURL, branch string, now time.Time) (*Entry, error) {
+	e, err := ownEntry(dir, role, id, worker)
+	if err != nil {
+		return nil, err
+	}
+	e.Job.PR.Number = &number
+	e.Job.PR.URL = &prURL
+	if branch != "" {
+		e.Job.PR.Branch = branch
+	}
+	if !strings.HasPrefix(prURL, "https://") && !strings.HasPrefix(prURL, "http://") {
+		return nil, fmt.Errorf("%w: pr.url %q deve ser http(s)", ErrInvalidJob, prURL)
+	}
+	if err := e.Job.Validate(role); err != nil {
+		return nil, err
+	}
+	e.Job.addEvent(now, layout.StateProcessing, worker, fmt.Sprintf("PR #%d registrado", number))
+	if err := writeJob(e.Path, &e.Job); err != nil {
+		return nil, err
+	}
+	return e, nil
+}
+
+// Get devolve o job pelo id sem exigir o estado; é o Find sem o caminho.
+func Get(dir, role, id string) (*Job, string, error) {
+	e, err := Find(dir, role, id)
+	if err != nil {
+		return nil, "", err
+	}
+	return &e.Job, e.State, nil
+}
