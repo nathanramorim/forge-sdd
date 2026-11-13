@@ -2,7 +2,7 @@
   "feature_id": "feat-70",
   "branch": "feat/70-pipeline-multi-sessao-orquestrada",
   "spec_status": "reviewed",
-  "updated_at": "2026-11-13T21:17:19Z",
+  "updated_at": "2026-11-13T21:19:52Z",
   "items": [
     {
       "task_id": "70-01",
@@ -42,7 +42,7 @@
       "task_id": "70-06",
       "title": "feat-70-06 — Notificações e Inbox (`internal/notify`, `forge-sdd inbox`)",
       "spec_path": "sdd/discovery/70-pipeline-multi-sessao-orquestrada/features/feat-70-06-notificacoes-e-inbox.md",
-      "status": "queued",
+      "status": "review_pending",
       "rules": [
         "SEG-02",
         "SEG-04",
@@ -51,7 +51,7 @@
         "TST-04"
       ],
       "skills_used": [],
-      "attempts": 0
+      "attempts": 1
     },
     {
       "task_id": "70-03",
