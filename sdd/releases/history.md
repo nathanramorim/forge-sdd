@@ -4,6 +4,30 @@ Este arquivo registra o histórico de entregas de produto deste projeto.
 
 ## Entregas
 
+### Versão 4.1.0 — Pipeline Multi-Sessão: Discovery, Builder e Reviewer em Terminais Separados (Beta)
+
+Compatível com a 4.0.0-beta: **sem `.forge/config/forge.json` o fluxo de implementação não muda**. O pipeline só liga com `forge-sdd pipeline init`. Em contrapartida, `init` e `update` passam a instalar, em todo projeto, a pasta `.forge/` (launcher e `.gitignore` do runtime), os comandos `/inbox` e `/implement`, o agente `reviewer` e, para Claude, o hook do inbox em `.claude/settings.json` (mesclado sem sobrescrever o seu) (Discovery 70, features `70-01` a `70-07`).
+
+*   **Três sessões que se falam por uma fila local:** `forge-discovery` (você conversa e decide), `forge-builder` e `forge-reviewer` (workers em laço) trocam jobs em `.forge/runtime/queues`. A reivindicação é atômica, com lease e recuperação de jobs presos; `high` (rework) passa na frente de `normal`.
+*   **`/implementar <feature>` com gate pré-build:** confirma spec e quebra prontas, ADRs, rules e IDs existentes e exige a **evidência de que o card existe**: o agente consulta o gerenciador pelo MCP (ClickUp, GitHub Projects, Azure DevOps ou Jira) e grava `card-evidence.json`, que o Go valida (formato, provider, feature e prazo). É uma checagem de processo, não de autenticidade: quem escreve no disco pode forjar o arquivo. Sem a evidência o despacho é bloqueado e as pendências são listadas; com ela, o status é movido e o job entra na fila do Builder.
+*   **Builder paralelo:** planeja ondas de tarefas independentes pelo cabeçalho `**Depende de:**`, orienta o agente a executar em paralelo (subagentes e, com `use_git_worktrees`, `forge-sdd pipeline worktree add|remove`) até `max_parallel_tasks`, valida build, lint e testes e abre o PR ligado ao card.
+*   **Reviewer com ciclo de correção limitado:** confere o PR contra spec, ADRs, rules e padrões. Não conforme: devolve ao Builder com feedback estruturado (`pr_rework`, prioridade alta) até `max_rework_attempts`; no limite, ou em dúvida, escala para você. Conforme: move o card e avisa.
+*   **Notificação onde você está:** o PR revisado chega ao inbox da sessão Discovery (hook no Claude, `/inbox` no Gemini e no agy) com o link, e opcionalmente toast do sistema, e-mail, webhook e comentário no card. Segredos só por variável de ambiente.
+*   **`forge-up`:** `.forge/forge-up.sh` (macOS, Linux, WSL e Git Bash) e `.forge/forge-up.ps1` (Windows) abrem as três sessões nomeadas, com `claude` ou `agy`.
+
+**Prévia dos comandos**
+```bash
+forge-sdd pipeline init                       # ativa o modo pipeline (forge.json e notifications.json)
+.forge/forge-up.sh --cli claude               # abre as três sessões (ou .forge\forge-up.ps1)
+forge-sdd dispatch auth-oauth                 # gate pré-build e despacho
+forge-sdd worker --role builder               # sessão forge-builder
+forge-sdd bus review --id <job> --verdict-file v.json   # aplica o veredito do Reviewer
+forge-sdd inbox                               # PR revisado pronto para aprovação
+```
+No chat: `/implementar` e `/implement` (despacho), `/inbox` (para Claude em `.claude/commands/`, Gemini em `.gemini/prompts/` e Copilot em `.github/prompts/`) e o agente `reviewer`.
+
+**Observações:** o ciclo completo foi testado com agente falso; **nem `claude` nem `agy` foram executados de ponta a ponta**, e o perfil padrão não traz flags de permissão (o worker precisa que o agente possa editar arquivos e rodar comandos em modo não interativo: ajuste `cli_profiles` ao seu ambiente). Os argumentos de `agy` precisam ser confirmados. O launcher de Windows e WSL só teve a geração dos comandos testada; a abertura real dos terminais depende do sistema (`forge-sdd up --dry-run` mostra os comandos).
+
 ### Versão 4.0.0-beta — Estrutura por Iniciativa, Skills por Estação e Orçamento de Contexto (Beta, mudança incompatível)
 
 Primeira versão da linha 4.x. **Contém mudanças incompatíveis** (veja "Como migrar"). Reestrutura o fluxo para trabalhar com várias frentes em paralelo sem conflito de arquivos de estado e para consumir muito menos contexto por comando (Discovery 69, features `69-01` a `69-07`).

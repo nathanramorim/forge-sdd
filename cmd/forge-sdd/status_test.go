@@ -19,6 +19,11 @@ func runRoot(t *testing.T, args ...string) (string, error) {
 	_ = nextIDCmd.Flags().Set("workitem", "")
 	_ = updateCmd.Flags().Set("dry-run", "false")
 	_ = contextCmd.Flags().Set("station", "build")
+	_ = pipelineInitCmd.Flags().Set("dry-run", "false")
+	_ = dispatchCmd.Flags().Set("card-evidence", "")
+	_ = dispatchCmd.Flags().Set("dry-run", "false")
+	resetWorkerFlags()
+	resetReviewFlags()
 	var out bytes.Buffer
 	rootCmd.SetOut(&out)
 	rootCmd.SetErr(&out)

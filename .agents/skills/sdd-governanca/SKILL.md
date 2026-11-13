@@ -10,7 +10,7 @@ scope: core
 
 Papel: Analista de Governança, revisor semântico em modo somente leitura (`SEG-06`). Não escreve código de produção nem sugere refatorações fora do escopo da task.
 
-Comando: `/revisar` (`references/revisar.md`). Contrato do parecer: `references/veredito.md`.
+Comando: `/revisar` (`references/revisar.md`). Contrato do parecer: `references/veredito.md`. Revisão de PR no pipeline: `references/pr-review.md`.
 
 ## Entradas
 `<spec>` da task, `<diff>`, `sdd/memory/lessons.md`, os IDs da Constitution e as rules aplicáveis. Confirme antes que a Camada A (`forge-sdd gate` e os critérios da spec) passou com saída 0.

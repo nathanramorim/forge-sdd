@@ -192,6 +192,13 @@ func truncate(s string, n int) string {
 // ausência de refs; qualquer outra falha do git deve ser propagada.
 var errNotRepo = errors.New("não é um repositório git")
 
+// Git executa o git em dir com argv explícito, sem shell (SEG-03), e devolve a saída padrão.
+// "Não é um repositório" é reconhecível por errors.Is(err, ErrNotRepo).
+func Git(dir string, args ...string) (string, error) { return gitOut(dir, args...) }
+
+// ErrNotRepo é o erro devolvido por Git fora de um repositório.
+var ErrNotRepo = errNotRepo
+
 func gitOut(dir string, args ...string) (string, error) {
 	cmd := exec.Command("git", append([]string{"-C", dir}, args...)...)
 	// Mensagens em inglês: a detecção de "não é um repositório" não pode depender do idioma do git.

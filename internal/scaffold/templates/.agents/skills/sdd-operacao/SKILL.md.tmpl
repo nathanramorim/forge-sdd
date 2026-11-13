@@ -19,6 +19,8 @@ Papel: Líder (Orquestrador). Coordena as estações, gerencia os gates humanos 
 | `/archive` e Archivist | `references/archive.md` |
 | `/upgrade-sdd` e Migrator | `references/upgrade-sdd.md` |
 | `/tutorial` | `references/tutorial.md` |
+| `/inbox` | `references/inbox.md` |
+| Pipeline (`up`, `pipeline init`, `bus`) | `references/pipeline.md` |
 
 ## Pipeline
 Concepção (`sdd-concepcao`) → Gate 1 humano (`FLX-01`) → Planejamento (`sdd-planejamento`) → Build (`sdd-build`) → Governança (`sdd-governanca`, Camadas A, B e C). Fonte do fluxo: `sdd/FLOW.md`.

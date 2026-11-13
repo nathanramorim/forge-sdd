@@ -31,6 +31,9 @@ Tudo de uma demanda vive em `sdd/discovery/<id>-<nome>/`:
 - O próximo ID vem de `forge-sdd next-id`, que consulta todas as branches.
 - Estado de execução (atividade e filas por estação) fica em `sdd/.runtime/`, fora do git.
 
+## Pipeline multi-sessão (opcional)
+Com `.forge/config/forge.json` (`forge-sdd pipeline init`), três sessões trabalham em paralelo: `forge-discovery` (você), `forge-builder` e `forge-reviewer`. `/implementar <feature>` valida o card via MCP e despacha o job; o Builder abre o PR; o Reviewer devolve com feedback até `max_rework_attempts` ou aprova; o inbox (`/inbox`) mostra o PR pronto. Abertura: `.forge/forge-up.sh` ou `.forge/forge-up.ps1`. Sem `forge.json`, vale o fluxo de sessão única acima.
+
 ## Quebra (`/split-features`)
 Fatie quando a feature cruzar mais de um contexto delimitado ou tiver mais de 7 tarefas. Sem dependência circular, cada task testável sozinha, ordem de baixo para cima (infraestrutura, domínio, aplicação, interface).
 

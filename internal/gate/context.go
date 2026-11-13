@@ -60,7 +60,7 @@ func BuildContext(dir, specPath string, extraIDs []string, station string) (Cont
 		return pack, fmt.Errorf("contexto: estação inválida %q (use concepcao, planejamento, build, governanca ou operacao)", station)
 	}
 
-	resolved, err := confineToDir(dir, specPath)
+	resolved, err := ConfineToDir(dir, specPath)
 	if err != nil {
 		return pack, err
 	}
@@ -110,9 +110,9 @@ func BuildContext(dir, specPath string, extraIDs []string, station string) (Cont
 	return pack, nil
 }
 
-// confineToDir resolve p relativo a dir e recusa caminho absoluto, ".." e links simbólicos que
+// ConfineToDir resolve p relativo a dir e recusa caminho absoluto, ".." e links simbólicos que
 // levem para fora de dir (SEG-01): o spec_path vem de queue.json, que é versionado e vem de outras branches.
-func confineToDir(dir, p string) (string, error) {
+func ConfineToDir(dir, p string) (string, error) {
 	if filepath.IsAbs(p) {
 		return "", fmt.Errorf("contexto: caminho absoluto %q recusado; use um caminho relativo ao projeto (SEG-01)", p)
 	}

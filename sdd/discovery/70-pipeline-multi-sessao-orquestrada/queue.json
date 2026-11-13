@@ -1,0 +1,152 @@
+{
+  "feature_id": "feat-70",
+  "branch": "feat/70-pipeline-multi-sessao-orquestrada",
+  "spec_status": "reviewed",
+  "updated_at": "2026-11-13T22:05:58Z",
+  "items": [
+    {
+      "task_id": "70-01",
+      "title": "feat-70-01 — Layout e Configuração do Forge (`.forge/`)",
+      "spec_path": "sdd/discovery/70-pipeline-multi-sessao-orquestrada/features/feat-70-01-layout-e-configuracao-do-forge.md",
+      "status": "approved",
+      "rules": [
+        "ARQ-01",
+        "ARQ-02",
+        "DUP-01",
+        "DUP-04",
+        "SEG-01",
+        "SEG-04",
+        "TST-02",
+        "TST-03"
+      ],
+      "skills_used": [],
+      "attempts": 1,
+      "governance_verdict": {
+        "veredito": "conforme",
+        "achados": [],
+        "resumo": "Reconferência do diff de correção: P-13 (token no teste), *_env validado com canal desligado e código morto corrigidos. Limite aceito e documentado no ADR 0004: command relativo em forge.json."
+      }
+    },
+    {
+      "task_id": "70-02",
+      "title": "feat-70-02 — Barramento de Jobs (`internal/bus`, `forge-sdd bus`)",
+      "spec_path": "sdd/discovery/70-pipeline-multi-sessao-orquestrada/features/feat-70-02-barramento-de-jobs.md",
+      "status": "approved",
+      "rules": [
+        "ARQ-01",
+        "SEG-01",
+        "SEG-02",
+        "COD-03",
+        "TST-03",
+        "TST-04"
+      ],
+      "skills_used": [],
+      "attempts": 1,
+      "governance_verdict": {
+        "veredito": "conforme",
+        "achados": [],
+        "resumo": "Reconferência: dono do lease exigido, created_at, Chtimes e pr.url corrigidos. A dúvida de efeitos antes da posse (ApplyVerdict) foi corrigida em f52d30e com bus.CheckOwner e teste, conferida por testes e não pelo revisor. Limite aceito: Recover/Renew/Enqueue sem trava (ADR 0004)."
+      }
+    },
+    {
+      "task_id": "70-06",
+      "title": "feat-70-06 — Notificações e Inbox (`internal/notify`, `forge-sdd inbox`)",
+      "spec_path": "sdd/discovery/70-pipeline-multi-sessao-orquestrada/features/feat-70-06-notificacoes-e-inbox.md",
+      "status": "approved",
+      "rules": [
+        "SEG-02",
+        "SEG-04",
+        "SEG-05",
+        "ARQ-10",
+        "TST-04"
+      ],
+      "skills_used": [],
+      "attempts": 1,
+      "governance_verdict": {
+        "veredito": "conforme",
+        "achados": [],
+        "resumo": "Reconferência: aspas tipográficas do PowerShell duplicadas e campos do inbox sanitizados na leitura. Sem regressão."
+      }
+    },
+    {
+      "task_id": "70-03",
+      "title": "feat-70-03 — Gate Pré-Build, `dispatch` e `/implementar` por Modo",
+      "spec_path": "sdd/discovery/70-pipeline-multi-sessao-orquestrada/features/feat-70-03-gate-pre-build-e-implementar-por-modo.md",
+      "status": "approved",
+      "rules": [
+        "FLX-01",
+        "FLX-08",
+        "DUP-02",
+        "SEG-01",
+        "TST-03"
+      ],
+      "skills_used": [],
+      "attempts": 1,
+      "governance_verdict": {
+        "veredito": "conforme",
+        "achados": [],
+        "resumo": "Reconferência: rule citada inexistente bloqueia, ADR com caixa e espaço reconhecida, findADR sem falso positivo. Limites aceitos no ADR 0004: evidência do card forjável e resolvedor de iniciativa próprio."
+      }
+    },
+    {
+      "task_id": "70-04",
+      "title": "feat-70-04 — Worker, Runner de CLI e Builder Paralelo",
+      "spec_path": "sdd/discovery/70-pipeline-multi-sessao-orquestrada/features/feat-70-04-worker-e-builder-paralelo.md",
+      "status": "approved",
+      "rules": [
+        "SEG-03",
+        "SEG-05",
+        "COD-01",
+        "COD-03",
+        "TST-04"
+      ],
+      "skills_used": [],
+      "attempts": 1,
+      "governance_verdict": {
+        "veredito": "conforme",
+        "achados": [],
+        "resumo": "Reconferência: worktree ligado por pipeline worktree add|remove, BuilderHints conforme forge.json, pr.url estrita. Limite aceito no ADR 0004: agente herda o ambiente e o log não filtra segredos."
+      }
+    },
+    {
+      "task_id": "70-05",
+      "title": "feat-70-05 — Reviewer: Veredito, Rework e Anti-Loop",
+      "spec_path": "sdd/discovery/70-pipeline-multi-sessao-orquestrada/features/feat-70-05-reviewer-e-anti-loop.md",
+      "status": "approved",
+      "rules": [
+        "FLX-06",
+        "FLX-08",
+        "SEG-06",
+        "TST-03"
+      ],
+      "skills_used": [],
+      "attempts": 1,
+      "governance_verdict": {
+        "veredito": "conforme",
+        "achados": [],
+        "resumo": "Reconferência: contrato único do veredito, conforme sem violação, worker exige veredito aplicado. A dúvida do ID da notificação acima de 80 caracteres foi corrigida em f52d30e (notificationID com hash) e a de posse antes dos efeitos também, ambas com teste e conferidas por testes e não pelo revisor."
+      }
+    },
+    {
+      "task_id": "70-07",
+      "title": "feat-70-07 — Launcher, Scaffold, Skills, ADR 0004 e Release 4.1.0",
+      "spec_path": "sdd/discovery/70-pipeline-multi-sessao-orquestrada/features/feat-70-07-launcher-scaffold-docs-e-release.md",
+      "status": "approved",
+      "rules": [
+        "DUP-10",
+        "FLX-05",
+        "FLX-07",
+        "GOV-01",
+        "TST-02",
+        "TST-05"
+      ],
+      "skills_used": [],
+      "attempts": 1,
+      "governance_verdict": {
+        "veredito": "conforme",
+        "achados": [],
+        "resumo": "Reconferência: notas da release e ADR sem afirmações inverídicas, hook instalado também em RunAgents, edições da Constituição listadas."
+      }
+    }
+  ]
+}

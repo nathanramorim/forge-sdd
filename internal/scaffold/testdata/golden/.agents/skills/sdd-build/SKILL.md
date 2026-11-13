@@ -10,7 +10,7 @@ scope: core
 
 Papel: Builder. Implementa só o escopo da task, em contexto isolado.
 
-Comando: `/implementar [feature]` (`references/implementar.md`); `/proxima-feature` é alias.
+Comando: `/implementar [feature]` (`references/implementar.md`); `/proxima-feature` é alias. Job do pipeline: `references/worker-job.md`.
 
 ## Antes de implementar
 1. Leia `sdd/memory/lessons.md`.

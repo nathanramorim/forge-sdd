@@ -65,7 +65,7 @@ func Run(cfg config.Config, targetDir string) ([]string, error) {
 
 	// 1. Templates globais (sdd/, .vscode/, e .github/ do copilot)
 	//    Sempre renderizados — são agnósticos ao agente de IA.
-	globalRoots := []string{"templates/sdd", "templates/.agents"}
+	globalRoots := []string{"templates/sdd", "templates/.agents", "templates/.forge"}
 
 	// .vscode/ e .github/ só são incluídos quando copilot está selecionado
 	copilotSelected := false
@@ -109,8 +109,23 @@ func Run(cfg config.Config, targetDir string) ([]string, error) {
 		if err := applyStructureUpgrade(cfg, targetDir); err != nil {
 			return created, err
 		}
+		installClaudeInboxHook(agents, targetDir)
 	}
 	return created, nil
+}
+
+// installClaudeInboxHook liga o hook do inbox quando o Claude está entre os agentes. A mesclagem é
+// segura (nunca sobrescreve a configuração do usuário); se não for possível, só avisa (SEG-02).
+func installClaudeInboxHook(agents []string, targetDir string) {
+	for _, a := range agents {
+		if a != config.AgentClaude {
+			continue
+		}
+		if _, err := MergeClaudeInboxHook(targetDir); err != nil {
+			fmt.Fprintf(os.Stderr, "aviso: hook do inbox não instalado: %v\n", err)
+		}
+		return
+	}
 }
 
 // applyStructureUpgrade move o legado de sdd/ para sdd/archive/ (com backup) e remove os
@@ -173,7 +188,11 @@ func renderDir(fsys embed.FS, root, stripPrefix string, cfg config.Config, targe
 			return fmt.Errorf("render template %s: %w", path, err)
 		}
 
-		if err := os.WriteFile(dest, buf.Bytes(), 0644); err != nil {
+		perm := os.FileMode(0644)
+		if strings.HasSuffix(dest, ".sh") {
+			perm = 0755 // scripts do pipeline (forge-up.sh) precisam ser executáveis
+		}
+		if err := os.WriteFile(dest, buf.Bytes(), perm); err != nil {
 			return fmt.Errorf("write %s: %w", dest, err)
 		}
 
@@ -218,6 +237,7 @@ func RunAgents(cfg config.Config, agents []string, targetDir string) ([]string, 
 	}
 	if !cfg.DryRun {
 		cleanObsoleteFiles(targetDir)
+		installClaudeInboxHook(agents, targetDir)
 	}
 	return created, nil
 }
