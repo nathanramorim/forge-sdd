@@ -38,6 +38,91 @@ const (
 	ProgressFileName     = "progress.md"
 )
 
+// Pipeline multi-sessão (feat 70): configuração versionada e estado de execução em .forge/.
+const (
+	ForgeDirName          = ".forge"
+	ForgeConfigDirName    = "config"
+	ForgeRuntimeDirName   = "runtime"
+	QueuesDirName         = "queues"
+	WorktreesDirName      = "worktrees"
+	LogsDirName           = "logs"
+	ForgeConfigFileName   = "forge.json"
+	NotificationsFileName = "notifications.json"
+
+	RoleBuilder   = "builder"
+	RoleReviewer  = "reviewer"
+	RoleDiscovery = "discovery"
+
+	StatePending    = "pending"
+	StateProcessing = "processing"
+	StateDone       = "done"
+	StateFailed     = "failed"
+	StateInbox      = "inbox"
+	StateArchive    = "archive"
+)
+
+// ErrInvalidQueue indica papel ou estado de fila fora da lista fechada.
+var ErrInvalidQueue = errors.New("fila inválida")
+
+// workerStates e discoveryStates são os estados válidos por papel (SEG-01).
+var (
+	workerStates    = map[string]bool{StatePending: true, StateProcessing: true, StateDone: true, StateFailed: true}
+	discoveryStates = map[string]bool{StateInbox: true, StateArchive: true}
+)
+
+// Forge devolve <dir>/.forge.
+func Forge(dir string) string { return filepath.Join(dir, ForgeDirName) }
+
+// ForgeConfigFile devolve .forge/config/forge.json.
+func ForgeConfigFile(dir string) string {
+	return filepath.Join(Forge(dir), ForgeConfigDirName, ForgeConfigFileName)
+}
+
+// NotificationsFile devolve .forge/config/notifications.json.
+func NotificationsFile(dir string) string {
+	return filepath.Join(Forge(dir), ForgeConfigDirName, NotificationsFileName)
+}
+
+// ForgeRuntime devolve .forge/runtime (estado de execução, fora do git).
+func ForgeRuntime(dir string) string { return filepath.Join(Forge(dir), ForgeRuntimeDirName) }
+
+// Worktrees devolve .forge/runtime/worktrees.
+func Worktrees(dir string) string { return filepath.Join(ForgeRuntime(dir), WorktreesDirName) }
+
+// Logs devolve .forge/runtime/logs.
+func Logs(dir string) string { return filepath.Join(ForgeRuntime(dir), LogsDirName) }
+
+// QueueState devolve .forge/runtime/queues/<papel>/<estado>. Papel e estado são validados
+// contra a lista fechada: builder e reviewer têm pending, processing, done e failed;
+// discovery tem inbox e archive.
+func QueueState(dir, role, state string) (string, error) {
+	switch role {
+	case RoleBuilder, RoleReviewer:
+		if !workerStates[state] {
+			return "", fmt.Errorf("%w: estado %q inválido para o papel %q", ErrInvalidQueue, state, role)
+		}
+	case RoleDiscovery:
+		if !discoveryStates[state] {
+			return "", fmt.Errorf("%w: estado %q inválido para o papel %q", ErrInvalidQueue, state, role)
+		}
+	default:
+		return "", fmt.Errorf("%w: papel %q (use builder, reviewer ou discovery)", ErrInvalidQueue, role)
+	}
+	return filepath.Join(ForgeRuntime(dir), QueuesDirName, role, state), nil
+}
+
+// Inbox devolve .forge/runtime/queues/discovery/inbox.
+func Inbox(dir string) string {
+	p, _ := QueueState(dir, RoleDiscovery, StateInbox)
+	return p
+}
+
+// InboxArchive devolve .forge/runtime/queues/discovery/archive.
+func InboxArchive(dir string) string {
+	p, _ := QueueState(dir, RoleDiscovery, StateArchive)
+	return p
+}
+
 // initiativeSlug valida o nome da pasta de uma iniciativa: <id>-<nome>, minúsculo,
 // sem separadores de caminho nem pontos (SEG-01).
 var initiativeSlug = regexp.MustCompile(`^[a-z0-9]+(-[a-z0-9]+)+$`)

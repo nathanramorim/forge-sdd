@@ -114,3 +114,34 @@ func TestCurrent_HeadDestacadoEForaDeRepositorio(t *testing.T) {
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "layout:")
 }
+
+func TestForgePaths(t *testing.T) {
+	d := "/proj"
+	assert.Equal(t, filepath.Join(d, ".forge", "config", "forge.json"), ForgeConfigFile(d))
+	assert.Equal(t, filepath.Join(d, ".forge", "config", "notifications.json"), NotificationsFile(d))
+	assert.Equal(t, filepath.Join(d, ".forge", "runtime"), ForgeRuntime(d))
+	assert.Equal(t, filepath.Join(d, ".forge", "runtime", "worktrees"), Worktrees(d))
+	assert.Equal(t, filepath.Join(d, ".forge", "runtime", "queues", "discovery", "inbox"), Inbox(d))
+	assert.Equal(t, filepath.Join(d, ".forge", "runtime", "queues", "discovery", "archive"), InboxArchive(d))
+
+	for _, role := range []string{RoleBuilder, RoleReviewer} {
+		for _, st := range []string{StatePending, StateProcessing, StateDone, StateFailed} {
+			p, err := QueueState(d, role, st)
+			require.NoError(t, err)
+			assert.Equal(t, filepath.Join(d, ".forge", "runtime", "queues", role, st), p)
+		}
+	}
+}
+
+func TestQueueState_Violacoes(t *testing.T) {
+	cases := [][2]string{
+		{"", "pending"}, {"builder", ""}, {"../x", "pending"}, {"builder", "../pending"}, {"builder", "inbox"},
+		{"reviewer", "archive"}, {"discovery", "pending"}, {"discovery", "done"}, {"Builder", "pending"}, {"builder", "pending/x"},
+	}
+	for _, c := range cases {
+		_, err := QueueState("/p", c[0], c[1])
+		require.Error(t, err, "%q/%q", c[0], c[1])
+		assert.ErrorIs(t, err, ErrInvalidQueue)
+	}
+	assert.Equal(t, "", func() string { p, _ := QueueState("/p", "x", "y"); return p }())
+}

@@ -1,0 +1,52 @@
+{
+  "cli": "claude",
+  "cli_profiles": {
+    "claude": {
+      "command": "claude",
+      "args": [
+        "-p",
+        "{prompt}",
+        "--agent",
+        "{agent}",
+        "-n",
+        "{name}"
+      ]
+    },
+    "agy": {
+      "command": "agy",
+      "args": [
+        "--agent",
+        "{agent}",
+        "-i",
+        "{prompt}"
+      ]
+    }
+  },
+  "pm_mcp": {
+    "provider": "auto",
+    "supported": [
+      "clickup",
+      "github-projects",
+      "azure-devops",
+      "jira"
+    ],
+    "require_existing_card": true,
+    "status_on_implement": "In Progress",
+    "status_on_pr_approved": "Ready for Review",
+    "evidence_max_age_minutes": 30
+  },
+  "builder": {
+    "max_parallel_tasks": 3,
+    "use_git_worktrees": true,
+    "run_tests_before_pr": true,
+    "job_timeout_minutes": 60
+  },
+  "reviewer": {
+    "max_rework_attempts": 3,
+    "comment_on_pr": true
+  },
+  "adr_dirs": [
+    "sdd/spec/adr"
+  ],
+  "base_branch": "main"
+}
