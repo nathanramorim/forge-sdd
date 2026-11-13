@@ -2,16 +2,15 @@
 
 ## Status
 ```
-Feat 64-67 (ACP, Pool, Telemetria, UX Studio) [x] done
-PR #67 aberto -> release/v3.0.1 (v3.2.2-beta), nao mergear
-Feat 68 — Sessoes ACP fisicas [~] FLX-01 aprovado, 6 tasks na fila (68-04/05 canceladas)
+Feat 68 — Sessoes ACP fisicas [~] em outra branch (feat/68), 6 tasks
+Disc 69 — Estrutura, tokens e paralelismo [~] FLX-01 aprovado, 7 tasks na fila
 ```
 
 ## Features ativas
-- Branch `feat/68-sessoes-acp-fisicas-multi-agente`; `sdd/discovery/68-sessoes-acp-fisicas-multi-agente/`.
+- Branch `feat/69-otimizacao-estrutura-tokens-e-paralelismo` (worktree `../forge-sdd-69`, base: tip da feat/68); `sdd/discovery/69-otimizacao-estrutura-tokens-e-paralelismo/`.
 
 ## Proximo passo
-**Proximo:** Builder (`proxima-feature`) na ordem: 68-01, 68-06, 68-02, 68-03, 68-03b, 68-06b. Sem PR.
-**A confirmar:** flags ACP do agy, comandos de instalacao dos presets.
+**Proximo:** Builder (`proxima-feature`): 69-01, 69-02, 69-03, 69-04, 69-06, 69-05, 69-07. Sem PR.
+**A confirmar:** bump 4.0.0-beta no PR de release; PR da 69 mira feat/68.
 
-> Histórico completo em `progress-log.md`
+> Historico completo em `progress-log.md`

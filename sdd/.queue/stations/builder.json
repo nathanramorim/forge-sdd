@@ -1,7 +1,7 @@
 {
   "station": "builder",
-  "version": 120,
-  "updated_at": "2026-11-01T19:57:41Z",
+  "version": 127,
+  "updated_at": "2026-11-13T16:47:47Z",
   "processed_keys": [
     "04dd6a4a482341b00be27e785371421d",
     "33d97bb9e86c646a0e20326c4747115e",
@@ -36,7 +36,14 @@
     "eddd1137d4d0a98eb47708ce00599f1b",
     "861227d1c5343c0117e6aa7f5cbe858a",
     "13121617c2c1b829b2ff4845f4e1310d",
-    "0ccb64607f24ee2bef8a35bf98052766"
+    "0ccb64607f24ee2bef8a35bf98052766",
+    "b43949bec4982ffc750d09800526be91",
+    "0c9ac4b2f9a5a46f114abd0ae6e47be9",
+    "0ad191ce265565dcc2f1b1940b78669e",
+    "64205e07f5aa4da0d7e8d6816492e767",
+    "530b9cd75058a0339a5c83c3e2f72f0c",
+    "4d64acabf19a36c596412f3d117fd5b4",
+    "6e8c8c1a45e34c7ef2cde19e825ef50e"
   ],
   "items": [
     {
@@ -583,6 +590,90 @@
       "attempt": 0,
       "created_at": "2026-11-01T19:57:41Z",
       "updated_at": "2026-11-01T19:57:41Z"
+    },
+    {
+      "id": "69-01",
+      "title": "feat-69-01 — Remoção do Forge Studio",
+      "station": "builder",
+      "operation": "build",
+      "status": "queued",
+      "artifact_path": "sdd/discovery/69-otimizacao-estrutura-tokens-e-paralelismo/features/feat-69-01-remocao-do-studio.md",
+      "idempotency_key": "b43949bec4982ffc750d09800526be91",
+      "attempt": 0,
+      "created_at": "2026-11-13T16:47:42Z",
+      "updated_at": "2026-11-13T16:47:47Z"
+    },
+    {
+      "id": "69-02",
+      "title": "feat-69-02 — Pacote `internal/layout`: Dono dos Caminhos da Iniciativa",
+      "station": "builder",
+      "operation": "build",
+      "status": "queued",
+      "artifact_path": "sdd/discovery/69-otimizacao-estrutura-tokens-e-paralelismo/features/feat-69-02-pacote-layout-caminhos-da-iniciativa.md",
+      "idempotency_key": "0c9ac4b2f9a5a46f114abd0ae6e47be9",
+      "attempt": 0,
+      "created_at": "2026-11-13T16:47:43Z",
+      "updated_at": "2026-11-13T16:47:47Z"
+    },
+    {
+      "id": "69-03",
+      "title": "feat-69-03 — Fila e Status por Iniciativa",
+      "station": "builder",
+      "operation": "build",
+      "status": "queued",
+      "artifact_path": "sdd/discovery/69-otimizacao-estrutura-tokens-e-paralelismo/features/feat-69-03-fila-e-status-por-iniciativa.md",
+      "idempotency_key": "0ad191ce265565dcc2f1b1940b78669e",
+      "attempt": 0,
+      "created_at": "2026-11-13T16:47:44Z",
+      "updated_at": "2026-11-13T16:47:47Z"
+    },
+    {
+      "id": "69-04",
+      "title": "feat-69-04 — Subcomandos `status` e `next-id`",
+      "station": "builder",
+      "operation": "build",
+      "status": "queued",
+      "artifact_path": "sdd/discovery/69-otimizacao-estrutura-tokens-e-paralelismo/features/feat-69-04-subcomandos-status-e-next-id.md",
+      "idempotency_key": "64205e07f5aa4da0d7e8d6816492e767",
+      "attempt": 0,
+      "created_at": "2026-11-13T16:47:45Z",
+      "updated_at": "2026-11-13T16:47:47Z"
+    },
+    {
+      "id": "69-06",
+      "title": "feat-69-06 — Skills por Estação",
+      "station": "builder",
+      "operation": "build",
+      "status": "queued",
+      "artifact_path": "sdd/discovery/69-otimizacao-estrutura-tokens-e-paralelismo/features/feat-69-06-skills-por-estacao.md",
+      "idempotency_key": "530b9cd75058a0339a5c83c3e2f72f0c",
+      "attempt": 0,
+      "created_at": "2026-11-13T16:47:45Z",
+      "updated_at": "2026-11-13T16:47:47Z"
+    },
+    {
+      "id": "69-05",
+      "title": "feat-69-05 — Migração do Legado e Templates no Novo Layout",
+      "station": "builder",
+      "operation": "build",
+      "status": "queued",
+      "artifact_path": "sdd/discovery/69-otimizacao-estrutura-tokens-e-paralelismo/features/feat-69-05-migracao-do-legado-e-templates.md",
+      "idempotency_key": "4d64acabf19a36c596412f3d117fd5b4",
+      "attempt": 0,
+      "created_at": "2026-11-13T16:47:46Z",
+      "updated_at": "2026-11-13T16:47:47Z"
+    },
+    {
+      "id": "69-07",
+      "title": "feat-69-07 — Orçamento de Contexto e Constitution Enxuta",
+      "station": "builder",
+      "operation": "build",
+      "status": "queued",
+      "artifact_path": "sdd/discovery/69-otimizacao-estrutura-tokens-e-paralelismo/features/feat-69-07-orcamento-de-contexto-e-constitution.md",
+      "idempotency_key": "6e8c8c1a45e34c7ef2cde19e825ef50e",
+      "attempt": 0,
+      "created_at": "2026-11-13T16:47:47Z",
+      "updated_at": "2026-11-13T16:47:47Z"
     }
   ]
 }
