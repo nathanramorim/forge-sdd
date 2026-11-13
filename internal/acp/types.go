@@ -126,7 +126,7 @@ type Notification struct {
 	Params  any    `json:"params,omitempty"`
 }
 
-// ClientInfo descreve o cliente conectado (IDE, Studio ou script).
+// ClientInfo descreve o cliente conectado (IDE ou script).
 type ClientInfo struct {
 	Name    string `json:"name"`
 	Version string `json:"version,omitempty"`

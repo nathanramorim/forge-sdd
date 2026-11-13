@@ -1,7 +1,7 @@
 {
   "station": "builder",
-  "version": 127,
-  "updated_at": "2026-11-13T16:47:47Z",
+  "version": 129,
+  "updated_at": "2026-11-13T16:52:21Z",
   "processed_keys": [
     "04dd6a4a482341b00be27e785371421d",
     "33d97bb9e86c646a0e20326c4747115e",
@@ -596,12 +596,12 @@
       "title": "feat-69-01 — Remoção do Forge Studio",
       "station": "builder",
       "operation": "build",
-      "status": "queued",
+      "status": "review_pending",
       "artifact_path": "sdd/discovery/69-otimizacao-estrutura-tokens-e-paralelismo/features/feat-69-01-remocao-do-studio.md",
       "idempotency_key": "b43949bec4982ffc750d09800526be91",
-      "attempt": 0,
+      "attempt": 1,
       "created_at": "2026-11-13T16:47:42Z",
-      "updated_at": "2026-11-13T16:47:47Z"
+      "updated_at": "2026-11-13T16:52:21Z"
     },
     {
       "id": "69-02",
@@ -613,7 +613,7 @@
       "idempotency_key": "0c9ac4b2f9a5a46f114abd0ae6e47be9",
       "attempt": 0,
       "created_at": "2026-11-13T16:47:43Z",
-      "updated_at": "2026-11-13T16:47:47Z"
+      "updated_at": "2026-11-13T16:52:21Z"
     },
     {
       "id": "69-03",
@@ -625,7 +625,7 @@
       "idempotency_key": "0ad191ce265565dcc2f1b1940b78669e",
       "attempt": 0,
       "created_at": "2026-11-13T16:47:44Z",
-      "updated_at": "2026-11-13T16:47:47Z"
+      "updated_at": "2026-11-13T16:52:21Z"
     },
     {
       "id": "69-04",
@@ -637,7 +637,7 @@
       "idempotency_key": "64205e07f5aa4da0d7e8d6816492e767",
       "attempt": 0,
       "created_at": "2026-11-13T16:47:45Z",
-      "updated_at": "2026-11-13T16:47:47Z"
+      "updated_at": "2026-11-13T16:52:21Z"
     },
     {
       "id": "69-06",
@@ -649,7 +649,7 @@
       "idempotency_key": "530b9cd75058a0339a5c83c3e2f72f0c",
       "attempt": 0,
       "created_at": "2026-11-13T16:47:45Z",
-      "updated_at": "2026-11-13T16:47:47Z"
+      "updated_at": "2026-11-13T16:52:21Z"
     },
     {
       "id": "69-05",
@@ -661,7 +661,7 @@
       "idempotency_key": "4d64acabf19a36c596412f3d117fd5b4",
       "attempt": 0,
       "created_at": "2026-11-13T16:47:46Z",
-      "updated_at": "2026-11-13T16:47:47Z"
+      "updated_at": "2026-11-13T16:52:21Z"
     },
     {
       "id": "69-07",
@@ -673,7 +673,7 @@
       "idempotency_key": "6e8c8c1a45e34c7ef2cde19e825ef50e",
       "attempt": 0,
       "created_at": "2026-11-13T16:47:47Z",
-      "updated_at": "2026-11-13T16:47:47Z"
+      "updated_at": "2026-11-13T16:52:21Z"
     }
   ]
 }

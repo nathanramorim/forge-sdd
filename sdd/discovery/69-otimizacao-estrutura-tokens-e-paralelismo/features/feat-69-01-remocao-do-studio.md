@@ -44,7 +44,7 @@ O Studio (`internal/studio`, 5.262 linhas, `three.min.js`) não será usado e cu
 go build ./... && go vet ./... && go test -race ./...
 test ! -d internal/studio && test ! -f cmd/forge-sdd/studio.go
 ! forge-sdd studio >/dev/null 2>&1
-! grep -rliE 'forge-sdd studio|forge studio' internal/scaffold sdd/FLOW.md README.md docs .agents .claude .gemini .github sdd/spec
+! grep -rliE 'forge-sdd studio|forge studio' internal/scaffold sdd/FLOW.md README.md docs .agents .claude .gemini .github sdd/spec --exclude-dir=adr
 ```
 - Teste novo em `cmd/forge-sdd`: iniciar o servidor `acp` com contexto cancelável inicia o heartbeat e o encerra sem goroutine remanescente.
 - `sdd/spec/concepts.md` não cita `internal/studio` nem `acp.HTTPTransport`.

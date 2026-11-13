@@ -2,9 +2,10 @@ package acp_test
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
-	"fmt"
 	"net/http"
+	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"testing"
@@ -12,20 +13,19 @@ import (
 
 	"github.com/forge-sdd/cli/internal/acp"
 	"github.com/forge-sdd/cli/internal/queue"
-	"github.com/forge-sdd/cli/internal/studio"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-// TestE2E_PoolLifecycleAndStudioIntegration valida a integração completa do SessionPool com o Forge Studio:
-// 1. Arranque do Studio e pré-aquecimento automático das 5 sessões (standby)
+// TestE2E_PoolLifecycleAndHTTPIntegration valida a integração completa do SessionPool com o transporte HTTP do ACP:
+// 1. Arranque do dispatcher ACP e pré-aquecimento das 5 sessões (standby)
 // 2. Despacho e consulta de status via HTTP JSON-RPC (/api/acp)
 // 3. Transição operacional da Estação 02 (PM & Arquiteto) -> processing (mascote working)
 // 4. Conclusão da Spec -> bloqueio estrito em approval_pending (mascote approval)
 // 5. Homologação do Portão FLX-01 via RPC gate/approve e handoff determinístico para Estação 03 (Planejador)
 // 6. Anexação de cliente terminal via AttachBridge (pub/sub de logs em tempo real)
 // 7. Desconexão graciosa sem encerramento das sessões no pool
-func TestE2E_PoolLifecycleAndStudioIntegration(t *testing.T) {
+func TestE2E_PoolLifecycleAndHTTPIntegration(t *testing.T) {
 	wsDir := t.TempDir()
 
 	// 1. Prepara estrutura SDD mínima e arquivo de especificação para homologação do Portão FLX-01
@@ -48,28 +48,18 @@ func TestE2E_PoolLifecycleAndStudioIntegration(t *testing.T) {
 `
 	require.NoError(t, os.WriteFile(specAbsPath, []byte(validSpecContent), 0o644))
 
-	// 2. Inicializa o servidor Forge Studio
-	srv, err := studio.NewServer(studio.Config{
-		Dir:  wsDir,
-		Host: "127.0.0.1",
-		Port: 0,
-	})
+	// 2. Inicializa o dispatcher ACP com transporte HTTP e pré-aquece o pool
+	dispatcher := acp.NewDispatcher()
+	pool := dispatcher.Pool()
+	require.NotNil(t, pool)
+	_, err := pool.Warmup(context.Background(), wsDir)
 	require.NoError(t, err)
-	require.NoError(t, srv.Listen())
-	go func() {
-		_ = srv.Start()
-	}()
-	defer func() {
-		_ = srv.Stop()
-	}()
 
-	serverURL := srv.URL()
-	require.NotEmpty(t, serverURL)
+	srv := httptest.NewServer(acp.NewHTTPHandler(dispatcher))
+	defer srv.Close()
+	serverURL := srv.URL
 
 	// 3. Valida se o SessionPool foi pré-aquecido com as 5 sessões canônicas em standby
-	pool := srv.Pool()
-	require.NotNil(t, pool)
-
 	sessions := pool.ListSessions()
 	require.Len(t, sessions, 5)
 	for _, s := range sessions {
@@ -87,14 +77,14 @@ func TestE2E_PoolLifecycleAndStudioIntegration(t *testing.T) {
 	body, err := json.Marshal(statusReq)
 	require.NoError(t, err)
 
-	httpResp, err := http.Post(fmt.Sprintf("%s/api/acp", serverURL), "application/json", bytes.NewReader(body))
+	httpResp, err := http.Post(serverURL, "application/json", bytes.NewReader(body))
 	require.NoError(t, err)
 	defer httpResp.Body.Close()
 	require.Equal(t, http.StatusOK, httpResp.StatusCode)
 
 	var rpcResp struct {
-		JSONRPC string             `json:"jsonrpc"`
-		ID      int                `json:"id"`
+		JSONRPC string               `json:"jsonrpc"`
+		ID      int                  `json:"id"`
 		Result  acp.PoolStatusResult `json:"result"`
 	}
 	require.NoError(t, json.NewDecoder(httpResp.Body).Decode(&rpcResp))
@@ -104,25 +94,8 @@ func TestE2E_PoolLifecycleAndStudioIntegration(t *testing.T) {
 	// 5. Simula Estação 02 iniciando elaboração (processing)
 	require.NoError(t, pool.TransitionState(queue.StationPMArchitect, acp.SessionStateProcessing, "conception"))
 
-	// Snapshot reflete mascote working
-	snap, err := srv.Aggregator.GetSnapshot()
-	require.NoError(t, err)
-	for _, st := range snap.Stations {
-		if st.ID == queue.StationPMArchitect {
-			assert.Equal(t, "working", st.MascotState)
-		}
-	}
-
 	// 6. Conclui elaboração e bloqueia em approval_pending (Portão FLX-01)
 	require.NoError(t, pool.TransitionState(queue.StationPMArchitect, acp.SessionStateApprovalPending, "spec completed"))
-
-	snap, err = srv.Aggregator.GetSnapshot()
-	require.NoError(t, err)
-	for _, st := range snap.Stations {
-		if st.ID == queue.StationPMArchitect {
-			assert.Equal(t, "approval", st.MascotState)
-		}
-	}
 
 	// 7. Homologação do Portão FLX-01 via chamada RPC gate/approve
 	gateReq := map[string]any{
@@ -139,14 +112,14 @@ func TestE2E_PoolLifecycleAndStudioIntegration(t *testing.T) {
 	gateBody, err := json.Marshal(gateReq)
 	require.NoError(t, err)
 
-	gateHttpResp, err := http.Post(fmt.Sprintf("%s/api/acp", serverURL), "application/json", bytes.NewReader(gateBody))
+	gateHttpResp, err := http.Post(serverURL, "application/json", bytes.NewReader(gateBody))
 	require.NoError(t, err)
 	defer gateHttpResp.Body.Close()
 	require.Equal(t, http.StatusOK, gateHttpResp.StatusCode)
 
 	var gateResp struct {
-		JSONRPC string          `json:"jsonrpc"`
-		ID      int             `json:"id"`
+		JSONRPC string                `json:"jsonrpc"`
+		ID      int                   `json:"id"`
 		Result  acp.GateApproveResult `json:"result"`
 	}
 	require.NoError(t, json.NewDecoder(gateHttpResp.Body).Decode(&gateResp))
@@ -158,17 +131,8 @@ func TestE2E_PoolLifecycleAndStudioIntegration(t *testing.T) {
 	require.True(t, ok)
 	assert.Equal(t, acp.SessionStateProcessing, plannerSess.State)
 
-	// Snapshot reflete mascote do Planejador em thinking
-	snap, err = srv.Aggregator.GetSnapshot()
-	require.NoError(t, err)
-	for _, st := range snap.Stations {
-		if st.ID == queue.StationPlanner {
-			assert.Equal(t, "thinking", st.MascotState)
-		}
-	}
-
 	// 8. Anexação de cliente terminal via AttachBridge
-	bridge := srv.AttachBridge()
+	bridge := dispatcher.AttachBridge()
 	require.NotNil(t, bridge)
 
 	stream, detach, err := bridge.Attach(queue.StationPlanner)

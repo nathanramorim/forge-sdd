@@ -2,13 +2,13 @@
   "feature_id": "feat-69",
   "branch": "feat/69-otimizacao-estrutura-tokens-e-paralelismo",
   "spec_status": "reviewed",
-  "updated_at": "2026-11-13T16:47:47Z",
+  "updated_at": "2026-11-13T16:52:21Z",
   "items": [
     {
       "task_id": "69-01",
       "title": "feat-69-01 — Remoção do Forge Studio",
       "spec_path": "sdd/discovery/69-otimizacao-estrutura-tokens-e-paralelismo/features/feat-69-01-remocao-do-studio.md",
-      "status": "queued",
+      "status": "review_pending",
       "rules": [
         "ARQ-01",
         "ARQ-02",
@@ -19,7 +19,7 @@
         "FLX-05"
       ],
       "skills_used": [],
-      "attempts": 0
+      "attempts": 1
     },
     {
       "task_id": "69-02",

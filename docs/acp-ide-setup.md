@@ -1,6 +1,6 @@
 # Guia de Integração IDE com o Protocolo ACP (`forge-sdd acp`)
 
-O **Protocolo ACP (Agent Client Protocol)** padroniza a comunicação bidirecional em tempo real entre IDEs modernas (como **Zed Editor**, **Cursor** e **VS Code**), o **Forge Studio** e a esteira de 5 estações autônomas do **forge-sdd**.
+O **Protocolo ACP (Agent Client Protocol)** padroniza a comunicação bidirecional em tempo real entre IDEs modernas (como **Zed Editor**, **Cursor** e **VS Code**) e a esteira de 5 estações autônomas do **forge-sdd**.
 
 Baseado no padrão **JSON-RPC 2.0**, o ACP permite que ambientes de desenvolvimento externos interajam diretamente com o ciclo de vida do projeto: inicializar workspaces, enviar prompts e demandas para as filas das estações, receber streaming de eventos assíncronos e homologar portões de qualidade (`FLX-01`).
 
@@ -115,7 +115,7 @@ O protocolo ACP no forge-sdd suporta dois modos de transporte:
 | Transporte | Canal de Comunicação | Cenário de Uso | Comando / Endpoint |
 |---|---|---|---|
 | **stdio** (Padrão) | `os.Stdin` / `os.Stdout` via pipes | IDEs locais (Zed, Cursor, VS Code) e scripts CLI | `forge-sdd acp` |
-| **HTTP + SSE** | HTTP POST + Server-Sent Events | Forge Studio, dashboards web e serviços desacoplados | POST `/acp`<br/>GET `/acp/events` |
+| **HTTP + SSE** | HTTP POST + Server-Sent Events | Dashboards web e serviços desacoplados | POST `/acp`<br/>GET `/acp/events` |
 
 ---
 
