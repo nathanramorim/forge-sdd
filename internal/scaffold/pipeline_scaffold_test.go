@@ -185,3 +185,84 @@ func TestScaffold_SkillsDoModoPipelineDizemQueADiscoveryNaoExecuta(t *testing.T)
 	assert.Contains(t, impl, "nunca edite `forge.json` nem o código da feature")
 	assert.Contains(t, read(".agents/skills/sdd-concepcao/references/discovery.md"), "esta sessão nunca constrói")
 }
+
+func TestScaffold_ProtocoloBrief(t *testing.T) {
+	dir := t.TempDir()
+	_, err := Run(config.Config{Project: "demo", Stack: "go", DB: "none", Lang: "pt-BR", SddVersion: "4.2.0-beta", Agents: []string{config.AgentClaude, config.AgentGemini, config.AgentOpenAI}}, dir)
+	require.NoError(t, err)
+	read := func(rel string) string {
+		b, err := os.ReadFile(filepath.Join(dir, filepath.FromSlash(rel)))
+		require.NoError(t, err, rel)
+		return string(b)
+	}
+
+	assert.Contains(t, read("CLAUDE.md"), "Discovery começa por `forge-sdd brief`")
+	assert.Contains(t, read("GEMINI.md"), "Discovery começa por `forge-sdd brief`")
+	assert.Contains(t, read("AGENTS.md"), "Discovery começa por `forge-sdd brief`")
+
+	concepcao := read(".agents/skills/sdd-concepcao/SKILL.md")
+	assert.Contains(t, concepcao, "rode `forge-sdd brief` antes de tudo")
+	assert.Contains(t, concepcao, "Decisões do projeto aplicadas")
+
+	for _, ref := range []string{
+		".agents/skills/sdd-concepcao/references/discovery.md",
+		".agents/skills/sdd-concepcao/references/nova-feature.md",
+		".agents/skills/sdd-concepcao/references/novo-fix.md",
+		".agents/skills/sdd-planejamento/references/split-features.md",
+	} {
+		assert.Contains(t, read(ref), "forge-sdd brief", ref)
+	}
+}
+
+func TestScaffold_ConstitutionConteudo(t *testing.T) {
+	dir := t.TempDir()
+	_, err := Run(config.Config{
+		Project: "demo", Stack: "go", DB: "none", Lang: "pt-BR", SddVersion: "4.2.0-beta",
+		Agents: []string{config.AgentClaude, config.AgentGemini, config.AgentCopilot},
+	}, dir)
+	require.NoError(t, err)
+
+	read := func(rel string) string {
+		b, err := os.ReadFile(filepath.Join(dir, filepath.FromSlash(rel)))
+		require.NoError(t, err, rel)
+		return string(b)
+	}
+
+	targets := []string{
+		".claude/commands/constitution.md",
+		".gemini/prompts/constitution.prompt.md",
+		".github/prompts/constitution.prompt.md",
+		".agents/skills/sdd-concepcao/references/constitution.md",
+	}
+
+	for _, path := range targets {
+		c := read(path)
+		assert.Contains(t, c, "módulos", path)
+		assert.Contains(t, c, "fluxos", path)
+		assert.Contains(t, c, "decisões", path)
+		assert.Contains(t, c, "ADR", path)
+		assert.Contains(t, c, "segurança", path)
+		assert.Contains(t, c, "brief --check", path)
+	}
+}
+
+func TestScaffold_DocsCitamBriefConstituicaoETmux(t *testing.T) {
+	root := filepath.Join("..", "..")
+
+	docs := []string{
+		filepath.Join(root, "README.md"),
+		filepath.Join(root, "docs", "pipeline.md"),
+		filepath.Join("templates", ".forge", "LEIA-ME.md.tmpl"),
+		filepath.Join(root, "site", "public", "guia-pipeline.html"),
+	}
+
+	for _, doc := range docs {
+		data, err := os.ReadFile(doc)
+		require.NoError(t, err, "arquivo de documentação deve existir: %s", doc)
+		content := string(data)
+
+		assert.True(t, strings.Contains(content, "brief") || strings.Contains(content, "forge-sdd brief"), "%s deve citar brief", doc)
+		assert.True(t, strings.Contains(content, "/constitution") || strings.Contains(content, "Constituição"), "%s deve citar constitution", doc)
+		assert.True(t, strings.Contains(content, "tmux"), "%s deve citar tmux", doc)
+	}
+}

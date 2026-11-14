@@ -5,9 +5,11 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
 
 	"github.com/forge-sdd/cli/internal/config"
+	"github.com/forge-sdd/cli/internal/gate"
 	"github.com/forge-sdd/cli/internal/layout"
 )
 
@@ -49,7 +51,7 @@ var agentFiles = map[string]struct {
 	InstallIt string
 }{
 	config.CLIClaude:  {[]string{"CLAUDE.md"}, "claude", "npm install -g @anthropic-ai/claude-code"},
-	config.CLIGemini:  {[]string{"GEMINI.md"}, "gemini", "npm install -g @google/gemini-cli"},
+	config.CLIGemini:  {[]string{"GEMINI.md"}, "gemini", "npm install -g @google/antigravity-cli"},
 	config.CLICopilot: {[]string{".github/copilot-instructions.md", "AGENTS.md"}, "copilot", "npm install -g @github/copilot"},
 	config.CLICodex:   {[]string{"AGENTS.md"}, "openai", "npm install -g @openai/codex"},
 	config.CLIAgy:     {[]string{"GEMINI.md", "AGENTS.md"}, "gemini", ""},
@@ -116,6 +118,35 @@ func Preflight(dir string, cfg config.ForgeConfig, env PreflightEnv) []Item {
 						Action:  "forge-sdd update --agent claude"})
 				}
 			}
+		}
+	}
+
+	if cfg.Terminal != config.TerminalNative && runtime.GOOS != "windows" {
+		if _, err := env.LookPath("tmux"); err != nil {
+			ienv := InstallEnv{GOOS: runtime.GOOS, LookPath: env.LookPath}
+			action := "instale o tmux ou use --terminal native"
+			if argv, _, ok := InstallPlan(ienv); ok {
+				action = "instale: " + InstallCommandLine(argv) + " (ou use --terminal native)"
+			}
+			items = append(items, Item{
+				Level:   LevelWarn,
+				Message: "tmux ausente: as sessões abrirão em janelas soltas",
+				Action:  action,
+			})
+		}
+	}
+
+	if _, err := os.Stat(filepath.Join(dir, "sdd", "memory", "constitution.md")); err == nil {
+		if b, err := gate.BuildBrief(dir, 0); err == nil && b.State == gate.BriefRascunho {
+			msg := "Constituição em rascunho"
+			if len(b.Missing) > 0 {
+				msg += ": " + strings.Join(b.Missing, ", ")
+			}
+			items = append(items, Item{
+				Level:   LevelWarn,
+				Message: msg,
+				Action:  "/constitution",
+			})
 		}
 	}
 	return items

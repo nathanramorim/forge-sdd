@@ -62,7 +62,7 @@ func shQuote(s string) string { return "'" + strings.ReplaceAll(s, "'", `'\''`) 
 
 // DiscoveryPrompt é o prompt inicial da sessão Discovery nas CLIs que o aceitam. Texto ASCII, sem
 // aspas, % nem metacaracteres: precisa sobreviver ao cmd.exe e ao AppleScript sem escapes frágeis.
-const DiscoveryPrompt = "Voce e a sessao forge-discovery do Forge SDD. Siga .agents/skills/sdd-concepcao/SKILL.md, carregue as ADRs e as rules antes de quebrar tarefas e use /implementar quando a feature estiver pronta."
+const DiscoveryPrompt = "Voce e a sessao forge-discovery do Forge SDD. Rode forge-sdd brief no inicio: se estiver em rascunho proponha /constitution antes de qualquer spec. Siga .agents/skills/sdd-concepcao/SKILL.md, cite as decisoes do projeto na spec e use /implementar quando a feature estiver pronta."
 
 var safeArgRe = regexp.MustCompile(`^[A-Za-z0-9_@%+=:,./-]+$`)
 
@@ -189,6 +189,22 @@ func LaunchPlanFor(env LaunchEnv, cfg config.ForgeConfig) ([]LaunchCommand, erro
 	sessions, err := SessionsFor(env, cfg)
 	if err != nil {
 		return nil, err
+	}
+	if env.GOOS == "windows" && (has(env, "wt.exe") || has(env, "wt")) {
+		wt := "wt.exe"
+		if !has(env, "wt.exe") && has(env, "wt") {
+			wt = "wt"
+		}
+		// Windows Terminal em janela única com 3 painéis (a confirmar em Windows real: o argv é testado unitariamente).
+		argv := []string{
+			wt, "-w", "new",
+			"new-tab", "--title", sessions[0].Title, "cmd.exe", "/k", sessions[0].Inner,
+			";",
+			"split-pane", "-V", "--title", sessions[1].Title, "cmd.exe", "/k", sessions[1].Inner,
+			";",
+			"split-pane", "-H", "--title", sessions[2].Title, "cmd.exe", "/k", sessions[2].Inner,
+		}
+		return []LaunchCommand{{Title: sessions[0].Title, Argv: argv}}, nil
 	}
 	var out []LaunchCommand
 	for _, s := range sessions {

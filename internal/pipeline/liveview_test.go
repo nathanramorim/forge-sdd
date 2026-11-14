@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -317,4 +318,44 @@ func TestLiveView_LinhaGiganteSemQuebraNaoCresceSemLimite(t *testing.T) {
 	assert.Less(t, v.partial.Len(), maxPartial+len(chunk), "o buffer é limitado")
 	_, _ = v.Write([]byte("resto da linha gigante\nlinha normal\n"))
 	assert.Equal(t, "  linha normal\n", term.String(), "a linha gigante é descartada até a próxima quebra")
+}
+
+func TestLiveView_RuidoGemini(t *testing.T) {
+	// Modo limpo (padrão): 40 conflitos colapsam em 1 linha; YOLO e Ripgrep somem
+	v, term, log := live(config.CLIGemini, false)
+	for i := 0; i < 40; i++ {
+		_, _ = v.Write([]byte(fmt.Sprintf("Skill conflict detected for skill 'skill-%d'\n", i)))
+	}
+	_, _ = v.Write([]byte("YOLO mode is enabled for this session\n"))
+	_, _ = v.Write([]byte("Ripgrep is not available, falling back\n"))
+	_, _ = v.Write([]byte("tarefa iniciada\n"))
+	v.Flush()
+
+	out := term.String()
+	assert.Contains(t, out, "(40 skills duplicadas nas suas pastas globais: ignorado; o log bruto guarda tudo)")
+	assert.NotContains(t, out, "Skill conflict detected for skill 'skill-0'")
+	assert.NotContains(t, out, "YOLO mode is enabled")
+	assert.NotContains(t, out, "Ripgrep is not available")
+	assert.Contains(t, out, "tarefa iniciada")
+
+	rawLog := log.String()
+	assert.Contains(t, rawLog, "Skill conflict detected for skill 'skill-0'")
+	assert.Contains(t, rawLog, "Skill conflict detected for skill 'skill-39'")
+	assert.Contains(t, rawLog, "YOLO mode is enabled")
+	assert.Contains(t, rawLog, "Ripgrep is not available")
+
+	// Modo --raw: tudo aparece no terminal
+	vRaw, termRaw, _ := live(config.CLIGemini, true)
+	for i := 0; i < 40; i++ {
+		_, _ = vRaw.Write([]byte(fmt.Sprintf("Skill conflict detected for skill 'skill-%d'\n", i)))
+	}
+	_, _ = vRaw.Write([]byte("YOLO mode is enabled for this session\n"))
+	_, _ = vRaw.Write([]byte("Ripgrep is not available, falling back\n"))
+	vRaw.Flush()
+
+	outRaw := termRaw.String()
+	assert.Contains(t, outRaw, "Skill conflict detected for skill 'skill-0'")
+	assert.Contains(t, outRaw, "Skill conflict detected for skill 'skill-39'")
+	assert.Contains(t, outRaw, "YOLO mode is enabled")
+	assert.Contains(t, outRaw, "Ripgrep is not available")
 }

@@ -18,9 +18,10 @@ import (
 
 // Resultados de um job para o gancho de telemetria.
 const (
-	OutcomeDone     = "done"
-	OutcomeFailed   = "failed"
-	OutcomeDeferred = "deferred" // limite de uso: o job voltou à fila sem gastar tentativa
+	OutcomeDone        = "done"
+	OutcomeFailed      = "failed"
+	OutcomeDeferred    = "deferred" // limite de uso: o job voltou à fila sem gastar tentativa
+	OutcomeUnavailable = "unavailable"
 )
 
 // WorkerOptions configura o laço do worker.
@@ -124,11 +125,13 @@ func RunWorker(ctx context.Context, opts WorkerOptions) error {
 			return err
 		}
 		lastIdleMsg = time.Time{} // depois de trabalhar, a próxima ociosidade avisa de novo
-		processJob(ctx, opts, cfg, entry)
+		if err := processJob(ctx, opts, cfg, entry); err != nil {
+			return err
+		}
 	}
 }
 
-func processJob(ctx context.Context, opts WorkerOptions, cfg config.ForgeConfig, entry *bus.Entry) {
+func processJob(ctx context.Context, opts WorkerOptions, cfg config.ForgeConfig, entry *bus.Entry) error {
 	job := entry.Job
 	started := opts.Now()
 
@@ -211,9 +214,31 @@ func processJob(ctx context.Context, opts WorkerOptions, cfg config.ForgeConfig,
 			if opts.OnJobDone != nil {
 				opts.OnJobDone(job, OutcomeDeferred)
 			}
-			return
+			return nil
 		}
-		if last := lastUsefulLine(live); last != "" {
+		if au, ok := DetectAgentUnavailable(live.Tail(12), opts.CLI); ok {
+			if _, reqErr := bus.Requeue(opts.Dir, opts.Role, job.ID, opts.Name, "agente indisponível: "+opts.CLI, opts.Now()); reqErr == nil {
+				if ncfg, err := config.LoadNotificationsConfig(opts.Dir); err == nil {
+					n := notify.Notification{
+						Type:    notify.TypeInfo,
+						Title:   fmt.Sprintf("Agente %s indisponível no %s", opts.CLI, opts.Role),
+						Message: fmt.Sprintf("%s\nAção: %s", au.Message, au.Hint),
+						Feature: job.Feature, JobID: job.ID,
+						ID: notificationID(job.ID, "agente-indisponivel"),
+					}
+					_, _ = notify.Dispatch(opts.Dir, ncfg, n, notify.Deps{})
+				}
+				live.Line(fmt.Sprintf("✗ %s indisponível: %s", opts.CLI, au.Message))
+				live.Line(fmt.Sprintf("→ %s", au.Hint))
+				if opts.OnJobDone != nil {
+					opts.OnJobDone(job, OutcomeUnavailable)
+				}
+				return fmt.Errorf("%s indisponível: %s", opts.CLI, au.Message)
+			}
+			// Se o Requeue falhar, cai no bus.Fail de hoje com a mensagem
+			reason += ": " + au.Message
+		}
+		if last := lastUsefulLine(live); last != "" && !strings.Contains(reason, last) {
 			reason += ": " + last
 		}
 		if deferrals(job) >= maxUsageLimitDeferrals {
@@ -237,6 +262,7 @@ func processJob(ctx context.Context, opts WorkerOptions, cfg config.ForgeConfig,
 	if opts.OnJobDone != nil {
 		opts.OnJobDone(job, outcome)
 	}
+	return nil
 }
 
 // verifyHandoff confere o que o agente precisava deixar feito e conclui o job. Devolve o motivo da
@@ -301,7 +327,7 @@ func lastUsefulLine(live *LiveView) string {
 	tail := live.Tail(5)
 	for i := len(tail) - 1; i >= 0; i-- {
 		l := strings.TrimSpace(strings.TrimPrefix(strings.TrimSpace(tail[i]), "✗"))
-		if l != "" && !strings.HasPrefix(l, "(hooks globais") {
+		if l != "" && !strings.HasPrefix(l, "(hooks globais") && !strings.Contains(l, "skills duplicadas") {
 			return l
 		}
 	}

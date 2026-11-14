@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/forge-sdd/cli/internal/config"
+	"github.com/forge-sdd/cli/internal/gate"
 	"github.com/forge-sdd/cli/internal/pipeline"
 	"github.com/forge-sdd/cli/internal/survey"
 	"github.com/mattn/go-isatty"
@@ -134,6 +135,13 @@ func runMenu(env *menuEnv) error {
 		if !installed {
 			opts = append(opts, menuOption{Label: "Instalar o Forge neste projeto", Value: valInstall})
 			def = valInstall
+		} else {
+			if _, err := os.Stat(filepath.Join(env.dir, "sdd", "memory", "constitution.md")); err == nil {
+				if b, err := gate.BuildBrief(env.dir, 0); err == nil && b.State == gate.BriefRascunho {
+					opts = append(opts, menuOption{Label: "Alinhar o projeto (passo 1: /constitution no seu agente de IA)", Value: "constitution"})
+					def = "constitution"
+				}
+			}
 		}
 		opts = append(opts,
 			menuOption{Label: "Pipeline multi-sessão (Discovery, Builder e Reviewer em 3 terminais)", Value: valPipeline},
@@ -148,6 +156,12 @@ func runMenu(env *menuEnv) error {
 			return err
 		}
 		switch choice {
+		case "constitution":
+			fmt.Fprintln(env.out, "\nPasso 1: Alinhar o projeto")
+			fmt.Fprintln(env.out, "Abra o seu agente de IA (Claude, Gemini ou Codex) e execute:")
+			fmt.Fprintln(env.out, "  /constitution")
+			fmt.Fprintln(env.out, "O comando vai alinhar stack, arquitetura, módulos e regras, validando com `forge-sdd brief --check`.")
+			_ = env.p.Pause("Enter para voltar ao menu")
 		case valInstall:
 			installed = env.installOrUpdate() == nil && config.DetectProject(env.dir)
 		case valPipeline:
@@ -484,7 +498,7 @@ func (e *menuEnv) showGuide() {
 	_ = e.p.Pause("Enter para voltar ao menu")
 }
 
-// terminalLabel diz onde as sessões vão abrir: "no tmux (3 painéis)" ou "em janelas do sistema".
+// terminalLabel diz onde as sessões vão abrir: "no tmux (3 painéis)", "em painéis do Windows Terminal" ou "em janelas do sistema".
 func (e *menuEnv) terminalLabel(cfg config.ForgeConfig) string {
 	look := e.preflightEnv.LookPath
 	if look == nil {
@@ -493,6 +507,14 @@ func (e *menuEnv) terminalLabel(cfg config.ForgeConfig) string {
 	env := pipeline.LaunchEnv{GOOS: runtime.GOOS, LookPath: look}
 	term, err := pipeline.ResolveTerminal("", cfg, env)
 	if err != nil || term == config.TerminalNative {
+		if runtime.GOOS == "windows" {
+			if _, err := look("wt.exe"); err == nil {
+				return "em painéis do Windows Terminal"
+			}
+			if _, err := look("wt"); err == nil {
+				return "em painéis do Windows Terminal"
+			}
+		}
 		return "em janelas do sistema"
 	}
 	return "no tmux (3 painéis)"

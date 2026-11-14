@@ -47,7 +47,7 @@ func TestUp_Precedencia(t *testing.T) {
 	require.NoError(t, err)
 	assert.Contains(t, out, "--name forge-builder --cli copilot", "sessions de forge.json vence --cli")
 	assert.Contains(t, out, "--name forge-reviewer --cli gemini", "--cli vale para a sessão sem escolha")
-	assert.Contains(t, out, "gemini -i", "a Discovery usa --cli")
+	assert.Contains(t, out, "agy -i", "a Discovery usa --cli")
 
 	resetWorkerFlags()
 	out, err = runRoot(t, "up", "--dir", dir, "--builder", "codex", "--dry-run", "--terminal", "native")

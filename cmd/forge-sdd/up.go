@@ -9,6 +9,7 @@ import (
 
 	"github.com/forge-sdd/cli/internal/config"
 	"github.com/forge-sdd/cli/internal/pipeline"
+	"github.com/forge-sdd/cli/internal/survey"
 	"github.com/spf13/cobra"
 )
 
@@ -46,12 +47,21 @@ não tiverem escolha própria. --dry-run só imprime os comandos.`,
 		}
 		env := pipeline.DefaultLaunchEnv(runtime.GOOS, abs, pipeline.ResolveBin())
 		termFlag, _ := cmd.Flags().GetString("terminal")
-		term, err := pipeline.ResolveTerminal(termFlag, cfg, env)
+		out := cmd.OutOrStdout()
+		prompt := pipeline.TerminalPrompt{
+			Env:         env,
+			Geteuid:     os.Geteuid,
+			Interactive: isInteractive() && !dry,
+			Confirm:     survey.ConfirmYesNo,
+			Runner:      pipeline.DefaultInstallRunner(),
+			Out:         out,
+			Remember:    pipeline.RememberNative(abs),
+		}
+		decision, err := pipeline.DecideTerminal(termFlag, cfg, prompt)
 		if err != nil {
 			return err
 		}
-		out := cmd.OutOrStdout()
-		if term == config.TerminalTmux {
+		if decision.Terminal == config.TerminalTmux {
 			plan, err := pipeline.BuildTmuxPlan(env, cfg, os.Getenv("TMUX") != "")
 			if err != nil {
 				return err
@@ -63,8 +73,15 @@ não tiverem escolha própria. --dry-run só imprime os comandos.`,
 				fmt.Fprintf(out, "[DRY-RUN] Nada foi aberto (sessão tmux %s).\n", plan.Session)
 				return nil
 			}
-			created, err := pipeline.LaunchTmux(plan, pipeline.DefaultTmuxRunner())
-			if err == nil && !created {
+			nativeFallback := func() error {
+				natPlan, err := pipeline.LaunchPlanFor(env, cfg)
+				if err != nil {
+					return err
+				}
+				return pipeline.Launch(natPlan)
+			}
+			created, fellBack, err := pipeline.LaunchTerminalTmux(plan, pipeline.DefaultTmuxRunner(), decision.Auto, out, nativeFallback)
+			if err == nil && !created && !fellBack {
 				fmt.Fprintf(out, "A sessão %s já existia: reconectado.\n", plan.Session)
 			}
 			return err
