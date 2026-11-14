@@ -50,7 +50,11 @@ o comando orienta forge-sdd pipeline init.`,
 		} else {
 			fmt.Fprintf(out, "Job %s já estava na fila (idempotente)\n", res.Job.ID)
 		}
-		fmt.Fprintf(out, "Próximo passo do agente: %s\n", res.CardInstruction)
+		if res.CardInstruction != "" {
+			fmt.Fprintf(out, "Próximo passo do agente: %s\n", res.CardInstruction)
+		} else {
+			fmt.Fprintln(out, "Despacho sem card (pm_mcp.require_existing_card: false). O Builder já pode pegar o job; acompanhe pelo painel dele.")
+		}
 		return nil
 	},
 }

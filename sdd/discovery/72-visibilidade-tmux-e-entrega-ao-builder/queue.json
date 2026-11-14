@@ -2,13 +2,13 @@
   "feature_id": "feat-72",
   "branch": "feat/72-visibilidade-tmux-e-entrega-ao-builder",
   "spec_status": "reviewed",
-  "updated_at": "2026-11-14T02:07:12Z",
+  "updated_at": "2026-11-14T02:32:38Z",
   "items": [
     {
       "task_id": "72-01",
       "title": "feat-72-01 — Entrega ao Builder e Despacho sem Card",
       "spec_path": "sdd/discovery/72-visibilidade-tmux-e-entrega-ao-builder/features/feat-72-01-entrega-ao-builder-e-despacho-sem-card.md",
-      "status": "queued",
+      "status": "review_pending",
       "rules": [
         "FLX-01",
         "FLX-08",
@@ -18,7 +18,7 @@
         "TST-03"
       ],
       "skills_used": [],
-      "attempts": 0
+      "attempts": 1
     },
     {
       "task_id": "72-02",

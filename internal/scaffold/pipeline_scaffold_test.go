@@ -167,3 +167,21 @@ func TestAgentsMD_TituloIgualDoUsuarioNaoEhGerado(t *testing.T) {
 	gen, _ := os.ReadFile(filepath.Join(dir2, "AGENTS.md"))
 	assert.Contains(t, string(gen), "<!-- forge-sdd:generated -->")
 }
+
+func TestScaffold_SkillsDoModoPipelineDizemQueADiscoveryNaoExecuta(t *testing.T) {
+	dir := t.TempDir()
+	_, err := Run(config.Config{Project: "demo", Stack: "go", DB: "none", Lang: "pt-BR", SddVersion: "4.2.0-beta", Agents: []string{config.AgentClaude}}, dir)
+	require.NoError(t, err)
+	read := func(rel string) string {
+		b, err := os.ReadFile(filepath.Join(dir, filepath.FromSlash(rel)))
+		require.NoError(t, err, rel)
+		return string(b)
+	}
+	split := read(".agents/skills/sdd-planejamento/references/split-features.md")
+	assert.Contains(t, split, "forge-sdd dispatch <iniciativa>")
+	assert.Contains(t, split, "entregue ao Builder")
+	assert.Contains(t, split, "Esta sessão não implementa")
+	impl := read(".agents/skills/sdd-build/references/implementar.md")
+	assert.Contains(t, impl, "nunca edite `forge.json`, `card-evidence.json`")
+	assert.Contains(t, read(".agents/skills/sdd-concepcao/references/discovery.md"), "esta sessão nunca constrói")
+}

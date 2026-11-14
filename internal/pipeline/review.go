@@ -86,7 +86,9 @@ func ApplyVerdict(dir, jobID, worker string, v queue.Verdict, deps notify.Deps, 
 	switch {
 	case v.Veredito == "conforme":
 		res.Action = ActionApproved
-		res.CardInstruction = fmt.Sprintf("Atualize o card %s (%s) para %q via MCP.", job.Card.ID, job.Card.URL, cfg.PMMCP.StatusOnPRApproved)
+		if job.Card.ID != "" {
+			res.CardInstruction = fmt.Sprintf("Atualize o card %s (%s) para %q via MCP.", job.Card.ID, job.Card.URL, cfg.PMMCP.StatusOnPRApproved)
+		}
 		n := notify.Notification{
 			Type: notify.TypePRApproved, Title: "PR pronto: " + job.Feature,
 			Message: "PR revisado, sem inconformidades e pronto para aprovação final.\n" + oneLine(v.Resumo, 600),

@@ -9,6 +9,7 @@
 5. **Tasks:** crie `sdd/discovery/<id>-<nome>/features/feat-<id>-<nn>-<nome>.md` com `Modelo do módulo`, `O que já existe`, `Dependências novas`, `Rules e IDs da Constituição Aplicáveis` e `Critérios de Aceitação Executáveis`.
 6. **Estado:** atualize `status.md` da iniciativa; não escreva índice nem progresso globais.
 7. **Fila:** com a confirmação do humano, `forge-sdd queue enqueue --task <spec> --task-id <id> --rules <IDs>` para cada task, na ordem de dependência.
-8. **Telemetria:** `forge-sdd session record --feature "sdd/discovery/<id>-<nome>/features/" --outcome approved --criterio-atendido=true`.
+8. **Pipeline (existe `.forge/config/forge.json`):** depois da confirmação humana que enfileirou as tasks, rode `forge-sdd dispatch <iniciativa>` (gate e job para o Builder), informe "entregue ao Builder" e **pare**: o Builder e o Reviewer rodam nas outras sessões. Esta sessão não implementa, não edita `forge.json`, `card-evidence.json` nem o código da feature; pendência do gate vai para a pessoa. Com `pm_mcp.require_existing_card: false` o despacho não pede card.
+9. **Telemetria:** `forge-sdd session record --feature "sdd/discovery/<id>-<nome>/features/" --outcome approved --criterio-atendido=true`.
 
 Use `/nova-feature` apenas para adições manuais e isoladas.

@@ -11,4 +11,4 @@
 7. **Estado:** crie `status.md` (até 1 KB) com `Status`, `Próximo passo` e `A confirmar`.
 8. Se `Nível de Linguagem` na Constitution for `iniciante`, explique C4 e critério de aceitação com exemplos simples, sem alterar os critérios.
 9. **Telemetria:** `forge-sdd session record --feature "sdd/discovery/<id>-<nome>/discovery.md" --outcome approved --criterio-atendido=true`.
-10. **Gate 1 (`FLX-01`):** submeta ao humano; após aprovar, sugira `/split-features`.
+10. **Gate 1 (`FLX-01`):** submeta ao humano; após aprovar, sugira `/split-features`. Em modo pipeline (existe `.forge/config/forge.json`) esta sessão nunca constrói: o `/split-features` termina entregando ao Builder.
