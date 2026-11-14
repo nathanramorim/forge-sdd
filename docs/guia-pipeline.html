@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Forge SDD 4.2 — Guia do pipeline</title>
+<style>
+  :root{--bg:#0d0f14;--bg2:#12151d;--bg3:#1a1e29;--line:rgba(255,255,255,.1);--fg:#e9ecf4;--muted:#a3abc0;--accent:#4f8ef7;--ok:#3ecf8e;--warn:#f5b04a;--bad:#f2677a;
+    --mono:ui-monospace,"JetBrains Mono",SFMono-Regular,Menlo,Consolas,monospace;--sans:Montserrat,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.65 var(--sans);
+    background-image:linear-gradient(rgba(79,142,247,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(79,142,247,.05) 1px,transparent 1px);background-size:44px 44px}
+  .wrap{max-width:860px;margin:0 auto;padding:0 20px}
+  header{padding:56px 0 28px}
+  .eyebrow{font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
+  h1{font-size:clamp(30px,5vw,44px);line-height:1.15;margin:10px 0 14px;letter-spacing:-.02em}
+  header p{color:var(--muted);font-size:18px;margin:0;max-width:640px}
+  nav{position:sticky;top:0;z-index:5;background:rgba(13,15,20,.92);backdrop-filter:blur(6px);border-bottom:1px solid var(--line)}
+  nav .wrap{display:flex;gap:6px;overflow-x:auto;padding:10px 20px}
+  nav a{white-space:nowrap;color:var(--muted);text-decoration:none;font-size:14px;font-weight:600;padding:6px 12px;border-radius:999px;border:1px solid transparent}
+  nav a:hover{color:var(--fg);border-color:var(--line);background:var(--bg3)}
+  section{padding:38px 0 6px}
+  h2{font-size:26px;margin:0 0 6px;letter-spacing:-.01em}
+  h2 .n{display:inline-grid;place-items:center;width:34px;height:34px;border-radius:50%;background:var(--accent);color:#fff;font-size:16px;margin-right:10px;vertical-align:2px}
+  h3{font-size:17px;margin:26px 0 6px}
+  p{margin:10px 0}
+  .lead{color:var(--muted)}
+  code{font-family:var(--mono);font-size:.9em;background:var(--bg3);border:1px solid var(--line);border-radius:6px;padding:1px 6px}
+  pre{font-family:var(--mono);font-size:14px;line-height:1.55;background:#090b10;border:1px solid var(--line);border-radius:12px;padding:16px 18px;overflow-x:auto;margin:14px 0}
+  pre .c{color:#7e89a6}
+  pre .g{color:var(--ok)} pre .w{color:var(--warn)} pre .r{color:var(--bad)} pre .b{color:var(--accent)}
+  .card{background:var(--bg2);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin:14px 0}
+  .card.ok{border-color:rgba(62,207,142,.4)} .card.warn{border-color:rgba(245,176,74,.45)}
+  .card b.t{display:block;margin-bottom:2px}
+  .grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;margin:14px 0}
+  .grid3 .card{margin:0}
+  .pill{display:inline-block;font-size:12px;font-weight:700;border-radius:999px;padding:2px 10px;border:1px solid var(--line);background:var(--bg3);color:var(--muted)}
+  .pill.a{color:#fff;background:var(--accent);border-color:var(--accent)}
+  table{width:100%;border-collapse:collapse;margin:14px 0;font-size:15px;background:var(--bg2);border:1px solid var(--line);border-radius:12px;overflow:hidden;display:block;overflow-x:auto}
+  th,td{padding:10px 14px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+  th{background:var(--bg3);font-size:13px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+  tr:last-child td{border-bottom:0}
+  .flow{display:flex;flex-wrap:wrap;gap:8px;align-items:stretch;margin:16px 0}
+  .step{flex:1 1 150px;background:var(--bg2);border:1px solid var(--line);border-radius:14px;padding:12px 14px;position:relative}
+  .step small{display:block;color:var(--muted);font-size:13px;margin-top:2px;line-height:1.45}
+  .step .who{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--accent)}
+  .step.you{border-color:var(--accent)}
+  .arrow{align-self:center;color:var(--muted);font-weight:700}
+  ul{padding-left:20px} li{margin:5px 0}
+  footer{padding:40px 0 70px;color:var(--muted);font-size:14px}
+  a{color:var(--accent)}
+  @media(max-width:560px){.arrow{display:none}}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <div class="eyebrow">Forge SDD 4.2.0-beta</div>
+  <h1>Três sessões trabalhando juntas. Você só decide.</h1>
+  <p>Conversa e decide numa sessão enquanto outras duas constroem e revisam sozinhas. Este guia mostra como abrir, usar e acompanhar tudo, do zero.</p>
+</div></header>
+
+<nav><div class="wrap">
+  <a href="#ideia">A ideia</a><a href="#comecar">Começar</a><a href="#fluxo">Fluxo de uma feature</a>
+  <a href="#agentes">Agentes</a><a href="#paineis">Painéis e tmux</a><a href="#limite">Limite de uso</a>
+  <a href="#problemas">Se algo não anda</a><a href="#limites">Limites da beta</a>
+</div></nav>
+
+<main class="wrap">
+
+<section id="ideia">
+  <h2>A ideia</h2>
+  <p class="lead">Antes, um agente só concebia, construía e revisava o próprio código. Agora cada papel tem a sua sessão, e elas conversam por uma fila local.</p>
+  <div class="grid3">
+    <div class="card"><span class="pill a">você</span><b class="t" style="margin-top:8px">forge-discovery</b>Sessão interativa: você conversa, refina a feature, aprova a spec e dispara a construção.</div>
+    <div class="card"><span class="pill">worker</span><b class="t" style="margin-top:8px">forge-builder</b>Pega o job da fila, constrói (em paralelo o que for independente), roda os testes e abre o PR.</div>
+    <div class="card"><span class="pill">worker</span><b class="t" style="margin-top:8px">forge-reviewer</b>Confere o PR contra spec, ADRs e rules. Devolve com feedback ou aprova e avisa você.</div>
+  </div>
+  <div class="card ok"><b class="t">O pipeline nunca mescla nada.</b>Quem aprova e mescla o PR é você. As duas sessões de trabalho só entregam o PR revisado.</div>
+</section>
+
+<section id="comecar">
+  <h2>Começar</h2>
+  <h3><span class="n" style="display:inline-grid;place-items:center;width:26px;height:26px;border-radius:50%;background:var(--accent);color:#fff;font-size:13px;margin-right:8px">1</span>Instalar</h3>
+<pre>npm install -g @nathanramorim/forge-sdd@beta
+<span class="c"># o "@beta" é importante: a versão estável (latest) ainda não tem o pipeline</span></pre>
+
+  <h3><span class="n" style="display:inline-grid;place-items:center;width:26px;height:26px;border-radius:50%;background:var(--accent);color:#fff;font-size:13px;margin-right:8px">2</span>Abrir o menu</h3>
+  <p>Na pasta do seu projeto, rode:</p>
+<pre>forge</pre>
+  <p>Setas navegam, <code>Enter</code> escolhe, <code>Esc</code> volta. Num projeto sem Forge, a primeira opção é <b>Instalar</b>.</p>
+<pre><span class="b">Forge SDD 4.2.0-beta</span> — o que você quer fazer?
+  <span class="g">▸ Pipeline multi-sessão</span> (Discovery, Builder e Reviewer em 3 terminais)
+    Estrutura padrão (uma sessão só)
+    Sair</pre>
+
+  <h3><span class="n" style="display:inline-grid;place-items:center;width:26px;height:26px;border-radius:50%;background:var(--accent);color:#fff;font-size:13px;margin-right:8px">3</span>Iniciar as 3 sessões</h3>
+  <p>Em <b>Pipeline multi-sessão → Iniciar as 3 sessões</b> o menu pergunta:</p>
+  <ul>
+    <li><b>Qual agente</b> roda em cada sessão (Claude, Gemini, Copilot ou Codex). Pode misturar. A última escolha já vem marcada.</li>
+    <li><b>O nível de permissão</b> dos workers (veja a seção Agentes).</li>
+    <li>Mostra a <b>checagem</b> (CLI instalada? arquivos do agente no projeto?) e pede confirmação.</li>
+  </ul>
+  <p>Se for a primeira vez, o menu oferece ativar o pipeline (cria <code>.forge/config/forge.json</code>). Depois de confirmar, as três sessões abrem.</p>
+  <div class="card"><b class="t">Prefere sem menu?</b>
+<pre style="margin-bottom:0">forge-sdd pipeline init
+forge-sdd up --discovery claude --builder codex --reviewer gemini</pre></div>
+</section>
+
+<section id="fluxo">
+  <h2>Fluxo de uma feature</h2>
+  <p class="lead">Do pedido ao PR pronto. Você só atua nas caixas azuis.</p>
+  <div class="flow">
+    <div class="step you"><span class="who">você · discovery</span>Descreve a demanda<small><code>/discovery</code> gera spec e critérios</small></div><span class="arrow">→</span>
+    <div class="step you"><span class="who">você · discovery</span>Aprova o Gate 1<small>e roda <code>/split-features</code></small></div><span class="arrow">→</span>
+    <div class="step"><span class="who">automático</span>Entrega ao Builder<small>o split já roda o <code>dispatch</code> (gate + job)</small></div>
+  </div>
+  <div class="flow">
+    <div class="step"><span class="who">forge-builder</span>Constrói<small>testes, lint, abre o PR</small></div><span class="arrow">→</span>
+    <div class="step"><span class="who">forge-reviewer</span>Confere o PR<small>spec, ADRs, rules</small></div><span class="arrow">→</span>
+    <div class="step"><span class="who">se não conforme</span>Devolve ao Builder<small>até 3 vezes, com feedback</small></div><span class="arrow">→</span>
+    <div class="step you"><span class="who">você · discovery</span>Recebe o aviso<small>PR pronto no inbox; você aprova</small></div>
+  </div>
+  <div class="card warn"><b class="t">A Discovery não constrói.</b>Em modo pipeline, quem constrói é o Builder. Se a Discovery tentar rodar <code>queue next</code> ou <code>queue complete</code>, o Forge recusa (a menos que você use <code>--local</code>, por sua conta).</div>
+
+  <h3>Comandos que você vai usar</h3>
+  <table>
+    <tr><th>Onde</th><th>Comando</th><th>Para quê</th></tr>
+    <tr><td>Discovery</td><td><code>/discovery</code></td><td>Começar uma demanda nova.</td></tr>
+    <tr><td>Discovery</td><td><code>/split-features</code></td><td>Fatiar em tasks e entregar ao Builder.</td></tr>
+    <tr><td>Discovery</td><td><code>/implementar &lt;feature&gt;</code></td><td>Despachar uma feature já pronta (gate e job).</td></tr>
+    <tr><td>Discovery</td><td><code>/inbox</code></td><td>Ver os avisos (PR pronto, intervenção necessária).</td></tr>
+    <tr><td>Terminal</td><td><code>forge-sdd bus list --role builder</code></td><td>Ver a fila (ou <code>reviewer</code>).</td></tr>
+    <tr><td>Terminal</td><td><code>forge-sdd inbox</code></td><td>Os mesmos avisos, fora do agente.</td></tr>
+  </table>
+  <p>Sem gerenciador de projeto (ClickUp, Jira...)? No menu: <b>Ativar ou reconfigurar → Usa gerenciador de projeto?</b> → Não. O despacho deixa de pedir card.</p>
+</section>
+
+<section id="agentes">
+  <h2>Agentes e permissões</h2>
+  <p class="lead">Cada sessão pode usar um agente diferente. Estes são os oferecidos:</p>
+  <table>
+    <tr><th>Agente</th><th>Lê as instruções em</th><th>Como o worker o chama</th></tr>
+    <tr><td><b>claude</b></td><td><code>CLAUDE.md</code></td><td><code>claude -p</code></td></tr>
+    <tr><td><b>gemini</b></td><td><code>GEMINI.md</code></td><td><code>gemini -p</code></td></tr>
+    <tr><td><b>copilot</b></td><td><code>.github/copilot-instructions.md</code>, <code>AGENTS.md</code></td><td><code>copilot -p</code></td></tr>
+    <tr><td><b>codex</b></td><td><code>AGENTS.md</code></td><td><code>codex exec</code></td></tr>
+  </table>
+  <p>Antes de abrir, o menu confere se a CLI está instalada. Se faltar o arquivo de instruções, ele avisa e indica <code>forge-sdd update --agent &lt;nome&gt;</code> (para o Codex, o agente se chama <code>openai</code>).</p>
+
+  <h3>Permissões dos workers</h3>
+  <p>O Builder e o Reviewer rodam <b>sem você aprovar cada passo</b>. Por isso há dois níveis:</p>
+  <div class="grid3" style="grid-template-columns:repeat(auto-fit,minmax(300px,1fr))">
+    <div class="card ok"><b class="t">project (padrão)</b>Edita arquivos e roda só os comandos de <code>allow_commands</code> (<code>git</code>, <code>gh</code>, <code>forge-sdd</code>). Para rodar testes do seu projeto, acrescente (<code>go</code>, <code>npm</code>…) em <code>.forge/config/forge.json</code>.</div>
+    <div class="card warn"><b class="t">full</b>Sem pedir confirmação nenhuma (o bypass de cada CLI). Use só em ambiente isolado.</div>
+  </div>
+  <p>No Gemini, o nível <code>project</code> libera só edição: para o Builder rodar testes com Gemini, é preciso <code>full</code>.</p>
+</section>
+
+<section id="paineis">
+  <h2>Painéis e tmux</h2>
+  <p>Com o <code>tmux</code> instalado, as três sessões abrem <b>numa tela só</b>: Discovery grande à esquerda; Builder e Reviewer empilhados à direita, cada painel com o nome da sessão no topo. Sem tmux, abrem três janelas do terminal.</p>
+  <table>
+    <tr><th>No tmux</th><th>Faz</th></tr>
+    <tr><td><code>Ctrl+b</code> e as setas</td><td>Troca de painel.</td></tr>
+    <tr><td><code>Ctrl+b d</code></td><td>Solta a tela sem encerrar nada (as sessões continuam).</td></tr>
+    <tr><td><code>tmux ls</code> e <code>tmux attach -t =&lt;nome&gt;</code></td><td>Reconecta. O nome é <code>forge-&lt;projeto&gt;-&lt;6 hex&gt;</code>; rodar <code>forge</code> de novo também reconecta.</td></tr>
+  </table>
+  <p>Para escolher: <code>forge-sdd up --terminal tmux|native|auto</code> (padrão <code>auto</code>).</p>
+
+  <h3>O que o Builder e o Reviewer mostram</h3>
+  <p>Linhas curtas do que o agente está fazendo. A saída completa fica em <code>.forge/runtime/logs/</code>.</p>
+<pre><span class="b">▶ job auth-oauth · feature_build · tentativa 1 · codex · permissões project</span>
+  <span class="g">✎ src/domain/unit.entity.ts</span>
+  $ npm test
+  <span class="g">✓ comando terminou (0)</span>
+  <span class="c">… trabalhando há 2m10s · 14 arquivos alterados</span>
+<span class="g">■ concluído em 4m12s · 14 arquivos alterados</span></pre>
+  <p>Segredos em comandos aparecem como <code>***</code>. Para ver a saída bruta: <code>forge-sdd worker --raw</code>.</p>
+</section>
+
+<section id="limite">
+  <h2>Quando o agente bate o limite de uso</h2>
+  <p>Se o agente avisa que acabou a cota (como o limite de 5 horas do Claude), o worker <b>não falha o job</b>:</p>
+  <ul>
+    <li>O job volta à fila sem gastar tentativa, e o painel mostra <code class="w">⏸ limite de uso do claude: retomo às 22:40</code>.</li>
+    <li>O inbox da Discovery recebe um aviso.</li>
+    <li>O worker espera e retoma sozinho (até 6 horas; no máximo 3 devoluções por job).</li>
+    <li>Limite semanal ou com data (<code>resets Nov 20</code>) faz o job falhar com o motivo, para não ficar preso.</li>
+  </ul>
+  <p>Toda falha agora traz a última linha útil do agente, não só "código 1".</p>
+</section>
+
+<section id="problemas">
+  <h2>Se algo não anda</h2>
+  <table>
+    <tr><th>Sintoma</th><th>O que fazer</th></tr>
+    <tr><td>Painel do Builder "Aguardando jobs" e nada acontece</td><td>Confira a fila: <code>forge-sdd bus list --role builder</code>. Sem job, rode <code>/split-features</code> ou <code>/implementar &lt;feature&gt;</code> na Discovery.</td></tr>
+    <tr><td><code>/implementar</code> bloqueado</td><td>Leia a lista de pendências: falta card, ADR, rule ou a evidência do card. Sem gerenciador de projeto, desligue a exigência do card (veja "Fluxo").</td></tr>
+    <tr><td>Job parado em <code>processing</code> (worker caiu)</td><td>15 minutos depois: <code>forge-sdd bus recover --role builder</code> (ou <code>reviewer</code>).</td></tr>
+    <tr><td>Quero devolver um job à fila</td><td><code>forge-sdd bus requeue --role builder --id &lt;job&gt; --worker &lt;sessão&gt;</code></td></tr>
+    <tr><td>Erro dizendo que a CLI não está no PATH</td><td>Instale a CLI do agente escolhido ou escolha outro no menu. O menu mostra "(não encontrado no PATH)".</td></tr>
+    <tr><td>Linhas "hook … failed: ECONNREFUSED"</td><td>Vêm de um hook global seu (<code>~/.claude/settings.json</code>), não do Forge; o worker as resume em uma linha.</td></tr>
+    <tr><td>Quero voltar ao fluxo de uma sessão só</td><td>Apague <code>.forge/config/forge.json</code> ou use a <b>Estrutura padrão</b> no menu.</td></tr>
+  </table>
+  <p>O guia completo também fica em cada projeto, em <code>.forge/LEIA-ME.md</code>.</p>
+</section>
+
+<section id="limites">
+  <h2>Limites desta beta</h2>
+  <div class="card warn">
+    <ul style="margin:0">
+      <li>Gemini, Copilot e Codex seguem a documentação oficial das CLIs, mas <b>ainda não rodaram de ponta a ponta</b> com o worker.</li>
+      <li>O <code>forge.json</code> que você já tinha mantém os argumentos antigos dos perfis; a visão limpa cai no acompanhamento por git até você atualizar <code>cli_profiles</code> (ou rodar <code>pipeline init</code> num projeto novo).</li>
+      <li>O tmux foi testado na versão 3.8 (macOS), sem o <code>attach</code> num terminal real.</li>
+      <li>A proteção "a Discovery não constrói" é uma barreira de processo, não de segurança.</li>
+    </ul>
+  </div>
+</section>
+
+</main>
+<footer><div class="wrap">Forge SDD 4.2.0-beta · <a href="https://github.com/nathanramorim/forge-sdd">GitHub</a> · <a href="https://www.npmjs.com/package/@nathanramorim/forge-sdd">npm</a></div></footer>
+</body>
+</html>
