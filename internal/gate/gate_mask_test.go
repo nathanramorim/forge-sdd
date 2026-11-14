@@ -56,3 +56,26 @@ func TestMaskSecrets_VariaveisComPrefixoAspasJSONEUserinfo(t *testing.T) {
 		assert.Equal(t, in, MaskSecrets(in), in)
 	}
 }
+
+func TestMaskSecrets_FalsosPositivosELacunasResiduais(t *testing.T) {
+	// Palavras que terminam em "sk-" e caminhos com slugs não são chaves.
+	for _, in := range []string{
+		"sdd/features/feat-72-x/task-72-01-visibilidade-tmux.md",
+		"risk-management-framework-review-document",
+		"max_tokens=100 e tokens: 5",
+	} {
+		assert.Equal(t, in, MaskSecrets(in), in)
+	}
+	// Lacunas apontadas na reconferência.
+	for in, leaked := range map[string]string{
+		`password = "my secret pass"`:          "secret pass",
+		`{\"password\":\"s3cr3t\"}`:            "s3cr3t",
+		"Authorization: Basic dXNlcjpwYXNz":    "dXNlcjpwYXNz",
+		"git clone https://u:pa/ss@host/x.git": "pa/ss",
+	} {
+		out := MaskSecrets(in)
+		assert.NotContains(t, out, leaked, in)
+		assert.Contains(t, out, "***", in)
+	}
+	assert.Contains(t, MaskSecrets("key sk-"+strings.Repeat("a", 24)), "***")
+}

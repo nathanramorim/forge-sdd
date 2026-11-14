@@ -80,6 +80,9 @@ func BuildTmuxPlan(env LaunchEnv, cfg config.ForgeConfig, insideTmux bool) (*Tmu
 	if env.GOOS == "windows" {
 		return nil, fmt.Errorf("tmux não existe no Windows nativo")
 	}
+	if !filepath.IsAbs(env.Dir) {
+		return nil, fmt.Errorf("o diretório do projeto precisa ser absoluto para o tmux (recebeu %q)", env.Dir)
+	}
 	sessions, err := SessionsFor(env, cfg)
 	if err != nil {
 		return nil, err

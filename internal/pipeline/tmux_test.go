@@ -207,3 +207,10 @@ func TestTmux_CorridaEntreDoisUpsSoConecta(t *testing.T) {
 		assert.NotEqual(t, "kill-session", run[1], "a sessão que a outra execução criou não é derrubada")
 	}
 }
+
+func TestTmux_DiretorioRelativoERecusado(t *testing.T) {
+	env := lenv("linux", map[string]bool{"tmux": true}, nil)
+	env.Dir = "."
+	_, err := BuildTmuxPlan(env, config.DefaultForgeConfig(), false)
+	assert.Error(t, err, "com . o hash seria igual para projetos distintos")
+}

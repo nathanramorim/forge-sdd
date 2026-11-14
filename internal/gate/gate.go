@@ -61,8 +61,15 @@ func MaskSecrets(s string) string {
 	}
 	s = urlUserinfoRe.ReplaceAllString(s, "${1}***@")
 	s = bearerRe.ReplaceAllString(s, "${1}***")
+	s = basicAuthRe.ReplaceAllString(s, "${1}***")
 	s = flagSecretRe.ReplaceAllString(s, "${1}***")
-	return kvSecretRe.ReplaceAllString(s, "${1}${2}${3}***")
+	return kvSecretRe.ReplaceAllStringFunc(s, func(m string) string {
+		sub := kvSecretRe.FindStringSubmatch(m)
+		if strings.HasSuffix(strings.ToLower(sub[1]), "tokens") {
+			return m // max_tokens=100 não é segredo
+		}
+		return sub[1] + sub[2] + "***"
+	})
 }
 
 var (
@@ -70,16 +77,18 @@ var (
 	privateKeyBlockRe = regexp.MustCompile("-----BEGIN [A-Z ]*PRIVATE" + " KEY-----[\\s\\S]*?-----END [A-Z ]*PRIVATE" + " KEY-----")
 	// Só para exibição (o P-13 não muda): variantes que o gate não cobre.
 	displaySecretPatterns = []*regexp.Regexp{
-		regexp.MustCompile(`sk-[A-Za-z0-9_-]{20,}`),
+		regexp.MustCompile(`\bsk-[A-Za-z0-9_-]{20,}`), // com \b: "task-..." e "risk-..." não são chaves
 		regexp.MustCompile(`github_pat_[A-Za-z0-9_]{20,}`),
 		regexp.MustCompile(`gh[osur]_[A-Za-z0-9]{20,}`),
 		regexp.MustCompile(`xox[abprs]-[A-Za-z0-9-]{10,}`),
 		regexp.MustCompile(`eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}`),
 	}
-	urlUserinfoRe = regexp.MustCompile(`(://[^/\s:@]+:)[^@\s/]+@`)
+	urlUserinfoRe = regexp.MustCompile(`(://[^/\s:@]+:)\S+@`)
 	bearerRe      = regexp.MustCompile(`(?i)(\bbearer\s+)[A-Za-z0-9._~+/=-]+`)
+	basicAuthRe   = regexp.MustCompile(`(?i)(authorization:\s*(?:basic|token)\s+)\S+`)
 	flagSecretRe  = regexp.MustCompile(`(?i)(--?(?:password|passwd|token|secret|api[_-]?key|access[_-]?key)[A-Za-z0-9_-]*\s+)[^\s-][^\s]*`)
-	kvSecretRe    = regexp.MustCompile(`(?i)([A-Za-z0-9_-]*(?:token|password|passwd|secret|api[_-]?key|access[_-]?key|credential)[A-Za-z0-9_-]*)(["']?\s*[:=]\s*)(["']?)[^\s"',}]+`)
+	// nome (com prefixo), separador (aceita \" de JSON escapado) e valor (entre aspas, com espaços, ou solto).
+	kvSecretRe = regexp.MustCompile(`(?i)([A-Za-z0-9_-]*(?:token|password|passwd|secret|api[_-]?key|access[_-]?key|credential)[A-Za-z0-9_-]*)(\\?["']?\s*[:=]\s*)(\\?"[^"]*"|'[^']*'|[^\s"',}\\]+)`)
 )
 
 // HasFailures indica se há ao menos uma verificação reprovada no relatório.
