@@ -1,0 +1,20 @@
+{
+  "$schema": "forge-sdd/metrics/1.0",
+  "feature": "sdd/discovery/81-tokens-por-janela-e-reset-suave/criteria.md",
+  "phase": "job-20261114-140042-81-tokens-por-janela-e-reset-suave",
+  "agent_path": [
+    "builder"
+  ],
+  "tokens_input": 0,
+  "tokens_output": 0,
+  "turns": 0,
+  "duration_seconds": 0,
+  "criterio_atendido": false,
+  "model": "",
+  "rework_lines": 0,
+  "context7_calls": 0,
+  "git_calls": 0,
+  "files_touched": null,
+  "outcome": "blocked",
+  "sdd_version": "4.5.0-beta"
+}

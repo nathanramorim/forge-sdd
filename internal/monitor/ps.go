@@ -265,7 +265,7 @@ func FormatProcessTable(r *ProjectProcessReport) string {
 	fmt.Fprintf(&b, "%s\n", strings.Repeat("─", 88))
 	fmt.Fprintf(&b, "Total do Projeto: %d processos ativos │ CPU: %.1f%% │ Memória: %.0f MB\n\n",
 		len(r.Processes), r.TotalCPU, r.TotalMemory)
-	fmt.Fprintf(&b, "[Dica: Use 'forge-sdd ps --kill-zombies' para limpar processos orfãos ou presos]\n")
+	fmt.Fprintf(&b, "[Dica: Use 'forge ps --kill-zombies' para limpar processos orfãos ou presos]\n")
 
 	return b.String()
 }
