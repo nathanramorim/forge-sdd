@@ -4,6 +4,14 @@ Este arquivo registra o histórico de entregas de produto deste projeto.
 
 ## Entregas
 
+### Versão 4.4.1 — Fix no Pipeline: Gemini abre CLI agy e auto-cura em instalações anteriores (Beta)
+
+Compatível com a 4.4.0-beta (Fix 78).
+
+*   **Mapeamento Gemini -> agy (Antigravity CLI):** ao selecionar o agente Gemini na pipeline ou no menu, o Forge-SDD garante a invocação do executável oficial `agy` em vez da CLI descontinuada `gemini`.
+*   **Tratamento de flags interativas:** omite flags de prompt interativo soltas (`-i`) quando a sessão inicializa sem prompt inicial (como nos painéis de Builder e Reviewer em modo `live`), evitando encerramento abrupto da CLI.
+*   **Auto-cura e migração de instalações anteriores:** ao atualizar a versão (`forge-sdd update`) ou ao carregar qualquer configuração do pipeline (`LoadForgeConfig`), o Forge-SDD detecta perfis com `command: "gemini"` legado e normaliza/persiste automaticamente o arquivo `.forge/config/forge.json` no disco com `command: "agy"`.
+
 ### Versão 4.4.0 — Sessões com a CLI Aberta (Builder e Reviewer ao Vivo) (Beta)
 
 Compatível com a 4.3.0-beta (Discovery 77, features `77-01` a `77-05`). Sem alteração em `forge.json`, o comportamento padrão permanece `headless`.

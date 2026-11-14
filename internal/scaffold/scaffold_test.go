@@ -394,7 +394,7 @@ func TestUpgradeMigratesForgeJSONGeminiToAgy(t *testing.T) {
 		DB:         "none",
 		Telemetry:  false,
 		Lang:       "pt-BR",
-		SddVersion: "4.4.0-beta",
+		SddVersion: "4.4.1-beta",
 		Agents:     []string{config.AgentGemini},
 	}
 	_, err := Run(cfg, dir)
