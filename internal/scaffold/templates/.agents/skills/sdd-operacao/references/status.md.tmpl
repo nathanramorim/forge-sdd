@@ -1,14 +1,31 @@
 # Comando: status
 
-**Uso:** `/status` mostra o Painel Executivo, a fila e a divergência remota, sem implementar nada.
+**Uso:** `/status` mostra o status executivo da esteira em formato tríplice e de baixo consumo de tokens (< 200 tokens).
 
-1. Rode `forge-sdd status` (e `--all-branches` para ver frentes paralelas).
-2. Apresente o Painel Executivo de `references/lider.md`.
-3. **Sincronização remota:** consulte `VCS / Work Item System` na Constitution; se for `nenhum`, pule. Senão, `git fetch` e compare a branch atual e `main` com `origin`; com `github`, rode `gh pr list` e cruze com as branches das iniciativas. Falha de rede ou de `gh` vira aviso curto, não erro.
-4. **Divergência remota** (só se houver): branches remotas sem iniciativa, PRs abertos fora do estado local, commits de `origin/main` ausentes na branch.
-5. Termine com `Próximo comando sugerido: <comando>`:
-   - divergência relevante: investigue antes;
-   - sem iniciativa: `/discovery`;
-   - iniciativa sem features: `/split-features`;
-   - tasks na fila: `/implementar`;
-   - tudo aprovado: `/archive` ou novo `/discovery`.
+Você pode rodar `forge-sdd status --live` diretamente para obter a consolidação instantânea, ou executar os 3 passos de inspeção:
+
+1. **Ao vivo no painel:** capture o painel do worker ativo (`tmux capture-pane -p -t <painel>`) ou leia as últimas linhas do arquivo mais recente em `.forge/runtime/logs/` caso tmux não esteja em execução.
+2. **Fila de tarefas:** execute `forge-sdd queue panel` (ou inspecione a fila ativa da iniciativa em `queue.json`).
+3. **Commits recentes:** execute `git log --oneline -n 5`.
+
+## Template Canônico Padronizado (< 200 Tokens)
+
+Responda obrigatoriamente no seguinte formato rígido:
+
+```text
+### Status da Esteira — <projeto> (<branch-atual>)
+
+1. Ao Vivo no Painel (<papel-ativo>):
+   • <linha 1 do que o agente está fazendo>
+   • <linha 2: tempo ativo e arquivos alterados>
+
+2. Commits Recentes no Git:
+   • <hash1> <mensagem do commit recente>
+   • <hash2> <mensagem do commit anterior>
+
+3. Fila de Tarefas:
+   • [x] <task-id>: <titulo da task pronta>
+   • [ ] <task-id>: <titulo da task pendente>
+
+Próximo passo: <Acompanhar o Builder / Revisão do Reviewer / /discovery>
+```

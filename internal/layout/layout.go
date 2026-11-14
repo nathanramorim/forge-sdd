@@ -290,6 +290,13 @@ func Current(dir string) (id string, ok bool, err error) {
 
 // CurrentBranch devolve o nome da branch atual (vazio em HEAD destacado).
 func CurrentBranch(dir string) (string, error) {
+	headPath := filepath.Join(dir, ".git", "HEAD")
+	if data, err := os.ReadFile(headPath); err == nil {
+		s := strings.TrimSpace(string(data))
+		if strings.HasPrefix(s, "ref: refs/heads/") {
+			return strings.TrimPrefix(s, "ref: refs/heads/"), nil
+		}
+	}
 	out, err := gitOut(dir, "branch", "--show-current")
 	if err != nil {
 		return "", err

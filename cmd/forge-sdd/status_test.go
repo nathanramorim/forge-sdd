@@ -4,7 +4,9 @@ import (
 	"bytes"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
+	"time"
 
 	"github.com/forge-sdd/cli/internal/testutil"
 	"github.com/stretchr/testify/assert"
@@ -15,6 +17,7 @@ func runRoot(t *testing.T, args ...string) (string, error) {
 	t.Helper()
 	// O rootCmd é global: restaura os padrões das flags entre execuções.
 	_ = statusCmd.Flags().Set("all-branches", "false")
+	_ = statusCmd.Flags().Set("live", "false")
 	_ = nextIDCmd.Flags().Set("kind", "discovery")
 	_ = nextIDCmd.Flags().Set("workitem", "")
 	_ = updateCmd.Flags().Set("dry-run", "false")
@@ -128,3 +131,54 @@ func TestContext_PorTaskIDEPorCaminho(t *testing.T) {
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "70-01", "o erro lista as tasks disponíveis")
 }
+
+func TestStatusLiveFlag(t *testing.T) {
+	dir := t.TempDir()
+	gitT(t, dir, "init", "-q", "-b", "feat/80-status")
+	gitT(t, dir, "commit", "-q", "--allow-empty", "-m", "feat: commit inicial")
+
+	logsDir := filepath.Join(dir, ".forge", "runtime", "logs")
+	require.NoError(t, os.MkdirAll(logsDir, 0o755))
+	require.NoError(t, os.WriteFile(filepath.Join(logsDir, "builder-job-1.log"), []byte("✎ internal/status.go\n… trabalhando há 1m · 1 arquivo alterado\n"), 0o644))
+
+	sddDir := filepath.Join(dir, "sdd", "discovery", "80-status")
+	require.NoError(t, os.MkdirAll(sddDir, 0o755))
+	require.NoError(t, os.WriteFile(filepath.Join(sddDir, "queue.json"), []byte(`{
+		"items": [
+			{"task_id": "80-01", "title": "Template Canônico", "status": "approved"},
+			{"task_id": "80-02", "title": "Subcomando live", "status": "queued"}
+		]
+	}`), 0o644))
+
+	// Testa flag longa --live
+	start := time.Now()
+	out, err := runRoot(t, "status", "--dir", dir, "--live")
+	elapsed := time.Since(start)
+
+	require.NoError(t, err)
+	assert.Less(t, elapsed, 100*time.Millisecond, "CA-01: deve executar em menos de 100ms")
+
+	assert.Contains(t, out, "### Status da Esteira —")
+	assert.Contains(t, out, "1. Ao Vivo no Painel")
+	assert.Contains(t, out, "✎ internal/status.go")
+	assert.Contains(t, out, "… trabalhando há 1m · 1 arquivo alterado")
+
+	assert.Contains(t, out, "2. Commits Recentes no Git:")
+	assert.Contains(t, out, "feat: commit inicial")
+
+	assert.Contains(t, out, "3. Fila de Tarefas:")
+	assert.Contains(t, out, "• [x] 80-01: Template Canônico")
+	assert.Contains(t, out, "• [ ] 80-02: Subcomando live")
+
+	assert.Contains(t, out, "Próximo passo: Acompanhar o Builder")
+
+	// Testa flag curta -l
+	outShort, err := runRoot(t, "status", "--dir", dir, "-l")
+	require.NoError(t, err)
+	assert.Equal(t, out, outShort, "flag curta -l deve produzir a mesma saída que --live")
+
+	// CA-03: Orçamento de tokens menor que 250 tokens
+	tokensAprox := len(strings.Fields(out))
+	assert.Less(t, tokensAprox, 250, "CA-03: saída deve respeitar o limite de 250 tokens")
+}
+
