@@ -1,6 +1,7 @@
 package pipeline
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"strings"
@@ -128,7 +129,7 @@ func TestRunLiveDashboard_Once(t *testing.T) {
 	require.NoError(t, os.WriteFile(filepath.Join(dir, ".git", "HEAD"), []byte("ref: refs/heads/feat/80-status\n"), 0o644))
 
 	var buf strings.Builder
-	err := RunLiveDashboard(nil, dir, &buf, true)
+	err := RunLiveDashboard(context.Background(), dir, &buf, true)
 	require.NoError(t, err)
 	assert.Contains(t, buf.String(), "PROCESSAMENTO & CONSUMO POR SESSÃO")
 }
