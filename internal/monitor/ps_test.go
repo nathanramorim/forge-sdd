@@ -2,6 +2,7 @@ package monitor
 
 import (
 	"strings"
+	"syscall"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -86,4 +87,31 @@ func TestProjectProcessInspection_SemTmuxAtivo(t *testing.T) {
 	require.Len(t, report.Processes, 1)
 	assert.Equal(t, 12345, report.Processes[0].PID)
 	assert.True(t, strings.Contains(report.Processes[0].Role, "builder"))
+}
+
+func TestKillZombies(t *testing.T) {
+	report := &ProjectProcessReport{
+		Project: "test-app",
+		Session: "forge-test",
+		Processes: []ProcessInfo{
+			{PID: 100, ParentPID: 1, Role: "tmux session (forge)"}, // sessão raiz tmux não deve ser morta
+			{PID: 101, ParentPID: 1, Role: "processo órfão"},        // órfão deve ser morto
+			{PID: 102, ParentPID: 100, Role: "filho do tmux"},      // não órfão
+			{PID: 103, ParentPID: 1, Role: "outro órfão"},          // outro órfão
+		},
+	}
+
+	var signalsSent []int
+	signaler := func(pid int, sig syscall.Signal) error {
+		assert.Equal(t, syscall.SIGTERM, sig)
+		signalsSent = append(signalsSent, pid)
+		return nil
+	}
+
+	killed, err := KillZombiesWithSignaler(report, signaler)
+	require.NoError(t, err)
+	require.Len(t, killed, 2)
+	assert.Equal(t, []int{101, 103}, signalsSent)
+	assert.Equal(t, 101, killed[0].PID)
+	assert.Equal(t, 103, killed[1].PID)
 }

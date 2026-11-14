@@ -335,8 +335,6 @@ var queueActivityCmd = &cobra.Command{
 	},
 }
 
-var queueLogCmd = queueActivityCmd
-
 func init() {
 	queueHandoffCmd.Flags().String("dir", ".", "Diretório alvo do projeto Forge-SDD")
 	queueHandoffCmd.Flags().String("from", "", "Estação de origem (ex: lider, pm-architect, planner, builder, governance)")

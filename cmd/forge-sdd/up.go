@@ -13,6 +13,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var newLaunchEnv = pipeline.DefaultLaunchEnv
+
 var upCmd = &cobra.Command{
 	Use:   "up",
 	Short: "Abre as 3 sessões do pipeline: forge-discovery, forge-builder e forge-reviewer",
@@ -45,7 +47,7 @@ não tiverem escolha própria. --dry-run só imprime os comandos.`,
 		if err != nil {
 			return err
 		}
-		env := pipeline.DefaultLaunchEnv(runtime.GOOS, abs, pipeline.ResolveBin())
+		env := newLaunchEnv(runtime.GOOS, abs, pipeline.ResolveBin())
 		termFlag, _ := cmd.Flags().GetString("terminal")
 		out := cmd.OutOrStdout()
 		prompt := pipeline.TerminalPrompt{

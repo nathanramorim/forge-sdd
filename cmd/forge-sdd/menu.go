@@ -478,16 +478,6 @@ func (e *menuEnv) diagnose() {
 	_ = e.p.Pause("Enter para voltar ao menu")
 }
 
-func (e *menuEnv) showGuide() {
-	guide := filepath.Join(e.dir, ".forge", "LEIA-ME.md")
-	if data, err := os.ReadFile(guide); err == nil {
-		fmt.Fprintf(e.out, "\n%s\n", data)
-	} else {
-		fmt.Fprintf(e.out, "\nO guia fica em .forge/LEIA-ME.md (rode forge-sdd update para instalá-lo) e em docs/pipeline.md.\n")
-	}
-	_ = e.p.Pause("Enter para voltar ao menu")
-}
-
 // terminalLabel diz onde as sessões vão abrir: "no tmux (3 painéis)", "em painéis do Windows Terminal" ou "em janelas do sistema".
 func (e *menuEnv) terminalLabel(cfg config.ForgeConfig) string {
 	look := e.preflightEnv.LookPath

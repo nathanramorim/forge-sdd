@@ -3,8 +3,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"os"
-	"syscall"
 
 	"github.com/forge-sdd/cli/internal/monitor"
 	"github.com/spf13/cobra"
@@ -24,20 +22,16 @@ var psCmd = &cobra.Command{
 		}
 
 		if killZombies {
-			killed := 0
-			for _, p := range report.Processes {
-				// Identifica processos candidatos a zumbi (ex: subprocessos com PPID 1 ou estado zumbi)
-				if p.ParentPID == 1 && p.Role != "tmux session (forge)" {
-					if proc, err := os.FindProcess(p.PID); err == nil {
-						if err := proc.Signal(syscall.SIGTERM); err == nil {
-							fmt.Printf("Encerrado processo órfão PID %d (%s)\n", p.PID, p.Role)
-							killed++
-						}
-					}
-				}
+			killed, err := monitor.KillZombies(report)
+			if err != nil {
+				return err
 			}
-			if killed == 0 {
+			if len(killed) == 0 {
 				fmt.Println("Nenhum processo órfão ou zumbi encontrado para encerrar.")
+			} else {
+				for _, p := range killed {
+					fmt.Printf("Encerrado processo órfão PID %d (%s)\n", p.PID, p.Role)
+				}
 			}
 			return nil
 		}

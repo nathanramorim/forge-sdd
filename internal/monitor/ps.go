@@ -3,10 +3,12 @@ package monitor
 import (
 	"bytes"
 	"fmt"
+	"os"
 	"os/exec"
 	"path/filepath"
 	"strconv"
 	"strings"
+	"syscall"
 
 	"github.com/forge-sdd/cli/internal/pipeline"
 )
@@ -266,4 +268,42 @@ func FormatProcessTable(r *ProjectProcessReport) string {
 	fmt.Fprintf(&b, "[Dica: Use 'forge-sdd ps --kill-zombies' para limpar processos orfãos ou presos]\n")
 
 	return b.String()
+}
+
+// Signaler envia um sinal para o processo com determinado PID.
+type Signaler func(pid int, sig syscall.Signal) error
+
+// DefaultSignaler usa os.FindProcess e proc.Signal.
+func DefaultSignaler(pid int, sig syscall.Signal) error {
+	proc, err := os.FindProcess(pid)
+	if err != nil {
+		return err
+	}
+	return proc.Signal(sig)
+}
+
+// KillZombies encerra processos órfãos ou zumbis candidatos associados ao projeto
+// (subprocessos com ParentPID == 1 que não sejam a própria sessão tmux).
+func KillZombies(report *ProjectProcessReport) ([]ProcessInfo, error) {
+	return KillZombiesWithSignaler(report, DefaultSignaler)
+}
+
+// KillZombiesWithSignaler permite mock do envio de sinais em testes.
+func KillZombiesWithSignaler(report *ProjectProcessReport, signaler Signaler) ([]ProcessInfo, error) {
+	if report == nil {
+		return nil, nil
+	}
+	if signaler == nil {
+		signaler = DefaultSignaler
+	}
+	var killed []ProcessInfo
+	for _, p := range report.Processes {
+		// Identifica processos candidatos a zumbi (ex: subprocessos com PPID 1 ou estado zumbi)
+		if p.ParentPID == 1 && p.Role != "tmux session (forge)" {
+			if err := signaler(p.PID, syscall.SIGTERM); err == nil {
+				killed = append(killed, p)
+			}
+		}
+	}
+	return killed, nil
 }
