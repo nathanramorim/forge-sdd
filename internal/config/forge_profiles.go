@@ -98,7 +98,7 @@ func defaultProfiles() map[string]CLIProfile {
 		CLIAgy: {
 			Command:         "agy",
 			Args:            []string{"-p", "{prompt}", MarkerPermissions},
-			InteractiveArgs: []string{"--agent", "{agent}", "-i"},
+			InteractiveArgs: []string{"-i", "{prompt}"},
 			ResetCommand:    "/clear",
 		},
 	}
@@ -161,10 +161,29 @@ func (c ForgeConfig) CLIFor(role string) string {
 
 // Profile devolve o perfil de uma CLI completando o que um forge.json da 4.1 não trazia
 // (interactive_args), para a atualização não quebrar projetos existentes.
+// Normaliza também "gemini" legado (Command: "gemini") para "agy" (fix 78).
 func (c ForgeConfig) Profile(cli string) (CLIProfile, bool) {
 	p, ok := c.CLIProfiles[cli]
 	if !ok {
-		return CLIProfile{}, false
+		if cli == CLIGemini {
+			p, ok = c.CLIProfiles[CLIAgy]
+		} else if cli == CLIAgy {
+			p, ok = c.CLIProfiles[CLIGemini]
+		}
+		if !ok {
+			return CLIProfile{}, false
+		}
+	}
+	if cli == CLIGemini || cli == CLIAgy {
+		if p.Command == "gemini" || p.Command == "" {
+			p.Command = "agy"
+		}
+		for _, a := range p.Args {
+			if a == "stream-json" || a == "-o" {
+				p.Args = defaultProfiles()[CLIGemini].Args
+				break
+			}
+		}
 	}
 	if len(p.InteractiveArgs) == 0 {
 		p.InteractiveArgs = defaultProfiles()[cli].InteractiveArgs
@@ -188,7 +207,7 @@ func (c ForgeConfig) validateSessions() error {
 		if !KnownCLI(cli) {
 			return fmt.Errorf("sessions.%s: agente %q inválido (use %s)", role, cli, strings.Join(OfferedCLIs(), ", "))
 		}
-		if _, ok := c.CLIProfiles[cli]; !ok {
+		if _, ok := c.Profile(cli); !ok {
 			return fmt.Errorf("sessions.%s: cli_profiles sem perfil para %q", role, cli)
 		}
 	}

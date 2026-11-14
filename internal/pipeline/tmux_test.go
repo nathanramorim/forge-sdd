@@ -70,7 +70,8 @@ func TestTmuxLivePlan(t *testing.T) {
 	assert.Contains(t, c[0][9], "claude -n forge-discovery --agent lider", "painel 0 da Discovery")
 	assert.Contains(t, c[2][7], "codex", "painel 1 do Builder com CLI interativa")
 	assert.Contains(t, c[2][7], "--sandbox workspace-write", "permissões project do codex presentes")
-	assert.Contains(t, c[3][7], "agy -i", "painel 2 do Reviewer com CLI interativa")
+	assert.Contains(t, c[3][7], "agy", "painel 2 do Reviewer com CLI interativa")
+	assert.NotContains(t, c[3][7], "-i", "sem prompt inicial não passa -i órfão")
 	assert.Contains(t, c[3][7], "--dangerously-skip-permissions", "permissões do agy presentes")
 
 	// Janela oculta forge-ctl com os despachantes

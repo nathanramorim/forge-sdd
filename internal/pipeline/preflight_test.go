@@ -195,3 +195,28 @@ func TestPreflight_ConstituicaoRascunho(t *testing.T) {
 		assert.NotContains(t, it.Message, "Constituição em rascunho")
 	}
 }
+
+func TestPreflight_GeminiChecaBinarioAgy(t *testing.T) {
+	cfg := config.DefaultForgeConfig()
+	// Simula forge.json legado onde o comando era "gemini"
+	cfg.CLIProfiles[config.CLIGemini] = config.CLIProfile{
+		Command: "gemini",
+		Args:    []string{"-p", "{prompt}", "-o", "stream-json", config.MarkerPermissions},
+	}
+	cfg.Sessions = map[string]string{config.SessionRoleReviewer: config.CLIGemini}
+
+	// Com agy no PATH (e sem o binário gemini): deve passar como OK
+	envComAgy := penv([]string{"claude", "agy", "tmux"}, "CLAUDE.md", "GEMINI.md", ".claude/agents/lider.md", ".claude/agents/builder.md")
+	items := Preflight("/proj", cfg, envComAgy)
+	it := findItem(items, config.SessionRoleReviewer, LevelOK)
+	require.NotNil(t, it, "deve reconhecer CLI agy para sessão gemini")
+	assert.Contains(t, it.Message, "agy")
+
+	// Sem agy no PATH: deve bloquear mesmo que haja um binário legado gemini
+	envSemAgy := penv([]string{"claude", "gemini", "tmux"}, "CLAUDE.md", "GEMINI.md", ".claude/agents/lider.md", ".claude/agents/builder.md")
+	itemsBloq := Preflight("/proj", cfg, envSemAgy)
+	itBloq := findItem(itemsBloq, config.SessionRoleReviewer, LevelBlock)
+	require.NotNil(t, itBloq, "sem agy no PATH deve bloquear")
+	assert.Contains(t, itBloq.Message, "agy")
+	assert.Contains(t, itBloq.Action, "@google/antigravity-cli")
+}

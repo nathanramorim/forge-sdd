@@ -89,3 +89,28 @@ func TestExecRunner_CLIInexistenteTemMensagemClara(t *testing.T) {
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "não encontrada no PATH")
 }
+
+func TestExpandArgs_FlagPromptVazio(t *testing.T) {
+	// Prompt vazio omite -i e {prompt}
+	args, err := expandArgs([]string{"-i", "{prompt}"}, RunSpec{Prompt: ""})
+	require.NoError(t, err)
+	assert.Empty(t, args, "deve omitir -i quando o prompt for vazio")
+
+	// Prompt vazio com --prompt-interactive também é omitido
+	args, err = expandArgs([]string{"--prompt-interactive", "{prompt}"}, RunSpec{Prompt: ""})
+	require.NoError(t, err)
+	assert.Empty(t, args)
+
+	// Prompt vazio com permissões preserva as permissões sem -i órfão
+	args, err = expandArgs([]string{"-i", "{prompt}", config.MarkerPermissions}, RunSpec{
+		Prompt:      "",
+		Permissions: []string{"--dangerously-skip-permissions"},
+	})
+	require.NoError(t, err)
+	assert.Equal(t, []string{"--dangerously-skip-permissions"}, args)
+
+	// Prompt preenchido mantém -i e o prompt expandido
+	args, err = expandArgs([]string{"-i", "{prompt}"}, RunSpec{Prompt: "iniciar"})
+	require.NoError(t, err)
+	assert.Equal(t, []string{"-i", "iniciar"}, args)
+}

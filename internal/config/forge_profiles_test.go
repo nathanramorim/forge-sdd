@@ -132,3 +132,29 @@ func TestSaveForgeConfig_PreservaCamposEGravaAtomico(t *testing.T) {
 	again, _, _ := LoadForgeConfig(dir)
 	assert.Equal(t, PermissionFull, again.Permissions)
 }
+
+func TestProfile_NormalizaGeminiLegadoParaAgy(t *testing.T) {
+	cfg := DefaultForgeConfig()
+	// Simula forge.json antigo com comando gemini e flags legadas
+	cfg.CLIProfiles[CLIGemini] = CLIProfile{
+		Command: "gemini",
+		Args:    []string{"-p", "{prompt}", "-o", "stream-json", MarkerPermissions},
+	}
+	p, ok := cfg.Profile(CLIGemini)
+	require.True(t, ok)
+	assert.Equal(t, "agy", p.Command, "deve normalizar comando gemini para agy")
+	assert.Equal(t, []string{"-p", "{prompt}", MarkerPermissions}, p.Args, "deve limpar flags legadas de saída de gemini")
+	assert.Equal(t, []string{"-i", "{prompt}"}, p.InteractiveArgs)
+	assert.Equal(t, "/clear", p.ResetCommand)
+
+	// Fallback quando gemini não existe mas agy existe
+	delete(cfg.CLIProfiles, CLIGemini)
+	cfg.CLIProfiles[CLIAgy] = CLIProfile{
+		Command: "agy",
+		Args:    []string{"-p", "{prompt}", MarkerPermissions},
+	}
+	pFallback, ok := cfg.Profile(CLIGemini)
+	require.True(t, ok)
+	assert.Equal(t, "agy", pFallback.Command)
+	assert.Equal(t, []string{"-i", "{prompt}"}, pFallback.InteractiveArgs)
+}

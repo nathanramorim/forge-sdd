@@ -70,7 +70,8 @@ func expandArgs(tpl []string, spec RunSpec) ([]string, error) {
 	repl := strings.NewReplacer("{agent}", spec.Agent, "{name}", spec.Name, "{prompt}", spec.Prompt)
 	args := make([]string, 0, len(tpl)+len(spec.Permissions))
 	hasPerms := false
-	for _, a := range tpl {
+	for i := 0; i < len(tpl); i++ {
+		a := tpl[i]
 		if a == config.MarkerPermissions {
 			hasPerms = true
 			for _, perm := range spec.Permissions {
@@ -79,6 +80,10 @@ func expandArgs(tpl []string, spec RunSpec) ([]string, error) {
 				}
 				args = append(args, perm)
 			}
+			continue
+		}
+		if (a == "-i" || a == "--prompt-interactive") && i+1 < len(tpl) && tpl[i+1] == "{prompt}" && spec.Prompt == "" {
+			i++
 			continue
 		}
 		if a == "{prompt}" && spec.Prompt == "" {
