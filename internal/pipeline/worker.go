@@ -152,8 +152,14 @@ func processJob(ctx context.Context, opts WorkerOptions, cfg config.ForgeConfig,
 	}
 	watchCtx, stopWatch := context.WithCancel(ctx)
 	defer stopWatch()
+	watchDone := make(chan struct{})
 	if watchEvery > 0 && !opts.Raw {
-		go watcher.Run(watchCtx, watchEvery, live.Line)
+		go func() {
+			defer close(watchDone)
+			watcher.Run(watchCtx, watchEvery, live.Line)
+		}()
+	} else {
+		close(watchDone)
 	}
 
 	// Renova o lease enquanto o agente trabalha (jobs longos não podem ser recuperados por engano).
@@ -187,6 +193,7 @@ func processJob(ctx context.Context, opts WorkerOptions, cfg config.ForgeConfig,
 	close(stop)
 	wg.Wait()
 	stopWatch()
+	<-watchDone // o watcher termina antes do rodapé: nenhuma linha sai depois dele
 	live.Flush()
 
 	reason := ""
@@ -199,7 +206,7 @@ func processJob(ctx context.Context, opts WorkerOptions, cfg config.ForgeConfig,
 		reason = fmt.Sprintf("o agente saiu com código %d", res.ExitCode)
 		// Limite de uso (só com saída diferente de zero): o job volta à fila sem gastar tentativa e o
 		// worker espera até o horário informado.
-		if ul, ok := DetectUsageLimit(live.Tail(8), opts.Now()); ok && !ul.Capped && ctx.Err() == nil {
+		if ul, ok := DetectUsageLimit(live.Tail(8), opts.Now()); ok && !ul.Capped && ctx.Err() == nil && deferrals(job) < maxUsageLimitDeferrals {
 			deferJob(ctx, opts, job, ul, live)
 			if opts.OnJobDone != nil {
 				opts.OnJobDone(job, OutcomeDeferred)
@@ -208,6 +215,9 @@ func processJob(ctx context.Context, opts WorkerOptions, cfg config.ForgeConfig,
 		}
 		if last := lastUsefulLine(live); last != "" {
 			reason += ": " + last
+		}
+		if deferrals(job) >= maxUsageLimitDeferrals {
+			reason += fmt.Sprintf(" (já foi adiado %d vezes por limite de uso)", deferrals(job))
 		}
 	}
 	if reason == "" {
@@ -298,9 +308,24 @@ func lastUsefulLine(live *LiveView) string {
 	return ""
 }
 
+// maxUsageLimitDeferrals é o teto de devoluções por limite de uso de um mesmo job: passou disso, o
+// job falha com o motivo em vez de pausar para sempre (por exemplo, um limite semanal).
+const maxUsageLimitDeferrals = 3
+
+func deferrals(job bus.Job) int {
+	n := 0
+	for _, e := range job.Events {
+		if strings.HasPrefix(e.Note, "adiado:") {
+			n++
+		}
+	}
+	return n
+}
+
 // deferJob devolve o job à fila, avisa no inbox (uma vez por pausa) e espera até o horário.
 func deferJob(ctx context.Context, opts WorkerOptions, job bus.Job, ul UsageLimit, live *LiveView) {
 	now := opts.Now()
+	ul.ResetAt = ul.ResetAt.In(now.Location()) // o horário mostrado é o seu, não o fuso da mensagem
 	reason := "limite de uso do " + opts.CLI
 	if _, err := bus.Requeue(opts.Dir, opts.Role, job.ID, opts.Name, reason, now); err != nil {
 		live.Line("✗ não foi possível devolver o job à fila: " + err.Error())

@@ -152,6 +152,9 @@ type gitScript struct {
 }
 
 func (g *gitScript) run(ctx context.Context, dir string, args ...string) (string, error) {
+	if len(args) > 0 && args[0] == "rev-parse" {
+		return "", nil // prefixo vazio: o diretório é a raiz do repositório
+	}
 	if g.err != nil {
 		return "", g.err
 	}
@@ -259,4 +262,59 @@ func TestWorker_RawNaoUsaAVisaoLimpa(t *testing.T) {
 	var term bytes.Buffer
 	require.NoError(t, RunWorker(context.Background(), WorkerOptions{Dir: dir, Role: layout.RoleBuilder, Once: true, Raw: true, Out: &term, Runner: runner, WatchEvery: -1, Now: func() time.Time { return now }}))
 	assert.Contains(t, term.String(), "agente falso rodando\n", "sem o recuo da visão limpa")
+}
+
+func TestGitWatch_DiretorioDentroDoRepositorio(t *testing.T) {
+	now := time.Now()
+	g := &prefixGit{status: []string{"?? other/x.ts\n", "?? other/x.ts\n?? app/src/a.ts\n?? app/.forge/runtime/y\n"}}
+	w := NewGitWatcher("/repo/app", func() time.Time { return now }, nil)
+	w.Git = g.run
+	w.Poll(context.Background())
+	assert.Equal(t, []string{"  ✎ src/a.ts"}, w.Poll(context.Background()), "caminhos relativos ao diretório do job; arquivos fora dele e o .forge/ de dentro são ignorados")
+}
+
+type prefixGit struct {
+	status []string
+	i      int
+}
+
+func (g *prefixGit) run(ctx context.Context, dir string, args ...string) (string, error) {
+	if args[0] == "rev-parse" {
+		return "app/\n", nil
+	}
+	o := g.status[min(g.i, len(g.status)-1)]
+	g.i++
+	return o, nil
+}
+
+func TestGitWatch_LentidaoAvisaUmaVez(t *testing.T) {
+	w := NewGitWatcher("/p", nil, nil)
+	w.Git = func(context.Context, string, ...string) (string, error) { return "", ErrGitSlow }
+	first := w.Poll(context.Background())
+	require.Len(t, first, 1)
+	assert.Contains(t, first[0], "git lento")
+	assert.Empty(t, w.Poll(context.Background()), "o aviso sai uma vez")
+}
+
+func TestLiveView_BlocoDeChavePrivadaNaoApareceNoTerminal(t *testing.T) {
+	v, term, log := live(config.CLIAgy, false)
+	feed(v, "antes", "-----BEGIN OPENSSH PRIVATE"+" KEY-----", "b3BlbnNzaC1rZXktdjEAAAAA", "AAAAB3NzaC1yc2EAAAADAQAB", "-----END OPENSSH PRIVATE"+" KEY-----", "depois")
+	out := term.String()
+	assert.NotContains(t, out, "b3BlbnNzaC1rZXktdjEAAAAA")
+	assert.NotContains(t, out, "AAAAB3NzaC1yc2E")
+	assert.Contains(t, out, "(chave privada omitida)")
+	assert.Contains(t, out, "antes")
+	assert.Contains(t, out, "depois")
+	assert.Contains(t, log.String(), "b3BlbnNzaC1rZXktdjEAAAAA", "o log bruto guarda tudo")
+}
+
+func TestLiveView_LinhaGiganteSemQuebraNaoCresceSemLimite(t *testing.T) {
+	v, term, _ := live(config.CLIClaude, false)
+	chunk := []byte(strings.Repeat("x", 32*1024))
+	for i := 0; i < 6; i++ { // 192 KB sem uma quebra de linha
+		_, _ = v.Write(chunk)
+	}
+	assert.Less(t, v.partial.Len(), maxPartial+len(chunk), "o buffer é limitado")
+	_, _ = v.Write([]byte("resto da linha gigante\nlinha normal\n"))
+	assert.Equal(t, "  linha normal\n", term.String(), "a linha gigante é descartada até a próxima quebra")
 }

@@ -17,7 +17,14 @@ const (
 )
 
 var (
-	usageLimitRe = regexp.MustCompile(`(?i)(hit your [^.\n]*limit|usage limit|rate[ _-]?limit|quota (?:exceeded|exhausted)|too many requests|resource[ _]exhausted)`)
+	// Mensagens inequívocas de limite de uso do agente: valem em qualquer das últimas linhas.
+	usageLimitStrongRe = regexp.MustCompile(`(?i)(hit your [^.\n]*limit|usage limit (?:reached|exceeded)|you(?:'|’)ve reached your [^.\n]*limit)`)
+	// Genéricas: só valem na última linha útil ou numa linha com cara de erro, para um texto sobre
+	// "rate limit" no meio da conversa não pausar um job que falhou por outro motivo.
+	usageLimitGenericRe = regexp.MustCompile(`(?i)(rate[ _-]?limit|quota (?:exceeded|exhausted)|too many requests|resource[ _]exhausted|\b429\b)`)
+	errorMarkerRe       = regexp.MustCompile(`(?i)(✗|\berror\b|api error|status)`)
+	// "weekly limit" e datas ("resets Nov 20, 9am") passam do teto: o job falha com o motivo.
+	farResetRe = regexp.MustCompile(`(?i)(weekly|monthly|resets?\s+(?:on\s+)?(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\s+\d{1,2})`)
 	// "resets 10:40pm (America/Sao_Paulo)", "resets at 22:40", "reset at 10pm".
 	resetClockRe = regexp.MustCompile(`(?i)resets?\s+(?:at\s+)?(\d{1,2})(?::(\d{2}))?\s*(am|pm)?(?:\s*\(([A-Za-z_]+(?:/[A-Za-z_+-]+)+|UTC)\))?`)
 	// "try again in 30 minutes", "in 2 hours", "after 45 seconds".
@@ -38,7 +45,9 @@ type UsageLimit struct {
 func DetectUsageLimit(tail []string, now time.Time) (UsageLimit, bool) {
 	for i := len(tail) - 1; i >= 0; i-- {
 		line := tail[i]
-		if !usageLimitRe.MatchString(line) {
+		strong := usageLimitStrongRe.MatchString(line)
+		generic := usageLimitGenericRe.MatchString(line) && (i == len(tail)-1 || errorMarkerRe.MatchString(line))
+		if !strong && !generic {
 			continue
 		}
 		ul := UsageLimit{Message: strings.TrimSpace(strings.TrimPrefix(strings.TrimSpace(line), "✗")), ResetAt: now.Add(UnknownUsageLimitPause)}
@@ -47,7 +56,7 @@ func DetectUsageLimit(tail []string, now time.Time) (UsageLimit, bool) {
 		} else if d, ok := parseResetIn(line); ok {
 			ul.ResetAt, ul.Known = now.Add(d), true
 		}
-		ul.Capped = ul.ResetAt.Sub(now) > MaxUsageLimitPause
+		ul.Capped = ul.ResetAt.Sub(now) > MaxUsageLimitPause || farResetRe.MatchString(line)
 		return ul, true
 	}
 	return UsageLimit{}, false
@@ -57,6 +66,9 @@ func parseResetClock(line string, now time.Time) (time.Time, bool) {
 	m := resetClockRe.FindStringSubmatch(line)
 	if m == nil {
 		return time.Time{}, false
+	}
+	if m[2] == "" && m[3] == "" {
+		return time.Time{}, false // "resets 5 hours" não é um horário
 	}
 	h, _ := strconv.Atoi(m[1])
 	min := 0

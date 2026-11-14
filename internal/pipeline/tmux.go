@@ -1,6 +1,8 @@
 package pipeline
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
 	"os"
 	"os/exec"
@@ -13,11 +15,12 @@ import (
 
 var (
 	tmuxNameBadRe = regexp.MustCompile(`[^A-Za-z0-9_-]+`)
-	tmuxNameOKRe  = regexp.MustCompile(`^forge-[A-Za-z0-9_-]{1,40}$`)
+	tmuxNameOKRe  = regexp.MustCompile(`^forge-[A-Za-z0-9_-]{1,40}-[0-9a-f]{6}$`)
 )
 
-// TmuxSessionName devolve forge-<projeto> saneado: só [A-Za-z0-9_-] (":" e "." têm sentido no
-// alvo do tmux) e até 40 caracteres do nome do projeto.
+// TmuxSessionName devolve forge-<projeto>-<hash>: o nome do projeto saneado (só [A-Za-z0-9_-], porque
+// ":" e "." têm sentido no alvo do tmux; até 40 caracteres) e 6 hex do caminho absoluto, para duas
+// pastas com o mesmo nome (/a/app e /b/app) não caírem na mesma sessão.
 func TmuxSessionName(projectDir string) string {
 	base := tmuxNameBadRe.ReplaceAllString(filepath.Base(projectDir), "-")
 	base = strings.Trim(base, "-_")
@@ -27,7 +30,8 @@ func TmuxSessionName(projectDir string) string {
 	if base == "" {
 		base = "projeto"
 	}
-	return "forge-" + base
+	sum := sha256.Sum256([]byte(filepath.Clean(projectDir)))
+	return "forge-" + base + "-" + hex.EncodeToString(sum[:3])
 }
 
 // ResolveTerminal escolhe entre tmux e as janelas do sistema. Precedência: flag, forge.json, auto
@@ -84,11 +88,15 @@ func BuildTmuxPlan(env LaunchEnv, cfg config.ForgeConfig, insideTmux bool) (*Tmu
 	if !tmuxNameOKRe.MatchString(name) {
 		return nil, fmt.Errorf("nome de sessão tmux %q inválido", name)
 	}
-	win := name + ":forge"
+	// "=" pede correspondência exata: sem ele o tmux casa por prefixo e pode cair na sessão de outro projeto.
+	exact := "=" + name
+	win := exact + ":forge"
 	titles := []string{SessionDiscovery, SessionBuilder, SessionReviewer}
 	plan := &TmuxPlan{Session: name}
 	plan.Create = [][]string{
 		{"tmux", "new-session", "-d", "-s", name, "-n", "forge", "-c", env.Dir, sessions[0].Inner},
+		// Quem usa pane-base-index 1 no tmux.conf teria painéis 1, 2 e 3: fixa 0 antes de endereçá-los.
+		{"tmux", "set-window-option", "-t", win, "pane-base-index", "0"},
 		{"tmux", "split-window", "-h", "-t", win, "-c", env.Dir, sessions[1].Inner},
 		{"tmux", "split-window", "-v", "-t", win + ".1", "-c", env.Dir, sessions[2].Inner},
 		{"tmux", "set-window-option", "-t", win, "pane-border-status", "top"},
@@ -100,9 +108,9 @@ func BuildTmuxPlan(env LaunchEnv, cfg config.ForgeConfig, insideTmux bool) (*Tmu
 	}
 	plan.Create = append(plan.Create, []string{"tmux", "select-pane", "-t", win + ".0"})
 	if insideTmux {
-		plan.Attach = []string{"tmux", "switch-client", "-t", name}
+		plan.Attach = []string{"tmux", "switch-client", "-t", exact}
 	} else {
-		plan.Attach = []string{"tmux", "attach-session", "-t", name}
+		plan.Attach = []string{"tmux", "attach-session", "-t", exact}
 	}
 	return plan, nil
 }
@@ -126,12 +134,20 @@ func (execTmux) Attach(argv []string) error {
 func DefaultTmuxRunner() TmuxRunner { return execTmux{} }
 
 // LaunchTmux cria a sessão (se ainda não existir) e conecta a ela. Sessão existente só conecta, sem
-// duplicar painéis.
+// duplicar painéis. A limpeza em falha só remove o que esta execução criou: se o primeiro passo
+// (new-session) falha porque outra execução criou a sessão no mesmo instante, só conecta.
 func LaunchTmux(plan *TmuxPlan, r TmuxRunner) (created bool, err error) {
-	if r.Run([]string{"tmux", "has-session", "-t", plan.Session}) != nil {
-		for _, step := range plan.Create {
+	exact := "=" + plan.Session
+	if r.Run([]string{"tmux", "has-session", "-t", exact}) != nil {
+		for i, step := range plan.Create {
 			if err := r.Run(step); err != nil {
-				_ = r.Run([]string{"tmux", "kill-session", "-t", plan.Session})
+				if i == 0 {
+					if r.Run([]string{"tmux", "has-session", "-t", exact}) == nil {
+						return false, r.Attach(plan.Attach) // corrida: outra execução criou a sessão
+					}
+					return false, fmt.Errorf("tmux %s: %w", step[1], err) // nada foi criado: nada a limpar
+				}
+				_ = r.Run([]string{"tmux", "kill-session", "-t", exact})
 				return false, fmt.Errorf("tmux %s: %w", step[1], err)
 			}
 		}

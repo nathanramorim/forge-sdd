@@ -226,6 +226,9 @@ func status(err error) string {
 }
 
 func pmCommentText(n Notification) string {
+	if n.CardURL == "" {
+		return "" // sem card não há o que comentar
+	}
 	switch n.Type {
 	case TypePRApproved:
 		return fmt.Sprintf("Comente no card %s: PR revisado, sem inconformidades, pronto para aprovação final: %s", n.CardURL, n.PRURL)

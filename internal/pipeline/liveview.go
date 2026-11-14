@@ -17,6 +17,7 @@ import (
 const (
 	maxLiveLine = 200
 	tailLines   = 20
+	maxPartial  = 64 * 1024 // linha sem quebra maior que isso é descartada até a próxima
 )
 
 var (
@@ -45,6 +46,8 @@ type LiveView struct {
 	partial   bytes.Buffer
 	lastEvent time.Time
 	hookShown bool
+	inKey     bool // dentro de um bloco de chave privada: nada dele vai ao terminal
+	dropNL    bool // descartando uma linha gigante até a próxima quebra
 	tail      []string
 }
 
@@ -56,7 +59,8 @@ func NewLiveView(term, log io.Writer, opts LiveOptions) *LiveView {
 	return &LiveView{term: term, log: log, opts: opts, lastEvent: opts.Now()}
 }
 
-// Write recebe a saída do agente. O log recebe sempre tudo; o terminal, a versão limpa.
+// Write recebe a saída do agente. O log recebe sempre tudo, bruto (arquivo 0600 fora do git: pode
+// conter segredos que o agente imprimiu); o terminal recebe a versão limpa e mascarada.
 func (v *LiveView) Write(p []byte) (int, error) {
 	v.mu.Lock()
 	defer v.mu.Unlock()
@@ -67,7 +71,19 @@ func (v *LiveView) Write(p []byte) (int, error) {
 		_, err := v.term.Write(p)
 		return len(p), err
 	}
+	if v.dropNL {
+		i := bytes.IndexByte(p, '\n')
+		if i < 0 {
+			return len(p), nil
+		}
+		p, v.dropNL = p[i+1:], false
+	}
 	v.partial.Write(p)
+	if v.partial.Len() > maxPartial && bytes.IndexByte(v.partial.Bytes(), '\n') < 0 {
+		v.partial.Reset()
+		v.dropNL = true
+		return len(p), nil
+	}
 	for {
 		data := v.partial.Bytes()
 		i := bytes.IndexByte(data, '\n')
@@ -148,9 +164,26 @@ func clean(s string) string {
 	return strings.TrimRight(s, " \t")
 }
 
+var (
+	// Montados em partes para o P-13 não casar com o próprio código-fonte.
+	keyBeginRe = regexp.MustCompile("-----BEGIN [A-Z ]*PRIVATE" + " KEY-----")
+	keyEndRe   = regexp.MustCompile("-----END [A-Z ]*PRIVATE" + " KEY-----")
+)
+
 func (v *LiveView) handleLine(line string) {
 	trim := strings.TrimSpace(line)
 	if trim == "" {
+		return
+	}
+	if v.inKey {
+		if keyEndRe.MatchString(trim) {
+			v.inKey = false
+		}
+		return
+	}
+	if keyBeginRe.MatchString(trim) {
+		v.inKey = !keyEndRe.MatchString(trim)
+		v.emit("  (chave privada omitida)", false)
 		return
 	}
 	if hookNoiseRe.MatchString(trim) {

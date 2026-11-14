@@ -133,7 +133,7 @@ func init() {
 	_ = workerCmd.MarkFlagRequired("role")
 	workerCmd.Flags().String("name", "", "Nome da sessão (padrão: forge-<papel>)")
 	workerCmd.Flags().String("cli", "", "Agente desta sessão: claude, gemini, copilot ou codex (padrão: sessions de forge.json)")
-	workerCmd.Flags().Bool("raw", false, "Mostra a saída bruta do agente em vez da visão limpa (o log sempre guarda a bruta)")
+	workerCmd.Flags().Bool("raw", false, "Mostra a saída bruta do agente em vez da visão limpa (sem máscara de segredos; o log sempre guarda a bruta)")
 	workerCmd.Flags().Bool("once", false, "Sai quando a fila esvazia")
 	workerCmd.Flags().Duration("poll", 5*time.Second, "Intervalo de consulta da fila")
 	rootCmd.AddCommand(workerCmd)

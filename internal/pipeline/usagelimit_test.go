@@ -217,3 +217,54 @@ func TestWorker_LimiteAcimaDoTetoFalhaComOMotivo(t *testing.T) {
 	require.Len(t, failed, 1)
 	assert.Contains(t, failed[0].Job.Events[len(failed[0].Job.Events)-1].Note, "weekly limit")
 }
+
+func TestDetectUsageLimit_FalsoPositivoEDatas(t *testing.T) {
+	now := time.Date(2026, 11, 14, 22, 30, 0, 0, time.UTC)
+	// Texto sobre rate limit no meio da conversa, com outro motivo de falha na última linha: não pausa.
+	_, ok := DetectUsageLimit([]string{"  › implementei o rate limit do login", "  › testando too many requests", "  Erro: módulo x não encontrado"}, now)
+	assert.False(t, ok)
+	// A mesma frase como última linha ou com cara de erro pausa.
+	_, ok = DetectUsageLimit([]string{"  › tudo certo", "  rate limit exceeded"}, now)
+	assert.True(t, ok)
+	_, ok = DetectUsageLimit([]string{"  ✗ HTTP 429 Too Many Requests", "  fim"}, now)
+	assert.True(t, ok, "linha de erro vale mesmo que não seja a última")
+	_, ok = DetectUsageLimit([]string{"status 429", "x"}, now)
+	assert.True(t, ok)
+	// O formato do Claude vale em qualquer das últimas linhas.
+	_, ok = DetectUsageLimit([]string{"You've hit your 5-hour limit · resets 10:40pm", "  ...", "  ..."}, now)
+	assert.True(t, ok)
+
+	// Limite semanal e datas passam do teto.
+	for _, msg := range []string{"You've hit your weekly limit", "You've hit your limit · resets Nov 20, 9am"} {
+		ul, ok := DetectUsageLimit([]string{msg}, now)
+		require.True(t, ok, msg)
+		assert.True(t, ul.Capped, msg)
+	}
+	// "resets 5 hours" não é um horário de relógio.
+	ul, ok := DetectUsageLimit([]string{"You've hit your limit · resets in 2 hours"}, now)
+	require.True(t, ok)
+	assert.Equal(t, now.Add(2*time.Hour), ul.ResetAt)
+	ul, ok = DetectUsageLimit([]string{"You've hit your limit · resets 5"}, now)
+	require.True(t, ok)
+	assert.False(t, ul.Known, "número solto sem am/pm nem minutos não é um horário")
+}
+
+func TestWorker_TetoDeDevolucoesPorJob(t *testing.T) {
+	loc := spLoc(t)
+	cur := time.Date(2026, 11, 14, 22, 30, 0, 0, loc)
+	dir := workerProject(t)
+	seedJob(t, dir, layout.RoleBuilder, "job-1", bus.TypeFeatureBuild, bus.PriorityNormal, cur)
+	r := &scriptRunner{fn: func(_ int, out io.Writer) (RunResult, error) {
+		_, _ = io.WriteString(out, "You've hit your usage limit · resets in 10 minutes\n")
+		return RunResult{ExitCode: 1}, nil
+	}}
+	var term bytes.Buffer
+	require.NoError(t, RunWorker(context.Background(), WorkerOptions{Dir: dir, Role: layout.RoleBuilder, Once: true, Out: &term, Runner: r, WatchEvery: -1,
+		Now: func() time.Time { return cur }, Sleep: func(_ context.Context, d time.Duration) bool { cur = cur.Add(d); return true }}))
+	assert.Equal(t, maxUsageLimitDeferrals+1, r.calls, "três devoluções e a quarta falha: o limite que não passa não prende o job para sempre")
+	failed, _ := bus.List(dir, layout.RoleBuilder, layout.StateFailed)
+	require.Len(t, failed, 1)
+	note := failed[0].Job.Events[len(failed[0].Job.Events)-1].Note
+	assert.Contains(t, note, "usage limit")
+	assert.Contains(t, note, "adiado 3 vezes")
+}

@@ -309,3 +309,25 @@ func TestReview_SemPosseNaoTemEfeitosColaterais(t *testing.T) {
 	pend, _ := bus.List(dir, layout.RoleBuilder, layout.StatePending)
 	assert.Empty(t, pend, "sem posse, nenhum rework é enfileirado")
 }
+
+func TestReview_AprovacaoSemCardNaoPedeParaMoverCard(t *testing.T) {
+	deps, _ := notifyDeps(nil)
+	dir := workerProject(t)
+	url := prURL
+	n := 12
+	j := bus.Job{
+		ID: "job-9-review", Type: bus.TypePRReview, Priority: bus.PriorityNormal, Feature: "auth-oauth", Title: "Auth", Initiative: "77-auth-oauth",
+		SpecPath: "sdd/discovery/77-auth-oauth/criteria.md", Card: bus.Card{},
+		PR:      bus.PR{Number: &n, URL: &url, Branch: "feat/77-auth-oauth", BaseBranch: "main"},
+		Attempt: 1, MaxReworkAttempts: 3,
+	}
+	_, _, err := bus.Enqueue(dir, layout.RoleReviewer, j, now)
+	require.NoError(t, err)
+	_, err = bus.Claim(dir, layout.RoleReviewer, "forge-reviewer", time.Hour, now)
+	require.NoError(t, err)
+
+	res, err := ApplyVerdict(dir, "job-9-review", "forge-reviewer", queue.Verdict{Veredito: "conforme", Resumo: "Tudo conforme."}, deps, now)
+	require.NoError(t, err)
+	assert.Equal(t, ActionApproved, res.Action)
+	assert.Empty(t, res.CardInstruction, "sem card não há card para mover")
+}

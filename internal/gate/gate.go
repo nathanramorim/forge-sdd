@@ -48,19 +48,38 @@ var (
 	ruleIDRegex = regexp.MustCompile(`\b(?:ARQ|SEG|DUP|COD|TST|FLX|GOV)-\d{2}\b`)
 )
 
-// MaskSecrets troca por *** os trechos que casam com os padrões de segredo do P-13 (e pares
-// chave=valor óbvios). Serve a qualquer saída mostrada na tela (SEG-05).
+// MaskSecrets troca por *** os trechos que parecem segredo: os padrões do P-13, tokens de provedores
+// comuns, `Bearer`, userinfo de URL, `--password valor` e pares nome=valor (inclusive com prefixo
+// como ANTHROPIC_API_KEY, aspas e JSON). Serve a qualquer saída mostrada na tela (SEG-05).
 func MaskSecrets(s string) string {
+	s = privateKeyBlockRe.ReplaceAllString(s, "***")
 	for _, re := range secretPatterns {
 		s = re.ReplaceAllString(s, "***")
 	}
+	for _, re := range displaySecretPatterns {
+		s = re.ReplaceAllString(s, "***")
+	}
+	s = urlUserinfoRe.ReplaceAllString(s, "${1}***@")
 	s = bearerRe.ReplaceAllString(s, "${1}***")
-	return kvSecretRe.ReplaceAllString(s, "${1}=***")
+	s = flagSecretRe.ReplaceAllString(s, "${1}***")
+	return kvSecretRe.ReplaceAllString(s, "${1}${2}${3}***")
 }
 
 var (
-	bearerRe   = regexp.MustCompile(`(?i)(\bbearer\s+)[A-Za-z0-9._~+/=-]+`)
-	kvSecretRe = regexp.MustCompile(`(?i)\b((?:token|password|passwd|secret|api[_-]?key|access[_-]?key)[A-Za-z_-]*)\s*[:=]\s*[^\s"']+`)
+	// O texto do cabeçalho é montado em partes para o próprio P-13 não casar com o código-fonte.
+	privateKeyBlockRe = regexp.MustCompile("-----BEGIN [A-Z ]*PRIVATE" + " KEY-----[\\s\\S]*?-----END [A-Z ]*PRIVATE" + " KEY-----")
+	// Só para exibição (o P-13 não muda): variantes que o gate não cobre.
+	displaySecretPatterns = []*regexp.Regexp{
+		regexp.MustCompile(`sk-[A-Za-z0-9_-]{20,}`),
+		regexp.MustCompile(`github_pat_[A-Za-z0-9_]{20,}`),
+		regexp.MustCompile(`gh[osur]_[A-Za-z0-9]{20,}`),
+		regexp.MustCompile(`xox[abprs]-[A-Za-z0-9-]{10,}`),
+		regexp.MustCompile(`eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}`),
+	}
+	urlUserinfoRe = regexp.MustCompile(`(://[^/\s:@]+:)[^@\s/]+@`)
+	bearerRe      = regexp.MustCompile(`(?i)(\bbearer\s+)[A-Za-z0-9._~+/=-]+`)
+	flagSecretRe  = regexp.MustCompile(`(?i)(--?(?:password|passwd|token|secret|api[_-]?key|access[_-]?key)[A-Za-z0-9_-]*\s+)[^\s-][^\s]*`)
+	kvSecretRe    = regexp.MustCompile(`(?i)([A-Za-z0-9_-]*(?:token|password|passwd|secret|api[_-]?key|access[_-]?key|credential)[A-Za-z0-9_-]*)(["']?\s*[:=]\s*)(["']?)[^\s"',}]+`)
 )
 
 // HasFailures indica se há ao menos uma verificação reprovada no relatório.

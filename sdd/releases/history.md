@@ -4,18 +4,22 @@ Este arquivo registra o histórico de entregas de produto deste projeto.
 
 ## Entregas
 
-### Versão 4.2.0 — Menu Navegável e Agente por Sessão do Pipeline (Beta)
+### Versão 4.2.0 — Menu Navegável, Agente por Sessão e Visibilidade do Pipeline (Beta)
 
-Compatível com a 4.1.0-beta: um `forge.json` da 4.1 continua válido e escolhe o mesmo agente nas três sessões (Discovery 71, features `71-01` a `71-05`). Sem `forge.json` o fluxo de implementação segue como na 4.0.0-beta.
+Compatível com a 4.1.0-beta: um `forge.json` da 4.1 continua válido e escolhe o mesmo agente nas três sessões (Discovery 71, features `71-01` a `71-05`, e Discovery 72, features `72-01` a `72-05`). Sem `forge.json` o fluxo de implementação segue como na 4.0.0-beta.
 
 *   **`forge` abre um menu navegável (setas, Enter, Esc volta):** dois caminhos, **Pipeline multi-sessão** (iniciar as 3 sessões, ver os comandos, reconfigurar, fila e inbox, recuperar jobs presos, diagnóstico, guia) e **Estrutura padrão** (status, painel da fila, gate, doctor, instalar ou atualizar). Num projeto sem Forge a primeira opção é instalar. Sem terminal interativo, `forge` imprime a ajuda curta e sai, sem travar.
 *   **Um agente por sessão:** Claude, Gemini, Copilot ou Codex em `forge-discovery`, `forge-builder` e `forge-reviewer`, escolhidos no menu (a última escolha vem marcada e é gravada em `sessions` de `forge.json`) ou por flags: `forge-sdd up --discovery claude --builder codex --reviewer gemini`.
 *   **Checagem antes de abrir:** a CLI escolhida está no PATH? O projeto tem o arquivo de instruções dela? CLI ausente bloqueia; arquivo ausente avisa e indica `forge-sdd update --agent <x>`.
 *   **Permissões em dois níveis:** `project` (padrão: edição e só os comandos de `allow_commands`) e `full` (bypass da CLI, só em ambiente isolado); o menu mostra o que cada um libera antes de abrir.
 *   **Correção:** o worker agora usa exatamente o agente da própria sessão (`--cli` explícito). Na 4.1, abrir a Discovery com `--cli agy` deixava Builder e Reviewer no agente do `forge.json`.
+*   **Cada sessão mostra o que está fazendo:** no terminal do Builder e do Reviewer aparecem linhas curtas (`✎ arquivo`, `$ comando`, batimento com o tempo decorrido) em vez de silêncio; a saída completa continua em `.forge/runtime/logs/`. Vale para qualquer agente (acompanhamento do `git status`) e, para Claude, Gemini e Codex, também pelos eventos do próprio agente. Segredos em comandos aparecem mascarados; `forge-sdd worker --raw` mostra a saída bruta.
+*   **Abre pelo tmux, em três painéis:** com `tmux` instalado, `forge` e `forge-sdd up` criam uma tela com `forge-discovery`, `forge-builder` e `forge-reviewer`, cada painel com o nome da sessão (`--terminal tmux|native|auto`).
+*   **Limite de uso não queima mais o job:** quando o agente avisa que bateu o limite (como o de 5 horas do Claude), o job volta à fila sem gastar tentativa, o painel mostra quando o worker retoma, o inbox avisa e o worker espera sozinho (até 6 horas). Toda falha agora traz a última linha útil do agente, não só "código 1".
+*   **A Discovery não executa o build:** em modo pipeline, o `/split-features` termina entregando o job ao Builder (`forge-sdd dispatch`), e `queue next` e `queue complete` só funcionam sob um worker (ou com `--local`). Com `pm_mcp.require_existing_card: false`, o despacho não pede card nem evidência (antes exigia o arquivo mesmo assim).
 *   **Codex:** o scaffold do agente `openai` passa a gerar `AGENTS.md`, que é o arquivo que o Codex lê; `OPENAI.md` vira ponteiro. Um `AGENTS.md` seu nunca é sobrescrito.
 
-**Observações:** os perfis de Gemini, Copilot e Codex seguem a documentação oficial das CLIs, mas **nenhuma delas foi executada de ponta a ponta com o worker**, só a montagem dos comandos foi testada. No Gemini, o nível `project` libera só edição: o Builder com Gemini precisa de `full` para rodar testes. Ver `sdd/spec/adr/adr-0005-menu-e-agente-por-sessao.md`.
+**Observações:** os perfis de Gemini, Copilot e Codex seguem a documentação oficial das CLIs, mas **nenhuma delas foi executada de ponta a ponta com o worker**, só a montagem dos comandos foi testada. No Gemini, o nível `project` libera só edição: o Builder com Gemini precisa de `full` para rodar testes. Ver `sdd/spec/adr/adr-0005-menu-e-agente-por-sessao.md` e `sdd/spec/adr/adr-0006-visibilidade-tmux-e-entrega-ao-builder.md`. **O tmux não foi executado de ponta a ponta** (só a geração dos comandos foi testada), e os formatos de evento e as mensagens de limite de uso do Gemini, do Copilot e do Codex estão a confirmar. Um `forge.json` que já existe mantém os argumentos antigos dos perfis: a visão cai no acompanhamento por git até você atualizar `cli_profiles`.
 
 ### Versão 4.1.0 — Pipeline Multi-Sessão: Discovery, Builder e Reviewer em Terminais Separados (Beta)
 

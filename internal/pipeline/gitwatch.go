@@ -2,10 +2,13 @@ package pipeline
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"io"
 	"os/exec"
 	"sort"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -17,11 +20,31 @@ const (
 // GitFunc roda um comando git no diretório e devolve a saída; injetável nos testes.
 type GitFunc func(ctx context.Context, dir string, args ...string) (string, error)
 
+// ErrGitSlow indica que o git passou do teto de tempo (repositório enorme ou travado).
+var ErrGitSlow = errors.New("git passou do teto de tempo")
+
+const maxGitOutput = 512 * 1024
+
+// defaultGit roda o git sem pegar o lock opcional do index (não atrapalha o git do agente), com
+// teto de tempo e de saída.
 func defaultGit(ctx context.Context, dir string, args ...string) (string, error) {
 	ctx, cancel := context.WithTimeout(ctx, gitWatchTimeout)
 	defer cancel()
-	out, err := exec.CommandContext(ctx, "git", append([]string{"-C", dir}, args...)...).Output()
-	return string(out), err
+	cmd := exec.CommandContext(ctx, "git", append([]string{"--no-optional-locks", "-C", dir}, args...)...)
+	stdout, err := cmd.StdoutPipe()
+	if err != nil {
+		return "", err
+	}
+	if err := cmd.Start(); err != nil {
+		return "", err
+	}
+	data, _ := io.ReadAll(io.LimitReader(stdout, maxGitOutput))
+	_, _ = io.Copy(io.Discard, stdout) // esvazia o resto para o git terminar
+	werr := cmd.Wait()
+	if ctx.Err() == context.DeadlineExceeded {
+		return "", ErrGitSlow
+	}
+	return string(data), werr
 }
 
 // GitWatcher acompanha o `git status` do diretório do job e descreve o que mudou, para qualquer
@@ -33,8 +56,10 @@ type GitWatcher struct {
 	Activity func() time.Time // último evento do agente; nil = ignora
 	Beat     time.Duration    // intervalo do batimento (padrão 30 s)
 
+	mu                            sync.Mutex
 	started, lastChange, lastBeat time.Time
-	init                          bool
+	init, warned                  bool
+	prefix                        string // caminho de Dir dentro do repositório (git rev-parse --show-prefix)
 	base, prev                    map[string]string
 }
 
@@ -49,7 +74,7 @@ func NewGitWatcher(dir string, now func() time.Time, activity func() time.Time) 
 
 var watchIgnore = []string{".forge/", "sdd/.runtime/", "sdd/.metrics/"}
 
-func parsePorcelain(out string) map[string]string {
+func parsePorcelain(out, prefix string) map[string]string {
 	m := map[string]string{}
 	for _, l := range strings.Split(out, "\n") {
 		if len(l) < 4 {
@@ -60,6 +85,12 @@ func parsePorcelain(out string) map[string]string {
 			path = path[i+4:]
 		}
 		path = strings.Trim(path, `"`)
+		if prefix != "" {
+			if !strings.HasPrefix(path, prefix) {
+				continue // fora do diretório do job
+			}
+			path = strings.TrimPrefix(path, prefix)
+		}
 		skip := false
 		for _, p := range watchIgnore {
 			if strings.HasPrefix(path, p) {
@@ -75,6 +106,12 @@ func parsePorcelain(out string) map[string]string {
 
 // Count diz quantos arquivos diferem do estado do início do job.
 func (w *GitWatcher) Count() int {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+	return w.count()
+}
+
+func (w *GitWatcher) count() int {
 	n := 0
 	for p, st := range w.prev {
 		if w.base[p] != st {
@@ -86,11 +123,22 @@ func (w *GitWatcher) Count() int {
 
 // Poll faz uma consulta e devolve as linhas a mostrar (vazio quando nada mudou).
 func (w *GitWatcher) Poll(ctx context.Context) []string {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+	if !w.init {
+		if p, err := w.Git(ctx, w.Dir, "rev-parse", "--show-prefix"); err == nil {
+			w.prefix = strings.TrimSpace(p)
+		}
+	}
 	out, err := w.Git(ctx, w.Dir, "status", "--porcelain", "-uall")
 	if err != nil {
+		if errors.Is(err, ErrGitSlow) && !w.warned {
+			w.warned = true
+			return []string{"  (acompanhamento por git lento neste repositório: sigo só com os eventos do agente)"}
+		}
 		return nil
 	}
-	cur := parsePorcelain(out)
+	cur := parsePorcelain(out, w.prefix)
 	now := w.Now()
 	if !w.init {
 		w.init, w.base, w.prev = true, cur, cur
@@ -125,7 +173,7 @@ func (w *GitWatcher) Poll(ctx context.Context) []string {
 	}
 	if now.Sub(last) >= w.Beat && now.Sub(w.lastBeat) >= w.Beat {
 		w.lastBeat = now
-		return []string{fmt.Sprintf("  … trabalhando há %s · %d arquivos alterados", FormatElapsed(now.Sub(w.started)), w.Count())}
+		return []string{fmt.Sprintf("  … trabalhando há %s · %d arquivos alterados", FormatElapsed(now.Sub(w.started)), w.count())}
 	}
 	return nil
 }

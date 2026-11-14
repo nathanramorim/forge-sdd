@@ -381,8 +381,22 @@ func pipelineModeGuard(cmd *cobra.Command, dir string) error {
 	if os.Getenv("FORGE_WORKER") != "" {
 		return nil
 	}
-	if _, found, err := config.LoadForgeConfig(dir); err != nil || !found {
-		return nil // sem forge.json (ou inválido, que outro comando reporta) nada muda
+	// Com forge.json (válido ou não) o projeto está em modo pipeline: um arquivo quebrado por edição
+	// do agente não pode destravar a guarda. Só o arquivo ausente deixa tudo como na 4.0.
+	_, found, err := config.LoadForgeConfig(dir)
+	if !found && err == nil {
+		return nil
 	}
-	return fmt.Errorf("modo pipeline: o Builder constrói nas outras sessões; use forge-sdd dispatch <iniciativa> (ou --local para construir nesta sessão por sua conta)")
+	hint := ""
+	if err != nil {
+		hint = " (atenção: .forge/config/forge.json está inválido: " + firstLineOf(err.Error()) + ")"
+	}
+	return fmt.Errorf("modo pipeline: o Builder constrói nas outras sessões; use forge-sdd dispatch <iniciativa> (ou --local para construir nesta sessão por sua conta)%s", hint)
+}
+
+func firstLineOf(s string) string {
+	if i := strings.IndexByte(s, '\n'); i >= 0 {
+		return s[:i]
+	}
+	return s
 }

@@ -1,0 +1,26 @@
+# ADR-0006: Visibilidade, tmux e Entrega ao Builder
+
+- **Data:** 2026-11-14
+- **Status:** `aprovado`
+- **Regras afetadas (IDs da constitution):** `SEG-03`, `SEG-05`, `DUP-01`, `FLX-08`, `GOV-01` (este ADR; nenhum ID foi criado ou removido; `ARQ-06` não ganha subcomando: `up`, `worker`, `queue` e `bus` ganham flags e `requeue`)
+- **Autor / Responsável:** Líder (decisão do dono do produto no discovery 72)
+
+## Contexto
+
+O primeiro uso real do pipeline (projeto `barbearia-app`, 2026-11-14) mostrou: o worker ficava mudo (o log do job tinha 0 bytes enquanto o agente criava arquivos); a Discovery tentava executar depois do split, editou `forge.json` e fabricou um `card-evidence.json`, porque o `dispatch` exigia o arquivo mesmo com `require_existing_card: false`; os jobs falharam por limite de uso do Claude com a razão "código 1"; e as três sessões abriam em janelas soltas. Referência: `sdd/discovery/72-visibilidade-tmux-e-entrega-ao-builder/` e `feat-72-01` a `feat-72-05`.
+
+## Decisão
+
+- **D-1 `LiveView` como `io.Writer`.** O runner recebe um escritor que grava tudo, bruto, no log do job e mostra no terminal só linhas curtas: eventos estruturados do Claude (`stream-json`), do Gemini (`-o stream-json`) e do Codex (`--json`) viram `✎ arquivo`, `$ comando`, `✗ falha` e uma linha do agente; JSON desconhecido ou truncado nunca aparece cru; o ruído de hooks globais vira uma linha. `forge-sdd worker --raw` devolve a saída bruta.
+- **D-2 Acompanhamento por git, para qualquer CLI.** A cada 5 s (consulta com teto de 3 s) o worker compara `git status --porcelain -uall` e mostra só o que mudou; sem mudança nem evento por 30 s, um batimento com o tempo decorrido. É o que dá visibilidade ao agy e ao Copilot, que não imprimem nada ou não têm formato confirmado. Ignora `.forge/`, `sdd/.runtime/` e `sdd/.metrics/`.
+- **D-3 Máscara de segredos (`SEG-05`).** `gate.MaskSecrets` (os padrões do P-13 mais `Bearer` e pares chave=valor) vale para tudo que vai ao terminal, e as linhas são truncadas em 200 caracteres. O **log bruto** guarda o que o agente imprimiu (arquivo `0600`, fora do git): é uma decisão consciente, para o diagnóstico não perder informação.
+- **D-4 `bus.Requeue`.** Devolve o job de `processing` a `pending` pelo dono do lease, sem tocar em `attempt` e sem mudar o nome do arquivo (a ordem da fila é preservada), com o evento `adiado: <motivo>`.
+- **D-5 Pausa por limite de uso.** Só com saída diferente de zero e só nas últimas linhas úteis da saída: padrões como `hit your ... limit`, `usage limit`, `rate limit`, `quota exceeded`, `too many requests`; o horário vem da mensagem (`resets 10:40pm (America/Sao_Paulo)`, `in 30 minutes`); sem horário, 30 minutos. Passa de 6 horas: o job falha com o motivo. O aviso vai ao inbox como `info`. O motivo de toda falha inclui a última linha útil do agente.
+- **D-6 tmux por argv.** Com `tmux` no PATH (e fora do Windows nativo), `forge-sdd up` cria `forge-<projeto>` com três painéis (Discovery à esquerda; Builder e Reviewer à direita) e conecta (ou `switch-client` dentro do tmux). Nome da sessão saneado (`[A-Za-z0-9_-]`, `forge-` + até 40); o comando de cada painel é o `Inner` já quotado; sessão existente só conecta; falha na criação remove só a sessão criada agora. `--terminal tmux|native|auto` e `terminal` em `forge.json`.
+- **D-7 A Discovery não executa.** Skills e templates dizem que, em modo pipeline, o `/split-features` termina em `forge-sdd dispatch` e para; a garantia no Go é `queue next` e `queue complete` recusarem fora de um worker (`FORGE_WORKER`) ou sem `--local`. `dispatch` com o card desligado não exige evidência. A guarda é uma barreira de processo (variável de ambiente), não de segurança.
+
+## Consequências
+
+- **Positivas:** o terminal de cada sessão mostra o que acontece sem decifrar JSON; o limite de uso deixa de queimar jobs; a Discovery não tem mais como "ajudar" construindo; as três sessões ficam numa tela só.
+- **Negativas / Trade-offs:** **a confirmar:** os formatos de evento de cada CLI e as mensagens reais de limite de uso do Gemini, do Copilot e do Codex (só o Claude tem mensagem real de exemplo); **o tmux não foi executado de ponta a ponta** (só a geração dos comandos e um runner falso foram testados); o `git status -uall` pode ser lento em repositório enorme sem `.gitignore` adequado (teto de 3 s por consulta); pausas por limite repetidas no mesmo job não têm contador próprio; o `forge.json` que já existe no projeto mantém os argumentos antigos dos perfis (sem as flags de saída estruturada), então a visão cai no acompanhamento por git até o perfil ser atualizado (`forge-sdd pipeline init` em um projeto novo, ou editar `cli_profiles`).
+- **Ações de acompanhamento:** executar as quatro CLIs e o tmux de ponta a ponta e confirmar os formatos; decidir se pausas repetidas precisam de teto por job.

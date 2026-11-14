@@ -182,6 +182,6 @@ func TestScaffold_SkillsDoModoPipelineDizemQueADiscoveryNaoExecuta(t *testing.T)
 	assert.Contains(t, split, "entregue ao Builder")
 	assert.Contains(t, split, "Esta sessão não implementa")
 	impl := read(".agents/skills/sdd-build/references/implementar.md")
-	assert.Contains(t, impl, "nunca edite `forge.json`, `card-evidence.json`")
+	assert.Contains(t, impl, "nunca edite `forge.json` nem o código da feature")
 	assert.Contains(t, read(".agents/skills/sdd-concepcao/references/discovery.md"), "esta sessão nunca constrói")
 }

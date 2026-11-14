@@ -25,3 +25,34 @@ func TestMaskSecrets(t *testing.T) {
 	}
 	assert.Equal(t, "npm test -- --watch=false", MaskSecrets("npm test -- --watch=false"), "texto comum não muda")
 }
+
+func TestMaskSecrets_VariaveisComPrefixoAspasJSONEUserinfo(t *testing.T) {
+	skAnt := "sk-ant-api03-" + strings.Repeat("a", 30)
+	skProj := "sk-proj-" + strings.Repeat("b", 30)
+	pat := "github_pat_" + strings.Repeat("c", 30)
+	slack := "xoxb-" + strings.Repeat("1", 12)
+	jwt := "eyJ" + strings.Repeat("a", 12) + "." + strings.Repeat("b", 12) + "." + strings.Repeat("c", 12)
+	for in, leaked := range map[string]string{
+		"export ANTHROPIC_API_KEY=" + skAnt:          skAnt,
+		"GITHUB_TOKEN=abc123def":                     "abc123def",
+		"AWS_SECRET_ACCESS_KEY=wJalrXUtnFEMI":        "wJalrXUtnFEMI",
+		`password="abc 123"`:                         "abc",
+		`token: 'tok999'`:                            "tok999",
+		`{"password": "hunter2", "ok": true}`:        "hunter2",
+		"mysql --password hunter2 -h x":              "hunter2",
+		"git clone https://user:senha123@host/x.git": "senha123",
+		"key " + skProj:                              skProj,
+		"x " + pat:                                   pat,
+		"x " + slack:                                 slack,
+		"Authorization: Bearer " + jwt:               jwt,
+		"-----BEGIN RSA PRIVATE" + " KEY-----\nMIIEabc\n-----END RSA PRIVATE" + " KEY-----": "MIIEabc",
+	} {
+		out := MaskSecrets(in)
+		assert.NotContains(t, out, leaked, in)
+		assert.Contains(t, out, "***", in)
+	}
+	// Texto comum e nomes sem valor secreto não mudam.
+	for _, in := range []string{"npm test -- --watch=false", "export PATH=/usr/bin", "git push origin main", "go test ./..."} {
+		assert.Equal(t, in, MaskSecrets(in), in)
+	}
+}
