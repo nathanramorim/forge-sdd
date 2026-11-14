@@ -36,7 +36,7 @@ export const EMU_STEPS: EmuStepData[] = [
     speech: 'Escolhi o agente de cada sessão no menu, conferi a checagem e abri tudo numa tela só. A última escolha fica lembrada.',
     logHtml: `
       <div class="cmd-input">$ forge</div>
-      <div class="accent">Forge SDD 4.2.0-beta — o que você quer fazer?  ▸ Pipeline multi-sessão</div>
+      <div class="accent">Forge SDD 4.4.0-beta — o que você quer fazer?  ▸ Pipeline multi-sessão</div>
       <div class="dim">→ Iniciar as 3 sessões: forge-discovery claude · forge-builder codex · forge-reviewer gemini</div>
       <div class="dim">Checagem antes de abrir: ✓ claude  ✓ codex  ✓ gemini  ✓ arquivos de instrução</div>
       <div class="ok">✓ Sessão tmux forge-checkout-api-1a2b3c aberta: 3 painéis nomeados</div>

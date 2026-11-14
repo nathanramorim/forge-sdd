@@ -1,4 +1,4 @@
-# Pipeline multi-sessão do Forge SDD (v4.2.0-beta)
+# Pipeline multi-sessão do Forge SDD (v4.4.0-beta)
 
 > Este guia também é instalado em cada projeto, em `.forge/LEIA-ME.md`, e aparece resumido ao final de `forge-sdd init`, `forge-sdd update` e `forge-sdd pipeline init`.
 
