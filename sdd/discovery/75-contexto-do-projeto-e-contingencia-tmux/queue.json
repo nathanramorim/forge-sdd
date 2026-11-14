@@ -2,7 +2,7 @@
   "feature_id": "feat-75",
   "branch": "feat/75-contexto-do-projeto-e-contingencia-tmux",
   "spec_status": "reviewed",
-  "updated_at": "2026-11-14T05:50:17Z",
+  "updated_at": "2026-11-14T05:55:29Z",
   "items": [
     {
       "task_id": "75-01",
@@ -48,7 +48,7 @@
       "task_id": "75-02",
       "title": "feat-75-02 — Protocolo de abertura da Discovery",
       "spec_path": "sdd/discovery/75-contexto-do-projeto-e-contingencia-tmux/features/feat-75-02-protocolo-de-abertura-da-discovery.md",
-      "status": "queued",
+      "status": "approved",
       "rules": [
         "FLX-01",
         "GOV-01",
@@ -56,7 +56,12 @@
         "TST-02"
       ],
       "skills_used": [],
-      "attempts": 0
+      "attempts": 1,
+      "governance_verdict": {
+        "veredito": "conforme",
+        "achados": [],
+        "resumo": "Protocolo de abertura da Discovery e seção Decisões do projeto aplicadas implementados conforme spec"
+      }
     },
     {
       "task_id": "75-05",

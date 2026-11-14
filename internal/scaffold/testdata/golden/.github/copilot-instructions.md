@@ -3,7 +3,7 @@
 demo: stack go. Fluxo por feature em `sdd/FLOW.md`.
 
 ## Ciclo por comando
-1. **READ-MIN:** `forge-sdd status`; Builder e Governança leem também `sdd/memory/lessons.md`.
+1. **READ-MIN:** Discovery começa por `forge-sdd brief`; `forge-sdd status`; Builder e Governança leem também `sdd/memory/lessons.md`.
 2. **PLAN:** reporte a intenção, aguarde confirmação e pergunte se vai para um subagente.
 3. **ACT:** siga a skill da estação em `.agents/skills/sdd-*`, só a referência do comando.
 4. **WRITE:** apenas arquivos do escopo.

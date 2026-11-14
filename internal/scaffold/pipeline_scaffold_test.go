@@ -185,3 +185,31 @@ func TestScaffold_SkillsDoModoPipelineDizemQueADiscoveryNaoExecuta(t *testing.T)
 	assert.Contains(t, impl, "nunca edite `forge.json` nem o código da feature")
 	assert.Contains(t, read(".agents/skills/sdd-concepcao/references/discovery.md"), "esta sessão nunca constrói")
 }
+
+func TestScaffold_ProtocoloBrief(t *testing.T) {
+	dir := t.TempDir()
+	_, err := Run(config.Config{Project: "demo", Stack: "go", DB: "none", Lang: "pt-BR", SddVersion: "4.2.0-beta", Agents: []string{config.AgentClaude, config.AgentGemini, config.AgentOpenAI}}, dir)
+	require.NoError(t, err)
+	read := func(rel string) string {
+		b, err := os.ReadFile(filepath.Join(dir, filepath.FromSlash(rel)))
+		require.NoError(t, err, rel)
+		return string(b)
+	}
+
+	assert.Contains(t, read("CLAUDE.md"), "Discovery começa por `forge-sdd brief`")
+	assert.Contains(t, read("GEMINI.md"), "Discovery começa por `forge-sdd brief`")
+	assert.Contains(t, read("AGENTS.md"), "Discovery começa por `forge-sdd brief`")
+
+	concepcao := read(".agents/skills/sdd-concepcao/SKILL.md")
+	assert.Contains(t, concepcao, "rode `forge-sdd brief` antes de tudo")
+	assert.Contains(t, concepcao, "Decisões do projeto aplicadas")
+
+	for _, ref := range []string{
+		".agents/skills/sdd-concepcao/references/discovery.md",
+		".agents/skills/sdd-concepcao/references/nova-feature.md",
+		".agents/skills/sdd-concepcao/references/novo-fix.md",
+		".agents/skills/sdd-planejamento/references/split-features.md",
+	} {
+		assert.Contains(t, read(ref), "forge-sdd brief", ref)
+	}
+}

@@ -62,7 +62,7 @@ func shQuote(s string) string { return "'" + strings.ReplaceAll(s, "'", `'\''`) 
 
 // DiscoveryPrompt é o prompt inicial da sessão Discovery nas CLIs que o aceitam. Texto ASCII, sem
 // aspas, % nem metacaracteres: precisa sobreviver ao cmd.exe e ao AppleScript sem escapes frágeis.
-const DiscoveryPrompt = "Voce e a sessao forge-discovery do Forge SDD. Siga .agents/skills/sdd-concepcao/SKILL.md, carregue as ADRs e as rules antes de quebrar tarefas e use /implementar quando a feature estiver pronta."
+const DiscoveryPrompt = "Voce e a sessao forge-discovery do Forge SDD. Rode forge-sdd brief no inicio: se estiver em rascunho proponha /constitution antes de qualquer spec. Siga .agents/skills/sdd-concepcao/SKILL.md, cite as decisoes do projeto na spec e use /implementar quando a feature estiver pronta."
 
 var safeArgRe = regexp.MustCompile(`^[A-Za-z0-9_@%+=:,./-]+$`)
 
