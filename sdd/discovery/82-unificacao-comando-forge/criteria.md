@@ -13,11 +13,11 @@
 ## O que já existe
 | Procurei | Onde | Achei | Decisão | Justificativa |
 |---|---|---|---|---|
-| Comando raiz Cobra | `cmd/forge-sdd/main.go` | `var rootCmd = &cobra.Command{ Use: "forge-sdd", ... }` | Modificar | `Use: "forge"` faz com que todas as mensagens de usage e help nativas do Cobra usem `forge` (`ARQ-01`). |
-| Mensagens de Dicas e Help | `cmd/forge-sdd/`, `internal/monitor/ps.go`, `internal/pipeline/` | Strings hardcoded `"forge-sdd "` | Modificar | Padronizar todas as mensagens visuais para citar `"forge "` (`COD-01`, `DUP-01`). |
-| Wrapper NPM | `npm/package.json` | `"bin": { "forge-sdd": "bin/run.js", "forge": "bin/run.js" }` | Reutilizar | Mantém `forge-sdd` como alias funcional transparente sem quebrar quem já o tem instalado (`DUP-01`). |
-| Templates de Scaffold | `internal/scaffold/templates/` | Diversos arquivos com `forge-sdd` | Modificar | Garantir que o código gerado em novos projetos já venha 100% padronizado com `forge` (`DUP-10`). |
-| Prompts e Rules | `GEMINI.md`, `CLAUDE.md`, `.agents/rules/` | Comandos `forge-sdd <cmd>` | Modificar | Eliminar a discrepância de comandos ensinados aos agentes (`COD-05`). |
+| Comando raiz Cobra | `cmd/forge-sdd/main.go` | `var rootCmd = &cobra.Command{ Use: "forge-sdd", ... }` | estender | `Use: "forge"` faz com que todas as mensagens de usage e help nativas do Cobra usem `forge` (`ARQ-01`). |
+| Mensagens de Dicas e Help | `cmd/forge-sdd/`, `internal/monitor/ps.go`, `internal/pipeline/` | Strings hardcoded `"forge-sdd "` | estender | Padronizar todas as mensagens visuais para citar `"forge "` (`COD-01`, `DUP-01`). |
+| Wrapper NPM | `npm/package.json` | `"bin": { "forge-sdd": "bin/run.js", "forge": "bin/run.js" }` | reusar | Mantém `forge-sdd` como alias funcional transparente sem quebrar quem já o tem instalado (`DUP-01`). |
+| Templates de Scaffold | `internal/scaffold/templates/` | Diversos arquivos com `forge-sdd` | estender | Garantir que o código gerado em novos projetos já venha 100% padronizado com `forge` (`DUP-10`). |
+| Prompts e Rules | `GEMINI.md`, `CLAUDE.md`, `.agents/rules/` | Comandos `forge-sdd <cmd>` | estender | Eliminar a discrepância de comandos ensinados aos agentes (`COD-05`). |
 
 ## Dependências novas
 - **Nenhuma (`SEG-07`):** Nenhuma dependência externa ou biblioteca adicional é adicionada. Apenas ajustes de nomenclatura, templates e mensagens de exibição.

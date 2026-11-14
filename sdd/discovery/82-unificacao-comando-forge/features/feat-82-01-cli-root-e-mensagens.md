@@ -22,10 +22,10 @@ A CLI Forge-SDD hoje ainda exibe o nome `forge-sdd` no comando raiz Cobra (`root
 
 | Procurei | Onde | Achei | Decisão | Justificativa |
 |---|---|---|---|---|
-| Comando raiz Cobra | `cmd/forge-sdd/main.go` | `var rootCmd = &cobra.Command{ Use: "forge-sdd", ... }` | Modificar | Alterar para `Use: "forge"` para que help e usage usem `forge`. |
-| Dicas do Monitor | `internal/monitor/ps.go` | `[Dica: Use 'forge-sdd ps --kill-zombies'...]` | Modificar | Padronizar string para `[Dica: Use 'forge ps --kill-zombies'...]`. |
-| Testes de Monitor | `internal/monitor/ps_test.go` | Asserções de string formatada | Atualizar | Ajustar asserções para o novo padrão. |
-| Testes do CLI | `cmd/forge-sdd/` | Testes do rootCmd | Atualizar | Adicionar teste validando `rootCmd.Use == "forge"`. |
+| Comando raiz Cobra | `cmd/forge-sdd/main.go` | `var rootCmd = &cobra.Command{ Use: "forge-sdd", ... }` | estender | Alterar para `Use: "forge"` para que help e usage usem `forge`. |
+| Dicas do Monitor | `internal/monitor/ps.go` | `[Dica: Use 'forge-sdd ps --kill-zombies'...]` | estender | Padronizar string para `[Dica: Use 'forge ps --kill-zombies'...]`. |
+| Testes de Monitor | `internal/monitor/ps_test.go` | Asserções de string formatada | estender | Ajustar asserções para o novo padrão. |
+| Testes do CLI | `cmd/forge-sdd/` | Testes do rootCmd | estender | Adicionar teste validando `rootCmd.Use == "forge"`. |
 
 ## Dependências novas
 - Nenhuma (`SEG-07`, `ARQ-04`).

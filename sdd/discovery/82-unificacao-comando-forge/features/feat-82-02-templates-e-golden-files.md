@@ -21,9 +21,9 @@ Novos projetos inicializados pelo Forge-SDD geram arquivos de onboarding e autom
 
 | Procurei | Onde | Achei | Decisão | Justificativa |
 |---|---|---|---|---|
-| Template LEIA-ME | `internal/scaffold/templates/.forge/LEIA-ME.md.tmpl` | Instruções `forge-sdd up`, etc. | Modificar | Padronizar para `forge up`, `forge status`, etc. |
-| Scripts de up | `internal/scaffold/templates/` | Comandos `forge-sdd` | Modificar | Padronizar para `forge`. |
-| Golden Files | `internal/scaffold/testdata/golden/` | Snapshots esperados dos templates | Atualizar | Sincronizar com os novos templates atualizados. |
+| Template LEIA-ME | `internal/scaffold/templates/.forge/LEIA-ME.md.tmpl` | Instruções `forge-sdd up`, etc. | estender | Padronizar para `forge up`, `forge status`, etc. |
+| Scripts de up | `internal/scaffold/templates/` | Comandos `forge-sdd` | estender | Padronizar para `forge`. |
+| Golden Files | `internal/scaffold/testdata/golden/` | Snapshots esperados dos templates | estender | Sincronizar com os novos templates atualizados. |
 
 ## Dependências novas
 - Nenhuma (`SEG-07`, `ARQ-04`).

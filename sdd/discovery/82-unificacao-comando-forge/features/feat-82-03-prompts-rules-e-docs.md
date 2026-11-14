@@ -21,11 +21,11 @@ Para que o ecossistema do Forge-SDD seja 100% coerente, os arquivos de contexto 
 
 | Procurei | Onde | Achei | Decisão | Justificativa |
 |---|---|---|---|---|
-| Contexto Gemini | `GEMINI.md` | Comandos `forge-sdd brief`, etc. | Modificar | Padronizar para `forge brief`, `forge status`, etc. |
-| Contexto Claude | `CLAUDE.md` | Comandos `forge-sdd` | Modificar | Padronizar para `forge`. |
-| Documentação CLI | `docs/comandos.md` | Lista de comandos `forge-sdd` | Modificar | Padronizar para `forge`. |
-| Regras dos agentes | `.agents/rules/` | Referências a `forge-sdd` | Modificar | Padronizar para `forge`. |
-| Skills operacionais | `.agents/skills/` | Comandos de apoio | Modificar | Padronizar para `forge`. |
+| Contexto Gemini | `GEMINI.md` | Comandos `forge-sdd brief`, etc. | estender | Padronizar para `forge brief`, `forge status`, etc. |
+| Contexto Claude | `CLAUDE.md` | Comandos `forge-sdd` | estender | Padronizar para `forge`. |
+| Documentação CLI | `docs/comandos.md` | Lista de comandos `forge-sdd` | estender | Padronizar para `forge`. |
+| Regras dos agentes | `.agents/rules/` | Referências a `forge-sdd` | estender | Padronizar para `forge`. |
+| Skills operacionais | `.agents/skills/` | Comandos de apoio | estender | Padronizar para `forge`. |
 
 ## Dependências novas
 - Nenhuma (`SEG-07`, `ARQ-04`).
