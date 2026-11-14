@@ -168,9 +168,9 @@ func (c ForgeConfig) Profile(cli string) (CLIProfile, bool) {
 	}
 	if len(p.InteractiveArgs) == 0 {
 		p.InteractiveArgs = defaultProfiles()[cli].InteractiveArgs
-	}
-	if p.ResetCommand == "" {
-		p.ResetCommand = defaultProfiles()[cli].ResetCommand
+		if p.ResetCommand == "" {
+			p.ResetCommand = defaultProfiles()[cli].ResetCommand
+		}
 	}
 	return p, true
 }

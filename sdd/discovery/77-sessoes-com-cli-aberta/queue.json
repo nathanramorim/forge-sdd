@@ -2,7 +2,7 @@
   "feature_id": "feat-77",
   "branch": "feat/77-sessoes-com-cli-aberta",
   "spec_status": "reviewed",
-  "updated_at": "2026-11-14T08:57:38Z",
+  "updated_at": "2026-11-14T09:14:12Z",
   "items": [
     {
       "task_id": "77-01",
@@ -46,7 +46,7 @@
       "task_id": "77-03",
       "title": "feat-77-03 — Despachante de entrega",
       "spec_path": "sdd/discovery/77-sessoes-com-cli-aberta/features/feat-77-03-despachante-de-entrega.md",
-      "status": "queued",
+      "status": "approved",
       "rules": [
         "SEG-01",
         "SEG-05",
@@ -56,7 +56,12 @@
         "TST-04"
       ],
       "skills_used": [],
-      "attempts": 0
+      "attempts": 1,
+      "governance_verdict": {
+        "veredito": "conforme",
+        "achados": [],
+        "resumo": "Despachante de entrega worker --deliver implementado com colagem por buffer, deteccao de ocioso, conclusao por estado e reset de contexto conforme spec"
+      }
     },
     {
       "task_id": "77-04",

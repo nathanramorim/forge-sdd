@@ -20,6 +20,7 @@ func resetWorkerFlags() {
 	_ = workerCmd.Flags().Set("once", "false")
 	_ = workerCmd.Flags().Set("name", "")
 	_ = workerCmd.Flags().Set("cli", "")
+	_ = workerCmd.Flags().Set("deliver", "")
 	_ = workerCmd.Flags().Set("raw", "false")
 	for _, f := range []string{"cli", "discovery", "builder", "reviewer", "terminal"} {
 		_ = upCmd.Flags().Set(f, "")
