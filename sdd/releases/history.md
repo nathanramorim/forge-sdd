@@ -4,6 +4,19 @@ Este arquivo registra o histórico de entregas de produto deste projeto.
 
 ## Entregas
 
+### Versão 4.4.0 — Sessões com a CLI Aberta (Builder e Reviewer ao Vivo) (Beta)
+
+Compatível com a 4.3.0-beta (Discovery 77, features `77-01` a `77-05`). Sem alteração em `forge.json`, o comportamento padrão permanece `headless`.
+
+*   **Modo `live` de sessão (`session_mode: live`):** em vez de inicializar um novo processo da CLI a cada job, o Builder e o Reviewer mantêm seus terminais interativos abertos nos painéis do tmux, eliminando a sobrecarga de boot e permitindo acompanhar o raciocínio do agente ao vivo na tela.
+*   **Despachante de entrega ao vivo (`worker --deliver <target>`):** executado em janela oculta de controle (`forge-ctl`), entrega o prompt ao painel alvo via buffers raw do tmux (`tmux load-buffer` + `paste-buffer -p` + `Enter`), garantindo integridade de aspas, quebras de linha e caracteres especiais.
+*   **Limpeza de contexto automática (`context: clear`):** envia o comando de reset do perfil (`/clear` para Claude, Gemini, Copilot e Agy; `/new` para Codex) via buffer entre jobs e aguarda a estabilização do painel antes da próxima tarefa. Suporta também `context: continuous` para manter o histórico de raciocínio.
+*   **Conclusão por estado compartilhado:** Builder conclui quando registra o PR no barramento (`UpdatePR` / `forge-sdd pipeline pr-opened`), enfileirando a revisão; Reviewer conclui quando aplica o veredito via `bus review` (`ApplyVerdict`).
+*   **Detecção de falhas lidas da tela:** inspeciona o terminal para identificar limites de cota (`DetectUsageLimit` → requeue e pausa), agente indisponível (`DetectAgentUnavailable` → alerta de login/tier no inbox) ou painel fechado inesperadamente.
+*   **Contingência suave:** quando configurado em `live` mas sem tmux ou em terminal nativo, executa fallback transparente para `headless` com aviso no terminal.
+
+Ver `sdd/spec/adr/adr-0008-sessoes-com-cli-aberta-no-tmux.md`.
+
 ### Versão 4.3.0 — Contexto do Projeto na Discovery, Briefing e Contingência de Terminal (Beta)
 
 Compatível com a 4.2.0-beta (Discovery 75, features `75-01` a `75-06`).

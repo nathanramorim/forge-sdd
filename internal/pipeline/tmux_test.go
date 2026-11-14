@@ -88,8 +88,8 @@ func TestTmuxLivePlan(t *testing.T) {
 	}
 	require.True(t, foundNewWin, "deve criar janela forge-ctl")
 	require.Len(t, ctlCmds, 2, "deve ter despachante do builder e do reviewer")
-	assert.Contains(t, ctlCmds[0], fmt.Sprintf("worker --role builder --name forge-builder --cli codex --deliver %s.1", win))
-	assert.Contains(t, ctlCmds[1], fmt.Sprintf("worker --role reviewer --name forge-reviewer --cli gemini --deliver %s.2", win))
+	assert.Contains(t, ctlCmds[0], fmt.Sprintf("worker --role builder --name forge-builder --cli codex --deliver %s", shQuote(win+".1")))
+	assert.Contains(t, ctlCmds[1], fmt.Sprintf("worker --role reviewer --name forge-reviewer --cli gemini --deliver %s", shQuote(win+".2")))
 
 	// Modo headless permanece idêntico
 	cfgHeadless := config.DefaultForgeConfig()

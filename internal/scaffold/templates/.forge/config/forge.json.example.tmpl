@@ -2,6 +2,12 @@
   "cli": "claude",
   "permissions": "project",
   "terminal": "auto",
+  "session_mode": "headless",
+  "context": "clear",
+  "live": {
+    "startup_wait_seconds": 8,
+    "ready_quiet_seconds": 3
+  },
   "allow_commands": [
     "git",
     "gh",
@@ -19,7 +25,8 @@
         "--agent",
         "{agent}",
         "-i"
-      ]
+      ],
+      "reset_command": "/clear"
     },
     "claude": {
       "command": "claude",
@@ -40,7 +47,8 @@
         "{name}",
         "--agent",
         "{agent}"
-      ]
+      ],
+      "reset_command": "/clear"
     },
     "codex": {
       "command": "codex",
@@ -52,7 +60,8 @@
       ],
       "interactive_args": [
         "{prompt}"
-      ]
+      ],
+      "reset_command": "/new"
     },
     "copilot": {
       "command": "copilot",
@@ -69,7 +78,8 @@
         "{prompt}",
         "-n",
         "{name}"
-      ]
+      ],
+      "reset_command": "/clear"
     },
     "gemini": {
       "command": "agy",
@@ -81,7 +91,8 @@
       "interactive_args": [
         "-i",
         "{prompt}"
-      ]
+      ],
+      "reset_command": "/clear"
     }
   },
   "pm_mcp": {

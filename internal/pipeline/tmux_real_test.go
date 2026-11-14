@@ -1,6 +1,7 @@
 package pipeline
 
 import (
+	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -33,7 +34,12 @@ func (r isolatedTmux) args(argv []string) []string {
 
 func (r isolatedTmux) Run(argv []string) error {
 	a := r.args(argv)
-	return exec.Command(a[0], a[1:]...).Run()
+	cmd := exec.Command(a[0], a[1:]...)
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("%s: %s (%w)", strings.Join(argv, " "), strings.TrimSpace(string(out)), err)
+	}
+	return nil
 }
 
 func (r isolatedTmux) Attach([]string) error { return nil } // sem terminal: não anexa
@@ -156,4 +162,41 @@ func TestTmuxReal_FalhaNoMeioLimpaSoASessaoCriada(t *testing.T) {
 	require.Error(t, err)
 	assert.Error(t, r.Run([]string{"tmux", "has-session", "-t", "=" + plan.Session}), "a sessão pela metade foi removida")
 	assert.NoError(t, r.Run([]string{"tmux", "has-session", "-t", "=" + other}), "a sessão alheia com o prefixo continua viva")
+}
+
+func TestTmuxReal_LivePlanCriaJanelaForgeEControle(t *testing.T) {
+	r := realTmux(t, "")
+	dir := t.TempDir()
+	cfg := config.DefaultForgeConfig()
+	cfg.SessionMode = config.SessionModeLive
+
+	fakeCLI := filepath.Join(t.TempDir(), "fake-cli")
+	require.NoError(t, os.WriteFile(fakeCLI, []byte("#!/bin/sh\nexec sleep 300\n"), 0o755))
+	cfg.CLIProfiles[config.CLIClaude] = config.CLIProfile{Command: fakeCLI, Args: []string{"1"}, InteractiveArgs: []string{}}
+
+	bin := filepath.Join(t.TempDir(), "fake-forge")
+	require.NoError(t, os.WriteFile(bin, []byte("#!/bin/sh\nexec sleep 300\n"), 0o755))
+	env := lenv("linux", map[string]bool{"tmux": true}, nil)
+	env.Dir = dir
+	env.Bin = bin
+
+	plan, err := BuildTmuxPlan(env, cfg, false)
+	require.NoError(t, err)
+
+	created, err := LaunchTmux(plan, r)
+	require.NoError(t, err)
+	assert.True(t, created)
+
+	// Janela principal 'forge' tem 3 painéis
+	checkLayout(t, panesOf(t, r, plan.Session))
+
+	// Confere se as janelas 'forge' e 'forge-ctl' foram criadas
+	rawWins := r.out(t, "list-windows", "-t", "="+plan.Session, "-F", "#{window_name}")
+	wins := strings.Split(rawWins, "\n")
+	assert.Contains(t, wins, "forge")
+	assert.Contains(t, wins, "forge-ctl")
+
+	// Janela forge-ctl tem 2 painéis (despachantes builder e reviewer)
+	ctlPanes := r.out(t, "list-panes", "-t", "="+plan.Session+":forge-ctl", "-F", "#{pane_index}")
+	assert.Len(t, strings.Split(ctlPanes, "\n"), 2)
 }

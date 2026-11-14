@@ -2,12 +2,12 @@
 
 ## Status
 ```
-FLX-01 aprovado; 77-01..77-05 fatiadas e enfileiradas.
-Branch feat/77-sessoes-com-cli-aberta, worktree ../forge-sdd-77, sincronizada com feat/75.
+77-01 a 77-04 concluidas e aprovadas. 77-05 (docs, ADR-0008, E2E) em finalizacao.
+Zero violacoes de portao.
 ```
 
 ## Proximo passo
-Builder (`proxima-feature` ou pipeline dispatch) na ordem: 77-01, 77-02, 77-03, 77-04, 77-05. Camada B por task, so sobre o diff.
+Concluir 77-05, aprovar Camada B, rodar gate e abrir PR para feat/75.
 
 ## A confirmar
-Comando de limpar contexto de agy, copilot e codex; deteccao de painel ocioso em cada CLI.
+Validacao em producao dos comandos /clear e /new nas CLIs de terceiros.

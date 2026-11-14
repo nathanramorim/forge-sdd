@@ -94,9 +94,19 @@ As linhas vêm dos eventos do agente (Claude, Gemini e Codex) e, para qualquer a
 
 Você decide e aprova o PR. O pipeline nunca mescla nada.
 
+## Modo Live e Despachante de Entrega
+
+Por padrão, os workers operam em modo `headless` (executam uma nova chamada de comando da CLI a cada job). Com `session_mode: live` e `tmux`:
+
+*   **CLIs Abertas nos Painéis:** Builder e Reviewer mantêm suas sessões interativas abertas continuamente na janela principal do tmux, sem pagar o custo de boot a cada job.
+*   **Despachante Oculto (`forge-ctl`):** uma janela de controle oculta entrega os prompts aos painéis usando buffers raw do tmux (`load-buffer` + `paste-buffer -p` + `Enter`), garantindo integridade total de aspas e quebras de linha.
+*   **Limpeza de Contexto (`context: clear`):** envia o comando de reset do perfil (`/clear` ou `/new`) entre jobs e espera a ociosidade do painel antes do próximo prompt. Para manter o histórico de raciocínio, use `context: continuous`.
+*   **Falhas Lidas da Tela:** o despachante inspeciona a tela em tempo real para detectar limites de cota (`DetectUsageLimit` → pausa automática) ou indisponibilidade de conta/tier (`DetectAgentUnavailable` → aviso no inbox).
+*   **Queda Suave:** se `live` estiver ativado sem tmux ou em terminal nativo, o pipeline recai suavemente para `headless` com um aviso no terminal.
+
 ## Configuração
 
-- `.forge/config/forge.json`: agente de cada sessão (`sessions`), nível de permissão, tarefas em paralelo, worktrees, tentativas de rework, status do card. Copie de `forge.json.example` se quiser recomeçar.
+- `.forge/config/forge.json`: agente de cada sessão (`sessions`), modo de sessão (`session_mode`: `live` ou `headless`), limpeza de contexto (`context`: `clear` ou `continuous`), nível de permissão, tarefas em paralelo, worktrees, tentativas de rework, status do card. Copie de `forge.json.example` se quiser recomeçar.
 - `.forge/config/notifications.json`: canais (inbox sempre ligado; toast, e-mail, webhook e comentário no card opcionais). URLs e senhas **só por variável de ambiente** (`url_env`, `password_env`), nunca no arquivo.
 - **Permissões do agente:** escolha o nível `project` ou `full` (veja acima, no menu ou em `permissions` de `forge.json`); só edite `cli_profiles` para ajustes finos.
 - Sem `forge.json`, o `/implementar` volta ao fluxo de sessão única da 4.0.0-beta.

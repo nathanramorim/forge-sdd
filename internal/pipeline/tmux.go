@@ -115,9 +115,9 @@ func BuildTmuxPlan(env LaunchEnv, cfg config.ForgeConfig, insideTmux bool) (*Tmu
 		revInner := fmt.Sprintf(`cd %s && printf '\033]0;%s\007' && %s`, shQuote(env.Dir), SessionReviewer, revCLI)
 
 		winCtl := exact + ":forge-ctl"
-		bldCtlCmd := fmt.Sprintf("%s worker --role builder --name %s --cli %s --deliver %s.1", shQuote(env.Bin), SessionBuilder, cfg.CLIFor(config.SessionRoleBuilder), win)
+		bldCtlCmd := fmt.Sprintf("%s worker --role builder --name %s --cli %s --deliver %s", shQuote(env.Bin), SessionBuilder, cfg.CLIFor(config.SessionRoleBuilder), shQuote(win+".1"))
 		bldCtlInner := fmt.Sprintf(`cd %s && printf '\033]0;%s\007' && %s`, shQuote(env.Dir), "forge-builder-ctl", bldCtlCmd)
-		revCtlCmd := fmt.Sprintf("%s worker --role reviewer --name %s --cli %s --deliver %s.2", shQuote(env.Bin), SessionReviewer, cfg.CLIFor(config.SessionRoleReviewer), win)
+		revCtlCmd := fmt.Sprintf("%s worker --role reviewer --name %s --cli %s --deliver %s", shQuote(env.Bin), SessionReviewer, cfg.CLIFor(config.SessionRoleReviewer), shQuote(win+".2"))
 		revCtlInner := fmt.Sprintf(`cd %s && printf '\033]0;%s\007' && %s`, shQuote(env.Dir), "forge-reviewer-ctl", revCtlCmd)
 
 		plan.Create = [][]string{
