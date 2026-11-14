@@ -2,7 +2,7 @@
   "feature_id": "feat-75",
   "branch": "feat/75-contexto-do-projeto-e-contingencia-tmux",
   "spec_status": "reviewed",
-  "updated_at": "2026-11-14T05:43:02Z",
+  "updated_at": "2026-11-14T05:50:17Z",
   "items": [
     {
       "task_id": "75-01",
@@ -28,7 +28,7 @@
       "task_id": "75-04",
       "title": "feat-75-04 — Instalar o tmux e cair com graça",
       "spec_path": "sdd/discovery/75-contexto-do-projeto-e-contingencia-tmux/features/feat-75-04-instalar-o-tmux-e-cair-com-graca.md",
-      "status": "queued",
+      "status": "approved",
       "rules": [
         "SEG-01",
         "SEG-03",
@@ -37,7 +37,12 @@
         "TST-04"
       ],
       "skills_used": [],
-      "attempts": 0
+      "attempts": 1,
+      "governance_verdict": {
+        "veredito": "conforme",
+        "achados": [],
+        "resumo": "Instalação do tmux e contingência implementadas conforme spec"
+      }
     },
     {
       "task_id": "75-02",

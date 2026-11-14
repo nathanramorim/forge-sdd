@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
 
 	"github.com/forge-sdd/cli/internal/config"
@@ -116,6 +117,21 @@ func Preflight(dir string, cfg config.ForgeConfig, env PreflightEnv) []Item {
 						Action:  "forge-sdd update --agent claude"})
 				}
 			}
+		}
+	}
+
+	if cfg.Terminal != config.TerminalNative && runtime.GOOS != "windows" {
+		if _, err := env.LookPath("tmux"); err != nil {
+			ienv := InstallEnv{GOOS: runtime.GOOS, LookPath: env.LookPath}
+			action := "instale o tmux ou use --terminal native"
+			if argv, _, ok := InstallPlan(ienv); ok {
+				action = "instale: " + InstallCommandLine(argv) + " (ou use --terminal native)"
+			}
+			items = append(items, Item{
+				Level:   LevelWarn,
+				Message: "tmux ausente: as sessões abrirão em janelas soltas",
+				Action:  action,
+			})
 		}
 	}
 	return items
