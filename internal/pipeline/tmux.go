@@ -131,8 +131,8 @@ func BuildTmuxPlan(env LaunchEnv, cfg config.ForgeConfig, insideTmux bool) (*Tmu
 
 		plan.Create = [][]string{
 			{"tmux", "new-session", "-d", "-s", name, "-n", winName, "-c", env.Dir, discInner},
-			{"tmux", "set-option", "-t", exact, "status-left", fmt.Sprintf("#[fg=colour16,bg=colour48,bold] 📦 %s #[default] ", proj)},
-			{"tmux", "set-option", "-t", exact, "status-left-length", "60"},
+			{"tmux", "set-option", "-t", name, "status-left", fmt.Sprintf("#[fg=colour16,bg=colour48,bold] 📦 %s #[default] ", proj)},
+			{"tmux", "set-option", "-t", name, "status-left-length", "60"},
 			{"tmux", "set-window-option", "-t", win, "pane-base-index", "0"},
 			{"tmux", "split-window", "-h", "-t", win, "-c", env.Dir, bldInner},
 			{"tmux", "split-window", "-v", "-t", win + ".1", "-c", env.Dir, revInner},
@@ -155,8 +155,8 @@ func BuildTmuxPlan(env LaunchEnv, cfg config.ForgeConfig, insideTmux bool) (*Tmu
 	} else {
 		plan.Create = [][]string{
 			{"tmux", "new-session", "-d", "-s", name, "-n", winName, "-c", env.Dir, sessions[0].Inner},
-			{"tmux", "set-option", "-t", exact, "status-left", fmt.Sprintf("#[fg=colour16,bg=colour48,bold] 📦 %s #[default] ", proj)},
-			{"tmux", "set-option", "-t", exact, "status-left-length", "60"},
+			{"tmux", "set-option", "-t", name, "status-left", fmt.Sprintf("#[fg=colour16,bg=colour48,bold] 📦 %s #[default] ", proj)},
+			{"tmux", "set-option", "-t", name, "status-left-length", "60"},
 			// Quem usa pane-base-index 1 no tmux.conf teria painéis 1, 2 e 3: fixa 0 antes de endereçá-los.
 			{"tmux", "set-window-option", "-t", win, "pane-base-index", "0"},
 			{"tmux", "split-window", "-h", "-t", win, "-c", env.Dir, sessions[1].Inner},
