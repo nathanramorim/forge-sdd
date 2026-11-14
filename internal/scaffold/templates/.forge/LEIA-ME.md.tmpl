@@ -45,7 +45,7 @@ forge-sdd worker --role reviewer
 
 ## O que cada painel mostra
 
-Com `tmux` instalado, `forge` e `forge-sdd up` abrem **uma tela com três painéis**, cada um com o nome da sessão no topo: `forge-discovery` (grande, à esquerda), `forge-builder` e `forge-reviewer` (empilhados à direita). Sem tmux, abrem três janelas do terminal do sistema. Para escolher: `forge-sdd up --terminal tmux|native|auto` ou `terminal` em `forge.json` (padrão `auto`). Dentro do tmux: `Ctrl+b` e as setas trocam de painel, `Ctrl+b d` solta a tela sem encerrar nada, e `tmux attach -t forge-<projeto>` reconecta.
+Com `tmux` instalado, `forge` e `forge-sdd up` abrem **uma tela com três painéis**, cada um com o nome da sessão no topo: `forge-discovery` (grande, à esquerda), `forge-builder` e `forge-reviewer` (empilhados à direita). Sem tmux, abrem três janelas do terminal do sistema. Para escolher: `forge-sdd up --terminal tmux|native|auto` ou `terminal` em `forge.json` (padrão `auto`). Dentro do tmux: `Ctrl+b` e as setas trocam de painel, `Ctrl+b d` solta a tela sem encerrar nada, e `tmux ls` mostra o nome da sessão (`forge-<projeto>-<6 hex do caminho>`) para reconectar com `tmux attach -t =<nome>`; rodar `forge` ou `forge-sdd up` de novo também reconecta.
 
 Nos painéis do Builder e do Reviewer o worker mostra o que o agente está fazendo, em linhas curtas (a saída completa fica em `.forge/runtime/logs/`):
 

@@ -35,7 +35,7 @@ Fecha a entrega: o guia e o README refletem o tmux, a visão limpa, a pausa por 
 2. ADR 0006 com D-1 a D-7, a guarda de modo, o que está confirmado e a confirmar (formatos de evento e mensagens de limite de uso por CLI) e o desvio, se houver.
 3. `concepts.md` e a entrada `### Versão 4.2.0` das release notes (honesta: o que não foi executado de ponta a ponta continua dito; nada promete o que não está no código).
 4. Versão permanece `4.2.0-beta`; goldens atualizados.
-5. E2E: o worker com agente falso emite eventos de claude, gemini e codex e mostra as linhas esperadas; e um caso de limite de uso em que o job volta à fila, pausa e retoma.
+5. E2E: o Builder com o Codex bate o limite de uso (o job volta à fila, pausa e retoma) e o Reviewer com o Gemini aprova, conferindo as linhas de cada terminal e o log bruto. Os eventos do Claude ficam cobertos por `TestLiveView_EventosDoClaude` e `TestWorker_LimiteDeUso` (mensagem real do Claude), não pelo E2E.
 
 ## Critérios de Aceitação Executáveis
 ```bash
