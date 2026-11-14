@@ -70,10 +70,18 @@ não tiverem escolha própria. --dry-run só imprime os comandos.`,
 				fmt.Fprintln(out, strings.Join(quoteArgs(step), " "))
 			}
 			if dry {
-				fmt.Fprintf(out, "[DRY-RUN] Nada foi aberto (sessão tmux %s).\n", plan.Session)
+				mode := cfg.SessionMode
+				if mode == "" {
+					mode = config.SessionModeHeadless
+				}
+				fmt.Fprintf(out, "[DRY-RUN] Nada foi aberto (sessão tmux %s, modo %s).\n", plan.Session, mode)
 				return nil
 			}
 			nativeFallback := func() error {
+				if cfg.SessionMode == config.SessionModeLive {
+					fmt.Fprintln(out, "modo live requer tmux; caindo para headless nas janelas do sistema")
+					cfg.SessionMode = config.SessionModeHeadless
+				}
 				natPlan, err := pipeline.LaunchPlanFor(env, cfg)
 				if err != nil {
 					return err
@@ -86,6 +94,10 @@ não tiverem escolha própria. --dry-run só imprime os comandos.`,
 			}
 			return err
 		}
+		if cfg.SessionMode == config.SessionModeLive {
+			fmt.Fprintln(out, "modo live requer tmux; caindo para headless nas janelas do sistema")
+			cfg.SessionMode = config.SessionModeHeadless
+		}
 		plan, err := pipeline.LaunchPlanFor(env, cfg)
 		if err != nil {
 			return err
@@ -94,7 +106,7 @@ não tiverem escolha própria. --dry-run só imprime os comandos.`,
 			fmt.Fprintf(out, "%-16s %s\n", c.Title, strings.Join(quoteArgs(c.Argv), " "))
 		}
 		if dry {
-			fmt.Fprintln(out, "[DRY-RUN] Nenhuma sessão foi aberta.")
+			fmt.Fprintln(out, "[DRY-RUN] Nenhuma sessão foi aberta (modo headless).")
 			return nil
 		}
 		return pipeline.Launch(plan)

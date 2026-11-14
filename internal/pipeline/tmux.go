@@ -96,20 +96,67 @@ func BuildTmuxPlan(env LaunchEnv, cfg config.ForgeConfig, insideTmux bool) (*Tmu
 	win := exact + ":forge"
 	titles := []string{SessionDiscovery, SessionBuilder, SessionReviewer}
 	plan := &TmuxPlan{Session: name}
-	plan.Create = [][]string{
-		{"tmux", "new-session", "-d", "-s", name, "-n", "forge", "-c", env.Dir, sessions[0].Inner},
-		// Quem usa pane-base-index 1 no tmux.conf teria painéis 1, 2 e 3: fixa 0 antes de endereçá-los.
-		{"tmux", "set-window-option", "-t", win, "pane-base-index", "0"},
-		{"tmux", "split-window", "-h", "-t", win, "-c", env.Dir, sessions[1].Inner},
-		{"tmux", "split-window", "-v", "-t", win + ".1", "-c", env.Dir, sessions[2].Inner},
-		{"tmux", "set-window-option", "-t", win, "pane-border-status", "top"},
-		{"tmux", "set-window-option", "-t", win, "pane-border-format", " #{pane_title} "},
-		{"tmux", "set-window-option", "-t", win, "automatic-rename", "off"},
+
+	if cfg.SessionMode == config.SessionModeLive {
+		discCLI, err := interactiveLineForRole(false, cfg, config.SessionRoleDiscovery, SessionDiscovery, "lider")
+		if err != nil {
+			return nil, err
+		}
+		builderCLI, err := interactiveLineForRole(false, cfg, config.SessionRoleBuilder, SessionBuilder, "builder")
+		if err != nil {
+			return nil, err
+		}
+		revCLI, err := interactiveLineForRole(false, cfg, config.SessionRoleReviewer, SessionReviewer, "reviewer")
+		if err != nil {
+			return nil, err
+		}
+		discInner := fmt.Sprintf(`cd %s && printf '\033]0;%s\007' && %s`, shQuote(env.Dir), SessionDiscovery, discCLI)
+		bldInner := fmt.Sprintf(`cd %s && printf '\033]0;%s\007' && %s`, shQuote(env.Dir), SessionBuilder, builderCLI)
+		revInner := fmt.Sprintf(`cd %s && printf '\033]0;%s\007' && %s`, shQuote(env.Dir), SessionReviewer, revCLI)
+
+		winCtl := exact + ":forge-ctl"
+		bldCtlCmd := fmt.Sprintf("%s worker --role builder --name %s --cli %s --deliver %s.1", shQuote(env.Bin), SessionBuilder, cfg.CLIFor(config.SessionRoleBuilder), win)
+		bldCtlInner := fmt.Sprintf(`cd %s && printf '\033]0;%s\007' && %s`, shQuote(env.Dir), "forge-builder-ctl", bldCtlCmd)
+		revCtlCmd := fmt.Sprintf("%s worker --role reviewer --name %s --cli %s --deliver %s.2", shQuote(env.Bin), SessionReviewer, cfg.CLIFor(config.SessionRoleReviewer), win)
+		revCtlInner := fmt.Sprintf(`cd %s && printf '\033]0;%s\007' && %s`, shQuote(env.Dir), "forge-reviewer-ctl", revCtlCmd)
+
+		plan.Create = [][]string{
+			{"tmux", "new-session", "-d", "-s", name, "-n", "forge", "-c", env.Dir, discInner},
+			{"tmux", "set-window-option", "-t", win, "pane-base-index", "0"},
+			{"tmux", "split-window", "-h", "-t", win, "-c", env.Dir, bldInner},
+			{"tmux", "split-window", "-v", "-t", win + ".1", "-c", env.Dir, revInner},
+			{"tmux", "set-window-option", "-t", win, "pane-border-status", "top"},
+			{"tmux", "set-window-option", "-t", win, "pane-border-format", " #{pane_title} "},
+			{"tmux", "set-window-option", "-t", win, "automatic-rename", "off"},
+			{"tmux", "select-pane", "-t", win + ".0", "-T", SessionDiscovery},
+			{"tmux", "select-pane", "-t", win + ".1", "-T", SessionBuilder},
+			{"tmux", "select-pane", "-t", win + ".2", "-T", SessionReviewer},
+			{"tmux", "select-pane", "-t", win + ".0"},
+			{"tmux", "new-window", "-d", "-n", "forge-ctl", "-t", exact, "-c", env.Dir, bldCtlInner},
+			{"tmux", "set-window-option", "-t", winCtl, "pane-base-index", "0"},
+			{"tmux", "split-window", "-h", "-t", winCtl, "-c", env.Dir, revCtlInner},
+			{"tmux", "set-window-option", "-t", winCtl, "pane-border-status", "top"},
+			{"tmux", "set-window-option", "-t", winCtl, "pane-border-format", " #{pane_title} "},
+			{"tmux", "set-window-option", "-t", winCtl, "automatic-rename", "off"},
+			{"tmux", "select-pane", "-t", winCtl + ".0", "-T", "forge-builder-ctl"},
+			{"tmux", "select-pane", "-t", winCtl + ".1", "-T", "forge-reviewer-ctl"},
+		}
+	} else {
+		plan.Create = [][]string{
+			{"tmux", "new-session", "-d", "-s", name, "-n", "forge", "-c", env.Dir, sessions[0].Inner},
+			// Quem usa pane-base-index 1 no tmux.conf teria painéis 1, 2 e 3: fixa 0 antes de endereçá-los.
+			{"tmux", "set-window-option", "-t", win, "pane-base-index", "0"},
+			{"tmux", "split-window", "-h", "-t", win, "-c", env.Dir, sessions[1].Inner},
+			{"tmux", "split-window", "-v", "-t", win + ".1", "-c", env.Dir, sessions[2].Inner},
+			{"tmux", "set-window-option", "-t", win, "pane-border-status", "top"},
+			{"tmux", "set-window-option", "-t", win, "pane-border-format", " #{pane_title} "},
+			{"tmux", "set-window-option", "-t", win, "automatic-rename", "off"},
+		}
+		for i, t := range titles {
+			plan.Create = append(plan.Create, []string{"tmux", "select-pane", "-t", fmt.Sprintf("%s.%d", win, i), "-T", t})
+		}
+		plan.Create = append(plan.Create, []string{"tmux", "select-pane", "-t", win + ".0"})
 	}
-	for i, t := range titles {
-		plan.Create = append(plan.Create, []string{"tmux", "select-pane", "-t", fmt.Sprintf("%s.%d", win, i), "-T", t})
-	}
-	plan.Create = append(plan.Create, []string{"tmux", "select-pane", "-t", win + ".0"})
 	if insideTmux {
 		plan.Attach = []string{"tmux", "switch-client", "-t", exact}
 	} else {

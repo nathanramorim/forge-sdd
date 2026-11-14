@@ -98,3 +98,30 @@ func TestUp_Terminal(t *testing.T) {
 		assert.Contains(t, out, "[DRY-RUN] Nada foi aberto (sessão tmux forge-")
 	}
 }
+
+func TestLiveFallback(t *testing.T) {
+	// 1. live com terminal: native reverte para headless e avisa
+	dir := pipelineDir(t, func(c *config.ForgeConfig) {
+		c.SessionMode = config.SessionModeLive
+		c.Terminal = config.TerminalNative
+	})
+	resetWorkerFlags()
+	out, err := runRoot(t, "up", "--dir", dir, "--dry-run")
+	require.NoError(t, err)
+	assert.Contains(t, out, "modo live requer tmux; caindo para headless nas janelas do sistema")
+	assert.Contains(t, out, "[DRY-RUN] Nenhuma sessão foi aberta (modo headless).")
+	assert.Contains(t, out, "worker --role builder --name forge-builder")
+
+	// 2. dry-run em tmux com live mostra o modo
+	if _, lookErr := exec.LookPath("tmux"); lookErr == nil {
+		dirTmux := pipelineDir(t, func(c *config.ForgeConfig) {
+			c.SessionMode = config.SessionModeLive
+			c.Terminal = config.TerminalTmux
+		})
+		resetWorkerFlags()
+		outTmux, errTmux := runRoot(t, "up", "--dir", dirTmux, "--dry-run")
+		require.NoError(t, errTmux)
+		assert.Contains(t, outTmux, "modo live")
+		assert.Contains(t, outTmux, "forge-ctl")
+	}
+}
