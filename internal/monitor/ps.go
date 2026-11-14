@@ -10,7 +10,7 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/forge-sdd/cli/internal/pipeline"
+	"github.com/forge-sdd/cli/internal/layout"
 )
 
 // ProcessInfo contém os dados de telemetria de um processo ligado ao projeto.
@@ -62,7 +62,7 @@ func InspectProjectProcesses(dir string, runner CommandRunner) (*ProjectProcessR
 		absDir = dir
 	}
 	projectName := filepath.Base(absDir)
-	sessionName := pipeline.TmuxSessionName(absDir)
+	sessionName := layout.TmuxSessionName(absDir)
 
 	report := &ProjectProcessReport{
 		Project:   projectName,

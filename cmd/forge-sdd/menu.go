@@ -121,6 +121,7 @@ Sem terminal interativo o menu não abre. Comandos mais usados:
 
 const (
 	valUp      = "up"
+	valLive    = "live"
 	valStatus  = "status"
 	valQueue   = "queue"
 	valDiag    = "diag"
@@ -163,6 +164,7 @@ func runMenu(env *menuEnv) error {
 
 		opts = append(opts,
 			menuOption{Label: "Iniciar esteira (up)", Value: valUp},
+			menuOption{Label: "Painel vivo da esteira (status --live)", Value: valLive},
 			menuOption{Label: "Status das iniciativas e esteira", Value: valStatus},
 			menuOption{Label: "Fila de tasks e inbox de notificações", Value: valQueue},
 			menuOption{Label: "Diagnóstico de saúde e regras (Doctor & Gate)", Value: valDiag},
@@ -189,6 +191,8 @@ func runMenu(env *menuEnv) error {
 			installed = env.installOrUpdate() == nil && config.DetectProject(env.dir)
 		case valUp:
 			env.startSessions()
+		case valLive:
+			env.act("status", "--live", "--dir", env.dir)
 		case valStatus:
 			env.act("status", "--dir", env.dir)
 		case valQueue:

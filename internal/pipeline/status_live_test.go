@@ -90,3 +90,47 @@ func TestFormatLiveStatus_ComTodasTarefasAprovadas(t *testing.T) {
 	assert.Contains(t, out, "Próximo passo: /archive ou novo /discovery")
 	assert.Contains(t, out, "(nenhum commit recente)")
 }
+
+func TestFormatRichDashboard(t *testing.T) {
+	dir := t.TempDir()
+	require.NoError(t, os.MkdirAll(filepath.Join(dir, ".git"), 0o755))
+	require.NoError(t, os.WriteFile(filepath.Join(dir, ".git", "HEAD"), []byte("ref: refs/heads/feat/80-status\n"), 0o644))
+
+	sddDir := filepath.Join(dir, "sdd", ".queue")
+	require.NoError(t, os.MkdirAll(sddDir, 0o755))
+	queueFile := filepath.Join(sddDir, "queue.json")
+	require.NoError(t, os.WriteFile(queueFile, []byte(`{"items":[{"task_id":"80-01","title":"Tarefa Concluida","status":"approved"},{"task_id":"80-02","title":"Tarefa em Andamento","status":"in_progress"}]}`), 0o644))
+
+	metricsDir := filepath.Join(dir, "sdd", ".metrics")
+	require.NoError(t, os.MkdirAll(metricsDir, 0o755))
+	require.NoError(t, os.WriteFile(filepath.Join(metricsDir, "session-1.json"), []byte(`{"agent_path":["builder"],"tokens_input":1200,"tokens_output":300}`), 0o644))
+
+	gitFn := func(d string, max int) ([]string, error) {
+		return []string{"abc1234 feat: painel vivo implementado"}, nil
+	}
+
+	out, err := FormatRichDashboard(dir, mockTmuxDeliverer{captured: "linha ativa do painel"}, gitFn, nil)
+	require.NoError(t, err)
+
+	assert.Contains(t, out, "feat/80-status")
+	assert.Contains(t, out, "PROCESSAMENTO & CONSUMO POR SESSÃO")
+	assert.Contains(t, out, "PROGRESSO DA ESTEIRA (DAG)")
+	assert.Contains(t, out, "50% (1/2 tasks)")
+	assert.Contains(t, out, "[✓] 80-01: Tarefa Concluida")
+	assert.Contains(t, out, "[▶] 80-02: Tarefa em Andamento")
+	assert.Contains(t, out, "COMMITS RECENTES NO GIT")
+	assert.Contains(t, out, "abc1234 feat: painel vivo implementado")
+}
+
+func TestRunLiveDashboard_Once(t *testing.T) {
+	dir := t.TempDir()
+	require.NoError(t, os.MkdirAll(filepath.Join(dir, ".git"), 0o755))
+	require.NoError(t, os.WriteFile(filepath.Join(dir, ".git", "HEAD"), []byte("ref: refs/heads/feat/80-status\n"), 0o644))
+
+	var buf strings.Builder
+	err := RunLiveDashboard(nil, dir, &buf, true)
+	require.NoError(t, err)
+	assert.Contains(t, buf.String(), "PROCESSAMENTO & CONSUMO POR SESSÃO")
+}
+
+
