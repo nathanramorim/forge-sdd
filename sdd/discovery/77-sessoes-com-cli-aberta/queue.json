@@ -1,0 +1,81 @@
+{
+  "feature_id": "feat-77",
+  "branch": "feat/77-sessoes-com-cli-aberta",
+  "spec_status": "reviewed",
+  "updated_at": "2026-11-14T08:30:29Z",
+  "items": [
+    {
+      "task_id": "77-01",
+      "title": "feat-77-01 — Modo de sessão e perfis",
+      "spec_path": "sdd/discovery/77-sessoes-com-cli-aberta/features/feat-77-01-modo-de-sessao-e-perfis.md",
+      "status": "queued",
+      "rules": [
+        "COD-01",
+        "COD-03",
+        "TST-04",
+        "ARQ-01"
+      ],
+      "skills_used": [],
+      "attempts": 0
+    },
+    {
+      "task_id": "77-02",
+      "title": "feat-77-02 — Painéis ao vivo no tmux",
+      "spec_path": "sdd/discovery/77-sessoes-com-cli-aberta/features/feat-77-02-paineis-ao-vivo-no-tmux.md",
+      "status": "queued",
+      "rules": [
+        "SEG-01",
+        "SEG-03",
+        "COD-03",
+        "TST-04"
+      ],
+      "skills_used": [],
+      "attempts": 0
+    },
+    {
+      "task_id": "77-03",
+      "title": "feat-77-03 — Despachante de entrega",
+      "spec_path": "sdd/discovery/77-sessoes-com-cli-aberta/features/feat-77-03-despachante-de-entrega.md",
+      "status": "queued",
+      "rules": [
+        "SEG-01",
+        "SEG-05",
+        "DUP-01",
+        "COD-01",
+        "TST-03",
+        "TST-04"
+      ],
+      "skills_used": [],
+      "attempts": 0
+    },
+    {
+      "task_id": "77-04",
+      "title": "feat-77-04 — Falhas lidas da tela",
+      "spec_path": "sdd/discovery/77-sessoes-com-cli-aberta/features/feat-77-04-falhas-lidas-da-tela.md",
+      "status": "queued",
+      "rules": [
+        "SEG-05",
+        "COD-03",
+        "TST-03",
+        "TST-04"
+      ],
+      "skills_used": [],
+      "attempts": 0
+    },
+    {
+      "task_id": "77-05",
+      "title": "feat-77-05 — Docs, ADR, E2E e release",
+      "spec_path": "sdd/discovery/77-sessoes-com-cli-aberta/features/feat-77-05-docs-adr-e2e-e-release.md",
+      "status": "queued",
+      "rules": [
+        "DUP-10",
+        "FLX-05",
+        "FLX-07",
+        "GOV-01",
+        "TST-05"
+      ],
+      "skills_used": [],
+      "attempts": 0
+    }
+  ]
+}
