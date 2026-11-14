@@ -85,32 +85,45 @@ func TestLauncher_LinuxEscolheOTerminalDisponivel(t *testing.T) {
 	assert.Contains(t, err.Error(), "nenhum terminal")
 }
 
-func TestLauncher_WindowsEWSL(t *testing.T) {
+func TestLauncherWindows(t *testing.T) {
 	win := lenv("windows", map[string]bool{"wt.exe": true}, nil)
 	win.Dir, win.Bin = `C:\Users\ana\proj`, `C:\Program Files\forge\forge-sdd.exe`
 	plan, err := LaunchPlan(win, "agy")
 	require.NoError(t, err)
-	assert.Equal(t, []string{"wt.exe", "new-tab", "--title", "forge-discovery", "cmd.exe", "/k"}, plan[0].Argv[:6])
-	assert.Contains(t, plan[0].Argv[6], "agy --agent lider -i")
-	assert.Contains(t, plan[1].Argv[6], `"C:\Program Files\forge\forge-sdd.exe" worker --role builder`)
-	assert.Contains(t, plan[1].Argv[6], `cd /d "C:\Users\ana\proj"`)
+	require.Len(t, plan, 1, "com wt.exe abre uma única chamada para os 3 painéis")
+	argv := plan[0].Argv
+	require.GreaterOrEqual(t, len(argv), 25)
+	assert.Equal(t, []string{"wt.exe", "-w", "new", "new-tab", "--title", "forge-discovery", "cmd.exe", "/k"}, argv[:8])
+	assert.Contains(t, argv[8], "agy --agent lider -i")
+	assert.Equal(t, ";", argv[9])
+	assert.Equal(t, []string{"split-pane", "-V", "--title", "forge-builder", "cmd.exe", "/k"}, argv[10:16])
+	assert.Contains(t, argv[16], `"C:\Program Files\forge\forge-sdd.exe" worker --role builder`)
+	assert.Contains(t, argv[16], `cd /d "C:\Users\ana\proj"`)
+	assert.Equal(t, ";", argv[17])
+	assert.Equal(t, []string{"split-pane", "-H", "--title", "forge-reviewer", "cmd.exe", "/k"}, argv[18:24])
+	assert.Contains(t, argv[24], `"C:\Program Files\forge\forge-sdd.exe" worker --role reviewer`)
 
-	win = lenv("windows", nil, nil)
-	win.Dir, win.Bin = `C:\p`, `C:\f\forge-sdd.exe`
-	plan, err = LaunchPlan(win, "claude")
+	// Sem wt.exe: 3 comandos com cmd.exe /c start
+	winNoWT := lenv("windows", nil, nil)
+	winNoWT.Dir, winNoWT.Bin = `C:\p`, `C:\f\forge-sdd.exe`
+	planNoWT, err := LaunchPlan(winNoWT, "claude")
 	require.NoError(t, err)
-	assert.Equal(t, []string{"cmd.exe", "/c", "start", `"forge-discovery"`, "cmd.exe", "/k"}, plan[0].Argv[:6], "sem wt.exe cai em cmd /c start")
+	require.Len(t, planNoWT, 3)
+	assert.Equal(t, []string{"cmd.exe", "/c", "start", `"forge-discovery"`, "cmd.exe", "/k"}, planNoWT[0].Argv[:6], "sem wt.exe cai em cmd /c start")
+	assert.Equal(t, []string{"cmd.exe", "/c", "start", `"forge-builder"`, "cmd.exe", "/k"}, planNoWT[1].Argv[:6])
+	assert.Equal(t, []string{"cmd.exe", "/c", "start", `"forge-reviewer"`, "cmd.exe", "/k"}, planNoWT[2].Argv[:6])
 
+	// WSL
 	wsl := lenv("linux", map[string]bool{"wt.exe": true}, map[string]string{"WSL_DISTRO_NAME": "Ubuntu-22.04"})
-	plan, err = LaunchPlan(wsl, "claude")
+	planWSL, err := LaunchPlan(wsl, "claude")
 	require.NoError(t, err)
-	assert.Equal(t, "wt.exe", plan[0].Argv[0])
-	assert.Contains(t, strings.Join(plan[0].Argv, " "), "wsl.exe -d Ubuntu-22.04 -- bash -lc")
+	assert.Equal(t, "wt.exe", planWSL[0].Argv[0])
+	assert.Contains(t, strings.Join(planWSL[0].Argv, " "), "wsl.exe -d Ubuntu-22.04 -- bash -lc")
 
 	wsl2 := lenv("linux", nil, map[string]string{"WSL_DISTRO_NAME": "Ubuntu"})
-	plan, err = LaunchPlan(wsl2, "claude")
+	planWSL2, err := LaunchPlan(wsl2, "claude")
 	require.NoError(t, err)
-	assert.Equal(t, "cmd.exe", plan[0].Argv[0])
+	assert.Equal(t, "cmd.exe", planWSL2[0].Argv[0])
 }
 
 func TestLauncher_Violacoes(t *testing.T) {
@@ -161,7 +174,11 @@ func TestSessions_AgentePorSessao(t *testing.T) {
 		assert.Contains(t, ss[2].Inner, "worker --role reviewer --name forge-reviewer --cli gemini", goos)
 		plan, err := LaunchPlanFor(env, cfg)
 		require.NoError(t, err, goos)
-		require.Len(t, plan, 3, goos)
+		if goos == "windows" {
+			require.Len(t, plan, 1, "windows com wt.exe abre uma única janela dividida em 3 painéis")
+		} else {
+			require.Len(t, plan, 3, goos)
+		}
 	}
 }
 

@@ -2,7 +2,7 @@
   "feature_id": "feat-75",
   "branch": "feat/75-contexto-do-projeto-e-contingencia-tmux",
   "spec_status": "reviewed",
-  "updated_at": "2026-11-14T05:55:29Z",
+  "updated_at": "2026-11-14T05:58:42Z",
   "items": [
     {
       "task_id": "75-01",
@@ -67,14 +67,19 @@
       "task_id": "75-05",
       "title": "feat-75-05 — Windows Terminal com painéis",
       "spec_path": "sdd/discovery/75-contexto-do-projeto-e-contingencia-tmux/features/feat-75-05-windows-terminal-com-paineis.md",
-      "status": "queued",
+      "status": "approved",
       "rules": [
         "SEG-01",
         "COD-03",
         "TST-04"
       ],
       "skills_used": [],
-      "attempts": 0
+      "attempts": 1,
+      "governance_verdict": {
+        "veredito": "conforme",
+        "achados": [],
+        "resumo": "Windows Terminal com 3 paineis implementado conforme spec"
+      }
     },
     {
       "task_id": "75-03",

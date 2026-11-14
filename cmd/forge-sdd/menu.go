@@ -484,7 +484,7 @@ func (e *menuEnv) showGuide() {
 	_ = e.p.Pause("Enter para voltar ao menu")
 }
 
-// terminalLabel diz onde as sessões vão abrir: "no tmux (3 painéis)" ou "em janelas do sistema".
+// terminalLabel diz onde as sessões vão abrir: "no tmux (3 painéis)", "em painéis do Windows Terminal" ou "em janelas do sistema".
 func (e *menuEnv) terminalLabel(cfg config.ForgeConfig) string {
 	look := e.preflightEnv.LookPath
 	if look == nil {
@@ -493,6 +493,14 @@ func (e *menuEnv) terminalLabel(cfg config.ForgeConfig) string {
 	env := pipeline.LaunchEnv{GOOS: runtime.GOOS, LookPath: look}
 	term, err := pipeline.ResolveTerminal("", cfg, env)
 	if err != nil || term == config.TerminalNative {
+		if runtime.GOOS == "windows" {
+			if _, err := look("wt.exe"); err == nil {
+				return "em painéis do Windows Terminal"
+			}
+			if _, err := look("wt"); err == nil {
+				return "em painéis do Windows Terminal"
+			}
+		}
 		return "em janelas do sistema"
 	}
 	return "no tmux (3 painéis)"

@@ -190,6 +190,22 @@ func LaunchPlanFor(env LaunchEnv, cfg config.ForgeConfig) ([]LaunchCommand, erro
 	if err != nil {
 		return nil, err
 	}
+	if env.GOOS == "windows" && (has(env, "wt.exe") || has(env, "wt")) {
+		wt := "wt.exe"
+		if !has(env, "wt.exe") && has(env, "wt") {
+			wt = "wt"
+		}
+		// Windows Terminal em janela única com 3 painéis (a confirmar em Windows real: o argv é testado unitariamente).
+		argv := []string{
+			wt, "-w", "new",
+			"new-tab", "--title", sessions[0].Title, "cmd.exe", "/k", sessions[0].Inner,
+			";",
+			"split-pane", "-V", "--title", sessions[1].Title, "cmd.exe", "/k", sessions[1].Inner,
+			";",
+			"split-pane", "-H", "--title", sessions[2].Title, "cmd.exe", "/k", sessions[2].Inner,
+		}
+		return []LaunchCommand{{Title: sessions[0].Title, Argv: argv}}, nil
+	}
 	var out []LaunchCommand
 	for _, s := range sessions {
 		argv, err := terminalArgv(env, s)
