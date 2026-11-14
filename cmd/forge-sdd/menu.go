@@ -11,6 +11,7 @@ import (
 
 	"github.com/forge-sdd/cli/internal/config"
 	"github.com/forge-sdd/cli/internal/gate"
+	"github.com/forge-sdd/cli/internal/layout"
 	"github.com/forge-sdd/cli/internal/pipeline"
 	"github.com/forge-sdd/cli/internal/survey"
 	"github.com/mattn/go-isatty"
@@ -119,36 +120,58 @@ Sem terminal interativo o menu não abre. Comandos mais usados:
 }
 
 const (
-	valPipeline = "pipeline"
-	valStandard = "standard"
-	valInstall  = "install"
-	valExit     = "exit"
-	valBack     = "back"
+	valUp      = "up"
+	valStatus  = "status"
+	valQueue   = "queue"
+	valDiag    = "diag"
+	valConfig  = "config"
+	valHelp    = "help"
+	valInstall = "install"
+	valExit    = "exit"
+	valBack    = "back"
 )
 
 // runMenu mostra o menu principal até a pessoa sair. O menu roda uma ação por vez e não é painel ao vivo.
 func runMenu(env *menuEnv) error {
 	installed := config.DetectProject(env.dir)
 	for {
-		var opts []menuOption
-		def := valPipeline
-		if !installed {
-			opts = append(opts, menuOption{Label: "Instalar o Forge neste projeto", Value: valInstall})
-			def = valInstall
-		} else {
+		proj := filepath.Base(env.dir)
+		state := "não instalado"
+		if installed {
+			state = "pronta"
 			if _, err := os.Stat(filepath.Join(env.dir, "sdd", "memory", "constitution.md")); err == nil {
-				if b, err := gate.BuildBrief(env.dir, 0); err == nil && b.State == gate.BriefRascunho {
-					opts = append(opts, menuOption{Label: "Alinhar o projeto (passo 1: /constitution no seu agente de IA)", Value: "constitution"})
-					def = "constitution"
+				if b, err := gate.BuildBrief(env.dir, 0); err == nil {
+					state = b.State
 				}
 			}
 		}
+		br, err := layout.CurrentBranch(env.dir)
+		if err != nil || br == "" {
+			br = "—"
+		}
+		header := fmt.Sprintf("Forge SDD %s — %s (%s · branch: %s)", version, proj, state, br)
+
+		var opts []menuOption
+		def := valUp
+		if !installed {
+			opts = append(opts, menuOption{Label: "Instalar o Forge neste projeto", Value: valInstall})
+			def = valInstall
+		} else if state == gate.BriefRascunho {
+			opts = append(opts, menuOption{Label: "Alinhar o projeto (passo 1: /constitution no seu agente de IA)", Value: "constitution"})
+			def = "constitution"
+		}
+
 		opts = append(opts,
-			menuOption{Label: "Pipeline multi-sessão (Discovery, Builder e Reviewer em 3 terminais)", Value: valPipeline},
-			menuOption{Label: "Estrutura padrão (uma sessão só)", Value: valStandard},
+			menuOption{Label: "Iniciar esteira (up)", Value: valUp},
+			menuOption{Label: "Status das iniciativas e esteira", Value: valStatus},
+			menuOption{Label: "Fila de tasks e inbox de notificações", Value: valQueue},
+			menuOption{Label: "Diagnóstico de saúde e regras (Doctor & Gate)", Value: valDiag},
+			menuOption{Label: "Configurações (agentes, terminal, modo ao vivo/headless)", Value: valConfig},
+			menuOption{Label: "Ajuda e comandos do CLI", Value: valHelp},
 			menuOption{Label: "Sair", Value: valExit},
 		)
-		choice, err := env.p.Select("Forge SDD "+version+" — o que você quer fazer?", opts, def)
+
+		choice, err := env.p.Select(header, opts, def)
 		if errors.Is(err, errBack) || choice == valExit {
 			return nil
 		}
@@ -164,14 +187,33 @@ func runMenu(env *menuEnv) error {
 			_ = env.p.Pause("Enter para voltar ao menu")
 		case valInstall:
 			installed = env.installOrUpdate() == nil && config.DetectProject(env.dir)
-		case valPipeline:
-			if err := env.pipelineMenu(); err != nil && !errors.Is(err, errBack) {
+		case valUp:
+			env.startSessions()
+		case valStatus:
+			env.act("status", "--dir", env.dir)
+		case valQueue:
+			for _, a := range [][]string{
+				{"queue", "panel", "--dir", env.dir},
+				{"bus", "list", "--dir", env.dir, "--role", "builder"},
+				{"bus", "list", "--dir", env.dir, "--role", "reviewer"},
+				{"inbox", "--dir", env.dir},
+			} {
+				if err := env.run(a...); err != nil {
+					fmt.Fprintf(env.out, "\n✗ %v\n", err)
+				}
+			}
+			_ = env.p.Pause("Enter para voltar ao menu")
+		case valDiag:
+			if err := env.diagMenu(); err != nil && !errors.Is(err, errBack) {
 				return err
 			}
-		case valStandard:
-			if err := env.standardMenu(); err != nil && !errors.Is(err, errBack) {
+		case valConfig:
+			if err := env.configMenu(); err != nil && !errors.Is(err, errBack) {
 				return err
 			}
+		case valHelp:
+			_ = rootCmd.Help()
+			_ = env.p.Pause("Enter para voltar ao menu")
 		}
 	}
 }
@@ -196,30 +238,16 @@ func (e *menuEnv) installOrUpdate() error {
 	return err
 }
 
-const (
-	valStandardStatus = "status"
-	valStandardPanel  = "panel"
-	valStandardGate   = "gate"
-	valStandardDoctor = "doctor"
-	valStandardAll    = "all"
-	valStandardInst   = "install"
-)
-
-func (e *menuEnv) standardMenu() error {
+func (e *menuEnv) diagMenu() error {
 	for {
-		inst := "Instalar a estrutura"
-		if config.DetectProject(e.dir) {
-			inst = "Atualizar a estrutura (ou adicionar agente)"
-		}
-		choice, err := e.p.Select("Estrutura padrão (sessão única)", []menuOption{
-			{Label: "Status das iniciativas", Value: valStandardStatus},
-			{Label: "Painel da fila de tasks", Value: valStandardPanel},
-			{Label: "Gate de governança (Camada A)", Value: valStandardGate},
-			{Label: "Doctor (check-up do projeto)", Value: valStandardDoctor},
-			{Label: inst, Value: valStandardInst},
-			{Label: "Ver todos os comandos", Value: valStandardAll},
+		choice, err := e.p.Select("Diagnóstico de saúde e regras", []menuOption{
+			{Label: "Doctor (check-up do projeto)", Value: "doctor"},
+			{Label: "Gate de governança (Camada A)", Value: "gate"},
+			{Label: "Processos ativos e consumo (ps)", Value: "ps"},
+			{Label: "Diagnóstico do pipeline (CLI instalada, arquivos do agente)", Value: "pipeline"},
+			{Label: "Recuperar jobs presos", Value: "recover"},
 			{Label: "Voltar", Value: valBack},
-		}, valStandardStatus)
+		}, "doctor")
 		if errors.Is(err, errBack) || choice == valBack {
 			return errBack
 		}
@@ -227,79 +255,21 @@ func (e *menuEnv) standardMenu() error {
 			return err
 		}
 		switch choice {
-		case valStandardStatus:
-			e.act("status", "--dir", e.dir)
-		case valStandardPanel:
-			e.act("queue", "panel", "--dir", e.dir)
-		case valStandardGate:
-			e.act("gate", "--dir", e.dir)
-		case valStandardDoctor:
+		case "doctor":
 			e.act("doctor", "--dir", e.dir)
-		case valStandardInst:
-			_ = e.installOrUpdate()
-			_ = e.p.Pause("Enter para voltar ao menu")
-		case valStandardAll:
-			_ = rootCmd.Help()
-			_ = e.p.Pause("Enter para voltar ao menu")
-		}
-	}
-}
-
-const (
-	valPipeStart   = "start"
-	valPipeDry     = "dry"
-	valPipeConfig  = "config"
-	valPipeQueue   = "queue"
-	valPipeRecover = "recover"
-	valPipeDiag    = "diag"
-	valPipeGuide   = "guide"
-)
-
-func (e *menuEnv) pipelineMenu() error {
-	for {
-		choice, err := e.p.Select("Pipeline multi-sessão", []menuOption{
-			{Label: "Iniciar as 3 sessões (escolher o agente de cada uma)", Value: valPipeStart},
-			{Label: "Só ver os comandos de abertura", Value: valPipeDry},
-			{Label: "Ativar ou reconfigurar (agentes, permissões, card)", Value: valPipeConfig},
-			{Label: "Fila e inbox", Value: valPipeQueue},
-			{Label: "Recuperar jobs presos", Value: valPipeRecover},
-			{Label: "Diagnóstico (CLI instalada, arquivos do agente)", Value: valPipeDiag},
-			{Label: "Abrir o guia", Value: valPipeGuide},
-			{Label: "Voltar", Value: valBack},
-		}, valPipeStart)
-		if errors.Is(err, errBack) || choice == valBack {
-			return errBack
-		}
-		if err != nil {
-			return err
-		}
-		switch choice {
-		case valPipeStart:
-			e.startSessions()
-		case valPipeDry:
-			e.act("up", "--dir", e.dir, "--dry-run")
-		case valPipeConfig:
-			if err := e.configMenu(); err != nil && !errors.Is(err, errBack) {
-				return err
-			}
-		case valPipeQueue:
-			for _, a := range [][]string{{"bus", "list", "--dir", e.dir, "--role", "builder"}, {"bus", "list", "--dir", e.dir, "--role", "reviewer"}, {"inbox", "--dir", e.dir}} {
-				if err := e.run(a...); err != nil {
-					fmt.Fprintf(e.out, "\n✗ %v\n", err)
-				}
-			}
-			_ = e.p.Pause("Enter para voltar ao menu")
-		case valPipeRecover:
+		case "gate":
+			e.act("gate", "--dir", e.dir)
+		case "ps":
+			e.act("ps", "--dir", e.dir)
+		case "pipeline":
+			e.diagnose()
+		case "recover":
 			for _, r := range []string{"builder", "reviewer"} {
 				if err := e.run("bus", "recover", "--dir", e.dir, "--role", r); err != nil {
 					fmt.Fprintf(e.out, "\n✗ %v\n", err)
 				}
 			}
 			_ = e.p.Pause("Enter para voltar ao menu")
-		case valPipeDiag:
-			e.diagnose()
-		case valPipeGuide:
-			e.showGuide()
 		}
 	}
 }

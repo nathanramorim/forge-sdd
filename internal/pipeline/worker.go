@@ -104,7 +104,7 @@ func RunWorker(ctx context.Context, opts WorkerOptions) error {
 	}
 	fmt.Fprintf(opts.Out, "[%s] agente: %s · permissões: %s\n", opts.Name, opts.CLI, config.PermissionSummary(cfg.Permissions, cfg.AllowCommands))
 
-	var lastIdleMsg time.Time
+	var wasIdle bool
 	for {
 		if ctx.Err() != nil {
 			return nil
@@ -117,9 +117,9 @@ func RunWorker(ctx context.Context, opts WorkerOptions) error {
 			if opts.Once {
 				return nil
 			}
-			if lastIdleMsg.IsZero() || opts.Now().Sub(lastIdleMsg) > time.Minute {
+			if !wasIdle {
 				fmt.Fprintf(opts.Out, "[%s] Aguardando jobs na fila...\n", opts.Name)
-				lastIdleMsg = opts.Now()
+				wasIdle = true
 			}
 			select {
 			case <-ctx.Done():
@@ -131,7 +131,7 @@ func RunWorker(ctx context.Context, opts WorkerOptions) error {
 		if err != nil {
 			return err
 		}
-		lastIdleMsg = time.Time{} // depois de trabalhar, a próxima ociosidade avisa de novo
+		wasIdle = false // depois de trabalhar, a próxima ociosidade avisa de novo
 		if err := processJob(ctx, opts, cfg, entry); err != nil {
 			return err
 		}

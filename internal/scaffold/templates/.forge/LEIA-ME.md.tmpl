@@ -65,6 +65,11 @@ Com `tmux` instalado, `forge` e `forge-sdd up` abrem **uma tela com três painé
 
 Dentro do tmux: `Ctrl+b` e as setas trocam de painel, `Ctrl+b d` solta a tela sem encerrar nada, e `tmux ls` mostra o nome da sessão (`forge-<projeto>-<6 hex do caminho>`) para reconectar com `tmux attach -t =<nome>`; rodar `forge` ou `forge-sdd up` de novo também reconecta.
 
+**Identidade visual e alertas no tmux:**
+- A barra inferior exibe o identificador visual `📦 <projeto>` e o nome da janela é padronizado como `forge:<projeto>`.
+- As bordas dos painéis mostram `[ <projeto> ❯ <papel> ]` para você saber exatamente em qual projeto e estação está trabalhando.
+- **Alertas visuais de aprovação:** quando um job aguarda revisão humana (ex.: PR aberto pelo Builder ou veredito do Reviewer), a borda do painel pisca com `[ 🔔 REVISÃO NECESSÁRIA ]` ou `[ 🔔 AÇÃO NECESSÁRIA ]`, voltando ao normal assim que a ação for destravada.
+
 Nos painéis do Builder e do Reviewer o worker mostra o que o agente está fazendo, em linhas curtas (a saída completa fica em `.forge/runtime/logs/`):
 
 ```
@@ -99,6 +104,22 @@ Por padrão, os workers operam em modo `headless` (executam uma nova chamada de 
 *   **Limpeza de Contexto (`context: clear`):** envia o comando de reset do perfil (`/clear` ou `/new`) entre jobs e espera a ociosidade do painel antes do próximo prompt. Para manter o histórico de raciocínio, use `context: continuous`.
 *   **Falhas Lidas da Tela:** o despachante inspeciona a tela em tempo real para detectar limites de cota (`DetectUsageLimit` → pausa automática) ou indisponibilidade de conta/tier (`DetectAgentUnavailable` → aviso no inbox).
 *   **Queda Suave:** se `live` estiver ativado sem tmux ou em terminal nativo, o pipeline recai suavemente para `headless` com um aviso no terminal.
+
+## Monitor de Processos e Consumo (`forge-sdd ps`)
+
+Para ter visibilidade total sobre o que está rodando no computador relacionado ao projeto:
+```bash
+forge-sdd ps            # exibe tabela com PID, papel, CPU %, RAM (MB), tempo e estado
+forge-sdd ps --json     # exporta em JSON para dashboards e automações
+forge-sdd ps --kill-zombies  # encerra processos orfãos ou presos de sessões anteriores
+```
+O monitor também está disponível no menu interativo (`forge`) sob a opção de diagnóstico.
+
+## Paralelismo de Filas por DAG
+
+O pipeline suporta dependências explícitas entre tarefas na fila (`**Depende de:** task-1, task-2`).
+- As tarefas são resolvidas respeitando o grafo acíclico dirigido (DAG), impedindo que tarefas bloqueadas iniciem antes da conclusão de suas dependências.
+- `forge-sdd queue next --batch <max>` extrai até N tarefas independentes prontas para execução em paralelo simultâneo no Builder.
 
 ## Configuração
 

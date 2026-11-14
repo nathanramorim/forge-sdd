@@ -21,18 +21,18 @@ func TestTmux_PlanoExato(t *testing.T) {
 	name := TmuxSessionName(env.Dir)
 	assert.Regexp(t, `^forge-meu-app-[0-9a-f]{6}$`, name)
 	assert.Equal(t, name, plan.Session)
-	win := "=" + name + ":forge"
+	win := "=" + name + ":forge:meu-app"
 
 	c := plan.Create
-	require.GreaterOrEqual(t, len(c), 11)
-	assert.Equal(t, []string{"tmux", "new-session", "-d", "-s", name, "-n", "forge", "-c", "/work/meu-app"}, c[0][:9])
+	require.GreaterOrEqual(t, len(c), 13)
+	assert.Equal(t, []string{"tmux", "new-session", "-d", "-s", name, "-n", "forge:meu-app", "-c", "/work/meu-app"}, c[0][:9])
 	assert.Contains(t, c[0][9], "claude -n forge-discovery --agent lider", "painel da Discovery")
-	assert.Equal(t, []string{"tmux", "set-window-option", "-t", win, "pane-base-index", "0"}, c[1], "painéis endereçáveis mesmo com pane-base-index 1 no tmux.conf")
-	assert.Equal(t, []string{"tmux", "split-window", "-h", "-t", win, "-c", "/work/meu-app"}, c[2][:7])
-	assert.Contains(t, c[2][7], "worker --role builder --name forge-builder --cli codex", "Builder à direita no alto")
-	assert.Equal(t, []string{"tmux", "split-window", "-v", "-t", win + ".1", "-c", "/work/meu-app"}, c[3][:7])
-	assert.Contains(t, c[3][7], "worker --role reviewer --name forge-reviewer --cli claude", "Reviewer embaixo")
-	assert.Equal(t, []string{"tmux", "set-window-option", "-t", win, "pane-border-status", "top"}, c[4])
+	assert.Equal(t, []string{"tmux", "set-window-option", "-t", win, "pane-base-index", "0"}, c[3], "painéis endereçáveis mesmo com pane-base-index 1 no tmux.conf")
+	assert.Equal(t, []string{"tmux", "split-window", "-h", "-t", win, "-c", "/work/meu-app"}, c[4][:7])
+	assert.Contains(t, c[4][7], "worker --role builder --name forge-builder --cli codex", "Builder à direita no alto")
+	assert.Equal(t, []string{"tmux", "split-window", "-v", "-t", win + ".1", "-c", "/work/meu-app"}, c[5][:7])
+	assert.Contains(t, c[5][7], "worker --role reviewer --name forge-reviewer --cli claude", "Reviewer embaixo")
+	assert.Equal(t, []string{"tmux", "set-window-option", "-t", win, "pane-border-status", "top"}, c[6])
 	var titles []string
 	for _, step := range c {
 		if step[1] == "select-pane" && len(step) > 4 && step[4] == "-T" {
@@ -62,17 +62,17 @@ func TestTmuxLivePlan(t *testing.T) {
 	require.NoError(t, err)
 
 	name := TmuxSessionName(env.Dir)
-	win := "=" + name + ":forge"
+	win := "=" + name + ":forge:meu-app"
 	winCtl := "=" + name + ":forge-ctl"
 
 	c := plan.Create
 	// Janela principal: Discovery, Builder CLI, Reviewer CLI
 	assert.Contains(t, c[0][9], "claude -n forge-discovery --agent lider", "painel 0 da Discovery")
-	assert.Contains(t, c[2][7], "codex", "painel 1 do Builder com CLI interativa")
-	assert.Contains(t, c[2][7], "--sandbox workspace-write", "permissões project do codex presentes")
-	assert.Contains(t, c[3][7], "agy", "painel 2 do Reviewer com CLI interativa")
-	assert.NotContains(t, c[3][7], "-i", "sem prompt inicial não passa -i órfão")
-	assert.Contains(t, c[3][7], "--dangerously-skip-permissions", "permissões do agy presentes")
+	assert.Contains(t, c[4][7], "codex", "painel 1 do Builder com CLI interativa")
+	assert.Contains(t, c[4][7], "--sandbox workspace-write", "permissões project do codex presentes")
+	assert.Contains(t, c[5][7], "agy", "painel 2 do Reviewer com CLI interativa")
+	assert.NotContains(t, c[5][7], "-i", "sem prompt inicial não passa -i órfão")
+	assert.Contains(t, c[5][7], "--dangerously-skip-permissions", "permissões do agy presentes")
 
 	// Janela oculta forge-ctl com os despachantes
 	foundNewWin := false
@@ -98,8 +98,57 @@ func TestTmuxLivePlan(t *testing.T) {
 	cfgHeadless.Sessions = cfg.Sessions
 	planHeadless, err := BuildTmuxPlan(env, cfgHeadless, false)
 	require.NoError(t, err)
-	assert.NotContains(t, planHeadless.Create[2][7], "--sandbox", "headless roda worker, não CLI interativa com sandbox no argv externo")
-	assert.Contains(t, planHeadless.Create[2][7], "worker --role builder")
+	assert.NotContains(t, planHeadless.Create[4][7], "--sandbox", "headless roda worker, não CLI interativa com sandbox no argv externo")
+	assert.Contains(t, planHeadless.Create[4][7], "worker --role builder")
+}
+
+func TestTmuxPlanProjectIdentity(t *testing.T) {
+	env := lenv("linux", map[string]bool{"tmux": true}, nil)
+	env.Dir = "/work/meu-app"
+	cfg := config.DefaultForgeConfig()
+	plan, err := BuildTmuxPlan(env, cfg, false)
+	require.NoError(t, err)
+
+	name := TmuxSessionName(env.Dir)
+	proj := TmuxProjectName(env.Dir)
+	assert.Equal(t, "meu-app", proj)
+
+	exact := "=" + name
+	winName := "forge:" + proj
+
+	var foundStatusLeft, foundStatusLength, foundBorderFormat, foundWindowName bool
+	for _, cmd := range plan.Create {
+		assert.NotContains(t, cmd, "-g", "nunca deve usar opções globais (-g)")
+		if cmd[1] == "new-session" {
+			for i, arg := range cmd {
+				if arg == "-n" && i+1 < len(cmd) && cmd[i+1] == winName {
+					foundWindowName = true
+				}
+			}
+		}
+		if cmd[1] == "set-option" && len(cmd) >= 5 {
+			assert.Equal(t, exact, cmd[3], "alvo de set-option deve ser a sessão exata")
+			if cmd[4] == "status-left" {
+				foundStatusLeft = true
+				assert.Contains(t, cmd[5], proj)
+				assert.Contains(t, cmd[5], "📦")
+			}
+			if cmd[4] == "status-left-length" {
+				foundStatusLength = true
+				assert.Equal(t, "60", cmd[5])
+			}
+		}
+		if cmd[1] == "set-window-option" && len(cmd) >= 5 {
+			if cmd[4] == "pane-border-format" {
+				foundBorderFormat = true
+				assert.Contains(t, cmd[5], proj+" ❯ #{pane_title}")
+			}
+		}
+	}
+	assert.True(t, foundWindowName, "nome da janela deve ser forge:<projeto>")
+	assert.True(t, foundStatusLeft, "status-left deve conter o nome do projeto")
+	assert.True(t, foundStatusLength, "status-left-length deve ser 60")
+	assert.True(t, foundBorderFormat, "pane-border-format deve conter <projeto> ❯ #{pane_title}")
 }
 
 func TestTmux_NomeDaSessaoSaneadoEUnicoPorCaminho(t *testing.T) {

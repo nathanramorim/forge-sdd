@@ -8,6 +8,7 @@ import (
 	"github.com/forge-sdd/cli/internal/layout"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"time"
 )
@@ -39,6 +40,7 @@ type QueueItem struct {
 	Title             string   `json:"title"`
 	SpecPath          string   `json:"spec_path"`
 	Status            string   `json:"status"`
+	DependsOn         []string `json:"depends_on,omitempty"`
 	Rules             []string `json:"rules"`
 	SkillsUsed        []string `json:"skills_used"`
 	Attempts          int      `json:"attempts"`
@@ -250,6 +252,8 @@ func Enqueue(dir, featureID, branch, taskID, title, specPath string, rules []str
 		rules = []string{}
 	}
 
+	dependsOn := extractSpecDependsOn(dir, specPath)
+
 	for i := range q.Items {
 		if q.Items[i].TaskID == taskID {
 			if q.Items[i].Status == StatusChangesRequested {
@@ -263,6 +267,9 @@ func Enqueue(dir, featureID, branch, taskID, title, specPath string, rules []str
 				if len(rules) > 0 {
 					q.Items[i].Rules = rules
 				}
+				if len(dependsOn) > 0 {
+					q.Items[i].DependsOn = dependsOn
+				}
 				return Save(dir, q)
 			}
 			return fmt.Errorf("task %q já existe na fila com status %q", taskID, q.Items[i].Status)
@@ -274,12 +281,139 @@ func Enqueue(dir, featureID, branch, taskID, title, specPath string, rules []str
 		Title:      title,
 		SpecPath:   specPath,
 		Status:     StatusQueued,
+		DependsOn:  dependsOn,
 		Rules:      rules,
 		SkillsUsed: []string{},
 		Attempts:   0,
 	}
 	q.Items = append(q.Items, item)
 	return Save(dir, q)
+}
+
+func extractSpecDependsOn(dir, specPath string) []string {
+	resolved := specPath
+	if !filepath.IsAbs(specPath) {
+		resolved = filepath.Join(dir, specPath)
+	}
+	data, err := os.ReadFile(resolved)
+	if err != nil {
+		return nil
+	}
+	return parseDependsOnContent(string(data))
+}
+
+func parseDependsOnContent(content string) []string {
+	re := regexp.MustCompile(`(?i)\*\*Depende de:\*\*\s*(.*)`)
+	m := re.FindStringSubmatch(content)
+	if len(m) < 2 {
+		return nil
+	}
+	val := strings.TrimSpace(m[1])
+	val = strings.Trim(val, "`*-_ ")
+	if val == "" || val == "—" || val == "-" || strings.ToLower(val) == "nenhuma" || strings.ToLower(val) == "nenhum" {
+		return nil
+	}
+	tokens := strings.FieldsFunc(val, func(r rune) bool {
+		return r == ',' || r == ';' || r == ' ' || r == '\t'
+	})
+	var deps []string
+	for _, tok := range tokens {
+		tok = strings.Trim(tok, "`*-_ ")
+		if tok == "" || tok == "—" || tok == "-" || strings.ToLower(tok) == "e" {
+			continue
+		}
+		deps = append(deps, tok)
+	}
+	return deps
+}
+
+// EligibleTasks resolve o grafo de dependências da fila (DAG) e devolve as tarefas com status "queued"
+// cujas dependências em DependsOn já estejam todas com status "approved".
+// Se houver ciclo de dependências, retorna erro descritivo.
+// Se max > 0, limita o retorno a até max tarefas elegíveis.
+func EligibleTasks(q *Queue, max int) ([]QueueItem, error) {
+	if q == nil || len(q.Items) == 0 {
+		return []QueueItem{}, nil
+	}
+
+	normalizeID := func(id string) string {
+		return strings.TrimSpace(strings.TrimPrefix(id, "feat-"))
+	}
+
+	// 1. Mapeamento de itens por ID normalizado
+	itemMap := make(map[string]QueueItem)
+	for _, it := range q.Items {
+		itemMap[normalizeID(it.TaskID)] = it
+	}
+
+	// 2. Grafo de adjacências e detecção de ciclos
+	adj := make(map[string][]string)
+	for _, it := range q.Items {
+		u := normalizeID(it.TaskID)
+		for _, dep := range it.DependsOn {
+			v := normalizeID(dep)
+			adj[u] = append(adj[u], v)
+		}
+	}
+
+	const (
+		unvisited = 0
+		visiting  = 1
+		visited   = 2
+	)
+	state := make(map[string]int)
+
+	var hasCycle func(u string, path []string) (bool, []string)
+	hasCycle = func(u string, path []string) (bool, []string) {
+		state[u] = visiting
+		path = append(path, u)
+		for _, v := range adj[u] {
+			if state[v] == visiting {
+				return true, append(path, v)
+			}
+			if state[v] == unvisited {
+				if cycle, cyclePath := hasCycle(v, path); cycle {
+					return true, cyclePath
+				}
+			}
+		}
+		state[u] = visited
+		return false, nil
+	}
+
+	for _, it := range q.Items {
+		id := normalizeID(it.TaskID)
+		if state[id] == unvisited {
+			if cycle, cyclePath := hasCycle(id, nil); cycle {
+				return nil, fmt.Errorf("ciclo de dependência detectado: %s", strings.Join(cyclePath, " -> "))
+			}
+		}
+	}
+
+	// 3. Seleção de tarefas elegíveis: status == queued e todas DependsOn == approved
+	var eligible []QueueItem
+	for _, it := range q.Items {
+		if it.Status != StatusQueued {
+			continue
+		}
+		allApproved := true
+		for _, dep := range it.DependsOn {
+			normDep := normalizeID(dep)
+			parent, exists := itemMap[normDep]
+			if !exists || parent.Status != StatusApproved {
+				allApproved = false
+				break
+			}
+		}
+		if allApproved {
+			eligible = append(eligible, it)
+			if max > 0 && len(eligible) >= max {
+				break
+			}
+		}
+	}
+
+	return eligible, nil
 }
 
 func extractSpecTitle(dir, specPath, fallback string) string {

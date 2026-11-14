@@ -53,7 +53,8 @@ type fakeTmuxDeliverer struct {
 		target string
 		keys   []string
 	}
-	errOn map[string]error
+	titles []string
+	errOn  map[string]error
 }
 
 func (f *fakeTmuxDeliverer) CapturePane(target string) (string, error) {
@@ -124,6 +125,26 @@ func (f *fakeTmuxDeliverer) SendKeys(target string, keys ...string) error {
 		f.currentText = fmt.Sprintf("prompt> [keys #%d: %s]", len(f.keys), strings.Join(keys, " "))
 	}
 	return nil
+}
+
+func (f *fakeTmuxDeliverer) SetPaneTitle(target, title string) error {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	if f.errOn != nil {
+		if err, ok := f.errOn["SetPaneTitle"]; ok {
+			return err
+		}
+	}
+	f.titles = append(f.titles, title)
+	return nil
+}
+
+func (f *fakeTmuxDeliverer) Titles() []string {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	cp := make([]string, len(f.titles))
+	copy(cp, f.titles)
+	return cp
 }
 
 func (f *fakeTmuxDeliverer) PastesLen() int {
@@ -796,4 +817,87 @@ func TestDeliverTela(t *testing.T) {
 		require.NotEmpty(t, items)
 		assert.Contains(t, items[0].Title, "fechado")
 	})
+}
+
+func TestWorkerApprovalAlert(t *testing.T) {
+	// 1. Detecção de padrões de aprovação
+	assert.True(t, DetectWaitingApproval([]string{"Do you want to run 'npm test'? [y/n]"}))
+	assert.True(t, DetectWaitingApproval([]string{"Aguardando aprovação humana para continuar"}))
+	assert.True(t, DetectWaitingApproval([]string{"Allow command execution? (y/n)"}))
+	assert.False(t, DetectWaitingApproval([]string{"Compilando internal/pipeline...", "ok"}))
+
+	// 2. SetApprovalAlert formata o título
+	dMock := &fakeTmuxDeliverer{}
+	require.NoError(t, SetApprovalAlert(dMock, "=sess:forge.1", "forge-builder", true))
+	require.NoError(t, SetApprovalAlert(dMock, "=sess:forge.1", "forge-builder", false))
+	titles := dMock.Titles()
+	require.Len(t, titles, 2)
+	assert.Contains(t, titles[0], "⚠️ APROVAÇÃO NECESSÁRIA ❯ forge-builder")
+	assert.Equal(t, "forge-builder", titles[1])
+
+	// 3. Transição de status durante o ciclo do despachante
+	dir, job := setupProjectWithJob(t, layout.RoleBuilder)
+	// Configura contexto contínuo para simplificar as entregas no teste
+	cfg, _, err := config.LoadForgeConfig(dir)
+	require.NoError(t, err)
+	cfg.Context = config.ContextContinuous
+	require.NoError(t, config.SaveForgeConfig(dir, cfg))
+
+	target := "=test:forge:app.1"
+	d := &fakeTmuxDeliverer{}
+	clk := newSafeClock(now)
+
+	go func() {
+		// Aguarda o prompt ser entregue
+		for d.PastesLen() == 0 {
+			time.Sleep(10 * time.Millisecond)
+		}
+		time.Sleep(20 * time.Millisecond)
+		// 1. Simula agente demandando aprovação humana
+		d.mu.Lock()
+		d.currentText = "Executing...\nAllow command 'go test'? [y/n]"
+		d.mu.Unlock()
+
+		time.Sleep(80 * time.Millisecond)
+		// 2. Simula aprovação humana concedida
+		d.mu.Lock()
+		d.currentText = "Approved! Tests running...\nAll tests passed."
+		d.mu.Unlock()
+
+		time.Sleep(80 * time.Millisecond)
+		// 3. Conclusão do job
+		_, _ = bus.UpdatePR(dir, layout.RoleBuilder, job.ID, "forge-builder", 10, "https://github.com/pr/10", "", clk.Now())
+	}()
+
+	var out bytes.Buffer
+	err = RunWorker(context.Background(), WorkerOptions{
+		Dir:           dir,
+		Role:          layout.RoleBuilder,
+		Name:          "forge-builder",
+		DeliverTarget: target,
+		Deliverer:     d,
+		Once:          true,
+		Now:           clk.Now,
+		Out:           &out,
+		Sleep: func(_ context.Context, dt time.Duration) bool {
+			clk.Add(dt)
+			time.Sleep(10 * time.Millisecond)
+			return true
+		},
+	})
+	require.NoError(t, err)
+
+	paneTitles := d.Titles()
+	require.NotEmpty(t, paneTitles, "deve ter registrado alterações no título do painel")
+	var hadAlert, hadRestore bool
+	for _, pt := range paneTitles {
+		if strings.Contains(pt, "APROVAÇÃO NECESSÁRIA") {
+			hadAlert = true
+		}
+		if pt == "forge-builder" {
+			hadRestore = true
+		}
+	}
+	assert.True(t, hadAlert, "deve ter ativado o alerta visual de aprovação pendente")
+	assert.True(t, hadRestore, "deve ter restaurado o título normal após aprovação/conclusão")
 }
