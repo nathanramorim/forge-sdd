@@ -71,6 +71,29 @@ Executados diretamente no terminal do desenvolvedor, normalmente utilizando o wr
   forge-sdd status --live
   ```
 
+### `forge` (Menu Interativo Unificado)
+- **O que faz:** O portal de entrada do desenvolvedor. Abre um menu contextual rápido, elegante e direto ao ponto que exibe o nome do projeto e branch atual, permitindo iniciar as 3 sessões da esteira (Discovery, Builder, Reviewer) com 1 Enter, inspecionar a fila, rodar diagnósticos e configurar agentes sem submenus confusos.
+- **Como usar:**
+  ```bash
+  forge
+  ```
+
+### `forge-sdd ps [flags]`
+- **O que faz:** Monitor transparente de processos em tempo real. Identifica todos os workers, CLIs de IA, painéis tmux e subprocessos (testes, compiladores) atrelados ao projeto. Exibe PID, % de CPU, memória RAM (RSS em MB), tempo ativo e estado de cada processo.
+- **Como usar:**
+  ```bash
+  forge-sdd ps
+  forge-sdd ps --json             # saída em JSON para automações
+  forge-sdd ps --kill-zombies     # encerra com segurança processos orfãos/presos
+  ```
+
+### `forge-sdd status --live`
+- **O que faz:** Status executivo tríplice de altíssima velocidade e baixo consumo de tokens. Captura em tempo real o que o Builder está fazendo na tela (`tmux capture-pane`), a lista de tasks da esteira (`queue panel`) e os commits recentes no git.
+- **Como usar:**
+  ```bash
+  forge-sdd status --live
+  ```
+
 ### `npx @nathanramorim/forge-sdd doctor [diretório]`
 - **O que faz:** Diagnostica a saúde e a integridade da metodologia instalada no repositório. Verifica a existência de arquivos estruturais, valida se as pastas e integrações físicas dos agentes de IA estão de acordo com o `.sddrc`, lista as features em andamento e detecta deriva de convenção de nomenclatura (mistura de `feat-NN` sequencial com `feat-xxxx` por hash em `sdd/features/` e `sdd/discovery/`).
 - **Como usar:**

@@ -32,14 +32,17 @@ export const EMU_STEPS: EmuStepData[] = [
     agentHex: 0xf2a65a,
     agentState: 'finished',
     chipColor: 'var(--ok)',
-    chipText: '3 sessões abertas',
-    speech: 'Escolhi o agente de cada sessão no menu, conferi a checagem e abri tudo numa tela só. A última escolha fica lembrada.',
+    chipText: '3 sessões identificadas',
+    speech: 'Abri o menu direto do forge, selecionei os agentes com 1 Enter e a esteira abriu com o projeto claramente identificado no tmux.',
     logHtml: `
       <div class="cmd-input">$ forge</div>
-      <div class="accent">Forge SDD 4.4.1-beta — o que você quer fazer?  ▸ Pipeline multi-sessão</div>
-      <div class="dim">→ Iniciar as 3 sessões: forge-discovery claude · forge-builder codex · forge-reviewer gemini</div>
-      <div class="dim">Checagem antes de abrir: ✓ claude  ✓ codex  ✓ gemini  ✓ arquivos de instrução</div>
-      <div class="ok">✓ Sessão tmux forge-checkout-api-1a2b3c aberta: 3 painéis nomeados</div>
+      <div class="accent">Forge SDD v4.4.1 — checkout-api (pronta · feat/12-pix)</div>
+      <div class="dim">▸ 1. Iniciar as 3 sessões do pipeline (Discovery, Builder, Reviewer)</div>
+      <div class="dim">  2. Status das iniciativas e da esteira</div>
+      <div class="dim">  3. Fila de tasks e inbox de notificações</div>
+      <div class="dim">  4. Diagnóstico de saúde e regras (Doctor & Gate)</div>
+      <div class="dim">  5. Configurações (agentes, terminal, modo ao vivo)</div>
+      <div class="ok">✓ Sessão tmux aberta: [ 📦 checkout-api │ feat/12-pix ] 3 painéis identificados</div>
     `,
     files: [
       ['.forge/config/forge.json', 'agentes lembrados', 'var(--ok)'],
@@ -102,16 +105,16 @@ export const EMU_STEPS: EmuStepData[] = [
     agentState: 'working',
     chipColor: 'var(--ok)',
     chipText: 'Construindo em paralelo',
-    speech: 'Peguei o job da fila e estou construindo. O painel mostra o que faço, em linhas curtas; o log completo fica à parte.',
+    speech: 'Peguei o job da fila e estou construindo em ondas paralelas com DAG. Você monitora os processos e consumo com forge-sdd ps sem travar a máquina.',
     logHtml: `
-      <div class="dim">[forge-builder] agente: codex · permissões: PROJETO</div>
-      <div class="accent">▶ job pagamento-pix · feature_build · tentativa 1 · codex · permissões project</div>
+      <div class="dim">[forge-builder] agente: codex · permissões: PROJETO · Ondas DAG</div>
+      <div class="accent">▶ job pagamento-pix · Onda 1 (2 tasks paralelas: 12-01 e 12-02)</div>
       <div class="ok">  ✎ internal/pix/domain.go</div>
       <div class="ok">  ✎ internal/pix/client.go</div>
-      <div class="dim">  $ go test ./...</div>
-      <div class="ok">  ✓ comando terminou (0)</div>
+      <div class="dim">  $ forge-sdd ps → 4 processos ativos · CPU: 12% · Mem: 220 MB</div>
+      <div class="ok">  ✓ testes e build verdes (0 falhas)</div>
       <div class="dim">  … trabalhando há 2m10s · 14 arquivos alterados</div>
-      <div class="ok">■ concluído em 4m12s · PR aberto e enfileirado para o Reviewer</div>
+      <div class="ok">■ concluído em 3m40s · PR aberto e enfileirado para o Reviewer</div>
     `,
     files: [
       ['builder/processing → done', 'job concluído', 'var(--ok)'],

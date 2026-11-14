@@ -57,9 +57,13 @@ forge-sdd worker --role builder
 forge-sdd worker --role reviewer
 ```
 
-## O que cada painel mostra e contingência de terminal
+## O que cada painel mostra, identificação do projeto e contingência de terminal
 
-Com `tmux` instalado, `forge` e `forge-sdd up` abrem **uma tela com três painéis**, cada um com o nome da sessão no topo: `forge-discovery` (grande, à esquerda), `forge-builder` e `forge-reviewer` (empilhados à direita).
+Com `tmux` instalado, `forge` e `forge-sdd up` abrem uma tela limpa, encantadora e com foco total no projeto:
+- **Identificação Imediata:** A barra inferior exibe `[ 📦 <projeto> │ <branch> ]`, o nome da janela é `forge:<projeto>` e as bordas de cada painel estampam `[ <projeto> ❯ forge-discovery ]`, impossibilitando qualquer confusão mesmo ao alternar entre múltiplos projetos abertos.
+- **Terminal Livre & Mini-Monitor:** Em repouso, o terminal direito fica desobstruído para o desenvolvedor trabalhar sem loops barulhentos de espera. O monitoramento da esteira resume o status passivo e se acende com alertas visuais amigáveis sempre que uma aprovação humana for demandada.
+- **Visibilidade de Processos e Consumo:** Com `forge-sdd ps`, você inspeciona a qualquer instante todos os workers, CLIs de IA e testes rodando em background com consumo de CPU, memória RAM e tempo ativo.
+- **Três Painéis Principais:** `forge-discovery` (amplo, à esquerda), `forge-builder` e `forge-reviewer` (à direita).
 
 **Instalação do tmux e contingência de terminal:**
 - Em modo `auto`, se o `tmux` não estiver no PATH, o Forge detecta o gerenciador de pacotes do sistema (Homebrew no macOS, apt-get, dnf, pacman, apk ou zypper no Linux) e pergunta se você deseja instalá-lo com confirmação interativa.
