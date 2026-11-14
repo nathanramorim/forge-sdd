@@ -40,3 +40,15 @@ func TestBuildArgv_PermissaoComControleERecusada(t *testing.T) {
 	_, _, err = BuildArgv(p, RunSpec{Agent: "builder", Name: "forge-builder", Prompt: "-rf"})
 	assert.Error(t, err, "prompt que começa com - continua recusado")
 }
+
+func TestBuildArgv_AgyComAsFlagsConfirmadasNoUsoReal(t *testing.T) {
+	cfg := config.DefaultForgeConfig()
+	p, _ := cfg.Profile(config.CLIAgy)
+	for _, level := range []string{config.PermissionProject, config.PermissionFull} {
+		cfg.Permissions = level
+		cmd, args, err := BuildArgv(p, RunSpec{Agent: "builder", Name: "forge-builder", Prompt: "faça o job", Permissions: cfg.WorkerPermissionArgs(config.CLIAgy)})
+		require.NoError(t, err)
+		assert.Equal(t, "agy", cmd)
+		assert.Equal(t, []string{"-p", "faça o job", "--dangerously-skip-permissions"}, args, level)
+	}
+}

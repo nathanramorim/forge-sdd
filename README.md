@@ -40,7 +40,7 @@ npx @nathanramorim/forge-sdd@latest init
 npx @nathanramorim/forge-sdd@latest init . --agent copilot,gemini --name meu-projeto
 ```
 
-## 🧵 Pipeline multi-sessão: comece em 3 passos (v4.1.0-beta)
+## 🧵 Pipeline multi-sessão: comece em 3 passos (v4.2.0-beta)
 
 Você conversa numa sessão enquanto outras duas constroem e revisam. Depois de instalar:
 

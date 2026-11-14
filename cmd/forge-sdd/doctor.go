@@ -267,7 +267,7 @@ inconsistências de configuração dos agentes de IA e progresso das features.`,
 				case config.AgentGemini:
 					fmt.Println("   - Cabeçalho do arquivo GEMINI.md (onde diz: # GEMINI.md — meu-projeto)")
 				case config.AgentOpenAI:
-					fmt.Println("   - Cabeçalho do arquivo OPENAI.md (onde diz: # OPENAI.md — meu-projeto)")
+					fmt.Println("   - Cabeçalho do arquivo AGENTS.md (onde diz: # AGENTS.md — meu-projeto)")
 				}
 			}
 			fmt.Println("   - Cabeçalho do arquivo sdd/memory/progress.md")

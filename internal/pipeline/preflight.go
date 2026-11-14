@@ -124,9 +124,11 @@ func Preflight(dir string, cfg config.ForgeConfig, env PreflightEnv) []Item {
 // claudeAgentsFor lista as definições de agente do claude usadas pelas sessões que o escolheram.
 func claudeAgentsFor(cfg config.ForgeConfig) []string {
 	var out []string
-	for role, agent := range map[string]string{config.SessionRoleDiscovery: "lider", config.SessionRoleBuilder: layout.RoleBuilder, config.SessionRoleReviewer: layout.RoleReviewer} {
-		if cfg.CLIFor(role) == config.CLIClaude {
-			out = append(out, agent)
+	for _, pair := range []struct{ role, agent string }{
+		{config.SessionRoleDiscovery, "lider"}, {config.SessionRoleBuilder, layout.RoleBuilder}, {config.SessionRoleReviewer, layout.RoleReviewer},
+	} {
+		if cfg.CLIFor(pair.role) == config.CLIClaude {
+			out = append(out, pair.agent)
 		}
 	}
 	return out

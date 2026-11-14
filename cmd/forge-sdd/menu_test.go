@@ -10,6 +10,8 @@ import (
 
 	"github.com/forge-sdd/cli/internal/config"
 	"github.com/forge-sdd/cli/internal/pipeline"
+	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -276,4 +278,39 @@ func TestRunSubcommand_ExecutaORunEDoSubcomando(t *testing.T) {
 	require.NoError(t, runSubcommand("pipeline", "init", "--dir", dir))
 	_, err = os.Stat(filepath.Join(dir, ".forge", "config", "forge.json"))
 	assert.NoError(t, err)
+}
+
+func TestRunSubcommand_NenhumFlagDeLista(t *testing.T) {
+	var walk func(c *cobra.Command)
+	walk = func(c *cobra.Command) {
+		c.Flags().VisitAll(func(f *pflag.Flag) {
+			assert.NotContains(t, f.Value.Type(), "Slice", "%s --%s: o reset do menu não vale para flags de lista", c.CommandPath(), f.Name)
+			assert.NotContains(t, f.Value.Type(), "Array", "%s --%s", c.CommandPath(), f.Name)
+			assert.NotContains(t, f.Value.Type(), "stringTo", "%s --%s", c.CommandPath(), f.Name)
+		})
+		for _, sub := range c.Commands() {
+			walk(sub)
+		}
+	}
+	walk(rootCmd)
+}
+
+func TestMenu_AcaoEMesmoResultadoDoSubcomando(t *testing.T) {
+	dir := pipelineDir(t, nil)
+	for _, args := range [][]string{
+		{"bus", "list", "--dir", dir, "--role", "builder"},
+		{"inbox", "--dir", dir},
+	} {
+		var viaMenu, viaCLI bytes.Buffer
+		rootCmd.SetOut(&viaMenu)
+		resetWorkerFlags()
+		require.NoError(t, runSubcommand(args...), args)
+
+		rootCmd.SetOut(&viaCLI)
+		resetWorkerFlags()
+		rootCmd.SetArgs(args)
+		require.NoError(t, rootCmd.Execute(), args)
+		rootCmd.SetOut(nil)
+		assert.Equal(t, viaCLI.String(), viaMenu.String(), "o menu e a linha de comando imprimem o mesmo: %v", args)
+	}
 }

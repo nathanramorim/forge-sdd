@@ -55,6 +55,8 @@ type menuEnv struct {
 }
 
 // runSubcommand executa o RunE de um subcomando com as flags dele zeradas, sem reexecutar o binário.
+// O reset (Value.Set(DefValue)) vale para flags escalares; um flag de lista (StringSlice etc.) o
+// quebraria, e o teste TestRunSubcommand_NenhumFlagDeLista impede que um apareça sem ajuste.
 func runSubcommand(args ...string) error {
 	sub, rest, err := rootCmd.Find(args)
 	if err != nil || sub == rootCmd {
@@ -371,7 +373,7 @@ func (e *menuEnv) choosePermissions(cfg config.ForgeConfig) (config.ForgeConfig,
 func summary(cfg config.ForgeConfig) string {
 	var parts []string
 	for _, role := range config.SessionRoles() {
-		parts = append(parts, strings.TrimPrefix(role, "")+" "+cfg.CLIFor(role))
+		parts = append(parts, role+" "+cfg.CLIFor(role))
 	}
 	return strings.Join(parts, " · ")
 }

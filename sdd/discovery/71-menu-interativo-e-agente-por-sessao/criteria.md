@@ -39,7 +39,7 @@
 |---|---|---|---|---|---|
 | `claude` | `claude -p {prompt} --agent {agent} -n {name}` + permissão | `claude -n {name} --agent lider` | `--agent` | `-n` | `CLAUDE.md` |
 | `gemini` | `gemini -p {prompt}` + `--approval-mode` | `gemini -i {prompt}` | não confirmado: o papel vai no prompt | sem flag (só título ANSI) | `GEMINI.md` |
-| `copilot` | `copilot -p {prompt} --agent {agent} -n {name} --no-ask-user` + permissão | `copilot -i {prompt} -n {name}` | `--agent` (pastas não confirmadas) | `-n` | `.github/copilot-instructions.md`, `AGENTS.md`, `CLAUDE.md`, `GEMINI.md` |
+| `copilot` | `copilot -p {prompt} -n {name} --no-ask-user` + permissão (sem `--agent`: as pastas de agentes não foram confirmadas; o papel vai no prompt) | `copilot -i {prompt} -n {name}` | `--agent` (pastas não confirmadas) | `-n` | `.github/copilot-instructions.md`, `AGENTS.md`, `CLAUDE.md`, `GEMINI.md` |
 | `codex` | `codex exec --sandbox workspace-write {prompt}` | `codex {prompt}` | sem flag equivalente: o papel vai no prompt | sem flag na criação | `AGENTS.md` |
 
 Cuidado de montagem: `-p` é o prompt em `claude`, `gemini` e `copilot`, mas é **perfil** no Codex (headless é `codex exec`); por isso cada perfil é escrito por inteiro e testado, e a validação recusa um prompt que comece com `-`. Níveis de permissão por CLI (`project` e `full`): `claude` (`--permission-mode acceptEdits` e allowlist de ferramentas; `--dangerously-skip-permissions`), `gemini` (`--approval-mode auto_edit`; `yolo`, com `--sandbox`), `copilot` (`--allow-tool` granular; `--allow-all-tools`), `codex` (`--sandbox workspace-write`; `--dangerously-bypass-approvals-and-sandbox`). Flags de permissão para comandos de shell no modo `project` de `gemini` e `codex` não foram confirmadas: ficam `a confirmar`.

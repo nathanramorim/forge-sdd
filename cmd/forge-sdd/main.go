@@ -317,7 +317,7 @@ func runUpdateFlow(cmd *cobra.Command, targetDir string) error {
 			case config.AgentGemini:
 				fmt.Println("  • Gemini: leia GEMINI.md e abra o projeto no Gemini")
 			case config.AgentOpenAI:
-				fmt.Println("  • OpenAI: leia OPENAI.md e configure sua chave de API")
+				fmt.Println("  • OpenAI/Codex: leia AGENTS.md (é o arquivo que o Codex lê) e configure sua chave de API")
 			case config.AgentCopilot:
 				fmt.Println("  • Copilot: aceite as extensões recomendadas no VS Code")
 			}

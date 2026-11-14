@@ -202,3 +202,17 @@ func TestSessions_AgenteInvalidoERecusado(t *testing.T) {
 	_, err = SessionsFor(lenv("linux", nil, nil), cfg)
 	assert.Error(t, err, "sem perfil não abre")
 }
+
+func TestSessions_PontoEVirgulaNoWindowsERecusado(t *testing.T) {
+	// ; é separador de subcomandos do wt.exe: um argumento de perfil com ; não pode chegar à linha de comando.
+	cfg := config.DefaultForgeConfig()
+	cfg.CLIProfiles[config.CLIGemini] = config.CLIProfile{Command: "gemini", Args: []string{"-p", "{prompt}"}, InteractiveArgs: []string{"-i", "{prompt}", "a;b"}}
+	cfg.Sessions = map[string]string{config.SessionRoleDiscovery: config.CLIGemini}
+	env := lenv("windows", map[string]bool{"wt.exe": true}, nil)
+	env.Dir, env.Bin = `C:\work\proj`, `C:\f\forge-sdd.exe`
+	_, err := SessionsFor(env, cfg)
+	assert.Error(t, err)
+	// No POSIX o mesmo argumento vai entre aspas simples e é aceito.
+	_, err = SessionsFor(lenv("linux", nil, nil), cfg)
+	assert.NoError(t, err)
+}

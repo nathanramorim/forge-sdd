@@ -24,7 +24,7 @@ Na 4.1.0-beta o pipeline abre as três sessões com **uma única CLI para todas*
 **1. Menu em dois caminhos.** `forge` (terminal interativo) mostra:
 - **Pipeline multi-sessão:** iniciar as 3 sessões (escolhendo o agente de cada uma), só ver os comandos de abertura, ativar ou reconfigurar (`pipeline init`), ver fila e inbox, recuperar jobs presos, diagnóstico (CLI instalada, arquivos do agente, `forge.json` válido) e abrir o guia.
 - **Estrutura padrão (sessão única):** status das iniciativas, painel da fila, gate (Camada A), doctor, instalar ou atualizar a estrutura e "ver todos os comandos".
-- Num projeto sem Forge, a primeira opção é instalar. Setas e Enter navegam, Esc volta um nível, `q` sai. Sem terminal interativo (CI, pipe) o comando imprime a ajuda curta e sai, sem travar.
+- Num projeto sem Forge, a primeira opção é instalar. Setas e Enter navegam, Esc volta um nível (no menu principal, sai) e a opção Sair encerra. Sem terminal interativo (CI, pipe) o comando imprime a ajuda curta e sai, sem travar.
 
 **2. Seletor de agente por sessão.** Três perguntas (`forge-discovery`, `forge-builder`, `forge-reviewer`), cada uma com Claude, Gemini, Copilot e Codex; a última escolha vem marcada, e as CLIs que não estão no PATH aparecem com aviso. Na linha de comando, o mesmo vale sem menu: `forge-sdd up --discovery claude --builder codex --reviewer gemini`, para scripts.
 

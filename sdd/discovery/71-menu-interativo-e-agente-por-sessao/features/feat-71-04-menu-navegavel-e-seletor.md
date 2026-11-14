@@ -33,7 +33,7 @@
 - Skill: `novo-subcomando-cli-sdd`.
 
 ## Escopo
-1. `forge` com TTY abre o menu: **Pipeline multi-sessão** (iniciar as 3 sessões, ver os comandos de abertura, ativar ou reconfigurar, fila e inbox, recuperar jobs presos, diagnóstico, abrir o guia) e **Estrutura padrão** (status das iniciativas, painel da fila, gate, doctor, instalar ou atualizar, ver todos os comandos). Num projeto sem Forge, instalar é a primeira opção. Setas e Enter navegam, Esc volta um nível, `q` sai.
+1. `forge` com TTY abre o menu: **Pipeline multi-sessão** (iniciar as 3 sessões, ver os comandos de abertura, ativar ou reconfigurar, fila e inbox, recuperar jobs presos, diagnóstico, abrir o guia) e **Estrutura padrão** (status das iniciativas, painel da fila, gate, doctor, instalar ou atualizar, ver todos os comandos). Num projeto sem Forge, instalar é a primeira opção. Setas e Enter navegam, Esc volta um nível (no menu principal, sai) e a opção Sair encerra.
 2. Seletor: três perguntas (`forge-discovery`, `forge-builder`, `forge-reviewer`) com Claude, Gemini, Copilot e Codex; a escolha lembrada vem marcada; CLI fora do PATH aparece com aviso. Depois, escolha do nível de permissão com o que cada um libera, o resumo da checagem prévia e a confirmação; só então grava `sessions` e abre.
 3. Sem TTY (`isatty` falso): imprime a ajuda curta e sai com 0, sem perguntar nada.
 4. O menu chama funções (`runStatus`, `runGate`, `runDoctor`, `busList`, `inboxList`, `runUp`, `runPipelineInit`, `runInitFlow`, `runUpdateFlow`) e não reexecuta o binário; o menu roda uma ação e sai (não é painel ao vivo).

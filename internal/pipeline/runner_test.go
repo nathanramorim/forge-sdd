@@ -26,7 +26,7 @@ func TestBuildArgv_PerfisClaudeEAgy(t *testing.T) {
 	cmd, args, err = BuildArgv(def.CLIProfiles[config.CLIAgy], spec)
 	require.NoError(t, err)
 	assert.Equal(t, "agy", cmd)
-	assert.Equal(t, []string{"--agent", "builder", "-i", "Execute o job x"}, args)
+	assert.Equal(t, []string{"-p", "Execute o job x"}, args, "agy: -p confirmado no uso real; sem permissões no spec o marcador expande para nada")
 }
 
 func TestBuildArgv_PromptComShellMetacaracteresEhUmUnicoArgumento(t *testing.T) {

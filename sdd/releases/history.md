@@ -6,7 +6,7 @@ Este arquivo registra o histórico de entregas de produto deste projeto.
 
 ### Versão 4.2.0 — Menu Navegável e Agente por Sessão do Pipeline (Beta)
 
-Compatível com a 4.1.0-beta: um `forge.json` da 4.1 continua válido e se comporta igual (Discovery 71, features `71-01` a `71-05`). Sem `forge.json` o fluxo de implementação segue como na 4.0.0-beta.
+Compatível com a 4.1.0-beta: um `forge.json` da 4.1 continua válido e escolhe o mesmo agente nas três sessões (Discovery 71, features `71-01` a `71-05`). Sem `forge.json` o fluxo de implementação segue como na 4.0.0-beta.
 
 *   **`forge` abre um menu navegável (setas, Enter, Esc volta):** dois caminhos, **Pipeline multi-sessão** (iniciar as 3 sessões, ver os comandos, reconfigurar, fila e inbox, recuperar jobs presos, diagnóstico, guia) e **Estrutura padrão** (status, painel da fila, gate, doctor, instalar ou atualizar). Num projeto sem Forge a primeira opção é instalar. Sem terminal interativo, `forge` imprime a ajuda curta e sai, sem travar.
 *   **Um agente por sessão:** Claude, Gemini, Copilot ou Codex em `forge-discovery`, `forge-builder` e `forge-reviewer`, escolhidos no menu (a última escolha vem marcada e é gravada em `sessions` de `forge.json`) ou por flags: `forge-sdd up --discovery claude --builder codex --reviewer gemini`.

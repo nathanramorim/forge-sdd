@@ -146,3 +146,24 @@ func TestScaffold_OpenAIGeraAGENTSmdEPreservaODoUsuario(t *testing.T) {
 	assert.Equal(t, own, string(got))
 	assert.False(t, IsGeneratedAgentsMD(filepath.Join(dir2, "AGENTS.md")))
 }
+
+func TestAgentsMD_TituloIgualDoUsuarioNaoEhGerado(t *testing.T) {
+	dir := t.TempDir()
+	own := "# AGENTS.md — Regras do time\n\nNão mexer.\n"
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "AGENTS.md"), []byte(own), 0o644))
+	assert.False(t, IsGeneratedAgentsMD(filepath.Join(dir, "AGENTS.md")), "só o título não basta: falta o marcador")
+
+	cfg := config.Config{Project: "demo", Stack: "go", DB: "none", Lang: "pt-BR", Agents: []string{config.AgentOpenAI}, SddVersion: "4.2.0-beta"}
+	_, err := Run(cfg, dir)
+	require.NoError(t, err)
+	got, _ := os.ReadFile(filepath.Join(dir, "AGENTS.md"))
+	assert.Equal(t, own, string(got), "init/update não sobrescrevem o arquivo do usuário, mesmo com o título parecido")
+
+	// O gerado tem o marcador e é reconhecido como gerado.
+	dir2 := t.TempDir()
+	_, err = Run(cfg, dir2)
+	require.NoError(t, err)
+	assert.True(t, IsGeneratedAgentsMD(filepath.Join(dir2, "AGENTS.md")))
+	gen, _ := os.ReadFile(filepath.Join(dir2, "AGENTS.md"))
+	assert.Contains(t, string(gen), "<!-- forge-sdd:generated -->")
+}

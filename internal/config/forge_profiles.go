@@ -76,9 +76,10 @@ func defaultProfiles() map[string]CLIProfile {
 			Args:            []string{"exec", MarkerPermissions, "{prompt}"},
 			InteractiveArgs: []string{"{prompt}"},
 		},
+		// agy: `-p` e `--dangerously-skip-permissions` confirmados no uso real (barbearia-app, 2026-11-14).
 		CLIAgy: {
 			Command:         "agy",
-			Args:            []string{"--agent", "{agent}", "-i", "{prompt}"},
+			Args:            []string{"-p", "{prompt}", MarkerPermissions},
 			InteractiveArgs: []string{"--agent", "{agent}", "-i"},
 		},
 	}
@@ -92,7 +93,7 @@ func PermissionArgs(cli, level string, allow []string) []string {
 	switch level {
 	case PermissionFull:
 		switch cli {
-		case CLIClaude:
+		case CLIClaude, CLIAgy:
 			return []string{"--dangerously-skip-permissions"}
 		case CLIGemini:
 			return []string{"--approval-mode", "yolo"}
@@ -103,6 +104,9 @@ func PermissionArgs(cli, level string, allow []string) []string {
 		}
 	case PermissionProject:
 		switch cli {
+		case CLIAgy:
+			// Sem allowlist confirmada: o agy só roda o worker sem confirmação com o bypass (igual a full).
+			return []string{"--dangerously-skip-permissions"}
 		case CLIClaude:
 			args := []string{"--permission-mode", "acceptEdits", "--allowedTools", "Read", "Edit", "Write", "Glob", "Grep"}
 			for _, c := range allow {

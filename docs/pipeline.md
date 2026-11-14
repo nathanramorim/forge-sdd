@@ -1,4 +1,4 @@
-# Pipeline multi-sessão do Forge SDD (v4.1.0-beta)
+# Pipeline multi-sessão do Forge SDD (v4.2.0-beta)
 
 > Este guia também é instalado em cada projeto, em `.forge/LEIA-ME.md`, e aparece resumido ao final de `forge-sdd init`, `forge-sdd update` e `forge-sdd pipeline init`.
 
@@ -60,7 +60,7 @@ Você decide e aprova o PR. O pipeline nunca mescla nada.
 
 - `.forge/config/forge.json`: agente de cada sessão (`sessions`), nível de permissão, tarefas em paralelo, worktrees, tentativas de rework, status do card. Copie de `forge.json.example` se quiser recomeçar.
 - `.forge/config/notifications.json`: canais (inbox sempre ligado; toast, e-mail, webhook e comentário no card opcionais). URLs e senhas **só por variável de ambiente** (`url_env`, `password_env`), nunca no arquivo.
-- **Permissões do agente:** o worker roda o agente sem interação. O perfil padrão do `claude` não traz flags de permissão: ajuste `cli_profiles` em `forge.json` para ele poder editar arquivos e rodar comandos sem esperar você.
+- **Permissões do agente:** escolha o nível `project` ou `full` (veja acima, no menu ou em `permissions` de `forge.json`); só edite `cli_profiles` para ajustes finos.
 - Sem `forge.json`, o `/implementar` volta ao fluxo de sessão única da 4.0.0-beta.
 
 ## Quando algo não anda

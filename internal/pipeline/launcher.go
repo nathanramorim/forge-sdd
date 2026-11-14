@@ -53,7 +53,7 @@ func DefaultLaunchEnv(goos, dir, bin string) LaunchEnv {
 
 var (
 	safeBinRe   = regexp.MustCompile(`^[A-Za-z0-9._/:\\ ()+-]+$`)
-	winUnsafe   = regexp.MustCompile(`["%^&|<>\r\n\x00]`)
+	winUnsafe   = regexp.MustCompile(`["%^&|<>;\r\n\x00]`) // ; é separador de subcomandos do wt.exe
 	posixUnsafe = regexp.MustCompile(`[\r\n\x00]`)
 )
 
