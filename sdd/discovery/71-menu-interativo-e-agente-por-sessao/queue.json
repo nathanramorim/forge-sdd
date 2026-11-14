@@ -2,7 +2,7 @@
   "feature_id": "feat-71",
   "branch": "feat/71-menu-interativo-e-agente-por-sessao",
   "spec_status": "reviewed",
-  "updated_at": "2026-11-14T01:46:00Z",
+  "updated_at": "2026-11-14T01:48:02Z",
   "items": [
     {
       "task_id": "71-01",
@@ -72,7 +72,7 @@
       "task_id": "71-05",
       "title": "feat-71-05 — Docs, Scaffold e Release 4.2.0",
       "spec_path": "sdd/discovery/71-menu-interativo-e-agente-por-sessao/features/feat-71-05-docs-scaffold-e-release.md",
-      "status": "queued",
+      "status": "review_pending",
       "rules": [
         "DUP-10",
         "FLX-05",
@@ -82,7 +82,7 @@
         "TST-05"
       ],
       "skills_used": [],
-      "attempts": 0
+      "attempts": 1
     }
   ]
 }

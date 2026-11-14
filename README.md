@@ -46,11 +46,10 @@ Você conversa numa sessão enquanto outras duas constroem e revisam. Depois de 
 
 ```bash
 npm install -g @nathanramorim/forge-sdd@beta   # versão com o pipeline
-forge-sdd pipeline init                        # 1. ativa o modo (cria .forge/config/forge.json)
-forge-sdd up --cli claude                      # 2. abre 3 terminais: forge-discovery, forge-builder, forge-reviewer
-# 3. na sessão forge-discovery:
-/implementar nome-da-feature
+forge                                          # menu: Pipeline multi-sessão → Iniciar as 3 sessões
 ```
+
+O menu pergunta qual agente roda em cada sessão (Claude, Gemini, Copilot ou Codex), mostra o nível de permissão e a checagem antes de abrir, e lembra a escolha. Sem menu: `forge-sdd pipeline init` e `forge-sdd up --discovery claude --builder codex --reviewer gemini`. Depois, na sessão `forge-discovery`: `/implementar nome-da-feature`.
 
 O Builder constrói em paralelo e abre o PR; o Reviewer confere ADRs e rules e devolve com feedback (até 3 vezes); quando estiver conforme, você é avisado na sessão de Discovery e aprova. O `init` e o `update` já mostram esse passo a passo, e o guia fica no projeto em `.forge/LEIA-ME.md`. Guia completo: [docs/pipeline.md](docs/pipeline.md).
 

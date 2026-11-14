@@ -12,8 +12,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// version é injetada via ldflags: -X main.version=4.1.0-beta
-var version = "4.1.0-beta"
+// version é injetada via ldflags: -X main.version=4.2.0-beta
+var version = "4.2.0-beta"
 
 var rootCmd = &cobra.Command{
 	Use:   "forge-sdd",
@@ -352,13 +352,14 @@ func printSummaryReport(cfg config.Config, targetDir string, fileCount int) {
 // já ativo (forge.json existe), só lembra de abrir as sessões.
 func printPipelineHint(targetDir string) {
 	if _, found, err := config.LoadForgeConfig(targetDir); err == nil && found {
-		fmt.Println("\nPipeline multi-sessão ATIVO: forge-sdd up abre forge-discovery, forge-builder e forge-reviewer.")
+		fmt.Println("\nPipeline multi-sessão ATIVO: rode forge (menu) ou forge-sdd up para abrir forge-discovery, forge-builder e forge-reviewer.")
 		fmt.Println("  Guia: .forge/LEIA-ME.md")
 		return
 	}
 	fmt.Println("\nQuer que o Builder e o Reviewer trabalhem em outras sessões enquanto você conversa? (opcional)")
+	fmt.Println("  Mais fácil: rode forge e escolha Pipeline multi-sessão (menu, com o agente de cada sessão).")
 	fmt.Println("  1. forge-sdd pipeline init      ativa o modo (cria .forge/config/forge.json)")
-	fmt.Println("  2. forge-sdd up --cli claude    abre 3 terminais: forge-discovery, forge-builder, forge-reviewer")
+	fmt.Println("  2. forge-sdd up --discovery claude --builder codex --reviewer gemini   abre as 3 sessões")
 	fmt.Println("  3. /implementar <feature>       na sessão forge-discovery: valida o card e despacha")
 	fmt.Println("  Guia rápido: .forge/LEIA-ME.md")
 }
