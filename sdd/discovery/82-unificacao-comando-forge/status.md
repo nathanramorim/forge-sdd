@@ -2,13 +2,13 @@
 
 ## Status
 ```
-Iniciativa 82 concebida na branch feat/82-unificacao-comando-forge.
-Discovery, Criteria e Plan elaborados com sucesso.
-Pronto para aprovação humana (Gate 1).
+Iniciativa 82 fatiada na branch feat/82-unificacao-comando-forge.
+Tasks 82-01, 82-02 e 82-03 geradas e enfileiradas na fila com DAG de dependências.
+Pronto para despacho e execução pelo Builder.
 ```
 
 ## Proximo passo
-Aprovação humana do Gate 1 e execução do /split-features para enfileirar as tasks ao Builder.
+Despacho e implementação das tarefas 82-01, 82-02 e 82-03 pelo Builder.
 
 ## A confirmar
-Aprovação do escopo de unificação e quebra de tarefas.
+Início da implementação da Task 82-01.
