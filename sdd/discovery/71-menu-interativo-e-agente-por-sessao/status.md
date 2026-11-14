@@ -2,12 +2,12 @@
 
 ## Status
 ```
-FLX-01 aprovado; 5 tasks (71-01..71-05) enfileiradas
-Nenhum codigo alterado
+71-01..71-03 review_pending (commits locais); 71-04 em andamento
+Camada B por task: 3 revisoes falharam por limite de uso, refazer
 ```
 
 ## Proximo passo
-Implementar a fila: 71-01 primeiro; 71-02 e 71-03 podem andar em paralelo depois dela.
+Terminar 71-04 e 71-05; depois tratar o backlog do uso real (barbearia-app).
 
-## A confirmar
-Flags de permissao e nome de sessao de gemini, copilot e codex (pesquisadas, nao testadas); Codex le AGENTS.md, o scaffold gera OPENAI.md (71-03).
+## Backlog do uso real (depois da fila)
+1 abrir por tmux (paineis nomeados); 2 visao limpa do que cada sessao faz (hoje o worker fica mudo); 3 split entrega ao Builder e a Discovery nao executa; 4 motivo legivel de falha (limite de uso) e hooks velhos do Studio (porta 47600).

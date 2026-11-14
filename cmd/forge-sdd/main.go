@@ -20,16 +20,6 @@ var rootCmd = &cobra.Command{
 	Short: "Scaffolda estruturas Forge-SDD em qualquer projeto",
 	Long: `forge-sdd é um CLI que gera a estrutura completa Forge-SDD
 (sdd/, .github/, .vscode/) pronta para uso com GitHub Copilot.`,
-	RunE: func(cmd *cobra.Command, args []string) error {
-		if len(args) == 0 {
-			if config.DetectProject(".") {
-				return runUpdateFlow(cmd, ".")
-			} else {
-				return runInitFlow(cmd, ".")
-			}
-		}
-		return cmd.Help()
-	},
 }
 
 var versionCmd = &cobra.Command{
