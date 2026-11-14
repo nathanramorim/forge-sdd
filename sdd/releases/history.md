@@ -4,6 +4,12 @@ Este arquivo registra o histórico de entregas de produto deste projeto.
 
 ## Entregas
 
+### Versão 4.5.2 — Fix no Monitor ps: Isolamento Estrito de Processos entre Projetos (Beta)
+
+Compatível com a 4.5.1-beta.
+
+*   **Isolamento Estrito no `forge ps`:** impede o vazamento de processos de outros projetos que compartilham o mesmo servidor daemon do Tmux. Ao inspecionar processos de um projeto, o comando obtém a correlação exata de sessão via `tmux list-panes -a -F "#{session_name}|#{pane_pid}|..."` e nunca ingere processos de outras sessões nem o processo raiz compartilhado do daemon Tmux como raiz de busca de filhos.
+
 ### Versão 4.5.1 — Fix no Tmux: Correção na sintaxe do set-option (Beta)
 
 Compatível com a 4.5.0-beta.
