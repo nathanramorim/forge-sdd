@@ -1,13 +1,14 @@
 <div class="hero">
-  <p class="eyebrow">Framework Open Source (MIT) · Orquestração em 5 Estações</p>
-  <h1>De um agente fazendo tudo sozinho para 5 especialistas em esteira.</h1>
+  <p class="eyebrow">Framework Open Source (MIT) · Pipeline de 3 sessões</p>
+  <h1>Você decide numa sessão. Outras duas constroem e revisam sozinhas.</h1>
   <p class="lead">
-    Instale em qualquer repositório com um comando. Cada estação recebe um artefato validado, executa sua especialidade em fila ou em paralelo e passa pela auditoria de Governança Read-Only antes de voltar para você.
+    Discovery, Builder e Reviewer rodam em terminais separados e conversam por uma fila local. Cada sessão mostra o que está fazendo, o PR chega revisado contra as suas ADRs e rules, e só você aprova. Funciona com Claude, Gemini, Copilot e Codex, e cada sessão pode usar um agente diferente.
   </p>
 
   <div class="hero-cta">
-    <a class="btn" href="#emulador">Testar no Emulador Real</a>
+    <a class="btn" href="#emulador">Ver o pipeline funcionando</a>
     <a class="btn solid" href="#instalacao">Como Instalar &amp; Usar</a>
+    <a class="btn ghost" href="/guia-pipeline.html">Guia do pipeline</a>
     <a class="btn ghost" href="https://github.com/nathanramorim/forge-sdd" target="_blank" rel="noopener noreferrer">
       <svg aria-hidden="true"><use href="#ico-github"/></svg>
       <span>GitHub (MIT)</span>
@@ -20,7 +21,7 @@
 
   <div>
     <div class="install-pill">
-      <span>$ npx @nathanramorim/forge-sdd@latest init</span>
+      <span>$ npm i -g @nathanramorim/forge-sdd@beta</span>
       <button type="button" id="copyHeroBtn">Copiar</button>
     </div>
   </div>

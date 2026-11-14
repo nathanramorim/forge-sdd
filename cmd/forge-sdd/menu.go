@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 
 	"github.com/forge-sdd/cli/internal/config"
@@ -409,7 +410,7 @@ func (e *menuEnv) startSessions() {
 			break
 		}
 	}
-	ok, err = e.p.Confirm("Abrir agora? "+summary(cfg)+" · permissões "+cfg.Permissions, true)
+	ok, err = e.p.Confirm("Abrir agora? "+summary(cfg)+" · permissões "+cfg.Permissions+" · "+e.terminalLabel(cfg), true)
 	if err != nil || !ok {
 		return
 	}
@@ -481,4 +482,18 @@ func (e *menuEnv) showGuide() {
 		fmt.Fprintf(e.out, "\nO guia fica em .forge/LEIA-ME.md (rode forge-sdd update para instalá-lo) e em docs/pipeline.md.\n")
 	}
 	_ = e.p.Pause("Enter para voltar ao menu")
+}
+
+// terminalLabel diz onde as sessões vão abrir: "no tmux (3 painéis)" ou "em janelas do sistema".
+func (e *menuEnv) terminalLabel(cfg config.ForgeConfig) string {
+	look := e.preflightEnv.LookPath
+	if look == nil {
+		look = pipeline.DefaultPreflightEnv().LookPath
+	}
+	env := pipeline.LaunchEnv{GOOS: runtime.GOOS, LookPath: look}
+	term, err := pipeline.ResolveTerminal("", cfg, env)
+	if err != nil || term == config.TerminalNative {
+		return "em janelas do sistema"
+	}
+	return "no tmux (3 painéis)"
 }

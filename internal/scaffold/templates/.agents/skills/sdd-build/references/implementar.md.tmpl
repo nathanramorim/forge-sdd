@@ -3,7 +3,7 @@
 **Uso:** `/implementar` (executa a fila da iniciativa da branch atual) ou `/implementar <nome-da-feature>`.
 
 ## Modo
-- **Pipeline** (existe `.forge/config/forge.json`): `/implementar <feature>` (alias `/implement`) **não constrói nesta sessão**. Consulte o card da feature pelo MCP do gerenciador de projeto, grave `card-evidence.json` na pasta da iniciativa (`provider`, `id`, `url`, `status`, `feature` e `checked_at` em RFC3339) e rode `forge-sdd dispatch <feature>`. Se o gate listar pendências, repasse-as ao usuário e pare. Se passar, mova o card para `pm_mcp.status_on_implement` pelo MCP e confirme o job enfileirado; o Builder e o Reviewer rodam nas outras sessões (`forge-up`).
+- **Pipeline** (existe `.forge/config/forge.json`): `/implementar <feature>` (alias `/implement`) **não constrói nesta sessão**. Consulte o card da feature pelo MCP do gerenciador de projeto, grave `card-evidence.json` na pasta da iniciativa (`provider`, `id`, `url`, `status`, `feature` e `checked_at` em RFC3339) e rode `forge-sdd dispatch <feature>`. Se o gate listar pendências, repasse-as ao usuário e pare. Se passar, mova o card para `pm_mcp.status_on_implement` pelo MCP e confirme o job enfileirado; o Builder e o Reviewer rodam nas outras sessões (`forge` ou `forge-sdd up`). Nesta sessão, nunca edite `forge.json` nem o código da feature; grave `card-evidence.json` só conforme o passo acima, e só com `pm_mcp.require_existing_card: true` (com `false` não há card nem evidência).
 - **Sessão única** (sem `forge.json`): o fluxo abaixo, o da 4.0.0-beta.
 
 ## 1. Resolver o alvo e reportar o plano

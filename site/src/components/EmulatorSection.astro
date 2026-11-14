@@ -8,9 +8,9 @@ const step0 = EMU_STEPS[0];
 <section id="emulador">
   <div class="sec-h">
     <div>
-      <p class="eyebrow" style="color:var(--warn)">02 · Emulador Interativo Fiel</p>
-      <h2>Veja como uma feature real nasce, roda em paralelo e passa na auditoria.</h2>
-      <p>Clique nos 5 comandos abaixo na ordem em que você usa no dia a dia. À esquerda você vê o terminal/chat real; à direita, a estação ativa e os arquivos gerados em <span class="mono">sdd/</span>.</p>
+      <p class="eyebrow" style="color:var(--warn)">02 · O pipeline na prática</p>
+      <h2>Veja uma feature nascer numa sessão, ser construída em outra e chegar revisada na sua.</h2>
+      <p>Clique nos 5 passos abaixo na ordem em que você usa no dia a dia. À esquerda você vê o que aparece no terminal da sessão; à direita, quem está trabalhando e os arquivos que mudam. Não há painel para acompanhar: cada sessão mostra o que faz no próprio terminal.</p>
     </div>
     <div>
       <button class="btn solid sm" id="emuNextStepBtn" type="button">Executar próximo passo &rarr;</button>
@@ -19,7 +19,7 @@ const step0 = EMU_STEPS[0];
 
   <div class="emu-shell">
     <div class="emu-topbar">
-      <div class="emu-dots"><i></i><i></i><i></i><span class="mono" style="margin-left:6px">meu-projeto — forge-sdd v3.0.0-beta</span></div>
+      <div class="emu-dots"><i></i><i></i><i></i><span class="mono" style="margin-left:6px">meu-projeto — forge-sdd v4.2.0-beta</span></div>
       <div class="emu-cmd-tabs" id="emuTabs">
         {EMU_STEPS.map((step, idx) => (
           <button
@@ -27,10 +27,10 @@ const step0 = EMU_STEPS[0];
             class={`emu-cmd-btn ${idx === 0 ? 'active' : ''}`}
             data-emu={idx}
           >
-            {idx === 0 ? '1. $ forge init' :
+            {idx === 0 ? '1. $ forge' :
              idx === 1 ? '2. /discovery' :
              idx === 2 ? '3. /split-features' :
-             idx === 3 ? '4. /proxima-feature' : '5. /revisar'}
+             idx === 3 ? '4. Builder' : '5. Reviewer'}
           </button>
         ))}
       </div>

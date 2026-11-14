@@ -70,7 +70,7 @@ func TestWorker_BuilderComPRGeraRevisaoEConclui(t *testing.T) {
 	var outcomes []string
 	out := runOnce(t, dir, layout.RoleBuilder, runner, func(j bus.Job, o string) { outcomes = append(outcomes, j.ID+":"+o) })
 
-	assert.Contains(t, out, "job job-1 concluído")
+	assert.Contains(t, out, "■ concluído")
 	assert.Equal(t, []string{"job-1:done"}, outcomes)
 
 	done, _ := bus.List(dir, layout.RoleBuilder, layout.StateDone)

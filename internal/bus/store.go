@@ -329,6 +329,17 @@ func Fail(dir, role, id, worker, reason string, now time.Time) (*Entry, error) {
 	return move(dir, role, e, layout.StateFailed, worker, reason, now)
 }
 
+// Requeue devolve um job de processing a pending sem gastar tentativa (attempt fica como está): o
+// agente não conseguiu trabalhar por um motivo externo, como o limite de uso. Só o dono do lease
+// pode devolver. O nome do arquivo (prioridade e data) não muda, então a ordem da fila é mantida.
+func Requeue(dir, role, id, worker, reason string, now time.Time) (*Entry, error) {
+	e, err := ownEntry(dir, role, id, worker)
+	if err != nil {
+		return nil, err
+	}
+	return move(dir, role, e, layout.StatePending, worker, "adiado: "+reason, now)
+}
+
 // Renew estende o lease do job reivindicado pelo worker.
 func Renew(dir, role, id, worker string, ttl time.Duration, now time.Time) error {
 	e, err := ownEntry(dir, role, id, worker)

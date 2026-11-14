@@ -7,8 +7,8 @@ interface Props {
 }
 
 const {
-  title = "Forge-SDD 3.0 — Orquestração Autônoma em 5 Estações com Governança Read-Only",
-  description = "Framework de desenvolvimento guiado por especificações (SDD) para equipes que usam agentes de IA. Substitui o caos de um único agente por uma esteira de 5 estações especializadas, governança em 3 camadas e portões determinísticos.",
+  title = "Forge-SDD 4.2 — Pipeline de 3 sessões: você decide, o Builder constrói e o Reviewer revisa",
+  description = "Framework de desenvolvimento guiado por especificações (SDD) para equipes que usam agentes de IA. Substitui o caos de um único agente por 3 sessões que se falam por uma fila local (Discovery, Builder e Reviewer), com 5 estações especializadas, governança em 3 camadas e portões determinísticos. Funciona com Claude, Gemini, Copilot e Codex.",
   canonicalUrl = "https://forge-sdd.org/",
   ogImage = "https://forge-sdd.org/og-image.svg"
 } = Astro.props;
@@ -20,7 +20,7 @@ const softwareApplicationSchema = {
   "alternateName": "forge-sdd",
   "applicationCategory": "DeveloperApplication",
   "operatingSystem": "macOS, Linux, Windows",
-  "softwareVersion": "3.0.0-beta",
+  "softwareVersion": "4.2.0-beta",
   "license": "https://opensource.org/licenses/MIT",
   "offers": {
     "@type": "Offer",
@@ -50,10 +50,10 @@ const faqSchema = {
   "mainEntity": [
     {
       "@type": "Question",
-      "name": "O que é o Forge-SDD 3.0?",
+      "name": "O que é o Forge-SDD 4.2?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "O Forge-SDD é um framework open source de desenvolvimento guiado por especificações (SDD) que orquestra agentes de inteligência artificial em uma esteira de 5 estações especializadas com governança somente-leitura."
+        "text": "O Forge-SDD é um framework open source de desenvolvimento guiado por especificações (SDD) que orquestra agentes de inteligência artificial em um pipeline de 3 sessões (Discovery, Builder e Reviewer) apoiado em 5 estações especializadas e em governança somente-leitura. Você decide numa sessão; outras duas constroem e revisam, e só você aprova o PR."
       }
     },
     {
@@ -69,7 +69,7 @@ const faqSchema = {
       "name": "Com quais ferramentas o Forge-SDD é compatível?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "É 100% compatível com Claude Code, Google Gemini CLI, Antigravity, GitHub Copilot e qualquer IDE com suporte a subcomandos CLI."
+        "text": "Funciona com Claude Code, Gemini CLI, GitHub Copilot e Codex (cada sessão do pipeline pode usar um agente diferente) e com qualquer IDE que aceite subcomandos CLI."
       }
     }
   ]

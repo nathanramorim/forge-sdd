@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/forge-sdd/cli/internal/config"
 	"os"
 	"strings"
 
@@ -57,6 +58,9 @@ var queueNextCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		dir, _ := cmd.Flags().GetString("dir")
 		asJSON, _ := cmd.Flags().GetBool("json")
+		if err := pipelineModeGuard(cmd, dir); err != nil {
+			return err
+		}
 
 		item, err := queue.Next(dir)
 		if err != nil {
@@ -89,6 +93,9 @@ var queueCompleteCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		dir, _ := cmd.Flags().GetString("dir")
 		taskID := args[0]
+		if err := pipelineModeGuard(cmd, dir); err != nil {
+			return err
+		}
 
 		if err := queue.Complete(dir, taskID); err != nil {
 			return err
@@ -326,8 +333,10 @@ func init() {
 
 	queueNextCmd.Flags().String("dir", ".", "Diretório alvo do projeto Forge-SDD")
 	queueNextCmd.Flags().Bool("json", false, "Exibir saída em formato JSON")
+	queueNextCmd.Flags().Bool("local", false, "Em modo pipeline, constrói nesta sessão (por sua conta); o padrão é deixar o Builder construir")
 
 	queueCompleteCmd.Flags().String("dir", ".", "Diretório alvo do projeto Forge-SDD")
+	queueCompleteCmd.Flags().Bool("local", false, "Em modo pipeline, conclui nesta sessão (por sua conta)")
 
 	queueReviewCmd.Flags().String("dir", ".", "Diretório alvo do projeto Forge-SDD")
 	queueReviewCmd.Flags().String("verdict-file", "", "Caminho para arquivo JSON com o parecer da Camada B")
@@ -360,4 +369,34 @@ func init() {
 	queueCmd.AddCommand(queueHandoffCmd)
 	queueCmd.AddCommand(queueStationsCmd)
 	queueCmd.AddCommand(queueActivityCmd)
+}
+
+// pipelineModeGuard impede que a sessão Discovery construa: com .forge/config/forge.json (modo
+// pipeline), `queue next` e `queue complete` só valem sob um worker (FORGE_WORKER, definido pelo
+// runner) ou com --local, o uso consciente de quem quer construir na própria sessão.
+func pipelineModeGuard(cmd *cobra.Command, dir string) error {
+	if local, _ := cmd.Flags().GetBool("local"); local {
+		return nil
+	}
+	if os.Getenv("FORGE_WORKER") != "" {
+		return nil
+	}
+	// Com forge.json (válido ou não) o projeto está em modo pipeline: um arquivo quebrado por edição
+	// do agente não pode destravar a guarda. Só o arquivo ausente deixa tudo como na 4.0.
+	_, found, err := config.LoadForgeConfig(dir)
+	if !found && err == nil {
+		return nil
+	}
+	hint := ""
+	if err != nil {
+		hint = " (atenção: .forge/config/forge.json está inválido: " + firstLineOf(err.Error()) + ")"
+	}
+	return fmt.Errorf("modo pipeline: o Builder constrói nas outras sessões; use forge-sdd dispatch <iniciativa> (ou --local para construir nesta sessão por sua conta)%s", hint)
+}
+
+func firstLineOf(s string) string {
+	if i := strings.IndexByte(s, '\n'); i >= 0 {
+		return s[:i]
+	}
+	return s
 }

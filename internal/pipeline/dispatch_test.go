@@ -266,3 +266,35 @@ func TestDispatch_ADRNaoCitadaEmRulesNaoBloqueiaMasEntraComoReferencia(t *testin
 	require.False(t, res.Blocked(), "%v", res.Pending)
 	assert.Equal(t, []string{"sdd/spec/adr/adr-0003-estrategia-de-auth.md"}, res.Job.ADRRefs)
 }
+
+func TestDispatch_SemCardObrigatorio(t *testing.T) {
+	// Card desligado: nenhuma evidência é exigida e o job nasce sem card.
+	dir := project(t, func(dir string) {
+		cfg := config.DefaultForgeConfig()
+		cfg.PMMCP.RequireExistingCard = false
+		data, _ := json.Marshal(cfg)
+		testutil.WriteFile(t, dir, ".forge/config/forge.json", string(data))
+		_ = os.Remove(filepath.Join(dir, "sdd/discovery/77-auth-oauth/card-evidence.json"))
+	})
+	_, statErr := os.Stat(filepath.Join(dir, "sdd/discovery/77-auth-oauth/card-evidence.json"))
+	require.True(t, os.IsNotExist(statErr), "o teste parte sem arquivo de evidência")
+
+	res, err := Dispatch(dir, "auth-oauth", DispatchOptions{Now: now})
+	require.NoError(t, err)
+	require.False(t, res.Blocked(), "%v", res.Pending)
+	assert.True(t, res.Created)
+	assert.Empty(t, res.CardInstruction, "sem card não há card para mover")
+	jobs := builderPending(t, dir)
+	require.Len(t, jobs, 1)
+	assert.Equal(t, bus.Card{}, jobs[0].Job.Card)
+
+	// Card ligado (padrão): sem evidência continua bloqueando.
+	dir2 := project(t, func(dir string) {
+		_ = os.Remove(filepath.Join(dir, "sdd/discovery/77-auth-oauth/card-evidence.json"))
+	})
+	res, err = Dispatch(dir2, "auth-oauth", DispatchOptions{Now: now})
+	require.NoError(t, err)
+	assert.True(t, res.Blocked())
+	assert.Contains(t, res.Pending[0], "evidência")
+	assert.Empty(t, builderPending(t, dir2))
+}

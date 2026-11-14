@@ -2,13 +2,13 @@
   <div class="sec-h">
     <div>
       <p class="eyebrow">05 · Evolução de Arquitetura</p>
-      <h2>O que muda da geração v2.x para o Forge-SDD 3.0.</h2>
+      <h2>O que muda do agente solitário para o pipeline de 3 sessões.</h2>
     </div>
   </div>
 
   <div class="comp-grid">
     <div class="comp-card">
-      <span class="chip"><i style="--o:var(--faint)"></i>Antes (v2.x) · Agente Solitário</span>
+      <span class="chip"><i style="--o:var(--faint)"></i>Antes · Agente Solitário</span>
       <ul class="comp-list" style="--dot:var(--faint)">
         <li>
           <strong>Um único agente acumulando todas as funções</strong>
@@ -26,19 +26,19 @@
     </div>
 
     <div class="comp-card v3">
-      <span class="chip"><i style="--o:var(--accent)"></i>Agora (v3.0-beta) · 5 Estações em Esteira</span>
+      <span class="chip"><i style="--o:var(--accent)"></i>Agora (v4.2-beta) · 3 Sessões e 5 Estações</span>
       <ul class="comp-list" style="--dot:var(--accent)">
         <li>
-          <strong>Handoff explícito entre 5 especialistas</strong>
-          Líder recebe a demanda &rarr; PM/Arquiteto especifica com seu aval &rarr; Planejador fatia &rarr; Builders constroem em paralelo &rarr; Governança audita em modo Read-Only.
+          <strong>Três sessões que se falam por uma fila local</strong>
+          A Discovery conversa com você; o Builder constrói em paralelo e abre o PR; o Reviewer confere ADRs e rules e devolve com feedback (até 3 vezes) ou avisa que está pronto. Cada sessão pode usar um agente diferente (Claude, Gemini, Copilot ou Codex).
         </li>
         <li>
-          <strong>Constituição por IDs + Regras sob demanda</strong>
-          Princípios fixos ficam enxutos com IDs estáveis; o "como cumprir" é carregado de <span class="mono">.agents/rules/sdd-*.md</span> apenas quando a tarefa exige.
+          <strong>Cada sessão mostra o que faz, no próprio terminal</strong>
+          Linhas curtas do que o agente edita e roda, com os painéis lado a lado no tmux. Se o agente bate o limite de uso, o job volta à fila e o worker retoma sozinho. Sem painel externo para acompanhar.
         </li>
         <li>
-          <strong>Motor de Auto-Skills (Regra de Três)</strong>
-          Atividades padronizadas que se repetem 3 vezes viram Skills reutilizáveis automaticamente sincronizadas entre os agentes.
+          <strong>Estado por iniciativa e instruções enxutas</strong>
+          Cada demanda vive na sua pasta (<span class="mono">sdd/discovery/&lt;id&gt;-&lt;nome&gt;/</span>), sem índice global que gera conflito entre branches; 5 skills por estação carregam só o contexto da tarefa.
         </li>
       </ul>
     </div>

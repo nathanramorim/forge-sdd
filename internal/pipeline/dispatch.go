@@ -189,8 +189,14 @@ func Dispatch(dir, feature string, opts DispatchOptions) (*DispatchResult, error
 	if evPath == "" {
 		evPath = rel(filepath.Join(base, CardEvidenceFile))
 	}
-	ev, pend := loadEvidence(dir, evPath, feature, initiative, cfg, now)
-	res.Pending = append(res.Pending, pend...)
+	// Com o card desligado (pm_mcp.require_existing_card: false) não há evidência a exigir: o job nasce
+	// sem card. Exigir o arquivo mesmo assim empurrava a Discovery a fabricá-lo.
+	var ev CardEvidence
+	if cfg.PMMCP.RequireExistingCard {
+		var pend []string
+		ev, pend = loadEvidence(dir, evPath, feature, initiative, cfg, now)
+		res.Pending = append(res.Pending, pend...)
+	}
 
 	sort.Strings(res.Pending)
 	if res.Blocked() {
@@ -217,7 +223,9 @@ func Dispatch(dir, feature string, opts DispatchOptions) (*DispatchResult, error
 		ReworkFeedback:    []bus.Feedback{},
 	}
 	res.Job = &job
-	res.CardInstruction = fmt.Sprintf("Atualize o card %s (%s) para %q via MCP.", ev.ID, ev.URL, cfg.PMMCP.StatusOnImplement)
+	if cfg.PMMCP.RequireExistingCard {
+		res.CardInstruction = fmt.Sprintf("Atualize o card %s (%s) para %q via MCP.", ev.ID, ev.URL, cfg.PMMCP.StatusOnImplement)
+	}
 	if opts.DryRun {
 		return res, nil
 	}

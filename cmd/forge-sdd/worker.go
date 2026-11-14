@@ -36,11 +36,12 @@ Reviewer: exige que o agente aplique o veredito (forge-sdd bus review).`,
 		once, _ := cmd.Flags().GetBool("once")
 		poll, _ := cmd.Flags().GetDuration("poll")
 		cli, _ := cmd.Flags().GetString("cli")
+		raw, _ := cmd.Flags().GetBool("raw")
 
 		ctx, cancel := signal.NotifyContext(cmd.Context(), os.Interrupt, syscall.SIGTERM)
 		defer cancel()
 		return pipeline.RunWorker(ctx, pipeline.WorkerOptions{
-			Dir: dir, Role: role, Name: name, CLI: cli, Once: once, Poll: poll,
+			Dir: dir, Role: role, Name: name, CLI: cli, Raw: raw, Once: once, Poll: poll,
 			Out:       cmd.OutOrStdout(),
 			OnJobDone: recordJobTelemetry(dir, role),
 		})
@@ -57,6 +58,9 @@ func recordJobTelemetry(dir, role string) func(job bus.Job, outcome string) {
 		self, err := os.Executable()
 		if err != nil {
 			return
+		}
+		if outcome == pipeline.OutcomeDeferred {
+			return // o job voltou à fila sem gastar tentativa: não é um resultado da sessão
 		}
 		ok := outcome == pipeline.OutcomeDone
 		result := "approved"
@@ -129,6 +133,7 @@ func init() {
 	_ = workerCmd.MarkFlagRequired("role")
 	workerCmd.Flags().String("name", "", "Nome da sessão (padrão: forge-<papel>)")
 	workerCmd.Flags().String("cli", "", "Agente desta sessão: claude, gemini, copilot ou codex (padrão: sessions de forge.json)")
+	workerCmd.Flags().Bool("raw", false, "Mostra a saída bruta do agente em vez da visão limpa (sem máscara de segredos; o log sempre guarda a bruta)")
 	workerCmd.Flags().Bool("once", false, "Sai quando a fila esvazia")
 	workerCmd.Flags().Duration("poll", 5*time.Second, "Intervalo de consulta da fila")
 	rootCmd.AddCommand(workerCmd)
