@@ -1,6 +1,6 @@
 {
-  "feature_id": "",
-  "branch": "",
+  "feature_id": "feat-75",
+  "branch": "feat/75-contexto-do-projeto-e-contingencia-tmux",
   "spec_status": "reviewed",
   "updated_at": "2026-11-14T04:45:21Z",
   "items": [
