@@ -89,6 +89,36 @@ func TestProjectProcessInspection_SemTmuxAtivo(t *testing.T) {
 	assert.True(t, strings.Contains(report.Processes[0].Role, "builder"))
 }
 
+func TestProjectProcessInspection_IsolamentoDeOutrasSessoes(t *testing.T) {
+	// Simula servidor tmux (PID 70000) compartilhado onde a sessão barbearia-app NÃO existe,
+	// mas a sessão forge-sdd existe e tem filhos sob o mesmo PID pai.
+	fakePS := `  PID  PPID  %CPU    RSS     ELAPSED COMMAND
+70000     1   0.2  18432     2:15:00 tmux new-session -d -s forge-barbearia-app-079283 -n forge
+28915 70000   1.5  83968     2:15:00 agy -i forge-discovery
+28918 70000   0.0  79872     2:15:00 forge worker --role builder
+`
+
+	fakeTmux := `forge-forge-sdd-dfce50|28915|forge-discovery|forge:forge-sdd
+forge-forge-sdd-dfce50|28918|forge-builder|forge:forge-sdd
+`
+
+	runner := func(name string, args ...string) ([]byte, error) {
+		if name == "ps" {
+			return []byte(fakePS), nil
+		}
+		if name == "tmux" && len(args) > 0 && args[0] == "list-panes" {
+			return []byte(fakeTmux), nil
+		}
+		return nil, nil
+	}
+
+	// Inspeciona barbearia-app: NÃO deve vazar processos do forge-sdd nem o tmux server
+	report, err := InspectProjectProcesses("/Users/nathanramorim/git/barbearia-app", runner)
+	require.NoError(t, err)
+	require.NotNil(t, report)
+	assert.Empty(t, report.Processes, "nenhum processo de outro projeto deve vazar")
+}
+
 func TestKillZombies(t *testing.T) {
 	report := &ProjectProcessReport{
 		Project: "test-app",

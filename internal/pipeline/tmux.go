@@ -1,43 +1,23 @@
 package pipeline
 
 import (
-	"crypto/sha256"
-	"encoding/hex"
 	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
-	"regexp"
-	"strings"
 
 	"github.com/forge-sdd/cli/internal/config"
-)
-
-var (
-	tmuxNameBadRe = regexp.MustCompile(`[^A-Za-z0-9_-]+`)
-	tmuxNameOKRe  = regexp.MustCompile(`^forge-[A-Za-z0-9_-]{1,40}-[0-9a-f]{6}$`)
+	"github.com/forge-sdd/cli/internal/layout"
 )
 
 // TmuxProjectName extrai o nome do projeto saneado para identificação visual no tmux.
 func TmuxProjectName(projectDir string) string {
-	base := tmuxNameBadRe.ReplaceAllString(filepath.Base(projectDir), "-")
-	base = strings.Trim(base, "-_")
-	if len(base) > 40 {
-		base = strings.Trim(base[:40], "-_")
-	}
-	if base == "" {
-		return "projeto"
-	}
-	return base
+	return layout.TmuxProjectName(projectDir)
 }
 
-// TmuxSessionName devolve forge-<projeto>-<hash>: o nome do projeto saneado (só [A-Za-z0-9_-], porque
-// ":" e "." têm sentido no alvo do tmux; até 40 caracteres) e 6 hex do caminho absoluto, para duas
-// pastas com o mesmo nome (/a/app e /b/app) não caírem na mesma sessão.
+// TmuxSessionName devolve forge-<projeto>-<hash>: o nome do projeto saneado e 6 hex do caminho absoluto.
 func TmuxSessionName(projectDir string) string {
-	base := TmuxProjectName(projectDir)
-	sum := sha256.Sum256([]byte(filepath.Clean(projectDir)))
-	return "forge-" + base + "-" + hex.EncodeToString(sum[:3])
+	return layout.TmuxSessionName(projectDir)
 }
 
 // ResolveTerminal escolhe entre tmux e as janelas do sistema. Precedência: flag, forge.json, auto
@@ -95,7 +75,7 @@ func BuildTmuxPlan(env LaunchEnv, cfg config.ForgeConfig, insideTmux bool) (*Tmu
 	}
 	proj := TmuxProjectName(env.Dir)
 	name := TmuxSessionName(env.Dir)
-	if !tmuxNameOKRe.MatchString(name) {
+	if !layout.IsValidTmuxSessionName(name) {
 		return nil, fmt.Errorf("nome de sessão tmux %q inválido", name)
 	}
 	// "=" pede correspondência exata: sem ele o tmux casa por prefixo e pode cair na sessão de outro projeto.
@@ -131,8 +111,8 @@ func BuildTmuxPlan(env LaunchEnv, cfg config.ForgeConfig, insideTmux bool) (*Tmu
 
 		plan.Create = [][]string{
 			{"tmux", "new-session", "-d", "-s", name, "-n", winName, "-c", env.Dir, discInner},
-			{"tmux", "set-option", "-t", exact, "status-left", fmt.Sprintf("#[fg=colour16,bg=colour48,bold] 📦 %s #[default] ", proj)},
-			{"tmux", "set-option", "-t", exact, "status-left-length", "60"},
+			{"tmux", "set-option", "-t", name, "status-left", fmt.Sprintf("#[fg=colour16,bg=colour48,bold] 📦 %s #[default] ", proj)},
+			{"tmux", "set-option", "-t", name, "status-left-length", "60"},
 			{"tmux", "set-window-option", "-t", win, "pane-base-index", "0"},
 			{"tmux", "split-window", "-h", "-t", win, "-c", env.Dir, bldInner},
 			{"tmux", "split-window", "-v", "-t", win + ".1", "-c", env.Dir, revInner},
@@ -155,8 +135,8 @@ func BuildTmuxPlan(env LaunchEnv, cfg config.ForgeConfig, insideTmux bool) (*Tmu
 	} else {
 		plan.Create = [][]string{
 			{"tmux", "new-session", "-d", "-s", name, "-n", winName, "-c", env.Dir, sessions[0].Inner},
-			{"tmux", "set-option", "-t", exact, "status-left", fmt.Sprintf("#[fg=colour16,bg=colour48,bold] 📦 %s #[default] ", proj)},
-			{"tmux", "set-option", "-t", exact, "status-left-length", "60"},
+			{"tmux", "set-option", "-t", name, "status-left", fmt.Sprintf("#[fg=colour16,bg=colour48,bold] 📦 %s #[default] ", proj)},
+			{"tmux", "set-option", "-t", name, "status-left-length", "60"},
 			// Quem usa pane-base-index 1 no tmux.conf teria painéis 1, 2 e 3: fixa 0 antes de endereçá-los.
 			{"tmux", "set-window-option", "-t", win, "pane-base-index", "0"},
 			{"tmux", "split-window", "-h", "-t", win, "-c", env.Dir, sessions[1].Inner},

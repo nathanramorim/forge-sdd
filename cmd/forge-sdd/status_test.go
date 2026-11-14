@@ -4,7 +4,9 @@ import (
 	"bytes"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
+	"time"
 
 	"github.com/forge-sdd/cli/internal/testutil"
 	"github.com/stretchr/testify/assert"
@@ -15,6 +17,10 @@ func runRoot(t *testing.T, args ...string) (string, error) {
 	t.Helper()
 	// O rootCmd é global: restaura os padrões das flags entre execuções.
 	_ = statusCmd.Flags().Set("all-branches", "false")
+	_ = statusCmd.Flags().Set("initiatives", "false")
+	_ = statusCmd.Flags().Set("live", "false")
+	_ = statusCmd.Flags().Set("once", "false")
+	_ = statusCmd.Flags().Set("compact", "false")
 	_ = nextIDCmd.Flags().Set("kind", "discovery")
 	_ = nextIDCmd.Flags().Set("workitem", "")
 	_ = updateCmd.Flags().Set("dry-run", "false")
@@ -128,3 +134,74 @@ func TestContext_PorTaskIDEPorCaminho(t *testing.T) {
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "70-01", "o erro lista as tasks disponíveis")
 }
+
+func TestStatusLiveFlag(t *testing.T) {
+	dir := t.TempDir()
+	gitT(t, dir, "init", "-q", "-b", "feat/80-status")
+	gitT(t, dir, "commit", "-q", "--allow-empty", "-m", "feat: commit inicial")
+
+	logsDir := filepath.Join(dir, ".forge", "runtime", "logs")
+	require.NoError(t, os.MkdirAll(logsDir, 0o755))
+	require.NoError(t, os.WriteFile(filepath.Join(logsDir, "builder-job-1.log"), []byte("✎ internal/status.go\n… trabalhando há 1m · 1 arquivo alterado\n"), 0o644))
+
+	sddDir := filepath.Join(dir, "sdd", "discovery", "80-status")
+	require.NoError(t, os.MkdirAll(sddDir, 0o755))
+	require.NoError(t, os.WriteFile(filepath.Join(sddDir, "queue.json"), []byte(`{
+		"items": [
+			{"task_id": "80-01", "title": "Template Canônico", "status": "approved"},
+			{"task_id": "80-02", "title": "Subcomando live", "status": "queued"}
+		]
+	}`), 0o644))
+
+	// Testa flag --compact (Template Canônico tríplice para agentes de IA)
+	start := time.Now()
+	outCompact, err := runRoot(t, "status", "--dir", dir, "--compact")
+	elapsedCompact := time.Since(start)
+	require.NoError(t, err)
+	assert.Less(t, elapsedCompact, 100*time.Millisecond, "CA-01: status compacto deve executar em menos de 100ms")
+
+	assert.Contains(t, outCompact, "### Status da Esteira —")
+	assert.Contains(t, outCompact, "1. Ao Vivo no Painel")
+	assert.Contains(t, outCompact, "✎ internal/status.go")
+	assert.Contains(t, outCompact, "2. Commits Recentes no Git:")
+	assert.Contains(t, outCompact, "feat: commit inicial")
+	assert.Contains(t, outCompact, "3. Fila de Tarefas:")
+	assert.Contains(t, outCompact, "• [x] 80-01: Template Canônico")
+	assert.Contains(t, outCompact, "• [ ] 80-02: Subcomando live")
+	assert.Contains(t, outCompact, "Próximo passo: Acompanhar o Builder")
+
+	tokensCompact := len(strings.Fields(outCompact))
+	assert.Less(t, tokensCompact, 250, "CA-03: saída compacta deve respeitar o limite de 250 tokens")
+
+	// Testa flag longa --live (Painel executivo vivo/living dashboard)
+	startLive := time.Now()
+	out, err := runRoot(t, "status", "--dir", dir, "--live", "--once")
+	elapsedLive := time.Since(startLive)
+
+	require.NoError(t, err)
+	assert.Less(t, elapsedLive, 500*time.Millisecond, "painel vivo snapshot deve executar rapidamente (< 500ms)")
+
+	assert.Contains(t, out, "feat/80-status")
+	assert.Contains(t, out, "PROCESSAMENTO & CONSUMO POR SESSÃO")
+	assert.Contains(t, out, "PROGRESSO DA ESTEIRA (DAG)")
+	assert.Contains(t, out, "50% (1/2 tasks)")
+	assert.Contains(t, out, "[✓] 80-01: Template Canônico")
+	assert.Contains(t, out, "[ ] 80-02: Subcomando live")
+	assert.Contains(t, out, "COMMITS RECENTES NO GIT")
+	assert.Contains(t, out, "feat: commit inicial")
+	assert.Contains(t, out, "Próximo passo: Acompanhar o Builder")
+
+	// Testa flag curta -l
+	outShort, err := runRoot(t, "status", "--dir", dir, "-l", "--once")
+	require.NoError(t, err)
+	assert.Equal(t, out, outShort, "flag curta -l deve produzir a mesma saída que --live")
+
+	// Testa forge status padrão (snapshot no CLI)
+	outSnapshot, err := runRoot(t, "status", "--dir", dir)
+	require.NoError(t, err)
+	assert.Contains(t, outSnapshot, "PROCESSAMENTO & CONSUMO POR SESSÃO")
+	assert.Contains(t, outSnapshot, "PROGRESSO DA ESTEIRA (DAG)")
+	assert.Contains(t, outSnapshot, "INICIATIVAS (sdd/discovery)")
+	assert.Contains(t, outSnapshot, "80-status")
+}
+

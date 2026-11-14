@@ -6,6 +6,8 @@
 package layout
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"os"
@@ -290,9 +292,47 @@ func Current(dir string) (id string, ok bool, err error) {
 
 // CurrentBranch devolve o nome da branch atual (vazio em HEAD destacado).
 func CurrentBranch(dir string) (string, error) {
+	headPath := filepath.Join(dir, ".git", "HEAD")
+	if data, err := os.ReadFile(headPath); err == nil {
+		s := strings.TrimSpace(string(data))
+		if strings.HasPrefix(s, "ref: refs/heads/") {
+			return strings.TrimPrefix(s, "ref: refs/heads/"), nil
+		}
+	}
 	out, err := gitOut(dir, "branch", "--show-current")
 	if err != nil {
 		return "", err
 	}
 	return strings.TrimSpace(out), nil
+}
+
+var (
+	tmuxNameBadRe = regexp.MustCompile(`[^A-Za-z0-9_-]`)
+	tmuxNameOKRe  = regexp.MustCompile(`^forge-[A-Za-z0-9_-]{1,40}-[0-9a-f]{6}$`)
+)
+
+// TmuxProjectName extrai o nome do projeto saneado para identificação visual no tmux.
+func TmuxProjectName(projectDir string) string {
+	base := tmuxNameBadRe.ReplaceAllString(filepath.Base(projectDir), "-")
+	base = strings.Trim(base, "-_")
+	if len(base) > 40 {
+		base = strings.Trim(base[:40], "-_")
+	}
+	if base == "" {
+		return "projeto"
+	}
+	return base
+}
+
+// TmuxSessionName devolve forge-<projeto>-<hash>: o nome do projeto saneado (só [A-Za-z0-9_-], até 40 caracteres)
+// e 6 hex do caminho absoluto.
+func TmuxSessionName(projectDir string) string {
+	base := TmuxProjectName(projectDir)
+	sum := sha256.Sum256([]byte(filepath.Clean(projectDir)))
+	return "forge-" + base + "-" + hex.EncodeToString(sum[:3])
+}
+
+// IsValidTmuxSessionName valida se o nome está no formato canonico forge-<projeto>-<hash>.
+func IsValidTmuxSessionName(name string) bool {
+	return tmuxNameOKRe.MatchString(name)
 }

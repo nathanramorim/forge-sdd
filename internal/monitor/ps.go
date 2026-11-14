@@ -10,7 +10,7 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/forge-sdd/cli/internal/pipeline"
+	"github.com/forge-sdd/cli/internal/layout"
 )
 
 // ProcessInfo contém os dados de telemetria de um processo ligado ao projeto.
@@ -62,7 +62,7 @@ func InspectProjectProcesses(dir string, runner CommandRunner) (*ProjectProcessR
 		absDir = dir
 	}
 	projectName := filepath.Base(absDir)
-	sessionName := pipeline.TmuxSessionName(absDir)
+	sessionName := layout.TmuxSessionName(absDir)
 
 	report := &ProjectProcessReport{
 		Project:   projectName,
@@ -78,22 +78,43 @@ func InspectProjectProcesses(dir string, runner CommandRunner) (*ProjectProcessR
 
 	rawMap := parsePSOutput(string(psOutput))
 
-	// 2. Tentar listar painéis do tmux da sessão
-	paneTargets := make(map[int]string) // PID -> Role
-	tmuxOut, err := runner("tmux", "list-panes", "-s", "-t", "="+sessionName, "-F", "#{pane_pid}|#{pane_title}|#{window_name}")
+	// 2. Listar painéis do tmux com identificação da sessão
+	paneTargets := make(map[int]string)    // PID -> Role
+	otherSessionPIDs := make(map[int]bool) // PIDs de outras sessões tmux
+	tmuxOut, err := runner("tmux", "list-panes", "-a", "-F", "#{session_name}|#{pane_pid}|#{pane_title}|#{window_name}")
+	if err != nil {
+		tmuxOut, err = runner("tmux", "list-panes", "-s", "-F", "#{pane_pid}|#{pane_title}|#{window_name}")
+	}
 	if err == nil {
 		for _, line := range strings.Split(strings.TrimSpace(string(tmuxOut)), "\n") {
 			parts := strings.Split(strings.TrimSpace(line), "|")
-			if len(parts) >= 3 {
-				pid, err := strconv.Atoi(parts[0])
-				if err == nil {
-					role := parts[1]
-					win := parts[2]
+			if len(parts) >= 4 {
+				sess := parts[0]
+				pid, err := strconv.Atoi(parts[1])
+				if err != nil {
+					continue
+				}
+				role := parts[2]
+				win := parts[3]
+				if sess == sessionName {
 					if strings.Contains(win, "ctl") {
 						role = "forge-ctl (" + role + ")"
 					}
 					paneTargets[pid] = role
+				} else {
+					otherSessionPIDs[pid] = true
 				}
+			} else if len(parts) >= 3 {
+				pid, err := strconv.Atoi(parts[0])
+				if err != nil {
+					continue
+				}
+				role := parts[1]
+				win := parts[2]
+				if strings.Contains(win, "ctl") {
+					role = "forge-ctl (" + role + ")"
+				}
+				paneTargets[pid] = role
 			}
 		}
 	}
@@ -107,21 +128,30 @@ func InspectProjectProcesses(dir string, runner CommandRunner) (*ProjectProcessR
 		visited[pid] = true
 	}
 
-	// Se não achou painéis tmux, busca processos que contenham o diretório ou sessionName
+	// Se não achou painéis tmux desta sessão:
+	// NUNCA incluir o servidor/daemon do tmux (tmux new-session / tmux server) como raiz,
+	// pois ele é o processo pai compartilhado de TODAS as sessões tmux da máquina!
 	if len(matchedPIDs) == 0 {
 		for pid, p := range rawMap {
-			if strings.Contains(p.Command, absDir) || strings.Contains(p.Command, sessionName) {
+			cmdLower := strings.ToLower(p.Command)
+			if strings.HasPrefix(cmdLower, "tmux new-session") || strings.HasPrefix(cmdLower, "tmux server") || strings.HasPrefix(cmdLower, "tmux ") {
+				continue
+			}
+			if otherSessionPIDs[pid] {
+				continue
+			}
+			if strings.Contains(p.Command, absDir) {
 				matchedPIDs = append(matchedPIDs, pid)
 				visited[pid] = true
 			}
 		}
 	}
 
-	// Coleta filhos recursivamente
+	// Coleta filhos recursivamente (bloqueando processos que pertençam a outras sessões tmux)
 	var collectChildren func(parentPID int)
 	collectChildren = func(parentPID int) {
 		for pid, p := range rawMap {
-			if p.PPID == parentPID && !visited[pid] {
+			if p.PPID == parentPID && !visited[pid] && !otherSessionPIDs[pid] {
 				visited[pid] = true
 				matchedPIDs = append(matchedPIDs, pid)
 				collectChildren(pid)

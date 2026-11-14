@@ -10,31 +10,77 @@ import (
 
 	"github.com/forge-sdd/cli/internal/config"
 	"github.com/forge-sdd/cli/internal/layout"
+	"github.com/forge-sdd/cli/internal/pipeline"
+	"github.com/mattn/go-isatty"
 	"github.com/spf13/cobra"
 )
 
 var statusCmd = &cobra.Command{
 	Use:   "status",
-	Short: "Mostra as iniciativas (discovery) e o estado de cada uma",
-	Long: `Lista as iniciativas de sdd/discovery com branch, status, próximo passo e a contagem
-de tasks da fila por situação. Substitui o index.md e o progress.md globais: o estado
-vive na pasta de cada iniciativa e a visão geral é calculada na leitura.
+	Short: "Mostra o status da esteira e iniciativas",
+	Long: `Sem flags, imprime o status da esteira em modo snapshot (processamento,
+tokens consumidos, progresso DAG, commits recentes e painel ativo).
 
-Com --all-branches, lê o status.md e a fila de todas as branches locais e remotas
-sem fazer checkout, para enxergar frentes paralelas ainda não mescladas.`,
+Com --live (ou -l), abre o painel vivo contínuo da esteira (living dashboard), atualizado
+a cada 2 segundos em tempo real.
+
+Com --all-branches, inclui iniciativas de todas as branches locais e remotas.
+Com --compact, imprime a versão tríplice enxuta (< 200 tokens) para agentes.`,
 	Args: cobra.NoArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		dir, _ := cmd.Flags().GetString("dir")
 		if dir == "" {
 			dir = "."
 		}
-		all, _ := cmd.Flags().GetBool("all-branches")
+		compact, _ := cmd.Flags().GetBool("compact")
+		if compact {
+			out, err := pipeline.FormatLiveStatus(dir)
+			if err != nil {
+				return err
+			}
+			_, err = fmt.Fprint(cmd.OutOrStdout(), out)
+			return err
+		}
 
-		items, err := layout.ListInitiatives(dir, all)
+		live, _ := cmd.Flags().GetBool("live")
+		if live {
+			once, _ := cmd.Flags().GetBool("once")
+			if !isatty.IsTerminal(os.Stdout.Fd()) && !cmd.Flags().Changed("once") {
+				once = true
+			}
+			return pipeline.RunLiveDashboard(cmd.Context(), dir, cmd.OutOrStdout(), once)
+		}
+		all, _ := cmd.Flags().GetBool("all-branches")
+		initiatives, _ := cmd.Flags().GetBool("initiatives")
+		if all || initiatives {
+			items, err := layout.ListInitiatives(dir, all)
+			if err != nil {
+				return err
+			}
+			return renderStatus(cmd.OutOrStdout(), items)
+		}
+
+		// forge status padrão: snapshot do painel executivo rico da esteira
+		dashboard, err := pipeline.FormatRichDashboard(dir, nil, nil, nil)
 		if err != nil {
 			return err
 		}
-		return renderStatus(cmd.OutOrStdout(), items)
+		if _, err := fmt.Fprint(cmd.OutOrStdout(), dashboard); err != nil {
+			return err
+		}
+
+		// Lista complementar de iniciativas em sdd/discovery
+		items, err := layout.ListInitiatives(dir, false)
+		if err == nil {
+			if len(items) > 0 {
+				fmt.Fprintln(cmd.OutOrStdout())
+				fmt.Fprintln(cmd.OutOrStdout(), "─── 📁 INICIATIVAS (sdd/discovery) ──────────────────────────────────────────")
+			}
+			if err := renderStatus(cmd.OutOrStdout(), items); err != nil {
+				return err
+			}
+		}
+		return nil
 	},
 }
 
@@ -123,6 +169,10 @@ Somente leitura: não cria arquivos nem branches.`,
 func init() {
 	statusCmd.Flags().String("dir", ".", "Diretório alvo do projeto Forge-SDD")
 	statusCmd.Flags().Bool("all-branches", false, "Inclui iniciativas de todas as branches locais e remotas, sem checkout")
+	statusCmd.Flags().Bool("initiatives", false, "Lista somente as iniciativas de sdd/discovery")
+	statusCmd.Flags().BoolP("live", "l", false, "Exibe o painel vivo contínuo da esteira (living dashboard) em tempo real")
+	statusCmd.Flags().Bool("once", false, "Executa uma única iteração do painel vivo e encerra")
+	statusCmd.Flags().Bool("compact", false, "Exibe o status tríplice compacto (< 200 tokens) para prompts de IA")
 	nextIDCmd.Flags().String("dir", ".", "Diretório alvo do projeto Forge-SDD")
 	nextIDCmd.Flags().String("kind", "discovery", "Tipo de item: discovery ou fix (a numeração é única)")
 	nextIDCmd.Flags().String("workitem", "", "ID do workitem (obrigatório quando naming_convention=workitem)")
