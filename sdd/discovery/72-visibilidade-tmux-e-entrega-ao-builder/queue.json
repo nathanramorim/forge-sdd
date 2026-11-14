@@ -2,7 +2,7 @@
   "feature_id": "feat-72",
   "branch": "feat/72-visibilidade-tmux-e-entrega-ao-builder",
   "spec_status": "reviewed",
-  "updated_at": "2026-11-14T02:32:38Z",
+  "updated_at": "2026-11-14T02:35:08Z",
   "items": [
     {
       "task_id": "72-01",
@@ -24,7 +24,7 @@
       "task_id": "72-02",
       "title": "feat-72-02 — Visão Limpa do Worker (`LiveView`)",
       "spec_path": "sdd/discovery/72-visibilidade-tmux-e-entrega-ao-builder/features/feat-72-02-visao-limpa-do-worker.md",
-      "status": "queued",
+      "status": "building",
       "rules": [
         "SEG-05",
         "SEG-03",
@@ -34,13 +34,13 @@
         "TST-04"
       ],
       "skills_used": [],
-      "attempts": 0
+      "attempts": 1
     },
     {
       "task_id": "72-03",
       "title": "feat-72-03 — Falha Legível e Pausa por Limite de Uso",
       "spec_path": "sdd/discovery/72-visibilidade-tmux-e-entrega-ao-builder/features/feat-72-03-falha-legivel-e-pausa-por-limite-de-uso.md",
-      "status": "queued",
+      "status": "building",
       "rules": [
         "SEG-01",
         "SEG-05",
@@ -49,13 +49,13 @@
         "TST-04"
       ],
       "skills_used": [],
-      "attempts": 0
+      "attempts": 1
     },
     {
       "task_id": "72-04",
       "title": "feat-72-04 — Abrir pelo tmux",
       "spec_path": "sdd/discovery/72-visibilidade-tmux-e-entrega-ao-builder/features/feat-72-04-abrir-pelo-tmux.md",
-      "status": "queued",
+      "status": "review_pending",
       "rules": [
         "SEG-01",
         "SEG-03",
@@ -64,7 +64,7 @@
         "TST-04"
       ],
       "skills_used": [],
-      "attempts": 0
+      "attempts": 1
     },
     {
       "task_id": "72-05",

@@ -58,6 +58,8 @@ type ForgeConfig struct {
 	// Sessions escolhe o agente de cada sessão (discovery, builder, reviewer). Sem a chave, vale cli.
 	Sessions    map[string]string `json:"sessions,omitempty"`
 	Permissions string            `json:"permissions"`
+	// Terminal escolhe onde as sessões abrem: auto (tmux se existir), tmux ou native (janelas do sistema).
+	Terminal string `json:"terminal"`
 	// AllowCommands são os comandos de shell liberados no nível project (nome do comando apenas).
 	AllowCommands []string              `json:"allow_commands"`
 	CLIProfiles   map[string]CLIProfile `json:"cli_profiles"`
@@ -84,6 +86,7 @@ func DefaultForgeConfig() ForgeConfig {
 	return ForgeConfig{
 		CLI:           CLIClaude,
 		Permissions:   PermissionProject,
+		Terminal:      TerminalAuto,
 		AllowCommands: []string{"git", "gh", "forge-sdd"},
 		CLIProfiles:   defaultProfiles(),
 		PMMCP: PMConfig{

@@ -30,7 +30,7 @@ func TestE2E_MenuPipeline(t *testing.T) {
 		dir: dir, out: &out, p: p, preflightEnv: allFound(),
 		run: func(args ...string) error {
 			if args[0] == "up" {
-				args = append(args, "--dry-run") // nunca abre terminais num teste
+				args = append(args, "--dry-run", "--terminal", "native") // nunca abre terminais num teste
 			}
 			resetWorkerFlags()
 			return runSubcommand(args...)

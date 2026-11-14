@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 	"runtime"
 	"strings"
@@ -43,11 +44,35 @@ não tiverem escolha própria. --dry-run só imprime os comandos.`,
 		if err != nil {
 			return err
 		}
-		plan, err := pipeline.LaunchPlanFor(pipeline.DefaultLaunchEnv(runtime.GOOS, abs, pipeline.ResolveBin()), cfg)
+		env := pipeline.DefaultLaunchEnv(runtime.GOOS, abs, pipeline.ResolveBin())
+		termFlag, _ := cmd.Flags().GetString("terminal")
+		term, err := pipeline.ResolveTerminal(termFlag, cfg, env)
 		if err != nil {
 			return err
 		}
 		out := cmd.OutOrStdout()
+		if term == config.TerminalTmux {
+			plan, err := pipeline.BuildTmuxPlan(env, cfg, os.Getenv("TMUX") != "")
+			if err != nil {
+				return err
+			}
+			for _, step := range append(append([][]string{}, plan.Create...), plan.Attach) {
+				fmt.Fprintln(out, strings.Join(quoteArgs(step), " "))
+			}
+			if dry {
+				fmt.Fprintf(out, "[DRY-RUN] Nada foi aberto (sessão tmux %s).\n", plan.Session)
+				return nil
+			}
+			created, err := pipeline.LaunchTmux(plan, pipeline.DefaultTmuxRunner())
+			if err == nil && !created {
+				fmt.Fprintf(out, "A sessão %s já existia: reconectado.\n", plan.Session)
+			}
+			return err
+		}
+		plan, err := pipeline.LaunchPlanFor(env, cfg)
+		if err != nil {
+			return err
+		}
 		for _, c := range plan {
 			fmt.Fprintf(out, "%-16s %s\n", c.Title, strings.Join(quoteArgs(c.Argv), " "))
 		}
@@ -77,6 +102,7 @@ func init() {
 	upCmd.Flags().String("discovery", "", "Agente da sessão forge-discovery: claude, gemini, copilot ou codex")
 	upCmd.Flags().String("builder", "", "Agente da sessão forge-builder: claude, gemini, copilot ou codex")
 	upCmd.Flags().String("reviewer", "", "Agente da sessão forge-reviewer: claude, gemini, copilot ou codex")
+	upCmd.Flags().String("terminal", "", "Onde abrir: tmux (três painéis), native (janelas do sistema) ou auto (padrão: tmux se existir)")
 	upCmd.Flags().Bool("dry-run", false, "Só imprime os comandos de abertura")
 	rootCmd.AddCommand(upCmd)
 }

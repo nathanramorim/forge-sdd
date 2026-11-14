@@ -33,6 +33,18 @@ const (
 	PermissionFull    = "full"    // bypass documentado da CLI; só em ambiente isolado
 )
 
+// Destinos das sessões do pipeline (feat 72).
+const (
+	TerminalAuto   = "auto"
+	TerminalTmux   = "tmux"
+	TerminalNative = "native"
+)
+
+// ValidTerminal diz se v é um destino aceito.
+func ValidTerminal(v string) bool {
+	return v == TerminalAuto || v == TerminalTmux || v == TerminalNative
+}
+
 // MarkerPermissions é expandido pelo runner em zero ou mais argumentos (PermissionArgs).
 const MarkerPermissions = "{permissions}"
 
@@ -173,6 +185,9 @@ func (c ForgeConfig) validateSessions() error {
 		if _, ok := c.CLIProfiles[cli]; !ok {
 			return fmt.Errorf("sessions.%s: cli_profiles sem perfil para %q", role, cli)
 		}
+	}
+	if !ValidTerminal(c.Terminal) {
+		return fmt.Errorf("terminal %q inválido (use auto, tmux ou native)", c.Terminal)
 	}
 	if c.Permissions != PermissionProject && c.Permissions != PermissionFull {
 		return fmt.Errorf("permissions %q inválido (use project ou full)", c.Permissions)
