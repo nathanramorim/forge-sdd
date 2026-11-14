@@ -2,12 +2,12 @@
 
 ## Status
 ```
-Retrabalho rework-2 concluído pelo Builder: saneamento de variáveis não utilizadas e reuso de IsValidTmuxSessionName entre layout e pipeline.
-Build, lint, typecheck e testes verdes. PR #77 atualizado para reavaliação da Camada B.
+Revisão automática da Camada B concluída com sucesso na tentativa 2 de 3 (job job-20261114-171006-81-tokens-por-janela-e-reset-suave-rework-2-review).
+Veredito CONFORME registrado no bus e PR #77 aprovado. Todos os critérios CA-01 a CA-06 atendidos.
 ```
 
 ## Proximo passo
-Acompanhar revisão pelo Reviewer (Camada B).
+Revisão humana (Camada C) e merge do PR #77 na branch base.
 
 ## A confirmar
-Veredito da governança e CI verde no PR #77.
+Aprovação final do PR #77.
