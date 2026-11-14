@@ -8,6 +8,7 @@ import (
 
 	"github.com/forge-sdd/cli/internal/config"
 	"github.com/forge-sdd/cli/internal/layout"
+	"github.com/forge-sdd/cli/internal/monitor"
 )
 
 // TmuxProjectName extrai o nome do projeto saneado para identificação visual no tmux.
