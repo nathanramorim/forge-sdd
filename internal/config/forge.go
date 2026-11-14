@@ -18,6 +18,34 @@ const (
 	CLIAgy    = "agy"
 )
 
+// Modos de sessão do pipeline (feat 77).
+const (
+	SessionModeHeadless = "headless"
+	SessionModeLive     = "live"
+)
+
+// Modos de contexto entre jobs (feat 77).
+const (
+	ContextClear      = "clear"
+	ContextContinuous = "continuous"
+)
+
+// ValidSessionMode diz se m é um modo de sessão aceito.
+func ValidSessionMode(m string) bool {
+	return m == SessionModeHeadless || m == SessionModeLive
+}
+
+// ValidContextMode diz se c é um modo de contexto aceito.
+func ValidContextMode(c string) bool {
+	return c == ContextClear || c == ContextContinuous
+}
+
+// LiveConfig define parâmetros de prontidão para o modo live (feat 77).
+type LiveConfig struct {
+	StartupWaitSeconds int `json:"startup_wait_seconds,omitempty"`
+	ReadyQuietSeconds  int `json:"ready_quiet_seconds,omitempty"`
+}
+
 // CLIProfile descreve como invocar um agente de forma não interativa. Os argumentos aceitam os
 // marcadores {agent}, {name} e {prompt}; a execução usa argv explícito, nunca shell (SEG-03).
 type CLIProfile struct {
@@ -26,6 +54,8 @@ type CLIProfile struct {
 	// InteractiveArgs abre a sessão interativa (Discovery). Vazio em um forge.json da 4.1: o padrão
 	// da CLI é aplicado por ForgeConfig.Profile.
 	InteractiveArgs []string `json:"interactive_args,omitempty"`
+	// ResetCommand é o comando enviado à CLI interativa para limpar o contexto entre jobs (ex: /clear, /new).
+	ResetCommand string `json:"reset_command,omitempty"`
 }
 
 // PMConfig configura o gerenciador de projeto acessado via MCP pelo agente.
@@ -60,6 +90,12 @@ type ForgeConfig struct {
 	Permissions string            `json:"permissions"`
 	// Terminal escolhe onde as sessões abrem: auto (tmux se existir), tmux ou native (janelas do sistema).
 	Terminal string `json:"terminal"`
+	// SessionMode escolhe o modo do worker: headless (padrão antigo) ou live (CLI aberta no painel).
+	SessionMode string `json:"session_mode,omitempty"`
+	// Context escolhe a gestão de contexto entre jobs no modo live: clear (padrão) ou continuous.
+	Context string `json:"context,omitempty"`
+	// Live define parâmetros de tempo do modo live.
+	Live LiveConfig `json:"live,omitempty"`
 	// AllowCommands são os comandos de shell liberados no nível project (nome do comando apenas).
 	AllowCommands []string              `json:"allow_commands"`
 	CLIProfiles   map[string]CLIProfile `json:"cli_profiles"`
@@ -87,6 +123,9 @@ func DefaultForgeConfig() ForgeConfig {
 		CLI:           CLIClaude,
 		Permissions:   PermissionProject,
 		Terminal:      TerminalAuto,
+		SessionMode:   SessionModeHeadless,
+		Context:       ContextClear,
+		Live:          LiveConfig{StartupWaitSeconds: 8, ReadyQuietSeconds: 3},
 		AllowCommands: []string{"git", "gh", "forge-sdd"},
 		CLIProfiles:   defaultProfiles(),
 		PMMCP: PMConfig{
@@ -119,6 +158,18 @@ func LoadForgeConfig(dir string) (cfg ForgeConfig, found bool, err error) {
 	cfg = DefaultForgeConfig()
 	if err := strictDecode(data, &cfg); err != nil {
 		return ForgeConfig{}, true, fmt.Errorf("%s inválido: %w", path, err)
+	}
+	if cfg.SessionMode == "" {
+		cfg.SessionMode = SessionModeHeadless
+	}
+	if cfg.Context == "" {
+		cfg.Context = ContextClear
+	}
+	if cfg.Live.StartupWaitSeconds == 0 {
+		cfg.Live.StartupWaitSeconds = 8
+	}
+	if cfg.Live.ReadyQuietSeconds == 0 {
+		cfg.Live.ReadyQuietSeconds = 3
 	}
 	if err := cfg.Validate(); err != nil {
 		return ForgeConfig{}, true, fmt.Errorf("%s inválido: %w", path, err)
@@ -153,6 +204,18 @@ func (c ForgeConfig) Validate() error {
 	}
 	if err := c.validateSessions(); err != nil {
 		return err
+	}
+	if c.SessionMode != "" && !ValidSessionMode(c.SessionMode) {
+		return fmt.Errorf("session_mode %q inválido (use %s ou %s)", c.SessionMode, SessionModeLive, SessionModeHeadless)
+	}
+	if c.Context != "" && !ValidContextMode(c.Context) {
+		return fmt.Errorf("context %q inválido (use %s ou %s)", c.Context, ContextClear, ContextContinuous)
+	}
+	if c.Live.StartupWaitSeconds < 0 || c.Live.StartupWaitSeconds > 60 {
+		return fmt.Errorf("live.startup_wait_seconds %d fora da faixa 0 a 60", c.Live.StartupWaitSeconds)
+	}
+	if c.Live.ReadyQuietSeconds < 0 || c.Live.ReadyQuietSeconds > 30 {
+		return fmt.Errorf("live.ready_quiet_seconds %d fora da faixa 0 a 30", c.Live.ReadyQuietSeconds)
 	}
 	if c.Builder.MaxParallelTasks < 1 || c.Builder.MaxParallelTasks > 8 {
 		return fmt.Errorf("builder.max_parallel_tasks %d fora da faixa 1 a 8", c.Builder.MaxParallelTasks)
