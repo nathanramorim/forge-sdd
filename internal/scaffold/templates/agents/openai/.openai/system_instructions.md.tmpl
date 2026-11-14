@@ -19,7 +19,7 @@ Este projeto usa **Forge-SDD** — uma metodologia de desenvolvimento assistido 
 | `sdd/spec/overview.md` | Visão geral do sistema |
 
 ### Protocolo de sessão (Lifecycle)
-1. **READ-MIN:** Rode `forge-sdd status` e leia a task ativa.
+1. **READ-MIN:** Discovery começa por `forge-sdd brief`; rode `forge-sdd status` e leia a task ativa.
 2. **PLAN:** Identifique a próxima action, reporte o plano e aguarde confirmação.
 3. **ACT:** Execute no escopo definido (Builder para código, Specifier para specs, etc. - veja `.openai/skills/`).
 4. **WRITE:** Edite apenas arquivos sob sua responsabilidade na fase atual.

@@ -92,8 +92,8 @@ func TestPermissionArgs_TabelaPorCLIeNivel(t *testing.T) {
 	allow := []string{"git", "go"}
 	assert.Equal(t, []string{"--permission-mode", "acceptEdits", "--allowedTools", "Read", "Edit", "Write", "Glob", "Grep", "Bash(git *)", "Bash(go *)"}, PermissionArgs(CLIClaude, PermissionProject, allow))
 	assert.Equal(t, []string{"--dangerously-skip-permissions"}, PermissionArgs(CLIClaude, PermissionFull, allow))
-	assert.Equal(t, []string{"--approval-mode", "auto_edit"}, PermissionArgs(CLIGemini, PermissionProject, allow))
-	assert.Equal(t, []string{"--approval-mode", "yolo"}, PermissionArgs(CLIGemini, PermissionFull, allow))
+	assert.Equal(t, []string{"--dangerously-skip-permissions"}, PermissionArgs(CLIGemini, PermissionProject, allow))
+	assert.Equal(t, []string{"--dangerously-skip-permissions"}, PermissionArgs(CLIGemini, PermissionFull, allow))
 	assert.Equal(t, []string{"--allow-tool=write", "--allow-tool=shell(git:*)", "--allow-tool=shell(go:*)"}, PermissionArgs(CLICopilot, PermissionProject, allow))
 	assert.Equal(t, []string{"--allow-all-tools"}, PermissionArgs(CLICopilot, PermissionFull, allow))
 	assert.Equal(t, []string{"--sandbox", "workspace-write"}, PermissionArgs(CLICodex, PermissionProject, allow))

@@ -4,6 +4,19 @@ Este arquivo registra o histórico de entregas de produto deste projeto.
 
 ## Entregas
 
+### Versão 4.3.0 — Contexto do Projeto na Discovery, Briefing e Contingência de Terminal (Beta)
+
+Compatível com a 4.2.0-beta (Discovery 75, features `75-01` a `75-06`).
+
+*   **`forge-sdd brief` e `--check`:** comando determinístico que lê a missão da constituição (`sdd/memory/constitution.md`), módulos (`sdd/spec/modules.md`), fluxos (`sdd/spec/flows.md`) e decisões (`sdd/spec/decisions.md`) sem alterar arquivos. O flag `--check` sai com código 0 (`pronta`) ou 3 (`rascunho`), validando se o projeto tem missão e arquitetura preenchidas antes de novas frentes.
+*   **Protocolo de abertura da Discovery:** toda sessão de Discovery agora inicia executando `forge-sdd brief` para assimilar decisões anteriores, e toda especificação gerada passa a registrar explicitamente a seção `## Decisões do projeto aplicadas`.
+*   **Constituição como primeiro passo (`/constitution`):** em projetos recém-criados ou com constituição em rascunho, o menu interativo do `forge` e o `forge-sdd doctor` destacam `/constitution` como o passo número 1 para evitar avanço sem diretrizes arquiteturais. Os templates de comandos de agentes foram otimizados dentro do orçamento de 300 bytes (`P-24`).
+*   **Instalação assistida do tmux:** em modo `auto`, quando o tmux não está no PATH, o Forge detecta o gerenciador de pacotes do sistema (Homebrew no macOS; apt-get, dnf, pacman, apk ou zypper no Linux) e oferece instalá-lo com confirmação interativa e sudo quando necessário.
+*   **Contingência suave de terminal (graceful fallback):** se o usuário recusar a instalação do tmux ou se ela falhar, as sessões abrem em janelas nativas do sistema e o Forge oferece salvar a escolha em `forge.json` (`terminal: "native"`). No Windows com Windows Terminal (`wt.exe`), as três sessões abrem em abas/painéis divididos na mesma janela. No WSL, o tmux funciona nativamente dentro do Linux.
+*   **Suporte ao CLI oficial Antigravity (`agy`):** o agente Gemini passa a mapear para o binário oficial `agy` com flags correspondentes.
+
+Ver `sdd/spec/adr/adr-0007-contexto-do-projeto-e-contingencia-tmux.md`.
+
 ### Versão 4.2.0 — Menu Navegável, Agente por Sessão e Visibilidade do Pipeline (Beta)
 
 Compatível com a 4.1.0-beta: um `forge.json` da 4.1 continua válido e escolhe o mesmo agente nas três sessões (Discovery 71, features `71-01` a `71-05`, e Discovery 72, features `72-01` a `72-05`). Sem `forge.json` o fluxo de implementação segue como na 4.0.0-beta.

@@ -2,7 +2,9 @@ package pipeline
 
 import (
 	"errors"
+	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 
@@ -12,13 +14,17 @@ import (
 )
 
 func penv(tools []string, files ...string) PreflightEnv {
+	return penvFor("/proj", tools, files...)
+}
+
+func penvFor(dir string, tools []string, files ...string) PreflightEnv {
 	has := map[string]bool{}
 	for _, t := range tools {
 		has[t] = true
 	}
 	exist := map[string]bool{}
 	for _, f := range files {
-		exist[filepath.FromSlash("/proj/"+f)] = true
+		exist[filepath.Join(dir, filepath.FromSlash(f))] = true
 	}
 	return PreflightEnv{
 		LookPath: func(n string) (string, error) {
@@ -43,12 +49,31 @@ func findItem(items []Item, role, level string) *Item {
 func TestPreflight_TudoCerto(t *testing.T) {
 	cfg := config.DefaultForgeConfig()
 	cfg.Sessions = map[string]string{config.SessionRoleDiscovery: config.CLIClaude, config.SessionRoleBuilder: config.CLICodex, config.SessionRoleReviewer: config.CLIGemini}
-	env := penv([]string{"claude", "codex", "gemini"}, "CLAUDE.md", "AGENTS.md", "GEMINI.md", ".claude/agents/lider.md")
+	env := penv([]string{"claude", "codex", "agy", "tmux"}, "CLAUDE.md", "AGENTS.md", "GEMINI.md", ".claude/agents/lider.md")
 	items := Preflight("/proj", cfg, env)
 	assert.False(t, PreflightBlocked(items), FormatPreflight(items))
 	for _, it := range items {
 		assert.Equal(t, LevelOK, it.Level, "%+v", it)
 	}
+}
+
+func TestPreflight_TmuxAusenteAvisaComComando(t *testing.T) {
+	cfg := config.DefaultForgeConfig()
+	cfg.Terminal = config.TerminalAuto
+	cfg.Sessions = map[string]string{config.SessionRoleDiscovery: config.CLIClaude, config.SessionRoleBuilder: config.CLICodex, config.SessionRoleReviewer: config.CLIGemini}
+	env := penv([]string{"claude", "codex", "agy", "brew"}, "CLAUDE.md", "AGENTS.md", "GEMINI.md", ".claude/agents/lider.md")
+	items := Preflight("/proj", cfg, env)
+	assert.False(t, PreflightBlocked(items), "tmux ausente só avisa")
+	var tmuxWarn *Item
+	for i := range items {
+		if strings.Contains(items[i].Message, "tmux ausente") {
+			tmuxWarn = &items[i]
+			break
+		}
+	}
+	require.NotNil(t, tmuxWarn)
+	assert.Equal(t, LevelWarn, tmuxWarn.Level)
+	assert.Contains(t, tmuxWarn.Action, "instale")
 }
 
 func TestPreflight_CLIAusenteBloqueia(t *testing.T) {
@@ -124,5 +149,49 @@ func TestPreflight_NaoExecutaAAgenteNemLeOAmbiente(t *testing.T) {
 		Exists:   func(string) bool { return true },
 	}
 	_ = Preflight("/proj", cfg, env)
-	assert.Equal(t, 3, called, "só LookPath, uma vez por sessão")
+	wantCalled := 3
+	if runtime.GOOS != "windows" {
+		wantCalled = 4 // 3 sessões + tmux
+	}
+	assert.Equal(t, wantCalled, called, "só LookPath, uma vez por sessão e uma para o tmux")
+}
+
+func TestPreflight_ConstituicaoRascunho(t *testing.T) {
+	dir := t.TempDir()
+	require.NoError(t, os.MkdirAll(filepath.Join(dir, "sdd", "memory"), 0o755))
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "sdd", "memory", "constitution.md"), []byte("# Constituição — Teste\n## Missão\n[Uma frase]\n"), 0o644))
+
+	cfg := config.DefaultForgeConfig()
+	cfg.Sessions = map[string]string{config.SessionRoleDiscovery: config.CLIClaude, config.SessionRoleBuilder: config.CLICodex, config.SessionRoleReviewer: config.CLIGemini}
+	env := penvFor(dir, []string{"claude", "codex", "gemini", "agy", "tmux"}, "CLAUDE.md", "AGENTS.md", "GEMINI.md", ".claude/agents/lider.md")
+
+	items := Preflight(dir, cfg, env)
+	assert.False(t, PreflightBlocked(items), FormatPreflight(items))
+
+	var constWarn *Item
+	for i := range items {
+		if strings.Contains(items[i].Message, "Constituição em rascunho") {
+			constWarn = &items[i]
+			break
+		}
+	}
+	require.NotNil(t, constWarn, "deve gerar aviso de Constituição em rascunho")
+	assert.Equal(t, LevelWarn, constWarn.Level)
+	assert.Equal(t, "/constitution", constWarn.Action)
+
+	// Agora com projeto pronta: não deve avisar
+	dirPronta := t.TempDir()
+	require.NoError(t, os.MkdirAll(filepath.Join(dirPronta, "sdd", "memory"), 0o755))
+	require.NoError(t, os.MkdirAll(filepath.Join(dirPronta, "sdd", "spec"), 0o755))
+	require.NoError(t, os.WriteFile(filepath.Join(dirPronta, "sdd", "memory", "constitution.md"), []byte("# Constituição — App\n## Missão\nMissao real.\n## Regras\n1. Regra.\n"), 0o644))
+	require.NoError(t, os.WriteFile(filepath.Join(dirPronta, "sdd", "spec", "modules.md"), []byte("# Módulos\n## Core\nModulo core.\n"), 0o644))
+	require.NoError(t, os.WriteFile(filepath.Join(dirPronta, "sdd", "spec", "flows.md"), []byte("# Fluxos\n## Fluxo 1\nFluxo real.\n"), 0o644))
+	require.NoError(t, os.WriteFile(filepath.Join(dirPronta, "sdd", "spec", "decisions.md"), []byte("# Decisões\n\n## Decisões Resolvidas\n| ID | Decisão | Escolha |\n|---|---|---|\n| D01 | Banco | SQLite |\n"), 0o644))
+
+	envPronta := penvFor(dirPronta, []string{"claude", "codex", "gemini", "agy", "tmux"}, "CLAUDE.md", "AGENTS.md", "GEMINI.md", ".claude/agents/lider.md")
+	itemsPronta := Preflight(dirPronta, cfg, envPronta)
+	assert.False(t, PreflightBlocked(itemsPronta), FormatPreflight(itemsPronta))
+	for _, it := range itemsPronta {
+		assert.NotContains(t, it.Message, "Constituição em rascunho")
+	}
 }

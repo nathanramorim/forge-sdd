@@ -14,6 +14,16 @@ Três sessões de terminal trabalham juntas: **você conversa numa, e outras dua
 
 ## Começar em 3 passos
 
+**Primeiro passo em projeto novo: a Constituição (`/constitution`)**
+Antes de qualquer discovery ou feature, o projeto precisa ter a sua missão, stack, módulos (`sdd/spec/modules.md`), fluxos (`sdd/spec/flows.md`) e decisões arquiteturais (`sdd/spec/decisions.md`) definidos. O menu do `forge` e o `forge-sdd doctor` alertam quando a constituição é rascunho e destacam o comando `/constitution` como passo 1.
+
+O comando determinístico de contexto:
+```bash
+forge-sdd brief           # imprime o resumo: missão, stack, módulos, fluxos e decisões
+forge-sdd brief --check   # confere prontidão (sai 0 pronta, 3 rascunho)
+```
+Toda sessão de Discovery inicia executando `forge-sdd brief` para ler a missão e as decisões arquiteturais antes de propor novas mudanças.
+
 **Jeito mais fácil: rode `forge` e navegue pelo menu** (setas, Enter, Esc volta). Em **Pipeline multi-sessão → Iniciar as 3 sessões** você escolhe o agente de cada sessão (Claude, Gemini, Copilot ou Codex), o nível de permissão, vê a checagem (CLI instalada, arquivos do agente) e confirma. A escolha fica lembrada para a próxima vez.
 
 Sem menu (scripts):
@@ -47,9 +57,17 @@ forge-sdd worker --role builder
 forge-sdd worker --role reviewer
 ```
 
-## O que cada painel mostra
+## O que cada painel mostra e contingência de terminal
 
-Com `tmux` instalado, `forge` e `forge-sdd up` abrem **uma tela com três painéis**, cada um com o nome da sessão no topo: `forge-discovery` (grande, à esquerda), `forge-builder` e `forge-reviewer` (empilhados à direita). Sem tmux, abrem três janelas do terminal do sistema. Para escolher: `forge-sdd up --terminal tmux|native|auto` ou `terminal` em `forge.json` (padrão `auto`). Dentro do tmux: `Ctrl+b` e as setas trocam de painel, `Ctrl+b d` solta a tela sem encerrar nada, e `tmux ls` mostra o nome da sessão (`forge-<projeto>-<6 hex do caminho>`) para reconectar com `tmux attach -t =<nome>`; rodar `forge` ou `forge-sdd up` de novo também reconecta.
+Com `tmux` instalado, `forge` e `forge-sdd up` abrem **uma tela com três painéis**, cada um com o nome da sessão no topo: `forge-discovery` (grande, à esquerda), `forge-builder` e `forge-reviewer` (empilhados à direita).
+
+**Instalação do tmux e contingência de terminal:**
+- Em modo `auto`, se o `tmux` não estiver no PATH, o Forge detecta o gerenciador de pacotes do sistema (Homebrew no macOS, apt-get, dnf, pacman, apk ou zypper no Linux) e pergunta se você deseja instalá-lo com confirmação interativa.
+- Se você recusar ou a instalação falhar, o Forge cai com graça (**contingência do tmux**) para **janelas nativas do sistema**. No Windows com Windows Terminal (`wt.exe`), ele abre as 3 sessões em abas/painéis divididos do Windows Terminal; no Windows nativo sem `wt.exe`, abre janelas separadas de `cmd.exe`.
+- No **WSL** (Windows Subsystem for Linux), o tmux funciona nativamente dentro da distribuição Linux.
+- Você pode forçar a escolha com `forge-sdd up --terminal tmux|native|auto` ou definindo `"terminal": "tmux"` ou `"native"` em `forge.json`.
+
+Dentro do tmux: `Ctrl+b` e as setas trocam de painel, `Ctrl+b d` solta a tela sem encerrar nada, e `tmux ls` mostra o nome da sessão (`forge-<projeto>-<6 hex do caminho>`) para reconectar com `tmux attach -t =<nome>`; rodar `forge` ou `forge-sdd up` de novo também reconecta.
 
 Nos painéis do Builder e do Reviewer o worker mostra o que o agente está fazendo, em linhas curtas (a saída completa fica em `.forge/runtime/logs/`):
 

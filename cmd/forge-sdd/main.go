@@ -342,9 +342,10 @@ func printSummaryReport(cfg config.Config, targetDir string, fileCount int) {
 	fmt.Printf("  • Agentes:        %s\n", strings.Join(cfg.Agents, ", "))
 	fmt.Printf("  • Telemetria:     %s\n", telemetryStatus)
 	fmt.Println("\nPróximos passos:")
-	fmt.Println("  1. Abra o projeto no VS Code ou sua IDE de preferência")
-	fmt.Println("  2. Aceite as extensões recomendadas (Copilot, MCP, etc.)")
-	fmt.Println("  3. Rode /discovery com a sua primeira demanda (ou forge-sdd status para ver as iniciativas)")
+	fmt.Println("  1. Rode /constitution no seu agente de IA para alinhar stack, arquitetura e regras")
+	fmt.Println("  2. Abra o projeto no VS Code ou sua IDE de preferência")
+	fmt.Println("  3. Aceite as extensões recomendadas (Copilot, MCP, etc.)")
+	fmt.Println("  4. Rode /discovery com a sua primeira demanda (ou forge-sdd status para ver as iniciativas)")
 	printPipelineHint(targetDir)
 }
 
@@ -415,8 +416,18 @@ func init() {
 	rootCmd.AddCommand(attachCmd)
 }
 
+type exitCoder interface {
+	ExitCode() int
+}
+
 func main() {
 	if err := rootCmd.Execute(); err != nil {
+		if ec, ok := err.(exitCoder); ok {
+			if err.Error() != "" {
+				fmt.Fprintln(os.Stderr, err)
+			}
+			os.Exit(ec.ExitCode())
+		}
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}

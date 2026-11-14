@@ -157,7 +157,7 @@ func LaunchTmux(plan *TmuxPlan, r TmuxRunner) (created bool, err error) {
 		created = true
 	}
 	if err := r.Attach(plan.Attach); err != nil {
-		return created, fmt.Errorf("a sessão %s está pronta, mas não consegui conectar a ela (%v; sem terminal interativo?). Rode: tmux attach -t =%s", plan.Session, err, plan.Session)
+		return created, &TmuxAttachError{Session: plan.Session, Err: err}
 	}
 	return created, nil
 }

@@ -22,8 +22,11 @@ const (
 
 var (
 	ansiRe      = regexp.MustCompile(`\x1b\[[0-9;?]*[ -/]*[@-~]|\x1b\][^\x07\x1b]*(?:\x07|\x1b\\)`)
-	hookNoiseRe = regexp.MustCompile(`(?i)\bhook \[[^\]]*\] failed:`)
-	editTools   = map[string]bool{"edit": true, "write": true, "multiedit": true, "notebookedit": true, "write_file": true, "replace": true, "create_file": true, "edit_file": true, "apply_patch": true, "file_change": true}
+	hookNoiseRe     = regexp.MustCompile(`(?i)\bhook \[[^\]]*\] failed:`)
+	skillConflictRe = regexp.MustCompile(`(?i)Skill conflict detected`)
+	yoloNoiseRe     = regexp.MustCompile(`(?i)YOLO mode is enabled`)
+	ripgrepNoiseRe  = regexp.MustCompile(`(?i)Ripgrep is not available`)
+	editTools       = map[string]bool{"edit": true, "write": true, "multiedit": true, "notebookedit": true, "write_file": true, "replace": true, "create_file": true, "edit_file": true, "apply_patch": true, "file_change": true}
 	shellTools  = map[string]bool{"bash": true, "run_shell_command": true, "shell": true, "run_command": true, "command_execution": true, "exec_command": true}
 )
 
@@ -45,8 +48,10 @@ type LiveView struct {
 	opts      LiveOptions
 	partial   bytes.Buffer
 	lastEvent time.Time
-	hookShown bool
-	inKey     bool // dentro de um bloco de chave privada: nada dele vai ao terminal
+	hookShown           bool
+	skillConflicts      int
+	skillConflictsShown bool
+	inKey               bool // dentro de um bloco de chave privada: nada dele vai ao terminal
 	dropNL    bool // descartando uma linha gigante até a próxima quebra
 	tail      []string
 }
@@ -97,7 +102,7 @@ func (v *LiveView) Write(p []byte) (int, error) {
 	return len(p), nil
 }
 
-// Flush processa a última linha sem quebra.
+// Flush processa a última linha sem quebra e emite resumos pendentes.
 func (v *LiveView) Flush() {
 	v.mu.Lock()
 	defer v.mu.Unlock()
@@ -107,6 +112,9 @@ func (v *LiveView) Flush() {
 		if !v.opts.Raw {
 			v.handleLine(line)
 		}
+	}
+	if !v.opts.Raw {
+		v.flushSkillConflicts()
 	}
 }
 
@@ -193,6 +201,14 @@ func (v *LiveView) handleLine(line string) {
 		}
 		return
 	}
+	if skillConflictRe.MatchString(trim) {
+		v.skillConflicts++
+		return
+	}
+	if yoloNoiseRe.MatchString(trim) || ripgrepNoiseRe.MatchString(trim) {
+		return
+	}
+	v.flushSkillConflicts()
 	if strings.HasPrefix(trim, "{") || strings.HasPrefix(trim, "[{") {
 		var ev map[string]any
 		if json.Unmarshal([]byte(trim), &ev) != nil {
@@ -206,6 +222,13 @@ func (v *LiveView) handleLine(line string) {
 	}
 	v.lastEvent = v.opts.Now()
 	v.emit("  "+trim, true)
+}
+
+func (v *LiveView) flushSkillConflicts() {
+	if v.skillConflicts > 0 && !v.skillConflictsShown {
+		v.skillConflictsShown = true
+		v.emit(fmt.Sprintf("  (%d skills duplicadas nas suas pastas globais: ignorado; o log bruto guarda tudo)", v.skillConflicts), false)
+	}
 }
 
 // summarizeEvent traduz um evento estruturado em linhas curtas. Formatos conhecidos: claude e

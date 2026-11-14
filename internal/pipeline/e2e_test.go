@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"io"
 	"os"
 	"path/filepath"
@@ -190,4 +191,106 @@ func TestE2E_WorkerVisaoLimpaELimiteDeUso(t *testing.T) {
 	require.NoError(t, err)
 	assert.Contains(t, string(logs), `"type":"thread.started"`, "o log guarda a saída bruta completa")
 	assert.NotEmpty(t, mustInbox(t, dir))
+}
+
+// TestE2E_TerminalSemTmux verifica a contingência de terminal em 4 cenários:
+// 1) instala: usuário aceita e o instalador funciona -> abre via tmux
+// 2) recusa: usuário recusa a instalação -> cai com graça para janelas do sistema e grava escolha
+// 3) sem terminal: ambiente não interativo -> imprime comando sugerido e segue com janelas nativas
+// 4) falha: o comando de instalação falha -> avisa o motivo e segue com janelas nativas
+func TestE2E_TerminalSemTmux(t *testing.T) {
+	mockEnv := func(tools ...string) LaunchEnv {
+		has := map[string]bool{}
+		for _, tool := range tools {
+			has[tool] = true
+		}
+		return LaunchEnv{
+			GOOS: "darwin",
+			LookPath: func(name string) (string, error) {
+				if has[name] {
+					return "/bin/" + name, nil
+				}
+				return "", errors.New("not found")
+			},
+		}
+	}
+
+	cfg := config.ForgeConfig{Terminal: config.TerminalAuto}
+
+	// 1. Instala: usuário aceita e o instalador roda com sucesso
+	t.Run("instala", func(t *testing.T) {
+		runner := &fakeInstallRunner{}
+		var out bytes.Buffer
+		d, err := DecideTerminal("", cfg, TerminalPrompt{
+			Env:         mockEnv("brew"),
+			Interactive: true,
+			Confirm:     func(_ string, _ bool) (bool, error) { return true, nil },
+			Runner:      runner,
+			Out:         &out,
+		})
+		require.NoError(t, err)
+		assert.Equal(t, config.TerminalTmux, d.Terminal)
+		assert.True(t, d.Auto)
+		require.Len(t, runner.runs, 1)
+		assert.Equal(t, []string{"brew", "install", "tmux"}, runner.runs[0])
+	})
+
+	// 2. Recusa: usuário responde 'não' à instalação e 'sim' para lembrar a escolha
+	t.Run("recusa", func(t *testing.T) {
+		var out bytes.Buffer
+		remembered := false
+		callCount := 0
+		d, err := DecideTerminal("", cfg, TerminalPrompt{
+			Env:         mockEnv("brew"),
+			Interactive: true,
+			Confirm: func(msg string, _ bool) (bool, error) {
+				callCount++
+				if callCount == 1 {
+					return false, nil // não instala
+				}
+				return true, nil // lembra escolha
+			},
+			Remember: func() error { remembered = true; return nil },
+			Out:      &out,
+		})
+		require.NoError(t, err)
+		assert.Equal(t, config.TerminalNative, d.Terminal)
+		assert.True(t, d.Auto)
+		assert.True(t, remembered, "deve gravar terminal native")
+		assert.Contains(t, out.String(), "abrindo em janelas do sistema")
+		assert.Contains(t, out.String(), "Gravado: terminal: native")
+	})
+
+	// 3. Sem terminal: ambiente não interativo (--dry-run ou pipe)
+	t.Run("sem terminal", func(t *testing.T) {
+		var out bytes.Buffer
+		d, err := DecideTerminal("", cfg, TerminalPrompt{
+			Env:         mockEnv("brew"),
+			Interactive: false,
+			Out:         &out,
+		})
+		require.NoError(t, err)
+		assert.Equal(t, config.TerminalNative, d.Terminal)
+		assert.True(t, d.Auto)
+		assert.Contains(t, out.String(), "Sem terminal para perguntar: abrindo em janelas do sistema")
+		assert.Contains(t, out.String(), "brew install tmux")
+	})
+
+	// 4. Falha: instalador retorna erro
+	t.Run("falha", func(t *testing.T) {
+		runner := &fakeInstallRunner{runErr: errors.New("network timeout")}
+		var out bytes.Buffer
+		d, err := DecideTerminal("", cfg, TerminalPrompt{
+			Env:         mockEnv("brew"),
+			Interactive: true,
+			Confirm:     func(_ string, _ bool) (bool, error) { return true, nil },
+			Runner:      runner,
+			Out:         &out,
+		})
+		require.NoError(t, err)
+		assert.Equal(t, config.TerminalNative, d.Terminal)
+		assert.True(t, d.Auto)
+		assert.Contains(t, out.String(), "a instalação falhou")
+		assert.Contains(t, out.String(), "Abrindo em janelas do sistema")
+	})
 }
