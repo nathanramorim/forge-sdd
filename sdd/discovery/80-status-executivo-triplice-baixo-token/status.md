@@ -2,13 +2,13 @@
 
 ## Status
 ```
-Iniciativa 80 criada na branch feat/80-status-executivo-triplice-baixo-token.
-Artefatos elaborados: discovery.md, criteria.md (com template canônico de saída), plan.md e status.md.
-Aguardando aprovação humana (Gate 1 - FLX-01).
+Iniciativa 80 fatiada na branch feat/80-status-executivo-triplice-baixo-token.
+Tasks 80-01, 80-02 e 80-03 enfileiradas na fila com DAG (depends_on).
+Pronto para despacho ao Builder.
 ```
 
 ## Proximo passo
-Apresentar o template canônico e o plano ao usuário para aprovação do Gate 1; em seguida, executar /split-features e enfileirar para o Builder.
+Despachar job ao Builder (forge-sdd dispatch 80-status-executivo-triplice-baixo-token).
 
 ## A confirmar
-Confirmação do formato do template canônico de saída (< 200 tokens).
+Início da implementação pelo Builder.

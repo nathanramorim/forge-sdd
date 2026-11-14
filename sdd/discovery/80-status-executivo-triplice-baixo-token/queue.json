@@ -1,0 +1,53 @@
+{
+  "feature_id": "feat-80",
+  "branch": "feat/80-status-executivo-triplice-baixo-token",
+  "spec_status": "reviewed",
+  "updated_at": "2026-11-14T13:57:18Z",
+  "items": [
+    {
+      "task_id": "80-01",
+      "title": "feat-80-01 — Template Canônico de Status nos Prompts de Agentes",
+      "spec_path": "sdd/discovery/80-status-executivo-triplice-baixo-token/features/feat-80-01-prompts-status-triplice.md",
+      "status": "queued",
+      "rules": [
+        "DUP-01",
+        "DUP-10",
+        "COD-01"
+      ],
+      "skills_used": [],
+      "attempts": 0
+    },
+    {
+      "task_id": "80-02",
+      "title": "feat-80-02 — Subcomando nativo forge-sdd status --live",
+      "spec_path": "sdd/discovery/80-status-executivo-triplice-baixo-token/features/feat-80-02-cli-status-live.md",
+      "status": "queued",
+      "rules": [
+        "ARQ-01",
+        "COD-01",
+        "COD-03",
+        "TST-04"
+      ],
+      "skills_used": [],
+      "attempts": 0
+    },
+    {
+      "task_id": "80-03",
+      "title": "feat-80-03 — Documentação, LEIA-ME e Validação Final",
+      "spec_path": "sdd/discovery/80-status-executivo-triplice-baixo-token/features/feat-80-03-documentacao-validacao.md",
+      "status": "queued",
+      "depends_on": [
+        "80-01",
+        "80-02"
+      ],
+      "rules": [
+        "DUP-10",
+        "FLX-05",
+        "GOV-01",
+        "TST-05"
+      ],
+      "skills_used": [],
+      "attempts": 0
+    }
+  ]
+}
