@@ -76,8 +76,8 @@ func defaultProfiles() map[string]CLIProfile {
 			InteractiveArgs: []string{"-n", "{name}", "--agent", "{agent}"},
 		},
 		CLIGemini: {
-			Command:         "gemini",
-			Args:            []string{"-p", "{prompt}", "-o", "stream-json", MarkerPermissions},
+			Command:         "agy",
+			Args:            []string{"-p", "{prompt}", MarkerPermissions},
 			InteractiveArgs: []string{"-i", "{prompt}"},
 		},
 		CLICopilot: {
@@ -107,10 +107,8 @@ func PermissionArgs(cli, level string, allow []string) []string {
 	switch level {
 	case PermissionFull:
 		switch cli {
-		case CLIClaude, CLIAgy:
+		case CLIClaude, CLIAgy, CLIGemini:
 			return []string{"--dangerously-skip-permissions"}
-		case CLIGemini:
-			return []string{"--approval-mode", "yolo"}
 		case CLICopilot:
 			return []string{"--allow-all-tools"}
 		case CLICodex:
@@ -118,7 +116,7 @@ func PermissionArgs(cli, level string, allow []string) []string {
 		}
 	case PermissionProject:
 		switch cli {
-		case CLIAgy:
+		case CLIAgy, CLIGemini:
 			// Sem allowlist confirmada: o agy só roda o worker sem confirmação com o bypass (igual a full).
 			return []string{"--dangerously-skip-permissions"}
 		case CLIClaude:
@@ -127,8 +125,6 @@ func PermissionArgs(cli, level string, allow []string) []string {
 				args = append(args, "Bash("+c+" *)")
 			}
 			return args
-		case CLIGemini:
-			return []string{"--approval-mode", "auto_edit"}
 		case CLICopilot:
 			args := []string{"--allow-tool=write"}
 			for _, c := range allow {

@@ -17,7 +17,11 @@ func TestBuildArgv_PorCLIeNivelDePermissao(t *testing.T) {
 			spec := RunSpec{Agent: "builder", Name: "forge-builder", Prompt: "faça o job", Permissions: cfg.WorkerPermissionArgs(cli)}
 			cmd, args, err := BuildArgv(p, spec)
 			require.NoError(t, err, cli)
-			assert.Equal(t, cli, cmd)
+			wantCmd := cli
+			if cli == config.CLIGemini {
+				wantCmd = "agy"
+			}
+			assert.Equal(t, wantCmd, cmd)
 			assert.NotContains(t, args, config.MarkerPermissions, "%s/%s: o marcador sempre é expandido", cli, level)
 			for _, perm := range spec.Permissions {
 				assert.Contains(t, args, perm, "%s/%s", cli, level)

@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"io"
+	"os"
+	"path/filepath"
 	"strings"
 	"sync"
 	"testing"
@@ -12,6 +14,7 @@ import (
 	"github.com/forge-sdd/cli/internal/bus"
 	"github.com/forge-sdd/cli/internal/config"
 	"github.com/forge-sdd/cli/internal/layout"
+	"github.com/forge-sdd/cli/internal/notify"
 	"github.com/forge-sdd/cli/internal/testutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -23,6 +26,7 @@ type fakeRunner struct {
 	prompts []string
 	specs   []RunSpec
 	fn      func(spec RunSpec) (RunResult, error)
+	output  string
 }
 
 func (f *fakeRunner) Run(ctx context.Context, spec RunSpec, out io.Writer) (RunResult, error) {
@@ -30,7 +34,11 @@ func (f *fakeRunner) Run(ctx context.Context, spec RunSpec, out io.Writer) (RunR
 	f.prompts = append(f.prompts, spec.Prompt)
 	f.specs = append(f.specs, spec)
 	f.mu.Unlock()
-	_, _ = io.WriteString(out, "agente falso rodando\n")
+	if f.output != "" {
+		_, _ = io.WriteString(out, f.output)
+	} else {
+		_, _ = io.WriteString(out, "agente falso rodando\n")
+	}
 	return f.fn(spec)
 }
 
@@ -237,4 +245,152 @@ func (l *lockedWriter) Write(p []byte) (int, error) {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 	return l.w.Write(p)
+}
+
+func TestWorker_AgenteIndisponivel(t *testing.T) {
+	dir := workerProject(t)
+	seedJob(t, dir, layout.RoleBuilder, "job-1", bus.TypeFeatureBuild, bus.PriorityNormal, now)
+	seedJob(t, dir, layout.RoleBuilder, "job-2", bus.TypeFeatureBuild, bus.PriorityNormal, now.Add(time.Second))
+
+	runner := &fakeRunner{
+		output: "IneligibleTierError: This client is no longer supported for Gemini Code Assist for individuals. ... migrate to the Antigravity suite of products\n",
+		fn: func(spec RunSpec) (RunResult, error) {
+			return RunResult{ExitCode: 1}, nil
+		},
+	}
+
+	var outcomes []string
+	var out strings.Builder
+	err := RunWorker(context.Background(), WorkerOptions{
+		Dir:    dir,
+		Role:   layout.RoleBuilder,
+		CLI:    config.CLIGemini,
+		Out:    &out,
+		Runner: runner,
+		Now:    func() time.Time { return now },
+		OnJobDone: func(j bus.Job, o string) {
+			outcomes = append(outcomes, j.ID+":"+o)
+		},
+	})
+
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "indisponível")
+	assert.Contains(t, err.Error(), "IneligibleTierError")
+
+	// Não consumiu o segundo job: parou no primeiro
+	require.Len(t, runner.specs, 1)
+	assert.Equal(t, []string{"job-1:unavailable"}, outcomes)
+
+	// O job voltou para pending com tentativa intacta
+	pending, err := bus.List(dir, layout.RoleBuilder, layout.StatePending)
+	require.NoError(t, err)
+	require.Len(t, pending, 2)
+	assert.Equal(t, "job-1", pending[0].Job.ID)
+	assert.Equal(t, 1, pending[0].Job.Attempt)
+
+	// Nenhum job em failed
+	failed, _ := bus.List(dir, layout.RoleBuilder, layout.StateFailed)
+	assert.Empty(t, failed)
+
+	// Inbox recebeu notificação info com a ação
+	items, err := notify.ListInbox(dir, false)
+	require.NoError(t, err)
+	require.Len(t, items, 1)
+	assert.Equal(t, notify.TypeInfo, items[0].Type)
+	assert.Contains(t, items[0].Title, "indisponível")
+	assert.Contains(t, items[0].Message, "IneligibleTierError")
+	assert.Contains(t, items[0].Message, "Ação:")
+}
+
+func TestWorker_AgenteIndisponivelRequeueFalha(t *testing.T) {
+	dir := workerProject(t)
+	seedJob(t, dir, layout.RoleBuilder, "job-1", bus.TypeFeatureBuild, bus.PriorityNormal, now)
+
+	runner := &fakeRunner{
+		output: "IneligibleTierError: This client is no longer supported for Gemini Code Assist for individuals.\n",
+		fn: func(spec RunSpec) (RunResult, error) {
+			// Força o bus.Requeue a falhar criando um subdiretório com o nome do arquivo em pending,
+			// o que faz o os.Rename para pending falhar com EISDIR sem quebrar a leitura de pending.
+			e, err := bus.Find(dir, layout.RoleBuilder, "job-1")
+			if err == nil {
+				pendingDir := filepath.Join(dir, ".forge", "runtime", "queues", "builder", "pending")
+				_ = os.MkdirAll(filepath.Join(pendingDir, filepath.Base(e.Path)), 0o755)
+			}
+			return RunResult{ExitCode: 1}, nil
+		},
+	}
+
+	var outcomes []string
+	var out strings.Builder
+	// O worker encerra sem erro retornado do processJob porque caiu no bus.Fail (falha normal)
+	_ = RunWorker(context.Background(), WorkerOptions{
+		Dir:    dir,
+		Role:   layout.RoleBuilder,
+		CLI:    config.CLIGemini,
+		Out:    &out,
+		Runner: runner,
+		Now:    func() time.Time { return now },
+		Once:   true,
+		OnJobDone: func(j bus.Job, o string) {
+			outcomes = append(outcomes, j.ID+":"+o)
+		},
+	})
+
+	assert.Equal(t, []string{"job-1:failed"}, outcomes)
+	failed, err := bus.List(dir, layout.RoleBuilder, layout.StateFailed)
+	require.NoError(t, err)
+	require.Len(t, failed, 1)
+	assert.Contains(t, failed[0].Job.Events[len(failed[0].Job.Events)-1].Note, "IneligibleTierError")
+}
+
+func TestUsageLimit_Inalterado(t *testing.T) {
+	// Limite de uso tem precedência quando a mesma saída traz as duas mensagens
+	nowTime := time.Date(2026, 11, 14, 10, 0, 0, 0, time.UTC)
+	tail := []string{
+		"You've hit your 5-hour limit · resets in 30 minutes",
+		"IneligibleTierError: This client is no longer supported",
+	}
+
+	ul, hasUL := DetectUsageLimit(tail, nowTime)
+	require.True(t, hasUL)
+	assert.Contains(t, ul.Message, "hit your 5-hour limit")
+	assert.False(t, ul.Capped)
+
+	au, hasAU := DetectAgentUnavailable(tail, config.CLIGemini)
+	require.True(t, hasAU)
+	assert.Contains(t, au.Message, "IneligibleTierError")
+
+	// No worker, o limite de uso tem precedência
+	dir := workerProject(t)
+	seedJob(t, dir, layout.RoleBuilder, "job-1", bus.TypeFeatureBuild, bus.PriorityNormal, nowTime)
+
+	runner := &fakeRunner{
+		output: strings.Join(tail, "\n") + "\n",
+		fn: func(spec RunSpec) (RunResult, error) {
+			return RunResult{ExitCode: 1}, nil
+		},
+	}
+
+	var outcomes []string
+	var out strings.Builder
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	_ = RunWorker(ctx, WorkerOptions{
+		Dir:    dir,
+		Role:   layout.RoleBuilder,
+		CLI:    config.CLIGemini,
+		Out:    &out,
+		Runner: runner,
+		Now:    func() time.Time { return nowTime },
+		Once:   true,
+		Sleep:  func(context.Context, time.Duration) bool { return false }, // não bloqueia o teste
+		OnJobDone: func(j bus.Job, o string) {
+			outcomes = append(outcomes, j.ID+":"+o)
+			cancel()
+		},
+	})
+
+	// Precedência do limite de uso: OutcomeDeferred
+	assert.Equal(t, []string{"job-1:deferred"}, outcomes)
 }

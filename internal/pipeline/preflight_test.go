@@ -43,7 +43,7 @@ func findItem(items []Item, role, level string) *Item {
 func TestPreflight_TudoCerto(t *testing.T) {
 	cfg := config.DefaultForgeConfig()
 	cfg.Sessions = map[string]string{config.SessionRoleDiscovery: config.CLIClaude, config.SessionRoleBuilder: config.CLICodex, config.SessionRoleReviewer: config.CLIGemini}
-	env := penv([]string{"claude", "codex", "gemini"}, "CLAUDE.md", "AGENTS.md", "GEMINI.md", ".claude/agents/lider.md")
+	env := penv([]string{"claude", "codex", "agy"}, "CLAUDE.md", "AGENTS.md", "GEMINI.md", ".claude/agents/lider.md")
 	items := Preflight("/proj", cfg, env)
 	assert.False(t, PreflightBlocked(items), FormatPreflight(items))
 	for _, it := range items {

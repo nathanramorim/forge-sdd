@@ -26,7 +26,7 @@ forge-sdd up --discovery claude --builder codex --reviewer gemini   # 2. abre as
 | Agente | Sessão interativa (Discovery) | Worker (Builder e Reviewer) | Instruções que lê |
 |---|---|---|---|
 | `claude` | sim | `claude -p` | `CLAUDE.md` |
-| `gemini` | sim | `gemini -p` | `GEMINI.md` |
+| `gemini` | sim | `agy -p` | `GEMINI.md` |
 | `copilot` | sim | `copilot -p` | `.github/copilot-instructions.md`, `AGENTS.md` |
 | `codex` | sim | `codex exec` | `AGENTS.md` (gerado pelo `forge-sdd update --agent openai`) |
 

@@ -292,20 +292,30 @@ func CheckOwner(dir, role, id, worker string) error {
 }
 
 func move(dir, role string, e *Entry, to, by, note string, now time.Time) (*Entry, error) {
-	e.Job.Lease = nil
+	origLease := e.Job.Lease
+	if to != layout.StateProcessing {
+		e.Job.Lease = nil
+	}
 	e.Job.addEvent(now, to, by, note)
 	if err := writeJob(e.Path, &e.Job); err != nil {
+		e.Job.Lease = origLease
 		return nil, err
 	}
 	td, err := stateDir(dir, role, to)
 	if err != nil {
+		e.Job.Lease = origLease
+		_ = writeJob(e.Path, &e.Job)
 		return nil, err
 	}
 	if err := os.MkdirAll(td, 0o755); err != nil {
+		e.Job.Lease = origLease
+		_ = writeJob(e.Path, &e.Job)
 		return nil, err
 	}
 	dst := filepath.Join(td, filepath.Base(e.Path))
 	if err := os.Rename(e.Path, dst); err != nil {
+		e.Job.Lease = origLease
+		_ = writeJob(e.Path, &e.Job)
 		return nil, fmt.Errorf("mover %s para %s: %w", e.Job.ID, to, err)
 	}
 	return &Entry{State: to, Path: dst, Job: e.Job}, nil

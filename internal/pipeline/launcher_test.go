@@ -168,7 +168,7 @@ func TestSessions_AgentePorSessao(t *testing.T) {
 func TestSessions_DiscoveryInterativaPorCLI(t *testing.T) {
 	want := map[string]string{
 		config.CLIClaude:  "claude -n forge-discovery --agent lider",
-		config.CLIGemini:  "gemini -i 'Voce e a sessao forge-discovery",
+		config.CLIGemini:  "agy -i 'Voce e a sessao forge-discovery",
 		config.CLICopilot: "copilot -i 'Voce e a sessao forge-discovery",
 		config.CLICodex:   "codex 'Voce e a sessao forge-discovery",
 		config.CLIAgy:     "agy --agent lider -i",
@@ -188,7 +188,7 @@ func TestSessions_DiscoveryInterativaPorCLI(t *testing.T) {
 	env.Dir, env.Bin = `C:\work\proj`, `C:\f\forge-sdd.exe`
 	ss, err := SessionsFor(env, cfg)
 	require.NoError(t, err)
-	assert.Contains(t, ss[0].Inner, `gemini -i "Voce e a sessao forge-discovery`)
+	assert.Contains(t, ss[0].Inner, `agy -i "Voce e a sessao forge-discovery`)
 }
 
 func TestSessions_AgenteInvalidoERecusado(t *testing.T) {

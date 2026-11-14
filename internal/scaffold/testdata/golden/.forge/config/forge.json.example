@@ -72,12 +72,10 @@
       ]
     },
     "gemini": {
-      "command": "gemini",
+      "command": "agy",
       "args": [
         "-p",
         "{prompt}",
-        "-o",
-        "stream-json",
         "{permissions}"
       ],
       "interactive_args": [

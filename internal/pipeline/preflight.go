@@ -49,7 +49,7 @@ var agentFiles = map[string]struct {
 	InstallIt string
 }{
 	config.CLIClaude:  {[]string{"CLAUDE.md"}, "claude", "npm install -g @anthropic-ai/claude-code"},
-	config.CLIGemini:  {[]string{"GEMINI.md"}, "gemini", "npm install -g @google/gemini-cli"},
+	config.CLIGemini:  {[]string{"GEMINI.md"}, "gemini", "npm install -g @google/antigravity-cli"},
 	config.CLICopilot: {[]string{".github/copilot-instructions.md", "AGENTS.md"}, "copilot", "npm install -g @github/copilot"},
 	config.CLICodex:   {[]string{"AGENTS.md"}, "openai", "npm install -g @openai/codex"},
 	config.CLIAgy:     {[]string{"GEMINI.md", "AGENTS.md"}, "gemini", ""},
