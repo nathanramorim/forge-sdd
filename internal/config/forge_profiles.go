@@ -64,18 +64,20 @@ var allowCommandRe = regexp.MustCompile(`^[A-Za-z0-9][A-Za-z0-9._-]{0,40}$`)
 // defaultProfiles reúne os perfis pesquisados na documentação oficial das CLIs (discovery 71).
 // Cada perfil é escrito por inteiro: -p é o prompt em claude, gemini e copilot, mas é perfil no
 // codex (o modo não interativo dele é `codex exec`).
-// A CONFIRMAR (não executados de ponta a ponta): gemini, copilot, codex e agy. O copilot não usa
+// A CONFIRMAR (não executados de ponta a ponta): gemini, copilot, codex e agy. As flags de saída
+// estruturada (claude --output-format stream-json --verbose, gemini -o stream-json, codex --json)
+// alimentam a visão limpa do worker; sem elas a visão cai no acompanhamento por git. O copilot não usa
 // --agent por padrão porque as pastas de agentes não foram confirmadas; o papel vai no prompt.
 func defaultProfiles() map[string]CLIProfile {
 	return map[string]CLIProfile{
 		CLIClaude: {
 			Command:         "claude",
-			Args:            []string{"-p", "{prompt}", "--agent", "{agent}", "-n", "{name}", MarkerPermissions},
+			Args:            []string{"-p", "{prompt}", "--agent", "{agent}", "-n", "{name}", "--output-format", "stream-json", "--verbose", MarkerPermissions},
 			InteractiveArgs: []string{"-n", "{name}", "--agent", "{agent}"},
 		},
 		CLIGemini: {
 			Command:         "gemini",
-			Args:            []string{"-p", "{prompt}", MarkerPermissions},
+			Args:            []string{"-p", "{prompt}", "-o", "stream-json", MarkerPermissions},
 			InteractiveArgs: []string{"-i", "{prompt}"},
 		},
 		CLICopilot: {
@@ -85,7 +87,7 @@ func defaultProfiles() map[string]CLIProfile {
 		},
 		CLICodex: {
 			Command:         "codex",
-			Args:            []string{"exec", MarkerPermissions, "{prompt}"},
+			Args:            []string{"exec", "--json", MarkerPermissions, "{prompt}"},
 			InteractiveArgs: []string{"{prompt}"},
 		},
 		// agy: `-p` e `--dangerously-skip-permissions` confirmados no uso real (barbearia-app, 2026-11-14).

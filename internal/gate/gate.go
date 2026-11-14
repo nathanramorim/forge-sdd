@@ -48,6 +48,21 @@ var (
 	ruleIDRegex = regexp.MustCompile(`\b(?:ARQ|SEG|DUP|COD|TST|FLX|GOV)-\d{2}\b`)
 )
 
+// MaskSecrets troca por *** os trechos que casam com os padrões de segredo do P-13 (e pares
+// chave=valor óbvios). Serve a qualquer saída mostrada na tela (SEG-05).
+func MaskSecrets(s string) string {
+	for _, re := range secretPatterns {
+		s = re.ReplaceAllString(s, "***")
+	}
+	s = bearerRe.ReplaceAllString(s, "${1}***")
+	return kvSecretRe.ReplaceAllString(s, "${1}=***")
+}
+
+var (
+	bearerRe   = regexp.MustCompile(`(?i)(\bbearer\s+)[A-Za-z0-9._~+/=-]+`)
+	kvSecretRe = regexp.MustCompile(`(?i)\b((?:token|password|passwd|secret|api[_-]?key|access[_-]?key)[A-Za-z_-]*)\s*[:=]\s*[^\s"']+`)
+)
+
 // HasFailures indica se há ao menos uma verificação reprovada no relatório.
 func HasFailures(results []CheckResult) bool {
 	for _, r := range results {

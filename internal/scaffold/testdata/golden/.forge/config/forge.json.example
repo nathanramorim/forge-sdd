@@ -30,6 +30,9 @@
         "{agent}",
         "-n",
         "{name}",
+        "--output-format",
+        "stream-json",
+        "--verbose",
         "{permissions}"
       ],
       "interactive_args": [
@@ -43,6 +46,7 @@
       "command": "codex",
       "args": [
         "exec",
+        "--json",
         "{permissions}",
         "{prompt}"
       ],
@@ -72,6 +76,8 @@
       "args": [
         "-p",
         "{prompt}",
+        "-o",
+        "stream-json",
         "{permissions}"
       ],
       "interactive_args": [

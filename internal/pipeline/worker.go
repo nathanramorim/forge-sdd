@@ -26,6 +26,10 @@ type WorkerOptions struct {
 	Dir  string
 	Role string // builder ou reviewer
 	Name string // nome da sessão e do lease (forge-builder)
+	// Raw devolve a saída bruta do agente ao terminal (sem a visão limpa).
+	Raw bool
+	// WatchEvery é o intervalo do acompanhamento por git (padrão 5 s; negativo desliga).
+	WatchEvery time.Duration
 	// CLI sobrescreve o agente da sessão (forge-sdd up --builder codex sem gravar em forge.json).
 	// Vazio: cfg.CLIFor(Role).
 	CLI        string
@@ -119,15 +123,30 @@ func RunWorker(ctx context.Context, opts WorkerOptions) error {
 
 func processJob(ctx context.Context, opts WorkerOptions, cfg config.ForgeConfig, entry *bus.Entry) {
 	job := entry.Job
-	fmt.Fprintf(opts.Out, "[%s] job %s (%s, tentativa %d) iniciado\n", opts.Name, job.ID, job.Type, job.Attempt)
+	started := opts.Now()
 
 	logPath := filepath.Join(layout.Logs(opts.Dir), opts.Role+"-"+job.ID+".log")
-	var out io.Writer = opts.Out
+	var logw io.Writer
 	if err := os.MkdirAll(filepath.Dir(logPath), 0o755); err == nil {
 		if lf, err := os.OpenFile(logPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o600); err == nil {
 			defer lf.Close()
-			out = io.MultiWriter(opts.Out, lf)
+			logw = lf
 		}
+	}
+	// O log guarda a saída bruta completa; o terminal recebe a visão limpa (ou a bruta com --raw).
+	live := NewLiveView(opts.Out, logw, LiveOptions{CLI: opts.CLI, Raw: opts.Raw, Now: opts.Now})
+	var out io.Writer = live
+	live.Line(fmt.Sprintf("▶ job %s · %s · tentativa %d · %s · permissões %s", job.Feature, job.Type, job.Attempt, opts.CLI, cfg.Permissions))
+
+	watcher := NewGitWatcher(opts.Dir, opts.Now, live.Activity)
+	watchEvery := opts.WatchEvery
+	if watchEvery == 0 {
+		watchEvery = 5 * time.Second
+	}
+	watchCtx, stopWatch := context.WithCancel(ctx)
+	defer stopWatch()
+	if watchEvery > 0 && !opts.Raw {
+		go watcher.Run(watchCtx, watchEvery, live.Line)
 	}
 
 	// Renova o lease enquanto o agente trabalha (jobs longos não podem ser recuperados por engano).
@@ -160,6 +179,8 @@ func processJob(ctx context.Context, opts WorkerOptions, cfg config.ForgeConfig,
 	}, out)
 	close(stop)
 	wg.Wait()
+	stopWatch()
+	live.Flush()
 
 	reason := ""
 	switch {
@@ -177,12 +198,12 @@ func processJob(ctx context.Context, opts WorkerOptions, cfg config.ForgeConfig,
 	outcome := OutcomeDone
 	if reason != "" {
 		outcome = OutcomeFailed
-		fmt.Fprintf(opts.Out, "[%s] job %s falhou: %s\n", opts.Name, job.ID, reason)
+		live.Line(fmt.Sprintf("✗ falhou em %s: %s", FormatElapsed(opts.Now().Sub(started)), reason))
 		if _, err := bus.Fail(opts.Dir, opts.Role, job.ID, opts.Name, reason, opts.Now()); err != nil {
 			fmt.Fprintf(opts.Out, "[%s] não foi possível marcar %s como falho: %v\n", opts.Name, job.ID, err)
 		}
 	} else {
-		fmt.Fprintf(opts.Out, "[%s] job %s concluído\n", opts.Name, job.ID)
+		live.Line(fmt.Sprintf("■ concluído em %s · %d arquivos alterados", FormatElapsed(opts.Now().Sub(started)), watcher.Count()))
 	}
 	if opts.OnJobDone != nil {
 		opts.OnJobDone(job, outcome)

@@ -30,7 +30,7 @@ func TestBuildArgv_PorCLIeNivelDePermissao(t *testing.T) {
 	p, _ := cfg.Profile(config.CLICodex)
 	_, args, err := BuildArgv(p, RunSpec{Agent: "reviewer", Name: "forge-reviewer", Prompt: "revise", Permissions: cfg.WorkerPermissionArgs(config.CLICodex)})
 	require.NoError(t, err)
-	assert.Equal(t, []string{"exec", "--sandbox", "workspace-write", "revise"}, args)
+	assert.Equal(t, []string{"exec", "--json", "--sandbox", "workspace-write", "revise"}, args)
 }
 
 func TestBuildArgv_PermissaoComControleERecusada(t *testing.T) {

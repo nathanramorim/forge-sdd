@@ -21,7 +21,7 @@ func TestBuildArgv_PerfisClaudeEAgy(t *testing.T) {
 	cmd, args, err := BuildArgv(def.CLIProfiles[config.CLIClaude], spec)
 	require.NoError(t, err)
 	assert.Equal(t, "claude", cmd)
-	assert.Equal(t, []string{"-p", "Execute o job x", "--agent", "builder", "-n", "forge-builder"}, args)
+	assert.Equal(t, []string{"-p", "Execute o job x", "--agent", "builder", "-n", "forge-builder", "--output-format", "stream-json", "--verbose"}, args)
 
 	cmd, args, err = BuildArgv(def.CLIProfiles[config.CLIAgy], spec)
 	require.NoError(t, err)
