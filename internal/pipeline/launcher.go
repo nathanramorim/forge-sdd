@@ -53,20 +53,75 @@ func DefaultLaunchEnv(goos, dir, bin string) LaunchEnv {
 
 var (
 	safeBinRe   = regexp.MustCompile(`^[A-Za-z0-9._/:\\ ()+-]+$`)
-	winUnsafe   = regexp.MustCompile(`["%^&|<>\r\n\x00]`)
+	winUnsafe   = regexp.MustCompile(`["%^&|<>;\r\n\x00]`) // ; é separador de subcomandos do wt.exe
 	posixUnsafe = regexp.MustCompile(`[\r\n\x00]`)
 )
 
 // shQuote coloca s entre aspas simples para um shell POSIX.
 func shQuote(s string) string { return "'" + strings.ReplaceAll(s, "'", `'\''`) + "'" }
 
-// Sessions monta as três sessões para o sistema e a CLI. A Discovery é interativa e usa o agente
-// "lider"; Builder e Reviewer rodam `forge-sdd worker`. O título é fixado também por escape ANSI
-// (`\033]0;<nome>\007`), que cobre terminais sem flag de título e o agy.
-func Sessions(env LaunchEnv, cli string) ([]Session, error) {
-	if cli != config.CLIClaude && cli != config.CLIAgy {
-		return nil, fmt.Errorf("cli %q inválida (use claude ou agy)", cli)
+// DiscoveryPrompt é o prompt inicial da sessão Discovery nas CLIs que o aceitam. Texto ASCII, sem
+// aspas, % nem metacaracteres: precisa sobreviver ao cmd.exe e ao AppleScript sem escapes frágeis.
+const DiscoveryPrompt = "Voce e a sessao forge-discovery do Forge SDD. Siga .agents/skills/sdd-concepcao/SKILL.md, carregue as ADRs e as rules antes de quebrar tarefas e use /implementar quando a feature estiver pronta."
+
+var safeArgRe = regexp.MustCompile(`^[A-Za-z0-9_@%+=:,./-]+$`)
+
+// quoteArg protege um argumento para a linha de comando de uma sessão: sem aspas quando é seguro
+// (comandos legíveis), com aspas simples no POSIX e duplas no cmd.exe quando precisa.
+func quoteArg(windows bool, a string) (string, error) {
+	if a == "" {
+		if windows {
+			return `""`, nil
+		}
+		return "''", nil
 	}
+	if safeArgRe.MatchString(a) && !(windows && strings.Contains(a, "%")) {
+		return a, nil
+	}
+	if windows {
+		if winUnsafe.MatchString(a) {
+			return "", fmt.Errorf("argumento com caracteres não suportados no Windows: %q", a)
+		}
+		return `"` + a + `"`, nil
+	}
+	if posixUnsafe.MatchString(a) {
+		return "", fmt.Errorf("argumento com caracteres de controle: %q", a)
+	}
+	return shQuote(a), nil
+}
+
+func interactiveLine(windows bool, cfg config.ForgeConfig, cli string) (string, error) {
+	profile, ok := cfg.Profile(cli)
+	if !ok || !config.KnownCLI(cli) {
+		return "", fmt.Errorf("cli %q inválida (use %s)", cli, strings.Join(config.OfferedCLIs(), ", "))
+	}
+	args, err := expandArgs(profile.InteractiveArgs, RunSpec{Agent: "lider", Name: SessionDiscovery, Prompt: DiscoveryPrompt})
+	if err != nil {
+		return "", err
+	}
+	parts := make([]string, 0, len(args)+1)
+	for _, a := range append([]string{profile.Command}, args...) {
+		q, err := quoteArg(windows, a)
+		if err != nil {
+			return "", err
+		}
+		parts = append(parts, q)
+	}
+	return strings.Join(parts, " "), nil
+}
+
+// Sessions mantém a assinatura da 4.1: a mesma CLI nas três sessões.
+func Sessions(env LaunchEnv, cli string) ([]Session, error) {
+	cfg := config.DefaultForgeConfig()
+	cfg.CLI = cli
+	cfg.Sessions = nil
+	return SessionsFor(env, cfg)
+}
+
+// SessionsFor monta as três sessões com o agente de cada uma (cfg.CLIFor). A Discovery é interativa
+// (interactive_args do perfil, agente "lider"); Builder e Reviewer rodam `forge-sdd worker --cli <agente>`. O título é
+// fixado também por escape ANSI (`\033]0;<nome>\007`), que cobre CLIs sem flag de título.
+func SessionsFor(env LaunchEnv, cfg config.ForgeConfig) ([]Session, error) {
 	windows := env.GOOS == "windows"
 	for name, v := range map[string]string{"diretório do projeto": env.Dir, "binário do forge-sdd": env.Bin} {
 		if v == "" {
@@ -83,12 +138,21 @@ func Sessions(env LaunchEnv, cli string) ([]Session, error) {
 		return nil, fmt.Errorf("caminho do binário %q contém caracteres não suportados", env.Bin)
 	}
 
-	var discoveryCLI string
-	switch cli {
-	case config.CLIClaude:
-		discoveryCLI = "claude -n " + SessionDiscovery + " --agent lider"
-	case config.CLIAgy:
-		discoveryCLI = "agy --agent lider -i"
+	discoveryCLI, err := interactiveLine(windows, cfg, cfg.CLIFor(config.SessionRoleDiscovery))
+	if err != nil {
+		return nil, err
+	}
+	workerArgs := func(role, name string) (string, error) {
+		cli := cfg.CLIFor(role)
+		if !config.KnownCLI(cli) {
+			return "", fmt.Errorf("cli %q inválida para %s (use %s)", cli, role, strings.Join(config.OfferedCLIs(), ", "))
+		}
+		if _, ok := cfg.Profile(cli); !ok {
+			return "", fmt.Errorf("cli_profiles sem perfil para %q", cli)
+		}
+		// --cli sempre explícito: o worker usa exatamente o agente que esta abertura escolheu, mesmo
+		// quando a escolha veio de uma flag e não foi gravada em forge.json.
+		return "forge-sdd worker --role " + role + " --name " + name + " --cli " + cli, nil
 	}
 	build := func(title, args string) Session {
 		if windows {
@@ -98,16 +162,31 @@ func Sessions(env LaunchEnv, cli string) ([]Session, error) {
 		resolved := strings.Replace(args, "forge-sdd ", shQuote(env.Bin)+" ", 1)
 		return Session{Title: title, Inner: fmt.Sprintf(`cd %s && printf '\033]0;%s\007' && %s`, shQuote(env.Dir), title, resolved)}
 	}
+	builder, err := workerArgs(config.SessionRoleBuilder, SessionBuilder)
+	if err != nil {
+		return nil, err
+	}
+	reviewer, err := workerArgs(config.SessionRoleReviewer, SessionReviewer)
+	if err != nil {
+		return nil, err
+	}
 	return []Session{
 		build(SessionDiscovery, discoveryCLI),
-		build(SessionBuilder, "forge-sdd worker --role builder --name "+SessionBuilder),
-		build(SessionReviewer, "forge-sdd worker --role reviewer --name "+SessionReviewer),
+		build(SessionBuilder, builder),
+		build(SessionReviewer, reviewer),
 	}, nil
 }
 
 // LaunchPlan devolve os comandos que abrem as três sessões no terminal do sistema.
 func LaunchPlan(env LaunchEnv, cli string) ([]LaunchCommand, error) {
-	sessions, err := Sessions(env, cli)
+	cfg := config.DefaultForgeConfig()
+	cfg.CLI = cli
+	return LaunchPlanFor(env, cfg)
+}
+
+// LaunchPlanFor devolve os comandos que abrem as três sessões com o agente de cada uma.
+func LaunchPlanFor(env LaunchEnv, cfg config.ForgeConfig) ([]LaunchCommand, error) {
+	sessions, err := SessionsFor(env, cfg)
 	if err != nil {
 		return nil, err
 	}

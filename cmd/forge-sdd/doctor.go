@@ -127,10 +127,10 @@ inconsistências de configuração dos agentes de IA e progresso das features.`,
 					fmt.Println("  ⚠️  GitHub Copilot: Configurado no .sddrc, mas arquivos físicos ausentes (.github/copilot-instructions.md)")
 				}
 			case config.AgentOpenAI:
-				hasOpenAIMD := fileExists(filepath.Join(targetDir, "OPENAI.md"))
+				hasOpenAIMD := fileExists(filepath.Join(targetDir, "AGENTS.md")) && fileExists(filepath.Join(targetDir, "OPENAI.md"))
 				hasOpenAIDir := fileExists(filepath.Join(targetDir, ".openai"))
 				if hasOpenAIMD && hasOpenAIDir {
-					fmt.Println("  ✓ OpenAI (GPT-4/Codex): Configurado e integrado (OPENAI.md + .openai/)")
+					fmt.Println("  ✓ OpenAI (GPT-4/Codex): Configurado e integrado (AGENTS.md + OPENAI.md + .openai/)")
 				} else {
 					fmt.Println("  ⚠️  OpenAI (GPT-4/Codex): Configurado no .sddrc, mas arquivos físicos ausentes ou incompletos.")
 				}
@@ -267,7 +267,7 @@ inconsistências de configuração dos agentes de IA e progresso das features.`,
 				case config.AgentGemini:
 					fmt.Println("   - Cabeçalho do arquivo GEMINI.md (onde diz: # GEMINI.md — meu-projeto)")
 				case config.AgentOpenAI:
-					fmt.Println("   - Cabeçalho do arquivo OPENAI.md (onde diz: # OPENAI.md — meu-projeto)")
+					fmt.Println("   - Cabeçalho do arquivo AGENTS.md (onde diz: # AGENTS.md — meu-projeto)")
 				}
 			}
 			fmt.Println("   - Cabeçalho do arquivo sdd/memory/progress.md")

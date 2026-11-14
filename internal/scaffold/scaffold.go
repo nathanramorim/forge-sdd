@@ -299,7 +299,33 @@ func shouldPreserve(dest string, targetDir string) bool {
 		return true
 	}
 
+	// AGENTS.md é um arquivo neutro que muitos projetos já têm: só é atualizado se foi gerado pelo
+	// forge-sdd (cabeçalho e marcador `<!-- forge-sdd:generated -->`); um arquivo do usuário nunca é sobrescrito.
+	if rel == "AGENTS.md" {
+		return !IsGeneratedAgentsMD(dest)
+	}
+
 	// Arquivos fora de sdd/ (configurações e instruções de agente) devem ser atualizados
+	return false
+}
+
+// IsGeneratedAgentsMD diz se o AGENTS.md foi gerado pelo scaffold: cabeçalho conhecido E o marcador
+// inequívoco `<!-- forge-sdd:generated -->` nas três primeiras linhas. Só o título não basta: um
+// AGENTS.md do usuário pode começar igual.
+func IsGeneratedAgentsMD(path string) bool {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return false
+	}
+	head := strings.SplitN(string(data), "\n", 4)
+	if len(head) < 2 || !strings.HasPrefix(head[0], "# AGENTS.md — ") {
+		return false
+	}
+	for _, l := range head[1:min(len(head), 3)] {
+		if strings.TrimSpace(l) == "<!-- forge-sdd:generated -->" {
+			return true
+		}
+	}
 	return false
 }
 

@@ -4,6 +4,19 @@ Este arquivo registra o histórico de entregas de produto deste projeto.
 
 ## Entregas
 
+### Versão 4.2.0 — Menu Navegável e Agente por Sessão do Pipeline (Beta)
+
+Compatível com a 4.1.0-beta: um `forge.json` da 4.1 continua válido e escolhe o mesmo agente nas três sessões (Discovery 71, features `71-01` a `71-05`). Sem `forge.json` o fluxo de implementação segue como na 4.0.0-beta.
+
+*   **`forge` abre um menu navegável (setas, Enter, Esc volta):** dois caminhos, **Pipeline multi-sessão** (iniciar as 3 sessões, ver os comandos, reconfigurar, fila e inbox, recuperar jobs presos, diagnóstico, guia) e **Estrutura padrão** (status, painel da fila, gate, doctor, instalar ou atualizar). Num projeto sem Forge a primeira opção é instalar. Sem terminal interativo, `forge` imprime a ajuda curta e sai, sem travar.
+*   **Um agente por sessão:** Claude, Gemini, Copilot ou Codex em `forge-discovery`, `forge-builder` e `forge-reviewer`, escolhidos no menu (a última escolha vem marcada e é gravada em `sessions` de `forge.json`) ou por flags: `forge-sdd up --discovery claude --builder codex --reviewer gemini`.
+*   **Checagem antes de abrir:** a CLI escolhida está no PATH? O projeto tem o arquivo de instruções dela? CLI ausente bloqueia; arquivo ausente avisa e indica `forge-sdd update --agent <x>`.
+*   **Permissões em dois níveis:** `project` (padrão: edição e só os comandos de `allow_commands`) e `full` (bypass da CLI, só em ambiente isolado); o menu mostra o que cada um libera antes de abrir.
+*   **Correção:** o worker agora usa exatamente o agente da própria sessão (`--cli` explícito). Na 4.1, abrir a Discovery com `--cli agy` deixava Builder e Reviewer no agente do `forge.json`.
+*   **Codex:** o scaffold do agente `openai` passa a gerar `AGENTS.md`, que é o arquivo que o Codex lê; `OPENAI.md` vira ponteiro. Um `AGENTS.md` seu nunca é sobrescrito.
+
+**Observações:** os perfis de Gemini, Copilot e Codex seguem a documentação oficial das CLIs, mas **nenhuma delas foi executada de ponta a ponta com o worker**, só a montagem dos comandos foi testada. No Gemini, o nível `project` libera só edição: o Builder com Gemini precisa de `full` para rodar testes. Ver `sdd/spec/adr/adr-0005-menu-e-agente-por-sessao.md`.
+
 ### Versão 4.1.0 — Pipeline Multi-Sessão: Discovery, Builder e Reviewer em Terminais Separados (Beta)
 
 Compatível com a 4.0.0-beta: **sem `.forge/config/forge.json` o fluxo de implementação não muda**. O pipeline só liga com `forge-sdd pipeline init`. Em contrapartida, `init` e `update` passam a instalar, em todo projeto, a pasta `.forge/` (launcher e `.gitignore` do runtime), os comandos `/inbox` e `/implement`, o agente `reviewer` e, para Claude, o hook do inbox em `.claude/settings.json` (mesclado sem sobrescrever o seu) (Discovery 70, features `70-01` a `70-07`).

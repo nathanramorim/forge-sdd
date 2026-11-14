@@ -12,24 +12,14 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// version é injetada via ldflags: -X main.version=4.1.0-beta
-var version = "4.1.0-beta"
+// version é injetada via ldflags: -X main.version=4.2.0-beta
+var version = "4.2.0-beta"
 
 var rootCmd = &cobra.Command{
 	Use:   "forge-sdd",
 	Short: "Scaffolda estruturas Forge-SDD em qualquer projeto",
 	Long: `forge-sdd é um CLI que gera a estrutura completa Forge-SDD
 (sdd/, .github/, .vscode/) pronta para uso com GitHub Copilot.`,
-	RunE: func(cmd *cobra.Command, args []string) error {
-		if len(args) == 0 {
-			if config.DetectProject(".") {
-				return runUpdateFlow(cmd, ".")
-			} else {
-				return runInitFlow(cmd, ".")
-			}
-		}
-		return cmd.Help()
-	},
 }
 
 var versionCmd = &cobra.Command{
@@ -327,7 +317,7 @@ func runUpdateFlow(cmd *cobra.Command, targetDir string) error {
 			case config.AgentGemini:
 				fmt.Println("  • Gemini: leia GEMINI.md e abra o projeto no Gemini")
 			case config.AgentOpenAI:
-				fmt.Println("  • OpenAI: leia OPENAI.md e configure sua chave de API")
+				fmt.Println("  • OpenAI/Codex: leia AGENTS.md (é o arquivo que o Codex lê) e configure sua chave de API")
 			case config.AgentCopilot:
 				fmt.Println("  • Copilot: aceite as extensões recomendadas no VS Code")
 			}
@@ -355,6 +345,23 @@ func printSummaryReport(cfg config.Config, targetDir string, fileCount int) {
 	fmt.Println("  1. Abra o projeto no VS Code ou sua IDE de preferência")
 	fmt.Println("  2. Aceite as extensões recomendadas (Copilot, MCP, etc.)")
 	fmt.Println("  3. Rode /discovery com a sua primeira demanda (ou forge-sdd status para ver as iniciativas)")
+	printPipelineHint(targetDir)
+}
+
+// printPipelineHint mostra como iniciar o pipeline multi-sessão logo depois da instalação. Com o modo
+// já ativo (forge.json existe), só lembra de abrir as sessões.
+func printPipelineHint(targetDir string) {
+	if _, found, err := config.LoadForgeConfig(targetDir); err == nil && found {
+		fmt.Println("\nPipeline multi-sessão ATIVO: rode forge (menu) ou forge-sdd up para abrir forge-discovery, forge-builder e forge-reviewer.")
+		fmt.Println("  Guia: .forge/LEIA-ME.md")
+		return
+	}
+	fmt.Println("\nQuer que o Builder e o Reviewer trabalhem em outras sessões enquanto você conversa? (opcional)")
+	fmt.Println("  Mais fácil: rode forge e escolha Pipeline multi-sessão (menu, com o agente de cada sessão).")
+	fmt.Println("  1. forge-sdd pipeline init      ativa o modo (cria .forge/config/forge.json)")
+	fmt.Println("  2. forge-sdd up --discovery claude --builder codex --reviewer gemini   abre as 3 sessões")
+	fmt.Println("  3. /implementar <feature>       na sessão forge-discovery: valida o card e despacha")
+	fmt.Println("  Guia rápido: .forge/LEIA-ME.md")
 }
 
 func printTutorialHint() {

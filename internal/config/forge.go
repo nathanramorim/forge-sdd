@@ -23,6 +23,9 @@ const (
 type CLIProfile struct {
 	Command string   `json:"command"`
 	Args    []string `json:"args"`
+	// InteractiveArgs abre a sessão interativa (Discovery). Vazio em um forge.json da 4.1: o padrão
+	// da CLI é aplicado por ForgeConfig.Profile.
+	InteractiveArgs []string `json:"interactive_args,omitempty"`
 }
 
 // PMConfig configura o gerenciador de projeto acessado via MCP pelo agente.
@@ -51,13 +54,18 @@ type ReviewerConfig struct {
 
 // ForgeConfig é o conteúdo de .forge/config/forge.json. A existência do arquivo ativa o modo pipeline.
 type ForgeConfig struct {
-	CLI         string                `json:"cli"`
-	CLIProfiles map[string]CLIProfile `json:"cli_profiles"`
-	PMMCP       PMConfig              `json:"pm_mcp"`
-	Builder     BuilderConfig         `json:"builder"`
-	Reviewer    ReviewerConfig        `json:"reviewer"`
-	ADRDirs     []string              `json:"adr_dirs"`
-	BaseBranch  string                `json:"base_branch"`
+	CLI string `json:"cli"`
+	// Sessions escolhe o agente de cada sessão (discovery, builder, reviewer). Sem a chave, vale cli.
+	Sessions    map[string]string `json:"sessions,omitempty"`
+	Permissions string            `json:"permissions"`
+	// AllowCommands são os comandos de shell liberados no nível project (nome do comando apenas).
+	AllowCommands []string              `json:"allow_commands"`
+	CLIProfiles   map[string]CLIProfile `json:"cli_profiles"`
+	PMMCP         PMConfig              `json:"pm_mcp"`
+	Builder       BuilderConfig         `json:"builder"`
+	Reviewer      ReviewerConfig        `json:"reviewer"`
+	ADRDirs       []string              `json:"adr_dirs"`
+	BaseBranch    string                `json:"base_branch"`
 }
 
 var (
@@ -67,18 +75,17 @@ var (
 	relDirRe      = regexp.MustCompile(`^[A-Za-z0-9._-]+(/[A-Za-z0-9._-]+)*$`)
 	branchRe      = regexp.MustCompile(`^[A-Za-z0-9._-]+(/[A-Za-z0-9._-]+)*$`)
 	emailRe       = regexp.MustCompile(`^[^@\s]+@[^@\s]+$`)
-	validMarkers  = map[string]bool{"{agent}": true, "{name}": true, "{prompt}": true}
+	validMarkers  = map[string]bool{"{agent}": true, "{name}": true, "{prompt}": true, MarkerPermissions: true}
 )
 
 // DefaultForgeConfig devolve os valores padrão da especificação do pipeline. Os argumentos do
 // perfil do agy são os documentados no discovery 70 e estão marcados "a confirmar".
 func DefaultForgeConfig() ForgeConfig {
 	return ForgeConfig{
-		CLI: CLIClaude,
-		CLIProfiles: map[string]CLIProfile{
-			CLIClaude: {Command: "claude", Args: []string{"-p", "{prompt}", "--agent", "{agent}", "-n", "{name}"}},
-			CLIAgy:    {Command: "agy", Args: []string{"--agent", "{agent}", "-i", "{prompt}"}},
-		},
+		CLI:           CLIClaude,
+		Permissions:   PermissionProject,
+		AllowCommands: []string{"git", "gh", "forge-sdd"},
+		CLIProfiles:   defaultProfiles(),
 		PMMCP: PMConfig{
 			Provider:              "auto",
 			Supported:             []string{"clickup", "github-projects", "azure-devops", "jira"},
@@ -130,8 +137,8 @@ func strictDecode(data []byte, v any) error {
 
 // Validate confere os limites e formatos do pipeline (SEG-01).
 func (c ForgeConfig) Validate() error {
-	if c.CLI != CLIClaude && c.CLI != CLIAgy {
-		return fmt.Errorf("cli %q inválido (use claude ou agy)", c.CLI)
+	if !KnownCLI(c.CLI) {
+		return fmt.Errorf("cli %q inválido (use %s ou agy)", c.CLI, strings.Join(OfferedCLIs(), ", "))
 	}
 	if _, ok := c.CLIProfiles[c.CLI]; !ok {
 		return fmt.Errorf("cli_profiles sem perfil para %q", c.CLI)
@@ -140,6 +147,9 @@ func (c ForgeConfig) Validate() error {
 		if err := validateProfile(name, p); err != nil {
 			return err
 		}
+	}
+	if err := c.validateSessions(); err != nil {
+		return err
 	}
 	if c.Builder.MaxParallelTasks < 1 || c.Builder.MaxParallelTasks > 8 {
 		return fmt.Errorf("builder.max_parallel_tasks %d fora da faixa 1 a 8", c.Builder.MaxParallelTasks)
@@ -180,14 +190,19 @@ func validateProfile(name string, p CLIProfile) error {
 	if !commandRe.MatchString(p.Command) || strings.HasPrefix(p.Command, "-") {
 		return fmt.Errorf("cli_profiles.%s.command %q inválido (sem espaços nem metacaracteres de shell)", name, p.Command)
 	}
-	for _, a := range p.Args {
-		for _, m := range placeholderRe.FindAllString(a, -1) {
-			if !validMarkers[m] {
-				return fmt.Errorf("cli_profiles.%s: marcador %s desconhecido (use {agent}, {name} ou {prompt})", name, m)
+	for field, args := range map[string][]string{"args": p.Args, "interactive_args": p.InteractiveArgs} {
+		for _, a := range args {
+			for _, m := range placeholderRe.FindAllString(a, -1) {
+				if !validMarkers[m] {
+					return fmt.Errorf("cli_profiles.%s.%s: marcador %s desconhecido (use {agent}, {name}, {prompt} ou {permissions})", name, field, m)
+				}
 			}
-		}
-		if strings.ContainsAny(a, "\x00\r\n") {
-			return fmt.Errorf("cli_profiles.%s: argumento com caractere de controle", name)
+			if strings.Contains(a, MarkerPermissions) && a != MarkerPermissions {
+				return fmt.Errorf("cli_profiles.%s.%s: %s precisa ser um argumento inteiro", name, field, MarkerPermissions)
+			}
+			if strings.ContainsAny(a, "\x00\r\n") {
+				return fmt.Errorf("cli_profiles.%s.%s: argumento com caractere de controle", name, field)
+			}
 		}
 	}
 	return nil

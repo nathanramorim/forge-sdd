@@ -78,7 +78,14 @@ func runPipelineInit(cmd *cobra.Command, dir string, dry bool) error {
 	}
 	if dry {
 		fmt.Fprintln(out, "[DRY-RUN] Nada foi gravado.")
+		return nil
 	}
+	fmt.Fprintln(out, "\nModo pipeline ativo. Próximos passos:")
+	fmt.Fprintln(out, "  1. forge                        menu: Pipeline multi-sessão → escolher o agente de cada sessão e abrir")
+	fmt.Fprintln(out, "     (ou forge-sdd up --discovery claude --builder codex --reviewer gemini)")
+	fmt.Fprintln(out, "  2. /implementar <feature>       na sessão forge-discovery: valida o card e despacha ao Builder")
+	fmt.Fprintln(out, "  3. forge-sdd inbox              mostra o aviso quando o Reviewer aprovar")
+	fmt.Fprintln(out, "  Ajuste a CLI e as permissões do agente em .forge/config/forge.json. Guia: .forge/LEIA-ME.md")
 	return nil
 }
 

@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 
 	"github.com/forge-sdd/cli/internal/layout"
+	"github.com/forge-sdd/cli/internal/scaffold"
 	"github.com/forge-sdd/cli/internal/survey"
 	"github.com/spf13/cobra"
 )
@@ -57,6 +58,10 @@ dos agentes de IA (CLAUDE.md, GEMINI.md, .claude/, .gemini/, etc.) instalados no
 			filepath.Join(targetDir, ".openai"),
 			filepath.Join(targetDir, ".github", "copilot-instructions.md"),
 			filepath.Join(targetDir, ".vscode", "mcp.json"),
+		}
+		// AGENTS.md só sai se foi gerado pelo forge-sdd: um arquivo do usuário nunca é removido.
+		if agentsMD := filepath.Join(targetDir, "AGENTS.md"); scaffold.IsGeneratedAgentsMD(agentsMD) {
+			pathsToRemove = append(pathsToRemove, agentsMD)
 		}
 
 		fmt.Println("🧹 Iniciando limpeza da metodologia...")

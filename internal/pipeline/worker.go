@@ -23,10 +23,13 @@ const (
 
 // WorkerOptions configura o laço do worker.
 type WorkerOptions struct {
-	Dir        string
-	Role       string // builder ou reviewer
-	Name       string // nome da sessão e do lease (forge-builder)
-	Once       bool   // sai quando a fila esvazia
+	Dir  string
+	Role string // builder ou reviewer
+	Name string // nome da sessão e do lease (forge-builder)
+	// CLI sobrescreve o agente da sessão (forge-sdd up --builder codex sem gravar em forge.json).
+	// Vazio: cfg.CLIFor(Role).
+	CLI        string
+	Once       bool // sai quando a fila esvazia
 	Poll       time.Duration
 	RenewEvery time.Duration
 	Out        io.Writer
@@ -67,13 +70,20 @@ func RunWorker(ctx context.Context, opts WorkerOptions) error {
 	if opts.RenewEvery <= 0 {
 		opts.RenewEvery = 5 * time.Minute
 	}
+	if opts.CLI == "" {
+		opts.CLI = cfg.CLIFor(opts.Role)
+	}
+	if !config.KnownCLI(opts.CLI) {
+		return fmt.Errorf("agente %q inválido para o worker %s (use %s)", opts.CLI, opts.Role, strings.Join(config.OfferedCLIs(), ", "))
+	}
+	profile, ok := cfg.Profile(opts.CLI)
+	if !ok {
+		return fmt.Errorf("sem perfil de CLI para %q", opts.CLI)
+	}
 	if opts.Runner == nil {
-		profile, ok := cfg.CLIProfiles[cfg.CLI]
-		if !ok {
-			return fmt.Errorf("sem perfil de CLI para %q", cfg.CLI)
-		}
 		opts.Runner = ExecRunner{Profile: profile}
 	}
+	fmt.Fprintf(opts.Out, "[%s] agente: %s · permissões: %s\n", opts.Name, opts.CLI, config.PermissionSummary(cfg.Permissions, cfg.AllowCommands))
 
 	var lastIdleMsg time.Time
 	for {
@@ -141,11 +151,12 @@ func processJob(ctx context.Context, opts WorkerOptions, cfg config.ForgeConfig,
 	rel, _ := filepath.Rel(opts.Dir, entry.Path)
 	timeout := time.Duration(cfg.Builder.JobTimeoutMinutes) * time.Minute
 	res, runErr := opts.Runner.Run(ctx, RunSpec{
-		Agent:   opts.Role,
-		Name:    opts.Name,
-		Prompt:  workerPrompt(opts.Role, job, filepath.ToSlash(rel), cfg),
-		Dir:     opts.Dir,
-		Timeout: timeout,
+		Agent:       opts.Role,
+		Name:        opts.Name,
+		Prompt:      workerPrompt(opts.Role, job, filepath.ToSlash(rel), cfg),
+		Permissions: cfg.WorkerPermissionArgs(opts.CLI),
+		Dir:         opts.Dir,
+		Timeout:     timeout,
 	}, out)
 	close(stop)
 	wg.Wait()

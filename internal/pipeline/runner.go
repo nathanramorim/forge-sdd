@@ -21,11 +21,14 @@ var (
 
 // RunSpec descreve uma execução não interativa do agente para um job.
 type RunSpec struct {
-	Agent   string // nome do agente (builder, reviewer)
-	Name    string // nome da sessão (forge-builder)
-	Prompt  string
-	Dir     string
-	Timeout time.Duration
+	Agent  string // nome do agente (builder, reviewer)
+	Name   string // nome da sessão (forge-builder)
+	Prompt string
+	// Permissions são os argumentos de permissão já traduzidos (config.PermissionArgs); expandem o
+	// marcador {permissions} do perfil em argumentos separados.
+	Permissions []string
+	Dir         string
+	Timeout     time.Duration
 }
 
 // RunResult é o desfecho da execução.
@@ -55,12 +58,30 @@ func BuildArgv(p config.CLIProfile, spec RunSpec) (string, []string, error) {
 	if strings.HasPrefix(strings.TrimSpace(spec.Prompt), "-") {
 		return "", nil, errors.New("prompt não pode começar com '-' (poderia ser lido como opção da CLI)")
 	}
-	repl := strings.NewReplacer("{agent}", spec.Agent, "{name}", spec.Name, "{prompt}", spec.Prompt)
-	args := make([]string, 0, len(p.Args))
-	for _, a := range p.Args {
-		args = append(args, repl.Replace(a))
+	args, err := expandArgs(p.Args, spec)
+	if err != nil {
+		return "", nil, err
 	}
 	return p.Command, args, nil
+}
+
+// expandArgs substitui {agent}, {name} e {prompt} e expande {permissions} em argumentos separados.
+func expandArgs(tpl []string, spec RunSpec) ([]string, error) {
+	repl := strings.NewReplacer("{agent}", spec.Agent, "{name}", spec.Name, "{prompt}", spec.Prompt)
+	args := make([]string, 0, len(tpl)+len(spec.Permissions))
+	for _, a := range tpl {
+		if a == config.MarkerPermissions {
+			for _, perm := range spec.Permissions {
+				if strings.ContainsAny(perm, "\x00\r\n") {
+					return nil, errors.New("argumento de permissão com caractere de controle")
+				}
+				args = append(args, perm)
+			}
+			continue
+		}
+		args = append(args, repl.Replace(a))
+	}
+	return args, nil
 }
 
 // ExecRunner executa o agente como processo filho.
