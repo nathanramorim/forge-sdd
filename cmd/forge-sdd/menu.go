@@ -442,6 +442,8 @@ func (e *menuEnv) configMenu() error {
 			{Label: "Ativar o pipeline (cria .forge/config/forge.json)", Value: "init"},
 			{Label: "Escolher o agente de cada sessão (sem abrir)", Value: "agents"},
 			{Label: "Permissões do Builder e do Reviewer", Value: "perms"},
+			{Label: "Modo de sessão (ao vivo no painel ou worker headless)", Value: "mode"},
+			{Label: "Contexto entre jobs (limpar ou contínuo)", Value: "context"},
 			{Label: "Usa gerenciador de projeto (card obrigatório no /implementar)?", Value: "card"},
 			{Label: "Voltar", Value: valBack},
 		}, "agents")
@@ -464,6 +466,24 @@ func (e *menuEnv) configMenu() error {
 			cfg, err = e.chooseAgents(cfg)
 		case "perms":
 			cfg, err = e.choosePermissions(cfg)
+		case "mode":
+			var mode string
+			mode, err = e.p.Select("Modo de sessão do Builder e Reviewer", []menuOption{
+				{Label: "Ao vivo (CLI aberta no painel desde o início; requer tmux)", Value: config.SessionModeLive},
+				{Label: "Headless (worker aguarda jobs e roda o agente em segundo plano)", Value: config.SessionModeHeadless},
+			}, cfg.SessionMode)
+			if err == nil {
+				cfg.SessionMode = mode
+			}
+		case "context":
+			var ctx string
+			ctx, err = e.p.Select("Contexto entre jobs", []menuOption{
+				{Label: "Limpar contexto a cada job (recomendado)", Value: config.ContextClear},
+				{Label: "Contínuo (acumula contexto; maior consumo de tokens)", Value: config.ContextContinuous},
+			}, cfg.Context)
+			if err == nil {
+				cfg.Context = ctx
+			}
 		case "card":
 			var need bool
 			need, err = e.p.Confirm("Exigir que o card exista no gerenciador de projeto antes de despachar? (Não: o /implementar despacha sem card)", cfg.PMMCP.RequireExistingCard)

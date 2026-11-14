@@ -37,13 +37,15 @@ Reviewer: exige que o agente aplique o veredito (forge-sdd bus review).`,
 		poll, _ := cmd.Flags().GetDuration("poll")
 		cli, _ := cmd.Flags().GetString("cli")
 		raw, _ := cmd.Flags().GetBool("raw")
+		deliver, _ := cmd.Flags().GetString("deliver")
 
 		ctx, cancel := signal.NotifyContext(cmd.Context(), os.Interrupt, syscall.SIGTERM)
 		defer cancel()
 		return pipeline.RunWorker(ctx, pipeline.WorkerOptions{
 			Dir: dir, Role: role, Name: name, CLI: cli, Raw: raw, Once: once, Poll: poll,
-			Out:       cmd.OutOrStdout(),
-			OnJobDone: recordJobTelemetry(dir, role),
+			DeliverTarget: deliver,
+			Out:           cmd.OutOrStdout(),
+			OnJobDone:     recordJobTelemetry(dir, role),
 		})
 	},
 }
@@ -133,6 +135,7 @@ func init() {
 	_ = workerCmd.MarkFlagRequired("role")
 	workerCmd.Flags().String("name", "", "Nome da sessão (padrão: forge-<papel>)")
 	workerCmd.Flags().String("cli", "", "Agente desta sessão: claude, gemini, copilot ou codex (padrão: sessions de forge.json)")
+	workerCmd.Flags().String("deliver", "", "Alvo tmux (=sessao:janela.painel) para entregar prompts no modo live")
 	workerCmd.Flags().Bool("raw", false, "Mostra a saída bruta do agente em vez da visão limpa (sem máscara de segredos; o log sempre guarda a bruta)")
 	workerCmd.Flags().Bool("once", false, "Sai quando a fila esvazia")
 	workerCmd.Flags().Duration("poll", 5*time.Second, "Intervalo de consulta da fila")

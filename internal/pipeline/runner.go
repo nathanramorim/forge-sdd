@@ -69,8 +69,11 @@ func BuildArgv(p config.CLIProfile, spec RunSpec) (string, []string, error) {
 func expandArgs(tpl []string, spec RunSpec) ([]string, error) {
 	repl := strings.NewReplacer("{agent}", spec.Agent, "{name}", spec.Name, "{prompt}", spec.Prompt)
 	args := make([]string, 0, len(tpl)+len(spec.Permissions))
-	for _, a := range tpl {
+	hasPerms := false
+	for i := 0; i < len(tpl); i++ {
+		a := tpl[i]
 		if a == config.MarkerPermissions {
+			hasPerms = true
 			for _, perm := range spec.Permissions {
 				if strings.ContainsAny(perm, "\x00\r\n") {
 					return nil, errors.New("argumento de permissão com caractere de controle")
@@ -79,7 +82,22 @@ func expandArgs(tpl []string, spec RunSpec) ([]string, error) {
 			}
 			continue
 		}
+		if (a == "-i" || a == "--prompt-interactive") && i+1 < len(tpl) && tpl[i+1] == "{prompt}" && spec.Prompt == "" {
+			i++
+			continue
+		}
+		if a == "{prompt}" && spec.Prompt == "" {
+			continue
+		}
 		args = append(args, repl.Replace(a))
+	}
+	if !hasPerms && len(spec.Permissions) > 0 {
+		for _, perm := range spec.Permissions {
+			if strings.ContainsAny(perm, "\x00\r\n") {
+				return nil, errors.New("argumento de permissão com caractere de controle")
+			}
+			args = append(args, perm)
+		}
 	}
 	return args, nil
 }

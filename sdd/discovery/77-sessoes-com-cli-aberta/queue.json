@@ -1,0 +1,106 @@
+{
+  "feature_id": "feat-77",
+  "branch": "feat/77-sessoes-com-cli-aberta",
+  "spec_status": "reviewed",
+  "updated_at": "2026-11-14T09:29:34Z",
+  "items": [
+    {
+      "task_id": "77-01",
+      "title": "feat-77-01 — Modo de sessão e perfis",
+      "spec_path": "sdd/discovery/77-sessoes-com-cli-aberta/features/feat-77-01-modo-de-sessao-e-perfis.md",
+      "status": "approved",
+      "rules": [
+        "COD-01",
+        "COD-03",
+        "TST-04",
+        "ARQ-01"
+      ],
+      "skills_used": [],
+      "attempts": 1,
+      "governance_verdict": {
+        "veredito": "conforme",
+        "achados": [],
+        "resumo": "Configuracao de session_mode, context, live e reset_command implementada com validacao e retrocompatibilidade conforme spec"
+      }
+    },
+    {
+      "task_id": "77-02",
+      "title": "feat-77-02 — Painéis ao vivo no tmux",
+      "spec_path": "sdd/discovery/77-sessoes-com-cli-aberta/features/feat-77-02-paineis-ao-vivo-no-tmux.md",
+      "status": "approved",
+      "rules": [
+        "SEG-01",
+        "SEG-03",
+        "COD-03",
+        "TST-04"
+      ],
+      "skills_used": [],
+      "attempts": 1,
+      "governance_verdict": {
+        "veredito": "conforme",
+        "achados": [],
+        "resumo": "Plano live do tmux com janela oculta forge-ctl, paineis interativos com permissoes e contingencia suave para headless implementados e testados conforme spec"
+      }
+    },
+    {
+      "task_id": "77-03",
+      "title": "feat-77-03 — Despachante de entrega",
+      "spec_path": "sdd/discovery/77-sessoes-com-cli-aberta/features/feat-77-03-despachante-de-entrega.md",
+      "status": "approved",
+      "rules": [
+        "SEG-01",
+        "SEG-05",
+        "DUP-01",
+        "COD-01",
+        "TST-03",
+        "TST-04"
+      ],
+      "skills_used": [],
+      "attempts": 1,
+      "governance_verdict": {
+        "veredito": "conforme",
+        "achados": [],
+        "resumo": "Despachante de entrega worker --deliver implementado com colagem por buffer, deteccao de ocioso, conclusao por estado e reset de contexto conforme spec"
+      }
+    },
+    {
+      "task_id": "77-04",
+      "title": "feat-77-04 — Falhas lidas da tela",
+      "spec_path": "sdd/discovery/77-sessoes-com-cli-aberta/features/feat-77-04-falhas-lidas-da-tela.md",
+      "status": "approved",
+      "rules": [
+        "SEG-05",
+        "COD-03",
+        "TST-03",
+        "TST-04"
+      ],
+      "skills_used": [],
+      "attempts": 1,
+      "governance_verdict": {
+        "veredito": "conforme",
+        "achados": [],
+        "resumo": "Deteccao de falhas lidas da tela (limite de uso, agente indisponivel e painel fechado) implementada com requeue e avisos conforme spec"
+      }
+    },
+    {
+      "task_id": "77-05",
+      "title": "feat-77-05 — Docs, ADR, E2E e release",
+      "spec_path": "sdd/discovery/77-sessoes-com-cli-aberta/features/feat-77-05-docs-adr-e2e-e-release.md",
+      "status": "approved",
+      "rules": [
+        "DUP-10",
+        "FLX-05",
+        "FLX-07",
+        "GOV-01",
+        "TST-05"
+      ],
+      "skills_used": [],
+      "attempts": 1,
+      "governance_verdict": {
+        "veredito": "conforme",
+        "achados": [],
+        "resumo": "ADR-0008, documentacao do modo live, release notes e testes concluidos conforme spec"
+      }
+    }
+  ]
+}

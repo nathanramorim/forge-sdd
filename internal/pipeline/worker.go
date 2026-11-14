@@ -42,8 +42,12 @@ type WorkerOptions struct {
 	Poll       time.Duration
 	RenewEvery time.Duration
 	Out        io.Writer
-	Runner     Runner
-	Now        func() time.Time
+	Runner Runner
+	// DeliverTarget é o alvo tmux (ex: =sessao:forge.1) para entrega de prompts no modo live (feat 77).
+	DeliverTarget string
+	// Deliverer executa operações no tmux para o modo live (injetável nos testes).
+	Deliverer TmuxDeliverer
+	Now       func() time.Time
 	// OnJobDone recebe o desfecho de cada job (telemetria); erros dele são ignorados.
 	OnJobDone func(job bus.Job, outcome string)
 }
@@ -51,6 +55,9 @@ type WorkerOptions struct {
 // RunWorker é o laço do worker: recupera leases vencidos, reivindica o próximo job, executa o
 // agente de forma não interativa e fecha o job conforme o resultado (D-1).
 func RunWorker(ctx context.Context, opts WorkerOptions) error {
+	if opts.DeliverTarget != "" {
+		return RunDeliverWorker(ctx, opts)
+	}
 	if opts.Role != layout.RoleBuilder && opts.Role != layout.RoleReviewer {
 		return fmt.Errorf("papel %q inválido para o worker (use builder ou reviewer)", opts.Role)
 	}
@@ -268,11 +275,20 @@ func processJob(ctx context.Context, opts WorkerOptions, cfg config.ForgeConfig,
 // verifyHandoff confere o que o agente precisava deixar feito e conclui o job. Devolve o motivo da
 // falha, ou vazio se tudo certo.
 func verifyHandoff(opts WorkerOptions, jobID string) string {
-	e, err := bus.Find(opts.Dir, opts.Role, jobID)
+	return VerifyJobHandoff(opts.Dir, opts.Role, opts.Name, opts.Now, jobID)
+}
+
+// VerifyJobHandoff confere o que o agente precisava deixar feito e conclui o job. Devolve o motivo da
+// falha, ou vazio se tudo certo.
+func VerifyJobHandoff(dir, role, workerName string, now func() time.Time, jobID string) string {
+	if now == nil {
+		now = time.Now
+	}
+	e, err := bus.Find(dir, role, jobID)
 	if err != nil {
 		return "job desapareceu da fila: " + err.Error()
 	}
-	switch opts.Role {
+	switch role {
 	case layout.RoleBuilder:
 		if e.State != layout.StateProcessing {
 			return "job fora de processing: " + e.State
@@ -289,11 +305,11 @@ func verifyHandoff(opts WorkerOptions, jobID string) string {
 		review.Events = nil
 		review.ReworkFeedback = []bus.Feedback{}
 		review.CreatedAt = time.Time{}
-		if _, _, err := bus.Enqueue(opts.Dir, layout.RoleReviewer, review, opts.Now()); err != nil {
+		if _, _, err := bus.Enqueue(dir, layout.RoleReviewer, review, now()); err != nil {
 			return "não foi possível enfileirar a revisão: " + err.Error()
 		}
 		note := fmt.Sprintf("PR #%d aberto; revisão enfileirada", *j.PR.Number)
-		if _, err := bus.Complete(opts.Dir, opts.Role, jobID, opts.Name, note, opts.Now()); err != nil {
+		if _, err := bus.Complete(dir, role, jobID, workerName, note, now()); err != nil {
 			return "não foi possível concluir o job: " + err.Error()
 		}
 	case layout.RoleReviewer:

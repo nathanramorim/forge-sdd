@@ -2,6 +2,7 @@ package pipeline
 
 import (
 	"errors"
+	"fmt"
 	"strings"
 	"testing"
 
@@ -45,6 +46,60 @@ func TestTmux_PlanoExato(t *testing.T) {
 	inside, err := BuildTmuxPlan(env, cfg, true)
 	require.NoError(t, err)
 	assert.Equal(t, []string{"tmux", "switch-client", "-t", "=" + name}, inside.Attach, "dentro do tmux troca o cliente")
+}
+
+func TestTmuxLivePlan(t *testing.T) {
+	env := lenv("linux", map[string]bool{"tmux": true}, nil)
+	env.Dir = "/work/meu-app"
+	cfg := config.DefaultForgeConfig()
+	cfg.SessionMode = config.SessionModeLive
+	cfg.Sessions = map[string]string{
+		config.SessionRoleBuilder:  config.CLICodex,
+		config.SessionRoleReviewer: config.CLIGemini,
+	}
+
+	plan, err := BuildTmuxPlan(env, cfg, false)
+	require.NoError(t, err)
+
+	name := TmuxSessionName(env.Dir)
+	win := "=" + name + ":forge"
+	winCtl := "=" + name + ":forge-ctl"
+
+	c := plan.Create
+	// Janela principal: Discovery, Builder CLI, Reviewer CLI
+	assert.Contains(t, c[0][9], "claude -n forge-discovery --agent lider", "painel 0 da Discovery")
+	assert.Contains(t, c[2][7], "codex", "painel 1 do Builder com CLI interativa")
+	assert.Contains(t, c[2][7], "--sandbox workspace-write", "permissões project do codex presentes")
+	assert.Contains(t, c[3][7], "agy", "painel 2 do Reviewer com CLI interativa")
+	assert.NotContains(t, c[3][7], "-i", "sem prompt inicial não passa -i órfão")
+	assert.Contains(t, c[3][7], "--dangerously-skip-permissions", "permissões do agy presentes")
+
+	// Janela oculta forge-ctl com os despachantes
+	foundNewWin := false
+	var ctlCmds []string
+	for _, step := range c {
+		if step[1] == "new-window" {
+			foundNewWin = true
+			assert.Equal(t, "forge-ctl", step[4])
+			ctlCmds = append(ctlCmds, step[len(step)-1])
+		}
+		if step[1] == "split-window" && len(step) > 4 && step[4] == winCtl {
+			ctlCmds = append(ctlCmds, step[len(step)-1])
+		}
+	}
+	require.True(t, foundNewWin, "deve criar janela forge-ctl")
+	require.Len(t, ctlCmds, 2, "deve ter despachante do builder e do reviewer")
+	assert.Contains(t, ctlCmds[0], fmt.Sprintf("worker --role builder --name forge-builder --cli codex --deliver %s", shQuote(win+".1")))
+	assert.Contains(t, ctlCmds[1], fmt.Sprintf("worker --role reviewer --name forge-reviewer --cli gemini --deliver %s", shQuote(win+".2")))
+
+	// Modo headless permanece idêntico
+	cfgHeadless := config.DefaultForgeConfig()
+	cfgHeadless.SessionMode = config.SessionModeHeadless
+	cfgHeadless.Sessions = cfg.Sessions
+	planHeadless, err := BuildTmuxPlan(env, cfgHeadless, false)
+	require.NoError(t, err)
+	assert.NotContains(t, planHeadless.Create[2][7], "--sandbox", "headless roda worker, não CLI interativa com sandbox no argv externo")
+	assert.Contains(t, planHeadless.Create[2][7], "worker --role builder")
 }
 
 func TestTmux_NomeDaSessaoSaneadoEUnicoPorCaminho(t *testing.T) {

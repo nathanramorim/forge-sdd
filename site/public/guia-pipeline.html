@@ -55,7 +55,7 @@
 </head>
 <body>
 <header><div class="wrap">
-  <div class="eyebrow">Forge SDD 4.2.0-beta</div>
+  <div class="eyebrow">Forge SDD 4.4.1-beta</div>
   <h1>Três sessões trabalhando juntas. Você só decide.</h1>
   <p>Conversa e decide numa sessão enquanto outras duas constroem e revisam sozinhas. Este guia mostra como abrir, usar e acompanhar tudo, do zero.</p>
 </div></header>
@@ -89,7 +89,7 @@
   <p>Na pasta do seu projeto, rode:</p>
 <pre>forge</pre>
   <p>Setas navegam, <code>Enter</code> escolhe, <code>Esc</code> volta. Num projeto sem Forge, a primeira opção é <b>Instalar</b>.</p>
-<pre><span class="b">Forge SDD 4.2.0-beta</span> — o que você quer fazer?
+<pre><span class="b">Forge SDD 4.4.1-beta</span> — o que você quer fazer?
   <span class="g">▸ Pipeline multi-sessão</span> (Discovery, Builder e Reviewer em 3 terminais)
     Estrutura padrão (uma sessão só)
     Sair</pre>
@@ -165,6 +165,7 @@ forge-sdd up --discovery claude --builder codex --reviewer gemini</pre></div>
   <h2>Painéis e contingência do tmux</h2>
   <p>Com o <code>tmux</code> instalado, as três sessões abrem <b>numa tela só</b>: Discovery grande à esquerda; Builder e Reviewer empilhados à direita, cada painel com o nome da sessão no topo. Sem tmux, o Forge oferece contingência suave com instalação assistida ou janelas nativas.</p>
   <div class="card ok"><b class="t">Instalação assistida e contingência suave</b>Se o <code>tmux</code> não estiver instalado, em modo <code>auto</code> o Forge detecta o gerenciador de pacotes (Homebrew no macOS; apt-get, dnf, pacman, apk ou zypper no Linux) e pergunta se você deseja instalá-lo automaticamente. Se recusar ou a instalação falhar, o Forge cai com graça (contingência do tmux) para <b>janelas nativas do sistema</b> (ou três painéis no <b>Windows Terminal</b> <code>wt.exe</code> no Windows). No <b>WSL</b>, o tmux roda nativamente na distribuição Linux.</div>
+  <div class="card"><b class="t">Modo Live e Despachante de Entrega (v4.4.0)</b>Com <code>session_mode: live</code> no <code>forge.json</code>, os painéis do Builder e Reviewer mantêm as CLIs abertas ao vivo. A entrega de jobs é feita por um despachante em janela oculta (<code>forge-ctl</code>) via buffers do tmux, com limpeza automática de contexto (<code>/clear</code> ou <code>/new</code>) entre tarefas. Se o tmux não estiver disponível, o Forge faz fallback transparente para o modo <code>headless</code>.</div>
   <table>
     <tr><th>No tmux</th><th>Faz</th></tr>
     <tr><td><code>Ctrl+b</code> e as setas</td><td>Troca de painel.</td></tr>
@@ -224,6 +225,6 @@ forge-sdd up --discovery claude --builder codex --reviewer gemini</pre></div>
 </section>
 
 </main>
-<footer><div class="wrap">Forge SDD 4.2.0-beta · <a href="https://github.com/nathanramorim/forge-sdd">GitHub</a> · <a href="https://www.npmjs.com/package/@nathanramorim/forge-sdd">npm</a></div></footer>
+<footer><div class="wrap">Forge SDD 4.4.1-beta · <a href="https://github.com/nathanramorim/forge-sdd">GitHub</a> · <a href="https://www.npmjs.com/package/@nathanramorim/forge-sdd">npm</a></div></footer>
 </body>
 </html>

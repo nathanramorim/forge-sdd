@@ -90,12 +90,22 @@ func quoteArg(windows bool, a string) (string, error) {
 	return shQuote(a), nil
 }
 
-func interactiveLine(windows bool, cfg config.ForgeConfig, cli string) (string, error) {
+func interactiveLineForRole(windows bool, cfg config.ForgeConfig, role, name, agent string) (string, error) {
+	cli := cfg.CLIFor(role)
 	profile, ok := cfg.Profile(cli)
 	if !ok || !config.KnownCLI(cli) {
-		return "", fmt.Errorf("cli %q inválida (use %s)", cli, strings.Join(config.OfferedCLIs(), ", "))
+		return "", fmt.Errorf("cli %q inválida para %s (use %s)", cli, role, strings.Join(config.OfferedCLIs(), ", "))
 	}
-	args, err := expandArgs(profile.InteractiveArgs, RunSpec{Agent: "lider", Name: SessionDiscovery, Prompt: DiscoveryPrompt})
+	spec := RunSpec{
+		Agent: agent,
+		Name:  name,
+	}
+	if role == config.SessionRoleDiscovery {
+		spec.Prompt = DiscoveryPrompt
+	} else {
+		spec.Permissions = cfg.WorkerPermissionArgs(cli)
+	}
+	args, err := expandArgs(profile.InteractiveArgs, spec)
 	if err != nil {
 		return "", err
 	}
@@ -108,6 +118,10 @@ func interactiveLine(windows bool, cfg config.ForgeConfig, cli string) (string, 
 		parts = append(parts, q)
 	}
 	return strings.Join(parts, " "), nil
+}
+
+func interactiveLine(windows bool, cfg config.ForgeConfig, cli string) (string, error) {
+	return interactiveLineForRole(windows, cfg, config.SessionRoleDiscovery, SessionDiscovery, "lider")
 }
 
 // Sessions mantém a assinatura da 4.1: a mesma CLI nas três sessões.

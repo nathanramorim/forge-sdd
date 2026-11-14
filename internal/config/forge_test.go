@@ -70,6 +70,68 @@ func TestLoadForgeConfig_Violacoes(t *testing.T) {
 	}
 }
 
+func TestSessionMode(t *testing.T) {
+	// 1. Config antiga sem session_mode, context ou live: assume padrões (headless, clear, 8s, 3s)
+	dir := t.TempDir()
+	writeForge(t, dir, ".forge/config/forge.json", `{"cli":"claude"}`)
+	cfg, found, err := LoadForgeConfig(dir)
+	require.NoError(t, err)
+	assert.True(t, found)
+	assert.Equal(t, SessionModeHeadless, cfg.SessionMode, "config antiga deve assumir headless")
+	assert.Equal(t, ContextClear, cfg.Context, "context omitido deve assumir clear")
+	assert.Equal(t, 8, cfg.Live.StartupWaitSeconds)
+	assert.Equal(t, 3, cfg.Live.ReadyQuietSeconds)
+
+	// 2. session_mode válido (live e headless)
+	for _, mode := range []string{SessionModeLive, SessionModeHeadless} {
+		c := DefaultForgeConfig()
+		c.SessionMode = mode
+		assert.NoError(t, c.Validate())
+	}
+
+	// 3. session_mode inválido
+	cBadMode := DefaultForgeConfig()
+	cBadMode.SessionMode = "interactive"
+	assert.ErrorContains(t, cBadMode.Validate(), "session_mode")
+
+	// 4. context válido (clear e continuous)
+	for _, ctx := range []string{ContextClear, ContextContinuous} {
+		c := DefaultForgeConfig()
+		c.Context = ctx
+		assert.NoError(t, c.Validate())
+	}
+
+	// 5. context inválido
+	cBadCtx := DefaultForgeConfig()
+	cBadCtx.Context = "stateless"
+	assert.ErrorContains(t, cBadCtx.Validate(), "context")
+
+	// 6. live config fora da faixa
+	cBadWait := DefaultForgeConfig()
+	cBadWait.Live.StartupWaitSeconds = 61
+	assert.ErrorContains(t, cBadWait.Validate(), "live.startup_wait_seconds")
+
+	cBadQuiet := DefaultForgeConfig()
+	cBadQuiet.Live.ReadyQuietSeconds = 31
+	assert.ErrorContains(t, cBadQuiet.Validate(), "live.ready_quiet_seconds")
+
+	// 7. reset_command por perfil nos padrões
+	profiles := defaultProfiles()
+	assert.Equal(t, "/clear", profiles[CLIClaude].ResetCommand)
+	assert.Equal(t, "/clear", profiles[CLIGemini].ResetCommand)
+	assert.Equal(t, "/clear", profiles[CLICopilot].ResetCommand)
+	assert.Equal(t, "/new", profiles[CLICodex].ResetCommand)
+	assert.Equal(t, "/clear", profiles[CLIAgy].ResetCommand)
+
+	// 8. Profile() herda ResetCommand de config antiga que não salvou o campo
+	cfgOld := DefaultForgeConfig()
+	delete(cfgOld.CLIProfiles, CLIClaude)
+	cfgOld.CLIProfiles[CLIClaude] = CLIProfile{Command: "claude", Args: []string{"-p", "{prompt}"}}
+	p, ok := cfgOld.Profile(CLIClaude)
+	require.True(t, ok)
+	assert.Equal(t, "/clear", p.ResetCommand)
+}
+
 func TestLoadNotificationsConfig(t *testing.T) {
 	dir := t.TempDir()
 	cfg, err := LoadNotificationsConfig(dir)
@@ -117,4 +179,39 @@ func TestPathsDoForgeSaoOsDoLayout(t *testing.T) {
 	_, found, err := LoadForgeConfig(dir)
 	require.NoError(t, err)
 	assert.True(t, found)
+}
+
+func TestLoadForgeConfig_MigraEPersisteGeminiLegado(t *testing.T) {
+	dir := t.TempDir()
+	// Simula arquivo forge.json de instalação anterior com comando gemini legado
+	legacy := `{
+  "cli": "claude",
+  "permissions": "project",
+  "terminal": "auto",
+  "cli_profiles": {
+    "gemini": {
+      "command": "gemini",
+      "args": [
+        "-p",
+        "{prompt}",
+        "-o",
+        "stream-json",
+        "{permissions}"
+      ]
+    }
+  }
+}`
+	writeForge(t, dir, ".forge/config/forge.json", legacy)
+
+	cfg, found, err := LoadForgeConfig(dir)
+	require.NoError(t, err)
+	require.True(t, found)
+	assert.Equal(t, "agy", cfg.CLIProfiles[CLIGemini].Command, "perfil em memória deve ter sido normalizado")
+
+	// Verifica se foi persistido no disco
+	raw, err := os.ReadFile(filepath.Join(dir, ".forge", "config", "forge.json"))
+	require.NoError(t, err)
+	disk := string(raw)
+	assert.Contains(t, disk, `"command": "agy"`, "arquivo no disco deve ter sido atualizado com agy")
+	assert.NotContains(t, disk, `"command": "gemini"`, "não deve mais conter o comando legado no disco")
 }

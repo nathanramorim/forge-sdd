@@ -32,7 +32,7 @@ func lenv(goos string, tools map[string]bool, env map[string]string, apps ...str
 }
 
 func TestLauncher_SessoesPorCLI(t *testing.T) {
-	for cli, want := range map[string]string{"claude": "claude -n forge-discovery --agent lider", "agy": "agy --agent lider -i"} {
+	for cli, want := range map[string]string{"claude": "claude -n forge-discovery --agent lider", "agy": "agy -i 'Voce e a sessao forge-discovery"} {
 		ss, err := Sessions(lenv("linux", nil, nil), cli)
 		require.NoError(t, err, cli)
 		require.Len(t, ss, 3)
@@ -94,7 +94,7 @@ func TestLauncherWindows(t *testing.T) {
 	argv := plan[0].Argv
 	require.GreaterOrEqual(t, len(argv), 25)
 	assert.Equal(t, []string{"wt.exe", "-w", "new", "new-tab", "--title", "forge-discovery", "cmd.exe", "/k"}, argv[:8])
-	assert.Contains(t, argv[8], "agy --agent lider -i")
+	assert.Contains(t, argv[8], "agy -i")
 	assert.Equal(t, ";", argv[9])
 	assert.Equal(t, []string{"split-pane", "-V", "--title", "forge-builder", "cmd.exe", "/k"}, argv[10:16])
 	assert.Contains(t, argv[16], `"C:\Program Files\forge\forge-sdd.exe" worker --role builder`)
@@ -188,7 +188,7 @@ func TestSessions_DiscoveryInterativaPorCLI(t *testing.T) {
 		config.CLIGemini:  "agy -i 'Voce e a sessao forge-discovery",
 		config.CLICopilot: "copilot -i 'Voce e a sessao forge-discovery",
 		config.CLICodex:   "codex 'Voce e a sessao forge-discovery",
-		config.CLIAgy:     "agy --agent lider -i",
+		config.CLIAgy:     "agy -i 'Voce e a sessao forge-discovery",
 	}
 	for cli, w := range want {
 		cfg := config.DefaultForgeConfig()
@@ -239,4 +239,36 @@ func TestSessions_PontoEVirgulaNoWindowsERecusado(t *testing.T) {
 	// No POSIX o mesmo argumento vai entre aspas simples e é aceito.
 	_, err = SessionsFor(lenv("linux", nil, nil), cfg)
 	assert.NoError(t, err)
+}
+
+func TestSessions_DiscoveryGeminiAbreAgyComPromptI(t *testing.T) {
+	cfg := config.DefaultForgeConfig()
+	cfg.Sessions = map[string]string{config.SessionRoleDiscovery: config.CLIGemini}
+	ss, err := SessionsFor(lenv("linux", nil, nil), cfg)
+	require.NoError(t, err)
+	assert.Contains(t, ss[0].Inner, "agy -i 'Voce e a sessao forge-discovery")
+	assert.NotContains(t, ss[0].Inner, "gemini")
+}
+
+func TestSessions_LiveModeBuilderReviewerGeminiAbreAgySemFlagI(t *testing.T) {
+	cfg := config.DefaultForgeConfig()
+	cfg.SessionMode = config.SessionModeLive
+	cfg.Sessions = map[string]string{
+		config.SessionRoleBuilder:  config.CLIGemini,
+		config.SessionRoleReviewer: config.CLIGemini,
+	}
+	plan, err := BuildTmuxPlan(lenv("linux", map[string]bool{"tmux": true}, nil), cfg, false)
+	require.NoError(t, err)
+
+	// Painel 1 (Builder) e Painel 2 (Reviewer) devem rodar agy sem flag -i
+	bldCmd := plan.Create[2][7]
+	revCmd := plan.Create[3][7]
+
+	assert.Contains(t, bldCmd, "agy --dangerously-skip-permissions")
+	assert.NotContains(t, bldCmd, "-i")
+	assert.NotContains(t, bldCmd, "gemini")
+
+	assert.Contains(t, revCmd, "agy --dangerously-skip-permissions")
+	assert.NotContains(t, revCmd, "-i")
+	assert.NotContains(t, revCmd, "gemini")
 }
