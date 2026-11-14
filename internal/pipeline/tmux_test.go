@@ -113,7 +113,6 @@ func TestTmuxPlanProjectIdentity(t *testing.T) {
 	proj := TmuxProjectName(env.Dir)
 	assert.Equal(t, "meu-app", proj)
 
-	exact := "=" + name
 	winName := "forge:" + proj
 
 	var foundStatusLeft, foundStatusLength, foundBorderFormat, foundWindowName bool
@@ -127,7 +126,7 @@ func TestTmuxPlanProjectIdentity(t *testing.T) {
 			}
 		}
 		if cmd[1] == "set-option" && len(cmd) >= 5 {
-			assert.Equal(t, exact, cmd[3], "alvo de set-option deve ser a sessão exata")
+			assert.Equal(t, name, cmd[3], "alvo de set-option deve ser o nome da sessão")
 			if cmd[4] == "status-left" {
 				foundStatusLeft = true
 				assert.Contains(t, cmd[5], proj)
