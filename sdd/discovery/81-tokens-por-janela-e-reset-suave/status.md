@@ -2,13 +2,13 @@
 
 ## Status
 ```
-Iniciativa 81 criada na branch feat/81-tokens-por-janela-e-reset-suave.
-Artefatos elaborados: discovery.md, criteria.md (com protótipos de badge de tokens e handoff in-place), plan.md e status.md.
-Aguardando aprovação humana (Gate 1 - FLX-01).
+Iniciativa 81 fatiada na branch feat/81-tokens-por-janela-e-reset-suave.
+Tasks 81-01, 81-02, 81-03 e 81-04 enfileiradas na fila com DAG (depends_on).
+Pronto para despacho ao Builder.
 ```
 
 ## Proximo passo
-Apresentar o desenho e protótipos de reset in-place e métricas de tokens ao usuário para aprovação do Gate 1; em seguida, executar /split-features e enfileirar para o Builder.
+Despachar job ao Builder (forge-sdd dispatch 81-tokens-por-janela-e-reset-suave).
 
 ## A confirmar
-Confirmação do limiar de tokens recomendado para aviso visual (padrão: 80k tokens) e do formato do card de handoff.
+Início da implementação pelo Builder.
