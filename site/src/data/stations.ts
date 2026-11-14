@@ -49,7 +49,7 @@ export const STATIONS: StationData[] = [
     inputArtifact: 'Pedido do Humano / Laudo Camada B',
     outputArtifact: 'Demanda estruturada → Estação 02',
     handoffTo: '02. PM & Arquiteto',
-    handoffPayload: 'Contexto do projeto (progress.md) + abertura de Discovery & Reuse Check',
+    handoffPayload: 'Contexto da iniciativa (status.md) + abertura de Discovery & Reuse Check',
     handoffGate: 'Passo 1 → 2 · Início da Esteira',
     handoffNote: 'O Líder nunca implementa código direto: delega à estação certa',
     desc: 'Recebe sua demanda, coordena os especialistas em sequência ou paralelo e consolida o Painel Executivo.',
@@ -91,7 +91,7 @@ export const STATIONS: StationData[] = [
     mark: 'bar',
     defaultState: 'thinking',
     inputArtifact: 'Spec aprovada (FLX-01)',
-    outputArtifact: 'plan.md + sdd/.queue/queue.json',
+    outputArtifact: 'plan.md + queue.json da iniciativa',
     handoffTo: '04. Fila de Builders',
     handoffPayload: 'Tarefas P/M/G enfileiradas em queue.json + seleção de .agents/rules/sdd-*.md',
     handoffGate: 'Regra GOV-04 · Contexto Seletivo',
@@ -100,7 +100,7 @@ export const STATIONS: StationData[] = [
     states: {
       thinking: 'Mapeando IDs da Constituição (ARQ, SEG, TST) por subtarefa…',
       working:  'Verificando colisão de arquivos para liberar execução em paralelo…',
-      finished: 'Fila gravada em sdd/.queue/queue.json! Despachando para os Builders.'
+      finished: 'Fila gravada na iniciativa! Despachando para o Builder.'
     }
   },
   {

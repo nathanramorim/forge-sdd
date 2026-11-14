@@ -3,7 +3,7 @@
     <div>
       <p class="eyebrow">03 · Instalação &amp; Guia Rápido</p>
       <h2>Simples de instalar. Funciona com os agentes que você já usa.</h2>
-      <p>Compatível com <strong>Claude Code</strong>, <strong>Google Gemini / Antigravity</strong> e <strong>GitHub Copilot</strong>. Código 100% aberto sob licença MIT.</p>
+      <p>Compatível com <strong>Claude Code</strong>, <strong>Gemini</strong>, <strong>GitHub Copilot</strong> e <strong>Codex</strong>, e cada sessão do pipeline pode usar um agente diferente. Código 100% aberto sob licença MIT.</p>
     </div>
   </div>
 
@@ -13,12 +13,12 @@
         <span class="chip"><i style="--o:var(--ok)"></i>Opção 1 · Instalação Global (Recomendado)</span>
         <span class="mono">npm / npx</span>
       </div>
-      <h3 style="font:700 15px var(--f-body);margin-bottom:6px">Instale uma vez e use o comando curto <span class="mono" style="color:#fff">forge</span></h3>
+      <h3 style="font:700 15px var(--f-body);margin-bottom:6px">Instale uma vez e navegue pelo menu do <span class="mono" style="color:#fff">forge</span></h3>
       <div class="term" style="margin-top:10px">
-        <div># 1. Instale globalmente via NPM</div>
-        <div style="color:#fff;font-weight:600">npm install -g @nathanramorim/forge-sdd</div>
-        <div style="margin-top:8px"># 2. Inicialize dentro do seu projeto</div>
-        <div style="color:#fff;font-weight:600">forge init</div>
+        <div># 1. Instale a versão com o pipeline (o @beta é importante)</div>
+        <div style="color:#fff;font-weight:600">npm install -g @nathanramorim/forge-sdd@beta</div>
+        <div style="margin-top:8px"># 2. Abra o menu dentro do seu projeto</div>
+        <div style="color:#fff;font-weight:600">forge</div>
       </div>
     </div>
 
@@ -29,9 +29,9 @@
       </div>
       <h3 style="font:700 15px var(--f-body);margin-bottom:6px">Rode direto via <span class="mono" style="color:#fff">npx</span> ou atualize projetos existentes</h3>
       <div class="term" style="margin-top:10px">
-        <div># Inicialização interativa (escolha Claude, Gemini, Copilot)</div>
-        <div style="color:#fff;font-weight:600">npx @nathanramorim/forge-sdd@latest init</div>
-        <div style="margin-top:8px"># Atualizar para v3.0 preservando seu histórico</div>
+        <div># Inicialização interativa (escolha Claude, Gemini, Copilot, Codex)</div>
+        <div style="color:#fff;font-weight:600">npx @nathanramorim/forge-sdd@beta init</div>
+        <div style="margin-top:8px"># Atualizar preservando seu histórico (com --dry-run para ver antes)</div>
         <div style="color:#fff;font-weight:600">forge update</div>
       </div>
     </div>
@@ -48,42 +48,50 @@
   <div class="cmd-ref-grid">
     <div class="cmd-item">
       <div class="cmd-item-head">
-        <code>/discovery [ideia]</code>
-        <span class="chip"><i style="--o:#8aa4ff"></i>Estação 02</span>
+        <code>forge</code>
+        <span class="chip"><i style="--o:var(--ok)"></i>Menu</span>
       </div>
-      <p class="cmd-desc">Faz o Reuse Check ("O que já existe"), gera a Spec e os critérios e aguarda seu OK no Portão FLX-01.</p>
+      <p class="cmd-desc">Abre um menu navegável (setas, Enter, Esc volta): pipeline de 3 sessões ou estrutura padrão. Escolhe o agente de cada sessão e abre tudo.</p>
+    </div>
+
+    <div class="cmd-item">
+      <div class="cmd-item-head">
+        <code>/discovery [ideia]</code>
+        <span class="chip"><i style="--o:#8aa4ff"></i>Discovery</span>
+      </div>
+      <p class="cmd-desc">Faz o Reuse Check ("O que já existe"), carrega ADRs e rules, gera a Spec e os critérios e aguarda seu OK no Portão FLX-01.</p>
     </div>
 
     <div class="cmd-item">
       <div class="cmd-item-head">
         <code>/split-features</code>
-        <span class="chip"><i style="--o:#c9a7ff"></i>Estação 03</span>
+        <span class="chip"><i style="--o:#c9a7ff"></i>Discovery</span>
       </div>
-      <p class="cmd-desc">Quebra o plano técnico em subtarefas P/M/G, vincula as rules aplicáveis e alimenta a fila determinística.</p>
+      <p class="cmd-desc">Quebra o plano em tarefas, alimenta a fila e, no modo pipeline, entrega ao Builder. A Discovery não constrói.</p>
     </div>
 
     <div class="cmd-item">
       <div class="cmd-item-head">
-        <code>/proxima-feature</code>
-        <span class="chip"><i style="--o:#4fd1b5"></i>Estação 04</span>
+        <code>/implementar [feature]</code>
+        <span class="chip"><i style="--o:#4fd1b5"></i>Discovery</span>
       </div>
-      <p class="cmd-desc">Aciona os Builders para consumirem os próximos itens da fila (em paralelo quando sem conflito).</p>
+      <p class="cmd-desc">Despacha uma feature pronta ao Builder (gate e job). Sem pipeline, executa a fila na própria sessão.</p>
     </div>
 
     <div class="cmd-item">
       <div class="cmd-item-head">
-        <code>/revisar</code>
-        <span class="chip"><i style="--o:#ff8a5c"></i>Estação 05 &rarr; 01</span>
+        <code>/inbox</code>
+        <span class="chip"><i style="--o:var(--warn)"></i>Aviso</span>
       </div>
-      <p class="cmd-desc">Roda o Portão A (<span class="mono">forge-sdd gate</span>), a auditoria Read-Only (Camada B) e entrega o Painel do Líder.</p>
+      <p class="cmd-desc">Mostra os avisos do pipeline: PR revisado pronto para aprovar e casos que pedem a sua intervenção.</p>
     </div>
 
     <div class="cmd-item">
       <div class="cmd-item-head">
-        <code>forge-sdd queue</code>
+        <code>forge-sdd up</code>
         <span class="chip"><i style="--o:var(--accent)"></i>CLI Go</span>
       </div>
-      <p class="cmd-desc">Gerencia a fila local (<span class="mono">enqueue</span>, <span class="mono">next</span>, <span class="mono">claim</span>, <span class="mono">complete</span>, <span class="mono">review</span>, <span class="mono">list</span>) com detecção de conflito.</p>
+      <p class="cmd-desc">Abre as 3 sessões (em painéis do tmux, se houver): <span class="mono">--discovery</span>, <span class="mono">--builder</span>, <span class="mono">--reviewer</span> escolhem o agente de cada uma.</p>
     </div>
 
     <div class="cmd-item">
@@ -91,23 +99,15 @@
         <code>forge-sdd gate</code>
         <span class="chip"><i style="--o:var(--ok)"></i>CLI Go</span>
       </div>
-      <p class="cmd-desc">Executa o Portão Determinístico Camada A (branch, spec vinculada, segredos, tamanho e testes).</p>
+      <p class="cmd-desc">Executa o Portão Determinístico Camada A (branch, spec vinculada, segredos, orçamentos de contexto e testes).</p>
     </div>
 
     <div class="cmd-item">
       <div class="cmd-item-head">
-        <code>forge-sdd skills</code>
-        <span class="chip"><i style="--o:var(--warn)"></i>CLI Go</span>
+        <code>/status &amp; forge-sdd status</code>
+        <span class="chip"><i style="--o:#f2a65a"></i>Estado</span>
       </div>
-      <p class="cmd-desc">Propõe, aprova e sincroniza Auto-Skills (<span class="mono">DUP-05</span>) entre <span class="mono">.agents/</span>, <span class="mono">.claude/</span> e <span class="mono">.gemini/</span>.</p>
-    </div>
-
-    <div class="cmd-item">
-      <div class="cmd-item-head">
-        <code>/status &amp; forge report</code>
-        <span class="chip"><i style="--o:#f2a65a"></i>Estação 01</span>
-      </div>
-      <p class="cmd-desc">Mostra o progresso atual, divergências com o Git remoto e relatório de telemetria por sessão.</p>
+      <p class="cmd-desc">Mostra as iniciativas, a fila e a divergência com o Git remoto, calculados na hora (sem índice global para dar conflito).</p>
     </div>
   </div>
 </section>

@@ -27,119 +27,119 @@ export interface EmuStepData {
 
 export const EMU_STEPS: EmuStepData[] = [
   {
-    stationLabel: 'Bootstrap CLI Go',
-    agentName: '01. O Líder (Orquestrador)',
+    stationLabel: 'Menu forge · Início',
+    agentName: 'Você + o menu do forge',
     agentHex: 0xf2a65a,
     agentState: 'finished',
     chipColor: 'var(--ok)',
-    chipText: 'Estrutura Pronta',
-    speech: 'Instalei os papéis das 5 estações (.agents/roles/), as regras modulares (.agents/rules/) e a Constitution por IDs.',
+    chipText: '3 sessões abertas',
+    speech: 'Escolhi o agente de cada sessão no menu, conferi a checagem e abri tudo numa tela só. A última escolha fica lembrada.',
     logHtml: `
-      <div class="cmd-input">$ forge init . --agent claude,gemini --name checkout-api</div>
-      <div class="dim">→ Gerando papéis canônicos em .agents/roles/{lider,pm-architect,planner,builder,governance}.md</div>
-      <div class="dim">→ Distribuindo regras em .agents/rules/sdd-{arquitetura,seguranca,reuso-e-duplicacao,codigo-e-testes,fluxo-e-portao}.md</div>
-      <div class="dim">→ Criando sdd/memory/constitution.md (IDs estáveis: ARQ-*, SEG-*, DUP-*, COD-*, TST-*, FLX-*, GOV-*)</div>
-      <div class="ok">✓ Estrutura Forge-SDD v3.0.0-beta criada com sucesso!</div>
+      <div class="cmd-input">$ forge</div>
+      <div class="accent">Forge SDD 4.2.0-beta — o que você quer fazer?  ▸ Pipeline multi-sessão</div>
+      <div class="dim">→ Iniciar as 3 sessões: forge-discovery claude · forge-builder codex · forge-reviewer gemini</div>
+      <div class="dim">Checagem antes de abrir: ✓ claude  ✓ codex  ✓ gemini  ✓ arquivos de instrução</div>
+      <div class="ok">✓ Sessão tmux forge-checkout-api-1a2b3c aberta: 3 painéis nomeados</div>
     `,
     files: [
-      ['.agents/roles/ (5 estações)', 'criado', 'var(--ok)'],
-      ['.agents/rules/sdd-*.md', 'criado', 'var(--ok)'],
-      ['sdd/memory/constitution.md', 'criado', 'var(--ok)'],
-      ['sdd/memory/progress.md', '240 bytes ≤ 1 KB', 'var(--accent)']
+      ['.forge/config/forge.json', 'agentes lembrados', 'var(--ok)'],
+      ['.forge/runtime/ (fila e logs)', 'fora do git', 'var(--accent)'],
+      ['sdd/discovery/<id>-<nome>/', 'uma pasta por iniciativa', 'var(--accent)']
     ],
-    actionBtn: { label: 'Rodar /discovery no chat →', nextStep: 1 }
+    actionBtn: { label: 'Conversar na Discovery (/discovery) →', nextStep: 1 }
   },
   {
-    stationLabel: 'Estação 02 · Concepção',
-    agentName: '02. Produto & Arquiteto',
+    stationLabel: 'Discovery · Concepção (você)',
+    agentName: 'Produto & Arquiteto',
     agentHex: 0x8aa4ff,
     agentState: 'approval',
     chipColor: 'var(--warn)',
     chipText: 'Portão FLX-01 (Aguarda Você)',
-    speech: 'Mapeei o que já existe para não duplicar código e gerei a Spec. Preciso do seu "De Acordo" antes de acionar o Planejador.',
+    speech: 'Mapeei o que já existe para não duplicar código e gerei a Spec. Preciso do seu "De Acordo" antes de fatiar em tarefas.',
     logHtml: `
       <div class="cmd-input">&gt; /discovery adicionar pagamento PIX com webhook idempotente</div>
-      <div class="accent">[Estação 02 · PM &amp; Arquiteto] Executando Reuse Check obrigatório (DUP-01 / DUP-02)…</div>
+      <div class="accent">[Discovery] Carregando ADRs e rules antes de propor (nada pode violá-las)…</div>
       <div class="dim">  • Reaproveitado: internal/http/middleware/hmac.go e internal/db/tx.go</div>
-      <div class="ok">✓ Gerado: sdd/discovery/discovery-01-pagamento-pix.md</div>
-      <div class="ok">✓ Gerado: sdd/discovery/criteria-01-pagamento-pix.md (CA-01..CA-05)</div>
-      <div class="warn">! PORTÃO HUMANO FLX-01: Revise a Spec antes de prosseguir para o plano técnico.</div>
+      <div class="ok">✓ Gerado: sdd/discovery/12-pagamento-pix/discovery.md e criteria.md (CA-01..CA-05)</div>
+      <div class="ok">✓ Gerado: plan.md e status.md da iniciativa</div>
+      <div class="warn">! PORTÃO HUMANO FLX-01: revise a Spec antes de fatiar.</div>
     `,
     files: [
-      ['sdd/discovery/discovery-01-pagamento-pix.md', 'Reuse Check OK', 'var(--ok)'],
-      ['sdd/discovery/criteria-01-pagamento-pix.md', 'aguarda seu OK', 'var(--warn)'],
-      ['sdd/discovery/plan-01-*.md', 'bloqueado (FLX-01)', 'var(--faint)']
+      ['sdd/discovery/12-pagamento-pix/discovery.md', 'Reuse Check OK', 'var(--ok)'],
+      ['sdd/discovery/12-pagamento-pix/criteria.md', 'aguarda seu OK', 'var(--warn)'],
+      ['sdd/discovery/12-pagamento-pix/status.md', '≤ 1 KB', 'var(--accent)']
     ],
-    actionBtn: { label: 'Aprovar Spec (FLX-01) e Planejar →', nextStep: 2, style: 'warn' }
+    actionBtn: { label: 'Aprovar Spec (FLX-01) e fatiar →', nextStep: 2, style: 'warn' }
   },
   {
-    stationLabel: 'Estação 03 · Planejamento & Fila',
-    agentName: '03. O Planejador',
+    stationLabel: 'Discovery → Builder · Entrega',
+    agentName: 'Planejador → fila do Builder',
     agentHex: 0xc9a7ff,
     agentState: 'thinking',
     chipColor: 'var(--accent)',
-    chipText: 'Fila Calculada',
-    speech: 'Dividi a Spec em 3 tarefas: 01 e 02 não tocam nos mesmos arquivos e vão rodar em paralelo; a 03 aguarda na fila.',
+    chipText: 'Entregue ao Builder',
+    speech: 'Fatiei em 3 tarefas e já entreguei ao Builder. Esta sessão não constrói: ela só acompanha pelo inbox.',
     logHtml: `
       <div class="cmd-input">&gt; /split-features</div>
-      <div class="accent">[Estação 03 · Planejador] Vinculando IDs da Constitution e rules por subtarefa (GOV-04)…</div>
-      <div class="dim">  • feat-01-01 (P): Domínio PIX [ARQ-01, TST-01] → sem conflito (Onda Paralela 1)</div>
-      <div class="dim">  • feat-01-02 (M): Cliente Banco [SEG-01, TST-01] → sem conflito (Onda Paralela 1)</div>
-      <div class="dim">  • feat-01-03 (M): Webhook Handler [SEG-02, DUP-01] → depends_on: [01, 02] (Onda 2)</div>
-      <div class="cmd-input">$ forge-sdd queue enqueue sdd/features/feat-01-pagamento-pix/*.md</div>
-      <div class="ok">✓ 3 tarefas gravadas em sdd/.queue/queue.json (0 colisões na Onda 1)</div>
+      <div class="dim">  • feat-12-01 Domínio PIX [ARQ-01, TST-01]  → Onda 1 (paralelo)</div>
+      <div class="dim">  • feat-12-02 Cliente do banco [SEG-01]     → Onda 1 (paralelo)</div>
+      <div class="dim">  • feat-12-03 Webhook idempotente [SEG-02]  → Onda 2 (depende de 01 e 02)</div>
+      <div class="cmd-input">$ forge-sdd dispatch pagamento-pix</div>
+      <div class="ok">✓ Gate pré-build: spec, ADRs e rules conferidas</div>
+      <div class="ok">✓ Job enfileirado em builder/pending. Entregue ao Builder.</div>
     `,
     files: [
-      ['sdd/discovery/plan-01-pagamento-pix.md', 'gerado', 'var(--ok)'],
-      ['sdd/.queue/queue.json (feat-01-01 & 02)', 'queued (paralelo)', 'var(--accent)'],
-      ['sdd/.queue/queue.json (feat-01-03)', 'queued (depends_on)', 'var(--warn)']
+      ['sdd/discovery/12-pagamento-pix/features/ (3 specs)', 'geradas', 'var(--ok)'],
+      ['sdd/discovery/12-pagamento-pix/queue.json', '3 tasks na fila', 'var(--accent)'],
+      ['.forge/runtime/queues/builder/pending/', '1 job', 'var(--warn)']
     ],
-    actionBtn: { label: 'Disparar Builders (/proxima-feature) →', nextStep: 3 }
+    actionBtn: { label: 'Ver o painel do Builder →', nextStep: 3 }
   },
   {
-    stationLabel: 'Estação 04 · Execução & Portão A',
-    agentName: '04. Fila de Builders',
+    stationLabel: 'forge-builder · Execução',
+    agentName: 'forge-builder (worker)',
     agentHex: 0x4fd1b5,
     agentState: 'working',
     chipColor: 'var(--ok)',
-    chipText: 'Portão A: PASS',
-    speech: 'Executamos as tarefas da fila respeitando as dependências e validamos tudo no Portão Determinístico Camada A!',
+    chipText: 'Construindo em paralelo',
+    speech: 'Peguei o job da fila e estou construindo. O painel mostra o que faço, em linhas curtas; o log completo fica à parte.',
     logHtml: `
-      <div class="cmd-input">&gt; /proxima-feature</div>
-      <div class="accent">[Builder A &amp; Builder B] Executando Onda 1 em paralelo (feat-01-01 + feat-01-02)…</div>
-      <div class="dim">[Builder A] concluído → liberando dependência de feat-01-03…</div>
-      <div class="cmd-input">$ forge-sdd gate --mode bloqueio --branch feat/01-pagamento-pix</div>
-      <div class="ok">  ✓ [P-01] Branch feat/01-pagamento-pix válida</div>
-      <div class="ok">  ✓ [P-13] Zero segredos expostos no diff</div>
-      <div class="ok">  ✓ [P-23] go test ./... &amp; go vet ./... (100% PASS)</div>
+      <div class="dim">[forge-builder] agente: codex · permissões: PROJETO</div>
+      <div class="accent">▶ job pagamento-pix · feature_build · tentativa 1 · codex · permissões project</div>
+      <div class="ok">  ✎ internal/pix/domain.go</div>
+      <div class="ok">  ✎ internal/pix/client.go</div>
+      <div class="dim">  $ go test ./...</div>
+      <div class="ok">  ✓ comando terminou (0)</div>
+      <div class="dim">  … trabalhando há 2m10s · 14 arquivos alterados</div>
+      <div class="ok">■ concluído em 4m12s · PR aberto e enfileirado para o Reviewer</div>
     `,
     files: [
-      ['feat-01-01 & feat-01-02', 'done (Portão A PASS)', 'var(--ok)'],
-      ['feat-01-03 (Webhook Handler)', 'done (Portão A PASS)', 'var(--ok)'],
-      ['sdd/memory/progress.md', '712 bytes ≤ 1024 B', 'var(--ok)']
+      ['builder/processing → done', 'job concluído', 'var(--ok)'],
+      ['PR #12 (feat/12-pagamento-pix)', 'aberto', 'var(--ok)'],
+      ['.forge/runtime/queues/reviewer/pending/', '1 job', 'var(--warn)']
     ],
-    actionBtn: { label: 'Rodar Auditoria Read-Only (/revisar) →', nextStep: 4 }
+    actionBtn: { label: 'Ver o painel do Reviewer →', nextStep: 4 }
   },
   {
-    stationLabel: 'Estação 05 → 01 · Governança & Líder',
-    agentName: '05. Governança → 01. Líder',
+    stationLabel: 'forge-reviewer → você · Revisão',
+    agentName: 'forge-reviewer → você',
     agentHex: 0x3ecf8e,
     agentState: 'finished',
     chipColor: 'var(--ok)',
-    chipText: 'Veredito: Conforme',
-    speech: 'Auditoria Read-Only aprovada sem ressalvas! O Líder consolidou seu Painel Executivo e sincronizou 1 nova Auto-Skill.',
+    chipText: 'Conforme · aguarda sua aprovação',
+    speech: 'Reprovei uma vez por violar uma ADR, o Builder corrigiu e agora está conforme. Quem aprova e mescla o PR é você.',
     logHtml: `
-      <div class="cmd-input">&gt; /revisar</div>
-      <div class="accent">[Estação 05 · Governança Read-Only] Auditando diff contra ARQ-01, SEG-01, DUP-01, TST-01…</div>
-      <div class="ok">✓ Parecer Camada B: {"veredito": "conforme", "bloqueios": [], "auto_skills_candidatas": ["webhook-hmac-idempotente"]}</div>
-      <div class="cmd-input">$ forge-sdd skills approve webhook-hmac-idempotente</div>
-      <div class="ok">✓ Auto-Skill sincronizada em .agents/skills/, .claude/skills/ e .gemini/skills/</div>
-      <div class="ok">✓ Painel Executivo do Líder (Camada C): 3/3 tarefas aprovadas · 0 pendências na fila!</div>
+      <div class="accent">▶ job pagamento-pix · pr_review · tentativa 1 · gemini</div>
+      <div class="warn">  ✗ ADR-0003 violada em internal/pix/client.go:42</div>
+      <div class="dim">↺ devolvido ao Builder (rework, prioridade alta, tentativa 2 de 3)</div>
+      <div class="accent">▶ job pagamento-pix · pr_review · tentativa 2 · gemini</div>
+      <div class="ok">■ conforme: ADRs e rules respeitadas</div>
+      <div class="ok">✓ Inbox da forge-discovery: PR revisado, sem inconformidades, pronto para a sua aprovação</div>
     `,
     files: [
-      ['sdd/.queue/queue.json (3/3 tarefas)', 'status: approved', 'var(--ok)'],
-      ['.agents/skills/webhook-hmac-idempotente/', 'Auto-Skill ativa', 'var(--ok)'],
-      ['Painel Executivo (Camada C)', 'entregue ao humano', 'var(--ok)']
+      ['PR #12', 'revisado, sem inconformidades', 'var(--ok)'],
+      ['Inbox da Discovery (/inbox)', 'aviso com o link do PR', 'var(--ok)'],
+      ['Aprovar e mesclar', 'só você', 'var(--warn)']
     ],
     actionBtn: { label: 'Reiniciar demonstração ↺', nextStep: 0, style: 'ghost' }
   }

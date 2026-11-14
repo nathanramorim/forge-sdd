@@ -728,7 +728,7 @@ section {
 .emu-log .warn { color: var(--warn); }
 .emu-log .accent { color: var(--accent); }
 
-/* Lado Direito do Emulador: Agente Ativo 3D + Estado de sdd/.queue/queue.json e Arquivos */
+/* Lado Direito do Emulador: Agente Ativo 3D + Estado da fila da iniciativa e Arquivos */
 .emu-state-pane {
   padding: 18px;
   background: var(--bg2);
