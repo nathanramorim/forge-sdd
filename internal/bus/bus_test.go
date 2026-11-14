@@ -394,3 +394,31 @@ func TestEnqueue_CreatedAtForaDaFaixaERecusado(t *testing.T) {
 	_, _, err = Enqueue(dir, layout.RoleBuilder, j, t0)
 	assert.ErrorIs(t, err, ErrInvalidJob)
 }
+
+func TestRequeue_DevolveSemGastarTentativaEPreservaAOrdem(t *testing.T) {
+	dir := t.TempDir()
+	mustEnqueue(t, dir, layout.RoleBuilder, newJob("job-a", TypeFeatureBuild, PriorityNormal), t0)
+	mustEnqueue(t, dir, layout.RoleBuilder, newJob("job-b", TypeFeatureBuild, PriorityNormal), t0.Add(time.Minute))
+	e, err := Claim(dir, layout.RoleBuilder, "w1", time.Minute, t0.Add(2*time.Minute))
+	require.NoError(t, err)
+	require.Equal(t, "job-a", e.Job.ID)
+	attempt := e.Job.Attempt
+
+	// Sem posse não devolve.
+	_, err = Requeue(dir, layout.RoleBuilder, "job-a", "w2", "x", t0)
+	assert.ErrorIs(t, err, ErrNotOwner)
+	_, err = Requeue(dir, layout.RoleBuilder, "job-a", "", "x", t0)
+	assert.ErrorIs(t, err, ErrNotOwner)
+
+	back, err := Requeue(dir, layout.RoleBuilder, "job-a", "w1", "limite de uso do claude", t0.Add(3*time.Minute))
+	require.NoError(t, err)
+	assert.Equal(t, layout.StatePending, back.State)
+	assert.Equal(t, attempt, back.Job.Attempt, "a tentativa não foi gasta")
+	assert.Nil(t, back.Job.Lease)
+	assert.Equal(t, "adiado: limite de uso do claude", back.Job.Events[len(back.Job.Events)-1].Note)
+
+	// A ordem é preservada: o job devolvido continua na frente do mais novo.
+	again, err := Claim(dir, layout.RoleBuilder, "w1", time.Minute, t0.Add(4*time.Minute))
+	require.NoError(t, err)
+	assert.Equal(t, "job-a", again.Job.ID)
+}

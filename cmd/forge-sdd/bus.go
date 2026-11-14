@@ -136,6 +136,24 @@ var busFailCmd = &cobra.Command{
 	},
 }
 
+var busRequeueCmd = &cobra.Command{
+	Use:   "requeue",
+	Short: "Devolve um job reivindicado a pending sem gastar tentativa (processing para pending)",
+	Args:  cobra.NoArgs,
+	RunE: func(cmd *cobra.Command, args []string) error {
+		dir, role := busArgs(cmd)
+		id, _ := cmd.Flags().GetString("id")
+		worker := workerFromFlags(cmd)
+		reason, _ := cmd.Flags().GetString("reason")
+		e, err := bus.Requeue(dir, role, id, worker, reason, time.Now())
+		if err != nil {
+			return err
+		}
+		fmt.Fprintf(cmd.OutOrStdout(), "devolvido à fila %s\n", e.Path)
+		return nil
+	},
+}
+
 var busRecoverCmd = &cobra.Command{
 	Use:   "recover",
 	Short: "Devolve a pending os jobs de processing com lease vencido",
@@ -207,7 +225,7 @@ func printJSON(w io.Writer, v any) error {
 }
 
 func init() {
-	for _, c := range []*cobra.Command{busEnqueueCmd, busClaimCmd, busCompleteCmd, busFailCmd, busRecoverCmd, busListCmd, busShowCmd} {
+	for _, c := range []*cobra.Command{busEnqueueCmd, busClaimCmd, busCompleteCmd, busFailCmd, busRequeueCmd, busRecoverCmd, busListCmd, busShowCmd} {
 		busFlags(c, true)
 		busCmd.AddCommand(c)
 	}
@@ -216,7 +234,7 @@ func init() {
 	busClaimCmd.Flags().String("worker", "", "Nome do worker (lease)")
 	_ = busClaimCmd.MarkFlagRequired("worker")
 	busClaimCmd.Flags().Duration("ttl", bus.DefaultLeaseTTL, "Duração do lease")
-	for _, c := range []*cobra.Command{busCompleteCmd, busFailCmd, busShowCmd} {
+	for _, c := range []*cobra.Command{busCompleteCmd, busFailCmd, busRequeueCmd, busShowCmd} {
 		c.Flags().String("id", "", "ID do job")
 		_ = c.MarkFlagRequired("id")
 	}
@@ -224,6 +242,8 @@ func init() {
 	busCompleteCmd.Flags().String("note", "", "Observação registrada no histórico")
 	busFailCmd.Flags().String("worker", "", "Worker dono do lease (padrão: variável FORGE_WORKER, definida pelo worker)")
 	busFailCmd.Flags().String("reason", "", "Motivo da falha")
+	busRequeueCmd.Flags().String("worker", "", "Worker dono do lease (padrão: variável FORGE_WORKER, definida pelo worker)")
+	busRequeueCmd.Flags().String("reason", "", "Motivo de devolver o job")
 	busListCmd.Flags().String("state", layout.StatePending, "Estado: pending, processing, done ou failed")
 	busListCmd.Flags().Bool("json", false, "Saída em JSON")
 	rootCmd.AddCommand(busCmd)

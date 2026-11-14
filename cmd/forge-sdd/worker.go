@@ -59,6 +59,9 @@ func recordJobTelemetry(dir, role string) func(job bus.Job, outcome string) {
 		if err != nil {
 			return
 		}
+		if outcome == pipeline.OutcomeDeferred {
+			return // o job voltou à fila sem gastar tentativa: não é um resultado da sessão
+		}
 		ok := outcome == pipeline.OutcomeDone
 		result := "approved"
 		if !ok {

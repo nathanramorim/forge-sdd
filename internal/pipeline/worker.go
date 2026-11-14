@@ -13,12 +13,14 @@ import (
 	"github.com/forge-sdd/cli/internal/bus"
 	"github.com/forge-sdd/cli/internal/config"
 	"github.com/forge-sdd/cli/internal/layout"
+	"github.com/forge-sdd/cli/internal/notify"
 )
 
 // Resultados de um job para o gancho de telemetria.
 const (
-	OutcomeDone   = "done"
-	OutcomeFailed = "failed"
+	OutcomeDone     = "done"
+	OutcomeFailed   = "failed"
+	OutcomeDeferred = "deferred" // limite de uso: o job voltou à fila sem gastar tentativa
 )
 
 // WorkerOptions configura o laço do worker.
@@ -26,6 +28,8 @@ type WorkerOptions struct {
 	Dir  string
 	Role string // builder ou reviewer
 	Name string // nome da sessão e do lease (forge-builder)
+	// Sleep espera uma duração e devolve false se o contexto acabar (injetável nos testes da pausa).
+	Sleep func(context.Context, time.Duration) bool
 	// Raw devolve a saída bruta do agente ao terminal (sem a visão limpa).
 	Raw bool
 	// WatchEvery é o intervalo do acompanhamento por git (padrão 5 s; negativo desliga).
@@ -67,6 +71,9 @@ func RunWorker(ctx context.Context, opts WorkerOptions) error {
 	}
 	if opts.Now == nil {
 		opts.Now = time.Now
+	}
+	if opts.Sleep == nil {
+		opts.Sleep = realSleep
 	}
 	if opts.Poll <= 0 {
 		opts.Poll = 5 * time.Second
@@ -190,6 +197,18 @@ func processJob(ctx context.Context, opts WorkerOptions, cfg config.ForgeConfig,
 		reason = fmt.Sprintf("timeout após %d minutos", cfg.Builder.JobTimeoutMinutes)
 	case res.ExitCode != 0:
 		reason = fmt.Sprintf("o agente saiu com código %d", res.ExitCode)
+		// Limite de uso (só com saída diferente de zero): o job volta à fila sem gastar tentativa e o
+		// worker espera até o horário informado.
+		if ul, ok := DetectUsageLimit(live.Tail(8), opts.Now()); ok && !ul.Capped && ctx.Err() == nil {
+			deferJob(ctx, opts, job, ul, live)
+			if opts.OnJobDone != nil {
+				opts.OnJobDone(job, OutcomeDeferred)
+			}
+			return
+		}
+		if last := lastUsefulLine(live); last != "" {
+			reason += ": " + last
+		}
 	}
 	if reason == "" {
 		reason = verifyHandoff(opts, entry.Job.ID)
@@ -265,4 +284,41 @@ func workerPrompt(role string, job bus.Job, rel string, cfg config.ForgeConfig) 
 		p += "\n" + BuilderHints(cfg.Builder, job)
 	}
 	return p
+}
+
+// lastUsefulLine devolve a última linha útil da saída do agente (saneada), para o motivo da falha.
+func lastUsefulLine(live *LiveView) string {
+	tail := live.Tail(5)
+	for i := len(tail) - 1; i >= 0; i-- {
+		l := strings.TrimSpace(strings.TrimPrefix(strings.TrimSpace(tail[i]), "✗"))
+		if l != "" && !strings.HasPrefix(l, "(hooks globais") {
+			return l
+		}
+	}
+	return ""
+}
+
+// deferJob devolve o job à fila, avisa no inbox (uma vez por pausa) e espera até o horário.
+func deferJob(ctx context.Context, opts WorkerOptions, job bus.Job, ul UsageLimit, live *LiveView) {
+	now := opts.Now()
+	reason := "limite de uso do " + opts.CLI
+	if _, err := bus.Requeue(opts.Dir, opts.Role, job.ID, opts.Name, reason, now); err != nil {
+		live.Line("✗ não foi possível devolver o job à fila: " + err.Error())
+		return
+	}
+	if ncfg, err := config.LoadNotificationsConfig(opts.Dir); err == nil {
+		n := notify.Notification{
+			Type:    notify.TypeInfo,
+			Title:   fmt.Sprintf("%s pausado: limite de uso do %s", opts.Name, opts.CLI),
+			Message: fmt.Sprintf("O job %s voltou à fila sem gastar tentativa. O worker retoma às %s.\n%s", job.Feature, ul.ResetAt.Format("15:04"), ul.Message),
+			Feature: job.Feature, JobID: job.ID,
+			ID: notificationID(job.ID, fmt.Sprintf("pausa-%d", now.Unix()/60)),
+		}
+		_, _ = notify.Dispatch(opts.Dir, ncfg, n, notify.Deps{})
+	}
+	live.Line("⏸ " + ul.Message)
+	if !pauseUntil(ctx, ul.ResetAt, opts.CLI, opts.Now, opts.Sleep, live.Line) {
+		return
+	}
+	live.Line("▶ retomando")
 }

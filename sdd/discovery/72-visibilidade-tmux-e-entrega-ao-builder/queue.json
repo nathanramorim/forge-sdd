@@ -2,7 +2,7 @@
   "feature_id": "feat-72",
   "branch": "feat/72-visibilidade-tmux-e-entrega-ao-builder",
   "spec_status": "reviewed",
-  "updated_at": "2026-11-14T02:38:58Z",
+  "updated_at": "2026-11-14T02:41:25Z",
   "items": [
     {
       "task_id": "72-01",
@@ -40,7 +40,7 @@
       "task_id": "72-03",
       "title": "feat-72-03 — Falha Legível e Pausa por Limite de Uso",
       "spec_path": "sdd/discovery/72-visibilidade-tmux-e-entrega-ao-builder/features/feat-72-03-falha-legivel-e-pausa-por-limite-de-uso.md",
-      "status": "building",
+      "status": "review_pending",
       "rules": [
         "SEG-01",
         "SEG-05",
