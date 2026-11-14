@@ -21,7 +21,7 @@ Instruções operacionais para aplicar os IDs `ARQ-01` a `ARQ-06` e `ARQ-11` def
 
 - **Templates via `embed.FS` (`ARQ-03`):**
   - Todo arquivo que o scaffold materializa no projeto do usuário deve residir em `internal/scaffold/templates/` com sufixo `.tmpl`.
-  - Nunca utilize `os.ReadFile` apontando para caminhos relativos do repositório do próprio `forge-sdd` para buscar templates em tempo de execução; leia sempre da instância `embed.FS`.
+  - Nunca utilize `os.ReadFile` apontando para caminhos relativos do repositório do próprio `forge` para buscar templates em tempo de execução; leia sempre da instância `embed.FS`.
 - **Preferência por `stdlib` (`ARQ-04`):**
   - Resolva parsing de JSON, manipulação de caminhos (`filepath`), expressões regulares e execução de processos com pacotes nativos do Go antes de cogitar bibliotecas externas.
 - **Execução segura em `--dry-run` (`ARQ-05`):**

@@ -17,6 +17,6 @@ Estes arquivos detalham **como cumprir** na prática as regras da Constituição
 - Um arquivo Markdown por domínio de regra adicional (ex: `design-system.md`, `frontend.md`, `accessibility.md`).
 - Inclua frontmatter YAML (`description`, `globs`, `regras: [...]`) quando a regra detalhar IDs registrados em `sdd/memory/constitution.md`.
 - O Planejador (`planner`) e o Líder (`lider`) selecionam apenas os arquivos relevantes para cada task da fila do Builder — não é necessário carregar todos os arquivos ao mesmo tempo.
-- `forge-sdd update` preserva regras customizadas criadas pelo usuário nesta pasta.
+- `forge update` preserva regras customizadas criadas pelo usuário nesta pasta.
 
 Veja `example.md.example` para um ponto de partida adicional (arquivos `.example` são ignorados pelos agentes).

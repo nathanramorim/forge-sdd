@@ -4,7 +4,7 @@
 **Fase:** 82-02
 **Tamanho:** `M`
 **Depende de:** 82-01
-**Status:** `queued`
+**Status:** `complete`
 
 ## Contexto & Motivação
 Novos projetos inicializados pelo Forge-SDD geram arquivos de onboarding e automação através de templates (`internal/scaffold/templates/`). Vários templates ainda ensinam e referenciam `forge-sdd` (ex: `LEIA-ME.md.tmpl`, scripts de pipeline e prompts). Esta task atualiza esses templates para recomendar `forge` e atualiza a suíte de golden files em `internal/scaffold/testdata/golden/`.
@@ -33,5 +33,5 @@ Novos projetos inicializados pelo Forge-SDD geram arquivos de onboarding e autom
 - `TST-02`: Golden files testados e correspondentes aos templates reais.
 
 ## Critérios de Aceitação Executáveis
-1. Todos os templates em `internal/scaffold/templates/` instruem o comando `forge` como comando primário.
-2. `go test -v ./internal/scaffold/...` passa sem regressões ou divergências de golden files.
+- [x] 1. Todos os templates em `internal/scaffold/templates/` instruem o comando `forge` como comando primário.
+- [x] 2. `go test -v ./internal/scaffold/...` passa sem regressões ou divergências de golden files.

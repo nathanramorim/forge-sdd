@@ -7,33 +7,33 @@ O ecossistema **forge-sdd** fornece um conjunto de ferramentas divididas entre *
 ## 💻 1. Comandos de Terminal (CLI / NPX)
 Executados diretamente no terminal do desenvolvedor, normalmente utilizando o wrapper NPX.
 
-### `npx @nathanramorim/forge-sdd init [diretório]`
+### `forge init [diretório]`
 - **O que faz:** Inicializa toda a estrutura de pastas do Forge-SDD (diretórios `sdd/`, `.vscode/`, `.gemini/`, `.github/`, etc.) adaptada para os agentes de IA escolhidos.
 - **Como usar:**
   - **Interativo (Recomendado):**
     ```bash
-    npx @nathanramorim/forge-sdd init
+    forge init
     ```
   - **Automático (Não-Interativo via flags):**
     ```bash
-    npx @nathanramorim/forge-sdd init --yes --name "Meu Projeto" --stack "go" --db "postgres" --agent "gemini,claude"
+    forge init --yes --name "Meu Projeto" --stack "go" --db "postgres" --agent "gemini,claude"
     ```
   - **Simulação (Dry-run):**
     ```bash
-    npx @nathanramorim/forge-sdd init --dry-run
+    forge init --dry-run
     ```
 
-### `npx @nathanramorim/forge-sdd update [diretório]`
+### `forge update [diretório]`
 - **O que faz:** Atualiza as regras estruturais de agentes de um projeto existente ou adiciona novos agentes de IA (ex: adicionar Claude a um projeto que só usava Gemini), preservando estritamente os dados de domínio (features, memory, etc.).
 - **Segurança (Preservação de Domínio):** Para evitar perda de dados, o comando atualiza apenas arquivos estruturais e de agentes (como `.gemini/`, `.claude/`, `CLAUDE.md`, `GEMINI.md`, `sdd/.sddrc` e `sdd/.sdd-version`). Todo o domínio do projeto sob a pasta `sdd/` (incluindo suas especificações de features, histórico de releases e arquivos de memória como `progress.md`) é estritamente preservado.
 - **Como usar:**
   - **Interativo:**
     ```bash
-    npx @nathanramorim/forge-sdd update
+    forge update
     ```
   - **Automático (Não-Interativo via flags):**
     ```bash
-    npx @nathanramorim/forge-sdd update --yes --upgrade --agent "gemini"
+    forge update --yes --upgrade --agent "gemini"
     ```
     - **Flags Disponíveis:**
       - `--yes`: Pula os prompts e executa a ação imediatamente.
@@ -41,11 +41,11 @@ Executados diretamente no terminal do desenvolvedor, normalmente utilizando o wr
       - `--upgrade`: Atualiza a estrutura para a versão mais recente do CLI.
       - `--version <versao>`: Atualiza a estrutura para uma versão específica (ex: `1.6.0`).
 
-### `npx @nathanramorim/forge-sdd version`
-- **O que faz:** Exibe a versão instalada do CLI do forge-sdd.
+### `forge version`
+- **O que faz:** Exibe a versão instalada do CLI do forge.
 - **Como usar:**
   ```bash
-  npx @nathanramorim/forge-sdd version
+  forge version
   ```
 
 ### `forge` (Menu Interativo Unificado)
@@ -55,49 +55,49 @@ Executados diretamente no terminal do desenvolvedor, normalmente utilizando o wr
   forge
   ```
 
-### `forge-sdd ps [flags]`
+### `forge ps [flags]`
 - **O que faz:** Monitor transparente de processos em tempo real. Identifica todos os workers, CLIs de IA, painéis tmux e subprocessos (testes, compiladores) atrelados ao projeto. Exibe PID, % de CPU, memória RAM (RSS em MB), tempo ativo e estado de cada processo.
 - **Como usar:**
   ```bash
-  forge-sdd ps
-  forge-sdd ps --json             # saída em JSON para automações
-  forge-sdd ps --kill-zombies     # encerra com segurança processos orfãos/presos
+  forge ps
+  forge ps --json             # saída em JSON para automações
+  forge ps --kill-zombies     # encerra com segurança processos orfãos/presos
   ```
 
-### `forge-sdd status [flags]`
+### `forge status [flags]`
 - **O que faz:** Exibe o status das iniciativas em `sdd/discovery/` com suas branches, estado, próximo passo e contagem de tarefas.
 - **Modo Live (`--live` ou `-l`):** Status executivo tríplice de altíssima velocidade (< 100ms) e baixíssimo consumo de tokens (< 200 tokens). Captura em tempo real o que o agente ativo está fazendo na tela (`tmux capture-pane` ou últimas linhas de `.forge/runtime/logs/`), o checklist de tarefas da esteira (`queue panel`) e os commits recentes no git.
 - **Como usar:**
   ```bash
-  forge-sdd status                # lista iniciativas e estado da fila
-  forge-sdd status --live         # status executivo tríplice em tempo real
-  forge-sdd status -l             # shorthand para modo live
-  forge-sdd status --all-branches # inclui iniciativas de todas as branches locais e remotas
+  forge status                # lista iniciativas e estado da fila
+  forge status --live         # status executivo tríplice em tempo real
+  forge status -l             # shorthand para modo live
+  forge status --all-branches # inclui iniciativas de todas as branches locais e remotas
   ```
 
-### `npx @nathanramorim/forge-sdd doctor [diretório]`
+### `forge doctor [diretório]`
 - **O que faz:** Diagnostica a saúde e a integridade da metodologia instalada no repositório. Verifica a existência de arquivos estruturais, valida se as pastas e integrações físicas dos agentes de IA estão de acordo com o `.sddrc`, lista as features em andamento e detecta deriva de convenção de nomenclatura (mistura de `feat-NN` sequencial com `feat-xxxx` por hash em `sdd/features/` e `sdd/discovery/`).
 - **Como usar:**
   ```bash
-  npx @nathanramorim/forge-sdd doctor
+  forge doctor
   ```
 
-### `npx @nathanramorim/forge-sdd autopilot [diretório]`
+### `forge autopilot [diretório]`
 - **O que faz:** Ativa o modo autopilot criando `sdd/.sdd-auto-pilot`, mas só libera a criação depois que o projeto acumular um número mínimo de ciclos completos (`outcome: approved`) registrados em `sdd/.metrics/` — preservando a função didática da metodologia para quem ainda está aprendendo. Idempotente se o arquivo já existir.
 - **Como usar:**
   ```bash
-  npx @nathanramorim/forge-sdd autopilot
+  forge autopilot
   ```
   - **Flags Disponíveis:**
     - `--min-cycles <N>`: Número mínimo de ciclos completos exigidos (default: `3`).
     - `--skip-graduation`: Bypass consciente — ativa o autopilot mesmo sem os ciclos mínimos completos.
 
-### `npx @nathanramorim/forge-sdd destroy [diretório]`
+### `forge destroy [diretório]`
 - **O que faz:** Desinstala e remove completamente toda a estrutura do Forge-SDD e integrações de agentes de IA locais (como a pasta `sdd/`, `.claude/`, `.gemini/`, `CLAUDE.md`, etc.). Requer confirmação interativa de segurança, a menos que a flag `--yes` esteja presente.
 - **Como usar:**
   - **Confirmando interativamente:**
     ```bash
-    npx @nathanramorim/forge-sdd destroy
+    forge destroy
     ```
   - **Remoção Direta:**
     ```bash
@@ -115,7 +115,7 @@ Digitados na interface de chat do agente de IA configurado no projeto (ex: Gemin
 
 ### `/status` ou `"qual o progresso?"`
 - **Quando usar:** No início de qualquer sessão de trabalho ou para acompanhar o andamento da esteira em tempo real.
-- **O que faz:** Executa a verificação tríplice (painel tmux ou logs, fila e commits git) e devolve o status da esteira formatado estritamente no template canônico de baixo consumo de tokens (< 200 tokens). Também pode ser invocado pelo CLI com `forge-sdd status --live`.
+- **O que faz:** Executa a verificação tríplice (painel tmux ou logs, fila e commits git) e devolve o status da esteira formatado estritamente no template canônico de baixo consumo de tokens (< 200 tokens). Também pode ser invocado pelo CLI com `forge status --live`.
 - **Exemplo de uso:** 
   > `/status`
 
@@ -169,7 +169,7 @@ Digitados na interface de chat do agente de IA configurado no projeto (ex: Gemin
 
 ### `/doctor` ou `"check-up do projeto"`
 - **Quando usar:** Se notar falhas de carregamento, conflito de MCP ou arquivos corrompidos.
-- **O que faz:** Verifica a integridade estrutural e a compatibilidade dos arquivos e pastas do Forge-SDD no repositório. Equivalente em chat do `forge-sdd doctor` do CLI, incluindo a detecção de deriva de convenção de nomenclatura.
+- **O que faz:** Verifica a integridade estrutural e a compatibilidade dos arquivos e pastas do Forge-SDD no repositório. Equivalente em chat do `forge doctor` do CLI, incluindo a detecção de deriva de convenção de nomenclatura.
 - **Exemplo de uso:** 
   > `/doctor`
 

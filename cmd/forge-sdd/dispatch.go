@@ -18,7 +18,7 @@ O gate verifica (todas as pendências de uma vez): discovery, criteria e plan; a
 as cinco seções obrigatórias; IDs da Constituição, rules e ADRs citados existentes; e a evidência do
 card (card-evidence.json na pasta da iniciativa, gravada pelo agente depois de consultar o MCP),
 com provider suportado, feature correta e dentro do prazo. Sem forge.json (modo pipeline inativo)
-o comando orienta forge-sdd pipeline init.`,
+o comando orienta forge pipeline init.`,
 	Args: cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		dir, _ := cmd.Flags().GetString("dir")

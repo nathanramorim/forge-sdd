@@ -26,8 +26,8 @@ func captureStdout(t *testing.T, fn func()) string {
 func TestPrintPipelineHint_SemModoAtivoMostraOPassoAPasso(t *testing.T) {
 	dir := t.TempDir()
 	out := captureStdout(t, func() { printPipelineHint(dir) })
-	assert.Contains(t, out, "forge-sdd pipeline init")
-	assert.Contains(t, out, "forge-sdd up --discovery claude")
+	assert.Contains(t, out, "forge pipeline init")
+	assert.Contains(t, out, "forge up --discovery claude")
 	assert.Contains(t, out, "forge")
 	assert.Contains(t, out, "/implementar <feature>")
 	assert.Contains(t, out, ".forge/LEIA-ME.md")
@@ -50,7 +50,7 @@ func TestPipelineInit_MostraProximosPassos(t *testing.T) {
 	out, err := runRoot(t, "pipeline", "init", "--dir", dir)
 	require.NoError(t, err)
 	assert.Contains(t, out, "Próximos passos")
-	assert.Contains(t, out, "forge-sdd up --discovery claude")
+	assert.Contains(t, out, "forge up --discovery claude")
 	assert.Contains(t, out, "forge")
 	assert.Contains(t, out, "/implementar <feature>")
 

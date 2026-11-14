@@ -2,13 +2,13 @@
   "feature_id": "feat-82",
   "branch": "feat/82-unificacao-comando-forge",
   "spec_status": "reviewed",
-  "updated_at": "2026-11-14T16:57:30Z",
+  "updated_at": "2026-11-14T17:17:57Z",
   "items": [
     {
       "task_id": "82-01",
       "title": "feat-82-01 — Padronização no CLI Go e Monitor",
       "spec_path": "sdd/discovery/82-unificacao-comando-forge/features/feat-82-01-cli-root-e-mensagens.md",
-      "status": "queued",
+      "status": "review_pending",
       "rules": [
         "ARQ-01",
         "COD-01",
@@ -17,13 +17,13 @@
         "DUP-01"
       ],
       "skills_used": [],
-      "attempts": 0
+      "attempts": 1
     },
     {
       "task_id": "82-02",
       "title": "feat-82-02 — Atualização de Templates de Scaffold e Golden Files",
       "spec_path": "sdd/discovery/82-unificacao-comando-forge/features/feat-82-02-templates-e-golden-files.md",
-      "status": "queued",
+      "status": "review_pending",
       "depends_on": [
         "82-01"
       ],
@@ -33,13 +33,13 @@
         "TST-02"
       ],
       "skills_used": [],
-      "attempts": 0
+      "attempts": 1
     },
     {
       "task_id": "82-03",
       "title": "feat-82-03 — Prompts, Regras e Documentação",
       "spec_path": "sdd/discovery/82-unificacao-comando-forge/features/feat-82-03-prompts-rules-e-docs.md",
-      "status": "queued",
+      "status": "review_pending",
       "depends_on": [
         "82-01"
       ],
@@ -50,7 +50,7 @@
         "GOV-01"
       ],
       "skills_used": [],
-      "attempts": 0
+      "attempts": 1
     }
   ]
 }

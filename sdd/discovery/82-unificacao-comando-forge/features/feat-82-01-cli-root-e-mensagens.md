@@ -4,7 +4,7 @@
 **Fase:** 82-01
 **Tamanho:** `M`
 **Depende de:** —
-**Status:** `queued`
+**Status:** `complete`
 
 ## Contexto & Motivação
 A CLI Forge-SDD hoje ainda exibe o nome `forge-sdd` no comando raiz Cobra (`rootCmd.Use = "forge-sdd"` em `cmd/forge-sdd/main.go`), além de mensagens hardcoded em dicas e avisos (como no monitor de processos `internal/monitor/ps.go`). Esta task padroniza o comando raiz para `forge` (`rootCmd.Use = "forge"`), ajusta as dicas do CLI (`forge ps --kill-zombies`) e atualiza a suíte de testes do CLI e monitor.
@@ -37,6 +37,6 @@ A CLI Forge-SDD hoje ainda exibe o nome `forge-sdd` no comando raiz Cobra (`root
 - `TST-01`: Testes unitários cobrindo o novo usage e formato de mensagens.
 
 ## Critérios de Aceitação Executáveis
-1. `forge --help` (ou `rootCmd.UsageString()`) informa `Usage: forge [flags]` e `forge [command]`.
-2. `internal/monitor/ps.go` exibe a dica `[Dica: Use 'forge ps --kill-zombies' para limpar processos orfãos ou presos]`.
-3. Testes unitários em `cmd/forge-sdd` e `internal/monitor` passam com 100% de sucesso (`go test -v ./cmd/forge-sdd/... ./internal/monitor/...`).
+- [x] 1. `forge --help` (ou `rootCmd.UsageString()`) informa `Usage: forge [flags]` e `forge [command]`.
+- [x] 2. `internal/monitor/ps.go` exibe a dica `[Dica: Use 'forge ps --kill-zombies' para limpar processos orfãos ou presos]`.
+- [x] 3. Testes unitários em `cmd/forge-sdd` e `internal/monitor` passam com 100% de sucesso (`go test -v ./cmd/forge-sdd/... ./internal/monitor/...`).

@@ -4,7 +4,7 @@
 **Fase:** 82-03
 **Tamanho:** `M`
 **Depende de:** 82-01
-**Status:** `queued`
+**Status:** `complete`
 
 ## Contexto & Motivação
 Para que o ecossistema do Forge-SDD seja 100% coerente, os arquivos de contexto raiz (`GEMINI.md`, `CLAUDE.md`), as rules de governança (`.agents/rules/`), as skills operacionais (`.agents/skills/`), a documentação de referência (`docs/comandos.md`) e o `README.md` devem instruir consistentemente `forge <comando>` (ex: `forge brief`, `forge status`, `forge gate`, `forge up`, `forge session record`), eliminando a confusão de nomes entre agentes e desenvolvedores.
@@ -37,6 +37,6 @@ Para que o ecossistema do Forge-SDD seja 100% coerente, os arquivos de contexto 
 - `GOV-01`: Cumprimento estrito da Constitution.
 
 ## Critérios de Aceitação Executáveis
-1. `GEMINI.md` e `CLAUDE.md` ensinam o ciclo com `forge <comando>` (ex: `forge brief`, `forge status`, `forge session record`).
-2. `docs/comandos.md` e `README.md` documentam `forge` como comando primário.
-3. `forge gate` e suíte de testes (`go test ./...`) passam 100% verdes com 0 violações de governança.
+- [x] 1. `GEMINI.md` e `CLAUDE.md` ensinam o ciclo com `forge <comando>` (ex: `forge brief`, `forge status`, `forge session record`).
+- [x] 2. `docs/comandos.md` e `README.md` documentam `forge` como comando primário.
+- [x] 3. `forge gate` e suíte de testes (`go test ./...`) passam 100% verdes com 0 violações de governança.

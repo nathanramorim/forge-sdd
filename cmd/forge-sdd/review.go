@@ -60,7 +60,7 @@ Aplicar duas vezes o mesmo veredito não repete efeitos.`,
 			fmt.Fprintf(out, "não conforme: devolvido ao Builder como %s (tentativa %d de %d, prioridade %s)\n",
 				res.ReworkJob.ID, res.ReworkJob.Attempt, res.ReworkJob.MaxReworkAttempts, res.ReworkJob.Priority)
 		case pipeline.ActionEscalated:
-			fmt.Fprintf(out, "escalado para a pessoa: veja o inbox (forge-sdd inbox)\n")
+			fmt.Fprintf(out, "escalado para a pessoa: veja o inbox (forge inbox)\n")
 		}
 		if res.CardInstruction != "" {
 			fmt.Fprintf(out, "Próximo passo do agente: %s\n", res.CardInstruction)

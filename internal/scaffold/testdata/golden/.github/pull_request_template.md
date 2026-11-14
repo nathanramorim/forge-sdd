@@ -30,7 +30,7 @@
 - [ ] **Arquitetura e Reúso (`ARQ-01..06`, `DUP-01`, `DUP-10`):** Fronteiras de módulos respeitadas e catálogo `sdd/spec/concepts.md` atualizado se necessário.
 - [ ] **Segurança (`SEG-01..07`):** Sem segredos no código/diff (`SEG-04`), sem dados sensíveis em logs (`SEG-05`) e dependências justificadas (`SEG-07`).
 - [ ] **Qualidade e Testes (`COD-02`, `TST-01..05`):** Verificação estática/lint e testes automatizados passando.
-- [ ] **Portão de Governança (`FLX-06`, `GOV-04`):** Camada A (`forge-sdd gate`) e Camada B (Analista de Governança) executadas sem violações abertas.
+- [ ] **Portão de Governança (`FLX-06`, `GOV-04`):** Camada A (`forge gate`) e Camada B (Analista de Governança) executadas sem violações abertas.
 
 <!--
 Caso este PR dependa de uma exceção temporária autorizada pelo humano (GOV-02 / check P-20),

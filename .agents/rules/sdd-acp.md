@@ -15,7 +15,7 @@ Procedimentos operacionais para implementar, operar e estender o Protocolo ACP n
   - Toda a lógica de protocolo, despacho de chamadas, controle de sessões, validações de workspace e regras de negócio reside no pacote `internal/acp`.
   - O pacote `internal/acp` jamais importa `cmd/` ou depende de bibliotecas externas, operando exclusivamente sobre a `stdlib` do Go.
 - **Superfície da CLI (`ARQ-06`):**
-  - O subcomando `forge-sdd acp` expõe o servidor ACP sobre `stdio` (linha de comando / IPC local).
+  - O subcomando `forge acp` expõe o servidor ACP sobre `stdio` (linha de comando / IPC local).
   - Flags expostas (como `--dir`) devem ser validadas na inicialização e repassadas ao `SessionManager` como raiz segura de trabalho.
 
 ## 2. Envelopes JSON-RPC 2.0 e Tratamento de Erros (`COD-01`, `COD-03`)

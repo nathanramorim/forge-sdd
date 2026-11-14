@@ -145,3 +145,18 @@ func TestKillZombies(t *testing.T) {
 	assert.Equal(t, 101, killed[0].PID)
 	assert.Equal(t, 103, killed[1].PID)
 }
+
+func TestFormatProcessTable(t *testing.T) {
+	report := &ProjectProcessReport{
+		Project: "meu-projeto",
+		Session: "forge-meu-projeto-123456",
+		Processes: []ProcessInfo{
+			{PID: 1234, Role: "builder", State: "executando", CPUPercent: 1.5, MemoryMB: 35.0, ElapsedTime: "01:23", Command: "forge worker"},
+		},
+		TotalCPU:    1.5,
+		TotalMemory: 35.0,
+	}
+
+	output := FormatProcessTable(report)
+	assert.Contains(t, output, "[Dica: Use 'forge ps --kill-zombies' para limpar processos orfãos ou presos]")
+}

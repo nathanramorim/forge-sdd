@@ -14,7 +14,7 @@ Comando: `/implementar [feature]` (`references/implementar.md`); `/proxima-featu
 
 ## Antes de implementar
 1. Leia `sdd/memory/lessons.md`.
-2. Pegue a task com `forge-sdd queue next` e leia a spec dela. Rode `forge-sdd context <task>` para obter só os IDs, rules e skills aplicáveis; carregue apenas esses arquivos.
+2. Pegue a task com `forge queue next` e leia a spec dela. Rode `forge context <task>` para obter só os IDs, rules e skills aplicáveis; carregue apenas esses arquivos.
 3. Leia o critério de conclusão primeiro; se já estiver atendido, encerre sem alterar código.
 4. Biblioteca externa só se a Spec autorizar (`SEG-07`); consulte `context7` na versão exata se estiver ativo em `sdd/memory/mcps.md`.
 
@@ -24,7 +24,7 @@ Comando: `/implementar [feature]` (`references/implementar.md`); `/proxima-featu
 - Sem código morto, comentado ou `TODO` sem ID (`COD-04`, `COD-06`). Não edite fora do escopo.
 
 ## Ao finalizar
-1. `go vet ./...`, os testes do critério e `forge-sdd gate`, todos com saída 0.
-2. Marque `[x]` na spec e rode `forge-sdd queue complete <task-id>`.
+1. `go vet ./...`, os testes do critério e `forge gate`, todos com saída 0.
+2. Marque `[x]` na spec e rode `forge queue complete <task-id>`.
 3. Commit na branch da iniciativa, nunca em `main` (`FLX-02`).
 4. Handoff ao Líder para o Portão de Governança.

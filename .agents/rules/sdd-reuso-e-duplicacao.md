@@ -32,4 +32,4 @@ Passos práticos para cumprir `DUP-01`, `DUP-02`, `DUP-05`, `DUP-10` e `GOV-04` 
 - Na 2ª ocorrência similar, observe a repetição e mantenha o código/fluxo alinhado.
 - Na **3ª ocorrência** de um mesmo bloco de código ou roteiro operacional:
   - Se for lógica em Go, extraia uma função ou pacote interno compartilhado.
-  - Se for procedimento operacional de agente (ex.: sequência padrão de criar subcomando + template + golden test), proponha uma Auto-Skill em `.agents/skills/<slug>/SKILL.md` via `forge-sdd skills propose` (ou no campo `candidate_skill` da revisão semântica).
+  - Se for procedimento operacional de agente (ex.: sequência padrão de criar subcomando + template + golden test), proponha uma Auto-Skill em `.agents/skills/<slug>/SKILL.md` via `forge skills propose` (ou no campo `candidate_skill` da revisão semântica).

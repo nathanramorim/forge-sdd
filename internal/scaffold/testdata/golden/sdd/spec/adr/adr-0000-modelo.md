@@ -22,4 +22,4 @@
 
 - **Positivas:** [O que melhora em simplicidade, segurança, reúso ou governança]
 - **Negativas / Trade-offs:** [Custo de migração, restrições assumidas ou dívidas técnicas associadas]
-- **Ações de acompanhamento:** [Tasks, rules em `.agents/rules/` ou checks em `forge-sdd gate` que precisam ser atualizados]
+- **Ações de acompanhamento:** [Tasks, rules em `.agents/rules/` ou checks em `forge gate` que precisam ser atualizados]

@@ -43,7 +43,7 @@ func TestQueue_GuardaModoPipeline(t *testing.T) {
 		_, err := runRoot(t, args...)
 		require.Error(t, err, args)
 		assert.Contains(t, err.Error(), "modo pipeline", args)
-		assert.Contains(t, err.Error(), "forge-sdd dispatch", args)
+		assert.Contains(t, err.Error(), "forge dispatch", args)
 	}
 
 	// --local libera os dois comandos.

@@ -274,7 +274,7 @@ func TestRoot_SemTerminalImprimeAjudaSemPerguntar(t *testing.T) {
 	defer rootCmd.SetOut(nil)
 	require.NoError(t, rootCmd.RunE(rootCmd, nil))
 	assert.Contains(t, out.String(), "Sem terminal interativo")
-	assert.Contains(t, out.String(), "forge-sdd pipeline init")
+	assert.Contains(t, out.String(), "forge pipeline init")
 }
 
 func TestRunSubcommand_ExecutaORunEDoSubcomando(t *testing.T) {

@@ -42,7 +42,7 @@ inconsistências de configuração dos agentes de IA e progresso das features.`,
 
 		if !hasSddrc {
 			fmt.Println("✗ Estrutura Forge-SDD não encontrada (sdd/.sddrc ausente).")
-			fmt.Println("  Use 'forge-sdd init' para inicializar a metodologia neste repositório.")
+			fmt.Println("  Use 'forge init' para inicializar a metodologia neste repositório.")
 			return nil
 		}
 
@@ -160,7 +160,7 @@ inconsistências de configuração dos agentes de IA e progresso das features.`,
 		} else if fileExists(progressPath) {
 			fmt.Println("  ✓ Painel de Progresso (sdd/memory/progress.md) ativo.")
 		} else {
-			fmt.Println("  ℹ Sem iniciativa ativa na branch atual: o status.md não se aplica (veja `forge-sdd status`).")
+			fmt.Println("  ℹ Sem iniciativa ativa na branch atual: o status.md não se aplica (veja `forge status`).")
 		}
 
 		// 5. Varredura de features: tasks das iniciativas (sdd/discovery/<id>-<nome>/features/) e,

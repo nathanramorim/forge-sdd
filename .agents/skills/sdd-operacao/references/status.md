@@ -2,10 +2,10 @@
 
 **Uso:** `/status` mostra o status executivo da esteira em formato tríplice e de baixo consumo de tokens (< 200 tokens).
 
-Você pode rodar `forge-sdd status --live` diretamente para obter a consolidação instantânea, ou executar os 3 passos de inspeção:
+Você pode rodar `forge status --live` diretamente para obter a consolidação instantânea, ou executar os 3 passos de inspeção:
 
 1. **Ao vivo no painel:** capture o painel do worker ativo (`tmux capture-pane -p -t <painel>`) ou leia as últimas linhas do arquivo mais recente em `.forge/runtime/logs/` caso tmux não esteja em execução.
-2. **Fila de tarefas:** execute `forge-sdd queue panel` (ou inspecione a fila ativa da iniciativa em `queue.json`).
+2. **Fila de tarefas:** execute `forge queue panel` (ou inspecione a fila ativa da iniciativa em `queue.json`).
 3. **Commits recentes:** execute `git log --oneline -n 5`.
 
 ## Template Canônico Padronizado (< 200 Tokens)
