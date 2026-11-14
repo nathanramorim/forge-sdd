@@ -13,6 +13,7 @@ import (
 	"github.com/forge-sdd/cli/internal/bus"
 	"github.com/forge-sdd/cli/internal/config"
 	"github.com/forge-sdd/cli/internal/layout"
+	"github.com/forge-sdd/cli/internal/notify"
 	"github.com/forge-sdd/cli/internal/queue"
 	"github.com/forge-sdd/cli/internal/testutil"
 	"github.com/stretchr/testify/assert"
@@ -182,8 +183,6 @@ func setupProjectWithJob(t *testing.T, role string) (string, bus.Job) {
 		data, _ := json.Marshal(cfg)
 		testutil.WriteFile(t, d, ".forge/config/forge.json", string(data))
 	})
-	prNum := 10
-	prURL := "https://github.com/pr/10"
 	job := bus.Job{
 		ID:                "job-test-1",
 		Feature:           "auth-oauth",
@@ -191,13 +190,17 @@ func setupProjectWithJob(t *testing.T, role string) (string, bus.Job) {
 		SpecPath:          "sdd/discovery/77-auth-oauth/criteria.md",
 		Type:              bus.TypeFeatureBuild,
 		Priority:          bus.PriorityNormal,
-		PR:                bus.PR{Number: &prNum, URL: &prURL, Branch: "feat/77-auth-oauth", BaseBranch: "main"},
+		PR:                bus.PR{Branch: "feat/77-auth-oauth", BaseBranch: "main"},
 		Attempt:           1,
 		MaxReworkAttempts: 3,
 		CreatedAt:         now,
 	}
 	if role == layout.RoleReviewer {
+		prNum := 10
+		prURL := "https://github.com/pr/10"
 		job.Type = bus.TypePRReview
+		job.PR.Number = &prNum
+		job.PR.URL = &prURL
 	}
 	_, _, err := bus.Enqueue(dir, role, job, now)
 	require.NoError(t, err)
@@ -634,5 +637,163 @@ func TestDeliverContexto(t *testing.T) {
 		require.NoError(t, err)
 
 		assert.Contains(t, out.String(), "sem reset_command: mantendo contexto contínuo")
+	})
+}
+
+func TestDeliverTela(t *testing.T) {
+	// 1. Limite de uso na tela: aciona requeue, notifica inbox e pausa até horário
+	t.Run("limite de uso", func(t *testing.T) {
+		dir, _ := setupProjectWithJob(t, layout.RoleBuilder)
+		target := "=test:forge.1"
+		d := &fakeTmuxDeliverer{}
+
+		clk := newSafeClock(now)
+		var out bytes.Buffer
+
+		// Simula tela com mensagem de limite de uso após entrega
+		go func() {
+			for {
+				if d.PastesLen() >= 2 {
+					d.mu.Lock()
+					d.currentText = "Error: You've reached your usage limit. Try again at 15:30."
+					d.mu.Unlock()
+					break
+				}
+				time.Sleep(10 * time.Millisecond)
+			}
+		}()
+
+		err := RunWorker(context.Background(), WorkerOptions{
+			Dir:           dir,
+			Role:          layout.RoleBuilder,
+			DeliverTarget: target,
+			Deliverer:     d,
+			Once:          true,
+			Now:           clk.Now,
+			Out:           &out,
+			Sleep: func(_ context.Context, dt time.Duration) bool {
+				clk.Add(dt)
+				time.Sleep(10 * time.Millisecond)
+				return true
+			},
+		})
+		require.NoError(t, err)
+
+		// Job foi requeued sem queimar tentativa
+		pend, err := bus.List(dir, layout.RoleBuilder, layout.StatePending)
+		require.NoError(t, err)
+		require.Len(t, pend, 1)
+		assert.Equal(t, 1, pend[0].Job.Attempt)
+
+		// Inbox recebeu notificação de pausa
+		items, err := notify.ListInbox(dir, false)
+		require.NoError(t, err)
+		require.NotEmpty(t, items)
+		assert.Contains(t, items[0].Title, "limite de uso")
+
+		assert.Contains(t, out.String(), "⏸")
+	})
+
+	// 2. Agente indisponível na tela: requeue, notifica inbox com hint e para o despachante
+	t.Run("agente indisponivel", func(t *testing.T) {
+		dir, _ := setupProjectWithJob(t, layout.RoleBuilder)
+		target := "=test:forge.1"
+		d := &fakeTmuxDeliverer{}
+
+		clk := newSafeClock(now)
+		var out bytes.Buffer
+
+		go func() {
+			for {
+				if d.PastesLen() >= 2 {
+					d.mu.Lock()
+					d.currentText = "IneligibleTierError: This model is not available for your subscription tier."
+					d.mu.Unlock()
+					break
+				}
+				time.Sleep(10 * time.Millisecond)
+			}
+		}()
+
+		err := RunWorker(context.Background(), WorkerOptions{
+			Dir:           dir,
+			Role:          layout.RoleBuilder,
+			DeliverTarget: target,
+			Deliverer:     d,
+			Once:          true,
+			Now:           clk.Now,
+			Out:           &out,
+			Sleep: func(_ context.Context, dt time.Duration) bool {
+				clk.Add(dt)
+				time.Sleep(10 * time.Millisecond)
+				return true
+			},
+		})
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "indisponível")
+
+		// Job devolvido para a fila
+		pend, err := bus.List(dir, layout.RoleBuilder, layout.StatePending)
+		require.NoError(t, err)
+		require.Len(t, pend, 1)
+
+		// Inbox recebeu notificação
+		items, err := notify.ListInbox(dir, false)
+		require.NoError(t, err)
+		require.NotEmpty(t, items)
+		assert.Contains(t, items[0].Title, "indisponível")
+	})
+
+	// 3. Painel fechado: CapturePane com erro -> requeue e interrompe
+	t.Run("painel fechado", func(t *testing.T) {
+		dir, _ := setupProjectWithJob(t, layout.RoleBuilder)
+		target := "=test:forge.1"
+		d := &fakeTmuxDeliverer{}
+
+		clk := newSafeClock(now)
+		var out bytes.Buffer
+
+		go func() {
+			for {
+				if d.PastesLen() >= 2 {
+					d.mu.Lock()
+					if d.errOn == nil {
+						d.errOn = make(map[string]error)
+					}
+					d.errOn["CapturePane"] = fmt.Errorf("can't find pane: %s", target)
+					d.mu.Unlock()
+					break
+				}
+				time.Sleep(10 * time.Millisecond)
+			}
+		}()
+
+		err := RunWorker(context.Background(), WorkerOptions{
+			Dir:           dir,
+			Role:          layout.RoleBuilder,
+			DeliverTarget: target,
+			Deliverer:     d,
+			Once:          true,
+			Now:           clk.Now,
+			Out:           &out,
+			Sleep: func(_ context.Context, dt time.Duration) bool {
+				clk.Add(dt)
+				time.Sleep(10 * time.Millisecond)
+				return true
+			},
+		})
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "painel fechado")
+
+		// Job devolvido para a fila
+		pend, err := bus.List(dir, layout.RoleBuilder, layout.StatePending)
+		require.NoError(t, err)
+		require.Len(t, pend, 1)
+
+		// Inbox recebeu notificação
+		items, err := notify.ListInbox(dir, false)
+		require.NoError(t, err)
+		require.NotEmpty(t, items)
+		assert.Contains(t, items[0].Title, "fechado")
 	})
 }

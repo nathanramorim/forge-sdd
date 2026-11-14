@@ -7,10 +7,12 @@ import (
 	"io"
 	"os/exec"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/forge-sdd/cli/internal/bus"
 	"github.com/forge-sdd/cli/internal/config"
+	"github.com/forge-sdd/cli/internal/notify"
 )
 
 // TmuxDeliverer opera buffers, teclas e captura de tela no tmux para o despachante (feat 77).
@@ -333,6 +335,77 @@ func RunDeliverWorker(ctx context.Context, opts WorkerOptions) error {
 				lastRenew = opts.Now()
 			}
 
+			// Inspeciona tela do painel (feat 77-04)
+			paneText, captureErr := d.CapturePane(target)
+			if captureErr != nil {
+				failMsg := "painel fechado: " + captureErr.Error()
+				fmt.Fprintf(opts.Out, "[%s] ✗ %s\n", opts.Name, failMsg)
+				_, _ = bus.Requeue(opts.Dir, opts.Role, job.ID, opts.Name, failMsg, opts.Now())
+				if ncfg, err := config.LoadNotificationsConfig(opts.Dir); err == nil {
+					n := notify.Notification{
+						Type:    notify.TypeInfo,
+						Title:   fmt.Sprintf("Painel %s fechado no %s", target, opts.Role),
+						Message: fmt.Sprintf("O painel da CLI foi fechado inesperadamente. O job %s voltou à fila.\n%s", job.Feature, captureErr),
+						Feature: job.Feature, JobID: job.ID,
+						ID: notificationID(job.ID, "painel-fechado"),
+					}
+					_, _ = notify.Dispatch(opts.Dir, ncfg, n, notify.Deps{})
+				}
+				return fmt.Errorf("painel fechado: %w", captureErr)
+			}
+
+			lines := extractLastLines(paneText, 20)
+
+			// 1. Limite de uso
+			if ul, ok := DetectUsageLimit(lines, opts.Now()); ok && !ul.Capped {
+				now := opts.Now()
+				ul.ResetAt = ul.ResetAt.In(now.Location())
+				reason := "limite de uso do " + opts.CLI
+				_, _ = bus.Requeue(opts.Dir, opts.Role, job.ID, opts.Name, reason, now)
+				if ncfg, err := config.LoadNotificationsConfig(opts.Dir); err == nil {
+					n := notify.Notification{
+						Type:    notify.TypeInfo,
+						Title:   fmt.Sprintf("%s pausado: limite de uso do %s", opts.Name, opts.CLI),
+						Message: fmt.Sprintf("O job %s voltou à fila sem gastar tentativa. O despachante retoma às %s.\n%s", job.Feature, ul.ResetAt.Format("15:04"), ul.Message),
+						Feature: job.Feature, JobID: job.ID,
+						ID: notificationID(job.ID, fmt.Sprintf("pausa-%d", now.Unix()/60)),
+					}
+					_, _ = notify.Dispatch(opts.Dir, ncfg, n, notify.Deps{})
+				}
+				fmt.Fprintf(opts.Out, "[%s] ⏸ %s\n", opts.Name, ul.Message)
+				if opts.OnJobDone != nil {
+					opts.OnJobDone(job, OutcomeDeferred)
+				}
+				if !pauseUntil(ctx, ul.ResetAt, opts.CLI, opts.Now, opts.Sleep, func(s string) {
+					fmt.Fprintf(opts.Out, "[%s] %s\n", opts.Name, s)
+				}) {
+					return nil
+				}
+				fmt.Fprintf(opts.Out, "[%s] ▶ retomando\n", opts.Name)
+				break
+			}
+
+			// 2. Agente indisponível
+			if au, ok := DetectAgentUnavailable(lines, opts.CLI); ok {
+				_, _ = bus.Requeue(opts.Dir, opts.Role, job.ID, opts.Name, "agente indisponível: "+opts.CLI, opts.Now())
+				if ncfg, err := config.LoadNotificationsConfig(opts.Dir); err == nil {
+					n := notify.Notification{
+						Type:    notify.TypeInfo,
+						Title:   fmt.Sprintf("Agente %s indisponível no %s", opts.CLI, opts.Role),
+						Message: fmt.Sprintf("%s\nAção: %s", au.Message, au.Hint),
+						Feature: job.Feature, JobID: job.ID,
+						ID: notificationID(job.ID, "agente-indisponivel"),
+					}
+					_, _ = notify.Dispatch(opts.Dir, ncfg, n, notify.Deps{})
+				}
+				fmt.Fprintf(opts.Out, "[%s] ✗ %s indisponível: %s\n", opts.Name, opts.CLI, au.Message)
+				fmt.Fprintf(opts.Out, "[%s] → %s\n", opts.Name, au.Hint)
+				if opts.OnJobDone != nil {
+					opts.OnJobDone(job, OutcomeUnavailable)
+				}
+				return fmt.Errorf("%s indisponível: %s", opts.CLI, au.Message)
+			}
+
 			// Verifica timeout
 			if opts.Now().Sub(started) >= timeoutDuration {
 				failReason := "tempo limite excedido"
@@ -349,4 +422,19 @@ func RunDeliverWorker(ctx context.Context, opts WorkerOptions) error {
 			return nil
 		}
 	}
+}
+
+func extractLastLines(s string, n int) []string {
+	raw := strings.Split(strings.ReplaceAll(s, "\r\n", "\n"), "\n")
+	var lines []string
+	for _, l := range raw {
+		c := clean(l)
+		if strings.TrimSpace(c) != "" {
+			lines = append(lines, strings.TrimSpace(c))
+		}
+	}
+	if len(lines) > n {
+		return lines[len(lines)-n:]
+	}
+	return lines
 }

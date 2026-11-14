@@ -2,7 +2,7 @@
   "feature_id": "feat-77",
   "branch": "feat/77-sessoes-com-cli-aberta",
   "spec_status": "reviewed",
-  "updated_at": "2026-11-14T09:14:12Z",
+  "updated_at": "2026-11-14T09:18:02Z",
   "items": [
     {
       "task_id": "77-01",
@@ -67,7 +67,7 @@
       "task_id": "77-04",
       "title": "feat-77-04 — Falhas lidas da tela",
       "spec_path": "sdd/discovery/77-sessoes-com-cli-aberta/features/feat-77-04-falhas-lidas-da-tela.md",
-      "status": "queued",
+      "status": "approved",
       "rules": [
         "SEG-05",
         "COD-03",
@@ -75,7 +75,12 @@
         "TST-04"
       ],
       "skills_used": [],
-      "attempts": 0
+      "attempts": 1,
+      "governance_verdict": {
+        "veredito": "conforme",
+        "achados": [],
+        "resumo": "Deteccao de falhas lidas da tela (limite de uso, agente indisponivel e painel fechado) implementada com requeue e avisos conforme spec"
+      }
     },
     {
       "task_id": "77-05",
