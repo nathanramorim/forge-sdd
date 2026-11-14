@@ -2,21 +2,18 @@
 
 ## Status
 ```
-Iniciativa 79 implementada pelo Builder!
-Job: job-20261114-125300-79-clareza-pipeline-e-identificacao-tmux
-Tasks concluídas (7/7):
-- 79-01: Diretrizes Pipeline-First (completed)
-- 79-02: Identificação Visual do Projeto e Ergonomia no Tmux (completed)
-- 79-03: Menu Unificado e Enxuto (completed)
-- 79-04: Alertas Visuais e Fluxo de Aprovação Não Bloqueante (completed)
-- 79-05: Paralelismo de Fila por DAG & Ondas (completed)
-- 79-06: Monitor de Processos forge-sdd ps (completed)
-- 79-07: Documentação, LEIA-ME e Validação Final (completed)
-Status: PR aberto para revisão do Reviewer.
+Iniciativa 79: rework-2 concluído e pronto para re-revisão.
+Job: job-20261114-125300-79-clareza-pipeline-e-identificacao-tmux-rework-2
+PR #74: base ajustada para feat/77-sessoes-com-cli-aberta.
+Correções aplicadas:
+- Isolamento de emulador nativo em testes headless (--dry-run)
+- Remoção de showGuide e queueLogCmd não utilizadas
+- Extração de KillZombies para internal/monitor
+Status: PR atualizado e registrado no pipeline.
 ```
 
 ## Proximo passo
 Reviewer analisa o PR contra a spec, ADRs e Constitution (Camada B).
 
 ## A confirmar
-Aprovação do PR pelo usuário/Reviewer.
+Aprovação do PR pelo Reviewer.
