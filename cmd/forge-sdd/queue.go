@@ -58,8 +58,36 @@ var queueNextCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		dir, _ := cmd.Flags().GetString("dir")
 		asJSON, _ := cmd.Flags().GetBool("json")
+		batch, _ := cmd.Flags().GetBool("batch")
 		if err := pipelineModeGuard(cmd, dir); err != nil {
 			return err
+		}
+
+		if batch {
+			q, err := queue.Load(dir)
+			if err != nil {
+				return err
+			}
+			items, err := queue.EligibleTasks(q, 0)
+			if err != nil {
+				return err
+			}
+			if asJSON {
+				data, err := json.MarshalIndent(items, "", "  ")
+				if err != nil {
+					return err
+				}
+				fmt.Println(string(data))
+				return nil
+			}
+			if len(items) == 0 {
+				fmt.Println("Nenhuma task elegível no momento.")
+				return nil
+			}
+			for _, it := range items {
+				fmt.Printf("Task: %s (%s) [status: %s]\n", it.TaskID, it.Title, it.Status)
+			}
+			return nil
 		}
 
 		item, err := queue.Next(dir)
@@ -307,8 +335,6 @@ var queueActivityCmd = &cobra.Command{
 	},
 }
 
-var queueLogCmd = queueActivityCmd
-
 func init() {
 	queueHandoffCmd.Flags().String("dir", ".", "Diretório alvo do projeto Forge-SDD")
 	queueHandoffCmd.Flags().String("from", "", "Estação de origem (ex: lider, pm-architect, planner, builder, governance)")
@@ -333,6 +359,7 @@ func init() {
 
 	queueNextCmd.Flags().String("dir", ".", "Diretório alvo do projeto Forge-SDD")
 	queueNextCmd.Flags().Bool("json", false, "Exibir saída em formato JSON")
+	queueNextCmd.Flags().Bool("batch", false, "Retorna a lista de tasks prontas para paralelizar (DAG)")
 	queueNextCmd.Flags().Bool("local", false, "Em modo pipeline, constrói nesta sessão (por sua conta); o padrão é deixar o Builder construir")
 
 	queueCompleteCmd.Flags().String("dir", ".", "Diretório alvo do projeto Forge-SDD")

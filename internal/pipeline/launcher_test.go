@@ -261,8 +261,8 @@ func TestSessions_LiveModeBuilderReviewerGeminiAbreAgySemFlagI(t *testing.T) {
 	require.NoError(t, err)
 
 	// Painel 1 (Builder) e Painel 2 (Reviewer) devem rodar agy sem flag -i
-	bldCmd := plan.Create[2][7]
-	revCmd := plan.Create[3][7]
+	bldCmd := plan.Create[4][7]
+	revCmd := plan.Create[5][7]
 
 	assert.Contains(t, bldCmd, "agy --dangerously-skip-permissions")
 	assert.NotContains(t, bldCmd, "-i")

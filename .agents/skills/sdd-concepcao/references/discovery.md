@@ -2,7 +2,7 @@
 
 **Uso:** `/discovery <descrição da demanda>`.
 
-1. **Brief primeiro:** rode `forge-sdd brief` no início; se o estado for `rascunho`, proponha `/constitution` antes de qualquer spec.
+1. **Brief primeiro:** rode `forge-sdd brief` no início; se o estado for `rascunho`, proponha `/constitution` antes de qualquer spec. Inspecione `forge-sdd status`: se houver tasks em `queued` ou `review_pending`, recomende priorizar o handoff para a esteira (Builder/Reviewer).
 2. **Clarify:** aplique `sdd/memory/clarify.md`.
 3. **ID:** rode `forge-sdd next-id` e crie a branch `feat/<id>-<nome>` (pergunte a branch de partida, padrão `main`; se já existir branch da iniciativa, pergunte se retoma).
 4. **ADRs e rules:** antes de propor qualquer coisa, leia as ADRs e as rules aplicáveis ao tema; cite as decisões aplicadas na spec; ADR depreciada ou substituída não vale como base.

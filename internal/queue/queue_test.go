@@ -233,3 +233,62 @@ func TestFormatExecutivePanel(t *testing.T) {
 	assert.Contains(t, panel, "feat-58-05")
 	assert.Contains(t, panel, "constitution-id-linter")
 }
+
+func TestQueueDAGParallelEligibility(t *testing.T) {
+	// 1. Duas tasks com DependsOn: [] são retornadas simultaneamente como elegíveis
+	q := &Queue{
+		Items: []QueueItem{
+			{TaskID: "79-01", Status: StatusQueued, DependsOn: []string{}},
+			{TaskID: "79-02", Status: StatusQueued, DependsOn: []string{}},
+			{TaskID: "79-03", Status: StatusQueued, DependsOn: []string{"79-01"}},
+		},
+	}
+
+	eligible, err := EligibleTasks(q, 0)
+	require.NoError(t, err)
+	require.Len(t, eligible, 2)
+	assert.Equal(t, "79-01", eligible[0].TaskID)
+	assert.Equal(t, "79-02", eligible[1].TaskID)
+
+	// Respeita max
+	limited, err := EligibleTasks(q, 1)
+	require.NoError(t, err)
+	require.Len(t, limited, 1)
+	assert.Equal(t, "79-01", limited[0].TaskID)
+
+	// 2. Task 79-03 com DependsOn: ["79-01"] só se torna elegível após a aprovação da 79-01
+	q.Items[0].Status = StatusApproved
+	eligibleAfterApproval, err := EligibleTasks(q, 0)
+	require.NoError(t, err)
+	require.Len(t, eligibleAfterApproval, 2)
+	assert.Equal(t, "79-02", eligibleAfterApproval[0].TaskID)
+	assert.Equal(t, "79-03", eligibleAfterApproval[1].TaskID)
+
+	// 3. Detecção de ciclo retorna erro imediato sem travar em loop infinito
+	qCyclic := &Queue{
+		Items: []QueueItem{
+			{TaskID: "A", Status: StatusQueued, DependsOn: []string{"B"}},
+			{TaskID: "B", Status: StatusQueued, DependsOn: []string{"A"}},
+		},
+	}
+	_, err = EligibleTasks(qCyclic, 0)
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "ciclo de dependência")
+
+	// 4. Teste de extração automática na spec via Enqueue
+	dir := t.TempDir()
+	specContent := `# feat-79-05 — DAG
+**Depende de:** 79-01, 79-02
+
+## O que já existe
+| Procurei | Onde | Achei | Decisão | Justificativa |
+|---|---|---|---|---|
+| Fila | internal/queue | Queue | estender | DAG |
+`
+	specRel := writeSpecFile(t, dir, "sdd/features/79-05.md", specContent)
+	require.NoError(t, Enqueue(dir, "79", "feat/79", "79-05", "DAG", specRel, nil))
+	loaded, err := Load(dir)
+	require.NoError(t, err)
+	require.Len(t, loaded.Items, 1)
+	assert.Equal(t, []string{"79-01", "79-02"}, loaded.Items[0].DependsOn)
+}

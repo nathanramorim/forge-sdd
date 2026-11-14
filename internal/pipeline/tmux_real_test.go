@@ -85,7 +85,7 @@ func realPlan(t *testing.T) (*TmuxPlan, config.ForgeConfig) {
 
 func panesOf(t *testing.T, r isolatedTmux, session string) [][]string {
 	t.Helper()
-	raw := r.out(t, "list-panes", "-t", "="+session+":forge", "-F", "#{pane_index}|#{pane_title}|#{pane_left}|#{pane_top}|#{pane_width}|#{pane_height}")
+	raw := r.out(t, "list-panes", "-t", "="+session+":0", "-F", "#{pane_index}|#{pane_title}|#{pane_left}|#{pane_top}|#{pane_width}|#{pane_height}")
 	var rows [][]string
 	for _, l := range strings.Split(raw, "\n") {
 		rows = append(rows, strings.Split(l, "|"))
@@ -115,8 +115,9 @@ func TestTmuxReal_PlanoMontaOsTresPaineisNomeados(t *testing.T) {
 	require.NoError(t, err)
 	assert.True(t, created)
 	checkLayout(t, panesOf(t, r, plan.Session))
-	assert.Equal(t, "forge", r.out(t, "list-windows", "-t", "="+plan.Session, "-F", "#{window_name}"))
-	assert.Equal(t, "top", r.out(t, "show-window-options", "-t", "="+plan.Session+":forge", "-v", "pane-border-status"))
+	winName := r.out(t, "list-windows", "-t", "="+plan.Session, "-F", "#{window_name}")
+	assert.True(t, strings.HasPrefix(winName, "forge:"), "nome da janela deve começar com forge:")
+	assert.Equal(t, "top", r.out(t, "show-window-options", "-t", "="+plan.Session+":0", "-v", "pane-border-status"))
 }
 
 func TestTmuxReal_PaneBaseIndex1NoTmuxConfNaoQuebra(t *testing.T) {
@@ -156,8 +157,8 @@ func TestTmuxReal_FalhaNoMeioLimpaSoASessaoCriada(t *testing.T) {
 	plan, _ := realPlan(t)
 	other := plan.Session + "-outra"
 	require.NoError(t, r.Run([]string{"tmux", "new-session", "-d", "-s", other, "sleep", "60"}))
-	// Quebra o terceiro passo (split do reviewer) apontando para um painel que não existe.
-	plan.Create[3][5] = "=" + plan.Session + ":forge.9"
+	// Quebra o passo de split do reviewer apontando para um painel que não existe.
+	plan.Create[5][5] = "=" + plan.Session + ":forge.9"
 	_, err := LaunchTmux(plan, r)
 	require.Error(t, err)
 	assert.Error(t, r.Run([]string{"tmux", "has-session", "-t", "=" + plan.Session}), "a sessão pela metade foi removida")
@@ -187,13 +188,13 @@ func TestTmuxReal_LivePlanCriaJanelaForgeEControle(t *testing.T) {
 	require.NoError(t, err)
 	assert.True(t, created)
 
-	// Janela principal 'forge' tem 3 painéis
+	// Janela principal tem 3 painéis
 	checkLayout(t, panesOf(t, r, plan.Session))
 
-	// Confere se as janelas 'forge' e 'forge-ctl' foram criadas
+	// Confere se as janelas 'forge:<projeto>' e 'forge-ctl' foram criadas
 	rawWins := r.out(t, "list-windows", "-t", "="+plan.Session, "-F", "#{window_name}")
 	wins := strings.Split(rawWins, "\n")
-	assert.Contains(t, wins, "forge")
+	assert.Contains(t, wins, "forge:"+TmuxProjectName(dir))
 	assert.Contains(t, wins, "forge-ctl")
 
 	// Janela forge-ctl tem 2 painéis (despachantes builder e reviewer)

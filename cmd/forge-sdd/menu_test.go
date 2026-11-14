@@ -84,8 +84,7 @@ func TestMenu_PipelineIniciar(t *testing.T) {
 	dir := pipelineDir(t, nil)
 	p := &scripted{
 		selects: map[string][]string{
-			"Forge SDD":                  {valPipeline, "<esc>"},
-			"Pipeline multi-sessão":      {valPipeStart, "<esc>"},
+			"Forge SDD":                  {valUp, "<esc>"},
 			"Agente da sessão":           {config.CLIClaude, config.CLICodex, config.CLIGemini},
 			"Permissões do Builder e do": {config.PermissionProject},
 		},
@@ -106,7 +105,11 @@ func TestMenu_PipelineIniciar(t *testing.T) {
 
 func TestMenu_EscVolta(t *testing.T) {
 	dir := pipelineDir(t, nil)
-	p := &scripted{selects: map[string][]string{"Forge SDD": {valPipeline, valStandard, "<esc>"}, "Pipeline multi-sessão": {"<esc>"}, "Estrutura padrão": {valBack}}}
+	p := &scripted{selects: map[string][]string{
+		"Forge SDD":                     {valDiag, valConfig, "<esc>"},
+		"Diagnóstico de saúde e regras": {valBack},
+		"Ativar ou reconfigurar":        {valBack},
+	}}
 	env, rl, _ := menuFor(t, dir, p, allFound())
 	require.NoError(t, runMenu(env))
 	assert.Empty(t, rl.calls, "voltar não executa nada")
@@ -134,7 +137,7 @@ func TestMenu_BloqueioImpedeAbrirENaoGrava(t *testing.T) {
 		return "/usr/bin/" + n, nil
 	}
 	p := &scripted{selects: map[string][]string{
-		"Forge SDD": {valPipeline, "<esc>"}, "Pipeline multi-sessão": {valPipeStart, "<esc>"},
+		"Forge SDD":                  {valUp, "<esc>"},
 		"Agente da sessão":           {config.CLIClaude, config.CLICodex, config.CLIClaude},
 		"Permissões do Builder e do": {config.PermissionProject},
 	}, confirms: []bool{true}}
@@ -153,7 +156,7 @@ func TestMenu_AvisoPedeConfirmacao(t *testing.T) {
 	penv.Exists = func(p string) bool { return !strings.HasSuffix(p, "AGENTS.md") }
 	mk := func(confirms ...bool) (*runLog, *scripted) {
 		p := &scripted{selects: map[string][]string{
-			"Forge SDD": {valPipeline, "<esc>"}, "Pipeline multi-sessão": {valPipeStart, "<esc>"},
+			"Forge SDD":                  {valUp, "<esc>"},
 			"Agente da sessão":           {config.CLICodex, config.CLICodex, config.CLICodex},
 			"Permissões do Builder e do": {config.PermissionProject},
 		}, confirms: confirms}
@@ -173,7 +176,7 @@ func TestMenu_LembraAEscolha(t *testing.T) {
 		c.Sessions = map[string]string{config.SessionRoleBuilder: config.CLICodex, config.SessionRoleReviewer: config.CLIGemini}
 	})
 	p := &scripted{selects: map[string][]string{
-		"Forge SDD": {valPipeline, "<esc>"}, "Pipeline multi-sessão": {valPipeStart, "<esc>"},
+		"Forge SDD":        {valUp, "<esc>"},
 		"Agente da sessão": {"<esc>"},
 	}}
 	env, _, _ := menuFor(t, dir, p, allFound())
@@ -189,7 +192,7 @@ func TestMenu_LembraAEscolha(t *testing.T) {
 	}
 	// Esc na primeira pergunta cancela antes da segunda; a escolha do builder volta marcada na próxima vez.
 	p2 := &scripted{selects: map[string][]string{
-		"Forge SDD": {valPipeline, "<esc>"}, "Pipeline multi-sessão": {valPipeStart, "<esc>"},
+		"Forge SDD":        {valUp, "<esc>"},
 		"Agente da sessão": {config.CLIClaude, "<esc>"},
 	}}
 	env2, _, _ := menuFor(t, dir, p2, allFound())
@@ -205,17 +208,17 @@ func TestMenu_LembraAEscolha(t *testing.T) {
 func TestMenu_AcoesChamamOsMesmosSubcomandos(t *testing.T) {
 	dir := pipelineDir(t, nil)
 	p := &scripted{selects: map[string][]string{
-		"Forge SDD":             {valStandard, valPipeline, "<esc>"},
-		"Estrutura padrão":      {valStandardStatus, valStandardPanel, valStandardGate, valStandardDoctor, valBack},
-		"Pipeline multi-sessão": {valPipeDry, valPipeQueue, valPipeRecover, valBack},
+		"Forge SDD":                     {valStatus, valQueue, valDiag, "<esc>"},
+		"Diagnóstico de saúde e regras": {"doctor", "gate", valBack},
 	}}
 	env, rl, _ := menuFor(t, dir, p, allFound())
 	require.NoError(t, runMenu(env))
 	assert.Equal(t, [][]string{
-		{"status", "--dir", dir}, {"queue", "panel", "--dir", dir}, {"gate", "--dir", dir}, {"doctor", "--dir", dir},
-		{"up", "--dir", dir, "--dry-run"},
+		{"status", "--dir", dir},
+		{"queue", "panel", "--dir", dir},
 		{"bus", "list", "--dir", dir, "--role", "builder"}, {"bus", "list", "--dir", dir, "--role", "reviewer"}, {"inbox", "--dir", dir},
-		{"bus", "recover", "--dir", dir, "--role", "builder"}, {"bus", "recover", "--dir", dir, "--role", "reviewer"},
+		{"doctor", "--dir", dir},
+		{"gate", "--dir", dir},
 	}, rl.calls)
 }
 
@@ -225,12 +228,18 @@ func TestMenu_ProjetoSemForgeOferecaInstalarPrimeiro(t *testing.T) {
 	env, rl, _ := menuFor(t, dir, p, allFound())
 	require.NoError(t, runMenu(env))
 	assert.Equal(t, "init", rl.calls[0][0])
-	assert.Equal(t, valInstall, p.defs["Forge SDD "+version+" — o que você quer fazer?"], "instalar é a primeira opção marcada")
+	var foundDef string
+	for title, def := range p.defs {
+		if strings.HasPrefix(title, "Forge SDD") {
+			foundDef = def
+		}
+	}
+	assert.Equal(t, valInstall, foundDef, "instalar é a primeira opção marcada")
 }
 
 func TestMenu_PipelineSemForgeJSONOfereceAtivar(t *testing.T) {
 	dir := t.TempDir()
-	p := &scripted{selects: map[string][]string{"Forge SDD": {valPipeline, "<esc>"}, "Pipeline multi-sessão": {valPipeStart, "<esc>"}}, confirms: []bool{false}}
+	p := &scripted{selects: map[string][]string{"Forge SDD": {valUp, "<esc>"}}, confirms: []bool{false}}
 	env, rl, _ := menuFor(t, dir, p, allFound())
 	require.NoError(t, runMenu(env))
 	assert.Empty(t, rl.calls, "recusar ativar não faz nada")
@@ -240,8 +249,8 @@ func TestMenu_ConfigurarCardEPermissoes(t *testing.T) {
 	dir := pipelineDir(t, nil)
 	p := &scripted{
 		selects: map[string][]string{
-			"Forge SDD": {valPipeline, "<esc>"}, "Pipeline multi-sessão": {valPipeConfig, valBack},
-			"Ativar ou reconfigurar":     {"card", "perms", valBack},
+			"Forge SDD":              {valConfig, "<esc>"},
+			"Ativar ou reconfigurar": {"card", "perms", valBack},
 			"Permissões do Builder e do": {config.PermissionFull},
 		},
 		confirms: []bool{false},

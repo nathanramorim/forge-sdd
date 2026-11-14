@@ -8,9 +8,30 @@ import (
 	"testing"
 
 	"github.com/forge-sdd/cli/internal/config"
+	"github.com/forge-sdd/cli/internal/pipeline"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
+
+func init() {
+	orig := newLaunchEnv
+	newLaunchEnv = func(goos, dir, bin string) pipeline.LaunchEnv {
+		env := orig(goos, dir, bin)
+		origLookPath := env.LookPath
+		env.LookPath = func(name string) (string, error) {
+			if origLookPath != nil {
+				if p, err := origLookPath(name); err == nil {
+					return p, nil
+				}
+			}
+			if name == "x-terminal-emulator" || name == "gnome-terminal" || name == "konsole" {
+				return "/usr/bin/" + name, nil
+			}
+			return "", exec.ErrNotFound
+		}
+		return env
+	}
+}
 
 func pipelineDir(t *testing.T, mut func(*config.ForgeConfig)) string {
 	t.Helper()

@@ -19,8 +19,7 @@ func TestE2E_MenuPipeline(t *testing.T) {
 
 	p := &scripted{
 		selects: map[string][]string{
-			"Forge SDD":                  {valPipeline, "<esc>"},
-			"Pipeline multi-sessão":      {valPipeStart, "<esc>"},
+			"Forge SDD":                  {valUp, "<esc>"},
 			"Agente da sessão":           {config.CLIClaude, config.CLICodex, config.CLIGemini},
 			"Permissões do Builder e do": {config.PermissionProject},
 		},

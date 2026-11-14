@@ -4,6 +4,18 @@ Este arquivo registra o histórico de entregas de produto deste projeto.
 
 ## Entregas
 
+### Versão 4.5.0 — Clareza no Pipeline, Identificação Visual no Tmux, Menu Direto, DAG e Monitor ps (Beta)
+
+Compatível com a 4.4.1-beta (Discovery 79, features `79-01` a `79-07`).
+
+*   **Diretrizes Pipeline-First nos Prompts e Skills (`79-01`):** eliminação definitiva da confusão cognitiva sobre subagentes; os prompts e skills instruem os agentes a utilizarem os painéis especializados da esteira (`forge-builder` e `forge-reviewer`) por meio da fila determinística, reservando subagentes estritamente para tarefas efêmeras de leitura e pesquisa em paralelo.
+*   **Identificação Visual do Projeto no Tmux (`79-02`):** inclusão automática do identificador do projeto no `status-left` do tmux (`[forge:meu-projeto]`), formatação dos títulos de borda dos painéis (`pane-border-format`) e padronização do nome da janela ativa (`forge:<projeto>`), evitando alternâncias acidentais entre múltiplos projetos abertos.
+*   **Menu Unificado e Direto (`79-03`):** simplificação da interface do comando `forge`, eliminando a divisão artificial entre "Pipeline multi-sessão" e "Estrutura padrão". As ações principais agora aparecem diretamente no primeiro nível com números de atalho claros e diretos.
+*   **Alertas Visuais e Fluxo de Entrega Não Bloqueante (`79-04`):** mecanismo de feedback em tempo real para a sessão de Discovery durante o despacho para o Builder, evitando loops ociosos de terminal e garantindo que o desenvolvedor tenha a linha de comando sempre liberada.
+*   **Paralelismo de Fila por DAG e Ondas de Execução (`79-05`):** suporte nativo ao atributo `depends_on` no `queue.json`, cálculo determinístico de grafos de dependência e liberação automática de tarefas em ondas paralelas quando suas dependências são satisfeitas.
+*   **Monitor Nativo de Processos `forge-sdd ps` (`79-06`):** novo comando CLI para inspecionar em tempo real os processos, servidores em background (ex: dev servers, workers, compilações) e threads ativas associadas à sessão e ao repositório, com flags `--json` e `--kill`.
+*   **Documentação Encantadora e Simulador Interativo Atualizado (`79-07`):** atualização do guia do pipeline (`docs/pipeline.md`, `LEIA-ME.md.tmpl`), documentação de comandos (`docs/comandos.md`) e simulação em tempo real no emulador web da landing page (`site/src/data/emulator.ts`).
+
 ### Versão 4.4.1 — Fix no Pipeline: Gemini abre CLI agy e auto-cura em instalações anteriores (Beta)
 
 Compatível com a 4.4.0-beta (Fix 78).

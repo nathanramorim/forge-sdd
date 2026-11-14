@@ -21,6 +21,7 @@ type TmuxDeliverer interface {
 	LoadBuffer(name string, data []byte) error
 	PasteBuffer(name, target string) error
 	SendKeys(target string, keys ...string) error
+	SetPaneTitle(target, title string) error
 }
 
 type execTmuxDeliverer struct{}
@@ -44,6 +45,10 @@ func (execTmuxDeliverer) PasteBuffer(name, target string) error {
 func (execTmuxDeliverer) SendKeys(target string, keys ...string) error {
 	args := append([]string{"send-keys", "-t", target}, keys...)
 	return exec.Command("tmux", args...).Run()
+}
+
+func (execTmuxDeliverer) SetPaneTitle(target, title string) error {
+	return exec.Command("tmux", "select-pane", "-t", target, "-T", title).Run()
 }
 
 // DefaultTmuxDeliverer devolve o executor de entrega real do tmux.
@@ -311,8 +316,12 @@ func RunDeliverWorker(ctx context.Context, opts WorkerOptions) error {
 		timeoutDuration := time.Duration(timeoutMin) * time.Minute
 
 		jobDone := false
+		var alertingApproval bool
 		for !jobDone {
 			if !opts.Sleep(ctx, 500*time.Millisecond) {
+				if alertingApproval {
+					_ = SetApprovalAlert(d, target, opts.Name, false)
+				}
 				return nil
 			}
 
@@ -320,6 +329,9 @@ func RunDeliverWorker(ctx context.Context, opts WorkerOptions) error {
 			reason := VerifyJobHandoff(opts.Dir, opts.Role, opts.Name, opts.Now, job.ID)
 			if reason == "" {
 				jobDone = true
+				if alertingApproval {
+					_ = SetApprovalAlert(d, target, opts.Name, false)
+				}
 				fmt.Fprintf(opts.Out, "■ job %s concluído · contexto limpo · painel livre\n", job.ID)
 				if opts.OnJobDone != nil {
 					opts.OnJobDone(job, OutcomeDone)
@@ -338,6 +350,9 @@ func RunDeliverWorker(ctx context.Context, opts WorkerOptions) error {
 			// Inspeciona tela do painel (feat 77-04)
 			paneText, captureErr := d.CapturePane(target)
 			if captureErr != nil {
+				if alertingApproval {
+					_ = SetApprovalAlert(d, target, opts.Name, false)
+				}
 				failMsg := "painel fechado: " + captureErr.Error()
 				fmt.Fprintf(opts.Out, "[%s] ✗ %s\n", opts.Name, failMsg)
 				_, _ = bus.Requeue(opts.Dir, opts.Role, job.ID, opts.Name, failMsg, opts.Now())
@@ -355,6 +370,17 @@ func RunDeliverWorker(ctx context.Context, opts WorkerOptions) error {
 			}
 
 			lines := extractLastLines(paneText, 20)
+
+			// Alerta visual de aprovação necessária (feat 79-04)
+			if DetectWaitingApproval(lines) {
+				if !alertingApproval {
+					alertingApproval = true
+					_ = SetApprovalAlert(d, target, opts.Name, true)
+				}
+			} else if alertingApproval {
+				alertingApproval = false
+				_ = SetApprovalAlert(d, target, opts.Name, false)
+			}
 
 			// 1. Limite de uso
 			if ul, ok := DetectUsageLimit(lines, opts.Now()); ok && !ul.Capped {
@@ -422,6 +448,43 @@ func RunDeliverWorker(ctx context.Context, opts WorkerOptions) error {
 			return nil
 		}
 	}
+}
+
+// DetectWaitingApproval analisa as últimas linhas do painel para identificar se o agente
+// está aguardando aprovação humana / intervenção interativa (feat 79-04).
+func DetectWaitingApproval(lines []string) bool {
+	for _, l := range lines {
+		lClean := strings.ToLower(clean(l))
+		if strings.Contains(lClean, "aprovação necessária") ||
+			strings.Contains(lClean, "aprovacao necessaria") ||
+			strings.Contains(lClean, "aguardando aprovação") ||
+			strings.Contains(lClean, "aguardando aprovacao") ||
+			strings.Contains(lClean, "allow command") ||
+			strings.Contains(lClean, "permission required") ||
+			strings.Contains(lClean, "do you want to run") ||
+			strings.Contains(lClean, "do you want to proceed") ||
+			strings.Contains(lClean, "do you want to execute") ||
+			strings.Contains(lClean, "[y/n]") ||
+			strings.Contains(lClean, "(y/n)") ||
+			strings.Contains(lClean, "[s/n]") ||
+			strings.Contains(lClean, "(s/n)") ||
+			strings.Contains(lClean, "human approval") {
+			return true
+		}
+	}
+	return false
+}
+
+// SetApprovalAlert atualiza o título do painel no tmux quando o worker demanda aprovação humana.
+func SetApprovalAlert(d TmuxDeliverer, target string, name string, alert bool) error {
+	if d == nil {
+		return nil
+	}
+	title := name
+	if alert {
+		title = fmt.Sprintf("[ ⚠️ APROVAÇÃO NECESSÁRIA ❯ %s ]", name)
+	}
+	return d.SetPaneTitle(target, title)
 }
 
 func extractLastLines(s string, n int) []string {
