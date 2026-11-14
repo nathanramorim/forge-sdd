@@ -180,3 +180,38 @@ func TestPathsDoForgeSaoOsDoLayout(t *testing.T) {
 	require.NoError(t, err)
 	assert.True(t, found)
 }
+
+func TestLoadForgeConfig_MigraEPersisteGeminiLegado(t *testing.T) {
+	dir := t.TempDir()
+	// Simula arquivo forge.json de instalação anterior com comando gemini legado
+	legacy := `{
+  "cli": "claude",
+  "permissions": "project",
+  "terminal": "auto",
+  "cli_profiles": {
+    "gemini": {
+      "command": "gemini",
+      "args": [
+        "-p",
+        "{prompt}",
+        "-o",
+        "stream-json",
+        "{permissions}"
+      ]
+    }
+  }
+}`
+	writeForge(t, dir, ".forge/config/forge.json", legacy)
+
+	cfg, found, err := LoadForgeConfig(dir)
+	require.NoError(t, err)
+	require.True(t, found)
+	assert.Equal(t, "agy", cfg.CLIProfiles[CLIGemini].Command, "perfil em memória deve ter sido normalizado")
+
+	// Verifica se foi persistido no disco
+	raw, err := os.ReadFile(filepath.Join(dir, ".forge", "config", "forge.json"))
+	require.NoError(t, err)
+	disk := string(raw)
+	assert.Contains(t, disk, `"command": "agy"`, "arquivo no disco deve ter sido atualizado com agy")
+	assert.NotContains(t, disk, `"command": "gemini"`, "não deve mais conter o comando legado no disco")
+}

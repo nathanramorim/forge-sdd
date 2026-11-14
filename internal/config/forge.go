@@ -171,10 +171,48 @@ func LoadForgeConfig(dir string) (cfg ForgeConfig, found bool, err error) {
 	if cfg.Live.ReadyQuietSeconds == 0 {
 		cfg.Live.ReadyQuietSeconds = 3
 	}
+
+	// Normaliza perfis de CLI legados (fix 78: gemini -> agy) e garante retrocompatibilidade
+	changed := false
+	if cfg.CLIProfiles != nil {
+		if p, ok := cfg.CLIProfiles[CLIGemini]; ok && p.Command == "gemini" {
+			if norm, ok := cfg.Profile(CLIGemini); ok {
+				if p.Command != norm.Command || len(p.Args) != len(norm.Args) {
+					changed = true
+				}
+				cfg.CLIProfiles[CLIGemini] = norm
+			}
+		}
+		if p, ok := cfg.CLIProfiles[CLIAgy]; ok {
+			if norm, ok := cfg.Profile(CLIAgy); ok {
+				if len(p.InteractiveArgs) != len(norm.InteractiveArgs) {
+					changed = true
+				}
+				cfg.CLIProfiles[CLIAgy] = norm
+			}
+		}
+	}
+
 	if err := cfg.Validate(); err != nil {
 		return ForgeConfig{}, true, fmt.Errorf("%s inválido: %w", path, err)
 	}
+
+	// Se houve migração de perfil legado, persiste no disco para atualizar a instalação anterior
+	if changed {
+		_ = SaveForgeConfig(dir, cfg)
+	}
+
 	return cfg, true, nil
+}
+
+// MigrateLegacyProfiles normaliza perfis legados em .forge/config/forge.json (ex: gemini -> agy)
+// e persiste as alterações no disco se o arquivo existir.
+func MigrateLegacyProfiles(dir string) (bool, error) {
+	_, found, err := LoadForgeConfig(dir)
+	if err != nil || !found {
+		return false, err
+	}
+	return true, nil
 }
 
 func strictDecode(data []byte, v any) error {

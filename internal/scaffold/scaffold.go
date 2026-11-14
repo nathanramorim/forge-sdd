@@ -138,8 +138,11 @@ func applyStructureUpgrade(cfg config.Config, targetDir string) error {
 	if _, err := ApplyLayoutMigration(targetDir, plan); err != nil {
 		return err
 	}
-	_, err = RemoveObsoleteAgentArtifacts(targetDir, cfg)
-	return err
+	if _, err := RemoveObsoleteAgentArtifacts(targetDir, cfg); err != nil {
+		return err
+	}
+	_, _ = config.MigrateLegacyProfiles(targetDir)
+	return nil
 }
 
 // renderDir percorre fsys a partir de root, renderiza cada template e escreve em targetDir.

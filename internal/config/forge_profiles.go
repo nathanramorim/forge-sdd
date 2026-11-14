@@ -175,7 +175,7 @@ func (c ForgeConfig) Profile(cli string) (CLIProfile, bool) {
 		}
 	}
 	if cli == CLIGemini || cli == CLIAgy {
-		if p.Command == "gemini" || p.Command == "" {
+		if p.Command == "gemini" {
 			p.Command = "agy"
 		}
 		for _, a := range p.Args {

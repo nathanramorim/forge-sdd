@@ -386,3 +386,44 @@ func TestUpdateCleansObsoleteClaudePromptSuffix(t *testing.T) {
 	assert.NoFileExists(t, filepath.Join(dryDir, ".claude", "commands", "discovery.md"))
 }
 
+func TestUpgradeMigratesForgeJSONGeminiToAgy(t *testing.T) {
+	dir := t.TempDir()
+	cfg := config.Config{
+		Project:    "demo",
+		Stack:      "go",
+		DB:         "none",
+		Telemetry:  false,
+		Lang:       "pt-BR",
+		SddVersion: "4.4.0-beta",
+		Agents:     []string{config.AgentGemini},
+	}
+	_, err := Run(cfg, dir)
+	require.NoError(t, err)
+
+	// Simula forge.json de instalação anterior
+	forgeJSONPath := filepath.Join(dir, ".forge", "config", "forge.json")
+	legacyJSON := `{
+  "cli": "claude",
+  "permissions": "project",
+  "terminal": "auto",
+  "cli_profiles": {
+    "gemini": {
+      "command": "gemini",
+      "args": ["-p", "{prompt}", "-o", "stream-json", "{permissions}"]
+    }
+  }
+}`
+	require.NoError(t, os.MkdirAll(filepath.Dir(forgeJSONPath), 0755))
+	require.NoError(t, os.WriteFile(forgeJSONPath, []byte(legacyJSON), 0644))
+
+	// Executa nova rodada de scaffold (como ocorre em upgrade / update)
+	_, err = Run(cfg, dir)
+	require.NoError(t, err)
+
+	raw, err := os.ReadFile(forgeJSONPath)
+	require.NoError(t, err)
+	disk := string(raw)
+	assert.Contains(t, disk, `"command": "agy"`)
+	assert.NotContains(t, disk, `"command": "gemini"`)
+}
+
