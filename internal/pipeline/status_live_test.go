@@ -2,6 +2,7 @@ package pipeline
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -132,6 +133,38 @@ func TestRunLiveDashboard_Once(t *testing.T) {
 	err := RunLiveDashboard(context.Background(), dir, &buf, true)
 	require.NoError(t, err)
 	assert.Contains(t, buf.String(), "PROCESSAMENTO & CONSUMO POR SESSÃO")
+}
+
+func TestFormatRichDashboard_LimitaTarefasEmFilaGrande(t *testing.T) {
+	dir := t.TempDir()
+	require.NoError(t, os.MkdirAll(filepath.Join(dir, ".git"), 0o755))
+	require.NoError(t, os.WriteFile(filepath.Join(dir, ".git", "HEAD"), []byte("ref: refs/heads/feat/80-status\n"), 0o644))
+
+	sddDir := filepath.Join(dir, "sdd", ".queue")
+	require.NoError(t, os.MkdirAll(sddDir, 0o755))
+
+	// Cria fila com 24 tarefas simulando barbearia-app
+	var itemsJSON strings.Builder
+	itemsJSON.WriteString(`{"items":[`)
+	for i := 1; i <= 24; i++ {
+		if i > 1 {
+			itemsJSON.WriteString(",")
+		}
+		status := "queued"
+		if i == 3 {
+			status = "in_progress"
+		}
+		itemsJSON.WriteString(fmt.Sprintf(`{"task_id":"feat-%02d","title":"Tarefa %d","status":"%s"}`, i, i, status))
+	}
+	itemsJSON.WriteString(`]}`)
+	require.NoError(t, os.WriteFile(filepath.Join(sddDir, "queue.json"), []byte(itemsJSON.String()), 0o644))
+
+	out, err := FormatRichDashboard(dir, nil, nil, nil)
+	require.NoError(t, err)
+
+	assert.Contains(t, out, "0% (0/24 tasks)")
+	assert.Contains(t, out, "[▶] feat-03: Tarefa 3")
+	assert.Contains(t, out, "... e mais 18 tarefas (use 'forge status' para a lista completa)")
 }
 
 

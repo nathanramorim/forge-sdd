@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 
 	"github.com/forge-sdd/cli/internal/config"
 	"github.com/forge-sdd/cli/internal/layout"
@@ -248,4 +249,69 @@ func LaunchTmux(plan *TmuxPlan, r TmuxRunner) (created bool, err error) {
 		return created, &TmuxAttachError{Session: plan.Session, Err: err}
 	}
 	return created, nil
+}
+
+// OpenLiveStatusInTmux anexa ou abre o painel vivo em uma janela/painel dedicado do tmux.
+func OpenLiveStatusInTmux(dir string) error {
+	tmuxPath, err := exec.LookPath("tmux")
+	if err != nil {
+		return fmt.Errorf("tmux não encontrado no PATH (instale com brew install tmux ou apt install tmux)")
+	}
+
+	if dir == "" {
+		dir = "."
+	}
+	absDir, err := filepath.Abs(dir)
+	if err != nil {
+		absDir = dir
+	}
+
+	sess := TmuxSessionName(absDir)
+	bin := ResolveBin()
+	statusCmd := fmt.Sprintf("%s status --live", shQuote(bin))
+
+	insideTmux := os.Getenv("TMUX") != ""
+
+	// Verifica se a sessão principal forge-<projeto>-<hash> já existe
+	hasSess := exec.Command(tmuxPath, "has-session", "-t", "="+sess).Run() == nil
+
+	if hasSess {
+		// Sessão existe: verifica se a janela forge-status já existe nela
+		checkWin := exec.Command(tmuxPath, "list-windows", "-t", "="+sess, "-F", "#{window_name}")
+		outBytes, _ := checkWin.Output()
+		hasWin := strings.Contains(string(outBytes), "forge-status")
+		if !hasWin {
+			// Cria a janela forge-status na sessão existente
+			createWin := exec.Command(tmuxPath, "new-window", "-d", "-n", "forge-status", "-t", "="+sess, "-c", absDir, statusCmd)
+			_ = createWin.Run()
+		}
+
+		if insideTmux {
+			// Já estamos no tmux: seleciona a janela forge-status
+			selectCmd := exec.Command(tmuxPath, "select-window", "-t", "="+sess+":forge-status")
+			return selectCmd.Run()
+		}
+
+		// Fora do tmux: anexa na janela forge-status da sessão
+		attachCmd := exec.Command(tmuxPath, "attach-session", "-t", "="+sess+":forge-status")
+		attachCmd.Stdin = os.Stdin
+		attachCmd.Stdout = os.Stdout
+		attachCmd.Stderr = os.Stderr
+		return attachCmd.Run()
+	}
+
+	// Se não existe a sessão do projeto:
+	if insideTmux {
+		// Abre janela no tmux atual
+		winCmd := exec.Command(tmuxPath, "new-window", "-n", "forge-status", "-c", absDir, statusCmd)
+		return winCmd.Run()
+	}
+
+	// Fora do tmux: cria sessão dedicada forge-status e conecta
+	statusSess := sess + "-status"
+	createSess := exec.Command(tmuxPath, "new-session", "-s", statusSess, "-n", "forge-status", "-c", absDir, statusCmd)
+	createSess.Stdin = os.Stdin
+	createSess.Stdout = os.Stdout
+	createSess.Stderr = os.Stderr
+	return createSess.Run()
 }

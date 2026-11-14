@@ -19,6 +19,7 @@ func runRoot(t *testing.T, args ...string) (string, error) {
 	_ = statusCmd.Flags().Set("all-branches", "false")
 	_ = statusCmd.Flags().Set("initiatives", "false")
 	_ = statusCmd.Flags().Set("live", "false")
+	_ = statusCmd.Flags().Set("tmux", "false")
 	_ = statusCmd.Flags().Set("once", "false")
 	_ = statusCmd.Flags().Set("compact", "false")
 	_ = nextIDCmd.Flags().Set("kind", "discovery")

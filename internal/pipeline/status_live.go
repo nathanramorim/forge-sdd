@@ -8,9 +8,11 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"os/signal"
 	"path/filepath"
 	"sort"
 	"strings"
+	"syscall"
 	"time"
 
 	"github.com/forge-sdd/cli/internal/bus"
@@ -284,7 +286,8 @@ func FormatRichDashboard(dir string, deliverer TmuxDeliverer, gitFn GitRunnerFn,
 			}
 		}
 		fmt.Fprintf(&b, "Progresso: %s\n", formatProgressBar(completed, len(q.Items), 20))
-		for _, it := range q.Items {
+		displayed, remaining := filterDisplayTasks(q.Items, 6)
+		for _, it := range displayed {
 			mark := "[ ]"
 			switch it.Status {
 			case queue.StatusApproved, "done", "completed":
@@ -295,6 +298,9 @@ func FormatRichDashboard(dir string, deliverer TmuxDeliverer, gitFn GitRunnerFn,
 				mark = "[🔍]"
 			}
 			fmt.Fprintf(&b, "%s %s: %s\n", mark, it.TaskID, it.Title)
+		}
+		if remaining > 0 {
+			fmt.Fprintf(&b, "• ... e mais %d tarefas (use 'forge status' para a lista completa)\n", remaining)
 		}
 		b.WriteString("\n")
 	}
@@ -350,6 +356,33 @@ func FormatRichDashboard(dir string, deliverer TmuxDeliverer, gitFn GitRunnerFn,
 	return b.String(), nil
 }
 
+func filterDisplayTasks(items []queue.QueueItem, maxDisplay int) (displayed []queue.QueueItem, remaining int) {
+	if len(items) <= maxDisplay {
+		return items, 0
+	}
+	var active []queue.QueueItem
+	var others []queue.QueueItem
+	for _, it := range items {
+		switch it.Status {
+		case "in_progress", "processing", "review_pending":
+			active = append(active, it)
+		default:
+			others = append(others, it)
+		}
+	}
+	for _, it := range active {
+		if len(displayed) < maxDisplay {
+			displayed = append(displayed, it)
+		}
+	}
+	for _, it := range others {
+		if len(displayed) < maxDisplay {
+			displayed = append(displayed, it)
+		}
+	}
+	return displayed, len(items) - len(displayed)
+}
+
 // RunLiveDashboard opera o painel vivo contínuo ou em modo snapshot (once).
 func RunLiveDashboard(ctx context.Context, dir string, out io.Writer, once bool) error {
 	if out == nil {
@@ -359,24 +392,34 @@ func RunLiveDashboard(ctx context.Context, dir string, out io.Writer, once bool)
 		ctx = context.Background()
 	}
 
+	if once {
+		content, err := FormatRichDashboard(dir, nil, nil, nil)
+		if err != nil {
+			return err
+		}
+		_, err = fmt.Fprint(out, content)
+		return err
+	}
+
+	// Captura interrupções (Ctrl+C / SIGTERM) para garantir restauração do terminal
+	sigCtx, stop := signal.NotifyContext(ctx, os.Interrupt, syscall.SIGTERM)
+	defer stop()
+
+	// Alterna para o buffer de tela alternativo (Alternate Screen Buffer) e esconde o cursor
+	// evitando rolagem de tela e sem sujar o histórico/scrollback do terminal.
+	fmt.Fprint(out, "\033[?1049h\033[?25l")
+	defer fmt.Fprint(out, "\033[?1049l\033[?25h")
+
 	render := func() error {
 		content, err := FormatRichDashboard(dir, nil, nil, nil)
 		if err != nil {
 			return err
 		}
-		if !once {
-			// Limpa a tela e reseta cursor no topo
-			fmt.Fprint(out, "\033[H\033[2J")
-		}
+		// Move o cursor para (1,1) e limpa a tela alternativa
+		fmt.Fprint(out, "\033[H\033[2J")
 		fmt.Fprint(out, content)
-		if !once {
-			fmt.Fprint(out, "\n[Atualizando a cada 2s • Pressione Ctrl+C para sair do painel vivo]\n")
-		}
+		fmt.Fprint(out, "\n[Atualizando a cada 2s • Ctrl+C para sair • Dica: 'forge status -l -t' para janela tmux]\n")
 		return nil
-	}
-
-	if once {
-		return render()
 	}
 
 	// Primeira renderização imediata
@@ -389,8 +432,7 @@ func RunLiveDashboard(ctx context.Context, dir string, out io.Writer, once bool)
 
 	for {
 		select {
-		case <-ctx.Done():
-			fmt.Fprintln(out, "\nPainel vivo encerrado.")
+		case <-sigCtx.Done():
 			return nil
 		case <-ticker.C:
 			if err := render(); err != nil {
