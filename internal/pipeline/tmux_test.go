@@ -111,10 +111,11 @@ func TestTmux_ResolverTerminalPorPrecedencia(t *testing.T) {
 }
 
 type fakeTmux struct {
-	existing bool
-	runs     [][]string
-	attached []string
-	failAt   string
+	existing  bool
+	runs      [][]string
+	attached  []string
+	failAt    string
+	attachErr error
 }
 
 func (f *fakeTmux) Run(argv []string) error {
@@ -130,7 +131,10 @@ func (f *fakeTmux) Run(argv []string) error {
 	}
 	return nil
 }
-func (f *fakeTmux) Attach(argv []string) error { f.attached = argv; return nil }
+func (f *fakeTmux) Attach(argv []string) error {
+	f.attached = argv
+	return f.attachErr
+}
 
 func TestTmux_SessaoExistenteSoConecta(t *testing.T) {
 	env := lenv("linux", map[string]bool{"tmux": true}, nil)
@@ -213,4 +217,15 @@ func TestTmux_DiretorioRelativoERecusado(t *testing.T) {
 	env.Dir = "."
 	_, err := BuildTmuxPlan(env, config.DefaultForgeConfig(), false)
 	assert.Error(t, err, "com . o hash seria igual para projetos distintos")
+}
+
+func TestTmux_FalhaAoConectarDizOQueFazer(t *testing.T) {
+	plan, err := BuildTmuxPlan(lenv("linux", map[string]bool{"tmux": true}, nil), config.DefaultForgeConfig(), false)
+	require.NoError(t, err)
+	f := &fakeTmux{attachErr: errors.New("exit status 1")}
+	created, err := LaunchTmux(plan, f)
+	require.Error(t, err)
+	assert.True(t, created, "a sessão foi criada mesmo sem conseguir conectar")
+	assert.Contains(t, err.Error(), "tmux attach -t =forge-")
+	assert.Contains(t, err.Error(), "está pronta")
 }
