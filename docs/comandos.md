@@ -64,34 +64,15 @@ Executados diretamente no terminal do desenvolvedor, normalmente utilizando o wr
   forge-sdd ps --kill-zombies     # encerra com segurança processos orfãos/presos
   ```
 
-### `forge-sdd status --live`
-- **O que faz:** Status executivo tríplice de altíssima velocidade e baixo consumo de tokens. Captura em tempo real o que o Builder está fazendo na tela (`tmux capture-pane`), a lista de tasks da esteira (`queue panel`) e os commits recentes no git.
+### `forge-sdd status [flags]`
+- **O que faz:** Exibe o status das iniciativas em `sdd/discovery/` com suas branches, estado, próximo passo e contagem de tarefas.
+- **Modo Live (`--live` ou `-l`):** Status executivo tríplice de altíssima velocidade (< 100ms) e baixíssimo consumo de tokens (< 200 tokens). Captura em tempo real o que o agente ativo está fazendo na tela (`tmux capture-pane` ou últimas linhas de `.forge/runtime/logs/`), o checklist de tarefas da esteira (`queue panel`) e os commits recentes no git.
 - **Como usar:**
   ```bash
-  forge-sdd status --live
-  ```
-
-### `forge` (Menu Interativo Unificado)
-- **O que faz:** O portal de entrada do desenvolvedor. Abre um menu contextual rápido, elegante e direto ao ponto que exibe o nome do projeto e branch atual, permitindo iniciar as 3 sessões da esteira (Discovery, Builder, Reviewer) com 1 Enter, inspecionar a fila, rodar diagnósticos e configurar agentes sem submenus confusos.
-- **Como usar:**
-  ```bash
-  forge
-  ```
-
-### `forge-sdd ps [flags]`
-- **O que faz:** Monitor transparente de processos em tempo real. Identifica todos os workers, CLIs de IA, painéis tmux e subprocessos (testes, compiladores) atrelados ao projeto. Exibe PID, % de CPU, memória RAM (RSS em MB), tempo ativo e estado de cada processo.
-- **Como usar:**
-  ```bash
-  forge-sdd ps
-  forge-sdd ps --json             # saída em JSON para automações
-  forge-sdd ps --kill-zombies     # encerra com segurança processos orfãos/presos
-  ```
-
-### `forge-sdd status --live`
-- **O que faz:** Status executivo tríplice de altíssima velocidade e baixo consumo de tokens. Captura em tempo real o que o Builder está fazendo na tela (`tmux capture-pane`), a lista de tasks da esteira (`queue panel`) e os commits recentes no git.
-- **Como usar:**
-  ```bash
-  forge-sdd status --live
+  forge-sdd status                # lista iniciativas e estado da fila
+  forge-sdd status --live         # status executivo tríplice em tempo real
+  forge-sdd status -l             # shorthand para modo live
+  forge-sdd status --all-branches # inclui iniciativas de todas as branches locais e remotas
   ```
 
 ### `npx @nathanramorim/forge-sdd doctor [diretório]`
@@ -133,8 +114,8 @@ Executados diretamente no terminal do desenvolvedor, normalmente utilizando o wr
 Digitados na interface de chat do agente de IA configurado no projeto (ex: Gemini, Claude Code, GitHub Copilot Chat). Eles disparam prompts padronizados sob a pasta `.gemini/prompts/` (ou correspondente ao agente configurado).
 
 ### `/status` ou `"qual o progresso?"`
-- **Quando usar:** No início de qualquer sessão de trabalho para que o agente entenda o contexto atual (comando obrigatório de inicialização).
-- **O que faz:** Lê o arquivo `sdd/memory/progress.md` e resume o status das features ativas, próximos passos, bloqueios e percentual de conclusão do projeto. Sempre encerra com a linha `Próximo comando sugerido: <comando>`, calculada a partir do estado real do projeto — elimina a necessidade de memorizar a ordem dos comandos.
+- **Quando usar:** No início de qualquer sessão de trabalho ou para acompanhar o andamento da esteira em tempo real.
+- **O que faz:** Executa a verificação tríplice (painel tmux ou logs, fila e commits git) e devolve o status da esteira formatado estritamente no template canônico de baixo consumo de tokens (< 200 tokens). Também pode ser invocado pelo CLI com `forge-sdd status --live`.
 - **Exemplo de uso:** 
   > `/status`
 

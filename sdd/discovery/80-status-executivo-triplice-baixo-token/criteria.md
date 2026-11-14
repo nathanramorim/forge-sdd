@@ -59,11 +59,11 @@ Próximo passo: <Acompanhar o Builder / Revisão do Reviewer / /discovery>
 
 ## Critérios de Aceitação Executáveis
 
-- **CA-01 (Flag CLI `status --live`):** `go test -v ./cmd/forge-sdd -run TestStatusLiveFlag` passa: `forge-sdd status --live` executa o status capturando painel tmux (ou fallback de log), fila e git log, retornando saída consolidada em menos de 100ms.
-- **CA-02 (Paridade entre Prompts de Agentes):** Todos os arquivos de prompt (`.gemini/prompts/status.prompt.md`, `.claude/commands/status.md`, `.github/prompts/status.prompt.md` e seus templates em `internal/scaffold/templates/`) instruem exatamente a mesma ordem de verificação e o mesmo template canônico de saída.
-- **CA-03 (Orçamento de Tokens):** A execução do template de status canônico gera no máximo 250 tokens de saída por chamada.
-- **CA-04 (Fallback Suave sem Tmux):** Em ambiente sem tmux ou modo headless, `status --live` lê as últimas linhas de `.forge/runtime/logs/` sem gerar erro de comando.
-- **CA-05 (Integridade de Suíte):** `go build ./... && go vet ./... && go test -race ./...` e `forge-sdd gate` passam com 0 falhas.
+- [x] **CA-01 (Flag CLI `status --live`):** `go test -v ./cmd/forge-sdd -run TestStatusLiveFlag` passa: `forge-sdd status --live` executa o status capturando painel tmux (ou fallback de log), fila e git log, retornando saída consolidada em menos de 100ms.
+- [x] **CA-02 (Paridade entre Prompts de Agentes):** Todos os arquivos de prompt (`.gemini/prompts/status.prompt.md`, `.claude/commands/status.md`, `.github/prompts/status.prompt.md` e seus templates em `internal/scaffold/templates/`) instruem exatamente a mesma ordem de verificação e o mesmo template canônico de saída.
+- [x] **CA-03 (Orçamento de Tokens):** A execução do template de status canônico gera no máximo 250 tokens de saída por chamada.
+- [x] **CA-04 (Fallback Suave sem Tmux):** Em ambiente sem tmux ou modo headless, `status --live` lê as últimas linhas de `.forge/runtime/logs/` sem gerar erro de comando.
+- [x] **CA-05 (Integridade de Suíte):** `go build ./... && go vet ./... && go test -race ./...` e `forge-sdd gate` passam com 0 falhas.
 
 ---
 

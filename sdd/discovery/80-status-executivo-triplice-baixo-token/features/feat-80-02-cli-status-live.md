@@ -4,7 +4,7 @@
 **Fase:** 80-02
 **Tamanho:** `M`
 **Depende de:** —
-**Status:** `ready` (FLX-01 aprovado)
+**Status:** `done` (implementado e validado)
 
 ## Contexto & Motivação
 Disponibilizar o comando `forge-sdd status --live` para inspecionar programaticamente a tríplice (painel tmux ou log de runtime, fila de tarefas e commits recentes git) em uma única invocação rápida (< 100ms).
@@ -33,6 +33,6 @@ Disponibilizar o comando `forge-sdd status --live` para inspecionar programatica
 - `ARQ-01`, `COD-01`, `COD-03`, `TST-04`: Testes unitários com mock/dry-run para execução com e sem tmux ativo.
 
 ## Critérios de Aceitação Executáveis
-1. `forge-sdd status --live` aceita a flag `--live` (ou `-l`).
-2. Quando executado com `--live`, imprime o resumo canônico formatado contendo painel ativo, fila e git log.
-3. `TestStatusLiveFlag` em `cmd/forge-sdd/status_test.go` valida a saída com 100% de sucesso.
+1. [x] `forge-sdd status --live` aceita a flag `--live` (ou `-l`).
+2. [x] Quando executado com `--live`, imprime o resumo canônico formatado contendo painel ativo, fila e git log.
+3. [x] `TestStatusLiveFlag` em `cmd/forge-sdd/status_test.go` valida a saída com 100% de sucesso.

@@ -4,7 +4,7 @@
 **Fase:** 80-01
 **Tamanho:** `M`
 **Depende de:** —
-**Status:** `ready` (FLX-01 aprovado)
+**Status:** `done` (implementado e validado)
 
 ## Contexto & Motivação
 Padronizar a verificação rápida de status em todas as CLIs (`/status`) via Padrão Tríplice de baixo consumo de tokens (`tmux capture-pane`, `forge-sdd queue panel`, `git log --oneline -n 5`) e template canônico de saída (< 200 tokens).
@@ -36,6 +36,6 @@ Padronizar a verificação rápida de status em todas as CLIs (`/status`) via Pa
 - `COD-01`, `COD-05`: Instruções precisas em pt-BR.
 
 ## Critérios de Aceitação Executáveis
-1. Todos os prompts de agentes instruem a execução dos 3 passos de inspeção (`tmux capture-pane` ou logs, `forge-sdd queue panel` e `git log --oneline -n 5`).
-2. O template de resposta gerado pelos agentes é idêntico em Claude, Gemini, Copilot e Codex.
-3. Orçamento de resposta estritamente menor que 250 tokens.
+1. [x] Todos os prompts de agentes instruem a execução dos 3 passos de inspeção (`tmux capture-pane` ou logs, `forge-sdd queue panel` e `git log --oneline -n 5`).
+2. [x] O template de resposta gerado pelos agentes é idêntico em Claude, Gemini, Copilot e Codex.
+3. [x] Orçamento de resposta estritamente menor que 250 tokens.

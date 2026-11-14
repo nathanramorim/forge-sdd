@@ -121,6 +121,18 @@ O pipeline suporta dependências explícitas entre tarefas na fila (`**Depende d
 - As tarefas são resolvidas respeitando o grafo acíclico dirigido (DAG), impedindo que tarefas bloqueadas iniciem antes da conclusão de suas dependências.
 - `forge-sdd queue next --batch <max>` extrai até N tarefas independentes prontas para execução em paralelo simultâneo no Builder.
 
+## Status Executivo Tríplice (`forge-sdd status --live`)
+
+Para obter o andamento da esteira sem gastar a janela de contexto de agentes:
+```bash
+forge-sdd status --live   # executa a verificação tríplice em menos de 100ms (< 200 tokens)
+forge-sdd status -l      # atalho para --live
+```
+O comando combina simultaneamente:
+1. **Ao vivo no painel:** o que o Builder ou Reviewer está executando no tmux (`tmux capture-pane`), com fallback para as últimas linhas de `.forge/runtime/logs/`.
+2. **Commits recentes:** últimos 5 commits da branch no git (`git log --oneline -n 5`).
+3. **Fila de tarefas:** checklist consolidado da iniciativa (`queue panel`).
+
 ## Configuração
 
 - `.forge/config/forge.json`: agente de cada sessão (`sessions`), modo de sessão (`session_mode`: `live` ou `headless`), limpeza de contexto (`context`: `clear` ou `continuous`), nível de permissão, tarefas em paralelo, worktrees, tentativas de rework, status do card. Copie de `forge.json.example` se quiser recomeçar.

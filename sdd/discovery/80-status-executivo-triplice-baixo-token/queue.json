@@ -8,7 +8,7 @@
       "task_id": "80-01",
       "title": "feat-80-01 — Template Canônico de Status nos Prompts de Agentes",
       "spec_path": "sdd/discovery/80-status-executivo-triplice-baixo-token/features/feat-80-01-prompts-status-triplice.md",
-      "status": "queued",
+      "status": "completed",
       "rules": [
         "DUP-01",
         "DUP-10",
@@ -21,7 +21,7 @@
       "task_id": "80-02",
       "title": "feat-80-02 — Subcomando nativo forge-sdd status --live",
       "spec_path": "sdd/discovery/80-status-executivo-triplice-baixo-token/features/feat-80-02-cli-status-live.md",
-      "status": "queued",
+      "status": "completed",
       "rules": [
         "ARQ-01",
         "COD-01",
@@ -35,7 +35,7 @@
       "task_id": "80-03",
       "title": "feat-80-03 — Documentação, LEIA-ME e Validação Final",
       "spec_path": "sdd/discovery/80-status-executivo-triplice-baixo-token/features/feat-80-03-documentacao-validacao.md",
-      "status": "queued",
+      "status": "completed",
       "depends_on": [
         "80-01",
         "80-02"

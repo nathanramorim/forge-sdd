@@ -10,6 +10,7 @@ import (
 
 	"github.com/forge-sdd/cli/internal/config"
 	"github.com/forge-sdd/cli/internal/layout"
+	"github.com/forge-sdd/cli/internal/pipeline"
 	"github.com/spf13/cobra"
 )
 
@@ -27,6 +28,15 @@ sem fazer checkout, para enxergar frentes paralelas ainda não mescladas.`,
 		dir, _ := cmd.Flags().GetString("dir")
 		if dir == "" {
 			dir = "."
+		}
+		live, _ := cmd.Flags().GetBool("live")
+		if live {
+			out, err := pipeline.FormatLiveStatus(dir)
+			if err != nil {
+				return err
+			}
+			_, err = fmt.Fprint(cmd.OutOrStdout(), out)
+			return err
 		}
 		all, _ := cmd.Flags().GetBool("all-branches")
 
@@ -123,6 +133,7 @@ Somente leitura: não cria arquivos nem branches.`,
 func init() {
 	statusCmd.Flags().String("dir", ".", "Diretório alvo do projeto Forge-SDD")
 	statusCmd.Flags().Bool("all-branches", false, "Inclui iniciativas de todas as branches locais e remotas, sem checkout")
+	statusCmd.Flags().BoolP("live", "l", false, "Exibe o status executivo tríplice em tempo real")
 	nextIDCmd.Flags().String("dir", ".", "Diretório alvo do projeto Forge-SDD")
 	nextIDCmd.Flags().String("kind", "discovery", "Tipo de item: discovery ou fix (a numeração é única)")
 	nextIDCmd.Flags().String("workitem", "", "ID do workitem (obrigatório quando naming_convention=workitem)")

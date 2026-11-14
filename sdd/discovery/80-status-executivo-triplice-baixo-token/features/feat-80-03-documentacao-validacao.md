@@ -4,7 +4,7 @@
 **Fase:** 80-03
 **Tamanho:** `P`
 **Depende de:** 80-01, 80-02
-**Status:** `ready` (FLX-01 aprovado)
+**Status:** `done` (implementado e validado)
 
 ## Contexto & Motivação
 Registrar a documentação do subcomando `status --live` e o padrão tríplice no LEIA-ME e comandos, garantindo 100% de conformidade com os portões de governança.
@@ -31,5 +31,5 @@ Registrar a documentação do subcomando `status --live` e o padrão tríplice n
 - `DUP-10`, `FLX-05`, `GOV-01`, `TST-05`: Suíte completa 100% verde e 0 violações no portão.
 
 ## Critérios de Aceitação Executáveis
-1. Documentar `forge-sdd status --live` em `docs/comandos.md` e `.forge/LEIA-ME.md.tmpl`.
-2. Execução de `go test ./...` e `forge-sdd gate` sem nenhuma regressão.
+1. [x] Documentar `forge-sdd status --live` em `docs/comandos.md` e `.forge/LEIA-ME.md.tmpl`.
+2. [x] Execução de `go test ./...` e `forge-sdd gate` sem nenhuma regressão.
