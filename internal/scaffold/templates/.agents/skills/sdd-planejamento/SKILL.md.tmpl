@@ -22,4 +22,4 @@ Comando: `/split-features` (`references/split-features.md`).
 - Todas as tasks de uma pasta compartilham uma única branch (`FLX-02`, Regra 15).
 
 ## Handoff
-Devolva plano e tasks ao Líder; o humano aprova a quebra e o enfileiramento (`forge-sdd queue enqueue`).
+Devolva plano e tasks ao Líder; o humano aprova a quebra e o enfileiramento (`forge queue enqueue`).

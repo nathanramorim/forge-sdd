@@ -58,7 +58,7 @@ func TestTmuxInstall_TabelaPorSOePATH(t *testing.T) {
 	assert.Equal(t, []string{"brew", "install", "tmux"}, argv)
 	assert.Equal(t, "macOS", desc)
 
-	argv, desc, ok = InstallPlan(mockEnv("darwin", true, "brew"))
+	argv, _, ok = InstallPlan(mockEnv("darwin", true, "brew"))
 	require.True(t, ok)
 	assert.Equal(t, []string{"brew", "install", "tmux"}, argv)
 
@@ -69,7 +69,7 @@ func TestTmuxInstall_TabelaPorSOePATH(t *testing.T) {
 	assert.Equal(t, "Debian/Ubuntu", desc)
 
 	// 3. Linux com apt-get sendo root
-	argv, desc, ok = InstallPlan(mockEnv("linux", true, "apt-get"))
+	argv, _, ok = InstallPlan(mockEnv("linux", true, "apt-get"))
 	require.True(t, ok)
 	assert.Equal(t, []string{"apt-get", "install", "-y", "tmux"}, argv)
 
@@ -272,7 +272,7 @@ func TestTmuxFallback(t *testing.T) {
 	// 2. Em auto=false (explícito), erro não chama fallback e retorna erro
 	warn.Reset()
 	fallbackCalled = false
-	created, fellBack, err = LaunchTerminalTmux(plan, runnerErr, false, &warn, func() error {
+	_, fellBack, err = LaunchTerminalTmux(plan, runnerErr, false, &warn, func() error {
 		fallbackCalled = true
 		return nil
 	})

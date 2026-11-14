@@ -8,7 +8,6 @@ import (
 
 	"github.com/forge-sdd/cli/internal/config"
 	"github.com/forge-sdd/cli/internal/layout"
-	"github.com/forge-sdd/cli/internal/monitor"
 )
 
 // TmuxProjectName extrai o nome do projeto saneado para identificação visual no tmux.
@@ -16,9 +15,7 @@ func TmuxProjectName(projectDir string) string {
 	return layout.TmuxProjectName(projectDir)
 }
 
-// TmuxSessionName devolve forge-<projeto>-<hash>: o nome do projeto saneado (só [A-Za-z0-9_-], porque
-// ":" e "." têm sentido no alvo do tmux; até 40 caracteres) e 6 hex do caminho absoluto, para duas
-// pastas com o mesmo nome (/a/app e /b/app) não caírem na mesma sessão.
+// TmuxSessionName devolve forge-<projeto>-<hash>: o nome do projeto saneado e 6 hex do caminho absoluto.
 func TmuxSessionName(projectDir string) string {
 	return layout.TmuxSessionName(projectDir)
 }
@@ -83,7 +80,7 @@ func BuildTmuxPlan(env LaunchEnv, cfg config.ForgeConfig, insideTmux bool) (*Tmu
 	}
 	proj := TmuxProjectName(env.Dir)
 	name := TmuxSessionName(env.Dir)
-	if !IsValidTmuxSessionName(name) {
+	if !layout.IsValidTmuxSessionName(name) {
 		return nil, fmt.Errorf("nome de sessão tmux %q inválido", name)
 	}
 	// "=" pede correspondência exata: sem ele o tmux casa por prefixo e pode cair na sessão de outro projeto.
@@ -149,8 +146,8 @@ func BuildTmuxPlan(env LaunchEnv, cfg config.ForgeConfig, insideTmux bool) (*Tmu
 
 		plan.Create = [][]string{
 			{"tmux", "new-session", "-d", "-s", name, "-n", winName, "-c", env.Dir, discInner},
-			{"tmux", "set-option", "-t", exact, "status-left", fmt.Sprintf("#[fg=colour16,bg=colour48,bold] 📦 %s #[default] ", proj)},
-			{"tmux", "set-option", "-t", exact, "status-left-length", "60"},
+			{"tmux", "set-option", "-t", name, "status-left", fmt.Sprintf("#[fg=colour16,bg=colour48,bold] 📦 %s #[default] ", proj)},
+			{"tmux", "set-option", "-t", name, "status-left-length", "60"},
 			{"tmux", "set-window-option", "-t", win, "pane-base-index", "0"},
 			{"tmux", "split-window", "-h", "-t", win, "-c", env.Dir, bldInner},
 			{"tmux", "split-window", "-v", "-t", win + ".1", "-c", env.Dir, revInner},
@@ -179,8 +176,8 @@ func BuildTmuxPlan(env LaunchEnv, cfg config.ForgeConfig, insideTmux bool) (*Tmu
 	} else {
 		plan.Create = [][]string{
 			{"tmux", "new-session", "-d", "-s", name, "-n", winName, "-c", env.Dir, sessions[0].Inner},
-			{"tmux", "set-option", "-t", exact, "status-left", fmt.Sprintf("#[fg=colour16,bg=colour48,bold] 📦 %s #[default] ", proj)},
-			{"tmux", "set-option", "-t", exact, "status-left-length", "60"},
+			{"tmux", "set-option", "-t", name, "status-left", fmt.Sprintf("#[fg=colour16,bg=colour48,bold] 📦 %s #[default] ", proj)},
+			{"tmux", "set-option", "-t", name, "status-left-length", "60"},
 			// Quem usa pane-base-index 1 no tmux.conf teria painéis 1, 2 e 3: fixa 0 antes de endereçá-los.
 			{"tmux", "set-window-option", "-t", win, "pane-base-index", "0"},
 			{"tmux", "split-window", "-h", "-t", win, "-c", env.Dir, sessions[1].Inner},

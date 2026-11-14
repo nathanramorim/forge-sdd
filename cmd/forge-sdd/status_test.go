@@ -17,7 +17,10 @@ func runRoot(t *testing.T, args ...string) (string, error) {
 	t.Helper()
 	// O rootCmd é global: restaura os padrões das flags entre execuções.
 	_ = statusCmd.Flags().Set("all-branches", "false")
+	_ = statusCmd.Flags().Set("initiatives", "false")
 	_ = statusCmd.Flags().Set("live", "false")
+	_ = statusCmd.Flags().Set("once", "false")
+	_ = statusCmd.Flags().Set("compact", "false")
 	_ = nextIDCmd.Flags().Set("kind", "discovery")
 	_ = nextIDCmd.Flags().Set("workitem", "")
 	_ = updateCmd.Flags().Set("dry-run", "false")
@@ -150,35 +153,55 @@ func TestStatusLiveFlag(t *testing.T) {
 		]
 	}`), 0o644))
 
-	// Testa flag longa --live
+	// Testa flag --compact (Template Canônico tríplice para agentes de IA)
 	start := time.Now()
-	out, err := runRoot(t, "status", "--dir", dir, "--live")
-	elapsed := time.Since(start)
+	outCompact, err := runRoot(t, "status", "--dir", dir, "--compact")
+	elapsedCompact := time.Since(start)
+	require.NoError(t, err)
+	assert.Less(t, elapsedCompact, 100*time.Millisecond, "CA-01: status compacto deve executar em menos de 100ms")
+
+	assert.Contains(t, outCompact, "### Status da Esteira —")
+	assert.Contains(t, outCompact, "1. Ao Vivo no Painel")
+	assert.Contains(t, outCompact, "✎ internal/status.go")
+	assert.Contains(t, outCompact, "2. Commits Recentes no Git:")
+	assert.Contains(t, outCompact, "feat: commit inicial")
+	assert.Contains(t, outCompact, "3. Fila de Tarefas:")
+	assert.Contains(t, outCompact, "• [x] 80-01: Template Canônico")
+	assert.Contains(t, outCompact, "• [ ] 80-02: Subcomando live")
+	assert.Contains(t, outCompact, "Próximo passo: Acompanhar o Builder")
+
+	tokensCompact := len(strings.Fields(outCompact))
+	assert.Less(t, tokensCompact, 250, "CA-03: saída compacta deve respeitar o limite de 250 tokens")
+
+	// Testa flag longa --live (Painel executivo vivo/living dashboard)
+	startLive := time.Now()
+	out, err := runRoot(t, "status", "--dir", dir, "--live", "--once")
+	elapsedLive := time.Since(startLive)
 
 	require.NoError(t, err)
-	assert.Less(t, elapsed, 100*time.Millisecond, "CA-01: deve executar em menos de 100ms")
+	assert.Less(t, elapsedLive, 500*time.Millisecond, "painel vivo snapshot deve executar rapidamente (< 500ms)")
 
-	assert.Contains(t, out, "### Status da Esteira —")
-	assert.Contains(t, out, "1. Ao Vivo no Painel")
-	assert.Contains(t, out, "✎ internal/status.go")
-	assert.Contains(t, out, "… trabalhando há 1m · 1 arquivo alterado")
-
-	assert.Contains(t, out, "2. Commits Recentes no Git:")
+	assert.Contains(t, out, "feat/80-status")
+	assert.Contains(t, out, "PROCESSAMENTO & CONSUMO POR SESSÃO")
+	assert.Contains(t, out, "PROGRESSO DA ESTEIRA (DAG)")
+	assert.Contains(t, out, "50% (1/2 tasks)")
+	assert.Contains(t, out, "[✓] 80-01: Template Canônico")
+	assert.Contains(t, out, "[ ] 80-02: Subcomando live")
+	assert.Contains(t, out, "COMMITS RECENTES NO GIT")
 	assert.Contains(t, out, "feat: commit inicial")
-
-	assert.Contains(t, out, "3. Fila de Tarefas:")
-	assert.Contains(t, out, "• [x] 80-01: Template Canônico")
-	assert.Contains(t, out, "• [ ] 80-02: Subcomando live")
-
 	assert.Contains(t, out, "Próximo passo: Acompanhar o Builder")
 
 	// Testa flag curta -l
-	outShort, err := runRoot(t, "status", "--dir", dir, "-l")
+	outShort, err := runRoot(t, "status", "--dir", dir, "-l", "--once")
 	require.NoError(t, err)
 	assert.Equal(t, out, outShort, "flag curta -l deve produzir a mesma saída que --live")
 
-	// CA-03: Orçamento de tokens menor que 250 tokens
-	tokensAprox := len(strings.Fields(out))
-	assert.Less(t, tokensAprox, 250, "CA-03: saída deve respeitar o limite de 250 tokens")
+	// Testa forge status padrão (snapshot no CLI)
+	outSnapshot, err := runRoot(t, "status", "--dir", dir)
+	require.NoError(t, err)
+	assert.Contains(t, outSnapshot, "PROCESSAMENTO & CONSUMO POR SESSÃO")
+	assert.Contains(t, outSnapshot, "PROGRESSO DA ESTEIRA (DAG)")
+	assert.Contains(t, outSnapshot, "INICIATIVAS (sdd/discovery)")
+	assert.Contains(t, outSnapshot, "80-status")
 }
 

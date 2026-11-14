@@ -11,7 +11,7 @@ import (
 )
 
 // inboxHookCommand é o comando que o hook da sessão Discovery executa a cada prompt.
-const inboxHookCommand = "forge-sdd inbox --unread --hook"
+const inboxHookCommand = "forge inbox --unread --hook"
 
 // MergeClaudeInboxHook garante o hook UserPromptSubmit do inbox em .claude/settings.json sem
 // sobrescrever a configuração do usuário (SEG-02): cria o arquivo se faltar, acrescenta só a
@@ -55,7 +55,7 @@ func MergeClaudeInboxHook(targetDir string) (bool, error) {
 			if inner, ok := gm["hooks"].([]any); ok {
 				for _, h := range inner {
 					if hm, ok := h.(map[string]any); ok {
-						if cmd, _ := hm["command"].(string); strings.Contains(cmd, "forge-sdd inbox") {
+						if cmd, _ := hm["command"].(string); strings.Contains(cmd, "forge inbox") || strings.Contains(cmd, "forge-sdd inbox") {
 							return false, nil // já instalado
 						}
 					}

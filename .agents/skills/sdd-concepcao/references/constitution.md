@@ -15,4 +15,4 @@ Garanta que a Constituição e a documentação técnica reflitam a realidade do
    - `sdd/spec/decisions.md` (decisões do projeto e índice de ADRs).
 6. **ADRs:** crie uma ADR em `sdd/spec/adr/` para cada decisão estrutural (`GOV-01`).
 7. **Segurança:** defina as regras e diretrizes de segurança (segredos, validação de entradas e dependências). Projeto vazio: proponha uma arquitetura base.
-8. **Fechamento e validação:** execute `forge-sdd brief --check`. Só dê o alinhamento por concluído quando o comando reportar o estado `pronta` (código de saída 0).
+8. **Fechamento e validação:** execute `forge brief --check`. Só dê o alinhamento por concluído quando o comando reportar o estado `pronta` (código de saída 0).

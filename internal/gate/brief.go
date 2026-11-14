@@ -273,7 +273,6 @@ func briefProject(dir, constitution string) string {
 		if m := briefTitleRe.FindStringSubmatch(line); m != nil {
 			return strings.TrimSpace(m[1])
 		}
-		break
 	}
 	if abs, err := filepath.Abs(dir); err == nil {
 		return filepath.Base(abs)

@@ -112,15 +112,16 @@ func runRootMenu(cmd *cobra.Command) error {
 func shortHelp() string {
 	return `Forge SDD ` + version + `
 Sem terminal interativo o menu não abre. Comandos mais usados:
-  forge-sdd init | update          instala ou atualiza a estrutura
-  forge-sdd pipeline init          ativa o pipeline multi-sessão
-  forge-sdd up [--discovery X --builder Y --reviewer Z]   abre as 3 sessões
-  forge-sdd status | gate | doctor
-  forge-sdd --help                 todos os comandos`
+  forge init | update          instala ou atualiza a estrutura
+  forge pipeline init          ativa o pipeline multi-sessão
+  forge up [--discovery X --builder Y --reviewer Z]   abre as 3 sessões
+  forge status | gate | doctor
+  forge --help                 todos os comandos`
 }
 
 const (
 	valUp      = "up"
+	valLive    = "live"
 	valStatus  = "status"
 	valQueue   = "queue"
 	valDiag    = "diag"
@@ -163,6 +164,7 @@ func runMenu(env *menuEnv) error {
 
 		opts = append(opts,
 			menuOption{Label: "Iniciar esteira (up)", Value: valUp},
+			menuOption{Label: "Painel vivo da esteira (status --live)", Value: valLive},
 			menuOption{Label: "Status das iniciativas e esteira", Value: valStatus},
 			menuOption{Label: "Fila de tasks e inbox de notificações", Value: valQueue},
 			menuOption{Label: "Diagnóstico de saúde e regras (Doctor & Gate)", Value: valDiag},
@@ -183,12 +185,14 @@ func runMenu(env *menuEnv) error {
 			fmt.Fprintln(env.out, "\nPasso 1: Alinhar o projeto")
 			fmt.Fprintln(env.out, "Abra o seu agente de IA (Claude, Gemini ou Codex) e execute:")
 			fmt.Fprintln(env.out, "  /constitution")
-			fmt.Fprintln(env.out, "O comando vai alinhar stack, arquitetura, módulos e regras, validando com `forge-sdd brief --check`.")
+			fmt.Fprintln(env.out, "O comando vai alinhar stack, arquitetura, módulos e regras, validando com `forge brief --check`.")
 			_ = env.p.Pause("Enter para voltar ao menu")
 		case valInstall:
 			installed = env.installOrUpdate() == nil && config.DetectProject(env.dir)
 		case valUp:
 			env.startSessions()
+		case valLive:
+			env.act("status", "--live", "--dir", env.dir)
 		case valStatus:
 			env.act("status", "--dir", env.dir)
 		case valQueue:

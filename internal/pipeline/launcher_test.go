@@ -209,7 +209,7 @@ func TestSessions_DiscoveryInterativaPorCLI(t *testing.T) {
 }
 
 func TestDiscoveryPrompt_ProtocoloBrief(t *testing.T) {
-	assert.Contains(t, DiscoveryPrompt, "forge-sdd brief")
+	assert.Contains(t, DiscoveryPrompt, "forge brief")
 	assert.Contains(t, DiscoveryPrompt, "proponha /constitution")
 	assert.Contains(t, DiscoveryPrompt, "cite as decisoes do projeto na spec")
 	assert.Contains(t, DiscoveryPrompt, "/implementar")

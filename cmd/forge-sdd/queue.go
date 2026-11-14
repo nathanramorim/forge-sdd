@@ -418,7 +418,7 @@ func pipelineModeGuard(cmd *cobra.Command, dir string) error {
 	if err != nil {
 		hint = " (atenção: .forge/config/forge.json está inválido: " + firstLineOf(err.Error()) + ")"
 	}
-	return fmt.Errorf("modo pipeline: o Builder constrói nas outras sessões; use forge-sdd dispatch <iniciativa> (ou --local para construir nesta sessão por sua conta)%s", hint)
+	return fmt.Errorf("modo pipeline: o Builder constrói nas outras sessões; use forge dispatch <iniciativa> (ou --local para construir nesta sessão por sua conta)%s", hint)
 }
 
 func firstLineOf(s string) string {

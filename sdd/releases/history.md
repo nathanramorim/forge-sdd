@@ -4,6 +4,18 @@ Este arquivo registra o histórico de entregas de produto deste projeto.
 
 ## Entregas
 
+### Versão 4.5.2 — Fix no Monitor ps: Isolamento Estrito de Processos entre Projetos (Beta)
+
+Compatível com a 4.5.1-beta.
+
+*   **Isolamento Estrito no `forge ps`:** impede o vazamento de processos de outros projetos que compartilham o mesmo servidor daemon do Tmux. Ao inspecionar processos de um projeto, o comando obtém a correlação exata de sessão via `tmux list-panes -a -F "#{session_name}|#{pane_pid}|..."` e nunca ingere processos de outras sessões nem o processo raiz compartilhado do daemon Tmux como raiz de busca de filhos.
+
+### Versão 4.5.1 — Fix no Tmux: Correção na sintaxe do set-option (Beta)
+
+Compatível com a 4.5.0-beta.
+
+*   **Correção de prefixo em comandos de estilização do Tmux:** substitui o alvo com prefixo de igualdade (`=session`) pelo nome direto da sessão nos comandos `tmux set-option -t <session> status-left` e `status-left-length`, prevenindo o erro `exit status 1: no such session` em versões modernas do tmux (ex: tmux 3.8 no macOS) e garantindo que o launcher abra os 3 painéis integrados no tmux sem recair indevidamente para janelas nativas avulsas do sistema.
+
 ### Versão 4.5.0 — Clareza no Pipeline, Identificação Visual no Tmux, Menu Direto, DAG e Monitor ps (Beta)
 
 Compatível com a 4.4.1-beta (Discovery 79, features `79-01` a `79-07`).
@@ -14,6 +26,7 @@ Compatível com a 4.4.1-beta (Discovery 79, features `79-01` a `79-07`).
 *   **Alertas Visuais e Fluxo de Entrega Não Bloqueante (`79-04`):** mecanismo de feedback em tempo real para a sessão de Discovery durante o despacho para o Builder, evitando loops ociosos de terminal e garantindo que o desenvolvedor tenha a linha de comando sempre liberada.
 *   **Paralelismo de Fila por DAG e Ondas de Execução (`79-05`):** suporte nativo ao atributo `depends_on` no `queue.json`, cálculo determinístico de grafos de dependência e liberação automática de tarefas em ondas paralelas quando suas dependências são satisfeitas.
 *   **Monitor Nativo de Processos `forge-sdd ps` (`79-06`):** novo comando CLI para inspecionar em tempo real os processos, servidores em background (ex: dev servers, workers, compilações) e threads ativas associadas à sessão e ao repositório, com flags `--json` e `--kill`.
+*   **Status Executivo Tríplice Live (`80-01` a `80-03`):** subcomando `forge status --live` para consolidação instantânea (< 100ms e < 200 tokens) combinando captura de tela do worker ativo no tmux, commits git recentes e fila de tarefas da esteira.
 *   **Documentação Encantadora e Simulador Interativo Atualizado (`79-07`):** atualização do guia do pipeline (`docs/pipeline.md`, `LEIA-ME.md.tmpl`), documentação de comandos (`docs/comandos.md`) e simulação em tempo real no emulador web da landing page (`site/src/data/emulator.ts`).
 
 ### Versão 4.4.1 — Fix no Pipeline: Gemini abre CLI agy e auto-cura em instalações anteriores (Beta)

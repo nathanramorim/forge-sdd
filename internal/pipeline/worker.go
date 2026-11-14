@@ -295,7 +295,7 @@ func VerifyJobHandoff(dir, role, workerName string, now func() time.Time, jobID 
 		}
 		j := e.Job
 		if j.PR.URL == nil || j.PR.Number == nil {
-			return "o agente terminou sem registrar o PR (forge-sdd pipeline pr-opened)"
+			return "o agente terminou sem registrar o PR (forge pipeline pr-opened)"
 		}
 		review := j
 		review.ID = reviewJobID(j.ID)
@@ -316,7 +316,7 @@ func VerifyJobHandoff(dir, role, workerName string, now func() time.Time, jobID 
 		// Só o veredito aplicado por `bus review` conta: um `bus complete` solto fecha o job sem
 		// notificar nem devolver ao Builder.
 		if e.State != layout.StateDone || actionFromNote(e.Job) == "" {
-			return "o agente terminou sem aplicar o veredito (forge-sdd bus review)"
+			return "o agente terminou sem aplicar o veredito (forge bus review)"
 		}
 	}
 	return ""

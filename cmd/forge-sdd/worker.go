@@ -23,8 +23,8 @@ var workerCmd = &cobra.Command{
 ocioso; para cada job reivindicado invoca o agente de forma não interativa com o perfil da CLI de
 forge.json (claude, gemini, copilot, codex ou agy), do agente da sessão (sessions) ou de --cli, renova o lease, grava o log em .forge/runtime/logs e fecha o job.
 
-Builder: exige que o agente registre o PR (forge-sdd pipeline pr-opened); então enfileira a revisão.
-Reviewer: exige que o agente aplique o veredito (forge-sdd bus review).`,
+Builder: exige que o agente registre o PR (forge pipeline pr-opened); então enfileira a revisão.
+Reviewer: exige que o agente aplique o veredito (forge bus review).`,
 	Args: cobra.NoArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		dir, _ := cmd.Flags().GetString("dir")

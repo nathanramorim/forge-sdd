@@ -57,4 +57,4 @@ Use esta trilha para trazer a inteligência do SDD para um codebase que já poss
 ## 🛠️ Ciclo de Vida da Sessão
 
 Todo trabalho segue o ciclo **READ-MIN -> PLAN -> ACT -> WRITE -> CLOSE**.
-O agente **sempre** lê o `status.md` da iniciativa primeiro (`forge-sdd status`). Nunca pule essa etapa!
+O agente **sempre** lê o `status.md` da iniciativa primeiro (`forge status`). Nunca pule essa etapa!

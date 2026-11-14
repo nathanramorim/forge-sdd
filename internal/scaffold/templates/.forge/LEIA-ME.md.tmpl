@@ -11,59 +11,59 @@ Três sessões de terminal trabalham juntas: **você conversa numa, e outras dua
 ## Começar em 3 passos
 
 **Primeiro passo em projeto novo: a Constituição (`/constitution`)**
-Antes de qualquer discovery ou feature, o projeto precisa ter a sua missão, stack, módulos (`sdd/spec/modules.md`), fluxos (`sdd/spec/flows.md`) e decisões arquiteturais (`sdd/spec/decisions.md`) definidos. O menu do `forge` e o `forge-sdd doctor` alertam quando a constituição é rascunho e destacam `/constitution` como passo 1.
+Antes de qualquer discovery ou feature, o projeto precisa ter a sua missão, stack, módulos (`sdd/spec/modules.md`), fluxos (`sdd/spec/flows.md`) e decisões arquiteturais (`sdd/spec/decisions.md`) definidos. O menu do `forge` e o `forge doctor` alertam quando a constituição é rascunho e destacam `/constitution` como passo 1.
 
 O comando determinístico de contexto:
 ```bash
-forge-sdd brief           # imprime o resumo: missão, stack, módulos, fluxos e decisões
-forge-sdd brief --check   # confere prontidão (sai 0 pronta, 3 rascunho)
+forge brief           # imprime o resumo: missão, stack, módulos, fluxos e decisões
+forge brief --check   # confere prontidão (sai 0 pronta, 3 rascunho)
 ```
-Toda sessão de Discovery inicia executando `forge-sdd brief` para ler a missão e as decisões arquiteturais antes de propor novas mudanças.
+Toda sessão de Discovery inicia executando `forge brief` para ler a missão e as decisões arquiteturais antes de propor novas mudanças.
 
 **Jeito mais fácil: rode `forge` e navegue pelo menu** (setas, Enter, Esc volta). Em **Pipeline multi-sessão → Iniciar as 3 sessões** você escolhe o agente de cada sessão (Claude, Gemini, Copilot ou Codex), o nível de permissão, vê a checagem (CLI instalada, arquivos do agente) e confirma. A escolha fica lembrada para a próxima vez.
 
 Sem menu (scripts):
 
 ```bash
-forge-sdd pipeline init                                  # 1. ativa o modo (cria .forge/config/forge.json)
-forge-sdd up --discovery claude --builder codex --reviewer gemini   # 2. abre as 3 sessões
+forge pipeline init                                  # 1. ativa o modo (cria .forge/config/forge.json)
+forge up --discovery claude --builder codex --reviewer gemini   # 2. abre as 3 sessões
 # 3. na sessão forge-discovery:
 /implementar nome-da-feature
 ```
 
-`forge-sdd up --cli <agente>` usa o mesmo agente nas três; sem flags vale o que está em `sessions` de `forge.json`. Cada sessão pode usar um agente diferente.
+`forge up --cli <agente>` usa o mesmo agente nas três; sem flags vale o que está em `sessions` de `forge.json`. Cada sessão pode usar um agente diferente.
 
 | Agente | Sessão interativa (Discovery) | Worker (Builder e Reviewer) | Instruções que lê |
 |---|---|---|---|
 | `claude` | sim | `claude -p` | `CLAUDE.md` |
 | `gemini` | sim | `agy -p` | `GEMINI.md` |
 | `copilot` | sim | `copilot -p` | `.github/copilot-instructions.md`, `AGENTS.md` |
-| `codex` | sim | `codex exec` | `AGENTS.md` (gerado pelo `forge-sdd update --agent openai`) |
+| `codex` | sim | `codex exec` | `AGENTS.md` (gerado pelo `forge update --agent openai`) |
 
 Gemini, Copilot e Codex seguem a documentação oficial das CLIs, mas **ainda não foram executados de ponta a ponta com o worker**: os perfis estão em `cli_profiles` de `forge.json` e podem ser ajustados.
 
-**Permissões:** o worker roda o agente sem você aprovar cada passo. `project` (padrão) libera edição e só os comandos listados em `allow_commands` (`git`, `gh`, `forge-sdd`); `full` usa o bypass de cada CLI e só deve ser usado em ambiente isolado. No Gemini, o nível `project` libera só edição: para rodar testes no Builder é preciso `full`.
+**Permissões:** o worker roda o agente sem você aprovar cada passo. `project` (padrão) libera edição e só os comandos listados em `allow_commands` (`git`, `gh`, `forge`); `full` usa o bypass de cada CLI e só deve ser usado em ambiente isolado. No Gemini, o nível `project` libera só edição: para rodar testes no Builder é preciso `full`.
 
-Builder e Reviewer mostram `Aguardando jobs na fila...` até chegar trabalho. Para só ver os comandos de abertura, sem abrir nada: `forge-sdd up --dry-run`. Os scripts `.forge/forge-up.sh` (macOS, Linux, WSL, Git Bash) e `.forge/forge-up.ps1` (Windows) fazem o mesmo.
+Builder e Reviewer mostram `Aguardando jobs na fila...` até chegar trabalho. Para só ver os comandos de abertura, sem abrir nada: `forge up --dry-run`. Os scripts `.forge/forge-up.sh` (macOS, Linux, WSL, Git Bash) e `.forge/forge-up.ps1` (Windows) fazem o mesmo.
 
 Sem terminal automático? Abra você mesmo, um terminal por papel:
 
 ```bash
-forge-sdd worker --role builder
-forge-sdd worker --role reviewer
+forge worker --role builder
+forge worker --role reviewer
 ```
 
 ## O que cada painel mostra e contingência de terminal
 
-Com `tmux` instalado, `forge` e `forge-sdd up` abrem **uma tela com três painéis**, cada um com o nome da sessão no topo: `forge-discovery` (grande, à esquerda), `forge-builder` e `forge-reviewer` (empilhados à direita).
+Com `tmux` instalado, `forge` e `forge up` abrem **uma tela com três painéis**, cada um com o nome da sessão no topo: `forge-discovery` (grande, à esquerda), `forge-builder` e `forge-reviewer` (empilhados à direita).
 
 **Instalação do tmux e contingência de terminal:**
 - Em modo `auto`, se o `tmux` não estiver no PATH, o Forge detecta o gerenciador de pacotes do sistema (Homebrew no macOS, apt-get, dnf, pacman, apk ou zypper no Linux) e pergunta se você deseja instalá-lo com confirmação interativa.
 - Se você recusar ou a instalação falhar, o Forge cai com graça (**contingência do tmux**) para **janelas nativas do sistema**. No Windows com Windows Terminal (`wt.exe`), ele abre as 3 sessões em abas/painéis divididos do Windows Terminal; no Windows nativo sem `wt.exe`, abre janelas separadas de `cmd.exe`.
 - No **WSL** (Windows Subsystem for Linux), o tmux funciona nativamente dentro da distribuição Linux.
-- Você pode forçar a escolha com `forge-sdd up --terminal tmux|native|auto` ou definindo `"terminal": "tmux"` ou `"native"` em `forge.json`.
+- Você pode forçar a escolha com `forge up --terminal tmux|native|auto` ou definindo `"terminal": "tmux"` ou `"native"` em `forge.json`.
 
-Dentro do tmux: `Ctrl+b` e as setas trocam de painel, `Ctrl+b d` solta a tela sem encerrar nada, e `tmux ls` mostra o nome da sessão (`forge-<projeto>-<6 hex do caminho>`) para reconectar com `tmux attach -t =<nome>`; rodar `forge` ou `forge-sdd up` de novo também reconecta.
+Dentro do tmux: `Ctrl+b` e as setas trocam de painel, `Ctrl+b d` solta a tela sem encerrar nada, e `tmux ls` mostra o nome da sessão (`forge-<projeto>-<6 hex do caminho>`) para reconectar com `tmux attach -t =<nome>`; rodar `forge` ou `forge up` de novo também reconecta.
 
 **Identidade visual e alertas no tmux:**
 - A barra inferior exibe o identificador visual `📦 <projeto>`, o nome da janela é padronizado como `forge:<projeto>`, e a barra de status à direita exibe a contabilidade agregada de tokens: `Tokens Totais: <n>k (Disc: .. · Bld: .. · Rev: ..)`.
@@ -80,11 +80,11 @@ Nos painéis do Builder e do Reviewer o worker mostra o que o agente está fazen
 ■ concluído em 4m12s · 14 arquivos alterados
 ```
 
-As linhas vêm dos eventos do agente (Claude, Gemini e Codex) e, para qualquer agente, do acompanhamento do `git status`; segredos em comandos aparecem mascarados. `forge-sdd worker --raw` mostra a saída bruta.
+As linhas vêm dos eventos do agente (Claude, Gemini e Codex) e, para qualquer agente, do acompanhamento do `git status`; segredos em comandos aparecem mascarados. `forge worker --raw` mostra a saída bruta.
 
 **Limite de uso:** se o agente avisa que bateu o limite (como o de 5 horas do Claude), o job volta à fila sem gastar tentativa, o painel mostra `⏸ limite de uso do claude: retomo às 22:40`, o inbox avisa e o worker retoma sozinho (espera de até 6 horas; um mesmo job é devolvido no máximo 3 vezes, e limite semanal ou com data faz o job falhar com o motivo).
 
-**A Discovery não executa o build.** Em modo pipeline, o `/split-features` termina em `forge-sdd dispatch` e entrega ao Builder; `queue next` e `queue complete` só funcionam sob um worker (ou com `--local`, por sua conta). Com `pm_mcp.require_existing_card: false` o despacho não pede card nem evidência.
+**A Discovery não executa o build.** Em modo pipeline, o `/split-features` termina em `forge dispatch` e entrega ao Builder; `queue next` e `queue complete` só funcionam sob um worker (ou com `--local`, por sua conta). Com `pm_mcp.require_existing_card: false` o despacho não pede card nem evidência.
 
 ## O que acontece depois do `/implementar`
 
@@ -106,13 +106,13 @@ Por padrão, os workers operam em modo `headless` (executam uma nova chamada de 
 *   **Falhas Lidas da Tela:** o despachante inspeciona a tela em tempo real para detectar limites de cota (`DetectUsageLimit` → pausa automática) ou indisponibilidade de conta/tier (`DetectAgentUnavailable` → aviso no inbox).
 *   **Queda Suave:** se `live` estiver ativado sem tmux ou em terminal nativo, o pipeline recai suavemente para `headless` com um aviso no terminal.
 
-## Monitor de Processos e Consumo (`forge-sdd ps`)
+## Monitor de Processos e Consumo (`forge ps`)
 
 Para ter visibilidade total sobre o que está rodando no computador relacionado ao projeto:
 ```bash
-forge-sdd ps            # exibe tabela com PID, papel, CPU %, RAM (MB), tempo e estado
-forge-sdd ps --json     # exporta em JSON para dashboards e automações
-forge-sdd ps --kill-zombies  # encerra processos orfãos ou presos de sessões anteriores
+forge ps            # exibe tabela com PID, papel, CPU %, RAM (MB), tempo e estado
+forge ps --json     # exporta em JSON para dashboards e automações
+forge ps --kill-zombies  # encerra processos orfãos ou presos de sessões anteriores
 ```
 O monitor também está disponível no menu interativo (`forge`) sob a opção de diagnóstico.
 
@@ -120,14 +120,14 @@ O monitor também está disponível no menu interativo (`forge`) sob a opção d
 
 O pipeline suporta dependências explícitas entre tarefas na fila (`**Depende de:** task-1, task-2`).
 - As tarefas são resolvidas respeitando o grafo acíclico dirigido (DAG), impedindo que tarefas bloqueadas iniciem antes da conclusão de suas dependências.
-- `forge-sdd queue next --batch <max>` extrai até N tarefas independentes prontas para execução em paralelo simultâneo no Builder.
+- `forge queue next --batch <max>` extrai até N tarefas independentes prontas para execução em paralelo simultâneo no Builder.
 
-## Status Executivo Tríplice (`forge-sdd status --live`)
+## Status Executivo Tríplice (`forge status --live`)
 
 Para obter o andamento da esteira sem gastar a janela de contexto de agentes:
 ```bash
-forge-sdd status --live   # executa a verificação tríplice em menos de 100ms (< 200 tokens)
-forge-sdd status -l      # atalho para --live
+forge status --live   # executa a verificação tríplice em menos de 100ms (< 200 tokens)
+forge status -l      # atalho para --live
 ```
 O comando combina simultaneamente:
 1. **Ao vivo no painel:** o que o Builder ou Reviewer está executando no tmux (`tmux capture-pane`), com fallback para as últimas linhas de `.forge/runtime/logs/`.
@@ -145,12 +145,12 @@ O comando combina simultaneamente:
 
 | Sintoma | O que fazer |
 |---|---|
-| Job parado em `processing` (worker caiu) | 15 minutos depois (o prazo do lease), `forge-sdd bus recover --role builder` (ou `reviewer`) devolve ao `pending` |
-| Ver a fila | `forge-sdd bus list --role builder` |
+| Job parado em `processing` (worker caiu) | 15 minutos depois (o prazo do lease), `forge bus recover --role builder` (ou `reviewer`) devolve ao `pending` |
+| Ver a fila | `forge bus list --role builder` |
 | O que o worker fez | o painel do Builder (ou do Reviewer) e os logs completos em `.forge/runtime/logs/` |
-| Painel parado com `⏸` | limite de uso do agente: ele retoma sozinho no horário mostrado (ou `forge-sdd bus requeue` para devolver um job à mão) |
+| Painel parado com `⏸` | limite de uso do agente: ele retoma sozinho no horário mostrado (ou `forge bus requeue` para devolver um job à mão) |
 | `/implementar` bloqueado | leia a lista de pendências: falta card, ADR, rule ou evidência do card |
-| Avisos não aparecem | `forge-sdd inbox` mostra as notificações pendentes |
+| Avisos não aparecem | `forge inbox` mostra as notificações pendentes |
 
 O estado de execução (filas, logs, worktrees) fica em `.forge/runtime/`, fora do git.
 

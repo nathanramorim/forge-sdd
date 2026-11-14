@@ -20,8 +20,8 @@ var upCmd = &cobra.Command{
 	Short: "Abre as 3 sessões do pipeline: forge-discovery, forge-builder e forge-reviewer",
 	Long: `Abre três terminais nomeados no sistema operacional atual (macOS, Linux, WSL ou Windows):
   forge-discovery   sessão interativa do agente
-  forge-builder     forge-sdd worker --role builder
-  forge-reviewer    forge-sdd worker --role reviewer
+  forge-builder     forge worker --role builder
+  forge-reviewer    forge worker --role reviewer
 O agente de cada sessão (claude, gemini, copilot ou codex) vem de --discovery, --builder e
 --reviewer, depois de "sessions" em .forge/config/forge.json; --cli vale para as três sessões que
 não tiverem escolha própria. --dry-run só imprime os comandos.`,

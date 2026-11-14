@@ -31,12 +31,12 @@ func TestPipeline_ScriptsDeLauncherInstaladosEExecutaveis(t *testing.T) {
 	}
 	data, _ := os.ReadFile(sh)
 	assert.True(t, strings.HasPrefix(string(data), "#!/usr/bin/env bash"))
-	assert.Contains(t, string(data), `exec forge-sdd up "$@"`)
-	assert.NotContains(t, string(data), "osascript", "a lógica de terminais fica em forge-sdd up (D-8)")
+	assert.Contains(t, string(data), `exec forge up "$@"`)
+	assert.NotContains(t, string(data), "osascript", "a lógica de terminais fica em forge up (D-8)")
 
 	ps1, err := os.ReadFile(filepath.Join(dir, ".forge", "forge-up.ps1"))
 	require.NoError(t, err)
-	assert.Contains(t, string(ps1), "& forge-sdd up @args")
+	assert.Contains(t, string(ps1), "& forge up @args")
 	assert.Contains(t, string(ps1), "Set-Location")
 	assert.NotContains(t, string(ps1), "bash", "o .ps1 roda sem Git Bash")
 
@@ -61,7 +61,7 @@ func TestPipeline_ForgeUpFalhaComMensagemSemForgeSdd(t *testing.T) {
 	cmd.Env = []string{"PATH=/nonexistent"}
 	out, err := cmd.CombinedOutput()
 	require.Error(t, err)
-	assert.Contains(t, string(out), "forge-sdd não está no PATH")
+	assert.Contains(t, string(out), "forge não está no PATH")
 }
 
 func TestPipeline_HookDoInboxSoComClaudeESemApagarConfiguracao(t *testing.T) {
@@ -178,7 +178,7 @@ func TestScaffold_SkillsDoModoPipelineDizemQueADiscoveryNaoExecuta(t *testing.T)
 		return string(b)
 	}
 	split := read(".agents/skills/sdd-planejamento/references/split-features.md")
-	assert.Contains(t, split, "forge-sdd dispatch <iniciativa>")
+	assert.Contains(t, split, "forge dispatch <iniciativa>")
 	assert.Contains(t, split, "entregue ao Builder")
 	assert.Contains(t, split, "Esta sessão não implementa")
 	impl := read(".agents/skills/sdd-build/references/implementar.md")
@@ -196,12 +196,12 @@ func TestScaffold_ProtocoloBrief(t *testing.T) {
 		return string(b)
 	}
 
-	assert.Contains(t, read("CLAUDE.md"), "Discovery começa por `forge-sdd brief`")
-	assert.Contains(t, read("GEMINI.md"), "Discovery começa por `forge-sdd brief`")
-	assert.Contains(t, read("AGENTS.md"), "Discovery começa por `forge-sdd brief`")
+	assert.Contains(t, read("CLAUDE.md"), "Discovery começa por `forge brief`")
+	assert.Contains(t, read("GEMINI.md"), "Discovery começa por `forge brief`")
+	assert.Contains(t, read("AGENTS.md"), "Discovery começa por `forge brief`")
 
 	concepcao := read(".agents/skills/sdd-concepcao/SKILL.md")
-	assert.Contains(t, concepcao, "rode `forge-sdd brief` antes de tudo")
+	assert.Contains(t, concepcao, "rode `forge brief` antes de tudo")
 	assert.Contains(t, concepcao, "Decisões do projeto aplicadas")
 
 	for _, ref := range []string{
@@ -210,7 +210,7 @@ func TestScaffold_ProtocoloBrief(t *testing.T) {
 		".agents/skills/sdd-concepcao/references/novo-fix.md",
 		".agents/skills/sdd-planejamento/references/split-features.md",
 	} {
-		assert.Contains(t, read(ref), "forge-sdd brief", ref)
+		assert.Contains(t, read(ref), "forge brief", ref)
 	}
 }
 
