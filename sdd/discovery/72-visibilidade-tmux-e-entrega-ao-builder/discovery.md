@@ -1,6 +1,6 @@
 # Discovery 72 — Visibilidade, tmux e Entrega ao Builder (v4.2.0)
 
-Status: `FLX-01` pendente. Nenhum código alterado.
+Status: `FLX-01` aprovado em 2026-11-14 (decisões 1 a 4 aceitas); fatiado em 5 features. Nenhum código alterado.
 
 ## Problema
 O primeiro uso real do pipeline (projeto `barbearia-app`, 2026-11-14) mostrou cinco falhas no dia a dia, todas de experiência e confiabilidade, não de arquitetura:

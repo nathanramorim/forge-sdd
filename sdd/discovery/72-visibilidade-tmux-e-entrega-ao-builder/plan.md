@@ -1,6 +1,6 @@
 # Plano de Discovery 72 — Visibilidade, tmux e Entrega ao Builder (v4.2.0)
 
-Branch única `feat/72-visibilidade-tmux-e-entrega-ao-builder` (`FLX-02`), em worktree `../forge-sdd-72`, empilhada na `feat/71`. O PR mira `feat/71`; a `4.2.0-beta` sai com as duas. Pasta de execução: `sdd/discovery/72-visibilidade-tmux-e-entrega-ao-builder/features/`. Status: `FLX-01` pendente.
+Branch única `feat/72-visibilidade-tmux-e-entrega-ao-builder` (`FLX-02`), em worktree `../forge-sdd-72`, empilhada na `feat/71`. O PR mira `feat/71`; a `4.2.0-beta` sai com as duas. Pasta de execução: `sdd/discovery/72-visibilidade-tmux-e-entrega-ao-builder/features/`. Status: `FLX-01` aprovado; fatiada em 5 tasks e enfileiradas.
 
 ## Ordem e dependências
 `72-01` e `72-04` são independentes e podem andar em paralelo; `72-02 -> 72-03 -> 72-05`; `72-04 -> 72-05`; `72-01 -> 72-05`.
