@@ -105,6 +105,11 @@ func TmuxSessionName(projectDir string) string {
 	return "forge-" + base + "-" + hex.EncodeToString(sum[:3])
 }
 
+// IsValidTmuxSessionName verifica se o nome da sessão segue o padrão forge-<projeto>-<hash>.
+func IsValidTmuxSessionName(name string) bool {
+	return tmuxNameOKRe.MatchString(name)
+}
+
 // NotificationsFile devolve .forge/config/notifications.json.
 func NotificationsFile(dir string) string {
 	return filepath.Join(Forge(dir), ForgeConfigDirName, NotificationsFileName)

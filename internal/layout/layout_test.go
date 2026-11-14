@@ -145,3 +145,12 @@ func TestQueueState_Violacoes(t *testing.T) {
 	}
 	assert.Equal(t, "", func() string { p, _ := QueueState("/p", "x", "y"); return p }())
 }
+
+func TestTmuxNames(t *testing.T) {
+	proj := TmuxProjectName("/Users/user/project-name")
+	assert.Equal(t, "project-name", proj)
+
+	sess := TmuxSessionName("/Users/user/project-name")
+	assert.True(t, IsValidTmuxSessionName(sess))
+	assert.False(t, IsValidTmuxSessionName("invalid-session-name"))
+}

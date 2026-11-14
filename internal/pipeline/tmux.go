@@ -5,16 +5,10 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"regexp"
 
 	"github.com/forge-sdd/cli/internal/config"
 	"github.com/forge-sdd/cli/internal/layout"
 	"github.com/forge-sdd/cli/internal/monitor"
-)
-
-var (
-	tmuxNameBadRe = regexp.MustCompile(`[^A-Za-z0-9_-]+`)
-	tmuxNameOKRe  = regexp.MustCompile(`^forge-[A-Za-z0-9_-]{1,40}-[0-9a-f]{6}$`)
 )
 
 // TmuxProjectName extrai o nome do projeto saneado para identificação visual no tmux.
@@ -27,6 +21,11 @@ func TmuxProjectName(projectDir string) string {
 // pastas com o mesmo nome (/a/app e /b/app) não caírem na mesma sessão.
 func TmuxSessionName(projectDir string) string {
 	return layout.TmuxSessionName(projectDir)
+}
+
+// IsValidTmuxSessionName verifica se o nome da sessão segue o padrão forge-<projeto>-<hash>.
+func IsValidTmuxSessionName(name string) bool {
+	return layout.IsValidTmuxSessionName(name)
 }
 
 // ResolveTerminal escolhe entre tmux e as janelas do sistema. Precedência: flag, forge.json, auto
@@ -84,7 +83,7 @@ func BuildTmuxPlan(env LaunchEnv, cfg config.ForgeConfig, insideTmux bool) (*Tmu
 	}
 	proj := TmuxProjectName(env.Dir)
 	name := TmuxSessionName(env.Dir)
-	if !tmuxNameOKRe.MatchString(name) {
+	if !IsValidTmuxSessionName(name) {
 		return nil, fmt.Errorf("nome de sessão tmux %q inválido", name)
 	}
 	// "=" pede correspondência exata: sem ele o tmux casa por prefixo e pode cair na sessão de outro projeto.

@@ -165,7 +165,9 @@ func TestTmux_NomeDaSessaoSaneadoEUnicoPorCaminho(t *testing.T) {
 		got := TmuxSessionName(in)
 		assert.True(t, strings.HasPrefix(got, base), "%q -> %q", in, got)
 		assert.Regexp(t, `^forge-[A-Za-z0-9_-]+-[0-9a-f]{6}$`, got)
+		assert.True(t, IsValidTmuxSessionName(got))
 	}
+	assert.False(t, IsValidTmuxSessionName("invalid"))
 	assert.NotEqual(t, TmuxSessionName("/a/app"), TmuxSessionName("/b/app"), "duas pastas com o mesmo nome não dividem a sessão")
 	assert.Equal(t, TmuxSessionName("/a/app"), TmuxSessionName("/a/app/"), "determinístico")
 }
