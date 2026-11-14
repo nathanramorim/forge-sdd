@@ -4,6 +4,25 @@ Este arquivo registra o histórico de entregas de produto deste projeto.
 
 ## Entregas
 
+### Versão 4.6.0 — Unificação Canônica do Comando `forge`, Painel Vivo Executivo e Gestão Suave de Tokens
+
+Compatível com a 4.5.2-beta (Iniciativas 80, 81 e 82).
+
+*   **Unificação e Padronização do Comando `forge` (Iniciativa 82):**
+    *   Comando raiz Cobra padronizado para `rootCmd.Use = "forge"` (`cmd/forge-sdd/main.go`), garantindo que todas as mensagens de usage e help usem unicamente `forge`.
+    *   Padronização de todas as mensagens de dicas e erros (ex: `forge ps --kill-zombies`).
+    *   Templates de scaffold (`internal/scaffold/templates/`), golden files, prompts de agentes (`GEMINI.md`, `CLAUDE.md`, `.agents/rules/`, `.agents/skills/`) e documentação oficial (`docs/comandos.md`, `README.md`) instruindo 100% o comando canônico `forge`.
+*   **Painel Executivo Vivo e Status Tríplice (Iniciativa 80):**
+    *   Separação clara entre `forge status` (snapshot instantâneo na CLI) e `forge status --live` (living dashboard atualizado em tempo real a cada 2s).
+    *   Monitoramento transparente de CPU % e RAM (MB) por sessão do projeto (`forge-discovery`, `forge-builder`, `forge-reviewer`) e seus subprocessos.
+    *   Contabilidade acumulada de tokens consumidos por papel.
+    *   Barra de progresso visual DAG (`[████████████████████] 100%`) com checklist detalhado de status das tarefas.
+    *   Nova opção direta no menu interativo `forge`: `"Painel vivo da esteira (status --live)"`.
+*   **Contabilidade de Tokens por Janela, Auto-Archive e Reset Suave (Iniciativa 81):**
+    *   Monitoramento contínuo de consumo de tokens por janela de contexto dos modelos.
+    *   Auto-archive automático de iniciativas quando todas as tarefas da esteira são concluídas com sucesso.
+    *   Reset suave in-place nos painéis de agentes sem necessidade de reiniciar o terminal ou recriar sessões tmux.
+
 ### Versão 4.5.2 — Fix no Monitor ps: Isolamento Estrito de Processos entre Projetos (Beta)
 
 Compatível com a 4.5.1-beta.
