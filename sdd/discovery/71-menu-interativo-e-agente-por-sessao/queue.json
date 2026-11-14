@@ -2,13 +2,13 @@
   "feature_id": "feat-71",
   "branch": "feat/71-menu-interativo-e-agente-por-sessao",
   "spec_status": "reviewed",
-  "updated_at": "2026-11-14T01:48:02Z",
+  "updated_at": "2026-11-14T01:51:47Z",
   "items": [
     {
       "task_id": "71-01",
       "title": "feat-71-01 — Perfis por Agente e `sessions` em `forge.json`",
       "spec_path": "sdd/discovery/71-menu-interativo-e-agente-por-sessao/features/feat-71-01-perfis-por-agente-e-sessions.md",
-      "status": "review_pending",
+      "status": "approved",
       "rules": [
         "ARQ-01",
         "ARQ-02",
@@ -19,13 +19,18 @@
         "TST-03"
       ],
       "skills_used": [],
-      "attempts": 1
+      "attempts": 1,
+      "governance_verdict": {
+        "veredito": "conforme",
+        "achados": [],
+        "resumo": "Parecer da Camada B: conforme, sem violação. SEG-03 (argv sem shell, {permissions} só inteiro), allow_commands validado, uma só tabela de permissões e uma só lista de CLIs, compatível com forge.json da 4.1. O desvio do copilot sem --agent foi registrado no criteria e no ADR 0005; o perfil do agy foi corrigido em 74ab3b6 com as flags confirmadas no uso real."
+      }
     },
     {
       "task_id": "71-02",
       "title": "feat-71-02 — Launcher e Worker por Sessão",
       "spec_path": "sdd/discovery/71-menu-interativo-e-agente-por-sessao/features/feat-71-02-launcher-e-worker-por-sessao.md",
-      "status": "review_pending",
+      "status": "approved",
       "rules": [
         "SEG-01",
         "SEG-03",
@@ -35,13 +40,18 @@
         "TST-04"
       ],
       "skills_used": [],
-      "attempts": 1
+      "attempts": 1,
+      "governance_verdict": {
+        "veredito": "conforme",
+        "achados": [],
+        "resumo": "Parecer da Camada B: conforme. Quoting POSIX e Windows, --cli explícito e validado, flags sem gravar forge.json, compatível com a 4.1. A dúvida sobre ';' no wt.exe foi corrigida em 74ab3b6 (';' recusado no Windows) com teste, conferida por testes e não pelo revisor."
+      }
     },
     {
       "task_id": "71-03",
       "title": "feat-71-03 — Checagem de Agente Antes de Abrir (`Preflight`)",
       "spec_path": "sdd/discovery/71-menu-interativo-e-agente-por-sessao/features/feat-71-03-checagem-de-agente-antes-de-abrir.md",
-      "status": "review_pending",
+      "status": "approved",
       "rules": [
         "SEG-01",
         "DUP-01",
@@ -50,13 +60,18 @@
         "TST-03"
       ],
       "skills_used": [],
-      "attempts": 1
+      "attempts": 1,
+      "governance_verdict": {
+        "veredito": "conforme",
+        "achados": [],
+        "resumo": "Parecer da Camada B: violação em IsGeneratedAgentsMD (título igual do usuário contava como gerado) e desvio do aviso do .sddrc. Corrigido em 74ab3b6: o AGENTS.md gerado exige o marcador \u003c!-- forge-sdd:generated --\u003e, com testes de preservação e destroy; ordem determinística das definições; mensagens citam AGENTS.md. O aviso do .sddrc ficou como desvio declarado no ADR 0005. Conferido por testes, não por nova revisão."
+      }
     },
     {
       "task_id": "71-04",
       "title": "feat-71-04 — Menu Navegável e Seletor de Agente",
       "spec_path": "sdd/discovery/71-menu-interativo-e-agente-por-sessao/features/feat-71-04-menu-navegavel-e-seletor.md",
-      "status": "review_pending",
+      "status": "approved",
       "rules": [
         "ARQ-01",
         "ARQ-02",
@@ -66,13 +81,18 @@
         "TST-04"
       ],
       "skills_used": [],
-      "attempts": 1
+      "attempts": 1,
+      "governance_verdict": {
+        "veredito": "conforme",
+        "achados": [],
+        "resumo": "Parecer da Camada B: dúvida baixa, sem violação. Corrigido em 74ab3b6: código morto removido, spec ajustada (Esc volta e a opção Sair encerra; não há tecla q), teste de equivalência menu x subcomando e guarda contra flags de lista. Conferido por testes, não por nova revisão."
+      }
     },
     {
       "task_id": "71-05",
       "title": "feat-71-05 — Docs, Scaffold e Release 4.2.0",
       "spec_path": "sdd/discovery/71-menu-interativo-e-agente-por-sessao/features/feat-71-05-docs-scaffold-e-release.md",
-      "status": "review_pending",
+      "status": "approved",
       "rules": [
         "DUP-10",
         "FLX-05",
@@ -82,7 +102,12 @@
         "TST-05"
       ],
       "skills_used": [],
-      "attempts": 1
+      "attempts": 1,
+      "governance_verdict": {
+        "veredito": "conforme",
+        "achados": [],
+        "resumo": "Parecer da Camada B: duas violações de texto. Corrigido em 74ab3b6: bullet de permissões antigo removido do guia (template, docs e golden), títulos em v4.2.0-beta, e a frase 'se comporta igual' trocada por 'escolhe o mesmo agente nas três sessões', no ADR e nas release notes. Conferido por testes, não por nova revisão."
+      }
     }
   ]
 }

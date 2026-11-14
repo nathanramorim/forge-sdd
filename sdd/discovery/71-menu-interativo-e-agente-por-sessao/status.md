@@ -2,12 +2,13 @@
 
 ## Status
 ```
-71-01..71-03 review_pending (commits locais); 71-04 em andamento
-Camada B por task: 3 revisoes falharam por limite de uso, refazer
+71-01..71-05 [x] approved (Camada B por task, achados corrigidos)
+Camada A verde (build, vet, test -race, gate)
+Local: nada publicado; PR e tag pendentes
 ```
 
 ## Proximo passo
-Terminar 71-04 e 71-05; depois tratar o backlog do uso real (barbearia-app).
+Backlog do uso real (barbearia-app): 1 abrir por tmux (paineis nomeados); 2 visao limpa do que cada sessao faz; 3 split entrega ao Builder; 4 motivo legivel de falha e hooks velhos do Studio. Depois publicar a 4.2.0-beta.
 
-## Backlog do uso real (depois da fila)
-1 abrir por tmux (paineis nomeados); 2 visao limpa do que cada sessao faz (hoje o worker fica mudo); 3 split entrega ao Builder e a Discovery nao executa; 4 motivo legivel de falha (limite de uso) e hooks velhos do Studio (porta 47600).
+## A confirmar
+Gemini, Copilot e Codex nunca rodaram de ponta a ponta com o worker (so montagem de comandos).
