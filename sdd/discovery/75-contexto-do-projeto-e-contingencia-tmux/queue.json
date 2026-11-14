@@ -2,7 +2,7 @@
   "feature_id": "feat-75",
   "branch": "feat/75-contexto-do-projeto-e-contingencia-tmux",
   "spec_status": "reviewed",
-  "updated_at": "2026-11-14T05:58:42Z",
+  "updated_at": "2026-11-14T06:11:28Z",
   "items": [
     {
       "task_id": "75-01",
@@ -85,7 +85,7 @@
       "task_id": "75-03",
       "title": "feat-75-03 — Constituição primeiro",
       "spec_path": "sdd/discovery/75-contexto-do-projeto-e-contingencia-tmux/features/feat-75-03-constituicao-primeiro.md",
-      "status": "queued",
+      "status": "approved",
       "rules": [
         "FLX-01",
         "COD-01",
@@ -93,7 +93,12 @@
         "TST-04"
       ],
       "skills_used": [],
-      "attempts": 0
+      "attempts": 1,
+      "governance_verdict": {
+        "veredito": "conforme",
+        "achados": [],
+        "resumo": "Constituição primeiro implementada em /constitution, init, menu, preflight e doctor conforme spec"
+      }
     },
     {
       "task_id": "75-06",

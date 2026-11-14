@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/forge-sdd/cli/internal/config"
+	"github.com/forge-sdd/cli/internal/gate"
 	"github.com/forge-sdd/cli/internal/layout"
 )
 
@@ -131,6 +132,20 @@ func Preflight(dir string, cfg config.ForgeConfig, env PreflightEnv) []Item {
 				Level:   LevelWarn,
 				Message: "tmux ausente: as sessões abrirão em janelas soltas",
 				Action:  action,
+			})
+		}
+	}
+
+	if _, err := os.Stat(filepath.Join(dir, "sdd", "memory", "constitution.md")); err == nil {
+		if b, err := gate.BuildBrief(dir, 0); err == nil && b.State == gate.BriefRascunho {
+			msg := "Constituição em rascunho"
+			if len(b.Missing) > 0 {
+				msg += ": " + strings.Join(b.Missing, ", ")
+			}
+			items = append(items, Item{
+				Level:   LevelWarn,
+				Message: msg,
+				Action:  "/constitution",
 			})
 		}
 	}

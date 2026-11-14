@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/forge-sdd/cli/internal/config"
+	"github.com/forge-sdd/cli/internal/gate"
 	"github.com/forge-sdd/cli/internal/layout"
 	"github.com/forge-sdd/cli/internal/scaffold"
 	"github.com/spf13/cobra"
@@ -143,7 +144,13 @@ inconsistências de configuração dos agentes de IA e progresso das features.`,
 		progressPath := layout.Progress(targetDir)
 
 		if fileExists(constitutionPath) {
-			fmt.Println("  ✓ Constituição (sdd/memory/constitution.md) ativa.")
+			b, bErr := gate.BuildBrief(targetDir, 0)
+			if bErr == nil && b.State == gate.BriefRascunho {
+				fmt.Println("  ✓ Constituição (sdd/memory/constitution.md) ativa.")
+				fmt.Println("  ⚠️  Constituição em rascunho (rode /constitution para alinhar). Faltam: " + strings.Join(b.Missing, ", "))
+			} else {
+				fmt.Println("  ✓ Constituição (sdd/memory/constitution.md) ativa.")
+			}
 		} else {
 			fmt.Println("  ✗ Constituição (sdd/memory/constitution.md) não encontrada!")
 		}
