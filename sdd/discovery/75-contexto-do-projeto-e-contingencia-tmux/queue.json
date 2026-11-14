@@ -2,7 +2,7 @@
   "feature_id": "feat-75",
   "branch": "feat/75-contexto-do-projeto-e-contingencia-tmux",
   "spec_status": "reviewed",
-  "updated_at": "2026-11-14T06:11:28Z",
+  "updated_at": "2026-11-14T06:20:21Z",
   "items": [
     {
       "task_id": "75-01",
@@ -104,7 +104,7 @@
       "task_id": "75-06",
       "title": "feat-75-06 — Docs, ADR e release",
       "spec_path": "sdd/discovery/75-contexto-do-projeto-e-contingencia-tmux/features/feat-75-06-docs-adr-e-release.md",
-      "status": "queued",
+      "status": "approved",
       "rules": [
         "DUP-10",
         "FLX-05",
@@ -113,7 +113,12 @@
         "TST-05"
       ],
       "skills_used": [],
-      "attempts": 0
+      "attempts": 1,
+      "governance_verdict": {
+        "veredito": "conforme",
+        "achados": [],
+        "resumo": "Documentacao (README, docs/pipeline.md, LEIA-ME, guia-pipeline.html), ADR-0007, concepts.md, releases/history.md e testes E2E (TestE2E_BriefProjetoNovo, TestE2E_TerminalSemTmux, TestScaffold_DocsCitamBriefConstituicaoETmux) concluidos e aprovados conforme spec"
+      }
     }
   ]
 }

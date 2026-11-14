@@ -245,3 +245,24 @@ func TestScaffold_ConstitutionConteudo(t *testing.T) {
 		assert.Contains(t, c, "brief --check", path)
 	}
 }
+
+func TestScaffold_DocsCitamBriefConstituicaoETmux(t *testing.T) {
+	root := filepath.Join("..", "..")
+
+	docs := []string{
+		filepath.Join(root, "README.md"),
+		filepath.Join(root, "docs", "pipeline.md"),
+		filepath.Join("templates", ".forge", "LEIA-ME.md.tmpl"),
+		filepath.Join(root, "site", "public", "guia-pipeline.html"),
+	}
+
+	for _, doc := range docs {
+		data, err := os.ReadFile(doc)
+		require.NoError(t, err, "arquivo de documentação deve existir: %s", doc)
+		content := string(data)
+
+		assert.True(t, strings.Contains(content, "brief") || strings.Contains(content, "forge-sdd brief"), "%s deve citar brief", doc)
+		assert.True(t, strings.Contains(content, "/constitution") || strings.Contains(content, "Constituição"), "%s deve citar constitution", doc)
+		assert.True(t, strings.Contains(content, "tmux"), "%s deve citar tmux", doc)
+	}
+}

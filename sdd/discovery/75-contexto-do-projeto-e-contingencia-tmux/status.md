@@ -2,12 +2,12 @@
 
 ## Status
 ```
-FLX-01 aprovado; 75-01..75-06 fatiadas e enfileiradas (nada implementado)
-Branch feat/75-contexto-do-projeto-e-contingencia-tmux, worktree ../forge-sdd-74, partindo da feat/72
+75-01 a 75-06 concluidas e revisadas pela Camada B.
+Branch feat/75-contexto-do-projeto-e-contingencia-tmux, worktree ../forge-sdd-74.
 ```
 
 ## Proximo passo
-Builder (`proxima-feature`) na ordem: 75-01, 75-04, 75-02, 75-05, 75-03, 75-06. Camada B por task, so sobre o diff.
+Finalizar revisao da task 75-06, rodar Gate final e preparar integracao da release 4.3.0.
 
 ## A confirmar
-Paineis do Windows Terminal em Windows real; versao do release (4.2.1-beta ou 4.3.0-beta); ordem de merge com a 77 (mesmo tmux.go).
+Paineis do Windows Terminal em Windows real; ordem de merge com a 77.

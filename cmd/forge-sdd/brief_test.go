@@ -80,3 +80,59 @@ Prover comando brief determinístico.
 	afterSnap := snapshotDir(t, dir)
 	assert.Equal(t, beforeSnap, afterSnap, "árvore de arquivos não pode ser alterada pelo brief")
 }
+
+func TestE2E_BriefProjetoNovo(t *testing.T) {
+	dir := t.TempDir()
+
+	// 1. Scaffold de novo projeto
+	outInit, errInit := runRoot(t, "init", dir, "--yes", "--name", "novo-app", "--stack", "go", "--agent", "claude")
+	require.NoError(t, errInit, outInit)
+
+	// 2. Projeto recém-gerado é rascunho: brief --check deve falhar com código 3
+	outCheck, errCheck := runRoot(t, "brief", "--dir", dir, "--check")
+	require.Error(t, errCheck)
+	assert.Contains(t, outCheck, "rascunho")
+	var ec exitCoder
+	require.True(t, errors.As(errCheck, &ec))
+	assert.Equal(t, 3, ec.ExitCode())
+
+	// 3. Povoar constitution.md, modules.md, flows.md e decisions.md
+	testutil.WriteFile(t, dir, "sdd/memory/constitution.md", `# Constituição — novo-app
+
+## Missão
+Prover serviço de pagamentos confiável e escalável.
+
+## Stack
+| Item | Escolha |
+|---|---|
+| Go | 1.23 |
+
+## Regras
+1. Regra única.
+
+## IDs da Constituição
+- **ARQ-01:** Regra de arquitetura.
+`)
+	testutil.WriteFile(t, dir, "sdd/spec/modules.md", "# Módulos\n\n## Pagamentos\nProcessamento de transações.\n")
+	testutil.WriteFile(t, dir, "sdd/spec/flows.md", "# Fluxos\n\n## Cobrança\nFluxo de cobrança via Pix e cartão.\n")
+	testutil.WriteFile(t, dir, "sdd/spec/decisions.md", `# Decisões de Arquitetura
+
+## Decisões Resolvidas
+| ID | Decisão | Escolha |
+|---|---|---|
+| D01 | Banco de dados | PostgreSQL com transações serializáveis |
+`)
+
+	// 4. Agora o projeto está pronto: brief --check deve ter sucesso (código 0) e imprimir "pronta"
+	outPronta, errPronta := runRoot(t, "brief", "--dir", dir, "--check")
+	require.NoError(t, errPronta)
+	assert.Equal(t, "pronta\n", outPronta)
+
+	// brief padrão deve imprimir resumo com dados povoados
+	outBrief, errBrief := runRoot(t, "brief", "--dir", dir)
+	require.NoError(t, errBrief)
+	assert.Contains(t, outBrief, "# Contexto do projeto — novo-app")
+	assert.Contains(t, outBrief, "Estado: pronta")
+	assert.Contains(t, outBrief, "Missão: Prover serviço de pagamentos confiável e escalável.")
+	assert.Contains(t, outBrief, "PostgreSQL com transações serializáveis")
+}

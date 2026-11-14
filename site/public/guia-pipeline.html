@@ -94,6 +94,8 @@
     Estrutura padrão (uma sessão só)
     Sair</pre>
 
+  <div class="card ok"><b class="t">Primeiro passo em projeto novo: a Constituição</b>Antes de qualquer feature ou discovery, alinhe o projeto rodando <code>/constitution</code>. O menu do <code>forge</code> e o <code>doctor</code> alertam quando a constituição é rascunho. O comando <code>forge-sdd brief</code> monta o contexto determinístico (missão, stack, módulos, fluxos e decisões) e <code>forge-sdd brief --check</code> valida a prontidão (código 0 pronta, código 3 rascunho).</div>
+
   <h3><span class="n" style="display:inline-grid;place-items:center;width:26px;height:26px;border-radius:50%;background:var(--accent);color:#fff;font-size:13px;margin-right:8px">3</span>Iniciar as 3 sessões</h3>
   <p>Em <b>Pipeline multi-sessão → Iniciar as 3 sessões</b> o menu pergunta:</p>
   <ul>
@@ -126,6 +128,8 @@ forge-sdd up --discovery claude --builder codex --reviewer gemini</pre></div>
   <h3>Comandos que você vai usar</h3>
   <table>
     <tr><th>Onde</th><th>Comando</th><th>Para quê</th></tr>
+    <tr><td>Discovery</td><td><code>/constitution</code></td><td>Alinhar missão, stack, módulos, fluxos e decisões.</td></tr>
+    <tr><td>Terminal</td><td><code>forge-sdd brief</code></td><td>Resumo determinístico do contexto do projeto (<code>--check</code> para prontidão).</td></tr>
     <tr><td>Discovery</td><td><code>/discovery</code></td><td>Começar uma demanda nova.</td></tr>
     <tr><td>Discovery</td><td><code>/split-features</code></td><td>Fatiar em tasks e entregar ao Builder.</td></tr>
     <tr><td>Discovery</td><td><code>/implementar &lt;feature&gt;</code></td><td>Despachar uma feature já pronta (gate e job).</td></tr>
@@ -158,8 +162,9 @@ forge-sdd up --discovery claude --builder codex --reviewer gemini</pre></div>
 </section>
 
 <section id="paineis">
-  <h2>Painéis e tmux</h2>
-  <p>Com o <code>tmux</code> instalado, as três sessões abrem <b>numa tela só</b>: Discovery grande à esquerda; Builder e Reviewer empilhados à direita, cada painel com o nome da sessão no topo. Sem tmux, abrem três janelas do terminal.</p>
+  <h2>Painéis e contingência do tmux</h2>
+  <p>Com o <code>tmux</code> instalado, as três sessões abrem <b>numa tela só</b>: Discovery grande à esquerda; Builder e Reviewer empilhados à direita, cada painel com o nome da sessão no topo. Sem tmux, o Forge oferece contingência suave com instalação assistida ou janelas nativas.</p>
+  <div class="card ok"><b class="t">Instalação assistida e contingência suave</b>Se o <code>tmux</code> não estiver instalado, em modo <code>auto</code> o Forge detecta o gerenciador de pacotes (Homebrew no macOS; apt-get, dnf, pacman, apk ou zypper no Linux) e pergunta se você deseja instalá-lo automaticamente. Se recusar ou a instalação falhar, o Forge cai com graça (contingência do tmux) para <b>janelas nativas do sistema</b> (ou três painéis no <b>Windows Terminal</b> <code>wt.exe</code> no Windows). No <b>WSL</b>, o tmux roda nativamente na distribuição Linux.</div>
   <table>
     <tr><th>No tmux</th><th>Faz</th></tr>
     <tr><td><code>Ctrl+b</code> e as setas</td><td>Troca de painel.</td></tr>
