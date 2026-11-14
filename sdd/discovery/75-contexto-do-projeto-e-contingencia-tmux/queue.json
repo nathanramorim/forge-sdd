@@ -2,13 +2,13 @@
   "feature_id": "feat-75",
   "branch": "feat/75-contexto-do-projeto-e-contingencia-tmux",
   "spec_status": "reviewed",
-  "updated_at": "2026-11-14T04:45:21Z",
+  "updated_at": "2026-11-14T05:43:02Z",
   "items": [
     {
       "task_id": "75-01",
       "title": "feat-75-01 — `forge-sdd brief`",
       "spec_path": "sdd/discovery/75-contexto-do-projeto-e-contingencia-tmux/features/feat-75-01-forge-sdd-brief.md",
-      "status": "queued",
+      "status": "approved",
       "rules": [
         "ARQ-01",
         "DUP-01",
@@ -17,7 +17,12 @@
         "TST-04"
       ],
       "skills_used": [],
-      "attempts": 0
+      "attempts": 1,
+      "governance_verdict": {
+        "veredito": "conforme",
+        "achados": [],
+        "resumo": "Subcomando brief implementado conforme spec e DUP-05"
+      }
     },
     {
       "task_id": "75-04",

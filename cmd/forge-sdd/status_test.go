@@ -22,6 +22,9 @@ func runRoot(t *testing.T, args ...string) (string, error) {
 	_ = pipelineInitCmd.Flags().Set("dry-run", "false")
 	_ = dispatchCmd.Flags().Set("card-evidence", "")
 	_ = dispatchCmd.Flags().Set("dry-run", "false")
+	_ = briefCmd.Flags().Set("dir", ".")
+	_ = briefCmd.Flags().Set("max-bytes", "0")
+	_ = briefCmd.Flags().Set("check", "false")
 	resetWorkerFlags()
 	resetReviewFlags()
 	var out bytes.Buffer
