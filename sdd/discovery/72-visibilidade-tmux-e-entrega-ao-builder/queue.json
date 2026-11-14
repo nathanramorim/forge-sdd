@@ -2,7 +2,7 @@
   "feature_id": "feat-72",
   "branch": "feat/72-visibilidade-tmux-e-entrega-ao-builder",
   "spec_status": "reviewed",
-  "updated_at": "2026-11-14T02:41:25Z",
+  "updated_at": "2026-11-14T03:04:38Z",
   "items": [
     {
       "task_id": "72-01",
@@ -70,7 +70,7 @@
       "task_id": "72-05",
       "title": "feat-72-05 — Docs, ADR 0006 e Release",
       "spec_path": "sdd/discovery/72-visibilidade-tmux-e-entrega-ao-builder/features/feat-72-05-docs-adr-e-release.md",
-      "status": "queued",
+      "status": "review_pending",
       "rules": [
         "DUP-10",
         "FLX-05",
@@ -80,7 +80,7 @@
         "TST-05"
       ],
       "skills_used": [],
-      "attempts": 0
+      "attempts": 1
     }
   ]
 }

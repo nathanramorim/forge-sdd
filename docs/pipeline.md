@@ -63,7 +63,7 @@ Nos painéis do Builder e do Reviewer o worker mostra o que o agente está fazen
 
 As linhas vêm dos eventos do agente (Claude, Gemini e Codex) e, para qualquer agente, do acompanhamento do `git status`; segredos em comandos aparecem mascarados. `forge-sdd worker --raw` mostra a saída bruta.
 
-**Limite de uso:** se o agente avisa que bateu o limite (como o de 5 horas do Claude), o job volta à fila sem gastar tentativa, o painel mostra `⏸ limite de uso do claude: retomo às 22:40`, o inbox avisa e o worker retoma sozinho (espera de até 6 horas).
+**Limite de uso:** se o agente avisa que bateu o limite (como o de 5 horas do Claude), o job volta à fila sem gastar tentativa, o painel mostra `⏸ limite de uso do claude: retomo às 22:40`, o inbox avisa e o worker retoma sozinho (espera de até 6 horas; um mesmo job é devolvido no máximo 3 vezes, e limite semanal ou com data faz o job falhar com o motivo).
 
 **A Discovery não executa o build.** Em modo pipeline, o `/split-features` termina em `forge-sdd dispatch` e entrega ao Builder; `queue next` e `queue complete` só funcionam sob um worker (ou com `--local`, por sua conta). Com `pm_mcp.require_existing_card: false` o despacho não pede card nem evidência.
 
