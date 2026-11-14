@@ -4,7 +4,7 @@
 **Fase:** 81-03
 **Tamanho:** `M`
 **Depende de:** 81-02
-**Status:** `ready` (FLX-01 aprovado)
+**Status:** `completed` (implementado e testado pelo Builder)
 
 ## Contexto & Motivação
 Disparar a rotina de auto-archive de features concluídas quando todas as suas tarefas forem aprovadas e não houver dependências pendentes, compactando a árvore ativa antes do reset de contexto.

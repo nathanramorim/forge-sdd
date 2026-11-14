@@ -10,28 +10,32 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/forge-sdd/cli/internal/pipeline"
+	"github.com/forge-sdd/cli/internal/layout"
 )
 
 // ProcessInfo contém os dados de telemetria de um processo ligado ao projeto.
 type ProcessInfo struct {
-	PID         int     `json:"pid"`
-	ParentPID   int     `json:"parent_pid,omitempty"`
-	Role        string  `json:"role"`
-	State       string  `json:"state"`
-	CPUPercent  float64 `json:"cpu_percent"`
-	MemoryMB    float64 `json:"memory_mb"`
-	ElapsedTime string  `json:"elapsed_time"`
-	Command     string  `json:"command"`
+	PID          int     `json:"pid"`
+	ParentPID    int     `json:"parent_pid,omitempty"`
+	Role         string  `json:"role"`
+	State        string  `json:"state"`
+	CPUPercent   float64 `json:"cpu_percent"`
+	MemoryMB     float64 `json:"memory_mb"`
+	TokensInput  int     `json:"tokens_input,omitempty"`
+	TokensOutput int     `json:"tokens_output,omitempty"`
+	TotalTokens  int     `json:"total_tokens,omitempty"`
+	ElapsedTime  string  `json:"elapsed_time"`
+	Command      string  `json:"command"`
 }
 
 // ProjectProcessReport contém a lista agregada de processos e consumo total do projeto.
 type ProjectProcessReport struct {
-	Project     string        `json:"project"`
-	Session     string        `json:"session"`
-	Processes   []ProcessInfo `json:"processes"`
-	TotalCPU    float64       `json:"total_cpu"`
-	TotalMemory float64       `json:"total_memory_mb"`
+	Project       string               `json:"project"`
+	Session       string               `json:"session"`
+	Processes     []ProcessInfo        `json:"processes"`
+	TotalCPU      float64              `json:"total_cpu"`
+	TotalMemory   float64              `json:"total_memory_mb"`
+	TokensSummary *ProjectTokenMetrics `json:"tokens_summary,omitempty"`
 }
 
 // CommandRunner abstrai a execução de comandos do sistema operacional (mockável para testes).
@@ -62,7 +66,7 @@ func InspectProjectProcesses(dir string, runner CommandRunner) (*ProjectProcessR
 		absDir = dir
 	}
 	projectName := filepath.Base(absDir)
-	sessionName := pipeline.TmuxSessionName(absDir)
+	sessionName := layout.TmuxSessionName(absDir)
 
 	report := &ProjectProcessReport{
 		Project:   projectName,
@@ -133,7 +137,10 @@ func InspectProjectProcesses(dir string, runner CommandRunner) (*ProjectProcessR
 		collectChildren(rootPID)
 	}
 
-	// 4. Montar a lista de ProcessInfo
+	// 4. Montar a lista de ProcessInfo e carregar telemetria de tokens
+	tokenMetrics, _ := CalculateTokenMetrics(dir)
+	report.TokensSummary = tokenMetrics
+
 	for _, pid := range matchedPIDs {
 		p, exists := rawMap[pid]
 		if !exists {
@@ -153,6 +160,15 @@ func InspectProjectProcesses(dir string, runner CommandRunner) (*ProjectProcessR
 			MemoryMB:    memMB,
 			ElapsedTime: p.Elapsed,
 			Command:     p.Command,
+		}
+
+		if tokenMetrics != nil {
+			normRole := NormalizeRole(role)
+			if rTok, ok := tokenMetrics.Roles[normRole]; ok {
+				info.TokensInput = rTok.TokensInput
+				info.TokensOutput = rTok.TokensOutput
+				info.TotalTokens = rTok.TotalTokens
+			}
 		}
 
 		report.Processes = append(report.Processes, info)
@@ -243,9 +259,9 @@ func FormatProcessTable(r *ProjectProcessReport) string {
 	var b bytes.Buffer
 	fmt.Fprintf(&b, "Processos Ativos — %s (Sessão tmux: %s)\n\n", r.Project, r.Session)
 
-	fmt.Fprintf(&b, "%-6s %-30s %-11s %-7s %-11s %-13s %s\n",
-		"PID", "PAPEL / COMPONENTE", "ESTADO", "CPU %", "MEM (RSS)", "TEMPO ATIVO", "COMANDO")
-	fmt.Fprintf(&b, "%s\n", strings.Repeat("─", 88))
+	fmt.Fprintf(&b, "%-6s %-30s %-11s %-7s %-11s %-15s %-13s %s\n",
+		"PID", "PAPEL / COMPONENTE", "ESTADO", "CPU %", "MEM (RSS)", "TOKENS (IN/OUT)", "TEMPO ATIVO", "COMANDO")
+	fmt.Fprintf(&b, "%s\n", strings.Repeat("─", 104))
 
 	if len(r.Processes) == 0 {
 		fmt.Fprintf(&b, "Nenhum processo ativo encontrado para este projeto.\n")
@@ -253,18 +269,29 @@ func FormatProcessTable(r *ProjectProcessReport) string {
 		for _, p := range r.Processes {
 			memStr := fmt.Sprintf("%.0f MB", p.MemoryMB)
 			cpuStr := fmt.Sprintf("%.1f%%", p.CPUPercent)
+			tokensStr := "-"
+			if p.TotalTokens > 0 {
+				tokensStr = fmt.Sprintf("%s / %s", FormatTokensShort(p.TokensInput), FormatTokensShort(p.TokensOutput))
+			}
 			cmdDisplay := p.Command
 			if len(cmdDisplay) > 30 {
 				cmdDisplay = cmdDisplay[:27] + "..."
 			}
-			fmt.Fprintf(&b, "%-6d %-30s %-11s %-7s %-11s %-13s %s\n",
-				p.PID, p.Role, p.State, cpuStr, memStr, p.ElapsedTime, cmdDisplay)
+			fmt.Fprintf(&b, "%-6d %-30s %-11s %-7s %-11s %-15s %-13s %s\n",
+				p.PID, p.Role, p.State, cpuStr, memStr, tokensStr, p.ElapsedTime, cmdDisplay)
 		}
 	}
 
-	fmt.Fprintf(&b, "%s\n", strings.Repeat("─", 88))
-	fmt.Fprintf(&b, "Total do Projeto: %d processos ativos │ CPU: %.1f%% │ Memória: %.0f MB\n\n",
-		len(r.Processes), r.TotalCPU, r.TotalMemory)
+	fmt.Fprintf(&b, "%s\n", strings.Repeat("─", 104))
+	tokSummary := ""
+	if r.TokensSummary != nil && r.TokensSummary.TotalTokens > 0 {
+		tokSummary = fmt.Sprintf(" │ Tokens: %s (%s in / %s out)",
+			FormatTokensShort(r.TokensSummary.TotalTokens),
+			FormatTokensShort(r.TokensSummary.TotalInput),
+			FormatTokensShort(r.TokensSummary.TotalOutput))
+	}
+	fmt.Fprintf(&b, "Total do Projeto: %d processos ativos │ CPU: %.1f%% │ Memória: %.0f MB%s\n\n",
+		len(r.Processes), r.TotalCPU, r.TotalMemory, tokSummary)
 	fmt.Fprintf(&b, "[Dica: Use 'forge-sdd ps --kill-zombies' para limpar processos orfãos ou presos]\n")
 
 	return b.String()

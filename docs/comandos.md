@@ -56,12 +56,21 @@ Executados diretamente no terminal do desenvolvedor, normalmente utilizando o wr
   ```
 
 ### `forge-sdd ps [flags]`
-- **O que faz:** Monitor transparente de processos em tempo real. Identifica todos os workers, CLIs de IA, painéis tmux e subprocessos (testes, compiladores) atrelados ao projeto. Exibe PID, % de CPU, memória RAM (RSS em MB), tempo ativo e estado de cada processo.
+- **O que faz:** Monitor transparente de processos em tempo real. Identifica todos os workers, CLIs de IA, painéis tmux e subprocessos (testes, compiladores) atrelados ao projeto. Exibe PID, % de CPU, memória RAM (RSS em MB), contabilidade acumulada de tokens consumidos por painel (`TOKENS (IN/OUT)`), tempo ativo e estado de cada processo.
 - **Como usar:**
   ```bash
   forge-sdd ps
-  forge-sdd ps --json             # saída em JSON para automações
+  forge-sdd ps --json             # saída em JSON para automações, incluindo tokens_summary
   forge-sdd ps --kill-zombies     # encerra com segurança processos orfãos/presos
+  ```
+
+### `forge-sdd archive [flags]`
+- **O que faz:** Arquiva iniciativas concluídas consolidando seus artefatos em `sdd/archive/discovery/<iniciativa>/`, registra a conclusão em `sdd/memory/progress-log.md` e gera telemetria determinística em `sdd/.metrics/`. É acionado de forma programática pela esteira (auto-archive) quando todas as tarefas da iniciativa forem aprovadas, ou sob demanda via CLI.
+- **Como usar:**
+  ```bash
+  forge-sdd archive                                # arquiva a iniciativa ativa da branch atual
+  forge-sdd archive --initiative <id-da-iniciativa> # arquiva explicitamente uma iniciativa
+  forge-sdd archive --json                         # resultado estruturado em JSON
   ```
 
 ### `forge-sdd status [flags]`

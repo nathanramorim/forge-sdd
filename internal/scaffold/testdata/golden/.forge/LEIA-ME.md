@@ -66,8 +66,8 @@ Com `tmux` instalado, `forge` e `forge-sdd up` abrem **uma tela com três painé
 Dentro do tmux: `Ctrl+b` e as setas trocam de painel, `Ctrl+b d` solta a tela sem encerrar nada, e `tmux ls` mostra o nome da sessão (`forge-<projeto>-<6 hex do caminho>`) para reconectar com `tmux attach -t =<nome>`; rodar `forge` ou `forge-sdd up` de novo também reconecta.
 
 **Identidade visual e alertas no tmux:**
-- A barra inferior exibe o identificador visual `📦 <projeto>` e o nome da janela é padronizado como `forge:<projeto>`.
-- As bordas dos painéis mostram `[ <projeto> ❯ <papel> ]` para você saber exatamente em qual projeto e estação está trabalhando.
+- A barra inferior exibe o identificador visual `📦 <projeto>`, o nome da janela é padronizado como `forge:<projeto>`, e a barra de status à direita exibe a contabilidade agregada de tokens: `Tokens Totais: <n>k (Disc: .. · Bld: .. · Rev: ..)`.
+- As bordas dos painéis mostram `[ <projeto> ❯ <papel> │ 🪙 <n>k tok ]` para monitorar o acúmulo de contexto em tempo real (com alerta `⚠️` quando próximo de 80k tokens).
 - **Alertas visuais de aprovação:** quando um job aguarda revisão humana (ex.: PR aberto pelo Builder ou veredito do Reviewer), a borda do painel pisca com `[ 🔔 REVISÃO NECESSÁRIA ]` ou `[ 🔔 AÇÃO NECESSÁRIA ]`, voltando ao normal assim que a ação for destravada.
 
 Nos painéis do Builder e do Reviewer o worker mostra o que o agente está fazendo, em linhas curtas (a saída completa fica em `.forge/runtime/logs/`):
@@ -101,7 +101,8 @@ Por padrão, os workers operam em modo `headless` (executam uma nova chamada de 
 
 *   **CLIs Abertas nos Painéis:** Builder e Reviewer mantêm suas sessões interativas abertas continuamente na janela principal do tmux, sem pagar o custo de boot a cada job.
 *   **Despachante Oculto (`forge-ctl`):** uma janela de controle oculta entrega os prompts aos painéis usando buffers raw do tmux (`load-buffer` + `paste-buffer -p` + `Enter`), garantindo integridade total de aspas e quebras de linha.
-*   **Limpeza de Contexto (`context: clear`):** envia o comando de reset do perfil (`/clear` ou `/new`) entre jobs e espera a ociosidade do painel antes do próximo prompt. Para manter o histórico de raciocínio, use `context: continuous`.
+*   **Reset Suave In-Place e Card de Handoff Compacto:** a limpeza de contexto (`context: clear`) ocorre diretamente no mesmo painel via `/clear` sem jamais fechar nem reiniciar o processo do terminal (sem piscar janela). Imediatamente após a limpeza, o despachante injeta o Card de Handoff Compacto (< 800 tokens de entrada) contextualizando a próxima tarefa.
+*   **Auto-Archive de Features Concluídas:** ao término e aprovação da última tarefa de uma iniciativa sem dependências pendentes, a esteira consolida e arquiva os artefatos automaticamente em `sdd/archive/discovery/<iniciativa>/` e grava a telemetria em `sdd/.metrics/`.
 *   **Falhas Lidas da Tela:** o despachante inspeciona a tela em tempo real para detectar limites de cota (`DetectUsageLimit` → pausa automática) ou indisponibilidade de conta/tier (`DetectAgentUnavailable` → aviso no inbox).
 *   **Queda Suave:** se `live` estiver ativado sem tmux ou em terminal nativo, o pipeline recai suavemente para `headless` com um aviso no terminal.
 

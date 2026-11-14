@@ -4,7 +4,7 @@
 **Fase:** 81-04
 **Tamanho:** `P`
 **Depende de:** 81-01, 81-03
-**Status:** `ready` (FLX-01 aprovado)
+**Status:** `completed` (implementado e testado pelo Builder)
 
 ## Contexto & Motivação
 Atualizar a documentação técnica, manuais e LEIA-ME para refletir as novidades de monitor de tokens por janela e auto-reset in-place, garantindo validação 100% verde nos portões.

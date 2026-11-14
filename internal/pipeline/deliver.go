@@ -216,6 +216,7 @@ func RunDeliverWorker(ctx context.Context, opts WorkerOptions) error {
 
 	firstJob := true
 	warnedNoReset := false
+	var lastCompletedTaskID string
 
 	fmt.Fprintf(opts.Out, "[%s] despachante live para %s · agente: %s\n", opts.Name, target, opts.CLI)
 
@@ -278,6 +279,8 @@ func RunDeliverWorker(ctx context.Context, opts WorkerOptions) error {
 		}
 		if contextMode == config.ContextClear {
 			if profile.ResetCommand != "" {
+				fmt.Fprintf(opts.Out, "[forge-ctl] Enviando %s in-place ao painel %s...\n", profile.ResetCommand, target)
+				fmt.Fprintf(opts.Out, "[forge-ctl] Aguardando painel ocioso (%v)...\n", quietDuration)
 				if err := deliverContextReset(ctx, d, target, job.ID, profile.ResetCommand, quietDuration, opts.Sleep, opts.Now); err != nil {
 					fmt.Fprintf(opts.Out, "[%s] aviso ao resetar contexto: %v\n", opts.Name, err)
 				}
@@ -289,6 +292,10 @@ func RunDeliverWorker(ctx context.Context, opts WorkerOptions) error {
 
 		rel, _ := filepath.Rel(opts.Dir, entry.Path)
 		prompt := workerPrompt(opts.Role, job, filepath.ToSlash(rel), cfg)
+		if contextMode == config.ContextClear && profile.ResetCommand != "" {
+			card := HandoffCardFromJob(job, lastCompletedTaskID, "concluída e arquivada com sucesso")
+			prompt = card + "\n" + prompt
+		}
 
 		accepted, err := deliverJobPrompt(ctx, d, target, job.ID, prompt, opts.Sleep, opts.Now, 30*time.Second)
 		if err != nil || !accepted {
@@ -329,6 +336,7 @@ func RunDeliverWorker(ctx context.Context, opts WorkerOptions) error {
 			reason := VerifyJobHandoff(opts.Dir, opts.Role, opts.Name, opts.Now, job.ID)
 			if reason == "" {
 				jobDone = true
+				lastCompletedTaskID = job.ID
 				if alertingApproval {
 					_ = SetApprovalAlert(d, target, opts.Name, false)
 				}

@@ -2,13 +2,13 @@
 
 ## Status
 ```
-Iniciativa 81 fatiada na branch feat/81-tokens-por-janela-e-reset-suave.
-Tasks 81-01, 81-02, 81-03 e 81-04 enfileiradas na fila com DAG (depends_on).
-Pronto para despacho ao Builder.
+Iniciativa 81 implementada e testada pelo Builder.
+Tasks 81-01, 81-02, 81-03 e 81-04 concluídas com suíte 100% verde (go test -race ./... e gate 0 violações).
+PR aberto para revisão da Camada B.
 ```
 
 ## Proximo passo
-Despachar job ao Builder (forge-sdd dispatch 81-tokens-por-janela-e-reset-suave).
+Acompanhar revisão pelo Reviewer (Camada B).
 
 ## A confirmar
-Início da implementação pelo Builder.
+Veredito da governança sobre o PR da feature 81.

@@ -6,6 +6,8 @@
 package layout
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"os"
@@ -76,6 +78,31 @@ func Forge(dir string) string { return filepath.Join(dir, ForgeDirName) }
 // ForgeConfigFile devolve .forge/config/forge.json.
 func ForgeConfigFile(dir string) string {
 	return filepath.Join(Forge(dir), ForgeConfigDirName, ForgeConfigFileName)
+}
+
+var (
+	tmuxNameBadRe = regexp.MustCompile(`[^A-Za-z0-9_-]+`)
+	tmuxNameOKRe  = regexp.MustCompile(`^forge-[A-Za-z0-9_-]{1,40}-[0-9a-f]{6}$`)
+)
+
+// TmuxProjectName extrai o nome do projeto saneado para identificação visual no tmux.
+func TmuxProjectName(projectDir string) string {
+	base := tmuxNameBadRe.ReplaceAllString(filepath.Base(projectDir), "-")
+	base = strings.Trim(base, "-_")
+	if len(base) > 40 {
+		base = strings.Trim(base[:40], "-_")
+	}
+	if base == "" {
+		return "projeto"
+	}
+	return base
+}
+
+// TmuxSessionName devolve forge-<projeto>-<hash>: o nome do projeto saneado e 6 hex do caminho.
+func TmuxSessionName(projectDir string) string {
+	base := TmuxProjectName(projectDir)
+	sum := sha256.Sum256([]byte(filepath.Clean(projectDir)))
+	return "forge-" + base + "-" + hex.EncodeToString(sum[:3])
 }
 
 // NotificationsFile devolve .forge/config/notifications.json.

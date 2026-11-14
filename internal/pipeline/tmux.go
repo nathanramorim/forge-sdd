@@ -1,16 +1,15 @@
 package pipeline
 
 import (
-	"crypto/sha256"
-	"encoding/hex"
 	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"regexp"
-	"strings"
 
 	"github.com/forge-sdd/cli/internal/config"
+	"github.com/forge-sdd/cli/internal/layout"
+	"github.com/forge-sdd/cli/internal/monitor"
 )
 
 var (
@@ -20,24 +19,14 @@ var (
 
 // TmuxProjectName extrai o nome do projeto saneado para identificação visual no tmux.
 func TmuxProjectName(projectDir string) string {
-	base := tmuxNameBadRe.ReplaceAllString(filepath.Base(projectDir), "-")
-	base = strings.Trim(base, "-_")
-	if len(base) > 40 {
-		base = strings.Trim(base[:40], "-_")
-	}
-	if base == "" {
-		return "projeto"
-	}
-	return base
+	return layout.TmuxProjectName(projectDir)
 }
 
 // TmuxSessionName devolve forge-<projeto>-<hash>: o nome do projeto saneado (só [A-Za-z0-9_-], porque
 // ":" e "." têm sentido no alvo do tmux; até 40 caracteres) e 6 hex do caminho absoluto, para duas
 // pastas com o mesmo nome (/a/app e /b/app) não caírem na mesma sessão.
 func TmuxSessionName(projectDir string) string {
-	base := TmuxProjectName(projectDir)
-	sum := sha256.Sum256([]byte(filepath.Clean(projectDir)))
-	return "forge-" + base + "-" + hex.EncodeToString(sum[:3])
+	return layout.TmuxSessionName(projectDir)
 }
 
 // ResolveTerminal escolhe entre tmux e as janelas do sistema. Precedência: flag, forge.json, auto
@@ -103,7 +92,37 @@ func BuildTmuxPlan(env LaunchEnv, cfg config.ForgeConfig, insideTmux bool) (*Tmu
 	winName := "forge:" + proj
 	win := exact + ":" + winName
 	borderFormat := fmt.Sprintf(" [ %s ❯ #{pane_title} ] ", proj)
-	titles := []string{SessionDiscovery, SessionBuilder, SessionReviewer}
+
+	tokMetrics, _ := monitor.CalculateTokenMetrics(env.Dir)
+	var discTokens, bldTokens, revTokens, totalTokens int
+	if tokMetrics != nil {
+		discTokens = tokMetrics.Roles[layout.RoleDiscovery].TotalTokens
+		bldTokens = tokMetrics.Roles[layout.RoleBuilder].TotalTokens
+		revTokens = tokMetrics.Roles[layout.RoleReviewer].TotalTokens
+		totalTokens = tokMetrics.TotalTokens
+	}
+
+	discTitle := SessionDiscovery
+	bldTitle := SessionBuilder
+	revTitle := SessionReviewer
+	if discTokens > 0 {
+		discTitle = fmt.Sprintf("%s │ %s", SessionDiscovery, monitor.FormatTokenBadge(discTokens))
+	}
+	if bldTokens > 0 {
+		bldTitle = fmt.Sprintf("%s │ %s", SessionBuilder, monitor.FormatTokenBadge(bldTokens))
+	}
+	if revTokens > 0 {
+		revTitle = fmt.Sprintf("%s │ %s", SessionReviewer, monitor.FormatTokenBadge(revTokens))
+	}
+	titles := []string{discTitle, bldTitle, revTitle}
+
+	statusRight := fmt.Sprintf("Tokens Totais: %s (Disc: %s · Bld: %s · Rev: %s)",
+		monitor.FormatTokensShort(totalTokens),
+		monitor.FormatTokensShort(discTokens),
+		monitor.FormatTokensShort(bldTokens),
+		monitor.FormatTokensShort(revTokens),
+	)
+
 	plan := &TmuxPlan{Session: name}
 
 	if cfg.SessionMode == config.SessionModeLive {
@@ -139,9 +158,9 @@ func BuildTmuxPlan(env LaunchEnv, cfg config.ForgeConfig, insideTmux bool) (*Tmu
 			{"tmux", "set-window-option", "-t", win, "pane-border-status", "top"},
 			{"tmux", "set-window-option", "-t", win, "pane-border-format", borderFormat},
 			{"tmux", "set-window-option", "-t", win, "automatic-rename", "off"},
-			{"tmux", "select-pane", "-t", win + ".0", "-T", SessionDiscovery},
-			{"tmux", "select-pane", "-t", win + ".1", "-T", SessionBuilder},
-			{"tmux", "select-pane", "-t", win + ".2", "-T", SessionReviewer},
+			{"tmux", "select-pane", "-t", win + ".0", "-T", discTitle},
+			{"tmux", "select-pane", "-t", win + ".1", "-T", bldTitle},
+			{"tmux", "select-pane", "-t", win + ".2", "-T", revTitle},
 			{"tmux", "select-pane", "-t", win + ".0"},
 			{"tmux", "new-window", "-d", "-n", "forge-ctl", "-t", exact, "-c", env.Dir, bldCtlInner},
 			{"tmux", "set-window-option", "-t", winCtl, "pane-base-index", "0"},
@@ -151,6 +170,12 @@ func BuildTmuxPlan(env LaunchEnv, cfg config.ForgeConfig, insideTmux bool) (*Tmu
 			{"tmux", "set-window-option", "-t", winCtl, "automatic-rename", "off"},
 			{"tmux", "select-pane", "-t", winCtl + ".0", "-T", "forge-builder-ctl"},
 			{"tmux", "select-pane", "-t", winCtl + ".1", "-T", "forge-reviewer-ctl"},
+		}
+		if totalTokens > 0 {
+			plan.Create = append(plan.Create,
+				[]string{"tmux", "set-option", "-t", exact, "status-right", statusRight},
+				[]string{"tmux", "set-option", "-t", exact, "status-right-length", "100"},
+			)
 		}
 	} else {
 		plan.Create = [][]string{
@@ -169,6 +194,12 @@ func BuildTmuxPlan(env LaunchEnv, cfg config.ForgeConfig, insideTmux bool) (*Tmu
 			plan.Create = append(plan.Create, []string{"tmux", "select-pane", "-t", fmt.Sprintf("%s.%d", win, i), "-T", t})
 		}
 		plan.Create = append(plan.Create, []string{"tmux", "select-pane", "-t", win + ".0"})
+		if totalTokens > 0 {
+			plan.Create = append(plan.Create,
+				[]string{"tmux", "set-option", "-t", exact, "status-right", statusRight},
+				[]string{"tmux", "set-option", "-t", exact, "status-right-length", "100"},
+			)
+		}
 	}
 	if insideTmux {
 		plan.Attach = []string{"tmux", "switch-client", "-t", exact}

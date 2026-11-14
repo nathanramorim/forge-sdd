@@ -4,7 +4,7 @@
 **Fase:** 81-02
 **Tamanho:** `M`
 **Depende de:** —
-**Status:** `ready` (FLX-01 aprovado)
+**Status:** `completed` (implementado e testado pelo Builder)
 
 ## Contexto & Motivação
 Garantir que entre jobs o Builder e o Reviewer não acumulem contexto indefinidamente: envio de comando de reset in-place no próprio terminal e injeção do Card de Handoff Compacto (< 800 tokens) com o resumo da próxima tarefa sem reabrir janelas.

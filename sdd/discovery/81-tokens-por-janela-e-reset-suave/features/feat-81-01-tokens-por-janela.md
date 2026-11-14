@@ -4,7 +4,7 @@
 **Fase:** 81-01
 **Tamanho:** `M`
 **Depende de:** —
-**Status:** `ready` (FLX-01 aprovado)
+**Status:** `completed` (implementado e testado pelo Builder)
 
 ## Contexto & Motivação
 Calcular e exibir o consumo acumulado de tokens por janela (Discovery, Builder, Reviewer) a partir dos registros de telemetria da sessão, enriquecendo o `forge-sdd ps` e os títulos das bordas dos painéis tmux.

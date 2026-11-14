@@ -901,3 +901,84 @@ func TestWorkerApprovalAlert(t *testing.T) {
 	assert.True(t, hadAlert, "deve ter ativado o alerta visual de aprovação pendente")
 	assert.True(t, hadRestore, "deve ter restaurado o título normal após aprovação/conclusão")
 }
+
+func TestDeliverResetSuaveInPlace(t *testing.T) {
+	// CA-03: O teste com runner simulado em internal/pipeline/deliver_test.go confirma que o envio de
+	// /clear e o handoff ocorrem no mesmo painel sem invocar kill-pane nem new-window.
+	dir, job := setupProjectWithJob(t, layout.RoleBuilder)
+	target := "=test:forge.1"
+	d := &fakeTmuxDeliverer{}
+	clk := newSafeClock(now)
+
+	go func() {
+		time.Sleep(50 * time.Millisecond)
+		_, _ = bus.UpdatePR(dir, layout.RoleBuilder, job.ID, "forge-builder", 10, "https://github.com/pr/10", "", clk.Now())
+	}()
+
+	var out bytes.Buffer
+	err := RunWorker(context.Background(), WorkerOptions{
+		Dir:           dir,
+		Role:          layout.RoleBuilder,
+		DeliverTarget: target,
+		Deliverer:     d,
+		Once:          true,
+		Now:           clk.Now,
+		Out:           &out,
+		Sleep: func(_ context.Context, dt time.Duration) bool {
+			clk.Add(dt)
+			time.Sleep(10 * time.Millisecond)
+			return true
+		},
+	})
+	require.NoError(t, err)
+
+	// Verifica colagens feitas pelo despachante
+	d.mu.Lock()
+	pastes := d.pastes
+	keys := d.keys
+	d.mu.Unlock()
+
+	require.GreaterOrEqual(t, len(pastes), 2, "deve ter colado ao menos /clear e o prompt do job")
+
+	// Confere que TODAS as operações de colagem foram direcionadas estritamente ao mesmo painel alvo
+	for _, p := range pastes {
+		assert.Equal(t, target, p.target, "todas as colagens devem ser no mesmo painel (in-place)")
+	}
+
+	for _, k := range keys {
+		assert.Equal(t, target, k.target, "todos os send-keys devem ser no mesmo painel")
+		assert.NotContains(t, k.keys, "kill-pane", "não deve invocar kill-pane")
+		assert.NotContains(t, k.keys, "new-window", "não deve invocar new-window")
+	}
+
+	assert.Contains(t, out.String(), "[forge-ctl] Enviando /clear in-place ao painel =test:forge.1...")
+	assert.Contains(t, out.String(), "entregue ao painel =test:forge.1")
+}
+
+func TestHandoffCardCompacto(t *testing.T) {
+	// CA-05: O prompt de handoff gerado pós-reset contém a identificação da task anterior, status
+	// da branch e escopo da próxima task em menos de 800 tokens de entrada.
+	job := bus.Job{
+		ID:        "79-02",
+		Title:     "Identificação Visual e Ergonomia no Tmux",
+		Feature:   "79-clareza-pipeline-e-identificacao-tmux",
+		SpecPath:  "sdd/discovery/79-clareza-pipeline-e-identificacao-tmux/features/feat-79-02.md",
+		RulesRefs: []string{"ARQ-01", "COD-01"},
+		PR: bus.PR{
+			Branch: "feat/79-clareza-pipeline-e-identificacao-tmux",
+		},
+	}
+
+	card := HandoffCardFromJob(job, "79-01", "concluída e arquivada com sucesso")
+
+	assert.Contains(t, card, "Iniciativa: 79-clareza-pipeline-e-identificacao-tmux")
+	assert.Contains(t, card, "Branch:     feat/79-clareza-pipeline-e-identificacao-tmux")
+	assert.Contains(t, card, "Task 79-01 concluída e arquivada com sucesso")
+	assert.Contains(t, card, "Task 79-02 (Identificação Visual e Ergonomia no Tmux)")
+	assert.Contains(t, card, "ARQ-01, COD-01")
+	assert.Contains(t, card, "Builder, continue a implementação da task 79-02 a partir deste ponto.")
+
+	tokens := EstimateTokens(card)
+	assert.Less(t, tokens, 800, "o card de handoff deve ser compacto (< 800 tokens)")
+	assert.Less(t, tokens, 200, "o card deve ser altamente enxuto (< 200 tokens)")
+}

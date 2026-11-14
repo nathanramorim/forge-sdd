@@ -1,8 +1,11 @@
 package pipeline
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -332,4 +335,67 @@ func TestTmux_FalhaAoConectarDizOQueFazer(t *testing.T) {
 	assert.True(t, created, "a sessão foi criada mesmo sem conseguir conectar")
 	assert.Contains(t, err.Error(), "tmux attach -t =forge-")
 	assert.Contains(t, err.Error(), "está pronta")
+}
+
+func TestTmux_BordaBadgeDeTokensEStatusRight(t *testing.T) {
+	tempDir := t.TempDir()
+	metricsDir := filepath.Join(tempDir, "sdd", ".metrics")
+	require.NoError(t, os.MkdirAll(metricsDir, 0o755))
+
+	sessions := []struct {
+		filename string
+		role     string
+		in       int
+		out      int
+	}{
+		{"session-2026-11-14T100000Z.json", "discovery", 10000, 2000},
+		{"session-2026-11-14T103000Z.json", "builder", 60000, 18000},
+		{"session-2026-11-14T110000Z.json", "reviewer", 22000, 6000},
+	}
+
+	for _, s := range sessions {
+		rec := map[string]interface{}{
+			"$schema":       "forge-sdd/metrics/1.0",
+			"feature":       fmt.Sprintf("sdd/%s/spec.md", s.role),
+			"agent_path":    []string{s.role},
+			"tokens_input":  s.in,
+			"tokens_output": s.out,
+		}
+		data, err := json.Marshal(rec)
+		require.NoError(t, err)
+		require.NoError(t, os.WriteFile(filepath.Join(metricsDir, s.filename), data, 0o644))
+	}
+
+	env := lenv("linux", map[string]bool{"tmux": true}, nil)
+	env.Dir = tempDir
+	cfg := config.DefaultForgeConfig()
+	cfg.SessionMode = config.SessionModeLive
+
+	plan, err := BuildTmuxPlan(env, cfg, false)
+	require.NoError(t, err)
+
+	var titles []string
+	var foundStatusRight bool
+	var statusRightVal string
+
+	for _, step := range plan.Create {
+		if step[1] == "select-pane" && len(step) > 4 && step[4] == "-T" {
+			titles = append(titles, step[5])
+		}
+		if step[1] == "set-option" && len(step) > 4 && step[4] == "status-right" {
+			foundStatusRight = true
+			statusRightVal = step[5]
+		}
+	}
+
+	require.NotEmpty(t, titles)
+	assert.Contains(t, titles[0], "forge-discovery │ 🪙 12k tok")
+	assert.Contains(t, titles[1], "forge-builder │ 🪙 78k tok ⚠️")
+	assert.Contains(t, titles[2], "forge-reviewer │ 🪙 28k tok")
+
+	assert.True(t, foundStatusRight, "deve configurar status-right com o resumo de tokens")
+	assert.Contains(t, statusRightVal, "Tokens Totais: 118k")
+	assert.Contains(t, statusRightVal, "Disc: 12k")
+	assert.Contains(t, statusRightVal, "Bld: 78k")
+	assert.Contains(t, statusRightVal, "Rev: 28k")
 }
