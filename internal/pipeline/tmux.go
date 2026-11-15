@@ -172,8 +172,8 @@ func BuildTmuxPlan(env LaunchEnv, cfg config.ForgeConfig, insideTmux bool) (*Tmu
 		}
 		if totalTokens > 0 {
 			plan.Create = append(plan.Create,
-				[]string{"tmux", "set-option", "-t", exact, "status-right", statusRight},
-				[]string{"tmux", "set-option", "-t", exact, "status-right-length", "100"},
+				[]string{"tmux", "set-option", "-t", name, "status-right", statusRight},
+				[]string{"tmux", "set-option", "-t", name, "status-right-length", "100"},
 			)
 		}
 	} else {
@@ -196,8 +196,8 @@ func BuildTmuxPlan(env LaunchEnv, cfg config.ForgeConfig, insideTmux bool) (*Tmu
 		plan.Create = append(plan.Create, []string{"tmux", "select-pane", "-t", win + ".0"})
 		if totalTokens > 0 {
 			plan.Create = append(plan.Create,
-				[]string{"tmux", "set-option", "-t", exact, "status-right", statusRight},
-				[]string{"tmux", "set-option", "-t", exact, "status-right-length", "100"},
+				[]string{"tmux", "set-option", "-t", name, "status-right", statusRight},
+				[]string{"tmux", "set-option", "-t", name, "status-right-length", "100"},
 			)
 		}
 	}

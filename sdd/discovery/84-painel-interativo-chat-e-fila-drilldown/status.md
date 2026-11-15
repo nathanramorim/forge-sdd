@@ -15,6 +15,7 @@
 - [x] Auto-correção de rework (duplicação de bind-key COD-01 resolvida)
 - [x] PR #78 aberto com checks 100% verdes
 - [x] Portão B (Governança) aprovado pelo Reviewer (Veredito: Conforme)
+- [x] Fix `fix-84-01`: correção do alvo `tmux set-option` em `status-right` quando `totalTokens > 0` e bump para `v4.7.1-beta`
 
 ## Próximo Passo
 Revisão humana (Camada C) e merge do PR #78 na branch `main`.

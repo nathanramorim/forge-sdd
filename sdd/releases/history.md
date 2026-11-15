@@ -4,6 +4,13 @@ Este arquivo registra o histórico de entregas de produto deste projeto.
 
 ## Entregas
 
+### Versão 4.7.1 — Fix no Tmux: Correção do Alvo em status-right com Tokens Acumulados (Beta)
+
+Compatível com a 4.7.0-beta.
+
+*   **Correção definitiva da abertura agrupada no tmux quando há tokens acumulados:** substitui o alvo com prefixo `=` (`=forge-<projeto>-<hash>`) pelo nome direto da sessão (`forge-<projeto>-<hash>`) nos passos `tmux set-option -t <sessão> status-right` e `status-right-length` em ambos os modos (`live` e `headless`). No tmux 3.8+, `set-option -t =<sessão>` falha com `exit status 1 (no such session)`, o que derrubava a sessão recém-criada e disparava indevidamente o fallback de 3 janelas separadas do sistema sempre que `totalTokens > 0`.
+*   **Teste de integração real com tmux (`FORGE_TMUX_REAL=1`):** inclui verificação ponta a ponta com métricas de tokens populadas em `sdd/.metrics/` contra um servidor tmux real e corrige a inspeção de painéis com `base-index 1`.
+
 ### Versão 4.7.0 — Painel Interativo: Stream Narrativo nos Workers, Fila com Drill-Down e Popup no Tmux (Beta)
 
 Compatível com a 4.6.1 (Iniciativa 84). Sem breaking changes.

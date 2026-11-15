@@ -85,7 +85,7 @@ func realPlan(t *testing.T) (*TmuxPlan, config.ForgeConfig) {
 
 func panesOf(t *testing.T, r isolatedTmux, session string) [][]string {
 	t.Helper()
-	raw := r.out(t, "list-panes", "-t", "="+session+":0", "-F", "#{pane_index}|#{pane_title}|#{pane_left}|#{pane_top}|#{pane_width}|#{pane_height}")
+	raw := r.out(t, "list-panes", "-t", "="+session, "-F", "#{pane_index}|#{pane_title}|#{pane_left}|#{pane_top}|#{pane_width}|#{pane_height}")
 	var rows [][]string
 	for _, l := range strings.Split(raw, "\n") {
 		rows = append(rows, strings.Split(l, "|"))
@@ -200,4 +200,29 @@ func TestTmuxReal_LivePlanCriaJanelaForgeEControle(t *testing.T) {
 	// Janela forge-ctl tem 2 painéis (despachantes builder e reviewer)
 	ctlPanes := r.out(t, "list-panes", "-t", "="+plan.Session+":forge-ctl", "-F", "#{pane_index}")
 	assert.Len(t, strings.Split(ctlPanes, "\n"), 2)
+}
+
+func TestTmuxReal_StatusRightComTokensNaoFalhaSetOption(t *testing.T) {
+	rTokens := realTmux(t, "")
+	dirTokens := t.TempDir()
+	metricsDir := filepath.Join(dirTokens, "sdd", ".metrics")
+	require.NoError(t, os.MkdirAll(metricsDir, 0o755))
+	require.NoError(t, os.WriteFile(
+		filepath.Join(metricsDir, "session-2026-11-15T100000Z.json"),
+		[]byte(`{"$schema":"forge-sdd/metrics/1.0","feature":"sdd/discovery/spec.md","agent_path":["discovery"],"tokens_input":10000,"tokens_output":2000}`),
+		0o644,
+	))
+	binTokens := filepath.Join(t.TempDir(), "fake-forge")
+	require.NoError(t, os.WriteFile(binTokens, []byte("#!/bin/sh\nexec sleep 300\n"), 0o755))
+	cfgTokens := config.DefaultForgeConfig()
+	cfgTokens.CLIProfiles[config.CLIClaude] = config.CLIProfile{Command: "sleep", Args: []string{"1"}, InteractiveArgs: []string{"300"}}
+	envTokens := lenv("linux", map[string]bool{"tmux": true}, nil)
+	envTokens.Dir = dirTokens
+	envTokens.Bin = binTokens
+	planTokens, err := BuildTmuxPlan(envTokens, cfgTokens, false)
+	require.NoError(t, err)
+	createdTokens, err := LaunchTmux(planTokens, rTokens)
+	require.NoError(t, err, "set-option status-right com tokens acumulados deve ser aceito pelo tmux real")
+	assert.True(t, createdTokens)
+	assert.Contains(t, rTokens.out(t, "show-options", "-t", planTokens.Session, "-v", "status-right"), "Tokens Totais: 12k")
 }
