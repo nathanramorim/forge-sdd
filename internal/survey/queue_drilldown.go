@@ -85,6 +85,51 @@ func IsTaskCompleted(status string) bool {
 	}
 }
 
+// cleanTaskDisplay normaliza a exibição de TaskID e Title para nunca repetir o mesmo ID duas vezes na linha
+// (ex: quando Title é "Feature: <task_id>") nem quebrar linha em terminais de 85%.
+func cleanTaskDisplay(taskID, rawTitle string) string {
+	t := strings.TrimSpace(rawTitle)
+	tLower := strings.ToLower(t)
+	idLower := strings.ToLower(strings.TrimSpace(taskID))
+
+	for _, prefix := range []string{"feature:", "feat:", "fix:", "task:"} {
+		if strings.HasPrefix(tLower, prefix) {
+			trimmed := strings.TrimSpace(t[len(prefix):])
+			if strings.EqualFold(trimmed, taskID) {
+				t = ""
+				break
+			}
+			t = trimmed
+			tLower = strings.ToLower(t)
+		}
+	}
+
+	if strings.EqualFold(t, taskID) || t == "" {
+		return truncateRunes(taskID, 56)
+	}
+	if strings.HasPrefix(tLower, idLower) {
+		rest := strings.TrimSpace(strings.TrimPrefix(strings.TrimSpace(t[len(taskID):]), "—"))
+		rest = strings.TrimSpace(strings.TrimPrefix(rest, "-"))
+		if rest == "" {
+			return truncateRunes(taskID, 56)
+		}
+		t = rest
+	}
+	combined := fmt.Sprintf("%s — %s", taskID, t)
+	return truncateRunes(combined, 58)
+}
+
+func truncateRunes(s string, maxRunes int) string {
+	r := []rune(s)
+	if len(r) <= maxRunes {
+		return s
+	}
+	if maxRunes <= 3 {
+		return string(r[:maxRunes])
+	}
+	return string(r[:maxRunes-3]) + "..."
+}
+
 // NewQueueDrilldownTUI inicializa a TUI carregando 100% das tarefas da fila sem truncamento,
 // separando as tarefas que estão na fila/em andamento das que já foram concluídas.
 func NewQueueDrilldownTUI(dir string, q *queue.Queue) *QueueDrilldownTUI {
@@ -107,10 +152,10 @@ func NewQueueDrilldownTUI(dir string, q *queue.Queue) *QueueDrilldownTUI {
 		if title == "" {
 			title = it.SpecPath
 		}
-		label := fmt.Sprintf("%s  %s — %s  •  %s  •  🪙 %s",
+		display := cleanTaskDisplay(it.TaskID, title)
+		label := fmt.Sprintf("%s  %s  •  %s  •  🪙 %s",
 			badge,
-			it.TaskID,
-			title,
+			display,
 			stage,
 			monitor.FormatTokensShort(tokMetrics.TotalTokens),
 		)
@@ -175,7 +220,7 @@ func (tui *QueueDrilldownTUI) BuildOptions() []huh.Option[string] {
 }
 
 // BuildTabOptions gera as opções apenas da aba selecionada (1. Na Fila / Em Andamento ou 2. Concluídas),
-// incluindo a opção de alternar entre as 2 abas.
+// colocando o botão de trocar de aba logo no TOPO da lista para ficar sempre visível sem precisar rolar até o fim.
 func (tui *QueueDrilldownTUI) BuildTabOptions(tab string) []huh.Option[string] {
 	var current []QueueDrilldownItem
 	if tab == TabCompleted {
@@ -185,23 +230,23 @@ func (tui *QueueDrilldownTUI) BuildTabOptions(tab string) []huh.Option[string] {
 	}
 
 	options := make([]huh.Option[string], 0, len(current)+2)
-	for _, it := range current {
-		options = append(options, huh.NewOption(it.Label, it.TaskID))
-	}
-
 	if tab == TabCompleted {
 		options = append(options, huh.NewOption(
-			fmt.Sprintf("⇄ Ver Aba 1: ⏳ Na Fila / Em Andamento (%d tarefas)", len(tui.ActiveItems)),
+			fmt.Sprintf("⇄ [Trocar Aba] Ir para Aba 1: ⏳ Na Fila / Em Andamento (%d tarefas)", len(tui.ActiveItems)),
 			"__tab_active__",
 		))
 	} else {
 		options = append(options, huh.NewOption(
-			fmt.Sprintf("⇄ Ver Aba 2: ✅ Concluídas (%d tarefas)", len(tui.CompletedItems)),
+			fmt.Sprintf("⇄ [Trocar Aba] Ir para Aba 2: ✅ Concluídas (%d tarefas)", len(tui.CompletedItems)),
 			"__tab_completed__",
 		))
 	}
 
-	options = append(options, huh.NewOption("← Fechar painel / Sair", "__exit__"))
+	for _, it := range current {
+		options = append(options, huh.NewOption(it.Label, it.TaskID))
+	}
+
+	options = append(options, huh.NewOption("← Fechar painel / Sair (Esc)", "__exit__"))
 	return options
 }
 
@@ -217,12 +262,18 @@ func (tui *QueueDrilldownTUI) SelectTask() (string, error) {
 			tab = TabActive
 		}
 
-		tabHeader := fmt.Sprintf("▸ [Aba 1: ⏳ Na Fila / Em Andamento (%d)]   │    Aba 2: ✅ Concluídas (%d)", len(tui.ActiveItems), len(tui.CompletedItems))
+		tabHeader := fmt.Sprintf("▸ [Aba 1: ⏳ Na Fila (%d)]  │  Aba 2: ✅ Concluídas (%d)   (1º item da lista troca de aba)", len(tui.ActiveItems), len(tui.CompletedItems))
 		if tab == TabCompleted {
-			tabHeader = fmt.Sprintf("   Aba 1: ⏳ Na Fila / Em Andamento (%d)    │  ▸ [Aba 2: ✅ Concluídas (%d)]", len(tui.ActiveItems), len(tui.CompletedItems))
+			tabHeader = fmt.Sprintf("  Aba 1: ⏳ Na Fila (%d)   │  ▸ [Aba 2: ✅ Concluídas (%d)] (1º item da lista troca de aba)", len(tui.ActiveItems), len(tui.CompletedItems))
 		}
 
 		var choice string
+		if tab == TabCompleted && len(tui.CompletedItems) > 0 {
+			choice = tui.CompletedItems[0].TaskID
+		} else if tab == TabActive && len(tui.ActiveItems) > 0 {
+			choice = tui.ActiveItems[0].TaskID
+		}
+
 		sel := huh.NewSelect[string]().
 			Title("Esteira SDD: [1. Discovery] ──► [2. Builder] ──► [3. Reviewer]").
 			Description(tabHeader + "  •  ↑/↓ navegar • Enter abrir • Esc sair").

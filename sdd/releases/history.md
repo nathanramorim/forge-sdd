@@ -4,6 +4,14 @@ Este arquivo registra o histórico de entregas de produto deste projeto.
 
 ## Entregas
 
+### Versão 4.7.5 — Troca de Aba no Topo da Lista, Sem Quebra de Linha e Dica Clara de Tela Cheia no Tmux (Beta)
+
+Compatível com a 4.7.4-beta (Iniciativa 84 — `feat-84-07`).
+
+*   **Botão de trocar de aba fixo no topo da lista (`internal/survey/queue_drilldown.go`):** a opção **`⇄ [Trocar Aba] Ir para Aba 1 / Aba 2`** agora é sempre o **1º item no topo da lista** (com o cursor iniciando direto na 1ª tarefa logo abaixo), permitindo alternar entre as abas com apenas uma seta para cima (`↑` + `Enter`) sem precisar rolar até o final quando há 25+ tarefas.
+*   **Eliminação de repetição de ID e quebra de linha na lista (`cleanTaskDisplay`):** remove a repetição redundante quando o título em `queue.json` repete o `TaskID` (`Feature: <task_id>`), mantendo todas as linhas da fila em linha única.
+*   **Linguagem clara na dica do atalho `Ctrl+b z` (`internal/pipeline/tmux.go`):** substitui o termo ambíguo `"z zoom"` por **`Ctrl+b z tela cheia/voltar`** (`[z] Tela Cheia/Voltar`), deixando claro que o atalho expande o painel atual em tela cheia e volta aos 3 painéis ao pressionar novamente.
+
 ### Versão 4.7.4 — Layout Sem Bordas Direitas e Separação em 2 Abas (Na Fila vs. Concluídas) (Beta)
 
 Compatível com a 4.7.3-beta (Iniciativa 84 — `feat-84-07`).

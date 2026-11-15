@@ -60,18 +60,18 @@ func TestQueueDrilldown_ListAllTasksWithoutTruncation(t *testing.T) {
 	assert.Equal(t, TabActive, tui.ActiveTab)
 
 	activeTabOpts := tui.BuildTabOptions(TabActive)
-	// 20 ativas + 1 alternar aba + 1 sair = 22
+	// 1 alternar aba no topo + 20 ativas + 1 sair = 22
 	require.Len(t, activeTabOpts, 22)
-	assert.Equal(t, "task-02", activeTabOpts[0].Value, "primeira task ativa na Aba 1")
-	assert.Equal(t, "task-25", activeTabOpts[19].Value, "última task ativa na Aba 1")
-	assert.Equal(t, "__tab_completed__", activeTabOpts[20].Value, "opção para alternar para a Aba 2 (Concluídas)")
+	assert.Equal(t, "__tab_completed__", activeTabOpts[0].Value, "opção para alternar para a Aba 2 (Concluídas) fica no topo")
+	assert.Equal(t, "task-02", activeTabOpts[1].Value, "primeira task ativa na Aba 1")
+	assert.Equal(t, "task-25", activeTabOpts[20].Value, "última task ativa na Aba 1")
 
 	completedTabOpts := tui.BuildTabOptions(TabCompleted)
-	// 5 concluídas + 1 alternar aba + 1 sair = 7
+	// 1 alternar aba no topo + 5 concluídas + 1 sair = 7
 	require.Len(t, completedTabOpts, 7)
-	assert.Equal(t, "task-01", completedTabOpts[0].Value, "primeira task concluída na Aba 2")
-	assert.Equal(t, "task-21", completedTabOpts[4].Value, "última task concluída na Aba 2")
-	assert.Equal(t, "__tab_active__", completedTabOpts[5].Value, "opção para voltar para a Aba 1 (Na Fila)")
+	assert.Equal(t, "__tab_active__", completedTabOpts[0].Value, "opção para voltar para a Aba 1 (Na Fila) fica no topo")
+	assert.Equal(t, "task-01", completedTabOpts[1].Value, "primeira task concluída na Aba 2")
+	assert.Equal(t, "task-21", completedTabOpts[5].Value, "última task concluída na Aba 2")
 }
 
 func TestQueueDrilldown_ListAllTasks(t *testing.T) {

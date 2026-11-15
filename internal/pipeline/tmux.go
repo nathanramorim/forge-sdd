@@ -115,7 +115,7 @@ func BuildTmuxPlan(env LaunchEnv, cfg config.ForgeConfig, insideTmux bool) (*Tmu
 	titles := []string{discTitle, bldTitle, revTitle}
 
 	// Dicas rotativas de atalhos na barra inferior direita do tmux (alterna a cada atividade e destaca ao apertar Ctrl+b).
-	const statusRightHints = "#{?client_prefix,⌨️  [q] Fila/Detalhes · [Setas] Painel · [z] Zoom,#{?#{==:#{e|%|:#{t/f/%%S:client_activity},2},0},💡 Dica: Ctrl+b q abre Fila,💡 Dica: Ctrl+b Setas navega · z zoom}}"
+	const statusRightHints = "#{?client_prefix,⌨️  [q] Fila/Detalhes · [Setas] Trocar Painel · [z] Tela Cheia/Voltar,#{?#{==:#{e|%|:#{t/f/%%S:client_activity},2},0},💡 Dica: Ctrl+b q abre Fila,💡 Dica: Ctrl+b Setas navega · Ctrl+b z tela cheia/voltar}}"
 	statusRight := statusRightHints
 	if totalTokens > 0 {
 		statusRight = fmt.Sprintf("%s │ Tokens Totais: %s (Disc: %s · Bld: %s · Rev: %s)",
