@@ -8,22 +8,28 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/huh"
+	"github.com/forge-sdd/cli/internal/monitor"
 	"github.com/forge-sdd/cli/internal/queue"
 )
 
 // TaskDetailView reúne todos os dados de auditoria e inspeção de uma tarefa da fila.
 type TaskDetailView struct {
-	TaskID       string   `json:"task_id"`
-	Title        string   `json:"title"`
-	Status       string   `json:"status"`
-	Duration     string   `json:"duration"`
-	FilesChanged []string `json:"files_changed"`
-	CommitMsg    string   `json:"commit_msg"`
-	Verdict      string   `json:"verdict"`
-	ReviewerNote string   `json:"reviewer_note"`
-	Rules        []string `json:"rules"`
-	SpecPath     string   `json:"spec_path"`
-	Attempts     int      `json:"attempts"`
+	TaskID          string   `json:"task_id"`
+	Title           string   `json:"title"`
+	Status          string   `json:"status"`
+	Duration        string   `json:"duration"`
+	PipelineFlow    string   `json:"pipeline_flow"`
+	DiscoveryTokens int      `json:"discovery_tokens"`
+	BuilderTokens   int      `json:"builder_tokens"`
+	ReviewerTokens  int      `json:"reviewer_tokens"`
+	TotalTokens     int      `json:"total_tokens"`
+	FilesChanged    []string `json:"files_changed"`
+	CommitMsg       string   `json:"commit_msg"`
+	Verdict         string   `json:"verdict"`
+	ReviewerNote    string   `json:"reviewer_note"`
+	Rules           []string `json:"rules"`
+	SpecPath        string   `json:"spec_path"`
+	Attempts        int      `json:"attempts"`
 }
 
 // InspectTaskDetails inspeciona a fila e monta a visão detalhada da tarefa selecionada.
@@ -44,13 +50,35 @@ func (tui *QueueDrilldownTUI) InspectTaskDetails(taskID string) (*TaskDetailView
 		return nil, fmt.Errorf("tarefa %q não encontrada na fila", taskID)
 	}
 
-	return BuildTaskDetailView(tui.Dir, *found), nil
+	v := BuildTaskDetailView(tui.Dir, *found)
+	tok := monitor.CalculateTaskTokenMetrics(tui.Dir, found.TaskID, found.SpecPath, found.Status, len(tui.Queue.Items))
+	v.DiscoveryTokens = tok.DiscoveryTokens
+	v.BuilderTokens = tok.BuilderTokens
+	v.ReviewerTokens = tok.ReviewerTokens
+	v.TotalTokens = tok.TotalTokens
+	return v, nil
 }
 
 // InspectTaskDetails extrai a visão detalhada a partir do diretório e da fila.
 func InspectTaskDetails(dir string, q *queue.Queue, taskID string) (*TaskDetailView, error) {
 	tui := NewQueueDrilldownTUI(dir, q)
 	return tui.InspectTaskDetails(taskID)
+}
+
+// PipelineFlowDiagram retorna o diagrama linear de progresso nas 3 estações (Discovery -> Builder -> Reviewer).
+func PipelineFlowDiagram(status string) string {
+	switch strings.ToLower(strings.TrimSpace(status)) {
+	case queue.StatusApproved, "conforme", "done", "completed":
+		return "[✓ 1. Discovery] ──► [✓ 2. Builder] ──► [✓ 3. Reviewer (Concluída)]"
+	case queue.StatusReviewPending, "review":
+		return "[✓ 1. Discovery] ──► [✓ 2. Builder] ──► [▶ 3. Reviewer (Auditando)]"
+	case queue.StatusChangesRequested, "violacao", "failed", "error":
+		return "[✓ 1. Discovery] ──► [✗ 2. Builder (Rework)] ──► [! 3. Reviewer]"
+	case queue.StatusBuilding, "processing", "in_progress":
+		return "[✓ 1. Discovery] ──► [▶ 2. Builder (Executando)] ──► [○ 3. Reviewer]"
+	default:
+		return "[✓ 1. Discovery] ──► [⌛ 2. Builder (Na Fila)] ──► [○ 3. Reviewer]"
+	}
 }
 
 // BuildTaskDetailView compila os dados do QueueItem em um TaskDetailView completo.
@@ -60,18 +88,25 @@ func BuildTaskDetailView(dir string, item queue.QueueItem) *TaskDetailView {
 		status = queue.StatusQueued
 	}
 
+	tok := monitor.CalculateTaskTokenMetrics(dir, item.TaskID, item.SpecPath, status, 1)
+
 	view := &TaskDetailView{
-		TaskID:       item.TaskID,
-		Title:        item.Title,
-		Status:       status,
-		SpecPath:     item.SpecPath,
-		Rules:        item.Rules,
-		Attempts:     item.Attempts,
-		FilesChanged: []string{},
-		Verdict:      "—",
-		ReviewerNote: "Nenhum laudo emitido ainda.",
-		Duration:     "pendente",
-		CommitMsg:    fmt.Sprintf("feat(%s): %s", item.TaskID, item.Title),
+		TaskID:          item.TaskID,
+		Title:           item.Title,
+		Status:          status,
+		PipelineFlow:    PipelineFlowDiagram(status),
+		DiscoveryTokens: tok.DiscoveryTokens,
+		BuilderTokens:   tok.BuilderTokens,
+		ReviewerTokens:  tok.ReviewerTokens,
+		TotalTokens:     tok.TotalTokens,
+		SpecPath:        item.SpecPath,
+		Rules:           item.Rules,
+		Attempts:        item.Attempts,
+		FilesChanged:    []string{},
+		Verdict:         "—",
+		ReviewerNote:    "Nenhum laudo emitido ainda.",
+		Duration:        "pendente",
+		CommitMsg:       fmt.Sprintf("feat(%s): %s", item.TaskID, item.Title),
 	}
 
 	if item.GovernanceVerdict != nil {
@@ -123,34 +158,137 @@ func BuildTaskDetailView(dir string, item queue.QueueItem) *TaskDetailView {
 	return view
 }
 
-// FormatTaskDetailCard gera a renderização textual do card de inspeção da tarefa.
+const cardTotalCols = 78
+const cardInnerCols = cardTotalCols - 4 // "│ " + 74 colunas + " │"
+
+// FormatTaskDetailCard gera a renderização textual do card de inspeção da tarefa com bordas alinhadas.
 func FormatTaskDetailCard(v *TaskDetailView) string {
 	badge := StatusBadge(v.Status)
+	flow := v.PipelineFlow
+	if flow == "" {
+		flow = PipelineFlowDiagram(v.Status)
+	}
+	discTok, bldTok, revTok, totTok := v.DiscoveryTokens, v.BuilderTokens, v.ReviewerTokens, v.TotalTokens
+	if totTok == 0 && discTok == 0 && bldTok == 0 && revTok == 0 {
+		tok := monitor.CalculateTaskTokenMetrics("", v.TaskID, v.SpecPath, v.Status, 1)
+		discTok, bldTok, revTok, totTok = tok.DiscoveryTokens, tok.BuilderTokens, tok.ReviewerTokens, tok.TotalTokens
+	}
+
 	var sb strings.Builder
 
-	sb.WriteString("┌─── 📋 Detalhes da Tarefa ──────────────────────────────────────────────────┐\n")
-	sb.WriteString(fmt.Sprintf("│ ID:           %-58s │\n", v.TaskID))
-	sb.WriteString(fmt.Sprintf("│ Título:       %-58s │\n", truncate(v.Title, 58)))
-	sb.WriteString(fmt.Sprintf("│ Status:       %-40s (Duração: %s) │\n", badge, v.Duration))
-	sb.WriteString(fmt.Sprintf("│ Spec:         %-58s │\n", truncate(v.SpecPath, 58)))
+	sb.WriteString(formatBoxBorder("┌", "📋 Detalhes da Tarefa", "┐") + "\n")
+	sb.WriteString(formatBoxKeyVal("ID:", v.TaskID) + "\n")
+	sb.WriteString(formatBoxKeyVal("Título:", v.Title) + "\n")
+	statusLine := fmt.Sprintf("%-36s (Duração: %s)", badge, v.Duration)
+	sb.WriteString(formatBoxKeyVal("Status:", statusLine) + "\n")
+	sb.WriteString(formatBoxKeyVal("Spec:", v.SpecPath) + "\n")
 	if len(v.Rules) > 0 {
-		sb.WriteString(fmt.Sprintf("│ Rules:        %-58s │\n", truncate(strings.Join(v.Rules, ", "), 58)))
+		sb.WriteString(formatBoxKeyVal("Rules:", strings.Join(v.Rules, ", ")) + "\n")
 	}
-	sb.WriteString(fmt.Sprintf("│ Commit:       %-58s │\n", truncate(v.CommitMsg, 58)))
-	sb.WriteString("├─── 📂 Arquivos Modificados ────────────────────────────────────────────────┤\n")
+	sb.WriteString(formatBoxKeyVal("Commit:", v.CommitMsg) + "\n")
+
+	sb.WriteString(formatBoxBorder("├", "🧭 Esteira (Discovery ──► Builder ──► Reviewer)", "┤") + "\n")
+	sb.WriteString(formatBoxRow("  "+flow) + "\n")
+
+	sb.WriteString(formatBoxBorder("├", "🪙 Consumo de Tokens por Etapa e Total da Tarefa", "┤") + "\n")
+	tokStages := fmt.Sprintf("  1. Discovery: %-8s │ 2. Builder: %-8s │ 3. Reviewer: %-8s",
+		monitor.FormatTokensShort(discTok)+" tok",
+		monitor.FormatTokensShort(bldTok)+" tok",
+		monitor.FormatTokensShort(revTok)+" tok",
+	)
+	sb.WriteString(formatBoxRow(tokStages) + "\n")
+	tokTotal := fmt.Sprintf("  Total da Tarefa: %s tok (%d tokens acumulados nas 3 etapas)",
+		monitor.FormatTokensShort(totTok),
+		totTok,
+	)
+	sb.WriteString(formatBoxRow(tokTotal) + "\n")
+
+	sb.WriteString(formatBoxBorder("├", "📂 Arquivos Modificados", "┤") + "\n")
 	if len(v.FilesChanged) == 0 {
-		sb.WriteString("│   (nenhum arquivo registrado)                                             │\n")
+		sb.WriteString(formatBoxRow("  (nenhum arquivo registrado)") + "\n")
 	} else {
 		for _, f := range v.FilesChanged {
-			sb.WriteString(fmt.Sprintf("│   • %-68s │\n", truncate(f, 68)))
+			sb.WriteString(formatBoxRow("  • "+f) + "\n")
 		}
 	}
-	sb.WriteString("├─── ⚖️ Laudo da Governança (Reviewer) ───────────────────────────────────────┤\n")
-	sb.WriteString(fmt.Sprintf("│ Veredito:     %-58s │\n", v.Verdict))
-	sb.WriteString(fmt.Sprintf("│ Parecer:      %-58s │\n", truncate(v.ReviewerNote, 58)))
-	sb.WriteString("└────────────────────────────────────────────────────────────────────────────┘")
+
+	sb.WriteString(formatBoxBorder("├", "⚖ Laudo da Governança (Reviewer)", "┤") + "\n")
+	sb.WriteString(formatBoxKeyVal("Veredito:", v.Verdict) + "\n")
+	sb.WriteString(formatBoxKeyVal("Parecer:", v.ReviewerNote) + "\n")
+	sb.WriteString("└" + strings.Repeat("─", cardTotalCols-2) + "┘")
 
 	return sb.String()
+}
+
+func formatBoxBorder(leftCorner, title, rightCorner string) string {
+	prefix := leftCorner + "─── " + title + " "
+	used := visualCols(prefix) + visualCols(rightCorner)
+	dashes := cardTotalCols - used
+	if dashes < 1 {
+		dashes = 1
+	}
+	return prefix + strings.Repeat("─", dashes) + rightCorner
+}
+
+func formatBoxKeyVal(label, val string) string {
+	labelPadded := padRightCols(label, 14)
+	maxValCols := cardInnerCols - 14
+	valTrunc := truncateCols(val, maxValCols)
+	return formatBoxRow(labelPadded + valTrunc)
+}
+
+func formatBoxRow(content string) string {
+	clipped := truncateCols(content, cardInnerCols)
+	padded := padRightCols(clipped, cardInnerCols)
+	return "│ " + padded + " │"
+}
+
+func visualCols(s string) int {
+	cols := 0
+	for _, r := range s {
+		cols += runeVisualWidth(r)
+	}
+	return cols
+}
+
+func runeVisualWidth(r rune) int {
+	if r == 0xFE0F || r == 0x200D {
+		return 0
+	}
+	if r >= 0x1F300 || r == 0x231B || r == 0x23F3 || r == 0x2705 || r == 0x274C {
+		return 2
+	}
+	return 1
+}
+
+func truncateCols(s string, maxCols int) string {
+	if visualCols(s) <= maxCols {
+		return s
+	}
+	if maxCols <= 3 {
+		return "..."[:maxCols]
+	}
+	target := maxCols - 3
+	var b strings.Builder
+	cols := 0
+	for _, r := range s {
+		w := runeVisualWidth(r)
+		if cols+w > target {
+			break
+		}
+		b.WriteRune(r)
+		cols += w
+	}
+	b.WriteString("...")
+	return b.String()
+}
+
+func padRightCols(s string, targetCols int) string {
+	w := visualCols(s)
+	if w >= targetCols {
+		return s
+	}
+	return s + strings.Repeat(" ", targetCols-w)
 }
 
 // ShowTaskDetail exibe o modal de detalhes e aguarda Enter ou Esc para retornar.
@@ -183,16 +321,6 @@ func contains(slice []string, s string) bool {
 		}
 	}
 	return false
-}
-
-func truncate(s string, maxLen int) string {
-	if len(s) <= maxLen {
-		return s
-	}
-	if maxLen <= 3 {
-		return s[:maxLen]
-	}
-	return s[:maxLen-3] + "..."
 }
 
 func extractFilesFromSpec(content string) []string {

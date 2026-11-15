@@ -4,6 +4,17 @@ Este arquivo registra o histórico de entregas de produto deste projeto.
 
 ## Entregas
 
+### Versão 4.7.2 — UX da Fila (Separação Ativas vs. Concluídas, Esteira Discovery→Builder→Reviewer, Tokens por Etapa e Dicas no Tmux) (Beta)
+
+Compatível com a 4.7.1-beta (Iniciativa 84 — `feat-84-07`).
+
+*   **Separação de tarefas `Na Fila / Em Andamento` vs. `Concluídas` (`internal/survey/queue_drilldown.go`):** as tarefas ativas ou aguardando na fila aparecem agrupadas no topo (`[FILA]`) e as concluídas ficam separadas abaixo (`[CONCLUÍDA]`), exibindo em qual etapa da esteira `Discovery ──► Builder ──► Reviewer` cada tarefa está e seu consumo de tokens (`🪙 Xk`).
+*   **UX e Tokens por Etapa no Card de Detalhes da Tarefa (`internal/survey/task_detail.go` e `internal/monitor/tokens.go`):**
+    *   Seção visual dedicada da esteira: `[✓ 1. Discovery] ──► [✓ 2. Builder] ──► [✓ 3. Reviewer]`.
+    *   Seção de consumo de tokens discriminado por etapa (`1. Discovery`, `2. Builder`, `3. Reviewer`) e **Total da Tarefa**, além de estimativa automática gravada pelo worker (`cmd/forge-sdd/worker.go`) ao encerrar cada job.
+    *   Alinhamento exato das bordas direitas (`│`) com cálculo de largura visual Unicode/emojis (78 colunas).
+*   **Dicas dinâmicas de atalhos na barra inferior direita do Tmux (`internal/pipeline/tmux.go`):** exibe dicas rotativas (`💡 Dica: Ctrl+b q abre Fila`, `💡 Dica: Ctrl+b Setas navega · z zoom`, e guia imediato `⌨️ [q] Fila/Detalhes · [Setas] Painel · [z] Zoom` ao pressionar `Ctrl+b`) ao lado do resumo de tokens, usando `-t <sessão>` sem prefixo `=`.
+
 ### Versão 4.7.1 — Fix no Tmux: Correção do Alvo em status-right com Tokens Acumulados (Beta)
 
 Compatível com a 4.7.0-beta.

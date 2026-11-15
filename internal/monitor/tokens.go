@@ -27,10 +27,33 @@ type ProjectTokenMetrics struct {
 }
 
 type sessionRecord struct {
-	Feature      string   `json:"feature"`
-	AgentPath    []string `json:"agent_path"`
-	TokensInput  int      `json:"tokens_input"`
-	TokensOutput int      `json:"tokens_output"`
+	Feature         string   `json:"feature"`
+	Phase           string   `json:"phase"`
+	AgentPath       []string `json:"agent_path"`
+	TokensInput     int      `json:"tokens_input"`
+	TokensOutput    int      `json:"tokens_output"`
+	DurationSeconds int      `json:"duration_seconds"`
+}
+
+// TaskTokenMetrics consolida o gasto de tokens de uma tarefa por etapa (Discovery -> Builder -> Reviewer) e total.
+type TaskTokenMetrics struct {
+	DiscoveryTokens int `json:"discovery_tokens"`
+	BuilderTokens   int `json:"builder_tokens"`
+	ReviewerTokens  int `json:"reviewer_tokens"`
+	TotalTokens     int `json:"total_tokens"`
+	DurationSeconds int `json:"duration_seconds"`
+}
+
+// EstimateTokensFromBytes estima tokens (~1 token a cada 4 bytes) com piso mínimo quando há conteúdo.
+func EstimateTokensFromBytes(byteCount int) int {
+	if byteCount <= 0 {
+		return 0
+	}
+	est := (byteCount + 3) / 4
+	if est < 50 {
+		est = 50
+	}
+	return est
 }
 
 // NormalizeRole normaliza nomes e apelidos de papéis para as três chaves canônicas:
@@ -158,4 +181,151 @@ func FormatTokensShort(tokens int) string {
 		return fmt.Sprintf("%.1fk", float64(tokens)/1000.0)
 	}
 	return fmt.Sprintf("%.0fk", float64(tokens)/1000.0)
+}
+
+// CalculateTaskTokenMetrics apura o consumo de tokens em cada etapa (Discovery, Builder, Reviewer)
+// e o total acumulado de uma tarefa específica a partir de sdd/.metrics/ (com fallback proporcional/estimado).
+func CalculateTaskTokenMetrics(dir, taskID, specPath, status string, totalTasks int) TaskTokenMetrics {
+	if totalTasks <= 0 {
+		totalTasks = 1
+	}
+
+	var res TaskTokenMetrics
+	var initDisc, initBld, initRev int
+
+	initPrefix := extractInitiativePrefix(specPath)
+	metricsDir := layout.Metrics(dir)
+	entries, err := os.ReadDir(metricsDir)
+	if err == nil {
+		for _, e := range entries {
+			name := e.Name()
+			if e.IsDir() || !strings.HasPrefix(name, "session-") || !strings.HasSuffix(name, ".json") {
+				continue
+			}
+			data, rerr := os.ReadFile(filepath.Join(metricsDir, name))
+			if rerr != nil {
+				continue
+			}
+			var rec sessionRecord
+			if jerr := json.Unmarshal(data, &rec); jerr != nil {
+				continue
+			}
+			tot := rec.TokensInput + rec.TokensOutput
+			role := inferRoleFromSession(rec)
+			if role == "" {
+				continue
+			}
+
+			if matchesTaskRecord(rec, taskID, specPath) {
+				switch role {
+				case layout.RoleDiscovery:
+					res.DiscoveryTokens += tot
+				case layout.RoleBuilder:
+					res.BuilderTokens += tot
+				case layout.RoleReviewer:
+					res.ReviewerTokens += tot
+				}
+				if rec.DurationSeconds > 0 {
+					res.DurationSeconds += rec.DurationSeconds
+				}
+			} else if initPrefix != "" && strings.Contains(filepath.ToSlash(rec.Feature), initPrefix) {
+				switch role {
+				case layout.RoleDiscovery:
+					initDisc += tot
+				case layout.RoleBuilder:
+					initBld += tot
+				case layout.RoleReviewer:
+					initRev += tot
+				}
+			}
+		}
+	}
+
+	// Se não houve registro individual de Discovery para a task, rateia o Discovery da iniciativa
+	if res.DiscoveryTokens == 0 && initDisc > 0 {
+		res.DiscoveryTokens = initDisc / totalTasks
+	}
+
+	specBytes := readSpecByteSize(dir, specPath)
+	if res.DiscoveryTokens == 0 {
+		if specBytes > 0 {
+			res.DiscoveryTokens = EstimateTokensFromBytes(specBytes * 3)
+		} else {
+			res.DiscoveryTokens = 1200
+		}
+	}
+
+	st := strings.ToLower(strings.TrimSpace(status))
+	passedBuilder := st == "building" || st == "processing" || st == "in_progress" ||
+		st == "review_pending" || st == "review" ||
+		st == "changes_requested" || st == "violacao" || st == "failed" || st == "error" ||
+		st == "approved" || st == "conforme" || st == "done" || st == "completed"
+	passedReviewer := st == "changes_requested" || st == "violacao" ||
+		st == "approved" || st == "conforme" || st == "done" || st == "completed"
+
+	if passedBuilder && res.BuilderTokens == 0 {
+		if initBld > 0 {
+			res.BuilderTokens = initBld / totalTasks
+		} else if specBytes > 0 {
+			res.BuilderTokens = EstimateTokensFromBytes(specBytes * 8)
+		} else {
+			res.BuilderTokens = 4800
+		}
+	}
+
+	if passedReviewer && res.ReviewerTokens == 0 {
+		if initRev > 0 {
+			res.ReviewerTokens = initRev / totalTasks
+		} else if specBytes > 0 {
+			res.ReviewerTokens = EstimateTokensFromBytes(specBytes * 3)
+		} else {
+			res.ReviewerTokens = 1800
+		}
+	}
+
+	res.TotalTokens = res.DiscoveryTokens + res.BuilderTokens + res.ReviewerTokens
+	return res
+}
+
+func matchesTaskRecord(rec sessionRecord, taskID, specPath string) bool {
+	feat := filepath.ToSlash(strings.TrimSpace(rec.Feature))
+	spec := filepath.ToSlash(strings.TrimSpace(specPath))
+	if spec != "" && feat == spec {
+		return true
+	}
+	if taskID != "" {
+		if strings.Contains(feat, taskID) || strings.Contains(rec.Phase, taskID) {
+			return true
+		}
+	}
+	return false
+}
+
+func extractInitiativePrefix(specPath string) string {
+	s := filepath.ToSlash(strings.TrimSpace(specPath))
+	idx := strings.Index(s, "sdd/discovery/")
+	if idx < 0 {
+		return ""
+	}
+	rest := s[idx+len("sdd/discovery/"):]
+	parts := strings.SplitN(rest, "/", 2)
+	if len(parts) > 0 && parts[0] != "" {
+		return "sdd/discovery/" + parts[0]
+	}
+	return ""
+}
+
+func readSpecByteSize(dir, specPath string) int {
+	if specPath == "" {
+		return 0
+	}
+	full := specPath
+	if dir != "" && !filepath.IsAbs(full) {
+		full = filepath.Join(dir, full)
+	}
+	info, err := os.Stat(full)
+	if err != nil || info.IsDir() {
+		return 0
+	}
+	return int(info.Size())
 }

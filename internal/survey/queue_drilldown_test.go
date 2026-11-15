@@ -54,9 +54,15 @@ func TestQueueDrilldown_ListAllTasksWithoutTruncation(t *testing.T) {
 		assert.False(t, strings.Contains(opt.Key, "... e mais"), "nenhuma linha deve conter truncamento")
 	}
 
-	// Garante que a 1ª e a 25ª tarefa estão nas opções
-	assert.Equal(t, "task-01", options[0].Value)
-	assert.Equal(t, "task-25", options[24].Value)
+	// As 20 tarefas Na Fila / Em Andamento vêm primeiro (separadas das 5 concluídas que ficam no final)
+	require.Len(t, tui.ActiveItems, 20)
+	require.Len(t, tui.CompletedItems, 5)
+	assert.Equal(t, "task-02", options[0].Value, "primeira task ativa na fila vem no topo")
+	assert.Contains(t, options[0].Key, "[FILA]")
+	assert.Equal(t, "task-25", options[19].Value, "última task ativa antes do bloco de concluídas")
+	assert.Equal(t, "task-01", options[20].Value, "primeira task concluída fica separada abaixo das ativas")
+	assert.Contains(t, options[20].Key, "[CONCLUÍDA]")
+	assert.Equal(t, "task-21", options[24].Value, "última task concluída")
 }
 
 func TestQueueDrilldown_ListAllTasks(t *testing.T) {

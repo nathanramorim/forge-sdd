@@ -393,7 +393,7 @@ func TestTmux_BordaBadgeDeTokensEStatusRight(t *testing.T) {
 				}
 				if step[4] == "status-right-length" {
 					foundStatusRightLen = true
-					assert.Equal(t, "100", step[5])
+					assert.Equal(t, "140", step[5])
 				}
 			}
 		}
@@ -403,8 +403,9 @@ func TestTmux_BordaBadgeDeTokensEStatusRight(t *testing.T) {
 		assert.Contains(t, titles[1], "forge-builder │ 🪙 78k tok ⚠️")
 		assert.Contains(t, titles[2], "forge-reviewer │ 🪙 28k tok")
 
-		assert.True(t, foundStatusRight, "deve configurar status-right com o resumo de tokens (modo %s)", mode)
-		assert.True(t, foundStatusRightLen, "deve configurar status-right-length=100 (modo %s)", mode)
+		assert.True(t, foundStatusRight, "deve configurar status-right com dicas e resumo de tokens (modo %s)", mode)
+		assert.True(t, foundStatusRightLen, "deve configurar status-right-length=140 (modo %s)", mode)
+		assert.Contains(t, statusRightVal, "Ctrl+b q abre Fila")
 		assert.Contains(t, statusRightVal, "Tokens Totais: 118k")
 		assert.Contains(t, statusRightVal, "Disc: 12k")
 		assert.Contains(t, statusRightVal, "Bld: 78k")

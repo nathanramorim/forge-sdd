@@ -16,6 +16,7 @@
 - [x] PR #78 aberto com checks 100% verdes
 - [x] Portão B (Governança) aprovado pelo Reviewer (Veredito: Conforme)
 - [x] Fix `fix-84-01`: correção do alvo `tmux set-option` em `status-right` quando `totalTokens > 0` e bump para `v4.7.1-beta`
+- [x] Feature `feat-84-07`: separação Ativas vs. Concluídas na fila, diagrama `Discovery ──► Builder ──► Reviewer`, tokens por etapa/total da tarefa e dicas de atalhos em `status-right` do tmux (`v4.7.2-beta`)
 
 ## Próximo Passo
 Revisão humana (Camada C) e merge do PR #78 na branch `main`.
