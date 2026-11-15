@@ -21,11 +21,13 @@ Desenvolvedores e líderes técnicos que utilizam o Forge SDD para orquestrar o 
      - ✅ *Task concluída com sucesso! Handoff despachado para o Reviewer.*
 3. **Acompanhamento no Reviewer (`forge-reviewer`):**
    - O Reviewer exibe em cards limpos os portões avaliados progressivamente (Portão de Governança, Type-Check, Testes, Lint, Segurança) e apresenta o veredito final com clareza.
-4. **Inspeção com Drill-Down na Fila (`forge status -i` ou `forge queue --panel`):**
-   - O usuário visualiza todas as tarefas da esteira (100% visíveis, sem truncamento).
-   - Navega com `↑` e `↓` entre as tarefas.
-   - Pressiona `Enter` para inspecionar a tarefa selecionada: card expandido com tempo total, arquivos modificados, resumo do commit, laudo de governança e logs relevantes.
-   - Pressiona `Esc` ou `q` para retornar à lista ou sair.
+4. **Inspeção In-Place / Popup na Mesma Janela (Sem Sair do Painel):**
+   - O usuário não precisa abrir outro terminal nem sair da tela dos 3 painéis.
+   - **No Tmux:** Um atalho simples (ou comando `forge queue` no painel) abre um **popup flutuante centralizado** (`tmux display-popup`) sobre a tela ativa.
+   - **No Terminal Geral / Discovery:** Executa in-place via *Alternate Screen Buffer*, permitindo navegar e inspecionar sem poluir o histórico do chat.
+   - O usuário navega com `↑` e `↓` por 100% das tarefas (sem truncamento).
+   - Pressiona `Enter` para inspecionar os detalhes (tempo, arquivos alterados, commit, laudo).
+   - Pressiona `Esc` ou `q`: o popup fecha instantaneamente e o usuário volta exatamente para onde estava nas 3 sessões.
 
 ## 4. Regras de Negócio
 - **RN-01 (Transparência Conversacional):** O stream nos workers deve traduzir eventos brutos de processos (leitura de arquivos, escrita, execução de testes, git) em etapas descritivas legíveis por humanos, sem suprimir eventuais mensagens de erro reais.

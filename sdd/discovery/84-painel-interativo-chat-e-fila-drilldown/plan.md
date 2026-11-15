@@ -38,11 +38,11 @@ Plano estruturado de baixo para cima, dividido em ondas com dependências explí
 
 ## Onda 3: Integração CLI, Menu e Validação Final
 
-### Task 84-05: Integração de Comandos CLI e Menu Principal
-- **Escopo:** Adicionar a flag `-i/--interactive` no comando `status` (`cmd/forge-sdd/status.go`) e incluir opção navegável no menu interativo `forge` (`cmd/forge-sdd/menu.go`), conectando a TUI de drill-down.
+### Task 84-05: Integração In-Place, Popup do Tmux e Menu
+- **Escopo:** Adicionar suporte a abertura in-place (Alternate Screen Buffer) e popup modal flutuante no tmux (`tmux display-popup -w 85% -h 85% -E "forge queue"`) acionável na mesma janela dos 3 painéis sem sair da tela; integrar ao comando `forge queue` e menu `forge`.
 - **Rules aplicáveis:** `ARQ-01`, `ARQ-06`, `COD-01`, `DUP-01`.
 - **Dependências:** Tasks 84-02 e 84-04.
-- **Critério Executável:** `go test -v ./cmd/forge-sdd -run TestCLI_StatusInteractive`
+- **Critério Executável:** `go test -v ./internal/pipeline -run TestTmux_PopupQueue` e `go test -v ./cmd/forge-sdd -run TestCLI_QueueInteractive`
 
 ### Task 84-06: Documentação, Golden Tests e Validação de Regressão
 - **Escopo:** Atualizar templates do `LEIA-ME.md` e testdata golden com o novo modo interativo e exemplos visuais do stream narrativo; rodar verificação estática global.

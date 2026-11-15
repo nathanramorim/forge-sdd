@@ -17,9 +17,10 @@
 
 | Procurei | Onde | Achei | Decisão | Justificativa |
 |---|---|---|---|---|
-| Painel ao vivo de status | `internal/monitor/status_live.go` | `RenderLiveStatusLoop`, captura de processos e tokens | estender | Adicionar modo interativo com drill-down e suporte ao feed conversacional unificado. |
+| Painel ao vivo de status | `internal/monitor/status_live.go` | `RenderLiveStatusLoop`, captura de processos e tokens | estender | Adicionar modo interativo in-place com Alternate Screen Buffer e suporte ao popup modal do tmux. |
 | Componentes interativos de terminal | `internal/survey/survey.go` | Wrappers de Charm `huh` para seleção e confirmação | estender | Implementar o componente `QueueDrilldownTUI` aproveitando a stack `huh` já integrada ao projeto. |
 | Monitoramento de progresso do worker | `cmd/forge-sdd/worker.go` | Loop do worker com heartbeat a cada 5 segundos | estender | Substituir o log periódico monótono por emissão de cards de etapas conversacionais com status humano. |
+| Integração no Tmux | `internal/pipeline/tmux.go` | `BuildTmuxPlan` e configuração de atalhos e janelas | estender | Configurar atalho/comando de popup modal (`tmux display-popup`) para abrir a fila sobre os 3 painéis sem sair da tela. |
 | Consulta e estado da fila | `internal/queue/queue.go` | `ListTasks`, `LoadQueue` e inspeção de status | reusar | A TUI de drill-down consome diretamente as estruturas existentes de `queue.json` sem alterar formato. |
 | Comandos de status e queue na CLI | `cmd/forge-sdd/status.go`, `cmd/forge-sdd/queue.go` | Comandos cobra para exibição estática e live | estender | Adicionar flag `-i/--interactive` para disparar a visualização navegável com drill-down. |
 
