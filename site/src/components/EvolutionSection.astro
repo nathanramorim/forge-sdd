@@ -1,0 +1,46 @@
+<section id="evolucao">
+  <div class="sec-h">
+    <div>
+      <p class="eyebrow">05 · Evolução de Arquitetura</p>
+      <h2>O que muda do agente solitário para o pipeline de 3 sessões.</h2>
+    </div>
+  </div>
+
+  <div class="comp-grid">
+    <div class="comp-card">
+      <span class="chip"><i style="--o:var(--faint)"></i>Antes · Agente Solitário</span>
+      <ul class="comp-list" style="--dot:var(--faint)">
+        <li>
+          <strong>Um único agente acumulando todas as funções</strong>
+          A mesma sessão que escrevia o código fazia a própria revisão, sem isolamento entre execução e auditoria.
+        </li>
+        <li>
+          <strong>Constituição monolítica carregada inteira</strong>
+          Todas as regras eram lidas do zero a cada comando, consumindo contexto com temas fora do escopo da tarefa.
+        </li>
+        <li>
+          <strong>Execução sequencial manual</strong>
+          Tarefas independentes esperavam em uma única lista de texto, sem fila determinística nem paralelismo.
+        </li>
+      </ul>
+    </div>
+
+    <div class="comp-card v3">
+      <span class="chip"><i style="--o:var(--accent)"></i>Agora (v4.2-beta) · 3 Sessões e 5 Estações</span>
+      <ul class="comp-list" style="--dot:var(--accent)">
+        <li>
+          <strong>Três sessões que se falam por uma fila local</strong>
+          A Discovery conversa com você; o Builder constrói em paralelo e abre o PR; o Reviewer confere ADRs e rules e devolve com feedback (até 3 vezes) ou avisa que está pronto. Cada sessão pode usar um agente diferente (Claude, Gemini, Copilot ou Codex).
+        </li>
+        <li>
+          <strong>Cada sessão mostra o que faz, no próprio terminal</strong>
+          Linhas curtas do que o agente edita e roda, com os painéis lado a lado no tmux. Se o agente bate o limite de uso, o job volta à fila e o worker retoma sozinho. Sem painel externo para acompanhar.
+        </li>
+        <li>
+          <strong>Estado por iniciativa e instruções enxutas</strong>
+          Cada demanda vive na sua pasta (<span class="mono">sdd/discovery/&lt;id&gt;-&lt;nome&gt;/</span>), sem índice global que gera conflito entre branches; 5 skills por estação carregam só o contexto da tarefa.
+        </li>
+      </ul>
+    </div>
+  </div>
+</section>

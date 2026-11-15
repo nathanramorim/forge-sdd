@@ -38,13 +38,25 @@ func TestTruncateDescription_BreaksAtWordBoundary(t *testing.T) {
 	assert.False(t, strings.HasSuffix(strings.TrimSuffix(got, "…"), " "))
 }
 
+// listedCommands devolve commandOrder sem os aliases de compatibilidade.
+func listedCommands() []string {
+	var out []string
+	for _, c := range commandOrder {
+		if !aliasCommands[c] {
+			out = append(out, c)
+		}
+	}
+	return out
+}
+
 func TestCommandCheatSheet_ClaudeHasAllCommandsInOrder(t *testing.T) {
 	cfg := config.Config{Project: "acme", Agents: []string{config.AgentClaude}}
 	commands := CommandCheatSheet(cfg)
 
-	require.Len(t, commands, len(commandOrder))
+	expected := listedCommands()
+	require.Len(t, commands, len(expected))
 	for i, c := range commands {
-		assert.Equal(t, "/"+commandOrder[i], c.Command)
+		assert.Equal(t, "/"+expected[i], c.Command)
 		assert.NotEmpty(t, c.Description, "comando %s deveria ter descrição", c.Command)
 	}
 }
@@ -56,7 +68,7 @@ func TestCommandCheatSheet_CopilotOmitsMissingC4Architecture(t *testing.T) {
 	for _, c := range commands {
 		assert.NotEqual(t, "/c4-architecture", c.Command, "copilot não possui c4-architecture.prompt.md.tmpl")
 	}
-	require.Len(t, commands, len(commandOrder)-1)
+	require.Len(t, commands, len(listedCommands())-1)
 }
 
 func TestCommandCheatSheet_RendersProjectPlaceholder(t *testing.T) {
@@ -70,5 +82,15 @@ func TestCommandCheatSheet_RendersProjectPlaceholder(t *testing.T) {
 
 func TestCommandCheatSheet_DefaultsToCopilotWhenNoAgents(t *testing.T) {
 	commands := CommandCheatSheet(config.Config{Project: "acme"})
-	require.Len(t, commands, len(commandOrder)-1)
+	require.Len(t, commands, len(listedCommands())-1)
+}
+
+func TestCommandCheatSheet_ImplementarListadoEAliasOculto(t *testing.T) {
+	commands := CommandCheatSheet(config.Config{Project: "acme", Agents: []string{config.AgentClaude}})
+	var names []string
+	for _, c := range commands {
+		names = append(names, c.Command)
+	}
+	assert.Contains(t, names, "/implementar")
+	assert.NotContains(t, names, "/proxima-feature", "alias de compatibilidade não aparece no cheat-sheet")
 }

@@ -1,0 +1,17 @@
+{
+  "$schema": "forge-sdd/metrics/1.0",
+  "feature": "sdd/discovery/77-sessoes-com-cli-aberta/fixes/fix-78-pipeline-gemini-abre-agy.md",
+  "agent_path": null,
+  "tokens_input": 0,
+  "tokens_output": 0,
+  "turns": 0,
+  "duration_seconds": 0,
+  "criterio_atendido": false,
+  "model": "",
+  "rework_lines": 0,
+  "context7_calls": 0,
+  "git_calls": 0,
+  "files_touched": null,
+  "outcome": "blocked",
+  "sdd_version": "4.4.0-beta"
+}

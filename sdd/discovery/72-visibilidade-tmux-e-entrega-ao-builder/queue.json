@@ -1,0 +1,111 @@
+{
+  "feature_id": "feat-72",
+  "branch": "feat/72-visibilidade-tmux-e-entrega-ao-builder",
+  "spec_status": "reviewed",
+  "updated_at": "2026-11-14T03:13:27Z",
+  "items": [
+    {
+      "task_id": "72-01",
+      "title": "feat-72-01 — Entrega ao Builder e Despacho sem Card",
+      "spec_path": "sdd/discovery/72-visibilidade-tmux-e-entrega-ao-builder/features/feat-72-01-entrega-ao-builder-e-despacho-sem-card.md",
+      "status": "approved",
+      "rules": [
+        "FLX-01",
+        "FLX-08",
+        "SEG-01",
+        "DUP-06",
+        "TST-02",
+        "TST-03"
+      ],
+      "skills_used": [],
+      "attempts": 1,
+      "governance_verdict": {
+        "veredito": "conforme",
+        "achados": [],
+        "resumo": "Parecer da Camada B: a primeira revisão achou a guarda falhando aberta com forge.json inválido, testes vazios, texto ambíguo no implementar.md, comentário ao card com URL vazia e falta de teste de aprovação sem card. Tudo corrigido em fc2333f e conferido na reconferência (sem regressão). A guarda é uma barreira de processo (variável de ambiente), não de segurança."
+      }
+    },
+    {
+      "task_id": "72-02",
+      "title": "feat-72-02 — Visão Limpa do Worker (`LiveView`)",
+      "spec_path": "sdd/discovery/72-visibilidade-tmux-e-entrega-ao-builder/features/feat-72-02-visao-limpa-do-worker.md",
+      "status": "approved",
+      "rules": [
+        "SEG-05",
+        "SEG-03",
+        "DUP-01",
+        "COD-01",
+        "COD-03",
+        "TST-04"
+      ],
+      "skills_used": [],
+      "attempts": 1,
+      "governance_verdict": {
+        "veredito": "conforme",
+        "achados": [],
+        "resumo": "Parecer da Camada B: a primeira revisão achou violação alta de SEG-05 (a máscara deixava vazar variáveis com prefixo, aspas, JSON, --password, senha em URL, sk-ant-, chave privada) e o watcher não aguardado. Corrigido em fc2333f; a reconferência achou só falso positivo do sk- em slugs e lacunas raras, corrigidos em 74239c4 (\\\\b no sk-, valores entre aspas com espaço, JSON escapado, Basic, max_tokens preservado) com testes. A máscara é defesa de exibição, não garantia; o log bruto guarda tudo (0600) e --raw não mascara."
+      }
+    },
+    {
+      "task_id": "72-03",
+      "title": "feat-72-03 — Falha Legível e Pausa por Limite de Uso",
+      "spec_path": "sdd/discovery/72-visibilidade-tmux-e-entrega-ao-builder/features/feat-72-03-falha-legivel-e-pausa-por-limite-de-uso.md",
+      "status": "approved",
+      "rules": [
+        "SEG-01",
+        "SEG-05",
+        "COD-03",
+        "TST-03",
+        "TST-04"
+      ],
+      "skills_used": [],
+      "attempts": 1,
+      "governance_verdict": {
+        "veredito": "conforme",
+        "achados": [],
+        "resumo": "Parecer da Camada B: a primeira revisão achou ausência de teto de devoluções por job, regex de limite largo demais e horário sem fuso local. Corrigido em fc2333f (teto de 3 devoluções, padrões fortes x genéricos, datas e limite semanal falham, horário no fuso local) e conferido na reconferência. Só o Claude tem mensagem real de exemplo; Gemini, Copilot e Codex estão a confirmar."
+      }
+    },
+    {
+      "task_id": "72-04",
+      "title": "feat-72-04 — Abrir pelo tmux",
+      "spec_path": "sdd/discovery/72-visibilidade-tmux-e-entrega-ao-builder/features/feat-72-04-abrir-pelo-tmux.md",
+      "status": "approved",
+      "rules": [
+        "SEG-01",
+        "SEG-03",
+        "COD-03",
+        "TST-03",
+        "TST-04"
+      ],
+      "skills_used": [],
+      "attempts": 1,
+      "governance_verdict": {
+        "veredito": "conforme",
+        "achados": [],
+        "resumo": "Parecer da Camada B: a lógica e os testes com runner falso já estavam corretos depois das correções; a dúvida era só a falta de execução contra um tmux real. Resolvida em e321135: cinco testes de integração (TestTmuxReal_*, com FORGE_TMUX_REAL=1, servidor isolado -L) rodaram no tmux 3.8 do macOS, três vezes seguidas: três painéis na posição certa (Discovery à esquerda, Builder em cima e Reviewer embaixo à direita), títulos, painéis endereçáveis como 0, 1 e 2 mesmo com pane-base-index 1 no tmux.conf, alvo `=` que não casa por prefixo (sem `=` casa, com `=` não), reconexão sem duplicar painéis e limpeza que não derruba uma sessão alheia com o mesmo prefixo. Também rodei o forge-sdd up de verdade em um diretório de sockets isolado: a sessão nasceu com os painéis nomeados e os workers mostrando 'Aguardando jobs na fila...'. Continuam sem verificação o attach interativo num terminal real e outras versões do tmux; quando o attach falha, o erro agora diz como conectar (tmux attach -t =\u003cnome\u003e). Conferido por testes, não por nova revisão."
+      }
+    },
+    {
+      "task_id": "72-05",
+      "title": "feat-72-05 — Docs, ADR 0006 e Release",
+      "spec_path": "sdd/discovery/72-visibilidade-tmux-e-entrega-ao-builder/features/feat-72-05-docs-adr-e-release.md",
+      "status": "approved",
+      "rules": [
+        "DUP-10",
+        "FLX-05",
+        "FLX-07",
+        "GOV-01",
+        "TST-02",
+        "TST-05"
+      ],
+      "skills_used": [],
+      "attempts": 1,
+      "governance_verdict": {
+        "veredito": "conforme",
+        "achados": [],
+        "resumo": "Parecer da Camada B: a revisão achou o comando de reconexão do tmux desatualizado nas três cópias do guia (o nome da sessão tem hash do caminho), o README sem --raw e a regra da Discovery, e o E2E sem o Claude. Corrigido em fe4af29: guia com tmux ls e attach pelo nome real, README completo, e a spec registra que os eventos do Claude ficam em TestLiveView_EventosDoClaude e TestWorker_LimiteDeUso."
+      }
+    }
+  ]
+}

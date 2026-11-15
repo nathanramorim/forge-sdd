@@ -6,3 +6,8 @@ Lógica única, referenciada por `/discovery`, `/nova-feature` e `/novo-fix` (no
 2. Se `naming_convention` for `workitem`, **pergunte obrigatoriamente ao usuário** qual é o ID do Workitem a usar (ex: prefixo `1024` gerando `feat-1024-<nome>.md`, `discovery-1024-<nome>.md` ou `fix-1024-<nome>.md`).
 3. Se `naming_convention` for `hash`, gere um hash de 4 dígitos hexadecimais únicos (ex: `5ae2`).
 4. Se `naming_convention` for `sequencial` ou ausente, use o próximo número sequencial (XX) incremental com base no histórico de arquivos em `sdd/features/` ou `sdd/discovery/`.
+
+5. **Estrutura de Pastas Unificada:**
+   - **Iniciativas de Discovery:** Criadas em `sdd/discovery/<id>-<resume>/` contendo `discovery.md`, `criteria.md`, `plan.md`, `features/` (para subfeatures fatiadas) e `fixes/` (para correções correlacionadas).
+   - **Features Independentes:** Criadas em `sdd/features/feat-<id>-<nome>/feat-<id>-<nome>.md` (com subpastas para tasks e fixes).
+   - **Fixes Correlacionados:** Devem sempre ser vinculados à iniciativa de origem e salvos em `sdd/discovery/<id>-<resume>/fixes/fix-<id>-<nome>.md` (ou `sdd/features/<id>-<nome>/fixes/`).

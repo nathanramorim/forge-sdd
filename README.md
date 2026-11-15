@@ -14,6 +14,7 @@
 <p align="center">
   <a href="https://forge-sdd.org">Site oficial</a> ·
   <a href="docs/comandos.md">Comandos</a> ·
+  <a href="docs/pipeline.md">Pipeline</a> ·
   <a href="docs/metodologia-sdd.md">Metodologia</a>
 </p>
 
@@ -92,6 +93,7 @@ Veja todos em [docs/comandos.md](docs/comandos.md).
 
 ## Guias
 
+- [Pipeline multi-sessão](docs/pipeline.md)
 - [Metodologia SDD](docs/metodologia-sdd.md)
 - [Arquitetura e fluxo](docs/arquitetura-e-fluxo-forge-sdd.md)
 - [Skills](docs/skills.md)

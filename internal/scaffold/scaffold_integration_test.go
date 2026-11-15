@@ -28,7 +28,7 @@ func TestScaffoldIntegration_Gemini(t *testing.T) {
 
 	// Árvore SDD básica
 	assert.FileExists(t, filepath.Join(dir, "sdd", ".sdd-version"))
-	assert.FileExists(t, filepath.Join(dir, "sdd", "memory", "progress.md"))
+	assert.FileExists(t, filepath.Join(dir, "sdd", "memory", "lessons.md"))
 	assert.DirExists(t, filepath.Join(dir, "sdd", "discovery"))
 	assert.FileExists(t, filepath.Join(dir, "sdd", "releases", "history.md"))
 	assert.FileExists(t, filepath.Join(dir, "sdd", ".metrics", "schema.json"))

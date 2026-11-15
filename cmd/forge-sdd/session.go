@@ -10,28 +10,13 @@ import (
 	"time"
 
 	"github.com/forge-sdd/cli/internal/config"
+	"github.com/forge-sdd/cli/internal/layout"
+	"github.com/forge-sdd/cli/internal/monitor"
 	"github.com/spf13/cobra"
 )
 
-// sessionMetrics espelha sdd/.metrics/schema.json.
-type sessionMetrics struct {
-	Schema           string   `json:"$schema"`
-	Feature          string   `json:"feature"`
-	Phase            string   `json:"phase,omitempty"`
-	AgentPath        []string `json:"agent_path"`
-	TokensInput      int      `json:"tokens_input"`
-	TokensOutput     int      `json:"tokens_output"`
-	Turns            int      `json:"turns"`
-	DurationSeconds  int      `json:"duration_seconds"`
-	CriterioAtendido bool     `json:"criterio_atendido"`
-	Model            string   `json:"model"`
-	ReworkLines      int      `json:"rework_lines"`
-	Context7Calls    int      `json:"context7_calls"`
-	GitCalls         int      `json:"git_calls"`
-	FilesTouched     []string `json:"files_touched"`
-	Outcome          string   `json:"outcome"`
-	SddVersion       string   `json:"sdd_version"`
-}
+// sessionMetrics espelha sdd/.metrics/schema.json via internal/monitor.
+type sessionMetrics = monitor.SessionMetrics
 
 var validOutcomes = map[string]bool{"approved": true, "rejected": true, "blocked": true}
 
@@ -121,29 +106,7 @@ e retorna sucesso (silencioso, por design).`,
 // segundo, um sufixo numérico (-2, -3, ...) é anexado para nunca sobrescrever
 // silenciosamente uma telemetria já gravada.
 func WriteSessionMetrics(targetDir string, metrics sessionMetrics, at time.Time) (string, error) {
-	metricsDir := filepath.Join(targetDir, "sdd", ".metrics")
-	if err := os.MkdirAll(metricsDir, 0o755); err != nil {
-		return "", fmt.Errorf("falha ao criar sdd/.metrics: %w", err)
-	}
-
-	base := fmt.Sprintf("session-%s", at.Format("2006-01-02T150405Z"))
-	filename := base + ".json"
-	path := filepath.Join(metricsDir, filename)
-	for i := 2; fileExists(path); i++ {
-		filename = fmt.Sprintf("%s-%d.json", base, i)
-		path = filepath.Join(metricsDir, filename)
-	}
-
-	data, err := json.MarshalIndent(metrics, "", "  ")
-	if err != nil {
-		return "", fmt.Errorf("falha ao serializar telemetria: %w", err)
-	}
-	data = append(data, '\n')
-
-	if err := os.WriteFile(path, data, 0o644); err != nil {
-		return "", fmt.Errorf("falha ao gravar %s: %w", path, err)
-	}
-	return path, nil
+	return monitor.RecordSessionMetrics(targetDir, metrics, at)
 }
 
 // SessionMetricsSummary agrega os arquivos sdd/.metrics/session-*.json para
@@ -170,7 +133,7 @@ var sessionFilenameRe = regexp.MustCompile(`^session-(\d{4}-\d{2}-\d{2}T\d{6}Z)(
 // AggregateSessionMetrics e pelo comando `report` (feat-55-02) — evita
 // duplicar o parsing de arquivo.
 func readSessionFiles(targetDir string) ([]sessionFileEntry, error) {
-	metricsDir := filepath.Join(targetDir, "sdd", ".metrics")
+	metricsDir := layout.Metrics(targetDir)
 
 	entries, err := os.ReadDir(metricsDir)
 	if err != nil {

@@ -1,0 +1,14 @@
+{
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "command": "forge-sdd inbox --unread --hook",
+            "type": "command"
+          }
+        ]
+      }
+    ]
+  }
+}

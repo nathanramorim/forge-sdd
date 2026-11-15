@@ -8,6 +8,8 @@ import (
 	"strings"
 
 	"github.com/forge-sdd/cli/internal/config"
+	"github.com/forge-sdd/cli/internal/gate"
+	"github.com/forge-sdd/cli/internal/layout"
 	"github.com/forge-sdd/cli/internal/scaffold"
 	"github.com/spf13/cobra"
 )
@@ -32,15 +34,15 @@ inconsistências de configuração dos agentes de IA e progresso das features.`,
 
 		fmt.Printf("🩺 Iniciando diagnóstico da metodologia em '%s'...\n\n", targetDir)
 
-		sddrcPath := filepath.Join(targetDir, "sdd", ".sddrc")
-		versionPath := filepath.Join(targetDir, "sdd", ".sdd-version")
+		sddrcPath := layout.Sddrc(targetDir)
+		versionPath := layout.Version(targetDir)
 
 		hasSddrc := fileExists(sddrcPath)
 		hasVersion := fileExists(versionPath)
 
 		if !hasSddrc {
 			fmt.Println("✗ Estrutura Forge-SDD não encontrada (sdd/.sddrc ausente).")
-			fmt.Println("  Use 'forge-sdd init' para inicializar a metodologia neste repositório.")
+			fmt.Println("  Use 'forge init' para inicializar a metodologia neste repositório.")
 			return nil
 		}
 
@@ -126,10 +128,10 @@ inconsistências de configuração dos agentes de IA e progresso das features.`,
 					fmt.Println("  ⚠️  GitHub Copilot: Configurado no .sddrc, mas arquivos físicos ausentes (.github/copilot-instructions.md)")
 				}
 			case config.AgentOpenAI:
-				hasOpenAIMD := fileExists(filepath.Join(targetDir, "OPENAI.md"))
+				hasOpenAIMD := fileExists(filepath.Join(targetDir, "AGENTS.md")) && fileExists(filepath.Join(targetDir, "OPENAI.md"))
 				hasOpenAIDir := fileExists(filepath.Join(targetDir, ".openai"))
 				if hasOpenAIMD && hasOpenAIDir {
-					fmt.Println("  ✓ OpenAI (GPT-4/Codex): Configurado e integrado (OPENAI.md + .openai/)")
+					fmt.Println("  ✓ OpenAI (GPT-4/Codex): Configurado e integrado (AGENTS.md + OPENAI.md + .openai/)")
 				} else {
 					fmt.Println("  ⚠️  OpenAI (GPT-4/Codex): Configurado no .sddrc, mas arquivos físicos ausentes ou incompletos.")
 				}
@@ -138,51 +140,65 @@ inconsistências de configuração dos agentes de IA e progresso das features.`,
 
 		// 4. Verificação de arquivos essenciais de metodologia
 		fmt.Println("\n📁 Arquivos de Metodologia:")
-		constitutionPath := filepath.Join(targetDir, "sdd", "memory", "constitution.md")
-		progressPath := filepath.Join(targetDir, "sdd", "memory", "progress.md")
+		constitutionPath := layout.Constitution(targetDir)
+		progressPath := layout.Progress(targetDir)
 
 		if fileExists(constitutionPath) {
-			fmt.Println("  ✓ Constituição (sdd/memory/constitution.md) ativa.")
+			b, bErr := gate.BuildBrief(targetDir, 0)
+			if bErr == nil && b.State == gate.BriefRascunho {
+				fmt.Println("  ✓ Constituição (sdd/memory/constitution.md) ativa.")
+				fmt.Println("  ⚠️  Constituição em rascunho (rode /constitution para alinhar). Faltam: " + strings.Join(b.Missing, ", "))
+			} else {
+				fmt.Println("  ✓ Constituição (sdd/memory/constitution.md) ativa.")
+			}
 		} else {
 			fmt.Println("  ✗ Constituição (sdd/memory/constitution.md) não encontrada!")
 		}
 
-		if fileExists(progressPath) {
+		if _, hasStatus := layout.StatusPath(targetDir); hasStatus {
+			fmt.Println("  ✓ Status da iniciativa (status.md) ativo.")
+		} else if fileExists(progressPath) {
 			fmt.Println("  ✓ Painel de Progresso (sdd/memory/progress.md) ativo.")
 		} else {
-			fmt.Println("  ✗ Painel de Progresso (sdd/memory/progress.md) não encontrado!")
+			fmt.Println("  ℹ Sem iniciativa ativa na branch atual: o status.md não se aplica (veja `forge status`).")
 		}
 
-		// 5. Varredura de features
-		featuresDir := filepath.Join(targetDir, "sdd", "features")
+		// 5. Varredura de features: tasks das iniciativas (sdd/discovery/<id>-<nome>/features/) e,
+		// em projetos ainda não migrados, a raiz legada sdd/features/.
+		sddRoot := layout.Root(targetDir)
 		var activeFeatures []string
-		err = filepath.WalkDir(featuresDir, func(path string, d os.DirEntry, err error) error {
-			if err != nil {
-				return err
+		scannedAny := false
+		for _, root := range []string{layout.Discovery(targetDir), layout.Features(targetDir)} {
+			if _, statErr := os.Stat(root); statErr != nil {
+				continue
 			}
-			if !d.IsDir() && strings.HasSuffix(d.Name(), ".md") {
-				if strings.HasPrefix(d.Name(), "feat-") || strings.HasPrefix(d.Name(), "task-") {
-					relPath, err := filepath.Rel(featuresDir, path)
-					if err == nil {
-						activeFeatures = append(activeFeatures, relPath)
-					} else {
-						activeFeatures = append(activeFeatures, d.Name())
-					}
+			scannedAny = true
+			_ = filepath.WalkDir(root, func(path string, d os.DirEntry, err error) error {
+				if err != nil || d.IsDir() || !strings.HasSuffix(d.Name(), ".md") {
+					return nil
 				}
-			}
-			return nil
-		})
+				if !strings.HasPrefix(d.Name(), "feat-") && !strings.HasPrefix(d.Name(), "task-") {
+					return nil
+				}
+				rel, relErr := filepath.Rel(sddRoot, path)
+				if relErr != nil {
+					rel = d.Name()
+				}
+				activeFeatures = append(activeFeatures, filepath.ToSlash(rel))
+				return nil
+			})
+		}
 
-		if err == nil {
+		if scannedAny {
 			fmt.Printf("\n📋 Features Registradas: %d cadastrada(s)\n", len(activeFeatures))
 			if len(activeFeatures) > 0 {
 				fmt.Println("  Caminhos:")
 				for _, feat := range activeFeatures {
-					fmt.Printf("   - sdd/features/%s\n", feat)
+					fmt.Printf("   - sdd/%s\n", feat)
 				}
 			}
 		} else {
-			fmt.Println("\n⚠️  Diretório sdd/features não encontrado ou inacessível.")
+			fmt.Println("\n⚠️  Diretório sdd/discovery não encontrado ou inacessível.")
 		}
 
 		// 6. Detecção de deriva de convenção de nomenclatura (sequencial feat-NN vs hash feat-xxxx)
@@ -197,7 +213,11 @@ inconsistências de configuração dos agentes de IA e progresso das features.`,
 				if relErr != nil {
 					rel = path
 				}
-				switch classifyNamingConvention(d.Name()) {
+				name := d.Name()
+				if name == "discovery.md" || name == "criteria.md" || name == "plan.md" {
+					name = filepath.Base(filepath.Dir(path))
+				}
+				switch classifyNamingConvention(name) {
 				case "sequencial":
 					sequentialFiles = append(sequentialFiles, rel)
 				case "hash":
@@ -206,8 +226,8 @@ inconsistências de configuração dos agentes de IA e progresso das features.`,
 				return nil
 			})
 		}
-		scanConventionDir(featuresDir)
-		scanConventionDir(filepath.Join(targetDir, "sdd", "discovery"))
+		scanConventionDir(layout.Features(targetDir))
+		scanConventionDir(layout.Discovery(targetDir))
 
 		if len(sequentialFiles) > 0 && len(hashFiles) > 0 {
 			fmt.Println("  ⚠️  Deriva de convenção detectada: nomenclatura sequencial (feat-NN/fix-NN) e por hash (feat-xxxx/fix-xxxx) coexistem no projeto.")
@@ -254,7 +274,7 @@ inconsistências de configuração dos agentes de IA e progresso das features.`,
 				case config.AgentGemini:
 					fmt.Println("   - Cabeçalho do arquivo GEMINI.md (onde diz: # GEMINI.md — meu-projeto)")
 				case config.AgentOpenAI:
-					fmt.Println("   - Cabeçalho do arquivo OPENAI.md (onde diz: # OPENAI.md — meu-projeto)")
+					fmt.Println("   - Cabeçalho do arquivo AGENTS.md (onde diz: # AGENTS.md — meu-projeto)")
 				}
 			}
 			fmt.Println("   - Cabeçalho do arquivo sdd/memory/progress.md")

@@ -12,29 +12,19 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// version é injetada via ldflags: -X main.version=2.4.0
-var version = "2.4.0"
+// version é injetada via ldflags: -X main.version=4.6.1
+var version = "4.6.1"
 
 var rootCmd = &cobra.Command{
-	Use:   "forge-sdd",
+	Use:   "forge",
 	Short: "Scaffolda estruturas Forge-SDD em qualquer projeto",
-	Long: `forge-sdd é um CLI que gera a estrutura completa Forge-SDD
+	Long: `forge é um CLI que gera a estrutura completa Forge-SDD
 (sdd/, .github/, .vscode/) pronta para uso com GitHub Copilot.`,
-	RunE: func(cmd *cobra.Command, args []string) error {
-		if len(args) == 0 {
-			if config.DetectProject(".") {
-				return runUpdateFlow(cmd, ".")
-			} else {
-				return runInitFlow(cmd, ".")
-			}
-		}
-		return cmd.Help()
-	},
 }
 
 var versionCmd = &cobra.Command{
 	Use:   "version",
-	Short: "Exibe a versão do forge-sdd",
+	Short: "Exibe a versão do forge",
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println(version)
 	},
@@ -190,6 +180,14 @@ func runUpdateFlow(cmd *cobra.Command, targetDir string) error {
 	}
 
 	yes, _ := cmd.Flags().GetBool("yes")
+	dryRun, _ := cmd.Flags().GetBool("dry-run")
+	if dryRun {
+		// Plano da atualização de estrutura: não consulta o NPM, não pergunta nada e não grava.
+		planCfg := rc.ToConfig()
+		fmt.Fprintf(cmd.OutOrStdout(), "[DRY-RUN] Nada será gravado. Plano para %s:\n", targetDir)
+		_, err := printUpgradePlan(cmd.OutOrStdout(), targetDir, planCfg)
+		return err
+	}
 	upgradeFlag, _ := cmd.Flags().GetBool("upgrade")
 	versionFlag, _ := cmd.Flags().GetString("version")
 
@@ -274,6 +272,9 @@ func runUpdateFlow(cmd *cobra.Command, targetDir string) error {
 
 	if targetVersion != "" {
 		baseCfg.SddVersion = targetVersion
+		if _, err := printUpgradePlan(cmd.OutOrStdout(), targetDir, baseCfg); err != nil {
+			return err
+		}
 		created, err = scaffold.Run(baseCfg, targetDir)
 		if err != nil {
 			return fmt.Errorf("upgrade falhou: %w", err)
@@ -316,7 +317,7 @@ func runUpdateFlow(cmd *cobra.Command, targetDir string) error {
 			case config.AgentGemini:
 				fmt.Println("  • Gemini: leia GEMINI.md e abra o projeto no Gemini")
 			case config.AgentOpenAI:
-				fmt.Println("  • OpenAI: leia OPENAI.md e configure sua chave de API")
+				fmt.Println("  • OpenAI/Codex: leia AGENTS.md (é o arquivo que o Codex lê) e configure sua chave de API")
 			case config.AgentCopilot:
 				fmt.Println("  • Copilot: aceite as extensões recomendadas no VS Code")
 			}
@@ -341,9 +342,27 @@ func printSummaryReport(cfg config.Config, targetDir string, fileCount int) {
 	fmt.Printf("  • Agentes:        %s\n", strings.Join(cfg.Agents, ", "))
 	fmt.Printf("  • Telemetria:     %s\n", telemetryStatus)
 	fmt.Println("\nPróximos passos:")
-	fmt.Println("  1. Abra o projeto no VS Code ou sua IDE de preferência")
-	fmt.Println("  2. Aceite as extensões recomendadas (Copilot, MCP, etc.)")
-	fmt.Println("  3. Leia sdd/memory/progress.md para começar a codificar!")
+	fmt.Println("  1. Rode /constitution no seu agente de IA para alinhar stack, arquitetura e regras")
+	fmt.Println("  2. Abra o projeto no VS Code ou sua IDE de preferência")
+	fmt.Println("  3. Aceite as extensões recomendadas (Copilot, MCP, etc.)")
+	fmt.Println("  4. Rode /discovery com a sua primeira demanda (ou forge status para ver as iniciativas)")
+	printPipelineHint(targetDir)
+}
+
+// printPipelineHint mostra como iniciar o pipeline multi-sessão logo depois da instalação. Com o modo
+// já ativo (forge.json existe), só lembra de abrir as sessões.
+func printPipelineHint(targetDir string) {
+	if _, found, err := config.LoadForgeConfig(targetDir); err == nil && found {
+		fmt.Println("\nPipeline multi-sessão ATIVO: rode forge (menu) ou forge up para abrir forge-discovery, forge-builder e forge-reviewer.")
+		fmt.Println("  Guia: .forge/LEIA-ME.md")
+		return
+	}
+	fmt.Println("\nQuer que o Builder e o Reviewer trabalhem em outras sessões enquanto você conversa? (opcional)")
+	fmt.Println("  Mais fácil: rode forge e escolha Pipeline multi-sessão (menu, com o agente de cada sessão).")
+	fmt.Println("  1. forge pipeline init      ativa o modo (cria .forge/config/forge.json)")
+	fmt.Println("  2. forge up --discovery claude --builder codex --reviewer gemini   abre as 3 sessões")
+	fmt.Println("  3. /implementar <feature>       na sessão forge-discovery: valida o card e despacha")
+	fmt.Println("  Guia rápido: .forge/LEIA-ME.md")
 }
 
 func printTutorialHint() {
@@ -376,6 +395,7 @@ func init() {
 	rootCmd.AddCommand(initCmd)
 
 	updateCmd.Flags().Bool("yes", false, "Pular prompts e usar flags")
+	updateCmd.Flags().Bool("dry-run", false, "Mostrar a migração de layout e a limpeza de obsoletos sem gravar nada")
 	updateCmd.Flags().String("agent", "", "Agente(s) a adicionar: copilot, claude, gemini, openai (csv)")
 	updateCmd.Flags().Bool("upgrade", false, "Atualizar estrutura para a versão mais recente do binário")
 	updateCmd.Flags().String("version", "", "Atualizar estrutura para uma versão específica (ex: 2.4.0)")
@@ -388,10 +408,26 @@ func init() {
 	rootCmd.AddCommand(sessionCmd)
 	rootCmd.AddCommand(reportCmd)
 	rootCmd.AddCommand(lessonsCmd)
+	rootCmd.AddCommand(queueCmd)
+	rootCmd.AddCommand(gateCmd)
+	rootCmd.AddCommand(skillsCmd)
+	rootCmd.AddCommand(governanceCmd)
+	rootCmd.AddCommand(acpCmd)
+	rootCmd.AddCommand(attachCmd)
+}
+
+type exitCoder interface {
+	ExitCode() int
 }
 
 func main() {
 	if err := rootCmd.Execute(); err != nil {
+		if ec, ok := err.(exitCoder); ok {
+			if err.Error() != "" {
+				fmt.Fprintln(os.Stderr, err)
+			}
+			os.Exit(ec.ExitCode())
+		}
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}

@@ -6,11 +6,13 @@ import (
 	"fmt"
 	"io/fs"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 	"text/template"
 
 	"github.com/forge-sdd/cli/internal/config"
+	"github.com/forge-sdd/cli/internal/layout"
 )
 
 //go:embed all:templates
@@ -63,7 +65,7 @@ func Run(cfg config.Config, targetDir string) ([]string, error) {
 
 	// 1. Templates globais (sdd/, .vscode/, e .github/ do copilot)
 	//    Sempre renderizados — são agnósticos ao agente de IA.
-	globalRoots := []string{"templates/sdd", "templates/.agents"}
+	globalRoots := []string{"templates/sdd", "templates/.agents", "templates/.forge"}
 
 	// .vscode/ e .github/ só são incluídos quando copilot está selecionado
 	copilotSelected := false
@@ -104,8 +106,43 @@ func Run(cfg config.Config, targetDir string) ([]string, error) {
 
 	if !cfg.DryRun {
 		cleanObsoleteFiles(targetDir)
+		if err := applyStructureUpgrade(cfg, targetDir); err != nil {
+			return created, err
+		}
+		installClaudeInboxHook(agents, targetDir)
 	}
 	return created, nil
+}
+
+// installClaudeInboxHook liga o hook do inbox quando o Claude está entre os agentes. A mesclagem é
+// segura (nunca sobrescreve a configuração do usuário); se não for possível, só avisa (SEG-02).
+func installClaudeInboxHook(agents []string, targetDir string) {
+	for _, a := range agents {
+		if a != config.AgentClaude {
+			continue
+		}
+		if _, err := MergeClaudeInboxHook(targetDir); err != nil {
+			fmt.Fprintf(os.Stderr, "aviso: hook do inbox não instalado: %v\n", err)
+		}
+		return
+	}
+}
+
+// applyStructureUpgrade move o legado de sdd/ para sdd/archive/ (com backup) e remove os
+// artefatos de agente obsoletos idênticos ao template anterior. Idempotente: sem legado, não faz nada.
+func applyStructureUpgrade(cfg config.Config, targetDir string) error {
+	plan, err := PlanLayoutMigration(targetDir)
+	if err != nil {
+		return err
+	}
+	if _, err := ApplyLayoutMigration(targetDir, plan); err != nil {
+		return err
+	}
+	if _, err := RemoveObsoleteAgentArtifacts(targetDir, cfg); err != nil {
+		return err
+	}
+	_, _ = config.MigrateLegacyProfiles(targetDir)
+	return nil
 }
 
 // renderDir percorre fsys a partir de root, renderiza cada template e escreve em targetDir.
@@ -154,7 +191,11 @@ func renderDir(fsys embed.FS, root, stripPrefix string, cfg config.Config, targe
 			return fmt.Errorf("render template %s: %w", path, err)
 		}
 
-		if err := os.WriteFile(dest, buf.Bytes(), 0644); err != nil {
+		perm := os.FileMode(0644)
+		if strings.HasSuffix(dest, ".sh") {
+			perm = 0755 // scripts do pipeline (forge-up.sh) precisam ser executáveis
+		}
+		if err := os.WriteFile(dest, buf.Bytes(), perm); err != nil {
 			return fmt.Errorf("write %s: %w", dest, err)
 		}
 
@@ -199,6 +240,7 @@ func RunAgents(cfg config.Config, agents []string, targetDir string) ([]string, 
 	}
 	if !cfg.DryRun {
 		cleanObsoleteFiles(targetDir)
+		installClaudeInboxHook(agents, targetDir)
 	}
 	return created, nil
 }
@@ -219,7 +261,7 @@ func UpdateSddrc(cfg config.Config, targetDir string) error {
 	if err := tmpl.Execute(&buf, cfg); err != nil {
 		return fmt.Errorf("render template %s: %w", tmplPath, err)
 	}
-	dest := filepath.Join(targetDir, "sdd", ".sddrc")
+	dest := layout.Sddrc(targetDir)
 	return os.WriteFile(dest, buf.Bytes(), 0644)
 }
 
@@ -240,7 +282,7 @@ func shouldPreserve(dest string, targetDir string) bool {
 	// Regras de preservação de domínio sob a pasta sdd/
 	if strings.HasPrefix(rel, "sdd/") {
 		// Exceções estruturais que DEVEM ser atualizadas/sobrescritas:
-		if rel == "sdd/.sdd-version" || rel == "sdd/.sddrc" {
+		if rel == path.Join(layout.SddDirName, layout.VersionFileName) || rel == path.Join(layout.SddDirName, layout.SddrcFileName) {
 			return false
 		}
 		// Todo o restante do domínio (memory, spec, features, releases, README, HOWTO, plan) é preservado
@@ -249,14 +291,44 @@ func shouldPreserve(dest string, targetDir string) bool {
 
 	// .agents/rules/ é conteúdo do usuário (regras de domínio livres) — nunca sobrescrito
 	// uma vez criado, mesmo espírito de preservação de domínio usado em sdd/.
-	// .agents/commands/ (corpo canônico dos comandos) NÃO entra aqui: é gerado pelo
-	// forge-sdd e deve continuar sendo atualizado a cada init/update, como qualquer
-	// outro arquivo de configuração de agente.
-	if strings.HasPrefix(rel, ".agents/rules/") {
+	// As skills de estação (.agents/skills/sdd-*) são geradas pelo forge-sdd e devem
+	// continuar sendo atualizadas a cada init/update, como qualquer outro arquivo de
+	// configuração de agente. Já as demais skills (aprovadas ou propostas pelo usuário
+	// ou pela governança) e as rules pertencem ao projeto e nunca são sobrescritas.
+	if strings.HasPrefix(rel, ".agents/skills/sdd-") {
+		return false
+	}
+	if strings.HasPrefix(rel, ".agents/rules/") || strings.HasPrefix(rel, ".agents/skills/") {
 		return true
 	}
 
+	// AGENTS.md é um arquivo neutro que muitos projetos já têm: só é atualizado se foi gerado pelo
+	// forge-sdd (cabeçalho e marcador `<!-- forge-sdd:generated -->`); um arquivo do usuário nunca é sobrescrito.
+	if rel == "AGENTS.md" {
+		return !IsGeneratedAgentsMD(dest)
+	}
+
 	// Arquivos fora de sdd/ (configurações e instruções de agente) devem ser atualizados
+	return false
+}
+
+// IsGeneratedAgentsMD diz se o AGENTS.md foi gerado pelo scaffold: cabeçalho conhecido E o marcador
+// inequívoco `<!-- forge-sdd:generated -->` nas três primeiras linhas. Só o título não basta: um
+// AGENTS.md do usuário pode começar igual.
+func IsGeneratedAgentsMD(path string) bool {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return false
+	}
+	head := strings.SplitN(string(data), "\n", 4)
+	if len(head) < 2 || !strings.HasPrefix(head[0], "# AGENTS.md — ") {
+		return false
+	}
+	for _, l := range head[1:min(len(head), 3)] {
+		if strings.TrimSpace(l) == "<!-- forge-sdd:generated -->" {
+			return true
+		}
+	}
 	return false
 }
 

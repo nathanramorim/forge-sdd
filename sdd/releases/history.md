@@ -4,6 +4,194 @@ Este arquivo registra o histórico de entregas de produto deste projeto.
 
 ## Entregas
 
+### Versão 4.6.0 — Unificação Canônica do Comando `forge`, Painel Vivo Executivo e Gestão Suave de Tokens
+
+Compatível com a 4.5.2-beta (Iniciativas 80, 81 e 82).
+
+*   **Unificação e Padronização do Comando `forge` (Iniciativa 82):**
+    *   Comando raiz Cobra padronizado para `rootCmd.Use = "forge"` (`cmd/forge-sdd/main.go`), garantindo que todas as mensagens de usage e help usem unicamente `forge`.
+    *   Padronização de todas as mensagens de dicas e erros (ex: `forge ps --kill-zombies`).
+    *   Templates de scaffold (`internal/scaffold/templates/`), golden files, prompts de agentes (`GEMINI.md`, `CLAUDE.md`, `.agents/rules/`, `.agents/skills/`) e documentação oficial (`docs/comandos.md`, `README.md`) instruindo 100% o comando canônico `forge`.
+*   **Painel Executivo Vivo e Status Tríplice (Iniciativa 80):**
+    *   Separação clara entre `forge status` (snapshot instantâneo na CLI) e `forge status --live` (living dashboard atualizado em tempo real a cada 2s).
+    *   Monitoramento transparente de CPU % e RAM (MB) por sessão do projeto (`forge-discovery`, `forge-builder`, `forge-reviewer`) e seus subprocessos.
+    *   Contabilidade acumulada de tokens consumidos por papel.
+    *   Barra de progresso visual DAG (`[████████████████████] 100%`) com checklist detalhado de status das tarefas.
+    *   Nova opção direta no menu interativo `forge`: `"Painel vivo da esteira (status --live)"`.
+*   **Contabilidade de Tokens por Janela, Auto-Archive e Reset Suave (Iniciativa 81):**
+    *   Monitoramento contínuo de consumo de tokens por janela de contexto dos modelos.
+    *   Auto-archive automático de iniciativas quando todas as tarefas da esteira são concluídas com sucesso.
+    *   Reset suave in-place nos painéis de agentes sem necessidade de reiniciar o terminal ou recriar sessões tmux.
+
+### Versão 4.5.2 — Fix no Monitor ps: Isolamento Estrito de Processos entre Projetos (Beta)
+
+Compatível com a 4.5.1-beta.
+
+*   **Isolamento Estrito no `forge ps`:** impede o vazamento de processos de outros projetos que compartilham o mesmo servidor daemon do Tmux. Ao inspecionar processos de um projeto, o comando obtém a correlação exata de sessão via `tmux list-panes -a -F "#{session_name}|#{pane_pid}|..."` e nunca ingere processos de outras sessões nem o processo raiz compartilhado do daemon Tmux como raiz de busca de filhos.
+
+### Versão 4.5.1 — Fix no Tmux: Correção na sintaxe do set-option (Beta)
+
+Compatível com a 4.5.0-beta.
+
+*   **Correção de prefixo em comandos de estilização do Tmux:** substitui o alvo com prefixo de igualdade (`=session`) pelo nome direto da sessão nos comandos `tmux set-option -t <session> status-left` e `status-left-length`, prevenindo o erro `exit status 1: no such session` em versões modernas do tmux (ex: tmux 3.8 no macOS) e garantindo que o launcher abra os 3 painéis integrados no tmux sem recair indevidamente para janelas nativas avulsas do sistema.
+
+### Versão 4.5.0 — Clareza no Pipeline, Identificação Visual no Tmux, Menu Direto, DAG e Monitor ps (Beta)
+
+Compatível com a 4.4.1-beta (Discovery 79, features `79-01` a `79-07`).
+
+*   **Diretrizes Pipeline-First nos Prompts e Skills (`79-01`):** eliminação definitiva da confusão cognitiva sobre subagentes; os prompts e skills instruem os agentes a utilizarem os painéis especializados da esteira (`forge-builder` e `forge-reviewer`) por meio da fila determinística, reservando subagentes estritamente para tarefas efêmeras de leitura e pesquisa em paralelo.
+*   **Identificação Visual do Projeto no Tmux (`79-02`):** inclusão automática do identificador do projeto no `status-left` do tmux (`[forge:meu-projeto]`), formatação dos títulos de borda dos painéis (`pane-border-format`) e padronização do nome da janela ativa (`forge:<projeto>`), evitando alternâncias acidentais entre múltiplos projetos abertos.
+*   **Menu Unificado e Direto (`79-03`):** simplificação da interface do comando `forge`, eliminando a divisão artificial entre "Pipeline multi-sessão" e "Estrutura padrão". As ações principais agora aparecem diretamente no primeiro nível com números de atalho claros e diretos.
+*   **Alertas Visuais e Fluxo de Entrega Não Bloqueante (`79-04`):** mecanismo de feedback em tempo real para a sessão de Discovery durante o despacho para o Builder, evitando loops ociosos de terminal e garantindo que o desenvolvedor tenha a linha de comando sempre liberada.
+*   **Paralelismo de Fila por DAG e Ondas de Execução (`79-05`):** suporte nativo ao atributo `depends_on` no `queue.json`, cálculo determinístico de grafos de dependência e liberação automática de tarefas em ondas paralelas quando suas dependências são satisfeitas.
+*   **Monitor Nativo de Processos `forge-sdd ps` (`79-06`):** novo comando CLI para inspecionar em tempo real os processos, servidores em background (ex: dev servers, workers, compilações) e threads ativas associadas à sessão e ao repositório, com flags `--json` e `--kill`.
+*   **Status Executivo Tríplice Live (`80-01` a `80-03`):** subcomando `forge status --live` para consolidação instantânea (< 100ms e < 200 tokens) combinando captura de tela do worker ativo no tmux, commits git recentes e fila de tarefas da esteira.
+*   **Documentação Encantadora e Simulador Interativo Atualizado (`79-07`):** atualização do guia do pipeline (`docs/pipeline.md`, `LEIA-ME.md.tmpl`), documentação de comandos (`docs/comandos.md`) e simulação em tempo real no emulador web da landing page (`site/src/data/emulator.ts`).
+
+### Versão 4.4.1 — Fix no Pipeline: Gemini abre CLI agy e auto-cura em instalações anteriores (Beta)
+
+Compatível com a 4.4.0-beta (Fix 78).
+
+*   **Mapeamento Gemini -> agy (Antigravity CLI):** ao selecionar o agente Gemini na pipeline ou no menu, o Forge-SDD garante a invocação do executável oficial `agy` em vez da CLI descontinuada `gemini`.
+*   **Tratamento de flags interativas:** omite flags de prompt interativo soltas (`-i`) quando a sessão inicializa sem prompt inicial (como nos painéis de Builder e Reviewer em modo `live`), evitando encerramento abrupto da CLI.
+*   **Auto-cura e migração de instalações anteriores:** ao atualizar a versão (`forge-sdd update`) ou ao carregar qualquer configuração do pipeline (`LoadForgeConfig`), o Forge-SDD detecta perfis com `command: "gemini"` legado e normaliza/persiste automaticamente o arquivo `.forge/config/forge.json` no disco com `command: "agy"`.
+
+### Versão 4.4.0 — Sessões com a CLI Aberta (Builder e Reviewer ao Vivo) (Beta)
+
+Compatível com a 4.3.0-beta (Discovery 77, features `77-01` a `77-05`). Sem alteração em `forge.json`, o comportamento padrão permanece `headless`.
+
+*   **Modo `live` de sessão (`session_mode: live`):** em vez de inicializar um novo processo da CLI a cada job, o Builder e o Reviewer mantêm seus terminais interativos abertos nos painéis do tmux, eliminando a sobrecarga de boot e permitindo acompanhar o raciocínio do agente ao vivo na tela.
+*   **Despachante de entrega ao vivo (`worker --deliver <target>`):** executado em janela oculta de controle (`forge-ctl`), entrega o prompt ao painel alvo via buffers raw do tmux (`tmux load-buffer` + `paste-buffer -p` + `Enter`), garantindo integridade de aspas, quebras de linha e caracteres especiais.
+*   **Limpeza de contexto automática (`context: clear`):** envia o comando de reset do perfil (`/clear` para Claude, Gemini, Copilot e Agy; `/new` para Codex) via buffer entre jobs e aguarda a estabilização do painel antes da próxima tarefa. Suporta também `context: continuous` para manter o histórico de raciocínio.
+*   **Conclusão por estado compartilhado:** Builder conclui quando registra o PR no barramento (`UpdatePR` / `forge-sdd pipeline pr-opened`), enfileirando a revisão; Reviewer conclui quando aplica o veredito via `bus review` (`ApplyVerdict`).
+*   **Detecção de falhas lidas da tela:** inspeciona o terminal para identificar limites de cota (`DetectUsageLimit` → requeue e pausa), agente indisponível (`DetectAgentUnavailable` → alerta de login/tier no inbox) ou painel fechado inesperadamente.
+*   **Contingência suave:** quando configurado em `live` mas sem tmux ou em terminal nativo, executa fallback transparente para `headless` com aviso no terminal.
+
+Ver `sdd/spec/adr/adr-0008-sessoes-com-cli-aberta-no-tmux.md`.
+
+### Versão 4.3.0 — Contexto do Projeto na Discovery, Briefing e Contingência de Terminal (Beta)
+
+Compatível com a 4.2.0-beta (Discovery 75, features `75-01` a `75-06`).
+
+*   **`forge-sdd brief` e `--check`:** comando determinístico que lê a missão da constituição (`sdd/memory/constitution.md`), módulos (`sdd/spec/modules.md`), fluxos (`sdd/spec/flows.md`) e decisões (`sdd/spec/decisions.md`) sem alterar arquivos. O flag `--check` sai com código 0 (`pronta`) ou 3 (`rascunho`), validando se o projeto tem missão e arquitetura preenchidas antes de novas frentes.
+*   **Protocolo de abertura da Discovery:** toda sessão de Discovery agora inicia executando `forge-sdd brief` para assimilar decisões anteriores, e toda especificação gerada passa a registrar explicitamente a seção `## Decisões do projeto aplicadas`.
+*   **Constituição como primeiro passo (`/constitution`):** em projetos recém-criados ou com constituição em rascunho, o menu interativo do `forge` e o `forge-sdd doctor` destacam `/constitution` como o passo número 1 para evitar avanço sem diretrizes arquiteturais. Os templates de comandos de agentes foram otimizados dentro do orçamento de 300 bytes (`P-24`).
+*   **Instalação assistida do tmux:** em modo `auto`, quando o tmux não está no PATH, o Forge detecta o gerenciador de pacotes do sistema (Homebrew no macOS; apt-get, dnf, pacman, apk ou zypper no Linux) e oferece instalá-lo com confirmação interativa e sudo quando necessário.
+*   **Contingência suave de terminal (graceful fallback):** se o usuário recusar a instalação do tmux ou se ela falhar, as sessões abrem em janelas nativas do sistema e o Forge oferece salvar a escolha em `forge.json` (`terminal: "native"`). No Windows com Windows Terminal (`wt.exe`), as três sessões abrem em abas/painéis divididos na mesma janela. No WSL, o tmux funciona nativamente dentro do Linux.
+*   **Suporte ao CLI oficial Antigravity (`agy`):** o agente Gemini passa a mapear para o binário oficial `agy` com flags correspondentes.
+
+Ver `sdd/spec/adr/adr-0007-contexto-do-projeto-e-contingencia-tmux.md`.
+
+### Versão 4.2.0 — Menu Navegável, Agente por Sessão e Visibilidade do Pipeline (Beta)
+
+Compatível com a 4.1.0-beta: um `forge.json` da 4.1 continua válido e escolhe o mesmo agente nas três sessões (Discovery 71, features `71-01` a `71-05`, e Discovery 72, features `72-01` a `72-05`). Sem `forge.json` o fluxo de implementação segue como na 4.0.0-beta.
+
+*   **`forge` abre um menu navegável (setas, Enter, Esc volta):** dois caminhos, **Pipeline multi-sessão** (iniciar as 3 sessões, ver os comandos, reconfigurar, fila e inbox, recuperar jobs presos, diagnóstico, guia) e **Estrutura padrão** (status, painel da fila, gate, doctor, instalar ou atualizar). Num projeto sem Forge a primeira opção é instalar. Sem terminal interativo, `forge` imprime a ajuda curta e sai, sem travar.
+*   **Um agente por sessão:** Claude, Gemini, Copilot ou Codex em `forge-discovery`, `forge-builder` e `forge-reviewer`, escolhidos no menu (a última escolha vem marcada e é gravada em `sessions` de `forge.json`) ou por flags: `forge-sdd up --discovery claude --builder codex --reviewer gemini`.
+*   **Checagem antes de abrir:** a CLI escolhida está no PATH? O projeto tem o arquivo de instruções dela? CLI ausente bloqueia; arquivo ausente avisa e indica `forge-sdd update --agent <x>`.
+*   **Permissões em dois níveis:** `project` (padrão: edição e só os comandos de `allow_commands`) e `full` (bypass da CLI, só em ambiente isolado); o menu mostra o que cada um libera antes de abrir.
+*   **Correção:** o worker agora usa exatamente o agente da própria sessão (`--cli` explícito). Na 4.1, abrir a Discovery com `--cli agy` deixava Builder e Reviewer no agente do `forge.json`.
+*   **Cada sessão mostra o que está fazendo:** no terminal do Builder e do Reviewer aparecem linhas curtas (`✎ arquivo`, `$ comando`, batimento com o tempo decorrido) em vez de silêncio; a saída completa continua em `.forge/runtime/logs/`. Vale para qualquer agente (acompanhamento do `git status`) e, para Claude, Gemini e Codex, também pelos eventos do próprio agente. Segredos em comandos aparecem mascarados; `forge-sdd worker --raw` mostra a saída bruta.
+*   **Abre pelo tmux, em três painéis:** com `tmux` instalado, `forge` e `forge-sdd up` criam uma tela com `forge-discovery`, `forge-builder` e `forge-reviewer`, cada painel com o nome da sessão (`--terminal tmux|native|auto`).
+*   **Limite de uso não queima mais o job:** quando o agente avisa que bateu o limite (como o de 5 horas do Claude), o job volta à fila sem gastar tentativa, o painel mostra quando o worker retoma, o inbox avisa e o worker espera sozinho (até 6 horas; no máximo 3 devoluções por job, e limite semanal ou com data falha com o motivo). Toda falha agora traz a última linha útil do agente, não só "código 1".
+*   **A Discovery não executa o build:** em modo pipeline, o `/split-features` termina entregando o job ao Builder (`forge-sdd dispatch`), e `queue next` e `queue complete` só funcionam sob um worker (ou com `--local`). Com `pm_mcp.require_existing_card: false`, o despacho não pede card nem evidência (antes exigia o arquivo mesmo assim).
+*   **Codex:** o scaffold do agente `openai` passa a gerar `AGENTS.md`, que é o arquivo que o Codex lê; `OPENAI.md` vira ponteiro. Um `AGENTS.md` seu nunca é sobrescrito.
+
+**Observações:** os perfis de Gemini, Copilot e Codex seguem a documentação oficial das CLIs, mas **nenhuma delas foi executada de ponta a ponta com o worker**, só a montagem dos comandos foi testada. No Gemini, o nível `project` libera só edição: o Builder com Gemini precisa de `full` para rodar testes. Ver `sdd/spec/adr/adr-0005-menu-e-agente-por-sessao.md` e `sdd/spec/adr/adr-0006-visibilidade-tmux-e-entrega-ao-builder.md`. **O tmux foi verificado contra o tmux 3.8 no macOS** (painéis, títulos, reconexão, `pane-base-index 1`), mas não o `attach` interativo num terminal real nem outras versões; os formatos de evento e as mensagens de limite de uso do Gemini, do Copilot e do Codex estão a confirmar. Um `forge.json` que já existe mantém os argumentos antigos dos perfis: a visão cai no acompanhamento por git até você atualizar `cli_profiles`.
+
+### Versão 4.1.0 — Pipeline Multi-Sessão: Discovery, Builder e Reviewer em Terminais Separados (Beta)
+
+Compatível com a 4.0.0-beta: **sem `.forge/config/forge.json` o fluxo de implementação não muda**. O pipeline só liga com `forge-sdd pipeline init`. Em contrapartida, `init` e `update` passam a instalar, em todo projeto, a pasta `.forge/` (launcher e `.gitignore` do runtime), os comandos `/inbox` e `/implement`, o agente `reviewer` e, para Claude, o hook do inbox em `.claude/settings.json` (mesclado sem sobrescrever o seu) (Discovery 70, features `70-01` a `70-07`).
+
+*   **Três sessões que se falam por uma fila local:** `forge-discovery` (você conversa e decide), `forge-builder` e `forge-reviewer` (workers em laço) trocam jobs em `.forge/runtime/queues`. A reivindicação é atômica, com lease e recuperação de jobs presos; `high` (rework) passa na frente de `normal`.
+*   **`/implementar <feature>` com gate pré-build:** confirma spec e quebra prontas, ADRs, rules e IDs existentes e exige a **evidência de que o card existe**: o agente consulta o gerenciador pelo MCP (ClickUp, GitHub Projects, Azure DevOps ou Jira) e grava `card-evidence.json`, que o Go valida (formato, provider, feature e prazo). É uma checagem de processo, não de autenticidade: quem escreve no disco pode forjar o arquivo. Sem a evidência o despacho é bloqueado e as pendências são listadas; com ela, o status é movido e o job entra na fila do Builder.
+*   **Builder paralelo:** planeja ondas de tarefas independentes pelo cabeçalho `**Depende de:**`, orienta o agente a executar em paralelo (subagentes e, com `use_git_worktrees`, `forge-sdd pipeline worktree add|remove`) até `max_parallel_tasks`, valida build, lint e testes e abre o PR ligado ao card.
+*   **Reviewer com ciclo de correção limitado:** confere o PR contra spec, ADRs, rules e padrões. Não conforme: devolve ao Builder com feedback estruturado (`pr_rework`, prioridade alta) até `max_rework_attempts`; no limite, ou em dúvida, escala para você. Conforme: move o card e avisa.
+*   **Notificação onde você está:** o PR revisado chega ao inbox da sessão Discovery (hook no Claude, `/inbox` no Gemini e no agy) com o link, e opcionalmente toast do sistema, e-mail, webhook e comentário no card. Segredos só por variável de ambiente.
+*   **`forge-up`:** `.forge/forge-up.sh` (macOS, Linux, WSL e Git Bash) e `.forge/forge-up.ps1` (Windows) abrem as três sessões nomeadas, com `claude` ou `agy`.
+
+**Prévia dos comandos**
+```bash
+forge-sdd pipeline init                       # ativa o modo pipeline (forge.json e notifications.json)
+.forge/forge-up.sh --cli claude               # abre as três sessões (ou .forge\forge-up.ps1)
+forge-sdd dispatch auth-oauth                 # gate pré-build e despacho
+forge-sdd worker --role builder               # sessão forge-builder
+forge-sdd bus review --id <job> --verdict-file v.json   # aplica o veredito do Reviewer
+forge-sdd inbox                               # PR revisado pronto para aprovação
+```
+No chat: `/implementar` e `/implement` (despacho), `/inbox` (para Claude em `.claude/commands/`, Gemini em `.gemini/prompts/` e Copilot em `.github/prompts/`) e o agente `reviewer`.
+
+**Observações:** o ciclo completo foi testado com agente falso; **nem `claude` nem `agy` foram executados de ponta a ponta**, e o perfil padrão não traz flags de permissão (o worker precisa que o agente possa editar arquivos e rodar comandos em modo não interativo: ajuste `cli_profiles` ao seu ambiente). Os argumentos de `agy` precisam ser confirmados. O launcher de Windows e WSL só teve a geração dos comandos testada; a abertura real dos terminais depende do sistema (`forge-sdd up --dry-run` mostra os comandos).
+
+### Versão 4.0.0-beta — Estrutura por Iniciativa, Skills por Estação e Orçamento de Contexto (Beta, mudança incompatível)
+
+Primeira versão da linha 4.x. **Contém mudanças incompatíveis** (veja "Como migrar"). Reestrutura o fluxo para trabalhar com várias frentes em paralelo sem conflito de arquivos de estado e para consumir muito menos contexto por comando (Discovery 69, features `69-01` a `69-07`).
+
+*   **Estado por iniciativa, sem conflito entre branches (`forge-sdd status`, `forge-sdd next-id`):** tudo de uma demanda vive em `sdd/discovery/<id>-<nome>/` (`discovery.md`, `criteria.md`, `plan.md`, `status.md`, `queue.json`, `features/` e `fixes/`). O `index.md` e o `progress.md` globais saem do fluxo; a visão geral é calculada na leitura e `--all-branches` enxerga frentes ainda não mescladas. `next-id` consulta todas as branches e não repete número. O estado de execução fica em `sdd/.runtime/`, fora do git.
+*   **5 skills por estação e o comando `/implementar [feature]`:** os 13 comandos e 7 papéis viram `sdd-concepcao`, `sdd-planejamento`, `sdd-build`, `sdd-governanca` e `sdd-operacao` em `.agents/skills/`, com referências carregadas sob demanda e adaptadores finos para Claude, Gemini e Copilot. `/implementar` executa a fila da iniciativa da branch atual ou a feature indicada (`/proxima-feature` continua como alias).
+*   **Menos contexto por comando:** o conjunto de leitura do `/discovery` cai de cerca de 66 KB para 22 KB e o do Builder de cerca de 32 KB para cerca de 13 KB (medido em bytes, ADR 0003). `forge-sdd context <task>` entrega só a spec, os IDs citados da Constituição, as rules e as skills da task. O check `P-24` do gate verifica os orçamentos.
+*   **Migração segura (`forge-sdd update --dry-run`):** o `update` move discoveries soltos e `sdd/features/` para `sdd/archive/` com backup em `sdd/backups/`, sem sobrescrever e recusando links simbólicos, e remove comandos e papéis antigos só quando idênticos ao template anterior.
+*   **Constituição enxuta:** cada regra escrita uma vez, por ID (45 IDs preservados), em até 9 KB. ADRs 0001, 0002 e 0003 registram as decisões.
+
+**Prévia dos comandos**
+```bash
+forge-sdd status --all-branches      # iniciativas de todas as branches
+forge-sdd next-id                    # próximo ID sem colidir com outras branches
+forge-sdd context <task>             # contexto mínimo de uma task
+forge-sdd update --dry-run           # plano da migração, sem gravar
+```
+No chat: `/implementar` (para Claude em `.claude/commands/`, Gemini em `.gemini/prompts/` e Copilot em `.github/prompts/`).
+
+**Mudanças incompatíveis**
+*   O **Forge Studio foi removido**: o comando `forge-sdd studio` não existe mais. O ACP (`forge-sdd acp`) permanece e passa a manter o heartbeat do pool.
+*   `.agents/commands/` e `.agents/roles/` deixam de existir (viraram skills); `sdd/features/`, `sdd/memory/progress.md` e a fila global `sdd/.queue/` deixam de ser o fluxo.
+*   A fila e o status passam a ficar na pasta da iniciativa; `sdd/.queue/{activity,stations}` migram para `sdd/.runtime/`.
+
+**Como migrar:** rode `forge-sdd update --dry-run` para ver o plano e `forge-sdd update --upgrade` para aplicar. Arquivos de comando ou papel que você editou são preservados e listados.
+
+### Versão 3.2.1-beta — Mascotes 3D Three.js no Studio e Visualização de Tarefa Ativa por Agente (Beta)
+
+Atualização incremental da linha v3.2 (versão 3.2.1-beta) trazendo melhorias visuais e ergonômicas ao **Forge Studio**:
+
+*   **Motor 3D Three.js Embarcado para os 5 Mascotes:** Integração nativa do Three.js embutido em `internal/studio/assets/three.min.js` via `embed.FS` (100% offline). Renderização 3D idêntica à do site oficial com floating bob, sombra dinâmica, olhar reativo ao mouse (`mousemove`), piscadas naturais, oscilação de antena, reações de salto (*hop*) e fallback SVG 2D automático (`CLS = 0`).
+*   **Visualização de Atividade Viva por Agente:** Cada card das 5 estações agora conta com uma caixa destacada indicando exatamente o que o agente está executando no momento (`EM EXECUÇÃO`, `RETRABALHO SOLICITADO`, `AUDITANDO` ou `STANDBY`), com ID da tarefa, título e ponto pulsante em tempo real.
+*   **Modo DEMO Enriquecido:** A simulação percorre sequencialmente o ciclo de vida real demonstrando o trabalho de cada um dos 5 especialistas com contratos de transição e animações dedicadas.
+*   **Porta Dinâmica em Testes:** Servidor HTTP agora suporta `Port: 0` para portas efêmeras do SO, eliminando colisões de bind quando o usuário está com o Studio aberto durante execuções de teste.
+
+### Versão 3.2.0-beta — Forge Studio (Módulo Visual Plugável), Filas Atômicas por Estação e Handoff Determinístico (Beta)
+
+Entrega do ciclo v3.2 (versão 3.2.0-beta) integrando o módulo visual plugável do Forge Studio e o motor de filas atômicas com handoff determinístico entre as 5 estações (Feature 59, 4 entregas: `feat-59-01` a `feat-59-04`).
+
+*   **Forge Studio & Servidor Read-Only HTTP/SSE (`forge-sdd studio`):** Servidor local isolado em `127.0.0.1:4321` sem nenhuma dependência Go externa (`net/http` e `embed.FS` nativos da stdlib — `ARQ-03`, `ARQ-04`). Rejeita mutações com `405 Method Not Allowed` (`SEG-01`, `SEG-06`) e distribui snapshots via Server-Sent Events (`/api/events`).
+*   **Interface Web Embarcada com 5 Mascotes & Trilho de Handoff:** Frontend completo pré-embutido em `internal/studio/assets/` com visualização dos 5 mascotes (`Líder`, `PM & Arquiteto`, `Planejador`, `Builder` e `Governança`) usando fallback SVG 2D de alta fidelidade e `CLS = 0`, trilho processual animado com pacote em trânsito e loop de retrabalho `05 ↺ 04`, cards de status e chaveador de modo `LIVE / DEMO`.
+*   **Filas Individuais por Estação com Idempotência Estrita (`forge-sdd queue handoff` e `stations`):** Persistência atômica via arquivo temporário + `os.Rename` em `sdd/.queue/stations/<station>.json`, cálculo de `IdempotencyKey` via SHA-256 e sincronização bidirecional com a fila do Builder mantendo total retrocompatibilidade com `sdd/.queue/queue.json`.
+*   **Auditoria Contínua da Governança:** Cartão do Inspetor de Governança apresentando o parecer em tempo real da Camada B e conformidade determinística com os 7 pilares constitucionais (`ARQ`, `SEG`, `DUP`, `COD`, `TST`, `FLX`, `GOV`).
+
+### Versão 3.0.1-beta.1 — Site Estático Oficial (Astro 5 SSG), Vídeo Player e Correções Visuais (Beta)
+
+Segunda entrega beta da linha v3.0 baseada na branch `release/v3.0.1` (Feature 60 e Fixes 61 e 62). Entrega a aplicação estática oficial em `/site` para `https://forge-sdd.org`, com zero impacto sobre o binário Go (`ARQ-04`).
+
+*   **Aplicação Estática Astro 5 SSG em `/site` (`https://forge-sdd.org`):** Arquitetura pré-renderizada no build com Core Web Vitals otimizados (`LCP < 1.2s`, `CLS = 0`), eliminação de scripts CDN externos bloqueantes e hidratação progressiva (`interactions.ts` e `mascot-3d.ts` com tree-shaking ESM e pausa via `IntersectionObserver`).
+*   **SEO Técnico Completo & Schemas JSON-LD:** Canonical tags, OpenGraph, Twitter Cards, `robots.txt`, `sitemap-index.xml`, `llms.txt` e schemas Schema.org (`SoftwareApplication`, `WebSite`, `FAQPage`).
+*   **Player de Vídeo Nativo Oficial:** Nova seção 06 com demonstração em vídeo (1080p Full HD, áudio stereo e controles nativos) e atalho de navegação no Header com ScrollSpy.
+*   **Fix 61 & Fix 62 (Handoff Responsivo & Limpeza):** Barra viva de handoff reformulada com empilhamento fluido (`max-width: 1180px`), eliminando qualquer sobreposição horizontal entre a rota dos agentes e os artefatos; link oficial do Instagram atualizado para `@nathan.ramorim` e player de vídeo limpo sem metadados redundantes.
+*   **Borda Cloudflare Workers:** Configuração declarativa em `site/wrangler.jsonc` com Static Assets e cabeçalhos de segurança HTTP com cache imutável de 1 ano para bundles em `/_astro/*`.
+
+### Versão 3.0.0-beta — Agentes Independentes, Fila do Builder, Portão de Governança (A/B/C), Constituição por IDs e Auto-Skills (Beta)
+
+Inaugura o ciclo major **v3.0.0-beta** (Discovery 58, 7 entregas: `feat-58-01` a `feat-58-07`), consolidando e substituindo os discoveries 53 e 56 sem dependência de modelos externos e incorporando ao core do Forge-SDD os mecanismos universais validados em `busize-solutions/planning-brain-governanca`. Publicada como Beta diretamente na branch `feat/58-orquestracao-autonoma-governanca-skills` com Pull Request mantido aberto para estabilização (Regra 11).
+
+*   **Topologia de 5 Estações Independentes (`.agents/roles/` para Claude, Gemini e Copilot):** os papéis do Forge-SDD agora têm fonte canônica única em `.agents/roles/` (`lider`, `pm-architect`, `planner`, `builder`, `governance`, `archivist`, `migrator`), com adaptadores nativos em `.claude/agents/*.md`, `.gemini/skills/*.chatmode.md` e `.github/chatmodes/*.chatmode.md`. O **Líder** coordena o fluxo, o **PM + Arquiteto** gera `discovery` e `criteria` sujeitos ao Gate obrigatório de Revisão de Spec (`FLX-01`), o **Planejador** gera o `plan` mapeando rules por task, o **Builder** executa pela fila e o **Analista de Governança** audita em modo somente leitura.
+*   **Constituição por IDs Estáveis + Rules Modulares (`GOV-04` e `DUP-10`):** `sdd/memory/constitution.md` passa a declarar "o quê e por quê" com IDs canônicos estáveis (`ARQ-*`, `SEG-*`, `DUP-*`, `COD-*`, `TST-*`, `FLX-*`, `GOV-*`), enquanto `.agents/rules/sdd-*.md` explicam "como cumprir" citando os IDs no frontmatter sem duplicar o texto da Constituição. Inclui no scaffold o Catálogo de Conceitos (`sdd/spec/concepts.md`), modelo de ADR (`sdd/spec/adr/adr-0000-modelo.md`) e template de PR com bloco de exceção com prazo (`constitution-exception`).
+*   **Reuse Check Obrigatório na Spec (`/discovery`, `/split-features` e `/nova-feature` para Claude, Gemini e Copilot):** toda especificação exige as seções `Modelo do módulo` (`completo | enxuto` — `ARQ-11`), `O que já existe` (`DUP-02` — decisão de reusar, estender ou criar com justificativa) e `Dependências novas` (`SEG-07`).
+*   **Motor Determinístico da Fila do Builder (`forge-sdd queue`):** novo comando CLI (`forge-sdd queue enqueue|next|complete|review|list|panel`) que gerencia `sdd/.queue/queue.json`, bloqueando o enfileiramento de specs sem Reuse Check e coordenando o ciclo `queued → building → review_pending → approved | changes_requested`.
+*   **Portão de Governança em 3 Camadas (`forge-sdd gate` + `/revisar` + `/status` para Claude, Gemini e Copilot):**
+    *   *Camada A (Determinística):* `forge-sdd gate --mode observacao|bloqueio` verifica automaticamente convenção de branch (`P-01`), existência e Reuse Check da spec (`P-02`/`P-03`), segredos (`P-13`), dependências novas (`P-14`), exceções dentro do prazo (`P-20`), orçamento de `progress.md` (`P-21`) e integridade de IDs entre `.agents/rules/` e a Constituição (`P-23`).
+    *   *Camada B (Analista de Governança Semântico):* audita Arquitetura, Boas Práticas e Segurança (`S-01..S-07`) com proteção contra prompt injection (`FLX-08`), exigindo evidência concreta (`arquivo`, `linha`, `evidencia`, `regra`) validada por `forge-sdd queue review`.
+    *   *Camada C (Painel Executivo no Líder):* `/status` para Claude, Gemini e Copilot (e `forge-sdd queue panel`) devolve ao humano a visão consolidada do que já foi feito e aprovado pela Governança, como está cada etapa ativa e o que ainda não foi desenvolvido.
+*   **Motor de Auto-Skills (`forge-sdd skills`):** atividades padronizadas que se repetem pela Regra de Três (`DUP-05`) ou na revisão de Fim de Onda (`GOV-03` em `/archive` para Claude, Gemini e Copilot) são propostas e aprovadas via `forge-sdd skills propose|approve|sync|list`, gerando a skill canônica em `.agents/skills/<slug>/SKILL.md` e sincronizando automaticamente para `.claude/skills/` e `.gemini/skills/`.
+*   **Importação Idempotente de Governança Externa (`forge-sdd governance`):** suporte nativo ao padrão `manifest.yaml` (`bloco` demarcado na `constitution.md`, `substituir`, `criar_se_ausente`, `mesclar`, `criar_uma_vez` e registro em `docs/governanca/VERSAO`).
+
 ### Versão 2.4.0 (Estável) — Telemetria com Cobertura Total e Relatório de Métricas
 
 Promovida direto a estável (2026-09-05), sem passar por tag beta — desvio pontual da Regra 11, autorizado explicitamente pelo usuário; PR #53 mergeado em `main` via rebase com bypass de review (`--admin`). Revisão de código (`/code-review`) no diff antes do merge encontrou e corrigiu 4 achados: 4 prompts do Copilot (`discovery`/`archive`/`nova-feature`/`split-features`) estavam com conteúdo antigo duplicado (nunca migrado para o padrão de adaptador fino, faltando o passo de telemetria), `forge-sdd report` escrevia parte da saída fora do writer configurável do comando, `ClassifySessionType` classificava por substring em vez de prefixo (risco de falso positivo tipo `feat-42-fix-race-condition.md`), e um teste sem `gofmt`.

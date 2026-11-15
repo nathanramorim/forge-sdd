@@ -1,0 +1,28 @@
+{
+  "$schema": "forge-sdd/metrics/1.0",
+  "feature": "79-clareza-pipeline-e-identificacao-tmux",
+  "phase": "79",
+  "agent_path": [
+    "builder"
+  ],
+  "tokens_input": 0,
+  "tokens_output": 0,
+  "turns": 0,
+  "duration_seconds": 0,
+  "criterio_atendido": true,
+  "model": "",
+  "rework_lines": 45,
+  "context7_calls": 0,
+  "git_calls": 0,
+  "files_touched": [
+    "cmd/forge-sdd/menu.go",
+    "cmd/forge-sdd/ps.go",
+    "cmd/forge-sdd/queue.go",
+    "cmd/forge-sdd/up.go",
+    "cmd/forge-sdd/up_sessions_test.go",
+    "internal/monitor/ps.go",
+    "internal/monitor/ps_test.go"
+  ],
+  "outcome": "approved",
+  "sdd_version": "4.4.1-beta"
+}
