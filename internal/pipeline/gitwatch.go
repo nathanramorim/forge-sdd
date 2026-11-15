@@ -10,6 +10,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/forge-sdd/cli/internal/monitor"
 )
 
 const (
@@ -50,11 +52,13 @@ func defaultGit(ctx context.Context, dir string, args ...string) (string, error)
 // GitWatcher acompanha o `git status` do diretório do job e descreve o que mudou, para qualquer
 // CLI de agente (inclusive as que não imprimem nada). Nunca falha o job: sem git, não diz nada.
 type GitWatcher struct {
-	Dir      string
-	Git      GitFunc
-	Now      func() time.Time
-	Activity func() time.Time // último evento do agente; nil = ignora
-	Beat     time.Duration    // intervalo do batimento (padrão 30 s)
+	Dir       string
+	Git       GitFunc
+	Now       func() time.Time
+	Activity  func() time.Time // último evento do agente; nil = ignora
+	Beat      time.Duration    // intervalo do batimento (padrão 30 s)
+	Role      string
+	Formatter *monitor.ChatFeedFormatter
 
 	mu                            sync.Mutex
 	started, lastChange, lastBeat time.Time
@@ -154,6 +158,13 @@ func (w *GitWatcher) Poll(ctx context.Context) []string {
 	w.prev = cur
 
 	var lines []string
+	if w.Formatter != nil {
+		lines = append(lines, w.Formatter.FormatEvent(monitor.ChatEvent{
+			Type:  monitor.EventEditFiles,
+			Role:  w.Role,
+			Files: changed,
+		}))
+	}
 	for i, p := range changed {
 		if i >= maxWatchLines {
 			lines = append(lines, fmt.Sprintf("  ✎ (+%d arquivos)", len(changed)-maxWatchLines))
@@ -173,6 +184,13 @@ func (w *GitWatcher) Poll(ctx context.Context) []string {
 	}
 	if now.Sub(last) >= w.Beat && now.Sub(w.lastBeat) >= w.Beat {
 		w.lastBeat = now
+		if w.Formatter != nil {
+			return []string{w.Formatter.FormatEvent(monitor.ChatEvent{
+				Type: monitor.EventRunValidation,
+				Role: w.Role,
+				Step: fmt.Sprintf("validação contínua (%s de execução · %d arquivos alterados)", FormatElapsed(now.Sub(w.started)), w.count()),
+			})}
+		}
 		return []string{fmt.Sprintf("  … trabalhando há %s · %d arquivos alterados", FormatElapsed(now.Sub(w.started)), w.count())}
 	}
 	return nil

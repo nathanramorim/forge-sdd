@@ -400,3 +400,26 @@ func TestTmux_BordaBadgeDeTokensEStatusRight(t *testing.T) {
 	assert.Contains(t, statusRightVal, "Bld: 78k")
 	assert.Contains(t, statusRightVal, "Rev: 28k")
 }
+
+func TestTmux_PopupQueue(t *testing.T) {
+	env := lenv("linux", map[string]bool{"tmux": true}, nil)
+	env.Dir = "/work/meu-app"
+	cfg := config.DefaultForgeConfig()
+	plan, err := BuildTmuxPlan(env, cfg, false)
+	require.NoError(t, err)
+
+	foundPopupBind := false
+	for _, step := range plan.Create {
+		if step[1] == "bind-key" && len(step) >= 9 && step[3] == "display-popup" {
+			foundPopupBind = true
+			assert.Equal(t, "q", step[2])
+			assert.Equal(t, "85%", step[5])
+			assert.Equal(t, "85%", step[7])
+			assert.Contains(t, step[9], "queue --interactive")
+		}
+	}
+	assert.True(t, foundPopupBind, "deve configurar atalho de popup modal para a fila interativa")
+
+	popupCmd := TmuxPopupQueueCommand("/usr/local/bin/forge-sdd")
+	assert.Equal(t, []string{"tmux", "display-popup", "-w", "85%", "-h", "85%", "-E", "'/usr/local/bin/forge-sdd' queue --interactive"}, popupCmd)
+}

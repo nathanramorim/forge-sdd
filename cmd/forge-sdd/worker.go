@@ -12,6 +12,7 @@ import (
 	"github.com/forge-sdd/cli/internal/bus"
 	"github.com/forge-sdd/cli/internal/config"
 	"github.com/forge-sdd/cli/internal/layout"
+	"github.com/forge-sdd/cli/internal/monitor"
 	"github.com/forge-sdd/cli/internal/pipeline"
 	"github.com/spf13/cobra"
 )
@@ -46,8 +47,14 @@ Reviewer: exige que o agente aplique o veredito (forge bus review).`,
 			DeliverTarget: deliver,
 			Out:           cmd.OutOrStdout(),
 			OnJobDone:     recordJobTelemetry(dir, role),
+			FeedFormatter: WorkerFeedFormatter(),
 		})
 	},
+}
+
+// WorkerFeedFormatter cria o formatador padrão de feed narrativo para o worker.
+func WorkerFeedFormatter() *monitor.ChatFeedFormatter {
+	return monitor.NewChatFeedFormatter(false, false)
 }
 
 // recordJobTelemetry registra uma sessão por job, chamando o próprio binário com argv explícito.

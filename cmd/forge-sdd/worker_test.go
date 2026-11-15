@@ -121,3 +121,39 @@ func TestPipelinePROpened_SemWorkerERecusado(t *testing.T) {
 	_, err := runRoot(t, "pipeline", "pr-opened", "--dir", dir, "--id", "job-1", "--number", "1", "--url", "https://x/1")
 	require.Error(t, err, "sem worker nem FORGE_WORKER o dono do lease não é provado")
 }
+
+func TestWorker_ChatFeed_Sequence(t *testing.T) {
+	dir := t.TempDir()
+	cfg, _ := json.Marshal(config.DefaultForgeConfig())
+	testutil.WriteFile(t, dir, ".forge/config/forge.json", string(cfg))
+
+	// Enfileira um job para o builder
+	j := bus.Job{
+		ID: "job-chat-feed", Type: bus.TypeFeatureBuild, Priority: bus.PriorityNormal,
+		Feature: "84-chat-feed", Title: "Painel Conversacional", Initiative: "84-painel",
+		SpecPath: "sdd/discovery/84-painel/criteria.md",
+		PR: bus.PR{Branch: "feat/84-chat-feed", BaseBranch: "main"},
+		Attempt: 1, MaxReworkAttempts: 3,
+	}
+	_, _, err := bus.Enqueue(dir, layout.RoleBuilder, j, time.Now())
+	require.NoError(t, err)
+
+	formatter := WorkerFeedFormatter()
+	require.NotNil(t, formatter)
+
+	startMsg := formatter.StartTask(j.Feature, j.Title)
+	assert.Contains(t, startMsg, "💭 Analisando requisitos e critérios da task 84-chat-feed")
+
+	editMsg := formatter.EditFiles("cmd/forge-sdd/worker.go")
+	assert.Contains(t, editMsg, "🔨 Editando cmd/forge-sdd/worker.go")
+
+	validMsg := formatter.RunValidation("testes unitários")
+	assert.Contains(t, validMsg, "🧪 Executando suite de testes unitários")
+
+	compMsg := formatter.CompleteTask(j.Feature, 45*time.Second, "Handoff despachado para a esteira.")
+	assert.Contains(t, compMsg, "✅ Concluído! Task 84-chat-feed finalizada com sucesso")
+
+	// Garante que não são saídas cruas de bash
+	assert.NotContains(t, startMsg, "bash -c")
+	assert.NotContains(t, compMsg, "sh: line 1:")
+}

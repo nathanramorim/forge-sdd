@@ -70,15 +70,22 @@ Dentro do tmux: `Ctrl+b` e as setas trocam de painel, `Ctrl+b d` solta a tela se
 - As bordas dos painéis mostram `[ <projeto> ❯ <papel> │ 🪙 <n>k tok ]` para monitorar o acúmulo de contexto em tempo real (com alerta `⚠️` quando próximo de 80k tokens).
 - **Alertas visuais de aprovação:** quando um job aguarda revisão humana (ex.: PR aberto pelo Builder ou veredito do Reviewer), a borda do painel pisca com `[ 🔔 REVISÃO NECESSÁRIA ]` ou `[ 🔔 AÇÃO NECESSÁRIA ]`, voltando ao normal assim que a ação for destravada.
 
-Nos painéis do Builder e do Reviewer o worker mostra o que o agente está fazendo, em linhas curtas (a saída completa fica em `.forge/runtime/logs/`):
+Nos painéis do Builder e do Reviewer o worker mostra o stream conversacional com status humano e cards de etapas (a saída completa fica em `.forge/runtime/logs/`):
 
 ```
-▶ job auth-oauth · feature_build · tentativa 1 · codex · permissões project
-  ✎ src/domain/unit.entity.ts
-  $ npm test
-  … trabalhando há 2m10s · 14 arquivos alterados
-■ concluído em 4m12s · 14 arquivos alterados
+[builder] 💭 Analisando requisitos e critérios da task auth-oauth...
+[builder] 🔨 Editando src/domain/unit.entity.ts...
+[builder] 🧪 Executando suite de testes automatizados...
+[builder] ✅ Concluído! Task auth-oauth finalizada com sucesso em 1m15s.
 ```
+
+**Fila interativa com drill-down e popup modal no tmux:**
+- Para abrir a fila interativa in-place com suporte a scroll e drill-down completo (sem truncamentos):
+  ```bash
+  forge queue --interactive   # ou: forge status -i
+  ```
+- No tmux, pressione o atalho `q` (ou `Ctrl+b q`) para abrir o **popup modal flutuante centralizado** sobre os 3 painéis sem sair da tela.
+- Use as setas `↑` e `↓` para navegar, `Enter` para inspecionar os detalhes da tarefa (arquivos alterados, tempo de build, commit gerado e parecer do reviewer) e `Esc` para voltar.
 
 As linhas vêm dos eventos do agente (Claude, Gemini e Codex) e, para qualquer agente, do acompanhamento do `git status`; segredos em comandos aparecem mascarados. `forge worker --raw` mostra a saída bruta.
 
