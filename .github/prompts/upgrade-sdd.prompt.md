@@ -3,4 +3,4 @@ description: "Migra a estrutura SDD de forge-sdd para versão mais nova"
 agent: agent
 ---
 
-Invoque o Migrator para migrar a estrutura Forge-SDD para a versão: ${input:versão alvo, ex: 1.2.0}
+Consulte `.agents/skills/sdd-operacao/references/upgrade-sdd.md` e siga as instruções descritas nesse arquivo.

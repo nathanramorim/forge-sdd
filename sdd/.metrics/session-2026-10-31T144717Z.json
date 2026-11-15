@@ -1,0 +1,29 @@
+{
+  "$schema": "forge-sdd/metrics/1.0",
+  "feature": "sdd/features/feat-58-orquestracao-autonoma-governanca-skills/feat-58-07-importador-governanca-update-docs-e-release-v3-beta.md",
+  "phase": "58-07",
+  "agent_path": [
+    "orquestrador",
+    "builder",
+    "governance"
+  ],
+  "tokens_input": 48500,
+  "tokens_output": 22400,
+  "turns": 12,
+  "duration_seconds": 960,
+  "criterio_atendido": true,
+  "model": "gemini-4-argon",
+  "rework_lines": 0,
+  "context7_calls": 0,
+  "git_calls": 0,
+  "files_touched": [
+    "cmd/forge-sdd/main.go",
+    "internal/queue/queue.go",
+    "internal/gate/gate.go",
+    "internal/skills/skills.go",
+    "internal/governance/importer.go",
+    "sdd/memory/constitution.md"
+  ],
+  "outcome": "approved",
+  "sdd_version": "3.0.0-beta"
+}

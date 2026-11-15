@@ -1,0 +1,108 @@
+{
+  "feature_id": "",
+  "branch": "feat/79-clareza-pipeline-e-identificacao-tmux",
+  "spec_status": "reviewed",
+  "updated_at": "2026-11-14T12:47:00Z",
+  "items": [
+    {
+      "task_id": "79-01",
+      "title": "feat-79-01 — Diretrizes Pipeline-First nos Prompts, Skills e Documentação",
+      "spec_path": "sdd/discovery/79-clareza-pipeline-e-identificacao-tmux/features/feat-79-01-diretrizes-pipeline-first.md",
+      "status": "completed",
+      "rules": [
+        "COD-05",
+        "FLX-01",
+        "DUP-02"
+      ],
+      "skills_used": [],
+      "attempts": 0
+    },
+    {
+      "task_id": "79-02",
+      "title": "feat-79-02 — Identificação Visual do Projeto e Ergonomia no Tmux",
+      "spec_path": "sdd/discovery/79-clareza-pipeline-e-identificacao-tmux/features/feat-79-02-identificacao-visual-e-ergonomia-tmux.md",
+      "status": "completed",
+      "rules": [
+        "ARQ-01",
+        "ARQ-04",
+        "COD-01",
+        "COD-03",
+        "TST-04"
+      ],
+      "skills_used": [],
+      "attempts": 0
+    },
+    {
+      "task_id": "79-03",
+      "title": "feat-79-03 — Menu Unificado e Enxuto (Mapa De/Para)",
+      "spec_path": "sdd/discovery/79-clareza-pipeline-e-identificacao-tmux/features/feat-79-03-menu-unificado-e-enxuto.md",
+      "status": "completed",
+      "rules": [
+        "ARQ-01",
+        "COD-01",
+        "COD-05",
+        "TST-04"
+      ],
+      "skills_used": [],
+      "attempts": 0
+    },
+    {
+      "task_id": "79-04",
+      "title": "feat-79-04 — Alertas Visuais e Fluxo de Aprovação Não Bloqueante",
+      "spec_path": "sdd/discovery/79-clareza-pipeline-e-identificacao-tmux/features/feat-79-04-alertas-visuais-e-fluxo-aprovacao.md",
+      "status": "completed",
+      "rules": [
+        "COD-01",
+        "COD-03",
+        "SEG-01",
+        "TST-04"
+      ],
+      "skills_used": [],
+      "attempts": 0
+    },
+    {
+      "task_id": "79-05",
+      "title": "feat-79-05 — Paralelismo de Fila por Grafo de Dependências (DAG & Ondas)",
+      "spec_path": "sdd/discovery/79-clareza-pipeline-e-identificacao-tmux/features/feat-79-05-paralelismo-de-fila-por-dependencias.md",
+      "status": "completed",
+      "rules": [
+        "ARQ-01",
+        "ARQ-02",
+        "COD-01",
+        "COD-03",
+        "TST-04"
+      ],
+      "skills_used": [],
+      "attempts": 0
+    },
+    {
+      "task_id": "79-06",
+      "title": "feat-79-06 — Monitor de Processos, Workers e Consumo do Projeto (forge-sdd ps)",
+      "spec_path": "sdd/discovery/79-clareza-pipeline-e-identificacao-tmux/features/feat-79-06-monitor-de-processos-e-consumo.md",
+      "status": "completed",
+      "rules": [
+        "ARQ-01",
+        "ARQ-04",
+        "COD-01",
+        "SEG-01",
+        "TST-04"
+      ],
+      "skills_used": [],
+      "attempts": 0
+    },
+    {
+      "task_id": "79-07",
+      "title": "feat-79-07 — Documentação, LEIA-ME e Validação Final",
+      "spec_path": "sdd/discovery/79-clareza-pipeline-e-identificacao-tmux/features/feat-79-07-docs-leia-me-e-validacao-final.md",
+      "status": "completed",
+      "rules": [
+        "DUP-10",
+        "FLX-05",
+        "GOV-01",
+        "TST-05"
+      ],
+      "skills_used": [],
+      "attempts": 0
+    }
+  ]
+}

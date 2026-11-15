@@ -26,14 +26,16 @@ func TestWalkTemplates(t *testing.T) {
 		"templates/.github/prompts/proxima-feature.prompt.md.tmpl",
 		"templates/.vscode/mcp.json.tmpl",
 		"templates/.agents/rules/README.md.tmpl",
-		"templates/.agents/commands/discovery.md.tmpl",
-		"templates/.agents/commands/proxima-feature.md.tmpl",
+		"templates/.agents/skills/sdd-concepcao/SKILL.md.tmpl",
+		"templates/.agents/skills/sdd-concepcao/references/discovery.md.tmpl",
+		"templates/.agents/skills/sdd-build/references/implementar.md.tmpl",
+		"templates/.github/prompts/implementar.prompt.md.tmpl",
 		"templates/agents/gemini/.gemini/mcp.json.tmpl",
 		"templates/sdd/.sdd-version.tmpl",
 		"templates/sdd/.sddrc.tmpl",
 		"templates/sdd/memory/constitution.md.tmpl",
-		"templates/sdd/memory/progress.md.tmpl",
-		"templates/sdd/features/index.md.tmpl",
+		"templates/sdd/memory/lessons.md.tmpl",
+		"templates/sdd/.runtime/.gitignore.tmpl",
 		"templates/sdd/skills/index.md.tmpl",
 		"templates/sdd/releases/history.md.tmpl",
 		"templates/sdd/.metrics/schema.json.tmpl",
@@ -226,12 +228,17 @@ func TestUpgradePreservesAgentRulesButRegeneratesCommands(t *testing.T) {
 	require.NoError(t, err)
 
 	rulesReadme := filepath.Join(dir, ".agents", "rules", "README.md")
-	commandsDiscovery := filepath.Join(dir, ".agents", "commands", "discovery.md")
+	commandsDiscovery := filepath.Join(dir, ".agents", "skills", "sdd-concepcao", "references", "discovery.md")
 	claudeAdapter := filepath.Join(dir, ".claude", "commands", "discovery.md")
 
 	require.FileExists(t, rulesReadme)
 	require.FileExists(t, commandsDiscovery)
 	require.FileExists(t, claudeAdapter)
+
+	// Skill própria do usuário (fora de sdd-*) também deve sobreviver a qualquer update futuro.
+	customSkill := filepath.Join(dir, ".agents", "skills", "minha-skill", "SKILL.md")
+	require.NoError(t, os.MkdirAll(filepath.Dir(customSkill), 0755))
+	require.NoError(t, os.WriteFile(customSkill, []byte("skill do usuário"), 0644))
 
 	// Usuário cria/edita uma regra própria — deve sobreviver a qualquer update futuro.
 	customRule := filepath.Join(dir, ".agents", "rules", "design-system.md")
@@ -246,6 +253,11 @@ func TestUpgradePreservesAgentRulesButRegeneratesCommands(t *testing.T) {
 	cfgUpgrade.SddVersion = "2.2.0-beta"
 	_, err = Run(cfgUpgrade, dir)
 	require.NoError(t, err)
+
+	// a0. Skill própria do usuário permanece intacta.
+	skillData, err := os.ReadFile(customSkill)
+	require.NoError(t, err)
+	assert.Equal(t, "skill do usuário", string(skillData))
 
 	// a. Regra customizada do usuário permanece intacta.
 	data, err := os.ReadFile(customRule)
@@ -303,11 +315,13 @@ func TestUpdateMigratesLegacyAgentDirToAgents(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, "regra antiga do usuário", string(data))
 
-	// c. O corpo do comando foi regenerado a partir do template atual (não é domínio do usuário).
+	// c. O comando legado migra junto, sem ser sobrescrito nem apagado: o template dele não
+	// existe mais (virou skill) e a limpeza de artefatos obsoletos é feita pelo update (feat 69-05).
 	migratedCommand := filepath.Join(dir, ".agents", "commands", "discovery.md")
 	data, err = os.ReadFile(migratedCommand)
 	require.NoError(t, err)
-	assert.NotEqual(t, "corpo antigo", string(data))
+	assert.Equal(t, "corpo antigo", string(data))
+	assert.FileExists(t, filepath.Join(dir, ".agents", "skills", "sdd-concepcao", "references", "discovery.md"))
 
 	// d. Idempotência: rodar novamente não falha nem perde a regra migrada.
 	_, err = Run(cfg, dir)
@@ -370,5 +384,46 @@ func TestUpdateCleansObsoleteClaudePromptSuffix(t *testing.T) {
 	require.NoError(t, err)
 	assert.FileExists(t, filepath.Join(dryDir, ".claude", "commands", "discovery.prompt.md"))
 	assert.NoFileExists(t, filepath.Join(dryDir, ".claude", "commands", "discovery.md"))
+}
+
+func TestUpgradeMigratesForgeJSONGeminiToAgy(t *testing.T) {
+	dir := t.TempDir()
+	cfg := config.Config{
+		Project:    "demo",
+		Stack:      "go",
+		DB:         "none",
+		Telemetry:  false,
+		Lang:       "pt-BR",
+		SddVersion: "4.5.0-beta",
+		Agents:     []string{config.AgentGemini},
+	}
+	_, err := Run(cfg, dir)
+	require.NoError(t, err)
+
+	// Simula forge.json de instalação anterior
+	forgeJSONPath := filepath.Join(dir, ".forge", "config", "forge.json")
+	legacyJSON := `{
+  "cli": "claude",
+  "permissions": "project",
+  "terminal": "auto",
+  "cli_profiles": {
+    "gemini": {
+      "command": "gemini",
+      "args": ["-p", "{prompt}", "-o", "stream-json", "{permissions}"]
+    }
+  }
+}`
+	require.NoError(t, os.MkdirAll(filepath.Dir(forgeJSONPath), 0755))
+	require.NoError(t, os.WriteFile(forgeJSONPath, []byte(legacyJSON), 0644))
+
+	// Executa nova rodada de scaffold (como ocorre em upgrade / update)
+	_, err = Run(cfg, dir)
+	require.NoError(t, err)
+
+	raw, err := os.ReadFile(forgeJSONPath)
+	require.NoError(t, err)
+	disk := string(raw)
+	assert.Contains(t, disk, `"command": "agy"`)
+	assert.NotContains(t, disk, `"command": "gemini"`)
 }
 

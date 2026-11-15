@@ -1,0 +1,20 @@
+{
+  "$schema": "forge-sdd/metrics/1.0",
+  "feature": "sdd/discovery/79-clareza-pipeline-e-identificacao-tmux/criteria.md",
+  "phase": "job-20261114-125300-79-clareza-pipeline-e-identificacao-tmux-rework-2",
+  "agent_path": [
+    "builder"
+  ],
+  "tokens_input": 0,
+  "tokens_output": 0,
+  "turns": 0,
+  "duration_seconds": 0,
+  "criterio_atendido": true,
+  "model": "",
+  "rework_lines": 0,
+  "context7_calls": 0,
+  "git_calls": 0,
+  "files_touched": null,
+  "outcome": "approved",
+  "sdd_version": "4.4.1-beta"
+}

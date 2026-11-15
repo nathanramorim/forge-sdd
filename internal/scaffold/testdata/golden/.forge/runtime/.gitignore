@@ -1,0 +1,3 @@
+# Estado de execução do pipeline (filas, logs, worktrees): não versionar.
+*
+!.gitignore

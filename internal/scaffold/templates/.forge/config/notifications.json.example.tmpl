@@ -1,0 +1,27 @@
+{
+  "default_channel": "discovery_session",
+  "channels": {
+    "discovery_session": {
+      "enabled": true,
+      "desktop_toast": true
+    },
+    "email": {
+      "enabled": false,
+      "provider": "smtp",
+      "host": "",
+      "port": 587,
+      "user_env": "",
+      "password_env": "",
+      "to": [],
+      "from": ""
+    },
+    "webhook": {
+      "enabled": false,
+      "provider": "slack",
+      "url_env": "FORGE_WEBHOOK_URL"
+    },
+    "pm_comment": {
+      "enabled": false
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "$schema": "forge-sdd/metrics/1.0",
+  "feature": "sdd/discovery/79-clareza-pipeline-e-identificacao-tmux/criteria.md",
+  "phase": "79",
+  "agent_path": [
+    "reviewer"
+  ],
+  "tokens_input": 0,
+  "tokens_output": 0,
+  "turns": 12,
+  "duration_seconds": 300,
+  "criterio_atendido": true,
+  "model": "gemini-3.8-flash",
+  "rework_lines": 0,
+  "context7_calls": 0,
+  "git_calls": 0,
+  "files_touched": null,
+  "outcome": "approved",
+  "sdd_version": "4.4.1-beta"
+}

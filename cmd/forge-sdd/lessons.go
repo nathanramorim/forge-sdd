@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/forge-sdd/cli/internal/layout"
 	"github.com/spf13/cobra"
 )
 
@@ -51,7 +52,7 @@ raiz é significativa/recorrente — não depende de o LLM montar o arquivo manu
 // AppendLesson insere uma nova entrada no topo da lista de lições e apara
 // entradas antigas para respeitar lessonsBudgetBytes.
 func AppendLesson(targetDir, pattern, fix, ref string) (string, error) {
-	memDir := filepath.Join(targetDir, "sdd", "memory")
+	memDir := layout.Memory(targetDir)
 	if err := os.MkdirAll(memDir, 0o755); err != nil {
 		return "", fmt.Errorf("falha ao criar sdd/memory: %w", err)
 	}

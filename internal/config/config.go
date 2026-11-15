@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/forge-sdd/cli/internal/layout"
 	"github.com/spf13/cobra"
 )
 
@@ -31,14 +32,14 @@ var validAgents = map[string]bool{
 
 // Sddrc representa o conteúdo persistido em sdd/.sddrc.
 type Sddrc struct {
-	Project          string   `json:"project"`
-	Version          string   `json:"version"`
-	Lang             string   `json:"lang"`
-	Agents           []string `json:"agents"`
-	Telemetry        struct {
+	Project   string   `json:"project"`
+	Version   string   `json:"version"`
+	Lang      string   `json:"lang"`
+	Agents    []string `json:"agents"`
+	Telemetry struct {
 		Enabled bool `json:"enabled"`
 	} `json:"telemetry"`
-	NamingConvention string   `json:"naming_convention"`
+	NamingConvention string `json:"naming_convention"`
 }
 
 // ToConfig converte Sddrc em Config para reuso nos comandos de scaffold.
@@ -55,7 +56,7 @@ func (r Sddrc) ToConfig() Config {
 
 // ReadSddrc lê e parseia sdd/.sddrc no diretório alvo.
 func ReadSddrc(targetDir string) (Sddrc, error) {
-	path := filepath.Join(targetDir, "sdd", ".sddrc")
+	path := layout.Sddrc(targetDir)
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return Sddrc{}, fmt.Errorf("sdd/.sddrc não encontrado em %s (execute forge-sdd init primeiro): %w", targetDir, err)
@@ -101,7 +102,7 @@ func FilterNewAgents(existing, candidates []string) []string {
 
 // ReadProjectVersion lê a versão registrada em sdd/.sdd-version.
 func ReadProjectVersion(targetDir string) (string, error) {
-	path := filepath.Join(targetDir, "sdd", ".sdd-version")
+	path := layout.Version(targetDir)
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return "", fmt.Errorf("sdd/.sdd-version não encontrado: %w", err)
@@ -173,7 +174,7 @@ func Defaults() Config {
 		DB:               "none",
 		Telemetry:        true,
 		Lang:             "pt-BR",
-		SddVersion:       "2.4.0",
+		SddVersion:       "4.5.0-beta",
 		DryRun:           false,
 		Agents:           []string{AgentCopilot},
 		NamingConvention: "sequencial",
@@ -220,7 +221,7 @@ func FromFlags(cmd *cobra.Command) Config {
 
 // DetectProject verifica se o diretório já contém um projeto Forge-SDD.
 func DetectProject(dir string) bool {
-	path := filepath.Join(dir, "sdd", ".sddrc")
+	path := layout.Sddrc(dir)
 	_, err := os.Stat(path)
 	return err == nil
 }
@@ -266,8 +267,8 @@ func FetchNpmVersions() (latest string, beta string, err error) {
 	return latest, beta, nil
 }
 
-var sequentialIDRe = regexp.MustCompile(`^(?:feat|fix|discovery|criteria|plan)-(\d{2})(?:[-.]|$)`)
-var hashIDRe = regexp.MustCompile(`^(?:feat|fix|discovery|criteria|plan)-([0-9a-f]{4})(?:[-.]|$)`)
+var sequentialIDRe = regexp.MustCompile(`^(?:(?:feat|fix|discovery|criteria|plan)-)?(\d{2})(?:[-.]|$)`)
+var hashIDRe = regexp.MustCompile(`^(?:(?:feat|fix|discovery|criteria|plan)-)?([0-9a-f]{4})(?:[-.]|$)`)
 
 // ClassifyNamingConvention identifica se o nome de um arquivo de feature/discovery/fix
 // segue a convenção sequencial (feat-NN/fix-NN) ou por hash de 4 dígitos (feat-xxxx/fix-xxxx).
@@ -284,8 +285,8 @@ func ClassifyNamingConvention(name string) string {
 
 // DetectNamingConvention varre o diretório e tenta inferir a convenção com base nos arquivos.
 func DetectNamingConvention(targetDir string) string {
-	featuresDir := filepath.Join(targetDir, "sdd", "features")
-	discoveryDir := filepath.Join(targetDir, "sdd", "discovery")
+	featuresDir := layout.Features(targetDir)
+	discoveryDir := layout.Discovery(targetDir)
 
 	var seqCount, hashCount int
 	scanDir := func(dir string) {
@@ -293,7 +294,11 @@ func DetectNamingConvention(targetDir string) string {
 			if err != nil || d.IsDir() || !strings.HasSuffix(d.Name(), ".md") {
 				return nil
 			}
-			switch ClassifyNamingConvention(d.Name()) {
+			name := d.Name()
+			if name == "discovery.md" || name == "criteria.md" || name == "plan.md" {
+				name = filepath.Base(filepath.Dir(path))
+			}
+			switch ClassifyNamingConvention(name) {
 			case "sequencial":
 				seqCount++
 			case "hash":
@@ -333,4 +338,3 @@ func ResolveUpgradeTarget(latest, beta string) string {
 		return latest
 	}
 }
-

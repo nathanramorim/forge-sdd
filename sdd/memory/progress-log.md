@@ -2,6 +2,16 @@
 
 <!-- Histórico arquivado pelo Archivist. Não editar manualmente. -->
 
+- 2026-11-01 — Feat 64/65/66/67 concluidas (PR #61-#63, #67 aberto, base release/v3.0.1, v3.2.2-beta): protocolo ACP, pool de sessoes, telemetria, UX Studio (esteira 4 passos, Visao Simples/Tecnica, sem emojis, grid 4 colunas).
+
+## Brief de retomada — Feat 68 (sessoes ACP fisicas)
+Problema: chip "5 SESSOES PRONTAS" e enganoso; `acp.SessionPool.Warmup` (internal/acp/pool.go) so registra estado standby em memoria, sem processo real.
+Decisoes do humano (2026-11-01):
+1. Um processo filho por estacao (5), comando configuravel via forge-sdd config, com PID, stdin/stdout e health check reais.
+2. Deve funcionar para multiplos agentes: copilot, claude code, agy, gemini, codex e outros (adaptador por agente, nada hardcoded).
+3. Falha/queda: chip mostra "x de 5 conectadas", estacao em erro; Studio segue em modo leitura (nao bloqueia boot).
+4. Fluxo: nova-feature -> discovery -> aprovacao FLX-01 -> plano -> build por subagentes. NAO abrir PR ate o humano voltar.
+Restricoes: zero deps runtime (ARQ-03/04), sem emojis, UI em pt-BR.
 - 2026-08-26/30 — feat-03-ergonomia-de-comandos-e-sincronizacao concluída de ponta a ponta em subagente (6 subtarefas): comando Claude corrigido (`.claude/commands/*.md`, sem `.prompt`), `forge-sdd update` limpa o nome antigo, `/status` ganhou sincronização remota (`git fetch` + `gh pr list` + seção "Divergência Remota"), clarify condicional em `/nova-feature`/`/novo-fix`/`/discovery` (`sdd/memory/clarify.md`), confirmação de delegação a subagente no passo `PLAN` do lifecycle. Bug pré-existente corrigido nos testes de 03-02: `cleanObsoleteFiles()` rodava mesmo em `--dry-run` — guarda `!cfg.DryRun` adicionada. Entregas beta acumuladas (feat-02+fix-52+feat-03) publicadas como `v2.3.0-beta` (Regra 11).
 - 2026-08-16 — feat-02-agent-rules-e-branch-por-feature concluída (discovery-02, escopo expandido de "só rules" para fonte única de agente): `.agent/rules/` (regras de domínio compartilhadas, preservadas em update) e `.agent/commands/` (corpo canônico dos 13 comandos SDD) substituem a duplicação manual entre `.claude/`, `.gemini/`, `.github/`; `forge-sdd update` migra projetos existentes reaproveitando `shouldPreserve` (feat-31); nova Regra 15 da Constituição (branch única por pasta de feature quebrada, com pergunta obrigatória de branch de partida/retomada). Publicado como v2.2.0-beta.
 - 2026-08-16 — Discovery 01 (simplificação e aprendizado contínuo) gerada e quebrada via `/split-features` em 8 features (`sdd/features/feat-01-simplificacao-e-aprendizado-continuo/`): telemetria code-enforced, agregador de telemetria, `lessons.md`, consulta de lessons no READ-MIN de Builder/Revisor, ferramentas/VCS configuráveis na Constituição, unificação do lifecycle, redução de duplicação de nomenclatura, auditoria de comandos sobrepostos.

@@ -1,0 +1,21 @@
+{
+  "$schema": "forge-sdd/metrics/1.0",
+  "feature": "sdd/discovery/82-unificacao-comando-forge/features/",
+  "phase": "82",
+  "agent_path": [
+    "orquestrador",
+    "pm"
+  ],
+  "tokens_input": 3000,
+  "tokens_output": 800,
+  "turns": 0,
+  "duration_seconds": 300,
+  "criterio_atendido": true,
+  "model": "",
+  "rework_lines": 0,
+  "context7_calls": 0,
+  "git_calls": 0,
+  "files_touched": null,
+  "outcome": "approved",
+  "sdd_version": "4.5.0-beta"
+}

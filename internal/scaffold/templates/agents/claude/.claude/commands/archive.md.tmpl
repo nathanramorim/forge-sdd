@@ -1,3 +1,3 @@
 # Prompt: archive
 
-Consulte `.agents/commands/archive.md` e siga as instruções descritas nesse arquivo.
+Consulte `.agents/skills/sdd-operacao/references/archive.md` e siga as instruções descritas nesse arquivo.

@@ -1,0 +1,124 @@
+{
+  "feature_id": "feat-75",
+  "branch": "feat/75-contexto-do-projeto-e-contingencia-tmux",
+  "spec_status": "reviewed",
+  "updated_at": "2026-11-14T06:20:21Z",
+  "items": [
+    {
+      "task_id": "75-01",
+      "title": "feat-75-01 — `forge-sdd brief`",
+      "spec_path": "sdd/discovery/75-contexto-do-projeto-e-contingencia-tmux/features/feat-75-01-forge-sdd-brief.md",
+      "status": "approved",
+      "rules": [
+        "ARQ-01",
+        "DUP-01",
+        "COD-01",
+        "TST-01",
+        "TST-04"
+      ],
+      "skills_used": [],
+      "attempts": 1,
+      "governance_verdict": {
+        "veredito": "conforme",
+        "achados": [],
+        "resumo": "Subcomando brief implementado conforme spec e DUP-05"
+      }
+    },
+    {
+      "task_id": "75-04",
+      "title": "feat-75-04 — Instalar o tmux e cair com graça",
+      "spec_path": "sdd/discovery/75-contexto-do-projeto-e-contingencia-tmux/features/feat-75-04-instalar-o-tmux-e-cair-com-graca.md",
+      "status": "approved",
+      "rules": [
+        "SEG-01",
+        "SEG-03",
+        "SEG-07",
+        "COD-03",
+        "TST-04"
+      ],
+      "skills_used": [],
+      "attempts": 1,
+      "governance_verdict": {
+        "veredito": "conforme",
+        "achados": [],
+        "resumo": "Instalação do tmux e contingência implementadas conforme spec"
+      }
+    },
+    {
+      "task_id": "75-02",
+      "title": "feat-75-02 — Protocolo de abertura da Discovery",
+      "spec_path": "sdd/discovery/75-contexto-do-projeto-e-contingencia-tmux/features/feat-75-02-protocolo-de-abertura-da-discovery.md",
+      "status": "approved",
+      "rules": [
+        "FLX-01",
+        "GOV-01",
+        "DUP-02",
+        "TST-02"
+      ],
+      "skills_used": [],
+      "attempts": 1,
+      "governance_verdict": {
+        "veredito": "conforme",
+        "achados": [],
+        "resumo": "Protocolo de abertura da Discovery e seção Decisões do projeto aplicadas implementados conforme spec"
+      }
+    },
+    {
+      "task_id": "75-05",
+      "title": "feat-75-05 — Windows Terminal com painéis",
+      "spec_path": "sdd/discovery/75-contexto-do-projeto-e-contingencia-tmux/features/feat-75-05-windows-terminal-com-paineis.md",
+      "status": "approved",
+      "rules": [
+        "SEG-01",
+        "COD-03",
+        "TST-04"
+      ],
+      "skills_used": [],
+      "attempts": 1,
+      "governance_verdict": {
+        "veredito": "conforme",
+        "achados": [],
+        "resumo": "Windows Terminal com 3 paineis implementado conforme spec"
+      }
+    },
+    {
+      "task_id": "75-03",
+      "title": "feat-75-03 — Constituição primeiro",
+      "spec_path": "sdd/discovery/75-contexto-do-projeto-e-contingencia-tmux/features/feat-75-03-constituicao-primeiro.md",
+      "status": "approved",
+      "rules": [
+        "FLX-01",
+        "COD-01",
+        "TST-02",
+        "TST-04"
+      ],
+      "skills_used": [],
+      "attempts": 1,
+      "governance_verdict": {
+        "veredito": "conforme",
+        "achados": [],
+        "resumo": "Constituição primeiro implementada em /constitution, init, menu, preflight e doctor conforme spec"
+      }
+    },
+    {
+      "task_id": "75-06",
+      "title": "feat-75-06 — Docs, ADR e release",
+      "spec_path": "sdd/discovery/75-contexto-do-projeto-e-contingencia-tmux/features/feat-75-06-docs-adr-e-release.md",
+      "status": "approved",
+      "rules": [
+        "DUP-10",
+        "FLX-05",
+        "FLX-07",
+        "GOV-01",
+        "TST-05"
+      ],
+      "skills_used": [],
+      "attempts": 1,
+      "governance_verdict": {
+        "veredito": "conforme",
+        "achados": [],
+        "resumo": "Documentacao (README, docs/pipeline.md, LEIA-ME, guia-pipeline.html), ADR-0007, concepts.md, releases/history.md e testes E2E (TestE2E_BriefProjetoNovo, TestE2E_TerminalSemTmux, TestScaffold_DocsCitamBriefConstituicaoETmux) concluidos e aprovados conforme spec"
+      }
+    }
+  ]
+}

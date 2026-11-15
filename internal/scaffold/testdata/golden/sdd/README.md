@@ -4,10 +4,10 @@ Navegação rápida:
 
 | Arquivo | Função |
 |---------|--------|
-| `memory/progress.md` | Estado ativo — leia primeiro |
+| `discovery/<id>-<nome>/status.md` | Estado da iniciativa — leia primeiro |
 | `memory/constitution.md` | Regras imutáveis |
 | `spec/overview.md` | Visão geral do sistema |
-| `features/index.md` | Mapa de features |
+| `discovery/` | Iniciativas: discovery, criteria, plan, status, fila, features e fixes |
 | `plan.md` | Roadmap faseado |
 | `skills/index.md` | Skills disponíveis |
 
@@ -23,7 +23,7 @@ Dependendo do estado do seu projeto, siga uma das trilhas lógicas:
 1. `/constitution` → Ative para definir a arquitetura e as regras iniciais.
 2. `/discovery "[ideia]"` → **Discovery de Produto:** Use para estruturar o "que" e o "para quem" o sistema será construído.
 3. `/nova-feature` → Crie as primeiras tarefas no roadmap baseado no discovery.
-4. `/proxima-feature` → Inicie a execução.
+4. `/implementar` → Execute a fila da iniciativa.
 
 ### 🏗️ Projeto Existente (Adoção)
 1. `/constitution` → O agente fará o **scan do seu codebase** para aprender suas regras.

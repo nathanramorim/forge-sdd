@@ -1,0 +1,27 @@
+{
+  "$schema": "forge-sdd/metrics/1.0",
+  "feature": "sdd/discovery/69-otimizacao-estrutura-tokens-e-paralelismo/discovery.md",
+  "phase": "69",
+  "agent_path": [
+    "lider",
+    "pm-architect",
+    "planner"
+  ],
+  "tokens_input": 0,
+  "tokens_output": 0,
+  "turns": 0,
+  "duration_seconds": 0,
+  "criterio_atendido": true,
+  "model": "claude-fable-5-2",
+  "rework_lines": 0,
+  "context7_calls": 0,
+  "git_calls": 0,
+  "files_touched": [
+    "sdd/discovery/69-otimizacao-estrutura-tokens-e-paralelismo/discovery.md",
+    "sdd/discovery/69-otimizacao-estrutura-tokens-e-paralelismo/criteria.md",
+    "sdd/discovery/69-otimizacao-estrutura-tokens-e-paralelismo/plan.md",
+    "sdd/memory/progress.md"
+  ],
+  "outcome": "approved",
+  "sdd_version": "3.2.2-beta"
+}
