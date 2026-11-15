@@ -5,18 +5,11 @@
 **Status:** Implementado pelo Builder e Aprovado pela Camada B (Reviewer) no PR #78
 
 ## Progresso
-- [x] Discovery do Produto (`discovery.md`)
-- [x] Critérios de Aceitação e Arquitetura C4 (`criteria.md`)
-- [x] Plano de Implementação em 3 ondas (`plan.md`)
-- [x] Gate 1 Aprovado
-- [x] Quebra de Tasks (`features/` — 6 tasks)
-- [x] Enfileiramento e Despacho ao Builder
-- [x] Implementação de código e testes (Tasks 84-01..84-06)
-- [x] Auto-correção de rework (duplicação de bind-key COD-01 resolvida)
-- [x] PR #78 aberto com checks 100% verdes
-- [x] Portão B (Governança) aprovado pelo Reviewer (Veredito: Conforme)
-- [x] Fix `fix-84-01`: correção do alvo `tmux set-option` em `status-right` quando `totalTokens > 0` e bump para `v4.7.1-beta`
-- [x] Feature `feat-84-07`: separação Ativas vs. Concluídas na fila, diagrama `Discovery ──► Builder ──► Reviewer`, tokens por etapa/total da tarefa e dicas de atalhos em `status-right` do tmux (`v4.7.2-beta`)
+- [x] Discovery, Critérios C4, Plano em 3 ondas e Gate 1
+- [x] Tasks `84-01`..`84-06` implementadas e testadas
+- [x] Fix `fix-84-01`: alvo `tmux set-option` em `status-right`
+- [x] Feature `feat-84-07`: 2 abas na fila, diagrama pipeline, tokens por etapa e dicas tmux (`v4.7.6-beta`)
+- [x] PR #78 aberto e validado
 
 ## Próximo Passo
 Revisão humana (Camada C) e merge do PR #78 na branch `main`.
