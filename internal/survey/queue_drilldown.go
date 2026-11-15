@@ -130,6 +130,15 @@ func truncateRunes(s string, maxRunes int) string {
 	return string(r[:maxRunes-3]) + "..."
 }
 
+// padRightRunes preenche com espaços à direita até atingir width runas, alinhando colunas sem quebrar.
+func padRightRunes(s string, width int) string {
+	r := []rune(s)
+	if len(r) >= width {
+		return s
+	}
+	return s + strings.Repeat(" ", width-len(r))
+}
+
 // NewQueueDrilldownTUI inicializa a TUI carregando 100% das tarefas da fila sem truncamento,
 // separando as tarefas que estão na fila/em andamento das que já foram concluídas.
 func NewQueueDrilldownTUI(dir string, q *queue.Queue) *QueueDrilldownTUI {
@@ -152,13 +161,18 @@ func NewQueueDrilldownTUI(dir string, q *queue.Queue) *QueueDrilldownTUI {
 		if title == "" {
 			title = it.SpecPath
 		}
-		display := cleanTaskDisplay(it.TaskID, title)
-		label := fmt.Sprintf("%s  %s  •  %s  •  🪙 %s",
-			badge,
-			display,
-			stage,
-			monitor.FormatTokensShort(tokMetrics.TotalTokens),
-		)
+		display := padRightRunes(cleanTaskDisplay(it.TaskID, title), 50)
+		tokStr := fmt.Sprintf("🪙 %4s tok", monitor.FormatTokensShort(tokMetrics.TotalTokens))
+
+		var label string
+		if completed {
+			idx := len(completedItems) + 1
+			label = fmt.Sprintf("✓  %02d. %s  │  %s", idx, display, tokStr)
+		} else {
+			idx := len(activeItems) + 1
+			stageCol := padRightRunes(stage, 19)
+			label = fmt.Sprintf("%s  %02d. [%s]  %s  │  %s", badge, idx, stageCol, display, tokStr)
+		}
 		item := QueueDrilldownItem{
 			TaskID:      it.TaskID,
 			Title:       title,
@@ -262,9 +276,13 @@ func (tui *QueueDrilldownTUI) SelectTask() (string, error) {
 			tab = TabActive
 		}
 
-		tabHeader := fmt.Sprintf("▸ [Aba 1: ⏳ Na Fila (%d)]  │  Aba 2: ✅ Concluídas (%d)   (1º item da lista troca de aba)", len(tui.ActiveItems), len(tui.CompletedItems))
+		var titleHeader, descHeader string
 		if tab == TabCompleted {
-			tabHeader = fmt.Sprintf("  Aba 1: ⏳ Na Fila (%d)   │  ▸ [Aba 2: ✅ Concluídas (%d)] (1º item da lista troca de aba)", len(tui.ActiveItems), len(tui.CompletedItems))
+			titleHeader = fmt.Sprintf("ABA ATIVA: ✅ CONCLUÍDAS (%d)   │   ⏳ Na Fila / Em Andamento (%d)", len(tui.CompletedItems), len(tui.ActiveItems))
+			descHeader = "Esteira: [1. Discovery] ──► [2. Builder] ──► [3. Reviewer ✓]  •  ↑/↓ navegar • Enter ver detalhes • Esc sair"
+		} else {
+			titleHeader = fmt.Sprintf("ABA ATIVA: ⏳ NA FILA / EM ANDAMENTO (%d)   │   ✅ Concluídas (%d)", len(tui.ActiveItems), len(tui.CompletedItems))
+			descHeader = "Esteira: [1. Discovery] ──► [2. Builder] ──► [3. Reviewer]  •  ↑/↓ navegar • Enter ver detalhes • Esc sair"
 		}
 
 		var choice string
@@ -275,8 +293,8 @@ func (tui *QueueDrilldownTUI) SelectTask() (string, error) {
 		}
 
 		sel := huh.NewSelect[string]().
-			Title("Esteira SDD: [1. Discovery] ──► [2. Builder] ──► [3. Reviewer]").
-			Description(tabHeader + "  •  ↑/↓ navegar • Enter abrir • Esc sair").
+			Title(titleHeader).
+			Description(descHeader).
 			Options(tui.BuildTabOptions(tab)...).
 			Height(tui.Height).
 			Value(&choice)

@@ -4,6 +4,13 @@ Este arquivo registra o histórico de entregas de produto deste projeto.
 
 ## Entregas
 
+### Versão 4.7.6 — Legibilidade e Alinhamento em Colunas na Lista de Tarefas (Beta)
+
+Compatível com a 4.7.5-beta (Iniciativa 84 — `feat-84-07`).
+
+*   **Alto contraste no cabeçalho de abas (`internal/survey/queue_drilldown.go`):** move o indicador da aba ativa (`ABA ATIVA: ✅ CONCLUÍDAS (25) │ ⏳ Na Fila / Em Andamento (0)`) para o `Title` principal em destaque, em vez do `Description` acinzentado do `huh`.
+*   **Linhas limpas e alinhadas em colunas sem repetição visual:** na aba de Concluídas, remove a repetição de `[✓] Concluído` e `Disc→Bld→Rev ✓` em todas as 25 linhas e alinha o número da tarefa, o identificador (`50` colunas) e a coluna de tokens (`│ 🪙 10k tok`) verticalmente.
+
 ### Versão 4.7.5 — Troca de Aba no Topo da Lista, Sem Quebra de Linha e Dica Clara de Tela Cheia no Tmux (Beta)
 
 Compatível com a 4.7.4-beta (Iniciativa 84 — `feat-84-07`).
