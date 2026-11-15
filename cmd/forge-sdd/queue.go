@@ -269,6 +269,9 @@ func RunInteractiveQueue(dir string, out io.Writer) error {
 			if errors.Is(err, survey.ErrBack) {
 				continue
 			}
+			if errors.Is(err, survey.ErrExit) {
+				return nil
+			}
 			return err
 		}
 	}

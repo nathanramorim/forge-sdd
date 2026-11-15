@@ -291,27 +291,33 @@ func padRightCols(s string, targetCols int) string {
 	return s + strings.Repeat(" ", targetCols-w)
 }
 
-// ShowTaskDetail exibe o modal de detalhes e aguarda Enter ou Esc para retornar.
+// ShowTaskDetail exibe o modal de detalhes com ações distintas: voltar para a lista ou fechar o painel.
 func ShowTaskDetail(view *TaskDetailView) error {
 	card := FormatTaskDetailCard(view)
-	ok := true
+	backToList := true
 	err := huh.NewForm(
 		huh.NewGroup(
 			huh.NewNote().
 				Title("Inspeção Detalhada da Tarefa").
 				Description(card),
 			huh.NewConfirm().
-				Title("Retornar para a lista de tarefas?").
-				Affirmative("Voltar").
-				Negative("Voltar").
-				Value(&ok),
+				Title("O que deseja fazer agora?").
+				Affirmative("← Voltar à lista").
+				Negative("✕ Fechar painel").
+				Value(&backToList),
 		),
 	).WithKeyMap(menuKeyMap()).Run()
 
 	if errors.Is(err, huh.ErrUserAborted) {
 		return ErrBack
 	}
-	return err
+	if err != nil {
+		return err
+	}
+	if !backToList {
+		return ErrExit
+	}
+	return nil
 }
 
 func contains(slice []string, s string) bool {

@@ -13,6 +13,7 @@ Refinar a experiência do painel interativo da fila (`forge queue -i`, `forge st
    - Alinhamento exato das bordas direitas (`│`) considerando largura visual de caracteres UTF-8 e emojis.
    - Seção visual da esteira da tarefa (`[1. Discovery] ──► [2. Builder] ──► [3. Reviewer]`).
    - Contabilidade de tokens consumidos em cada etapa (`Discovery`, `Builder`, `Reviewer`) e **Total da Tarefa**, além de gravação automática da estimativa de tokens pelo worker ao concluir jobs.
+   - Eliminação dos botões `"Voltar"` duplicados: em `ShowTaskDetail`, os dois botões agora têm ações distintas e rotuladas (`← Voltar à lista` para retornar à lista de tarefas e `✕ Fechar painel` para encerrar o modal direto); em `Pause` (`internal/survey/select.go`), o segundo botão idêntico `"Voltar ao menu"` foi removido, deixando apenas uma opção `"← Voltar ao menu"`.
 
 ## Modelo do módulo
 - **Modelo:** `enxuto`.

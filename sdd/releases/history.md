@@ -4,6 +4,13 @@ Este arquivo registra o histórico de entregas de produto deste projeto.
 
 ## Entregas
 
+### Versão 4.7.3 — UX dos Botões de Ação no Painel e Menu Interativo (Beta)
+
+Compatível com a 4.7.2-beta (Iniciativa 84 — `feat-84-07`).
+
+*   **Ações claras no card de detalhes da tarefa (`internal/survey/task_detail.go` e `cmd/forge-sdd/queue.go`):** substitui os dois botões idênticos `[ Voltar ]  [ Voltar ]` por ações distintas e identificadas: **`← Voltar à lista`** (retorna para a lista de tarefas) e **`✕ Fechar painel`** (fecha o popup/modal imediatamente).
+*   **Remoção do botão duplicado na pausa do menu (`internal/survey/select.go`):** substitui o componente de confirmação com dois botões repetidos `[ Voltar ao menu ]  [ Voltar ao menu ]` por uma opção única **`← Voltar ao menu`**.
+
 ### Versão 4.7.2 — UX da Fila (Separação Ativas vs. Concluídas, Esteira Discovery→Builder→Reviewer, Tokens por Etapa e Dicas no Tmux) (Beta)
 
 Compatível com a 4.7.1-beta (Iniciativa 84 — `feat-84-07`).
