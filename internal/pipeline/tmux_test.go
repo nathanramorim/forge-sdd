@@ -408,17 +408,17 @@ func TestTmux_PopupQueue(t *testing.T) {
 	plan, err := BuildTmuxPlan(env, cfg, false)
 	require.NoError(t, err)
 
-	foundPopupBind := false
+	popupBindCount := 0
 	for _, step := range plan.Create {
 		if step[1] == "bind-key" && len(step) >= 9 && step[3] == "display-popup" {
-			foundPopupBind = true
+			popupBindCount++
 			assert.Equal(t, "q", step[2])
 			assert.Equal(t, "85%", step[5])
 			assert.Equal(t, "85%", step[7])
 			assert.Contains(t, step[9], "queue --interactive")
 		}
 	}
-	assert.True(t, foundPopupBind, "deve configurar atalho de popup modal para a fila interativa")
+	assert.Equal(t, 1, popupBindCount, "deve configurar atalho de popup modal para a fila interativa exatamente uma vez")
 
 	popupCmd := TmuxPopupQueueCommand("/usr/local/bin/forge-sdd")
 	assert.Equal(t, []string{"tmux", "display-popup", "-w", "85%", "-h", "85%", "-E", "'/usr/local/bin/forge-sdd' queue --interactive"}, popupCmd)

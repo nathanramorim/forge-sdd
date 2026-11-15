@@ -189,7 +189,6 @@ func BuildTmuxPlan(env LaunchEnv, cfg config.ForgeConfig, insideTmux bool) (*Tmu
 			{"tmux", "set-window-option", "-t", win, "pane-border-format", borderFormat},
 			{"tmux", "set-window-option", "-t", win, "automatic-rename", "off"},
 			{"tmux", "bind-key", "q", "display-popup", "-w", "85%", "-h", "85%", "-E", fmt.Sprintf("%s queue --interactive", shQuote(env.Bin))},
-			{"tmux", "bind-key", "q", "display-popup", "-w", "85%", "-h", "85%", "-E", fmt.Sprintf("%s queue --interactive", shQuote(env.Bin))},
 		}
 		for i, t := range titles {
 			plan.Create = append(plan.Create, []string{"tmux", "select-pane", "-t", fmt.Sprintf("%s.%d", win, i), "-T", t})
