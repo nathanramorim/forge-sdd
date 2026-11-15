@@ -4,6 +4,13 @@ Este arquivo registra o histórico de entregas de produto deste projeto.
 
 ## Entregas
 
+### Versão 4.7.4 — Layout Sem Bordas Direitas e Separação em 2 Abas (Na Fila vs. Concluídas) (Beta)
+
+Compatível com a 4.7.3-beta (Iniciativa 84 — `feat-84-07`).
+
+*   **Blocos de detalhe abertos à direita (`internal/survey/task_detail.go`):** substitui a caixa fechada nos 4 lados (`┌─...─┐` / `│...│`) por blocos com borda apenas à esquerda (`╭───` / `│` / `├───` / `╰───`), eliminando em definitivo qualquer desalinhamento ou quebra de layout causada por emojis, acentos ou largura do terminal.
+*   **Separação em 2 Abas (`1. Na Fila / Em Andamento` e `2. Concluídas`) (`internal/survey/queue_drilldown.go`):** divide a listagem interativa em duas listas independentes com alternância direta no menu (`⇄ Ver Aba 2: ✅ Concluídas` / `⇄ Ver Aba 1: ⏳ Na Fila / Em Andamento`) e formatação fluida que não quebra quando o `TaskID` é extenso.
+
 ### Versão 4.7.3 — UX dos Botões de Ação no Painel e Menu Interativo (Beta)
 
 Compatível com a 4.7.2-beta (Iniciativa 84 — `feat-84-07`).

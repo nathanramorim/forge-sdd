@@ -93,18 +93,18 @@ func TestQueueDrilldown_InspectDetails(t *testing.T) {
 	assert.Contains(t, card, "conforme")
 	assert.Contains(t, card, "Todos os testes passaram e regras respeitadas.")
 
-	// Garante que é uma moldura visual com pipeline, tokens por etapa/total e bordas alinhadas
-	assert.True(t, strings.HasPrefix(card, "┌─── 📋 Detalhes da Tarefa"))
-	assert.True(t, strings.HasSuffix(card, "┘"))
+	// Garante que usa blocos abertos à direita (╭─ / │ / ├ / ╰─, sem fechar caixa na direita para nunca desalinhar)
+	assert.True(t, strings.HasPrefix(card, "╭─── 📋 Detalhes da Tarefa"))
+	assert.True(t, strings.HasSuffix(card, "─"))
 	assert.Contains(t, card, "Esteira (Discovery ──► Builder ──► Reviewer)")
 	assert.Contains(t, card, "[✓ 1. Discovery] ──► [✓ 2. Builder] ──► [✓ 3. Reviewer (Concluída)]")
 	assert.Contains(t, card, "Consumo de Tokens por Etapa e Total da Tarefa")
 	assert.Contains(t, card, "1. Discovery:")
 	assert.Contains(t, card, "2. Builder:")
 	assert.Contains(t, card, "3. Reviewer:")
-	assert.Contains(t, card, "Total da Tarefa:")
+	assert.Contains(t, card, "Total da Task:")
 
 	for i, line := range strings.Split(card, "\n") {
-		assert.Equal(t, cardTotalCols, visualCols(line), "linha %d do card deve ter largura visual exata de %d colunas: %q", i+1, cardTotalCols, line)
+		assert.False(t, strings.HasSuffix(line, "│"), "linha %d não deve fechar borda na direita para evitar quebra de alinhamento: %q", i+1, line)
 	}
 }

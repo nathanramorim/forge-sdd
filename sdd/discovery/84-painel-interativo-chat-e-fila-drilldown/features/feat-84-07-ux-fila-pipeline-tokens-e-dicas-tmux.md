@@ -7,10 +7,10 @@
 
 ## Objetivo
 Refinar a experiência do painel interativo da fila (`forge queue -i`, `forge status -i` e popup `Ctrl+b q` no tmux) e da barra inferior do tmux sem impactar o funcionamento atual:
-1. **Separação clara na fila (`Na Fila / Em Andamento` vs. `Concluídas`):** tarefas ativas/pendentes ficam no topo e tarefas concluídas ficam agrupadas abaixo, com indicação explícita da posição na esteira `Discovery ──► Builder ──► Reviewer`.
+1. **Separação em 2 Abas na Fila (`Aba 1: ⏳ Na Fila / Em Andamento` vs. `Aba 2: ✅ Concluídas`):** cada aba lista exclusivamente seu conjunto de tarefas com opção nativa de alternância (`⇄ Ver Aba 2: Concluídas` / `⇄ Ver Aba 1: Na Fila`), sem colunas fixas de texto que estouram quando o `TaskID` é grande.
 2. **Dicas dinâmicas de atalhos na barra inferior direita do tmux (`status-right`):** exibe dicas rotativas nativas (`💡 Dica: Ctrl+b q abre Fila`, `💡 Dica: Ctrl+b Setas navega · z zoom`, e guia imediato `⌨️ [q] Fila/Detalhes · [Setas] Painel · [z] Zoom` ao pressionar `Ctrl+b`) ao lado do resumo de tokens, usando `-t <session>` sem prefixo `=`.
 3. **UX do card de detalhes da tarefa (`TaskDetailView`):**
-   - Alinhamento exato das bordas direitas (`│`) considerando largura visual de caracteres UTF-8 e emojis.
+   - Layout de blocos com borda apenas à esquerda (`╭───`, `│`, `├───`, `╰───`), **sem fechar caixa com `│` na direita**, eliminando qualquer quebra de alinhamento causada por largura de emojis/fontes ou redimensionamento de terminal.
    - Seção visual da esteira da tarefa (`[1. Discovery] ──► [2. Builder] ──► [3. Reviewer]`).
    - Contabilidade de tokens consumidos em cada etapa (`Discovery`, `Builder`, `Reviewer`) e **Total da Tarefa**, além de gravação automática da estimativa de tokens pelo worker ao concluir jobs.
    - Eliminação dos botões `"Voltar"` duplicados: em `ShowTaskDetail`, os dois botões agora têm ações distintas e rotuladas (`← Voltar à lista` para retornar à lista de tarefas e `✕ Fechar painel` para encerrar o modal direto); em `Pause` (`internal/survey/select.go`), o segundo botão idêntico `"Voltar ao menu"` foi removido, deixando apenas uma opção `"← Voltar ao menu"`.

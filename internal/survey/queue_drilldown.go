@@ -22,13 +22,19 @@ type QueueDrilldownItem struct {
 	Label       string
 }
 
-// QueueDrilldownTUI encapsula o estado e a navegação da fila interativa.
+const (
+	TabActive    = "active"
+	TabCompleted = "completed"
+)
+
+// QueueDrilldownTUI encapsula o estado e a navegação da fila interativa separada em 2 abas.
 type QueueDrilldownTUI struct {
 	Dir            string
 	Queue          *queue.Queue
 	Items          []QueueDrilldownItem
 	ActiveItems    []QueueDrilldownItem
 	CompletedItems []QueueDrilldownItem
+	ActiveTab      string
 	Height         int
 }
 
@@ -101,17 +107,12 @@ func NewQueueDrilldownTUI(dir string, q *queue.Queue) *QueueDrilldownTUI {
 		if title == "" {
 			title = it.SpecPath
 		}
-		groupTag := "[FILA]"
-		if completed {
-			groupTag = "[CONCLUÍDA]"
-		}
-		label := fmt.Sprintf("%-11s %-16s %-20s [%-19s] (🪙 %s) %s",
-			groupTag,
-			it.TaskID,
+		label := fmt.Sprintf("%s  %s — %s  •  %s  •  🪙 %s",
 			badge,
+			it.TaskID,
+			title,
 			stage,
 			monitor.FormatTokensShort(tokMetrics.TotalTokens),
-			title,
 		)
 		item := QueueDrilldownItem{
 			TaskID:      it.TaskID,
@@ -139,12 +140,18 @@ func NewQueueDrilldownTUI(dir string, q *queue.Queue) *QueueDrilldownTUI {
 		height = 24
 	}
 
+	initialTab := TabActive
+	if len(activeItems) == 0 && len(completedItems) > 0 {
+		initialTab = TabCompleted
+	}
+
 	return &QueueDrilldownTUI{
 		Dir:            dir,
 		Queue:          q,
 		Items:          drilldownItems,
 		ActiveItems:    activeItems,
 		CompletedItems: completedItems,
+		ActiveTab:      initialTab,
 		Height:         height,
 	}
 }
@@ -154,8 +161,7 @@ func (tui *QueueDrilldownTUI) TotalTasks() int {
 	return len(tui.Items)
 }
 
-// BuildOptions gera as opções de seleção para o componente do huh,
-// posicionando primeiro as tarefas Na Fila / Em Andamento e separando abaixo as Concluídas.
+// BuildOptions gera todas as opções (ativas primeiro, concluídas depois) sem truncamento.
 func (tui *QueueDrilldownTUI) BuildOptions() []huh.Option[string] {
 	options := make([]huh.Option[string], 0, len(tui.Items)+1)
 	for _, it := range tui.ActiveItems {
@@ -164,31 +170,82 @@ func (tui *QueueDrilldownTUI) BuildOptions() []huh.Option[string] {
 	for _, it := range tui.CompletedItems {
 		options = append(options, huh.NewOption(it.Label, it.TaskID))
 	}
-	options = append(options, huh.NewOption("← Voltar ao menu principal / Sair", "__exit__"))
+	options = append(options, huh.NewOption("← Fechar painel / Sair", "__exit__"))
 	return options
 }
 
-// SelectTask executa o menu interativo com setas e Enter. Devolve o TaskID selecionado ou ErrBack.
+// BuildTabOptions gera as opções apenas da aba selecionada (1. Na Fila / Em Andamento ou 2. Concluídas),
+// incluindo a opção de alternar entre as 2 abas.
+func (tui *QueueDrilldownTUI) BuildTabOptions(tab string) []huh.Option[string] {
+	var current []QueueDrilldownItem
+	if tab == TabCompleted {
+		current = tui.CompletedItems
+	} else {
+		current = tui.ActiveItems
+	}
+
+	options := make([]huh.Option[string], 0, len(current)+2)
+	for _, it := range current {
+		options = append(options, huh.NewOption(it.Label, it.TaskID))
+	}
+
+	if tab == TabCompleted {
+		options = append(options, huh.NewOption(
+			fmt.Sprintf("⇄ Ver Aba 1: ⏳ Na Fila / Em Andamento (%d tarefas)", len(tui.ActiveItems)),
+			"__tab_active__",
+		))
+	} else {
+		options = append(options, huh.NewOption(
+			fmt.Sprintf("⇄ Ver Aba 2: ✅ Concluídas (%d tarefas)", len(tui.CompletedItems)),
+			"__tab_completed__",
+		))
+	}
+
+	options = append(options, huh.NewOption("← Fechar painel / Sair", "__exit__"))
+	return options
+}
+
+// SelectTask executa o menu interativo separado nas 2 abas (Na Fila vs Concluídas). Devolve o TaskID selecionado ou ErrBack.
 func (tui *QueueDrilldownTUI) SelectTask() (string, error) {
 	if len(tui.Items) == 0 {
 		return "", fmt.Errorf("nenhuma tarefa na fila para exibir")
 	}
 
-	var choice string
-	sel := huh.NewSelect[string]().
-		Title("Esteira SDD: [1. Discovery] ──► [2. Builder] ──► [3. Reviewer]  (↑/↓ navegar • Enter detalhes)").
-		Description(fmt.Sprintf("⏳ Na Fila / Em Andamento: %d  │  ✅ Concluídas: %d  │  Total: %d (sem corte) • Esc para sair", len(tui.ActiveItems), len(tui.CompletedItems), len(tui.Items))).
-		Options(tui.BuildOptions()...).
-		Height(tui.Height).
-		Value(&choice)
+	for {
+		tab := tui.ActiveTab
+		if tab == "" {
+			tab = TabActive
+		}
 
-	err := huh.NewForm(huh.NewGroup(sel)).WithKeyMap(menuKeyMap()).Run()
-	if errors.Is(err, huh.ErrUserAborted) || choice == "__exit__" {
-		return "", ErrBack
-	}
-	if err != nil {
-		return "", err
-	}
+		tabHeader := fmt.Sprintf("▸ [Aba 1: ⏳ Na Fila / Em Andamento (%d)]   │    Aba 2: ✅ Concluídas (%d)", len(tui.ActiveItems), len(tui.CompletedItems))
+		if tab == TabCompleted {
+			tabHeader = fmt.Sprintf("   Aba 1: ⏳ Na Fila / Em Andamento (%d)    │  ▸ [Aba 2: ✅ Concluídas (%d)]", len(tui.ActiveItems), len(tui.CompletedItems))
+		}
 
-	return choice, nil
+		var choice string
+		sel := huh.NewSelect[string]().
+			Title("Esteira SDD: [1. Discovery] ──► [2. Builder] ──► [3. Reviewer]").
+			Description(tabHeader + "  •  ↑/↓ navegar • Enter abrir • Esc sair").
+			Options(tui.BuildTabOptions(tab)...).
+			Height(tui.Height).
+			Value(&choice)
+
+		err := huh.NewForm(huh.NewGroup(sel)).WithKeyMap(menuKeyMap()).Run()
+		if errors.Is(err, huh.ErrUserAborted) || choice == "__exit__" {
+			return "", ErrBack
+		}
+		if err != nil {
+			return "", err
+		}
+		if choice == "__tab_completed__" {
+			tui.ActiveTab = TabCompleted
+			continue
+		}
+		if choice == "__tab_active__" {
+			tui.ActiveTab = TabActive
+			continue
+		}
+
+		return choice, nil
+	}
 }

@@ -158,10 +158,8 @@ func BuildTaskDetailView(dir string, item queue.QueueItem) *TaskDetailView {
 	return view
 }
 
-const cardTotalCols = 78
-const cardInnerCols = cardTotalCols - 4 // "│ " + 74 colunas + " │"
-
-// FormatTaskDetailCard gera a renderização textual do card de inspeção da tarefa com bordas alinhadas.
+// FormatTaskDetailCard gera a renderização do detalhe da tarefa usando blocos abertos à direita
+// (borda apenas à esquerda ╭─ / │ / ├ / ╰─), garantindo que nunca desalinhe ou quebre no terminal.
 func FormatTaskDetailCard(v *TaskDetailView) string {
 	badge := StatusBadge(v.Status)
 	flow := v.PipelineFlow
@@ -176,119 +174,40 @@ func FormatTaskDetailCard(v *TaskDetailView) string {
 
 	var sb strings.Builder
 
-	sb.WriteString(formatBoxBorder("┌", "📋 Detalhes da Tarefa", "┐") + "\n")
-	sb.WriteString(formatBoxKeyVal("ID:", v.TaskID) + "\n")
-	sb.WriteString(formatBoxKeyVal("Título:", v.Title) + "\n")
-	statusLine := fmt.Sprintf("%-36s (Duração: %s)", badge, v.Duration)
-	sb.WriteString(formatBoxKeyVal("Status:", statusLine) + "\n")
-	sb.WriteString(formatBoxKeyVal("Spec:", v.SpecPath) + "\n")
+	sb.WriteString("╭─── 📋 Detalhes da Tarefa ──────────────────────────────────────────\n")
+	sb.WriteString(fmt.Sprintf("│ ID:        %s\n", v.TaskID))
+	sb.WriteString(fmt.Sprintf("│ Título:    %s\n", v.Title))
+	sb.WriteString(fmt.Sprintf("│ Status:    %s  •  Duração: %s\n", badge, v.Duration))
+	sb.WriteString(fmt.Sprintf("│ Spec:      %s\n", v.SpecPath))
 	if len(v.Rules) > 0 {
-		sb.WriteString(formatBoxKeyVal("Rules:", strings.Join(v.Rules, ", ")) + "\n")
+		sb.WriteString(fmt.Sprintf("│ Rules:     %s\n", strings.Join(v.Rules, ", ")))
 	}
-	sb.WriteString(formatBoxKeyVal("Commit:", v.CommitMsg) + "\n")
+	sb.WriteString(fmt.Sprintf("│ Commit:    %s\n", v.CommitMsg))
 
-	sb.WriteString(formatBoxBorder("├", "🧭 Esteira (Discovery ──► Builder ──► Reviewer)", "┤") + "\n")
-	sb.WriteString(formatBoxRow("  "+flow) + "\n")
+	sb.WriteString("├─── 🧭 Esteira (Discovery ──► Builder ──► Reviewer) ────────────────\n")
+	sb.WriteString(fmt.Sprintf("│ %s\n", flow))
 
-	sb.WriteString(formatBoxBorder("├", "🪙 Consumo de Tokens por Etapa e Total da Tarefa", "┤") + "\n")
-	tokStages := fmt.Sprintf("  1. Discovery: %-8s │ 2. Builder: %-8s │ 3. Reviewer: %-8s",
-		monitor.FormatTokensShort(discTok)+" tok",
-		monitor.FormatTokensShort(bldTok)+" tok",
-		monitor.FormatTokensShort(revTok)+" tok",
-	)
-	sb.WriteString(formatBoxRow(tokStages) + "\n")
-	tokTotal := fmt.Sprintf("  Total da Tarefa: %s tok (%d tokens acumulados nas 3 etapas)",
-		monitor.FormatTokensShort(totTok),
-		totTok,
-	)
-	sb.WriteString(formatBoxRow(tokTotal) + "\n")
+	sb.WriteString("├─── 🪙 Consumo de Tokens por Etapa e Total da Tarefa ───────────────\n")
+	sb.WriteString(fmt.Sprintf("│ • 1. Discovery:   %s tok\n", monitor.FormatTokensShort(discTok)))
+	sb.WriteString(fmt.Sprintf("│ • 2. Builder:     %s tok\n", monitor.FormatTokensShort(bldTok)))
+	sb.WriteString(fmt.Sprintf("│ • 3. Reviewer:    %s tok\n", monitor.FormatTokensShort(revTok)))
+	sb.WriteString(fmt.Sprintf("│ • Total da Task:  %s tok (%d tokens acumulados nas 3 etapas)\n", monitor.FormatTokensShort(totTok), totTok))
 
-	sb.WriteString(formatBoxBorder("├", "📂 Arquivos Modificados", "┤") + "\n")
+	sb.WriteString("├─── 📂 Arquivos Modificados ────────────────────────────────────────\n")
 	if len(v.FilesChanged) == 0 {
-		sb.WriteString(formatBoxRow("  (nenhum arquivo registrado)") + "\n")
+		sb.WriteString("│ • (nenhum arquivo registrado)\n")
 	} else {
 		for _, f := range v.FilesChanged {
-			sb.WriteString(formatBoxRow("  • "+f) + "\n")
+			sb.WriteString(fmt.Sprintf("│ • %s\n", f))
 		}
 	}
 
-	sb.WriteString(formatBoxBorder("├", "⚖ Laudo da Governança (Reviewer)", "┤") + "\n")
-	sb.WriteString(formatBoxKeyVal("Veredito:", v.Verdict) + "\n")
-	sb.WriteString(formatBoxKeyVal("Parecer:", v.ReviewerNote) + "\n")
-	sb.WriteString("└" + strings.Repeat("─", cardTotalCols-2) + "┘")
+	sb.WriteString("├─── ⚖ Laudo da Governança (Reviewer) ───────────────────────────────\n")
+	sb.WriteString(fmt.Sprintf("│ Veredito:  %s\n", v.Verdict))
+	sb.WriteString(fmt.Sprintf("│ Parecer:   %s\n", v.ReviewerNote))
+	sb.WriteString("╰────────────────────────────────────────────────────────────────────")
 
 	return sb.String()
-}
-
-func formatBoxBorder(leftCorner, title, rightCorner string) string {
-	prefix := leftCorner + "─── " + title + " "
-	used := visualCols(prefix) + visualCols(rightCorner)
-	dashes := cardTotalCols - used
-	if dashes < 1 {
-		dashes = 1
-	}
-	return prefix + strings.Repeat("─", dashes) + rightCorner
-}
-
-func formatBoxKeyVal(label, val string) string {
-	labelPadded := padRightCols(label, 14)
-	maxValCols := cardInnerCols - 14
-	valTrunc := truncateCols(val, maxValCols)
-	return formatBoxRow(labelPadded + valTrunc)
-}
-
-func formatBoxRow(content string) string {
-	clipped := truncateCols(content, cardInnerCols)
-	padded := padRightCols(clipped, cardInnerCols)
-	return "│ " + padded + " │"
-}
-
-func visualCols(s string) int {
-	cols := 0
-	for _, r := range s {
-		cols += runeVisualWidth(r)
-	}
-	return cols
-}
-
-func runeVisualWidth(r rune) int {
-	if r == 0xFE0F || r == 0x200D {
-		return 0
-	}
-	if r >= 0x1F300 || r == 0x231B || r == 0x23F3 || r == 0x2705 || r == 0x274C {
-		return 2
-	}
-	return 1
-}
-
-func truncateCols(s string, maxCols int) string {
-	if visualCols(s) <= maxCols {
-		return s
-	}
-	if maxCols <= 3 {
-		return "..."[:maxCols]
-	}
-	target := maxCols - 3
-	var b strings.Builder
-	cols := 0
-	for _, r := range s {
-		w := runeVisualWidth(r)
-		if cols+w > target {
-			break
-		}
-		b.WriteRune(r)
-		cols += w
-	}
-	b.WriteString("...")
-	return b.String()
-}
-
-func padRightCols(s string, targetCols int) string {
-	w := visualCols(s)
-	if w >= targetCols {
-		return s
-	}
-	return s + strings.Repeat(" ", targetCols-w)
 }
 
 // ShowTaskDetail exibe o modal de detalhes com ações distintas: voltar para a lista ou fechar o painel.

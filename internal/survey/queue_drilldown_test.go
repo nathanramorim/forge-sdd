@@ -54,15 +54,24 @@ func TestQueueDrilldown_ListAllTasksWithoutTruncation(t *testing.T) {
 		assert.False(t, strings.Contains(opt.Key, "... e mais"), "nenhuma linha deve conter truncamento")
 	}
 
-	// As 20 tarefas Na Fila / Em Andamento vêm primeiro (separadas das 5 concluídas que ficam no final)
+	// As 20 tarefas Na Fila / Em Andamento ficam na Aba 1 e as 5 concluídas ficam separadas na Aba 2
 	require.Len(t, tui.ActiveItems, 20)
 	require.Len(t, tui.CompletedItems, 5)
-	assert.Equal(t, "task-02", options[0].Value, "primeira task ativa na fila vem no topo")
-	assert.Contains(t, options[0].Key, "[FILA]")
-	assert.Equal(t, "task-25", options[19].Value, "última task ativa antes do bloco de concluídas")
-	assert.Equal(t, "task-01", options[20].Value, "primeira task concluída fica separada abaixo das ativas")
-	assert.Contains(t, options[20].Key, "[CONCLUÍDA]")
-	assert.Equal(t, "task-21", options[24].Value, "última task concluída")
+	assert.Equal(t, TabActive, tui.ActiveTab)
+
+	activeTabOpts := tui.BuildTabOptions(TabActive)
+	// 20 ativas + 1 alternar aba + 1 sair = 22
+	require.Len(t, activeTabOpts, 22)
+	assert.Equal(t, "task-02", activeTabOpts[0].Value, "primeira task ativa na Aba 1")
+	assert.Equal(t, "task-25", activeTabOpts[19].Value, "última task ativa na Aba 1")
+	assert.Equal(t, "__tab_completed__", activeTabOpts[20].Value, "opção para alternar para a Aba 2 (Concluídas)")
+
+	completedTabOpts := tui.BuildTabOptions(TabCompleted)
+	// 5 concluídas + 1 alternar aba + 1 sair = 7
+	require.Len(t, completedTabOpts, 7)
+	assert.Equal(t, "task-01", completedTabOpts[0].Value, "primeira task concluída na Aba 2")
+	assert.Equal(t, "task-21", completedTabOpts[4].Value, "última task concluída na Aba 2")
+	assert.Equal(t, "__tab_active__", completedTabOpts[5].Value, "opção para voltar para a Aba 1 (Na Fila)")
 }
 
 func TestQueueDrilldown_ListAllTasks(t *testing.T) {
