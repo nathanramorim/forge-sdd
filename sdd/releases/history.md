@@ -4,24 +4,14 @@ Este arquivo registra o histórico de entregas de produto deste projeto.
 
 ## Entregas
 
-### Versão 4.7.0 - Popup Modal Flutuante no Tmux 
+### Versão 4.7.0 — Painel Interativo: Stream Narrativo nos Workers, Fila com Drill-Down e Popup no Tmux (Beta)
 
-1. Implementação pelo Builder (Tasks 84-01 a 84-06):
-      • Stream Narrativo nos Workers: internal/monitor/chat_feed.go implementado. O Builder e o Reviewer agora emitem balões estruturados de etapas humanas (💭 Analisando...,
-      🔨 Editando..., 🧪 Testando..., ✅ Concluído!), substituindo os contadores de tempo estéreis.
-      • Fila Rolável com Drill-Down: internal/survey/queue_drilldown.go e internal/survey/task_detail.go. Todas as tarefas da esteira agora são 100% navegáveis por teclado
-      (setas ↑/↓), e ao teclar Enter abre o modal de inspeção detalhada (tempo, arquivos tocados, veredito da governança e commits), retornando à lista com Esc ou q.
-      • Popup Modal Flutuante no Tmux: Configurado no internal/pipeline/tmux.go:
-        tmux bind-key q display-popup -w 85% -h 85% -E "forge queue --interactive"
-      Você aciona diretamente nos 3 painéis e um modal flutuante cobre o centro da tela sem você precisar sair da janela.
-      • Flags Interativas In-Place: Subcomandos forge queue -i e forge status -i integrados com Alternate Screen Buffer (\033[?1049h).
-      • Bump da Versão Beta: Atualizado para v4.7.0-beta em cmd/forge-sdd/main.go e npm/package.json.
-  2. Auto-Cura e Governança (Camada B):
-      • Na tentativa 1, o Reviewer detectou uma duplicação pontual de bind-key em tmux.go:192 (COD-01).
-      • O Builder aplicou a correção automaticamente no commit 35a3536 https://github.com/nathanramorim/forge-sdd/commit/35a3536.
-      • Na tentativa 2, o Reviewer aprovou com louvor:
-      │ Veredito: Conforme ✅ (Portão A e B aprovados, 100% dos testes verdes e zero violações).
+Compatível com a 4.6.1 (Iniciativa 84). Sem breaking changes.
 
+*   **Stream narrativo estilo chat no Builder e no Reviewer:** o heartbeat monótono (`trabalhando há 4m40s · 3 arquivos alterados`) dá lugar a etapas legíveis (💭 analisando, 🔨 editando, 🧪 validando, ✅ concluído, ❌ falha com as últimas linhas relevantes). Há fallback ASCII para terminais sem Unicode.
+*   **Fila interativa com drill-down:** `forge queue -i` e `forge status -i` listam 100% das tasks (sem o corte "... e mais N tarefas") com badge de status. Setas navegam, `Enter` abre o detalhe da task (duração, arquivos alterados, commit, laudo do Reviewer) e `Esc`/`q` volta. Usa Alternate Screen Buffer e não suja o histórico do terminal.
+*   **Popup no tmux sem sair da tela:** `Ctrl+b q` abre a fila em popup (85% da janela) por cima dos 3 painéis e, ao fechar, você volta exatamente onde estava.
+*   **Governança:** PR #78 aprovado pela Camada B na tentativa 2 de 3 (duplicação de `bind-key` corrigida, `COD-01`).
 
 ### Versão 4.6.0 — Unificação Canônica do Comando `forge`, Painel Vivo Executivo e Gestão Suave de Tokens
 
