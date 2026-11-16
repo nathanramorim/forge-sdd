@@ -231,6 +231,19 @@ func RunDeliverWorker(ctx context.Context, opts WorkerOptions) error {
 			fmt.Fprintf(opts.Out, "[%s] aviso ao recuperar leases: %v\n", opts.Name, err)
 		}
 
+		if reason := HaltReason(opts.Dir, cfg, opts.Now()); reason != "" {
+			fmt.Fprintf(opts.Out, "[%s] esteira parada: %s\n", opts.Name, reason)
+			notifyHalt(opts.Dir, reason, opts.Now())
+			return nil
+		}
+
+		if !waitDailyPause(ctx, opts, cfg, opts.Name) {
+			if opts.Once {
+				return nil
+			}
+			continue
+		}
+
 		entry, err := bus.Claim(opts.Dir, opts.Role, opts.Name, bus.DefaultLeaseTTL, opts.Now())
 		if err == bus.ErrEmpty {
 			if opts.Once {
