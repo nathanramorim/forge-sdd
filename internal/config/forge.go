@@ -94,10 +94,11 @@ type ReviewerConfig struct {
 	CommentOnPR       bool `json:"comment_on_pr"`
 }
 
-// SafeguardsConfig são os tetos do modo avançado (feat 88-07). Zero desliga o teto. O tempo por job
-// reaproveita builder.job_timeout_minutes.
+// SafeguardsConfig são os tetos do modo avançado (feat 88-07). Zero desliga o teto (padrão: todos
+// desligados). O teto de tempo é próprio e não se confunde com builder.job_timeout_minutes (timeout do runner).
 type SafeguardsConfig struct {
 	MaxJobTokens  int `json:"max_job_tokens,omitempty"`
+	MaxJobMinutes int `json:"max_job_minutes,omitempty"`
 	MaxJobsPerDay int `json:"max_jobs_per_day,omitempty"`
 }
 
@@ -151,7 +152,7 @@ func DefaultForgeConfig() ForgeConfig {
 		SessionMode:   SessionModeHeadless,
 		Context:       ContextClear,
 		Live:          LiveConfig{StartupWaitSeconds: 8, ReadyQuietSeconds: 3},
-		Safeguards:    SafeguardsConfig{MaxJobTokens: 2000000},
+		Safeguards:    SafeguardsConfig{},
 		AllowCommands: []string{"git", "gh", "forge-sdd"},
 		CLIProfiles:   defaultProfiles(),
 		PMMCP: PMConfig{
@@ -286,8 +287,8 @@ func (c ForgeConfig) Validate() error {
 			return fmt.Errorf("autonomy %s exige isolated_confirmed: true (confirme o ambiente isolado)", AutonomyAdvanced)
 		}
 	}
-	if c.Safeguards.MaxJobTokens < 0 || c.Safeguards.MaxJobsPerDay < 0 || c.Safeguards.MaxJobsPerDay > 10000 {
-		return errors.New("safeguards: max_job_tokens e max_jobs_per_day devem ser >= 0 (jobs por dia até 10000)")
+	if c.Safeguards.MaxJobTokens < 0 || c.Safeguards.MaxJobMinutes < 0 || c.Safeguards.MaxJobsPerDay < 0 || c.Safeguards.MaxJobsPerDay > 10000 {
+		return errors.New("safeguards: max_job_tokens, max_job_minutes e max_jobs_per_day devem ser >= 0 (jobs por dia até 10000)")
 	}
 	if c.Live.StartupWaitSeconds < 0 || c.Live.StartupWaitSeconds > 60 {
 		return fmt.Errorf("live.startup_wait_seconds %d fora da faixa 0 a 60", c.Live.StartupWaitSeconds)

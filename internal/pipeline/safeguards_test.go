@@ -32,7 +32,10 @@ func TestSalvaguardas_TetoPorJob(t *testing.T) {
 	require.NoError(t, os.WriteFile(filepath.Join(logDir, "builder-job-1.log"), make([]byte, 4000), 0o600))
 
 	assert.Contains(t, JobOverCeiling(dir, cfg, layout.RoleBuilder, "job-1", time.Minute), "teto de 100 tokens")
-	assert.Contains(t, JobOverCeiling(dir, cfg, layout.RoleBuilder, "job-2", 2*time.Hour), "minutos", "teto de tempo")
+	assert.Empty(t, JobOverCeiling(dir, cfg, layout.RoleBuilder, "job-2", 2*time.Hour), "sem max_job_minutes não há teto de tempo")
+	cfg.Safeguards.MaxJobMinutes = 30
+	assert.Contains(t, JobOverCeiling(dir, cfg, layout.RoleBuilder, "job-2", 2*time.Hour), "30 minutos", "teto de tempo")
+	assert.Empty(t, JobOverCeiling(dir, cfg, layout.RoleBuilder, "job-2", 10*time.Minute), "dentro do teto")
 	assert.Empty(t, JobOverCeiling(dir, config.DefaultForgeConfig(), layout.RoleBuilder, "job-1", 2*time.Hour), "modo normal sem teto")
 }
 
@@ -63,7 +66,16 @@ func TestSalvaguardas_ContaJobsDistintos(t *testing.T) {
 }
 
 func TestDefaultSafeguards_SemTetoDiario(t *testing.T) {
-	assert.Zero(t, config.DefaultForgeConfig().Safeguards.MaxJobsPerDay)
+	assert.Equal(t, config.SafeguardsConfig{}, config.DefaultForgeConfig().Safeguards, "nenhum teto ligado por padrão")
+}
+
+func TestJobOverCeiling_PadraoNaoParaJobLongo(t *testing.T) {
+	dir := t.TempDir()
+	cfg := advancedCfg()
+	logDir := layout.Logs(dir)
+	require.NoError(t, os.MkdirAll(logDir, 0o755))
+	require.NoError(t, os.WriteFile(filepath.Join(logDir, "builder-job-1.log"), make([]byte, 40_000_000), 0o600))
+	assert.Empty(t, JobOverCeiling(dir, cfg, layout.RoleBuilder, "job-1", 10*time.Hour))
 }
 
 func TestRun_PausaNoTeto(t *testing.T) {

@@ -550,7 +550,7 @@ type settingKey struct {
 	set   func(*config.ForgeConfig, bool)
 }
 
-// settingKeys é a casa única das chaves liga/desliga (DUP-01); o card e o teto diário de jobs.
+// settingKeys é a casa única das chaves liga/desliga (DUP-01); o card e os tetos do modo avançado (todos desligados por padrão).
 var settingKeys = []settingKey{{
 	value: "card",
 	label: "Usa gerenciador de projeto (card obrigatório no /implementar)",
@@ -566,10 +566,34 @@ var settingKeys = []settingKey{{
 			c.Safeguards.MaxJobsPerDay = defaultDailyJobCap
 		}
 	},
+}, {
+	value: "teto-tokens",
+	label: fmt.Sprintf("Teto de tokens por job (%d; ao passar, a esteira para)", defaultJobTokenCap),
+	get:   func(c config.ForgeConfig) bool { return c.Safeguards.MaxJobTokens > 0 },
+	set: func(c *config.ForgeConfig, v bool) {
+		c.Safeguards.MaxJobTokens = 0
+		if v {
+			c.Safeguards.MaxJobTokens = defaultJobTokenCap
+		}
+	},
+}, {
+	value: "teto-tempo",
+	label: fmt.Sprintf("Teto de tempo por job (%d min; ao passar, a esteira para)", defaultJobMinutesCap),
+	get:   func(c config.ForgeConfig) bool { return c.Safeguards.MaxJobMinutes > 0 },
+	set: func(c *config.ForgeConfig, v bool) {
+		c.Safeguards.MaxJobMinutes = 0
+		if v {
+			c.Safeguards.MaxJobMinutes = defaultJobMinutesCap
+		}
+	},
 }}
 
-// defaultDailyJobCap é o valor gravado ao ligar o teto diário no Settings.
-const defaultDailyJobCap = 30
+// Valores gravados ao ligar cada teto no Settings.
+const (
+	defaultDailyJobCap   = 30
+	defaultJobTokenCap   = 2000000
+	defaultJobMinutesCap = 60
+)
 
 func onOff(v bool) string {
 	if v {
