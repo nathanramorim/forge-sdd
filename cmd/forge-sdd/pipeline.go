@@ -8,8 +8,14 @@ import (
 
 	"github.com/forge-sdd/cli/internal/config"
 	"github.com/forge-sdd/cli/internal/layout"
+	"github.com/forge-sdd/cli/internal/survey"
 	"github.com/spf13/cobra"
 )
+
+// askCard pergunta se o projeto usa gerenciador de projeto (card obrigatório); variável para os testes.
+var askCard = func() (bool, error) {
+	return survey.ConfirmYesNo("Usa gerenciador de projeto (ClickUp, Jira, Azure DevOps…)? Se sim, o /implementar exige o card.", false)
+}
 
 var pipelineCmd = &cobra.Command{
 	Use:   "pipeline",
@@ -39,8 +45,14 @@ func runPipelineInit(cmd *cobra.Command, dir string, dry bool) error {
 		path string
 		data any
 	}
+	forgeCfg := config.DefaultForgeConfig() // sem terminal: RequireExistingCard = false
+	if _, err := os.Lstat(layout.ForgeConfigFile(dir)); err != nil && !dry && isInteractive() {
+		if need, aerr := askCard(); aerr == nil {
+			forgeCfg.PMMCP.RequireExistingCard = need
+		}
+	}
 	items := []item{
-		{layout.ForgeConfigFile(dir), config.DefaultForgeConfig()},
+		{layout.ForgeConfigFile(dir), forgeCfg},
 		{layout.NotificationsFile(dir), config.DefaultNotificationsConfig()},
 	}
 	for _, it := range items {
@@ -91,7 +103,46 @@ func runPipelineInit(cmd *cobra.Command, dir string, dry bool) error {
 
 const runtimeGitignore = "# Estado de execução do pipeline (filas, logs, worktrees): não versionar.\n*\n!.gitignore\n"
 
+var pipelineAutonomyCmd = &cobra.Command{
+	Use:   "autonomy normal|advanced",
+	Short: "Liga ou desliga o modo avançado (experimental): o Reviewer revisa a spec",
+	Long: `normal  (padrão) a aprovação da spec é humana.
+advanced  o Reviewer revisa a spec no lugar da pessoa (ADR-0013); exige permissions full e a
+          confirmação de ambiente isolado (--isolated). Use só em contêiner, VM ou máquina descartável.`,
+	Args: cobra.ExactArgs(1),
+	RunE: func(cmd *cobra.Command, args []string) error {
+		dir, _ := cmd.Flags().GetString("dir")
+		isolated, _ := cmd.Flags().GetBool("isolated")
+		cfg, found, err := config.LoadForgeConfig(dir)
+		if err != nil {
+			return err
+		}
+		if !found {
+			return fmt.Errorf("modo pipeline não ativo: rode forge pipeline init")
+		}
+		switch args[0] {
+		case config.AutonomyNormal:
+			cfg.Autonomy, cfg.IsolatedConfirmed = config.AutonomyNormal, false
+		case config.AutonomyAdvanced:
+			if !isolated {
+				return fmt.Errorf("o modo avançado exige confirmar o ambiente isolado: repita com --isolated")
+			}
+			cfg.Autonomy, cfg.IsolatedConfirmed, cfg.Permissions = config.AutonomyAdvanced, true, config.PermissionFull
+		default:
+			return fmt.Errorf("modo %q inválido (use normal ou advanced)", args[0])
+		}
+		if err := config.SaveForgeConfig(dir, cfg); err != nil {
+			return err
+		}
+		fmt.Fprintf(cmd.OutOrStdout(), "autonomy: %s (gravado em .forge/config/forge.json)\n", args[0])
+		return nil
+	},
+}
+
 func init() {
+	pipelineAutonomyCmd.Flags().String("dir", ".", "Diretório alvo do projeto Forge-SDD")
+	pipelineAutonomyCmd.Flags().Bool("isolated", false, "Confirma que o ambiente é isolado (obrigatório para advanced)")
+	pipelineCmd.AddCommand(pipelineAutonomyCmd)
 	pipelineInitCmd.Flags().String("dir", ".", "Diretório alvo do projeto Forge-SDD")
 	pipelineInitCmd.Flags().Bool("dry-run", false, "Mostra o que seria criado sem gravar")
 	pipelineCmd.AddCommand(pipelineInitCmd)

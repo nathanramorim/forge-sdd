@@ -67,7 +67,9 @@ func evidence(feature string, at time.Time) string {
 func project(t *testing.T, mut func(dir string)) string {
 	t.Helper()
 	dir := t.TempDir()
-	cfg, _ := json.Marshal(config.DefaultForgeConfig())
+	def := config.DefaultForgeConfig()
+	def.PMMCP.RequireExistingCard = true // os cenários do despacho com card partem do card obrigatório
+	cfg, _ := json.Marshal(def)
 	testutil.WriteFile(t, dir, ".forge/config/forge.json", string(cfg))
 	testutil.WriteFile(t, dir, "sdd/memory/constitution.md", constitution)
 	testutil.WriteFile(t, dir, ".agents/rules/sdd-seguranca.md", "---\ndescription: s\nglobs: [\"**/*\"]\nregras: [SEG-01, DUP-02]\n---\ncorpo\n")

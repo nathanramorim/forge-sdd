@@ -208,6 +208,9 @@ var queueListCmd = &cobra.Command{
 		fmt.Printf("Feature: %s | Branch: %s | Spec: %s\n", q.FeatureID, q.Branch, q.SpecStatus)
 		for _, it := range q.Items {
 			fmt.Printf("  - [%s] %s: %s (tentativas: %d, spec: %s)\n", it.Status, it.TaskID, it.Title, it.Attempts, it.SpecPath)
+			if it.Status == queue.StatusBlocked && it.BlockedReason != "" {
+				fmt.Printf("      bloqueada: %s\n", it.BlockedReason)
+			}
 		}
 		return nil
 	},

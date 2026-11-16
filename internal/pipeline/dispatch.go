@@ -222,6 +222,14 @@ func Dispatch(dir, feature string, opts DispatchOptions) (*DispatchResult, error
 		MaxReworkAttempts: cfg.Reviewer.MaxReworkAttempts,
 		ReworkFeedback:    []bus.Feedback{},
 	}
+	role := layout.RoleBuilder
+	if cfg.IsAdvanced() {
+		// Modo avançado (ADR-0013): a spec passou na Camada A; o Reviewer a revisa antes da fila.
+		role = layout.RoleReviewer
+		job.Type = bus.TypeSpecReview
+		job.ID = specJobID(job.ID)
+		job.Attempt = nextSpecAttempt(dir, initiative, job.MaxReworkAttempts)
+	}
 	res.Job = &job
 	if cfg.PMMCP.RequireExistingCard {
 		res.CardInstruction = fmt.Sprintf("Atualize o card %s (%s) para %q via MCP.", ev.ID, ev.URL, cfg.PMMCP.StatusOnImplement)
@@ -229,7 +237,7 @@ func Dispatch(dir, feature string, opts DispatchOptions) (*DispatchResult, error
 	if opts.DryRun {
 		return res, nil
 	}
-	path, created, err := bus.Enqueue(dir, layout.RoleBuilder, job, now)
+	path, created, err := bus.Enqueue(dir, role, job, now)
 	if err != nil {
 		return nil, err
 	}

@@ -239,11 +239,11 @@ func actionFromNote(j bus.Job) string {
 	}
 	note := j.Events[len(j.Events)-1].Note
 	switch {
-	case strings.HasPrefix(note, "aprovado"):
+	case strings.HasPrefix(note, "aprovado"), strings.HasPrefix(note, "spec: aprovada"):
 		return ActionApproved
-	case strings.HasPrefix(note, "não conforme"):
+	case strings.HasPrefix(note, "não conforme"), strings.HasPrefix(note, "spec: ajustar"):
 		return ActionRework
-	case strings.HasPrefix(note, "escalado"):
+	case strings.HasPrefix(note, "escalado"), strings.HasPrefix(note, "spec: escalada"):
 		return ActionEscalated
 	}
 	return ""

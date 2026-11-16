@@ -19,6 +19,7 @@ const (
 	StatusReviewPending    = "review_pending"
 	StatusApproved         = "approved"
 	StatusChangesRequested = "changes_requested"
+	StatusBlocked          = "blocked"
 
 	VerdictConforme = "conforme"
 	VerdictViolacao = "violacao"
@@ -44,6 +45,7 @@ type QueueItem struct {
 	Rules             []string `json:"rules"`
 	SkillsUsed        []string `json:"skills_used"`
 	Attempts          int      `json:"attempts"`
+	BlockedReason     string   `json:"blocked_reason,omitempty"`
 	GovernanceVerdict *Verdict `json:"governance_verdict,omitempty"`
 }
 
@@ -582,7 +584,7 @@ func FormatExecutivePanel(q *Queue) string {
 		switch item.Status {
 		case StatusApproved:
 			approved = append(approved, item)
-		case StatusBuilding, StatusReviewPending, StatusChangesRequested:
+		case StatusBuilding, StatusReviewPending, StatusChangesRequested, StatusBlocked:
 			inProgress = append(inProgress, item)
 		case StatusQueued:
 			queued = append(queued, item)
@@ -627,6 +629,9 @@ func FormatExecutivePanel(q *Queue) string {
 			detail := ""
 			if it.GovernanceVerdict != nil && it.GovernanceVerdict.Resumo != "" {
 				detail = " — " + it.GovernanceVerdict.Resumo
+			}
+			if it.Status == StatusBlocked && it.BlockedReason != "" {
+				detail = " — bloqueada: " + it.BlockedReason
 			}
 			fmt.Fprintf(&b, "- [~] `%s`: %s (`%s`, tentativas: %d)%s\n", it.TaskID, it.Title, it.Status, it.Attempts, detail)
 		}

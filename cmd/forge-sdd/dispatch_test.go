@@ -20,7 +20,9 @@ const dispatchTask = "# feat-77-01\n\n## Modelo do módulo\n- enxuto\n\n## O que
 func dispatchProject(t *testing.T) string {
 	t.Helper()
 	dir := t.TempDir()
-	cfg, _ := json.Marshal(config.DefaultForgeConfig())
+	def := config.DefaultForgeConfig()
+	def.PMMCP.RequireExistingCard = true // estes cenários partem do card obrigatório
+	cfg, _ := json.Marshal(def)
 	testutil.WriteFile(t, dir, ".forge/config/forge.json", string(cfg))
 	testutil.WriteFile(t, dir, "sdd/memory/constitution.md", "- **SEG-01:** Entrada validada.\n")
 	testutil.WriteFile(t, dir, ".agents/rules/sdd-seguranca.md", "---\ndescription: s\nregras: [SEG-01]\n---\n")

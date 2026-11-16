@@ -10,6 +10,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/forge-sdd/cli/internal/bus"
+	"github.com/forge-sdd/cli/internal/layout"
 	"github.com/forge-sdd/cli/internal/notify"
 	"github.com/forge-sdd/cli/internal/pipeline"
 	"github.com/forge-sdd/cli/internal/queue"
@@ -43,6 +45,14 @@ Aplicar duas vezes o mesmo veredito não repete efeitos.`,
 		dec.DisallowUnknownFields()
 		if err := dec.Decode(&v); err != nil {
 			return fmt.Errorf("veredito inválido: %w", err)
+		}
+		if entry, ferr := bus.Find(dir, layout.RoleReviewer, id); ferr == nil && entry.Job.Type == bus.TypeSpecReview {
+			sres, err := pipeline.ApplySpecVerdict(dir, id, worker, v, notify.Deps{}, time.Now())
+			if err != nil {
+				return err
+			}
+			printSpecResult(cmd.OutOrStdout(), id, sres)
+			return nil
 		}
 		res, err := pipeline.ApplyVerdict(dir, id, worker, v, notify.Deps{}, time.Now())
 		if err != nil {
@@ -118,4 +128,20 @@ func init() {
 	_ = busReviewCmd.MarkFlagRequired("verdict-file")
 	busReviewCmd.Flags().String("worker", "", "Worker dono do lease (padrão: variável FORGE_WORKER, definida pelo worker)")
 	busCmd.AddCommand(busReviewCmd)
+}
+
+// printSpecResult informa o efeito do parecer da spec (modo avançado).
+func printSpecResult(out io.Writer, id string, res *pipeline.SpecResult) {
+	if res.AlreadyApplied {
+		fmt.Fprintf(out, "parecer já aplicado ao job %s (%s); nada foi repetido\n", id, res.Action)
+		return
+	}
+	switch res.Action {
+	case pipeline.ActionApproved:
+		fmt.Fprintf(out, "spec aprovada: fila liberada ao Builder (job %s); parecer em review-spec.md\n", res.BuildJob.ID)
+	case pipeline.ActionRework:
+		fmt.Fprintln(out, "spec devolvida à Discovery para ajuste; veja o inbox (forge inbox)")
+	case pipeline.ActionEscalated:
+		fmt.Fprintln(out, "spec bloqueada: tasks marcadas como blocked; veja o inbox (forge inbox)")
+	}
 }

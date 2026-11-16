@@ -8,6 +8,10 @@
     "startup_wait_seconds": 8,
     "ready_quiet_seconds": 3
   },
+  "safeguards": {
+    "max_job_tokens": 2000000,
+    "max_jobs_per_day": 30
+  },
   "allow_commands": [
     "git",
     "gh",
@@ -102,7 +106,7 @@
       "azure-devops",
       "jira"
     ],
-    "require_existing_card": true,
+    "require_existing_card": false,
     "status_on_implement": "In Progress",
     "status_on_pr_approved": "Ready for Review",
     "evidence_max_age_minutes": 30
