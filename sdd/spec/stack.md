@@ -1,4 +1,4 @@
-# Stack — forge-sdd
+# Stack — forge-sdd (v4.7.7-beta)
 
 ## Dependências
 
@@ -6,38 +6,53 @@
 |--------|-----|--------|-------------|
 | Runtime | Go | 1.22+ | `GOTOOLCHAIN=local` |
 | CLI | cobra | v1.9.x | `github.com/spf13/cobra` |
-| Prompts | huh | v0.3.x | `github.com/charmbracelet/huh` |
-| Templates | embed.FS | stdlib | `//go:embed templates/**` |
+| Prompts e menus | huh | v0.3.x | `github.com/charmbracelet/huh` |
+| Componentes de TUI | bubbles | v0.17.x | `github.com/charmbracelet/bubbles` |
+| Detecção de terminal | go-isatty | v0.0.20 | `github.com/mattn/go-isatty` |
+| Templates | embed.FS | stdlib | `//go:embed all:templates` |
 | Render | text/template | stdlib | `text/template` |
 | Testes | testify | v1.9.x | `github.com/stretchr/testify` |
 | Lint | golangci-lint | v1.57+ | via GitHub Actions |
 | Release | goreleaser | v2.x | `.goreleaser.yaml` |
 
+Dependências indiretas relevantes: `bubbletea` e `lipgloss` (renderização da TUI do `huh`).
+
+## Ferramentas externas (opcionais, detectadas em runtime)
+- **tmux**: abre as 3 sessões do pipeline em painéis numa tela só (`forge up`); sem ele, há contingência para janelas do sistema ou Windows Terminal (ADR-0007).
+- **CLIs de agente**: `claude`, `gemini`, `copilot`, `codex` ou `agy`, uma por sessão (perfis em `internal/config/forge_profiles.go`).
+- **git** e **gh**: branches por iniciativa, worktrees do Builder e criação de PR.
+
+## Distribuição
+- Pacote npm `@nathanramorim/forge-sdd`: um launcher (`bin/run.js`) baixa o binário da versão do GitHub Releases, confere o SHA256 e o guarda em `~/.cache/forge-sdd/<versão>/`.
+- Binários: linux/amd64, linux/arm64, darwin/amd64, darwin/arm64 e windows/amd64.
+- Site: `site/` (Astro 5 SSG, `ARQ-04`), hospedado em `https://forge-sdd.org`.
+
 ## Layout do projeto
 ```
-cmd/forge-sdd/
-  main.go                  # entrypoint — registra cobra root + init cmd
+cmd/forge-sdd/           # camada Cobra: init, update, doctor, status, queue, bus, dispatch,
+                         # worker, up, ps, inbox, review, pipeline, brief, context, gate,
+                         # skills, session, report, archive, lessons, next-id, acp, menu...
 internal/
-  config/config.go         # struct Config, Defaults(), FromFlags()
-  scaffold/scaffold.go     # Walk + Run (render + write)
-  scaffold/scaffold_test.go
-  survey/survey.go         # formulário huh, retorna Config
-templates/                 # embed.FS — todos os artefatos Forge-SDD como *.tmpl
-  .github/
-  sdd/
-  .vscode/
-tests/
-  fixtures/expected/       # golden test: saída esperada de init --yes
-go.mod
-go.sum
-.goreleaser.yaml
-.github/workflows/
-  ci.yml
-  release.yml
+  acp/                   # servidor Agent Client Protocol (stdio e HTTP)
+  bus/                   # barramento de jobs entre as sessões
+  config/                # .sddrc, forge.json e perfis de agente
+  gate/                  # Portão Camada A, brief e contexto mínimo
+  governance/            # importador de regras externas
+  layout/                # caminhos de sdd/ e .forge/, iniciativa ativa pela branch
+  monitor/               # processos, tokens por janela, feed de chat, telemetria
+  notify/                # inbox, toast, e-mail e webhook
+  pipeline/              # dispatch, worker, review, tmux, handoff, auto-archive, status vivo
+  queue/                 # fila por iniciativa, filas por estação, atividades
+  scaffold/              # templates embarcados, migração e golden tests
+  skills/                # Motor de Auto-Skills
+  survey/                # formulário do init e TUI da fila com drill-down
+  testutil/              # auxiliares de teste
+site/                    # Astro 5 (isolado, ARQ-04)
+npm/                     # launcher do binário
+sdd/                     # memória, specs, discovery, releases e métricas do próprio projeto
 ```
 
 ## Características do binário
-- Estático (`CGO_ENABLED=0`)
-- Tamanho estimado: ~8 MB
-- Sem acesso à rede em runtime
-- Targets: linux/amd64, darwin/amd64, darwin/arm64, windows/amd64
+- Estático (`CGO_ENABLED=0`), cerca de 10 MB.
+- Rede só para notificações opcionais (webhook e e-mail) e para o launcher npm baixar o binário.
+- Estado do pipeline em `.forge/` (jobs, logs, runtime) e do projeto em `sdd/`.

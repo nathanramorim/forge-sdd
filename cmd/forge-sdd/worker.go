@@ -16,6 +16,7 @@ import (
 	"github.com/forge-sdd/cli/internal/layout"
 	"github.com/forge-sdd/cli/internal/monitor"
 	"github.com/forge-sdd/cli/internal/pipeline"
+	"github.com/forge-sdd/cli/internal/queue"
 	"github.com/spf13/cobra"
 )
 
@@ -125,8 +126,13 @@ var pipelinePROpenedCmd = &cobra.Command{
 		number, _ := cmd.Flags().GetInt("number")
 		url, _ := cmd.Flags().GetString("url")
 		branch, _ := cmd.Flags().GetString("branch")
-		if _, err := bus.UpdatePR(dir, layout.RoleBuilder, id, worker, number, url, branch, time.Now()); err != nil {
+		entry, err := bus.UpdatePR(dir, layout.RoleBuilder, id, worker, number, url, branch, time.Now())
+		if err != nil {
 			return err
+		}
+		// O PR aberto entrega as tasks do job à revisão: a fila e o painel passam a refletir isso.
+		if _, err := queue.SetTaskStatuses(dir, entry.Job.Initiative, entry.Job.TaskIDs, queue.StatusReviewPending); err != nil {
+			return fmt.Errorf("atualizar a fila da iniciativa: %w", err)
 		}
 		fmt.Fprintf(cmd.OutOrStdout(), "PR #%d registrado no job %s\n", number, id)
 		return nil

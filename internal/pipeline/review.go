@@ -5,6 +5,8 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -82,6 +84,8 @@ func ApplyVerdict(dir, jobID, worker string, v queue.Verdict, deps notify.Deps, 
 		return nil, err
 	}
 
+	persistVerdict(dir, job, v)
+
 	res := &ReviewResult{}
 	switch {
 	case v.Veredito == "conforme":
@@ -100,6 +104,11 @@ func ApplyVerdict(dir, jobID, worker string, v queue.Verdict, deps notify.Deps, 
 			return nil, err
 		}
 		res.Notification, res.Channels = &n, out.Channels
+		// A aprovação vale para as tasks do job: sem isso a fila e o painel ficam defasados.
+		// Antes do Complete, para que uma falha seja reaplicável (a notificação é idempotente).
+		if _, err := queue.SetTaskStatuses(dir, job.Initiative, job.TaskIDs, queue.StatusApproved); err != nil {
+			return nil, fmt.Errorf("atualizar a fila da iniciativa: %w", err)
+		}
 		if _, err := bus.Complete(dir, layout.RoleReviewer, jobID, worker, "aprovado: PR sem inconformidades", now); err != nil {
 			return nil, err
 		}
@@ -270,4 +279,26 @@ func notificationID(jobID, suffix string) string {
 	}
 	sum := sha256.Sum256([]byte(jobID))
 	return jobID[:60] + "-" + hex.EncodeToString(sum[:4]) + "-" + suffix
+}
+
+// persistVerdict guarda uma cópia do veredito em sdd/discovery/<iniciativa>/verdicts/<job>.json.
+// O agente Reviewer é somente leitura e entrega o veredito em arquivo temporário; é o Go quem o
+// preserva na pasta da iniciativa, para o registro não se perder junto com o /tmp. Best-effort:
+// sem iniciativa válida ou com falha de escrita, o fluxo de aprovação segue sem a cópia.
+func persistVerdict(dir string, job bus.Job, v queue.Verdict) {
+	if job.Initiative == "" {
+		return
+	}
+	base, err := layout.Initiative(dir, job.Initiative)
+	if err != nil {
+		return
+	}
+	if info, err := os.Stat(base); err != nil || !info.IsDir() {
+		return // não cria iniciativa que não existe
+	}
+	vdir := filepath.Join(base, "verdicts")
+	if err := os.MkdirAll(vdir, 0o755); err != nil {
+		return
+	}
+	_ = queue.WriteJSONAtomic(filepath.Join(vdir, job.ID+".json"), v, 0o644)
 }

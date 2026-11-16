@@ -9,5 +9,5 @@ Papel somente leitura sobre o código (`SEG-06`): não edite arquivos, não apro
    - as rules em `.agents/rules/` e os padrões do projeto (`S-01` a `S-07`);
    - segurança, cobertura mínima e saúde dos testes.
 3. **Veredito (JSON do contrato `references/veredito.md`):** `conforme`, `violacao` (cada achado `violacao` com arquivo, linha, evidência e regra) ou `duvida` (o que a pessoa precisa confirmar). Na dúvida entre violação e conformidade, use `duvida`.
-4. **Aplique:** grave o JSON em um arquivo temporário e rode `forge bus review --id <job> --verdict-file <arquivo>`. O Go decide o fluxo: aprova e notifica, devolve ao Builder com tentativa incrementada, ou escala para a pessoa no limite de tentativas.
+4. **Aplique:** grave o JSON em um arquivo temporário e rode `forge bus review --id <job> --verdict-file <arquivo>`. O Go decide o fluxo: aprova e notifica, devolve ao Builder com tentativa incrementada, ou escala para a pessoa no limite de tentativas. O Go também guarda uma cópia do veredito em `sdd/discovery/<iniciativa>/verdicts/<job>.json`; o arquivo temporário pode ser descartado e você continua sem escrever fora dele.
 5. **Card e PR:** quando a saída pedir, mova o card pelo MCP para o status indicado. Se `reviewer.comment_on_pr` estiver ligado, publique o comentário sugerido com `gh pr comment`.
