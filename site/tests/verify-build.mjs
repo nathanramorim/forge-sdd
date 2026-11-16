@@ -19,8 +19,8 @@ assert(existsSync(join(DIST_DIR, 'llms.txt')), 'dist/llms.txt deve existir');
 assert(existsSync(join(DIST_DIR, 'favicon.svg')), 'dist/favicon.svg deve existir');
 assert(existsSync(join(DIST_DIR, 'og-image.png')), 'dist/og-image.png deve existir');
 assert(existsSync(join(DIST_DIR, '_headers')), 'dist/_headers deve existir');
-assert(existsSync(join(DIST_DIR, 'video/forge-sdd-v3.mp4')), 'dist/video/forge-sdd-v3.mp4 deve existir');
-assert(existsSync(join(DIST_DIR, 'video/forge-sdd-v3-poster.jpg')), 'dist/video/forge-sdd-v3-poster.jpg deve existir');
+assert(existsSync(join(DIST_DIR, 'video/forge-sdd-pipeline.mp4')), 'dist/video/forge-sdd-pipeline.mp4 deve existir');
+assert(existsSync(join(DIST_DIR, 'video/forge-sdd-pipeline-poster.jpg')), 'dist/video/forge-sdd-pipeline-poster.jpg deve existir');
 
 const html = readFileSync(HTML_FILE, 'utf-8');
 
@@ -49,9 +49,9 @@ assert(html.includes('id="instalacao"'), 'Seção #instalacao ausente');
 assert(html.includes('id="governanca"'), 'Seção #governanca ausente');
 assert(html.includes('id="evolucao"'), 'Seção #evolucao ausente');
 assert(html.includes('id="video"'), 'Seção #video ausente');
-assert(html.includes('src="/video/forge-sdd-v3.mp4"'), 'Vídeo /video/forge-sdd-v3.mp4 ausente');
+assert(html.includes('src="/video/forge-sdd-pipeline.mp4"'), 'Vídeo /video/forge-sdd-pipeline.mp4 ausente');
 // Invariantes Fix 62: apenas o vídeo limpo, sem nome de arquivo ou menção a ferramenta geradora
-assert(!html.includes('forge-sdd-v3-demo.mp4'), 'Nome de arquivo do vídeo não deve ser exibido na UI');
+assert(!html.includes('forge-sdd-pipeline-demo.mp4'), 'Nome de arquivo do vídeo não deve ser exibido na UI');
 assert(!html.includes('gerado pelo BRAG') && !html.includes('gerada com BRAG'), 'Menção à ferramenta geradora não deve ser exibida na UI');
 
 // 4. Invariantes de Design System e Fix 61 (CA-05)
@@ -68,9 +68,9 @@ assert(html.includes('id="hoTo"'), 'Campo #hoTo ausente');
 assert(html.includes('id="hoPayload"'), 'Campo #hoPayload ausente');
 assert(html.includes('id="hoGateChip"'), 'Campo #hoGateChip ausente');
 
-// SVG Fallbacks dos mascotes pré-renderizados no HTML inicial (evita CLS: 5 na esteira, 1 no emulador, 1 na governança e 3 na seção de lançamento)
+// SVG Fallbacks dos mascotes pré-renderizados no HTML inicial (evita CLS: 3 nas sessões, 1 no emulador, 1 na governança e 3 na seção de lançamento)
 const mascotMatches = html.match(/class="mascot-fallback-svg"/g);
-assert(mascotMatches && mascotMatches.length === 10, `Esperado 10 mascotes SVG de fallback pré-renderizados (5 esteira + 1 emulador + 1 governança + 3 lançamento), encontrados: ${mascotMatches ? mascotMatches.length : 0}`);
+assert(mascotMatches && mascotMatches.length === 8, `Esperado 8 mascotes SVG de fallback pré-renderizados (3 sessões + 1 emulador + 1 governança + 3 lançamento), encontrados: ${mascotMatches ? mascotMatches.length : 0}`);
 
 // 5. Verificação de Scripts e Bundles (CA-06)
 console.log('5. Verificando ausência de scripts CDN externos bloqueantes e presença de bundle Astro...');

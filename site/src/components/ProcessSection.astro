@@ -9,9 +9,9 @@ const initialHandoffTo = STATIONS[1];
 <section id="estacoes">
   <div class="sec-h">
     <div>
-      <p class="eyebrow">01 · Visão Processual entre os Agentes</p>
-      <h2>Como o bastão passa de uma estação para a outra.</h2>
-      <p>Clique em qualquer etapa da esteira processual abaixo (ou aguarde a transição automática) para inspecionar o que cada agente recebe, o que ele produz e qual portão valida a passagem.</p>
+      <p class="eyebrow">01 · Visão Processual entre as Sessões</p>
+      <h2>Como o trabalho passa de uma sessão para a outra.</h2>
+      <p>São três terminais que se falam por uma fila local. Clique em qualquer sessão (ou aguarde a transição automática) para ver o que ela recebe, o que entrega e qual portão valida a passagem.</p>
     </div>
     <div style="display:flex;gap:8px;align-items:center">
       <button class="btn ghost sm" id="prevStepBtn" type="button">&larr; Anterior</button>
@@ -20,12 +20,12 @@ const initialHandoffTo = STATIONS[1];
     </div>
   </div>
 
-  <!-- ESTEIRA PROCESSUAL INTERATIVA (PASSO 1 → 2 → 3 → 4 → 5 ↺ 1) -->
+  <!-- PIPELINE INTERATIVO: 3 SESSÕES (Discovery → Builder → Reviewer; o Reviewer volta ao Builder em rework) -->
   <div class="process-rail-box">
     <div class="stepper-track" id="stepperTrack">
       {STATIONS.map((st, idx) => {
-        const nextNum = idx === 4 ? '01 / 04' : `0${idx + 2}`;
-        const arrowText = idx === 4 ? `↺ ${nextNum}` : `→ ${nextNum}`;
+        const last = idx === STATIONS.length - 1;
+        const arrowText = last ? '↺ 01 ou 02' : `→ 0${idx + 2}`;
         return (
           <button
             type="button"
@@ -65,7 +65,7 @@ const initialHandoffTo = STATIONS[1];
     </div>
   </div>
 
-  <!-- CARDS DOS 5 ESPECIALISTAS COM PALCO E CONTROLES EMBUTIDOS -->
+  <!-- CARDS DAS 3 SESSÕES COM PALCO E CONTROLES EMBUTIDOS -->
   <div class="agents-grid" id="agentsGrid">
     {STATIONS.map((st, idx) => {
       const activeState = st.defaultState;

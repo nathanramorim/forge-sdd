@@ -30,7 +30,7 @@ if (copyHeroBtn) {
 let activeStationIdx = 0;
 let autoCycleEnabled = true;
 let cycleProgress = 0;
-const mascotControllers: (MascotController | null)[] = [null, null, null, null, null];
+const mascotControllers: (MascotController | null)[] = STATIONS.map(() => null);
 
 function updateHandoffBar(fromIdx: number) {
   const st = STATIONS[fromIdx];
