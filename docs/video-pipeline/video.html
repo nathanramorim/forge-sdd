@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Forge-SDD: como funciona o pipeline (vídeo)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600&family=Montserrat:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root { --bg:#0d0f14; --bg2:#12151d; --bg3:#1a1e29; --line:#252d40; --fg:#e9ecf4; --muted:#99a2b8; --faint:#667089;
+          --accent:#4f8ef7; --ok:#3ecf8e; --warn:#f5b04a; --bad:#f2677a; }
+  * { box-sizing: border-box; margin: 0; }
+  html, body { width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg);
+               font-family: 'Montserrat', system-ui, sans-serif; }
+  #root { position: relative; width: 1920px; height: 1080px;
+          background: radial-gradient(1400px 700px at 50% -10%, #1e2a4a 0%, rgba(13,15,20,0) 70%), var(--bg); }
+  .abs { position: absolute; }
+  .mono { font-family: 'JetBrains Mono', ui-monospace, Menlo, monospace; }
+  .grad { background: linear-gradient(90deg,#4f8ef7,#8aa4ff 50%,#3ecf8e); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .scene { position: absolute; inset: 0; opacity: 0; }
+
+  #brand { left: 60px; top: 36px; display: flex; align-items: center; gap: 14px; font-weight: 800; font-size: 30px; letter-spacing: -.5px; }
+  #brand svg { width: 46px; height: 46px; }
+
+  .pane { position: absolute; border: 2px solid var(--line); border-radius: 18px; background: var(--bg2); overflow: hidden; }
+  .pane .bar { height: 52px; display: flex; align-items: center; padding: 0 20px; gap: 10px; font: 600 20px 'JetBrains Mono', monospace;
+               border-bottom: 1px solid var(--line); background: #0f121a; }
+  .pane .bar i { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
+  .pane .body { padding: 18px 22px; font: 500 25px/38px 'JetBrains Mono', monospace; color: var(--fg); white-space: pre-wrap; }
+  .pane .mascot { position: absolute; right: 22px; top: 62px; width: 104px; height: 116px; }
+  .ok { color: var(--ok); } .warn { color: var(--warn); } .bad { color: var(--bad); } .dim { color: var(--muted); } .c { color: var(--accent); }
+  .cursor { display: inline-block; width: 12px; height: 26px; background: var(--fg); vertical-align: -4px; margin-left: 3px; }
+
+  .packet { position: absolute; padding: 10px 18px; border-radius: 999px; font: 700 21px 'JetBrains Mono', monospace; color: #0d0f14;
+            box-shadow: 0 0 36px currentColor; opacity: 0; white-space: nowrap; z-index: 20; }
+
+  #caption { left: 0; right: 0; bottom: 70px; text-align: center; font-weight: 700; font-size: 44px; line-height: 1.25; padding: 0 160px; opacity: 0; }
+  #caption b { font-weight: 800; }
+
+  .card { position: absolute; width: 540px; height: 300px; border: 1.5px solid var(--line); border-top: 5px solid var(--c); border-radius: 18px;
+          background: var(--bg2); padding: 34px 34px; }
+  .card h3 { font-size: 34px; font-weight: 800; margin-bottom: 14px; }
+  .card p { font-size: 25px; line-height: 1.5; color: var(--muted); font-weight: 500; }
+  .chip { position: absolute; padding: 12px 26px; border-radius: 999px; border: 2px solid var(--c); background: #181c26; font-weight: 700; font-size: 30px; }
+</style>
+</head>
+<body>
+<div id="root">
+  <div id="brand" class="abs"></div>
+
+  <!-- S0: abertura -->
+  <div id="s0" class="scene">
+    <div class="abs" id="s0logo" style="left:0;right:0;top:250px;display:flex;justify-content:center"></div>
+    <div class="abs grad" id="s0name" style="left:0;right:0;top:420px;text-align:center;font-weight:800;font-size:150px;letter-spacing:-4px"></div>
+    <div class="abs" id="s0tag" style="left:0;right:0;top:620px;text-align:center;font-weight:700;font-size:56px">Seu time de IA, com método.</div>
+    <div class="abs" id="s0sub" style="left:0;right:0;top:720px;text-align:center;font-weight:500;font-size:34px;color:var(--muted)">Como funciona, em 1 minuto.</div>
+  </div>
+
+  <!-- S1: o problema -->
+  <div id="s1" class="scene">
+    <div class="abs" id="s1card" style="left:360px;top:190px;width:1200px;height:520px;border:2px solid var(--line);border-radius:22px;background:var(--bg2);overflow:hidden">
+      <div style="height:56px;border-bottom:1px solid var(--line);background:#0f121a;display:flex;align-items:center;padding:0 22px;font:600 22px 'JetBrains Mono',monospace;color:var(--muted)">uma conversa só, para tudo</div>
+      <div id="s1mascot" class="abs" style="left:60px;top:110px"></div>
+      <div class="chip" id="s1c1" style="--c:#f2a65a;left:330px;top:150px">planeja</div>
+      <div class="chip" id="s1c2" style="--c:#4fd1b5;left:560px;top:230px">constrói</div>
+      <div class="chip" id="s1c3" style="--c:#ff8a5c;left:790px;top:310px">revisa</div>
+      <div class="abs bad" id="s1mix" style="left:330px;top:420px;font:700 30px 'JetBrains Mono',monospace">contexto misturado · revisão enviesada</div>
+    </div>
+    <div class="abs" id="s1big" style="left:0;right:0;top:350px;text-align:center;font-weight:800;font-size:84px;line-height:1.15;opacity:0">
+      O Forge-SDD separa em <span class="grad">3 sessões</span>.
+    </div>
+  </div>
+
+  <!-- palco: 3 terminais -->
+  <div id="stage" class="scene"></div>
+
+  <!-- S7: novidades -->
+  <div id="s7" class="scene">
+    <div class="abs" style="left:0;right:0;top:120px;text-align:center;font-weight:800;font-size:64px">Você <span class="grad">vê tudo</span>, em tempo real.</div>
+    <div class="card" id="k1" style="--c:#4f8ef7;left:90px;top:330px"><h3>💬 Chat nos workers</h3><p>Cada etapa do Builder e do Reviewer em linguagem de gente.</p></div>
+    <div class="card" id="k2" style="--c:#c9a7ff;left:690px;top:330px"><h3>🗂️ Fila com abas</h3><p>Na Fila e Concluídas, com laudo, tempo e tokens por etapa.</p></div>
+    <div class="card" id="k3" style="--c:#3ecf8e;left:1290px;top:330px"><h3>✅ Painel que acompanha</h3><p>Aprovou o job? A fila e o status mostram as tasks aprovadas.</p></div>
+  </div>
+
+  <!-- S8: chamada -->
+  <div id="s8" class="scene">
+    <div class="abs" id="s8logo" style="left:0;right:0;top:170px;display:flex;justify-content:center"></div>
+    <div class="abs grad" style="left:0;right:0;top:330px;text-align:center;font-weight:800;font-size:120px;letter-spacing:-3px">Forge-SDD 4.8</div>
+    <div class="abs" style="left:0;right:0;top:490px;text-align:center;font-weight:700;font-size:46px">Você decide numa sessão. Outras duas constroem e revisam.</div>
+    <div class="abs mono" style="left:520px;width:880px;top:640px;height:90px;border:2px solid #363e52;border-radius:18px;background:#090b10;display:flex;align-items:center;justify-content:center;font-size:38px;font-weight:600;color:var(--ok)">$ npm i -g @nathanramorim/forge-sdd</div>
+    <div class="abs" style="left:0;right:0;top:790px;text-align:center;font-weight:600;font-size:30px;color:var(--faint);letter-spacing:2px">FORGE-SDD.ORG · OPEN SOURCE · MIT</div>
+  </div>
+
+  <div id="caption" class="abs"></div>
+</div>
+
+<script>
+const W = 1920, H = 1080;
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const seg = (t, a, b) => clamp((t - a) / (b - a));
+const eo = x => 1 - Math.pow(1 - x, 3);                 // ease-out
+const eio = x => x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+const $ = id => document.getElementById(id);
+
+const HEX = `<svg viewBox="0 0 32 32" fill="none"><defs><linearGradient id="hg" x1="2" y1="4" x2="30" y2="28" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#4f8ef7"/><stop offset=".5" stop-color="#8aa4ff"/><stop offset="1" stop-color="#3ecf8e"/></linearGradient></defs><path d="M16 2.2 L28.4 9.1 V22.9 L16 29.8 L3.6 22.9 V9.1 Z" stroke="url(#hg)" stroke-width="1.8" stroke-linejoin="round"/><path d="M16 9 L22.5 12.6 V13.4 L16 17 L9.5 13.4 V12.6 Z" fill="#f1f5f9"/><path d="M9.5 13.4 L16 17 V23.8 L9.5 20.2 Z" fill="#d5dbe6"/><path d="M22.5 13.4 L16 17 V23.8 L22.5 20.2 Z" fill="#b7bfce"/></svg>`;
+
+function mascot(color, mark, orb, eyes, w = 104, h = 116) {
+  const mk = { ring: '<circle cx="60" cy="52" r="4.6" fill="none" stroke="rgba(18,24,48,.6)" stroke-width="2.6"/>',
+    wave: '<path d="M51 53 Q55.5 47 60 53 Q64.5 59 69 53" fill="none" stroke="rgba(18,24,48,.6)" stroke-width="2.6" stroke-linecap="round"/>',
+    tri: '<polygon points="60,46.5 66,57 54,57" fill="rgba(18,24,48,.6)"/>' }[mark];
+  const ey = { cap: `<g fill="${orb}"><rect x="41.5" y="78" width="7" height="16" rx="3.5"/><rect x="71.5" y="78" width="7" height="16" rx="3.5"/></g>`,
+    round: `<g fill="${orb}"><circle cx="45" cy="86" r="6.5"/><circle cx="75" cy="86" r="6.5"/></g>`,
+    happy: `<g stroke="${orb}" stroke-width="4" stroke-linecap="round" fill="none"><path d="M39 90 Q45 79 51 90"/><path d="M69 90 Q75 79 81 90"/></g>`,
+    x: `<g stroke="${orb}" stroke-width="3.5" stroke-linecap="round"><line x1="41.5" y1="82" x2="48.5" y2="90"/><line x1="48.5" y1="82" x2="41.5" y2="90"/><line x1="71.5" y1="82" x2="78.5" y2="90"/><line x1="78.5" y1="82" x2="71.5" y2="90"/></g>` }[eyes];
+  return `<svg viewBox="0 -8 120 142" width="${w}" height="${h}"><ellipse cx="60" cy="127" rx="32" ry="4.5" fill="rgba(0,0,0,.38)"/>
+    <ellipse cx="13" cy="90" rx="7" ry="11" fill="${color}"/><ellipse cx="107" cy="90" rx="7" ry="11" fill="${color}"/>
+    <line x1="60" y1="30" x2="60" y2="17" stroke="${color}" stroke-width="3.2" stroke-linecap="round"/>
+    <circle cx="60" cy="11" r="14" fill="${orb}" opacity=".3"/><circle cx="60" cy="11" r="7.8" fill="${orb}"/>
+    <path d="M60 28 C86 28 102 52 105 80 C108 106 92 118 60 118 C28 118 12 106 15 80 C18 52 34 28 60 28 Z" fill="${color}"/>
+    <path d="M15 80 C12 106 28 118 60 118 C92 118 108 106 105 80 C97 98 80 106 60 106 C40 106 23 98 15 80 Z" fill="rgba(0,0,0,.22)"/>
+    ${mk}<rect x="25" y="70" width="70" height="32" rx="16" fill="#10131a" stroke="rgba(255,255,255,.1)"/>${ey}</svg>`;
+}
+
+// ---- sessões (cores da landing) ----
+const SES = {
+  D: { id: 'pD', name: 'forge-discovery', color: '#f2a65a', mark: 'ring', x: 60,   y: 130, w: 840, h: 730, n: 15 },
+  B: { id: 'pB', name: 'forge-builder',   color: '#4fd1b5', mark: 'wave', x: 1020, y: 130, w: 840, h: 355, n: 6 },
+  R: { id: 'pR', name: 'forge-reviewer',  color: '#ff8a5c', mark: 'tri',  x: 1020, y: 505, w: 840, h: 355, n: 6 }
+};
+const ctr = k => [SES[k].x + SES[k].w / 2, SES[k].y + SES[k].h / 2];
+
+// ---- falas de cada terminal (t em segundos) ----
+const L = {
+  D: [
+    { t: 23.0, s: '<span class="c">›</span> /discovery convites por e-mail', type: 1 },
+    { t: 25.4, s: '<span class="ok">✓</span> discovery.md e criteria.md prontos' },
+    { t: 26.6, s: '<span class="dim">  Reuse Check: o que já existe foi mapeado</span>' },
+    { t: 27.8, s: '<span class="warn">⏸ Portão FLX-01: aguardando o seu "De Acordo"</span>' },
+    { t: 29.6, s: '<span class="c">›</span> De Acordo', type: 1 },
+    { t: 30.6, s: '<span class="c">›</span> /split-features', type: 1 },
+    { t: 31.9, s: '<span class="ok">▶</span> forge dispatch · job <b>feature_build</b>' },
+    { t: 61.6, s: '<span class="warn">🔔 PR #12 pronto para aprovar</span>' },
+    { t: 63.2, s: '<span class="c">›</span> aprovo o PR #12', type: 1 },
+    { t: 64.8, s: '<span class="ok">✓ Aprovado por você · fila 6/6</span>' }
+  ],
+  B: [
+    { t: 34.4, s: '<span class="dim">job feature_build recebido</span>' },
+    { t: 35.2, s: '💭 Analisando a spec e os critérios…' },
+    { t: 36.6, s: '📋 Lendo as rules do escopo' },
+    { t: 38.0, s: '✎ internal/convites/envio.go' },
+    { t: 39.4, s: '✎ internal/convites/envio_test.go' },
+    { t: 40.8, s: '🧪 testes e forge gate: ok' },
+    { t: 42.0, s: '<span class="ok">✅ PR #12 aberto</span>' },
+    { t: 52.0, s: '↩ Corrigindo: o segredo agora vem do ambiente' },
+    { t: 53.4, s: '✎ internal/convites/config.go' },
+    { t: 54.6, s: '<span class="ok">✅ PR #12 atualizado</span>' }
+  ],
+  R: [
+    { t: 45.2, s: '<span class="dim">job pr_review recebido</span>' },
+    { t: 46.2, s: '<span class="ok">✓</span> Spec e critérios' },
+    { t: 47.2, s: '<span class="ok">✓</span> ADRs e rules' },
+    { t: 48.2, s: '<span class="bad">✗ Segurança: segredo no código (SEG-04)</span>' },
+    { t: 49.4, s: '<span class="warn">↩ Devolvendo ao Builder · tentativa 1 de 3</span>' },
+    { t: 56.8, s: '<span class="ok">✓</span> Spec e critérios' },
+    { t: 57.6, s: '<span class="ok">✓</span> ADRs e rules' },
+    { t: 58.4, s: '<span class="ok">✓</span> Segurança' },
+    { t: 59.4, s: '<span class="ok">✅ Conforme · só leitura, nada foi editado</span>' }
+  ]
+};
+// estado do mascote por sessão: [início, fim, cor do orbe, olhos]
+const ST = {
+  D: [[14, 27.8, '#4f8ef7', 'cap'], [27.8, 29.6, '#f5b04a', 'round'], [29.6, 61.4, '#4f8ef7', 'cap'], [61.4, 64.8, '#f5b04a', 'round'], [64.8, 99, '#3ecf8e', 'happy']],
+  B: [[14, 34, '#667089', 'round'], [34, 42.4, '#4f8ef7', 'cap'], [42.4, 51.6, '#667089', 'round'], [51.6, 54.8, '#4f8ef7', 'cap'], [54.8, 99, '#3ecf8e', 'happy']],
+  R: [[14, 45, '#667089', 'round'], [45, 48.2, '#38c6e8', 'round'], [48.2, 51, '#f2677a', 'x'], [51, 56.6, '#667089', 'round'], [56.6, 59.4, '#38c6e8', 'round'], [59.4, 99, '#3ecf8e', 'happy']]
+};
+// janelas em que cada terminal está "ativo" (borda acesa)
+const ACT = { D: [[22, 33], [61, 66]], B: [[33.5, 45], [51, 56]], R: [[45, 51.4], [56, 61]] };
+// pacotes entre terminais: [t0, t1, de, para, rótulo, cor]
+const PK = [
+  [32.4, 34.2, 'D', 'B', 'feature_build', '#f2a65a'],
+  [42.5, 44.4, 'B', 'R', 'pr_review', '#4fd1b5'],
+  [49.8, 51.6, 'R', 'B', 'pr_rework · 1 de 3', '#f2677a'],
+  [54.8, 56.6, 'B', 'R', 'pr_review', '#4fd1b5'],
+  [59.8, 61.6, 'R', 'D', '🔔 PR pronto', '#3ecf8e']
+];
+// legendas: [início, fim, html]
+const CAP = [
+  [6.2, 13.6, 'Uma conversa só faz tudo: <b>planeja, constrói e revisa</b>. O contexto se mistura.'],
+  [14.6, 21.6, '<b>Três terminais</b>. Cada um com um agente de IA e um papel.'],
+  [22.2, 33.4, '<b>1. Você conversa e decide.</b> Nada é construído sem o seu "De Acordo" na spec.'],
+  [33.8, 44.8, '<b>2. O Builder constrói</b>, roda os testes e abre o PR.'],
+  [45.2, 60.8, '<b>3. O Reviewer só lê.</b> Achou problema? Devolve ao Builder, até 3 vezes. Tudo certo? Avisa você.'],
+  [61.4, 67.6, '<b>Quem aprova é você.</b> O Reviewer nunca mescla.'],
+  [69.0, 73.4, 'Veja o que seu time de IA faz, e <b>confie no painel</b>.']
+];
+
+// ---- DOM do palco ----
+const stage = $('stage');
+for (const k of ['D', 'B', 'R']) {
+  const s = SES[k];
+  const el = document.createElement('div');
+  el.className = 'pane'; el.id = s.id;
+  el.style.cssText = `left:${s.x}px;top:${s.y}px;width:${s.w}px;height:${s.h}px`;
+  el.innerHTML = `<div class="bar" style="color:${s.color}"><i style="background:#ef4444"></i><i style="background:#f59e0b"></i><i style="background:#22c55e"></i>&nbsp;[ forge-sdd ❯ ${s.name} ]</div><div class="body"></div><div class="mascot"></div>`;
+  stage.appendChild(el);
+}
+const bus = document.createElement('div');
+bus.className = 'abs mono';
+bus.style.cssText = 'left:900px;top:430px;width:120px;text-align:center;font:600 17px "JetBrains Mono",monospace;color:#8aa4ff;line-height:1.3';
+bus.innerHTML = '<div style="font-size:34px">⇄</div>fila<br>local';
+stage.appendChild(bus);
+const pk = PK.map(p => { const e = document.createElement('div'); e.className = 'packet'; e.textContent = p[4]; e.style.background = p[5]; e.style.color = p[5]; e.innerHTML = `<span style="color:#0d0f14">${p[4]}</span>`; stage.appendChild(e); return e; });
+
+function inRange(t, list) { return list.some(([a, b]) => t >= a && t < b); }
+function linesHTML(k, t) {
+  const vis = L[k].filter(l => t >= l.t);
+  const last = vis.slice(-SES[k].n);
+  return last.map(l => {
+    if (l.type && t < l.t + 2.2) {
+      const plain = l.s.replace(/<[^>]+>/g, '');
+      const n = Math.floor((t - l.t) * 30);
+      if (n < plain.length) return plain.slice(0, n) + '<span class="cursor"></span>';
+    }
+    return l.s;
+  }).join('\n');
+}
+
+// ---- render(t): estado determinístico do quadro no instante t ----
+function render(t) {
+  // marca
+  $('brand').innerHTML = `${HEX}<span>forge-sdd</span>`;
+  $('brand').style.opacity = clamp(seg(t, 0.8, 1.6)) * (1 - seg(t, 73.6, 74.2));
+
+  // S0 abertura
+  const s0 = 1 - seg(t, 5.2, 6.0);
+  $('s0').style.opacity = s0 * clamp(seg(t, 0, .4) + .0001);
+  $('s0logo').innerHTML = `<div style="width:150px;height:150px;transform:scale(${.6 + .4 * eo(seg(t, .1, 1))});opacity:${eo(seg(t, .1, .9))}">${HEX}</div>`;
+  const nm = 'Forge-SDD';
+  $('s0name').textContent = nm.slice(0, Math.floor(seg(t, 0.9, 2.1) * nm.length));
+  $('s0tag').style.opacity = eo(seg(t, 2.4, 3.2)); $('s0tag').style.transform = `translateY(${(1 - eo(seg(t, 2.4, 3.2))) * 24}px)`;
+  $('s0sub').style.opacity = eo(seg(t, 3.6, 4.4));
+
+  // S1 problema
+  const s1 = seg(t, 5.8, 6.6) * (1 - seg(t, 13.4, 14.0));
+  $('s1').style.opacity = s1;
+  $('s1mascot').innerHTML = mascot('#99a2b8', 'ring', t > 9.8 ? '#f2677a' : '#4f8ef7', t > 9.8 ? 'x' : 'cap', 190, 212);
+  for (const [i, ta] of [[1, 7.0], [2, 8.0], [3, 9.0]]) {
+    const p = eo(seg(t, ta, ta + .5));
+    const e = $('s1c' + i); e.style.opacity = p; e.style.transform = `translateY(${(1 - p) * 30}px) scale(${.9 + .1 * p})`;
+  }
+  $('s1mix').style.opacity = eo(seg(t, 10, 10.6));
+  $('s1card').style.opacity = 1 - seg(t, 11.8, 12.4);
+  $('s1big').style.opacity = eo(seg(t, 12.2, 12.9)) * (1 - seg(t, 13.5, 14));
+
+  // palco
+  const stg = seg(t, 13.8, 14.6) * (1 - seg(t, 66.8, 67.8));
+  stage.style.opacity = stg;
+  stage.style.transform = `scale(${.97 + .03 * eo(seg(t, 13.8, 14.6))})`;
+  for (const k of ['D', 'B', 'R']) {
+    const s = SES[k], el = $(s.id), on = inRange(t, ACT[k]);
+    el.style.borderColor = on ? s.color : '#252d40';
+    el.style.boxShadow = on ? `0 0 46px ${s.color}55` : 'none';
+    el.querySelector('.body').innerHTML = linesHTML(k, t);
+    const st = ST[k].find(([a, b]) => t >= a && t < b) || ST[k][0];
+    el.querySelector('.mascot').innerHTML = mascot(s.color, s.mark, st[2], st[3]);
+    el.querySelector('.mascot').style.transform = `translateY(${Math.sin(t * 2.4 + k.charCodeAt(0)) * 4}px)`;
+  }
+  bus.style.opacity = eo(seg(t, 15, 16));
+  bus.style.color = inRange(t, PK.map(p => [p[0], p[1]])) ? '#ffffff' : '#8aa4ff';
+  PK.forEach((p, i) => {
+    const e = pk[i], pr = seg(t, p[0], p[1]);
+    if (pr <= 0 || pr >= 1) { e.style.opacity = 0; return; }
+    const a = ctr(p[2]), b = ctr(p[3]), q = eio(pr);
+    e.style.opacity = Math.min(1, pr * 8) * Math.min(1, (1 - pr) * 8);
+    e.style.left = (a[0] + (b[0] - a[0]) * q - 90) + 'px';
+    e.style.top = (a[1] + (b[1] - a[1]) * q - 22) + 'px';
+  });
+
+  // S7 novidades
+  const s7 = seg(t, 67.4, 68.2) * (1 - seg(t, 73.4, 74.1));
+  $('s7').style.opacity = s7;
+  ['k1', 'k2', 'k3'].forEach((id, i) => { const p = eo(seg(t, 68.2 + i * .5, 69 + i * .5)); $(id).style.opacity = p; $(id).style.transform = `translateY(${(1 - p) * 40}px)`; });
+
+  // S8 chamada
+  $('s8').style.opacity = seg(t, 73.8, 74.6);
+  $('s8logo').innerHTML = `<div style="width:130px;height:130px">${HEX}</div>`;
+
+  // legendas
+  let capHTML = '', capOp = 0;
+  for (const [a, b, h] of CAP) { const o = seg(t, a, a + .5) * (1 - seg(t, b - .5, b)); if (o > 0) { capHTML = h; capOp = o; } }
+  $('caption').innerHTML = capHTML; $('caption').style.opacity = capOp;
+}
+window.render = render;
+window.__ready = document.fonts.ready.then(() => true);
+render(0);
+</script>
+</body>
+</html>

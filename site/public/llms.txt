@@ -11,9 +11,10 @@
 ## O Pipeline de 3 Sessões
 forge-discovery (você conversa e decide), forge-builder (constrói em paralelo e abre o PR) e forge-reviewer (confere ADRs e rules; devolve ou aprova). O pipeline nunca mescla: só você aprova o PR.
 
-## As 5 Estações Especializadas
+## As 5 Estações Especializadas (skills que rodam dentro das 3 sessões)
+Discovery roda as estações 01 a 03; o Builder roda a 04; o Reviewer roda a 05.
 1. Estação 01 (O Líder): Orquestrador único e ponto de contato com o humano.
 2. Estação 02 (PM & Arquiteto): Mapeia ativos existentes (Reuse Check DUP-01), escreve a Spec e exige aprovação humana no Portão FLX-01.
 3. Estação 03 (O Planejador): Fatia a Spec aprovada em subtarefas atômicas P/M/G e popula a fila da iniciativa (queue.json).
-4. Estação 04 (Builders): Implementam código e testes em paralelo para tarefas sem conflito de arquivos e validam no Portão Camada A (forge-sdd gate).
+4. Estação 04 (Builders): Implementam código e testes em paralelo para tarefas sem conflito de arquivos e validam no Portão Camada A (forge gate).
 5. Estação 05 (Analista de Governança): Auditoria estritamente somente-leitura (0 arquivos com permissão de escrita) que impede que o agente aprove o próprio erro, devolvendo falhas para a fila do Builder (05 -> 04).

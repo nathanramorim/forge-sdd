@@ -10,7 +10,7 @@ const {
   title = "Forge-SDD 4.8 — Pipeline de 3 sessões: você decide, o Builder constrói e o Reviewer revisa",
   description = "Framework de desenvolvimento guiado por especificações (SDD) para equipes que usam agentes de IA. Substitui o caos de um único agente por 3 sessões que se falam por uma fila local (Discovery, Builder e Reviewer), com 5 estações especializadas, governança em 3 camadas e portões determinísticos. Funciona com Claude, Gemini, Copilot e Codex.",
   canonicalUrl = "https://forge-sdd.org/",
-  ogImage = "https://forge-sdd.org/og-image.svg"
+  ogImage = "https://forge-sdd.org/og-image.png"
 } = Astro.props;
 
 const softwareApplicationSchema = {
@@ -91,6 +91,10 @@ const faqSchema = {
 <meta property="og:title" content={title} />
 <meta property="og:description" content={description} />
 <meta property="og:image" content={ogImage} />
+<meta property="og:image:type" content="image/png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content="Forge-SDD 4.8, nova versão estável: chat nos workers, fila com drill-down e painel que acompanha a aprovação." />
 <meta property="og:locale" content="pt_BR" />
 
 <!-- Twitter -->
@@ -99,6 +103,7 @@ const faqSchema = {
 <meta name="twitter:title" content={title} />
 <meta name="twitter:description" content={description} />
 <meta name="twitter:image" content={ogImage} />
+<meta name="twitter:image:alt" content="Forge-SDD 4.8, nova versão estável: chat nos workers, fila com drill-down e painel que acompanha a aprovação." />
 
 <!-- Preconnect & Fonts -->
 <link rel="preconnect" href="https://fonts.googleapis.com" />
