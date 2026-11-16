@@ -77,3 +77,55 @@ func TestTokenMetricsPerRole(t *testing.T) {
 	assert.Equal(t, "🪙 0.8k tok", FormatTokenBadge(800))
 	assert.Equal(t, "🪙 0k tok", FormatTokenBadge(0))
 }
+
+func TestCalculateTaskTokenMetrics_ByStageAndTotal(t *testing.T) {
+	tempDir := t.TempDir()
+	metricsDir := filepath.Join(tempDir, "sdd", ".metrics")
+	require.NoError(t, os.MkdirAll(metricsDir, 0o755))
+
+	recs := []map[string]interface{}{
+		{
+			"$schema":       "forge-sdd/metrics/1.0",
+			"feature":       "sdd/discovery/84-painel/discovery.md",
+			"agent_path":    []string{"discovery"},
+			"tokens_input":  8000,
+			"tokens_output": 2000,
+		},
+		{
+			"$schema":       "forge-sdd/metrics/1.0",
+			"feature":       "sdd/discovery/84-painel/features/feat-84-01.md",
+			"phase":         "feat-84-01",
+			"agent_path":    []string{"builder"},
+			"tokens_input":  15000,
+			"tokens_output": 5000,
+		},
+		{
+			"$schema":       "forge-sdd/metrics/1.0",
+			"feature":       "sdd/discovery/84-painel/features/feat-84-01.md",
+			"phase":         "feat-84-01-review",
+			"agent_path":    []string{"reviewer"},
+			"tokens_input":  6000,
+			"tokens_output": 1000,
+		},
+	}
+
+	for i, r := range recs {
+		data, err := json.Marshal(r)
+		require.NoError(t, err)
+		require.NoError(t, os.WriteFile(filepath.Join(metricsDir, fmt.Sprintf("session-2026-11-15T10000%dZ.json", i)), data, 0o644))
+	}
+
+	// 2 tasks na fila: Discovery da iniciativa (10k) é rateado (5k) + Builder (20k) + Reviewer (7k) = 32k
+	m := CalculateTaskTokenMetrics(tempDir, "feat-84-01", "sdd/discovery/84-painel/features/feat-84-01.md", "approved", 2)
+	assert.Equal(t, 5000, m.DiscoveryTokens)
+	assert.Equal(t, 20000, m.BuilderTokens)
+	assert.Equal(t, 7000, m.ReviewerTokens)
+	assert.Equal(t, 32000, m.TotalTokens)
+
+	// Task ainda na fila (queued): Builder e Reviewer permanecem 0
+	mQueued := CalculateTaskTokenMetrics(tempDir, "feat-84-02", "sdd/discovery/84-painel/features/feat-84-02.md", "queued", 2)
+	assert.Equal(t, 5000, mQueued.DiscoveryTokens)
+	assert.Equal(t, 0, mQueued.BuilderTokens)
+	assert.Equal(t, 0, mQueued.ReviewerTokens)
+	assert.Equal(t, 5000, mQueued.TotalTokens)
+}

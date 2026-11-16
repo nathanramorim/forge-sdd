@@ -13,6 +13,7 @@ import (
 	"github.com/forge-sdd/cli/internal/bus"
 	"github.com/forge-sdd/cli/internal/config"
 	"github.com/forge-sdd/cli/internal/layout"
+	"github.com/forge-sdd/cli/internal/monitor"
 	"github.com/forge-sdd/cli/internal/notify"
 )
 
@@ -50,6 +51,8 @@ type WorkerOptions struct {
 	Now       func() time.Time
 	// OnJobDone recebe o desfecho de cada job (telemetria); erros dele são ignorados.
 	OnJobDone func(job bus.Job, outcome string)
+	// FeedFormatter formata eventos de etapas em stream conversacional para humanos.
+	FeedFormatter *monitor.ChatFeedFormatter
 }
 
 // RunWorker é o laço do worker: recupera leases vencidos, reivindica o próximo job, executa o
@@ -153,9 +156,22 @@ func processJob(ctx context.Context, opts WorkerOptions, cfg config.ForgeConfig,
 	// O log guarda a saída bruta completa; o terminal recebe a visão limpa (ou a bruta com --raw).
 	live := NewLiveView(opts.Out, logw, LiveOptions{CLI: opts.CLI, Raw: opts.Raw, Now: opts.Now})
 	var out io.Writer = live
+
+	feed := opts.FeedFormatter
+	if feed == nil {
+		feed = monitor.NewChatFeedFormatter(false, false)
+	}
+	live.Line(feed.FormatEvent(monitor.ChatEvent{
+		Type:   monitor.EventStartTask,
+		Role:   opts.Role,
+		TaskID: job.Feature,
+		Title:  job.Title,
+	}))
 	live.Line(fmt.Sprintf("▶ job %s · %s · tentativa %d · %s · permissões %s", job.Feature, job.Type, job.Attempt, opts.CLI, cfg.Permissions))
 
 	watcher := NewGitWatcher(opts.Dir, opts.Now, live.Activity)
+	watcher.Role = opts.Role
+	watcher.Formatter = feed
 	watchEvery := opts.WatchEvery
 	if watchEvery == 0 {
 		watchEvery = 5 * time.Second
@@ -259,12 +275,21 @@ func processJob(ctx context.Context, opts WorkerOptions, cfg config.ForgeConfig,
 	outcome := OutcomeDone
 	if reason != "" {
 		outcome = OutcomeFailed
+		live.Line(feed.FormatErrorCard("execução", fmt.Errorf("%s", reason), live.Tail(5)))
 		live.Line(fmt.Sprintf("✗ falhou em %s: %s", FormatElapsed(opts.Now().Sub(started)), reason))
 		if _, err := bus.Fail(opts.Dir, opts.Role, job.ID, opts.Name, reason, opts.Now()); err != nil {
 			fmt.Fprintf(opts.Out, "[%s] não foi possível marcar %s como falho: %v\n", opts.Name, job.ID, err)
 		}
 	} else {
-		live.Line(fmt.Sprintf("■ concluído em %s · %d arquivos alterados", FormatElapsed(opts.Now().Sub(started)), watcher.Count()))
+		dur := opts.Now().Sub(started)
+		live.Line(feed.FormatEvent(monitor.ChatEvent{
+			Type:     monitor.EventTaskSuccess,
+			Role:     opts.Role,
+			TaskID:   job.Feature,
+			Duration: dur,
+			Message:  "Handoff despachado para a esteira.",
+		}))
+		live.Line(fmt.Sprintf("■ concluído em %s · %d arquivos alterados", FormatElapsed(dur), watcher.Count()))
 	}
 	if opts.OnJobDone != nil {
 		opts.OnJobDone(job, outcome)

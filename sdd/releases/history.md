@@ -4,6 +4,83 @@ Este arquivo registra o histórico de entregas de produto deste projeto.
 
 ## Entregas
 
+### Versão 4.8.0 — Painel Interativo e Fila que Acompanha a Aprovação (Estável)
+
+Compatível com a 4.6.1. Consolida em versão estável tudo o que foi entregue na linha 4.7.x.
+
+*   **Veja o que cada sessão está fazendo, em linguagem de gente:** o Builder e o Reviewer mostram um stream narrativo, estilo chat (analisando, editando, validando, concluído), no lugar de contadores secos e saída crua de terminal.
+*   **Fila interativa com drill-down:** `forge queue -i` e `forge status -i` listam todas as tasks, sem o corte "... e mais N tarefas", em duas abas: **Na Fila** e **Concluídas**. Um `Enter` abre o detalhe da task: duração, arquivos alterados, laudo do Reviewer, tokens por etapa e o caminho Discovery → Builder → Reviewer.
+*   **Popup no tmux:** `Ctrl+b q` abre a fila por cima dos três painéis e devolve você exatamente onde estava.
+*   **Painel que não mente:** quando o Reviewer aprova um job, a fila, o `forge status` e o painel passam a mostrar as tasks como aprovadas (antes ficavam em 0/N). A iniciativa concluída pode ser arquivada sozinha, e o veredito fica guardado em `sdd/discovery/<iniciativa>/verdicts/`, sem o Reviewer precisar escrever no repositório.
+*   **Menos surpresas no tmux:** abrir as sessões com tokens acumulados não derruba mais o painel para janelas soltas do sistema.
+*   **Documentação com cara de produto:** novo README com banner, selos e guia de instalação e uso em linguagem simples; `LICENSE` MIT; especificação técnica (`sdd/spec/`) alinhada ao código e quatro novas decisões de arquitetura registradas (ADR-0009 a ADR-0012).
+*   **Como atualizar:** `npm install -g @nathanramorim/forge-sdd` e, nos projetos existentes, `forge update`.
+
+### Versão 4.7.7 — Fila e Painel Acompanham a Aprovação do Job (Beta)
+
+Compatível com a 4.7.6-beta (Iniciativa 84 — `fix-84-02`).
+
+*   **A aprovação do Reviewer agora atualiza a fila (`internal/pipeline/review.go`):** ao aplicar o veredito `conforme`, as tasks do job (`TaskIDs`, da iniciativa do job) passam a `approved` no `queue.json`, então `forge status`, `forge queue list` e o painel deixam de ficar em 0/N. A mudança é idempotente e nunca faz uma task aprovada regredir.
+*   **O PR aberto entrega as tasks à revisão (`forge pipeline pr-opened`):** as tasks do job passam a `review_pending` quando o Builder registra o PR.
+*   **Veredito preservado:** o Go guarda uma cópia do veredito em `sdd/discovery/<iniciativa>/verdicts/<job>.json`; o Reviewer segue somente leitura e o arquivo temporário pode ser descartado.
+*   **Fila da iniciativa do job, não da branch atual (`internal/queue/taskstatus.go`):** `SetTaskStatuses` abre o `queue.json` da iniciativa pelo nome, já que Builder e Reviewer podem estar em outra branch.
+
+### Versão 4.7.6 — Legibilidade e Alinhamento em Colunas na Lista de Tarefas (Beta)
+
+Compatível com a 4.7.5-beta (Iniciativa 84 — `feat-84-07`).
+
+*   **Alto contraste no cabeçalho de abas (`internal/survey/queue_drilldown.go`):** move o indicador da aba ativa (`ABA ATIVA: ✅ CONCLUÍDAS (25) │ ⏳ Na Fila / Em Andamento (0)`) para o `Title` principal em destaque, em vez do `Description` acinzentado do `huh`.
+*   **Linhas limpas e alinhadas em colunas sem repetição visual:** na aba de Concluídas, remove a repetição de `[✓] Concluído` e `Disc→Bld→Rev ✓` em todas as 25 linhas e alinha o número da tarefa, o identificador (`50` colunas) e a coluna de tokens (`│ 🪙 10k tok`) verticalmente.
+
+### Versão 4.7.5 — Troca de Aba no Topo da Lista, Sem Quebra de Linha e Dica Clara de Tela Cheia no Tmux (Beta)
+
+Compatível com a 4.7.4-beta (Iniciativa 84 — `feat-84-07`).
+
+*   **Botão de trocar de aba fixo no topo da lista (`internal/survey/queue_drilldown.go`):** a opção **`⇄ [Trocar Aba] Ir para Aba 1 / Aba 2`** agora é sempre o **1º item no topo da lista** (com o cursor iniciando direto na 1ª tarefa logo abaixo), permitindo alternar entre as abas com apenas uma seta para cima (`↑` + `Enter`) sem precisar rolar até o final quando há 25+ tarefas.
+*   **Eliminação de repetição de ID e quebra de linha na lista (`cleanTaskDisplay`):** remove a repetição redundante quando o título em `queue.json` repete o `TaskID` (`Feature: <task_id>`), mantendo todas as linhas da fila em linha única.
+*   **Linguagem clara na dica do atalho `Ctrl+b z` (`internal/pipeline/tmux.go`):** substitui o termo ambíguo `"z zoom"` por **`Ctrl+b z tela cheia/voltar`** (`[z] Tela Cheia/Voltar`), deixando claro que o atalho expande o painel atual em tela cheia e volta aos 3 painéis ao pressionar novamente.
+
+### Versão 4.7.4 — Layout Sem Bordas Direitas e Separação em 2 Abas (Na Fila vs. Concluídas) (Beta)
+
+Compatível com a 4.7.3-beta (Iniciativa 84 — `feat-84-07`).
+
+*   **Blocos de detalhe abertos à direita (`internal/survey/task_detail.go`):** substitui a caixa fechada nos 4 lados (`┌─...─┐` / `│...│`) por blocos com borda apenas à esquerda (`╭───` / `│` / `├───` / `╰───`), eliminando em definitivo qualquer desalinhamento ou quebra de layout causada por emojis, acentos ou largura do terminal.
+*   **Separação em 2 Abas (`1. Na Fila / Em Andamento` e `2. Concluídas`) (`internal/survey/queue_drilldown.go`):** divide a listagem interativa em duas listas independentes com alternância direta no menu (`⇄ Ver Aba 2: ✅ Concluídas` / `⇄ Ver Aba 1: ⏳ Na Fila / Em Andamento`) e formatação fluida que não quebra quando o `TaskID` é extenso.
+
+### Versão 4.7.3 — UX dos Botões de Ação no Painel e Menu Interativo (Beta)
+
+Compatível com a 4.7.2-beta (Iniciativa 84 — `feat-84-07`).
+
+*   **Ações claras no card de detalhes da tarefa (`internal/survey/task_detail.go` e `cmd/forge-sdd/queue.go`):** substitui os dois botões idênticos `[ Voltar ]  [ Voltar ]` por ações distintas e identificadas: **`← Voltar à lista`** (retorna para a lista de tarefas) e **`✕ Fechar painel`** (fecha o popup/modal imediatamente).
+*   **Remoção do botão duplicado na pausa do menu (`internal/survey/select.go`):** substitui o componente de confirmação com dois botões repetidos `[ Voltar ao menu ]  [ Voltar ao menu ]` por uma opção única **`← Voltar ao menu`**.
+
+### Versão 4.7.2 — UX da Fila (Separação Ativas vs. Concluídas, Esteira Discovery→Builder→Reviewer, Tokens por Etapa e Dicas no Tmux) (Beta)
+
+Compatível com a 4.7.1-beta (Iniciativa 84 — `feat-84-07`).
+
+*   **Separação de tarefas `Na Fila / Em Andamento` vs. `Concluídas` (`internal/survey/queue_drilldown.go`):** as tarefas ativas ou aguardando na fila aparecem agrupadas no topo (`[FILA]`) e as concluídas ficam separadas abaixo (`[CONCLUÍDA]`), exibindo em qual etapa da esteira `Discovery ──► Builder ──► Reviewer` cada tarefa está e seu consumo de tokens (`🪙 Xk`).
+*   **UX e Tokens por Etapa no Card de Detalhes da Tarefa (`internal/survey/task_detail.go` e `internal/monitor/tokens.go`):**
+    *   Seção visual dedicada da esteira: `[✓ 1. Discovery] ──► [✓ 2. Builder] ──► [✓ 3. Reviewer]`.
+    *   Seção de consumo de tokens discriminado por etapa (`1. Discovery`, `2. Builder`, `3. Reviewer`) e **Total da Tarefa**, além de estimativa automática gravada pelo worker (`cmd/forge-sdd/worker.go`) ao encerrar cada job.
+    *   Alinhamento exato das bordas direitas (`│`) com cálculo de largura visual Unicode/emojis (78 colunas).
+*   **Dicas dinâmicas de atalhos na barra inferior direita do Tmux (`internal/pipeline/tmux.go`):** exibe dicas rotativas (`💡 Dica: Ctrl+b q abre Fila`, `💡 Dica: Ctrl+b Setas navega · z zoom`, e guia imediato `⌨️ [q] Fila/Detalhes · [Setas] Painel · [z] Zoom` ao pressionar `Ctrl+b`) ao lado do resumo de tokens, usando `-t <sessão>` sem prefixo `=`.
+
+### Versão 4.7.1 — Fix no Tmux: Correção do Alvo em status-right com Tokens Acumulados (Beta)
+
+Compatível com a 4.7.0-beta.
+
+*   **Correção definitiva da abertura agrupada no tmux quando há tokens acumulados:** substitui o alvo com prefixo `=` (`=forge-<projeto>-<hash>`) pelo nome direto da sessão (`forge-<projeto>-<hash>`) nos passos `tmux set-option -t <sessão> status-right` e `status-right-length` em ambos os modos (`live` e `headless`). No tmux 3.8+, `set-option -t =<sessão>` falha com `exit status 1 (no such session)`, o que derrubava a sessão recém-criada e disparava indevidamente o fallback de 3 janelas separadas do sistema sempre que `totalTokens > 0`.
+*   **Teste de integração real com tmux (`FORGE_TMUX_REAL=1`):** inclui verificação ponta a ponta com métricas de tokens populadas em `sdd/.metrics/` contra um servidor tmux real e corrige a inspeção de painéis com `base-index 1`.
+
+### Versão 4.7.0 — Painel Interativo: Stream Narrativo nos Workers, Fila com Drill-Down e Popup no Tmux (Beta)
+
+Compatível com a 4.6.1 (Iniciativa 84). Sem breaking changes.
+
+*   **Stream narrativo estilo chat no Builder e no Reviewer:** o heartbeat monótono (`trabalhando há 4m40s · 3 arquivos alterados`) dá lugar a etapas legíveis (💭 analisando, 🔨 editando, 🧪 validando, ✅ concluído, ❌ falha com as últimas linhas relevantes). Há fallback ASCII para terminais sem Unicode.
+*   **Fila interativa com drill-down:** `forge queue -i` e `forge status -i` listam 100% das tasks (sem o corte "... e mais N tarefas") com badge de status. Setas navegam, `Enter` abre o detalhe da task (duração, arquivos alterados, commit, laudo do Reviewer) e `Esc`/`q` volta. Usa Alternate Screen Buffer e não suja o histórico do terminal.
+*   **Popup no tmux sem sair da tela:** `Ctrl+b q` abre a fila em popup (85% da janela) por cima dos 3 painéis e, ao fechar, você volta exatamente onde estava.
+*   **Governança:** PR #78 aprovado pela Camada B na tentativa 2 de 3 (duplicação de `bind-key` corrigida, `COD-01`).
+
 ### Versão 4.6.0 — Unificação Canônica do Comando `forge`, Painel Vivo Executivo e Gestão Suave de Tokens
 
 Compatível com a 4.5.2-beta (Iniciativas 80, 81 e 82).

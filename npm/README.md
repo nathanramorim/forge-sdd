@@ -1,186 +1,121 @@
-# @nathanramorim/forge-sdd
+<p align="center">
+  <img src="https://raw.githubusercontent.com/nathanramorim/forge-sdd/main/docs/img/banner.png" alt="forge-sdd: seu time de IA, com método" width="100%">
+</p>
 
-[![NPM Version](https://img.shields.io/npm/v/@nathanramorim/forge-sdd)](https://www.npmjs.com/package/@nathanramorim/forge-sdd)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+<p align="center">
+  <a href="https://www.npmjs.com/package/@nathanramorim/forge-sdd"><img alt="npm" src="https://img.shields.io/npm/v/@nathanramorim/forge-sdd?label=npm&color=cb3837&labelColor=0d0f14"></a>
+  <a href="https://github.com/nathanramorim/forge-sdd/releases"><img alt="versão" src="https://img.shields.io/github/v/tag/nathanramorim/forge-sdd?label=vers%C3%A3o&color=4f8ef7&labelColor=0d0f14"></a>
+  <img alt="licença" src="https://img.shields.io/badge/licen%C3%A7a-MIT-3ecf8e?labelColor=0d0f14">
+  <img alt="agentes" src="https://img.shields.io/badge/agentes-Claude%20·%20Gemini%20·%20Copilot%20·%20Codex-8aa4ff?labelColor=0d0f14">
+</p>
 
-> CLI open source que instala em qualquer projeto a **Metodologia Forge-SDD** — um framework de desenvolvimento guiado por IA que elimina a repetição de instruções, garante padrões arquiteturais e traz a expertise de um engenheiro sênior para o seu fluxo diário.
+<h3 align="center">Seu time de IA, com método.<br>Do plano ao PR, sem repetir instruções.</h3>
 
-🚀 **Landing Page Oficial:** [forge-sdd.vercel.app](https://forge-sdd.vercel.app)
-📖 **Wiki & Documentação Completa:** [Wiki do Forge-SDD](https://forge-sdd.vercel.app/wiki#introducao)
+<p align="center">
+  <a href="https://forge-sdd.org">Site oficial</a> ·
+  <a href="https://github.com/nathanramorim/forge-sdd/blob/main/docs/comandos.md">Comandos</a> ·
+  <a href="https://github.com/nathanramorim/forge-sdd/blob/main/docs/pipeline.md">Pipeline</a> ·
+  <a href="https://github.com/nathanramorim/forge-sdd/blob/main/docs/metodologia-sdd.md">Metodologia</a>
+</p>
 
 ---
 
-## ⚡ O que é o forge-sdd?
+## O que é
 
-O **forge-sdd** nasceu para **mudar a dinâmica de desenvolvimento orientado a IA**. Ele resolve o desafio de manter a consistência, qualidade e velocidade do desenvolvimento através de agentes de IA locais especializados (Orquestrador, Builder, Revisor, etc.) operando sob a metodologia SDD (Software Design Doc).
+Quando você trabalha com uma IA, precisa repetir as mesmas instruções a cada conversa: como o projeto é organizado, quais regras seguir, o que já foi decidido.
 
-Para conhecer todos os comandos disponíveis (`/status`, `/discovery`, `/nova-feature`, etc.), guias rápidos de início do zero e adoção em projetos existentes, acesse a nossa **[Landing Page Oficial](https://forge-sdd.vercel.app)** ou a **[Wiki do Projeto](https://forge-sdd.vercel.app/wiki#introducao)**.
+O **forge-sdd** resolve isso. Ele instala no seu projeto um conjunto de regras, comandos e agentes de IA que trabalham em etapas e lembram do que importa. Você conversa, planeja e aprova. A IA constrói e outra IA confere o resultado.
 
----
+## Como funciona
 
-## 💻 Instalação & Inicialização Rápida
+Você usa três sessões de IA ao mesmo tempo:
 
-Você pode rodar diretamente via `npx` ou instalar globalmente para ter o comando simplificado `forge` à disposição:
+| Sessão | O que faz |
+|---|---|
+| **1. Discovery** | É onde você conversa e planeja a ideia. |
+| **2. Builder** | Constrói em paralelo e abre o PR. |
+| **3. Reviewer** | Confere as regras e as decisões, e devolve com comentários (até 3 vezes). |
 
-### Via Instalação Global (Recomendado)
+Quando o PR está conforme, você é avisado na sessão de Discovery e faz a aprovação final.
+
+## Por que usar
+
+| | |
+|---|---|
+| 🧠 **A IA lembra do projeto** | Regras e decisões ficam em arquivos do projeto, não na sua cabeça. |
+| 🔍 **Revisão independente** | Quem confere não é quem construiu. |
+| 🔁 **Uma fonte para vários agentes** | Claude, Gemini, Copilot e Codex leem as mesmas regras. |
+| 🛡️ **Você decide** | Nada é entregue sem a sua aprovação final. |
+
+## Antes de começar
+
+- **Node.js** (para instalar pelo npm).
+- Pelo menos um agente de IA: **Claude Code**, **Gemini**, **Copilot** ou **Codex**.
+- Opcional: **tmux**, para ver as três sessões numa tela só.
+
+## Instalação
+
 ```bash
-# Instale globalmente no seu sistema
 npm install -g @nathanramorim/forge-sdd
-
-# Inicialize de forma simples em qualquer projeto
 forge init
 ```
 
-### Via Execução Direta (npx)
+Prefere não instalar? Use o `npx`:
+
 ```bash
-# Inicialização interativa (escolha os agentes no menu)
 npx @nathanramorim/forge-sdd@latest init
-
-# Inicialização rápida no diretório atual
-npx @nathanramorim/forge-sdd@latest init . --agent copilot,gemini --name meu-projeto
 ```
 
-## Orquestração Independente, Portão de Governança (A/B/C), Constituição por IDs e Auto-Skills (v3.0.0-beta)
+O pipeline de três sessões já vem na versão estável. Para já instalar a próxima prévia, use `@beta`.
 
-> **De um agente solitário para uma esteira de 5 especialistas trabalhando em paralelo por você.**
-> Na versão 3.0, você alinha a visão com o **Líder**, aprova a planta do projeto e aciona uma linha de produção autônoma: planejadores, construtores em paralelo e um auditor independente entregam o software validado em um **Painel Executivo** para sua decisão final.
+## Como usar
 
-```mermaid
-flowchart LR
-    subgraph Voce["VOCÊ // DIREÇÃO E APROVAÇÃO"]
-        V1["01. Alinha a demanda"]
-        V2["02. Aprova a especificação"]
-        V3["03. Recebe o Painel Executivo"]
-    end
+**1. Comece o pipeline.** Rode `forge` e escolha *Pipeline multi-sessão → Iniciar as 3 sessões*. O menu pergunta qual agente roda em cada sessão e lembra da sua escolha.
 
-    subgraph Equipe["FORGE-SDD 3.0 // ESTEIRA AUTÔNOMA EM 5 ESTAÇÕES"]
-        direction TB
-        E1["01 // LÍDER (Orquestrador)<br/>Coordena as estações e reporta a você"]
-        E2["02 // PRODUTO & ARQUITETO<br/>Especificação técnica e verificação de reuso"]
-        E3["03 // PLANEJADOR<br/>Decompõe em tarefas e vincula regras"]
+**2. Alinhe o projeto.** Em projetos novos, comece com `/constitution`. Ele registra a missão, a stack e as decisões antes da primeira feature. Para saber se o projeto está pronto, rode `forge brief --check`; sem `--check`, `forge brief` imprime o resumo das decisões.
 
-        subgraph Paralelo["EXECUÇÃO SIMULTÂNEA // FILA DETERMINÍSTICA"]
-            B1["04A // BUILDER A<br/>Frente Independente 1"]
-            B2["04B // BUILDER B<br/>Frente Independente 2"]
-        end
+**3. Planeje e construa.** Na sessão Discovery:
 
-        E5["05 // AUDITOR DE GOVERNANÇA<br/>(Somente Leitura — audita arquitetura,<br/>boas práticas e segurança)"]
-        SK["MOTOR AUTO-SKILLS<br/>Padrões recorrentes (3x) viram<br/>habilidades reutilizáveis automaticamente"]
-    end
+| Comando | Para que serve |
+|---|---|
+| `/discovery <ideia>` | Planejar uma ideia |
+| `/split-features` | Dividir o plano em tarefas para o Builder |
+| `/implementar <feature>` | Construir uma feature |
+| `/revisar` | Conferir o resultado |
+| `/status` | Ver o andamento e o próximo passo |
+| `/tutorial` | Aprender o ciclo com um exemplo |
 
-    V1 --> E1
-    E1 --> E2
-    E2 -->|"Portão FLX-01"| V2
-    V2 -->|"Aprovado"| E3
-    E3 --> B1 & B2
-    B1 & B2 --> E5
-    E5 -->|"Laudo técnico"| E1
-    E5 -.->|"Cataloga padrão"| SK
-    E1 -->|"O que foi feito, estado por etapa<br/>e o que resta no backlog"| V3
-```
+Veja todos em [docs/comandos.md](https://github.com/nathanramorim/forge-sdd/blob/main/docs/comandos.md).
 
-| Estação | Função Executiva | Responsabilidade na Esteira |
-| :--- | :--- | :--- |
-| **01 // Líder** | *Gerente de Operações* | Único ponto de contato humano. Aciona as estações e consolida o **Painel Executivo (Camada C)** (*o que foi feito, status de cada etapa e o que falta*). |
-| **02 // Produto & Arquiteto** | *Autoria da Especificação* | Desenha a solução e verifica o que já existe (`Reuse Check`). **Nenhuma implementação inicia sem sua aprovação na especificação (`FLX-01`).** |
-| **03 // Planejador** | *Engenharia de Plano* | Decompõe a especificação aprovada em tarefas atômicas e seleciona apenas os módulos de regras aplicáveis a cada tarefa. |
-| **04 // Builders** | *Execução em Fila* | Consomem tarefas de uma **fila determinística** (`forge-sdd queue`): frentes independentes rodam **em paralelo**; dependências aguardam liberação. |
-| **05 // Governança** | *Auditoria Independente* | **Sem permissão de escrita em código.** Audita se a entrega respeitou arquitetura, boas práticas e segurança antes de devolver ao Líder. |
+## Guias
 
-### Destaques Técnicos da `v3.0.0-beta`
-*   **5 Estações Coordenadas (`.agents/roles/`):** fonte canônica única dos papéis com adaptadores finos para Claude Code, Gemini e GitHub Copilot.
-*   **Constituição por IDs Estáveis + Rules Modulares (`.agents/rules/sdd-*.md`):** `sdd/memory/constitution.md` mantém "o quê e por quê" enxuto com IDs (`ARQ`, `SEG`, `DUP`, `COD`, `TST`, `FLX`, `GOV`), enquanto as rules detalham "como cumprir" sob demanda sem duplicar texto (`GOV-04`).
-*   **Fila do Builder (`forge-sdd queue`) e Portão em 3 Camadas (`forge-sdd gate`):** exige seção `"O que já existe"` (Reuse Check `DUP-02`) na Spec, roda checks determinísticos `P-xx` (Camada A) e valida o parecer JSON baseado em evidências do Analista de Governança (Camada B) antes da aprovação humana no Líder (Camada C).
-*   **Auto-Skills (`forge-sdd skills`) e Pacotes de Governança (`forge-sdd governance`):** atividades padronizadas repetidas viram skills reutilizáveis em `.agents/skills/` sincronizadas para `.claude/skills/` e `.gemini/skills/`.
-
----
-
-## 📢 Novidades da Versão Anterior (v2.4.0) — Telemetria com Cobertura Total e Relatório de Métricas
-
-*   **Nenhuma sessão perdida:** `/discovery`, `/split-features`, `/nova-feature` e `/archive` agora gravam telemetria automaticamente, junto dos comandos que já gravavam (`/proxima-feature`, `/revisar`, `/novo-fix`) — antes, uma sessão que passasse só por esses quatro comandos não deixava rastro nenhum em `sdd/.metrics/`.
-*   **Novo comando `forge-sdd report`:** mostra, por feature/fix/discovery, tokens gastos, modelos de IA usados, duração de cada sessão, e há quanto tempo (medido pela telemetria) o projeto está ativo.
-
-📢 [Ver todas as entregas desta versão](https://github.com/nathanramorim/forge-sdd/blob/main/sdd/releases/history.md)
-
----
-
-## 📢 Novidades da Versão Anterior (v2.3.0) — Ergonomia de Comandos e Sincronização
-
-Primeira versão estável desde a v1.9.4 — acumula e promove para `main` todo o ciclo beta v2.0.0 → v2.2.0 → v2.3.0 (Forge-SDD Slim, Agent Rules e esta entrega).
-
-*   **Comando do Claude corrigido:** `.claude/commands/*.md` (sem o sufixo `.prompt`) — o Claude Code descobre slash commands pelo nome do arquivo sem `.md`, então `nova-feature.prompt.md` registrava `/nova-feature.prompt`, não `/nova-feature`, quebrando o comando recomendado por todo handoff. Gemini/Copilot não mudam — mantêm `.prompt.md`, que é a convenção correta de cada um. `forge-sdd update` limpa o nome antigo automaticamente.
-*   **`.agent/` renomeada para `.agents/`:** ajuste de nome da fonte única de agente antes de qualquer publicação estável; `forge-sdd update` migra projetos que já tinham `.agent/`, preservando `rules/` do usuário.
-*   **`/status` agora sincroniza com o remoto:** roda `git fetch` e compara ahead/behind antes do relatório; se o VCS configurado for GitHub, cruza `gh pr list` com `sdd/features/index.md` e aponta branches órfãs ou PRs não referenciados numa nova seção "Divergência Remota" — evita decisões tomadas com base em estado desatualizado.
-*   **Clarify em `/nova-feature`, `/novo-fix` e `/discovery`:** os três comandos agora avaliam a descrição recebida contra sinais objetivos de ambiguidade (critério de aceitação ausente, escopo com mais de uma leitura, dependência externa não citada) e só perguntam ao usuário quando detectam lacuna real — pedidos já claros seguem direto, sem fricção.
-*   **Confirmação de delegação a subagente:** o passo `PLAN` do lifecycle (todo agente, todo comando) agora pergunta objetivamente se a próxima atividade deve ser delegada a um subagente, com critério documentado — decisão deixa de ser implícita.
-*   **Cheat-sheet do `init` corrigido:** a descrição de cada comando no resumo impresso ao final do `init`/`update` volta a mostrar o uso real (ex: `Peça "/archive"...`) em vez da frase de redirect interno introduzida pelos adaptadores `.claude/`/`.gemini/`.
-
-📢 [Ver todas as entregas desta versão](https://github.com/nathanramorim/forge-sdd/blob/main/sdd/releases/history.md)
-
----
-
-## 📢 Novidades da Versão Anterior (v2.2.0-beta) — uma fonte, três agentes, sem duplicar
-
-*   **`.agents/rules/` — regras de domínio compartilhadas:** declare design system, arquitetura, acessibilidade e outras convenções do seu projeto em `.agents/rules/*.md`, uma pasta neutra fora de `.claude/`/`.gemini/`/`.github/`. Qualquer agente configurado consulta o mesmo arquivo — nada para copiar entre eles.
-*   **`.agents/commands/` — comandos com corpo único, não mais triplicado:** os 13 comandos SDD (`/discovery`, `/proxima-feature`, etc.) agora têm um corpo de instrução canônico em `.agents/commands/`. `.claude/commands/`, `.gemini/prompts/` e `.github/prompts/` continuam existindo (é assim que cada ferramenta descobre o comando), mas viram adaptadores finos que apontam para o corpo compartilhado — uma mudança de comportamento passa a ser editada uma vez, não três.
-*   **`forge-sdd update` migra sem perder nada:** projetos existentes ganham `.agents/rules/` e `.agents/commands/` automaticamente ao atualizar, sem tocar em `sdd/features/`, `sdd/discovery/`, `sdd/fix/*` ou `progress.md`. Regras já criadas em `.agents/rules/` nunca são sobrescritas.
-*   **Branch única por feature quebrada em subpastas:** ao trabalhar em uma feature dividida em subtarefas (`sdd/features/feat-XX-nome/`), os agentes (`/nova-feature`, `/proxima-feature`, `/novo-fix`) agora tratam a pasta inteira como uma única branch — em vez de uma por subtarefa.
-*   **Pergunta obrigatória de branch de partida e retomada:** antes de criar uma branch, os agentes perguntam de onde partir (default `main`) e verificam se já existe uma branch da mesma feature/fix para continuar, em vez de recriar do zero.
-
----
-
-## 📢 Novidades da Versão Anterior (v2.0.0-beta — Forge-SDD Slim)
-
-A metodologia continua completa — só ficou mais fácil de confiar nela.
-
-*   **Telemetria que não falha mais em silêncio:** a gravação de métricas de sessão deixou de depender de um passo tardio de um prompt longo — agora é um comando determinístico do próprio binário, disparado em todos os pontos onde uma sessão pode terminar.
-*   **Os agentes aprendem com os próprios fixes:** novo `sdd/memory/lessons.md` registra automaticamente padrões de erro já corrigidos e é consultado por Builder/Revisor antes de implementar ou revisar.
-*   **MCPs e VCS configuráveis por projeto:** declare na Constituição se o seu projeto usa GitHub, Azure DevOps ou nenhum VCS automatizado, e quais MCPs realmente respondem — sem mais suposições incondicionais.
-*   **Um fluxo, uma fonte da verdade:** o pipeline por feature agora vive em um único lugar (`sdd/FLOW.md`), não em três descrições que podiam divergir.
-*   **Menos duplicação nos bastidores:** a lógica de nomenclatura, antes copiada em ~14 lugares, agora vive em um único arquivo — mesma capacidade, menos superfície para manter.
-
----
-
-## 📢 Novidades da Versão Anterior (v1.9.4)
-
-*   **Telemetria funcionando para todos os agentes:** Antes, a gravação de métricas de uso ao final de uma sessão só acontecia de fato ao usar o agente Gemini — Claude e Copilot silenciosamente deixavam de registrar telemetria mesmo com a opção ativada no projeto. Agora os três agentes gravam a telemetria corretamente ao concluir uma feature ou correção.
-
----
-
-## 📢 Novidades da Versão Anterior (v1.9.3)
-
-Release apenas de documentação: sincroniza a seção "Novidades" com o estado real do projeto, sem alteração de código/comportamento.
-
----
-
-## 📢 Novidades da Versão Anterior (v1.9.1)
-
-Esta release estável consolidou todo o ciclo de betas desde a v1.7.0:
-
-*   **Convenção de Nomenclatura Configurável:** Escolha entre nomenclatura `sequencial`, `hash` ou `workitem` no `init`, com auto-healing e detecção de deriva de convenção no `doctor` para projetos existentes.
-*   **Onboarding Mais Simples:** `init` agora imprime um cheat-sheet dos comandos disponíveis, `/status` sempre sugere o próximo passo, e um novo comando `/tutorial` guia um ciclo SDD completo fictício para quem está começando.
-*   **Modo Iniciante:** `/constitution` pode gerar explicações em linguagem simplificada, com exemplos no lugar de jargão técnico.
-*   **Comando `forge-sdd autopilot`:** Ativa o modo autopilot somente após um número mínimo de ciclos completos registrados em telemetria, com bypass consciente via flag.
-*   **Telemetria Mais Confiável e Diagnósticos Adicionais no `doctor`:** Estimativa real de tokens de entrada/saída, ativação/desativação dinâmica baseada no `.sddrc`, e novas checagens de nome padrão de projeto e caminho de métricas.
-
----
-
-## 📢 Novidades da Versão Anterior (v1.9.0-beta)
-
-Esta versão trouxe o atalho global de execução `forge`, uma interface de onboarding pós-instalação e melhorias focadas em reduzir a curva de aprendizado do Forge-SDD:
-
-*   **Atalho Global (`forge`) e Onboarding Pós-Instalação:** Agora você pode acionar todos os comandos da CLI simplesmente usando `forge` (ex: `forge init`, `forge doctor`). Ao instalar o pacote globalmente, uma tela de boas-vindas interativa e instrutiva é exibida com o guia dos comandos.
-*   **Cheat-Sheet de Comandos:** O `forge init` agora imprime a lista completa dos comandos SDD disponíveis para os agentes escolhidos ao final da inicialização.
-*   **`/status` Prescritivo:** O comando `/status` (Copilot, Claude e Gemini) agora sempre sugere o próximo comando a ser executado, com base no estado real do progresso do projeto.
-*   **Diagnóstico de Deriva de Nomenclatura:** O comando `doctor` passa a detectar quando um projeto mistura a nomenclatura sequencial (`feat-NN`) com a nomenclatura por hash (`feat-xxxx`), alertando o usuário sobre a inconsistência.
-*   **Comando `autopilot`:** Novo comando CLI que ativa o modo autopilot somente após um número mínimo de ciclos completos registrados em telemetria, com bypass consciente disponível via flag.
-
----
-
-## Links Úteis
-
-- [GitHub Repository](https://github.com/nathanramorim/forge-sdd)
-- [Landing Page](https://forge-sdd.vercel.app)
+- [Pipeline multi-sessão](https://github.com/nathanramorim/forge-sdd/blob/main/docs/pipeline.md)
 - [Metodologia SDD](https://github.com/nathanramorim/forge-sdd/blob/main/docs/metodologia-sdd.md)
-- [Telemetria e Métricas](https://github.com/nathanramorim/forge-sdd/blob/main/docs/telemetria.md)
-- [Licença MIT](https://github.com/nathanramorim/forge-sdd/blob/main/LICENSE)
+- [Arquitetura e fluxo](https://github.com/nathanramorim/forge-sdd/blob/main/docs/arquitetura-e-fluxo-forge-sdd.md)
+- [Skills](https://github.com/nathanramorim/forge-sdd/blob/main/docs/skills.md)
+- [Telemetria e métricas](https://github.com/nathanramorim/forge-sdd/blob/main/docs/telemetria.md)
+
+## Privacidade
+
+A telemetria é opcional e fica no seu projeto. No modo `forge worker --raw`, a saída aparece sem máscara de segredos; use com cuidado.
+
+## Versões
+
+| Versão | Novidades |
+|---|---|
+| **4.8.0** | Versão estável do painel interativo: stream de chat nos workers, fila com abas e drill-down, popup no tmux e fila que acompanha a aprovação do Reviewer. |
+| **4.6.x** | Comando único `forge`, painel vivo executivo e tokens por janela com reset suave. |
+| **4.2.0-beta** | Pipeline multi-sessão: Discovery, Builder e Reviewer trabalhando juntos. |
+| **3.0.0-beta** | Esteira de 5 especialistas, portão de governança (A/B/C), regras por ID e auto-skills. |
+| **2.2.0-beta** | Regras e comandos compartilhados em `.agents/`, uma fonte para vários agentes. |
+| **2.0.0-beta** | Versão enxuta: telemetria confiável, `lessons.md` e um fluxo único em `sdd/FLOW.md`. |
+
+Histórico completo: [sdd/releases/history.md](https://github.com/nathanramorim/forge-sdd/blob/main/sdd/releases/history.md).
+
+## Contribuir
+
+Veja o [guia de contribuição](https://github.com/nathanramorim/forge-sdd/blob/main/CONTRIBUTING.md).
+
+## Licença
+
+[MIT](https://github.com/nathanramorim/forge-sdd/blob/main/LICENSE)

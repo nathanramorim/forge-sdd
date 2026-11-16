@@ -1,0 +1,33 @@
+{
+  "$schema": "forge-sdd/metrics/1.0",
+  "feature": "sdd/discovery/84-painel-interativo-chat-e-fila-drilldown/features/feat-84-07-ux-fila-pipeline-tokens-e-dicas-tmux.md",
+  "agent_path": [
+    "pm-architect",
+    "builder"
+  ],
+  "tokens_input": 14000,
+  "tokens_output": 4500,
+  "turns": 0,
+  "duration_seconds": 0,
+  "criterio_atendido": true,
+  "model": "",
+  "rework_lines": 0,
+  "context7_calls": 0,
+  "git_calls": 0,
+  "files_touched": [
+    "internal/monitor/tokens.go",
+    "internal/monitor/tokens_test.go",
+    "internal/survey/queue_drilldown.go",
+    "internal/survey/queue_drilldown_test.go",
+    "internal/survey/task_detail.go",
+    "internal/survey/task_detail_test.go",
+    "internal/pipeline/tmux.go",
+    "internal/pipeline/tmux_test.go",
+    "cmd/forge-sdd/worker.go",
+    "cmd/forge-sdd/main.go",
+    "npm/package.json",
+    "sdd/releases/history.md"
+  ],
+  "outcome": "approved",
+  "sdd_version": "4.5.0-beta"
+}

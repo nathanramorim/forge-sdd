@@ -6,13 +6,17 @@ import (
 	"os"
 	"os/exec"
 	"os/signal"
+	"path/filepath"
+	"strconv"
 	"syscall"
 	"time"
 
 	"github.com/forge-sdd/cli/internal/bus"
 	"github.com/forge-sdd/cli/internal/config"
 	"github.com/forge-sdd/cli/internal/layout"
+	"github.com/forge-sdd/cli/internal/monitor"
 	"github.com/forge-sdd/cli/internal/pipeline"
+	"github.com/forge-sdd/cli/internal/queue"
 	"github.com/spf13/cobra"
 )
 
@@ -46,8 +50,14 @@ Reviewer: exige que o agente aplique o veredito (forge bus review).`,
 			DeliverTarget: deliver,
 			Out:           cmd.OutOrStdout(),
 			OnJobDone:     recordJobTelemetry(dir, role),
+			FeedFormatter: WorkerFeedFormatter(),
 		})
 	},
+}
+
+// WorkerFeedFormatter cria o formatador padrão de feed narrativo para o worker.
+func WorkerFeedFormatter() *monitor.ChatFeedFormatter {
+	return monitor.NewChatFeedFormatter(false, false)
 }
 
 // recordJobTelemetry registra uma sessão por job, chamando o próprio binário com argv explícito.
@@ -69,11 +79,37 @@ func recordJobTelemetry(dir, role string) func(job bus.Job, outcome string) {
 		if !ok {
 			result = "blocked"
 		}
+		tokensIn, tokensOut := estimateJobTokens(dir, role, job)
 		ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 		defer cancel()
 		_ = exec.CommandContext(ctx, self, "session", "record", "--dir", dir, "--feature", job.SpecPath, "--phase", job.ID,
-			"--agent-path", role, "--outcome", result, fmt.Sprintf("--criterio-atendido=%t", ok)).Run()
+			"--agent-path", role, "--outcome", result, fmt.Sprintf("--criterio-atendido=%t", ok),
+			"--tokens-input", strconv.Itoa(tokensIn),
+			"--tokens-output", strconv.Itoa(tokensOut),
+		).Run()
 	}
+}
+
+// estimateJobTokens estima os tokens de entrada e saída do job a partir da Spec e do log do worker.
+func estimateJobTokens(dir, role string, job bus.Job) (int, int) {
+	specBytes := 4000
+	if job.SpecPath != "" {
+		specFull := job.SpecPath
+		if dir != "" && !filepath.IsAbs(specFull) {
+			specFull = filepath.Join(dir, specFull)
+		}
+		if info, err := os.Stat(specFull); err == nil && !info.IsDir() && info.Size() > 0 {
+			specBytes = int(info.Size())
+		}
+	}
+	logPath := filepath.Join(layout.Logs(dir), role+"-"+job.ID+".log")
+	logBytes := 2000
+	if info, err := os.Stat(logPath); err == nil && !info.IsDir() && info.Size() > 0 {
+		logBytes = int(info.Size())
+	}
+	tokensIn := monitor.EstimateTokensFromBytes(specBytes * 4)
+	tokensOut := monitor.EstimateTokensFromBytes(logBytes)
+	return tokensIn, tokensOut
 }
 
 var pipelinePROpenedCmd = &cobra.Command{
@@ -90,8 +126,13 @@ var pipelinePROpenedCmd = &cobra.Command{
 		number, _ := cmd.Flags().GetInt("number")
 		url, _ := cmd.Flags().GetString("url")
 		branch, _ := cmd.Flags().GetString("branch")
-		if _, err := bus.UpdatePR(dir, layout.RoleBuilder, id, worker, number, url, branch, time.Now()); err != nil {
+		entry, err := bus.UpdatePR(dir, layout.RoleBuilder, id, worker, number, url, branch, time.Now())
+		if err != nil {
 			return err
+		}
+		// O PR aberto entrega as tasks do job à revisão: a fila e o painel passam a refletir isso.
+		if _, err := queue.SetTaskStatuses(dir, entry.Job.Initiative, entry.Job.TaskIDs, queue.StatusReviewPending); err != nil {
+			return fmt.Errorf("atualizar a fila da iniciativa: %w", err)
 		}
 		fmt.Fprintf(cmd.OutOrStdout(), "PR #%d registrado no job %s\n", number, id)
 		return nil

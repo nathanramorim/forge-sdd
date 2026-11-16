@@ -12,8 +12,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// version é injetada via ldflags: -X main.version=4.6.1
-var version = "4.6.1"
+// version é injetada via ldflags: -X main.version=4.8.0
+var version = "4.8.0"
 
 var rootCmd = &cobra.Command{
 	Use:   "forge",

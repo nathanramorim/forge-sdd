@@ -36,7 +36,7 @@ export const EMU_STEPS: EmuStepData[] = [
     speech: 'Abri o menu direto do forge, selecionei os agentes com 1 Enter e a esteira abriu com o projeto claramente identificado no tmux.',
     logHtml: `
       <div class="cmd-input">$ forge</div>
-      <div class="accent">Forge SDD v4.4.1 — checkout-api (pronta · feat/12-pix)</div>
+      <div class="accent">Forge SDD v4.8.0 — checkout-api (pronta · feat/12-pix)</div>
       <div class="dim">▸ 1. Iniciar as 3 sessões do pipeline (Discovery, Builder, Reviewer)</div>
       <div class="dim">  2. Status das iniciativas e da esteira</div>
       <div class="dim">  3. Fila de tasks e inbox de notificações</div>

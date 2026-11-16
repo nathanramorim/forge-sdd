@@ -3,12 +3,15 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"os"
+	"path/filepath"
 	"testing"
 	"time"
 
 	"github.com/forge-sdd/cli/internal/bus"
 	"github.com/forge-sdd/cli/internal/config"
 	"github.com/forge-sdd/cli/internal/layout"
+	"github.com/forge-sdd/cli/internal/queue"
 	"github.com/forge-sdd/cli/internal/testutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -39,6 +42,41 @@ func claimedJob(t *testing.T, dir string) {
 	require.NoError(t, err)
 	_, err = bus.Claim(dir, layout.RoleBuilder, "forge-builder", time.Minute, time.Now())
 	require.NoError(t, err)
+}
+
+func TestPipelinePROpened_EntregaTasksDoJobParaRevisao(t *testing.T) {
+	t.Setenv("FORGE_WORKER", "forge-builder")
+	dir := t.TempDir()
+	resetWorkerFlags()
+	j := bus.Job{
+		ID: "job-1", Type: bus.TypeFeatureBuild, Priority: bus.PriorityNormal, Feature: "auth-oauth", Title: "Auth", Initiative: "77-auth-oauth",
+		TaskIDs:  []string{"01", "02"},
+		SpecPath: "sdd/discovery/77-auth-oauth/criteria.md", PR: bus.PR{Branch: "feat/77-auth-oauth", BaseBranch: "main"}, MaxReworkAttempts: 3,
+	}
+	_, _, err := bus.Enqueue(dir, layout.RoleBuilder, j, time.Now())
+	require.NoError(t, err)
+	_, err = bus.Claim(dir, layout.RoleBuilder, "forge-builder", time.Minute, time.Now())
+	require.NoError(t, err)
+	q, err := json.Marshal(queue.Queue{SpecStatus: "reviewed", Items: []queue.QueueItem{
+		{TaskID: "01", Status: queue.StatusQueued}, {TaskID: "02", Status: queue.StatusBuilding}, {TaskID: "03", Status: queue.StatusQueued},
+	}})
+	require.NoError(t, err)
+	testutil.WriteFile(t, dir, "sdd/discovery/77-auth-oauth/queue.json", string(q))
+
+	_, err = runRoot(t, "pipeline", "pr-opened", "--dir", dir, "--id", "job-1", "--number", "12", "--url", "https://github.com/acme/app/pull/12")
+	require.NoError(t, err)
+
+	base, err := layout.Initiative(dir, "77-auth-oauth")
+	require.NoError(t, err)
+	data, err := os.ReadFile(filepath.Join(base, layout.QueueFileName))
+	require.NoError(t, err)
+	var got queue.Queue
+	require.NoError(t, json.Unmarshal(data, &got))
+	status := map[string]string{}
+	for _, it := range got.Items {
+		status[it.TaskID] = it.Status
+	}
+	assert.Equal(t, map[string]string{"01": queue.StatusReviewPending, "02": queue.StatusReviewPending, "03": queue.StatusQueued}, status)
 }
 
 func TestPipelinePROpened_RegistraEValida(t *testing.T) {
@@ -120,4 +158,40 @@ func TestPipelinePROpened_SemWorkerERecusado(t *testing.T) {
 	claimedJob(t, dir)
 	_, err := runRoot(t, "pipeline", "pr-opened", "--dir", dir, "--id", "job-1", "--number", "1", "--url", "https://x/1")
 	require.Error(t, err, "sem worker nem FORGE_WORKER o dono do lease não é provado")
+}
+
+func TestWorker_ChatFeed_Sequence(t *testing.T) {
+	dir := t.TempDir()
+	cfg, _ := json.Marshal(config.DefaultForgeConfig())
+	testutil.WriteFile(t, dir, ".forge/config/forge.json", string(cfg))
+
+	// Enfileira um job para o builder
+	j := bus.Job{
+		ID: "job-chat-feed", Type: bus.TypeFeatureBuild, Priority: bus.PriorityNormal,
+		Feature: "84-chat-feed", Title: "Painel Conversacional", Initiative: "84-painel",
+		SpecPath: "sdd/discovery/84-painel/criteria.md",
+		PR: bus.PR{Branch: "feat/84-chat-feed", BaseBranch: "main"},
+		Attempt: 1, MaxReworkAttempts: 3,
+	}
+	_, _, err := bus.Enqueue(dir, layout.RoleBuilder, j, time.Now())
+	require.NoError(t, err)
+
+	formatter := WorkerFeedFormatter()
+	require.NotNil(t, formatter)
+
+	startMsg := formatter.StartTask(j.Feature, j.Title)
+	assert.Contains(t, startMsg, "💭 Analisando requisitos e critérios da task 84-chat-feed")
+
+	editMsg := formatter.EditFiles("cmd/forge-sdd/worker.go")
+	assert.Contains(t, editMsg, "🔨 Editando cmd/forge-sdd/worker.go")
+
+	validMsg := formatter.RunValidation("testes unitários")
+	assert.Contains(t, validMsg, "🧪 Executando suite de testes unitários")
+
+	compMsg := formatter.CompleteTask(j.Feature, 45*time.Second, "Handoff despachado para a esteira.")
+	assert.Contains(t, compMsg, "✅ Concluído! Task 84-chat-feed finalizada com sucesso")
+
+	// Garante que não são saídas cruas de bash
+	assert.NotContains(t, startMsg, "bash -c")
+	assert.NotContains(t, compMsg, "sh: line 1:")
 }

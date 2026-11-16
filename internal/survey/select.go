@@ -10,6 +10,9 @@ import (
 // ErrBack indica que a pessoa pressionou Esc (ou Ctrl+C) para voltar um nível no menu.
 var ErrBack = errors.New("voltar")
 
+// ErrExit indica que a pessoa escolheu fechar o painel interativo diretamente.
+var ErrExit = errors.New("sair")
+
 // Option é uma linha de um seletor: o texto mostrado e o valor devolvido.
 type Option struct {
 	Label string
@@ -53,10 +56,15 @@ func ConfirmYesNo(title string, def bool) (bool, error) {
 }
 
 // Pause espera Enter antes de voltar ao menu, para a saída de uma ação não sumir da tela.
+// Usa opção única (sem botão duplicado).
 func Pause(msg string) error {
-	ok := true
-	err := huh.NewForm(huh.NewGroup(huh.NewConfirm().Title(msg).Affirmative("Voltar ao menu").Negative("Voltar ao menu").Value(&ok))).
-		WithKeyMap(menuKeyMap()).Run()
+	choice := "back"
+	sel := huh.NewSelect[string]().
+		Title(msg).
+		Options(huh.NewOption("← Voltar ao menu", "back")).
+		Height(4).
+		Value(&choice)
+	err := huh.NewForm(huh.NewGroup(sel)).WithKeyMap(menuKeyMap()).Run()
 	if errors.Is(err, huh.ErrUserAborted) {
 		return nil
 	}

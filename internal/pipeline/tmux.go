@@ -114,12 +114,18 @@ func BuildTmuxPlan(env LaunchEnv, cfg config.ForgeConfig, insideTmux bool) (*Tmu
 	}
 	titles := []string{discTitle, bldTitle, revTitle}
 
-	statusRight := fmt.Sprintf("Tokens Totais: %s (Disc: %s · Bld: %s · Rev: %s)",
-		monitor.FormatTokensShort(totalTokens),
-		monitor.FormatTokensShort(discTokens),
-		monitor.FormatTokensShort(bldTokens),
-		monitor.FormatTokensShort(revTokens),
-	)
+	// Dicas rotativas de atalhos na barra inferior direita do tmux (alterna a cada atividade e destaca ao apertar Ctrl+b).
+	const statusRightHints = "#{?client_prefix,⌨️  [q] Fila/Detalhes · [Setas] Trocar Painel · [z] Tela Cheia/Voltar,#{?#{==:#{e|%|:#{t/f/%%S:client_activity},2},0},💡 Dica: Ctrl+b q abre Fila,💡 Dica: Ctrl+b Setas navega · Ctrl+b z tela cheia/voltar}}"
+	statusRight := statusRightHints
+	if totalTokens > 0 {
+		statusRight = fmt.Sprintf("%s │ Tokens Totais: %s (Disc: %s · Bld: %s · Rev: %s)",
+			statusRightHints,
+			monitor.FormatTokensShort(totalTokens),
+			monitor.FormatTokensShort(discTokens),
+			monitor.FormatTokensShort(bldTokens),
+			monitor.FormatTokensShort(revTokens),
+		)
+	}
 
 	plan := &TmuxPlan{Session: name}
 
@@ -156,6 +162,9 @@ func BuildTmuxPlan(env LaunchEnv, cfg config.ForgeConfig, insideTmux bool) (*Tmu
 			{"tmux", "set-window-option", "-t", win, "pane-border-status", "top"},
 			{"tmux", "set-window-option", "-t", win, "pane-border-format", borderFormat},
 			{"tmux", "set-window-option", "-t", win, "automatic-rename", "off"},
+			{"tmux", "bind-key", "q", "display-popup", "-w", "85%", "-h", "85%", "-E", fmt.Sprintf("%s queue --interactive", shQuote(env.Bin))},
+			{"tmux", "set-option", "-t", name, "status-right", statusRight},
+			{"tmux", "set-option", "-t", name, "status-right-length", "140"},
 			{"tmux", "select-pane", "-t", win + ".0", "-T", discTitle},
 			{"tmux", "select-pane", "-t", win + ".1", "-T", bldTitle},
 			{"tmux", "select-pane", "-t", win + ".2", "-T", revTitle},
@@ -169,12 +178,6 @@ func BuildTmuxPlan(env LaunchEnv, cfg config.ForgeConfig, insideTmux bool) (*Tmu
 			{"tmux", "select-pane", "-t", winCtl + ".0", "-T", "forge-builder-ctl"},
 			{"tmux", "select-pane", "-t", winCtl + ".1", "-T", "forge-reviewer-ctl"},
 		}
-		if totalTokens > 0 {
-			plan.Create = append(plan.Create,
-				[]string{"tmux", "set-option", "-t", exact, "status-right", statusRight},
-				[]string{"tmux", "set-option", "-t", exact, "status-right-length", "100"},
-			)
-		}
 	} else {
 		plan.Create = [][]string{
 			{"tmux", "new-session", "-d", "-s", name, "-n", winName, "-c", env.Dir, sessions[0].Inner},
@@ -187,17 +190,14 @@ func BuildTmuxPlan(env LaunchEnv, cfg config.ForgeConfig, insideTmux bool) (*Tmu
 			{"tmux", "set-window-option", "-t", win, "pane-border-status", "top"},
 			{"tmux", "set-window-option", "-t", win, "pane-border-format", borderFormat},
 			{"tmux", "set-window-option", "-t", win, "automatic-rename", "off"},
+			{"tmux", "bind-key", "q", "display-popup", "-w", "85%", "-h", "85%", "-E", fmt.Sprintf("%s queue --interactive", shQuote(env.Bin))},
+			{"tmux", "set-option", "-t", name, "status-right", statusRight},
+			{"tmux", "set-option", "-t", name, "status-right-length", "140"},
 		}
 		for i, t := range titles {
 			plan.Create = append(plan.Create, []string{"tmux", "select-pane", "-t", fmt.Sprintf("%s.%d", win, i), "-T", t})
 		}
 		plan.Create = append(plan.Create, []string{"tmux", "select-pane", "-t", win + ".0"})
-		if totalTokens > 0 {
-			plan.Create = append(plan.Create,
-				[]string{"tmux", "set-option", "-t", exact, "status-right", statusRight},
-				[]string{"tmux", "set-option", "-t", exact, "status-right-length", "100"},
-			)
-		}
 	}
 	if insideTmux {
 		plan.Attach = []string{"tmux", "switch-client", "-t", exact}
@@ -314,4 +314,20 @@ func OpenLiveStatusInTmux(dir string) error {
 	createSess.Stdout = os.Stdout
 	createSess.Stderr = os.Stderr
 	return createSess.Run()
+}
+
+// TmuxPopupQueueCommand monta o comando tmux para abrir a fila em popup modal flutuante.
+func TmuxPopupQueueCommand(binPath string) []string {
+	if binPath == "" {
+		binPath = ResolveBin()
+	}
+	cmd := fmt.Sprintf("%s queue --interactive", shQuote(binPath))
+	return []string{"tmux", "display-popup", "-w", "85%", "-h", "85%", "-E", cmd}
+}
+
+// OpenPopupQueueInTmux executa o popup modal da fila na sessão ativa do tmux.
+func OpenPopupQueueInTmux(dir string) error {
+	bin := ResolveBin()
+	argv := TmuxPopupQueueCommand(bin)
+	return exec.Command(argv[0], argv[1:]...).Run()
 }

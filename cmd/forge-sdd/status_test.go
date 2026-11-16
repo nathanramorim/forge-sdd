@@ -22,6 +22,9 @@ func runRoot(t *testing.T, args ...string) (string, error) {
 	_ = statusCmd.Flags().Set("tmux", "false")
 	_ = statusCmd.Flags().Set("once", "false")
 	_ = statusCmd.Flags().Set("compact", "false")
+	_ = statusCmd.Flags().Set("interactive", "false")
+	_ = queueCmd.Flags().Set("interactive", "false")
+	_ = queuePanelCmd.Flags().Set("interactive", "false")
 	_ = nextIDCmd.Flags().Set("kind", "discovery")
 	_ = nextIDCmd.Flags().Set("workitem", "")
 	_ = updateCmd.Flags().Set("dry-run", "false")
@@ -204,5 +207,18 @@ func TestStatusLiveFlag(t *testing.T) {
 	assert.Contains(t, outSnapshot, "PROGRESSO DA ESTEIRA (DAG)")
 	assert.Contains(t, outSnapshot, "INICIATIVAS (sdd/discovery)")
 	assert.Contains(t, outSnapshot, "80-status")
+}
+
+func TestCLI_StatusInteractiveFlag(t *testing.T) {
+	dir := t.TempDir()
+	// Sem tarefas na fila: deve indicar ausência de tarefas de forma limpa sem erro
+	out, err := runRoot(t, "status", "--dir", dir, "--interactive")
+	require.NoError(t, err)
+	assert.Contains(t, out, "Nenhuma tarefa na fila ativa.")
+
+	// Testa também com alias curto -i
+	outShort, err := runRoot(t, "status", "--dir", dir, "-i")
+	require.NoError(t, err)
+	assert.Contains(t, outShort, "Nenhuma tarefa na fila ativa.")
 }
 

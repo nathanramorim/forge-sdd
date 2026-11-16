@@ -43,7 +43,14 @@ jobs:
 
       - name: Publish to npm
         working-directory: npm
-        run: npm publish --access public --tag ${{ steps.npm-tag.outputs.NPM_TAG }}
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          # Idempotente: re-run depois de um publish bem-sucedido não deve falhar com 403.
+          if npm view "@nathanramorim/forge-sdd@${TAG}" version >/dev/null 2>&1; then
+            echo "@nathanramorim/forge-sdd@${TAG} já está publicado no npm; pulando o publish."
+          else
+            npm publish --access public --tag ${{ steps.npm-tag.outputs.NPM_TAG }}
+          fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 

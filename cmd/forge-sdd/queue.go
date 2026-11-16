@@ -2,12 +2,15 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
-	"github.com/forge-sdd/cli/internal/config"
+	"io"
 	"os"
 	"strings"
 
+	"github.com/forge-sdd/cli/internal/config"
 	"github.com/forge-sdd/cli/internal/queue"
+	"github.com/forge-sdd/cli/internal/survey"
 	"github.com/spf13/cobra"
 )
 
@@ -15,6 +18,17 @@ var queueCmd = &cobra.Command{
 	Use:   "queue",
 	Short: "Gerencia a fila determinística do Builder (queue.json da iniciativa ativa)",
 	Long:  `Subcomando para enfileirar, consumir, completar, revisar e exibir o painel executivo da fila de tarefas do Builder.`,
+	RunE: func(cmd *cobra.Command, args []string) error {
+		interactive, _ := cmd.Flags().GetBool("interactive")
+		dir, _ := cmd.Flags().GetString("dir")
+		if dir == "" {
+			dir = "."
+		}
+		if interactive {
+			return RunInteractiveQueue(dir, cmd.OutOrStdout())
+		}
+		return cmd.Help()
+	},
 }
 
 var queueEnqueueCmd = &cobra.Command{
@@ -204,6 +218,13 @@ var queuePanelCmd = &cobra.Command{
 	Short: "Exibe o Painel Executivo do Líder (Camada C)",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		dir, _ := cmd.Flags().GetString("dir")
+		if dir == "" {
+			dir = "."
+		}
+		interactive, _ := cmd.Flags().GetBool("interactive")
+		if interactive {
+			return RunInteractiveQueue(dir, cmd.OutOrStdout())
+		}
 		q, err := queue.Load(dir)
 		if err != nil {
 			return err
@@ -211,6 +232,49 @@ var queuePanelCmd = &cobra.Command{
 		fmt.Print(queue.FormatExecutivePanel(q))
 		return nil
 	},
+}
+
+// RunInteractiveQueue abre a visualização navegável interativa da fila em Alternate Screen Buffer.
+func RunInteractiveQueue(dir string, out io.Writer) error {
+	if out == nil {
+		out = os.Stdout
+	}
+	q, err := queue.Load(dir)
+	if err != nil {
+		return err
+	}
+	if len(q.Items) == 0 {
+		fmt.Fprintln(out, "Nenhuma tarefa na fila ativa.")
+		return nil
+	}
+
+	// Ativa Alternate Screen Buffer para retorno limpo sem poluir o terminal
+	fmt.Fprint(out, "\033[?1049h\033[H")
+	defer fmt.Fprint(out, "\033[?1049l")
+
+	tui := survey.NewQueueDrilldownTUI(dir, q)
+	for {
+		taskID, err := tui.SelectTask()
+		if err != nil {
+			if errors.Is(err, survey.ErrBack) {
+				return nil
+			}
+			return err
+		}
+		detail, err := tui.InspectTaskDetails(taskID)
+		if err != nil {
+			return err
+		}
+		if err := survey.ShowTaskDetail(detail); err != nil {
+			if errors.Is(err, survey.ErrBack) {
+				continue
+			}
+			if errors.Is(err, survey.ErrExit) {
+				return nil
+			}
+			return err
+		}
+	}
 }
 
 var queueHandoffCmd = &cobra.Command{
@@ -373,6 +437,10 @@ func init() {
 	queueListCmd.Flags().Bool("json", false, "Exibir saída em formato JSON")
 
 	queuePanelCmd.Flags().String("dir", ".", "Diretório alvo do projeto Forge-SDD")
+	queuePanelCmd.Flags().BoolP("interactive", "i", false, "Abre a visualização rolável interativa com drill-down de detalhes")
+
+	queueCmd.Flags().String("dir", ".", "Diretório alvo do projeto Forge-SDD")
+	queueCmd.Flags().BoolP("interactive", "i", false, "Abre a visualização rolável interativa com drill-down de detalhes")
 
 	queueActivityCmd.Flags().String("dir", ".", "Diretório alvo do projeto Forge-SDD")
 	queueActivityCmd.Flags().String("station", "lider", "Estação responsável (lider, pm-architect, planner, builder, governance)")

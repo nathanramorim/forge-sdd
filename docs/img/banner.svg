@@ -40,7 +40,7 @@
 
   <!-- Terminal -->
   <rect x="80" y="352" width="500" height="40" rx="12" fill="#090b10" stroke="#363e52" stroke-width="1.2"/>
-  <text x="100" y="377" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-weight="600" font-size="16" fill="#3ecf8e">$ npm i -g @nathanramorim/forge-sdd@beta</text>
+  <text x="100" y="377" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-weight="600" font-size="16" fill="#3ecf8e">$ npm i -g @nathanramorim/forge-sdd</text>
 
   <!-- Painel das 3 sessões -->
   <rect x="760" y="62" width="480" height="318" rx="18" fill="#12151d" stroke="#252d40" stroke-width="1.5"/>

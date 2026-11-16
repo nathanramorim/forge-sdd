@@ -34,6 +34,10 @@ Com --compact, imprime a versão tríplice enxuta (< 200 tokens) para agentes.`,
 		if dir == "" {
 			dir = "."
 		}
+		interactive, _ := cmd.Flags().GetBool("interactive")
+		if interactive {
+			return RunInteractiveQueue(dir, cmd.OutOrStdout())
+		}
 		compact, _ := cmd.Flags().GetBool("compact")
 		if compact {
 			out, err := pipeline.FormatLiveStatus(dir)
@@ -181,6 +185,7 @@ func init() {
 	statusCmd.Flags().BoolP("tmux", "t", false, "Abre ou anexa o painel vivo diretamente em uma janela/sessão do tmux")
 	statusCmd.Flags().Bool("once", false, "Executa uma única iteração do painel vivo e encerra")
 	statusCmd.Flags().Bool("compact", false, "Exibe o status tríplice compacto (< 200 tokens) para prompts de IA")
+	statusCmd.Flags().BoolP("interactive", "i", false, "Exibe a fila de tarefas interativa com drill-down de detalhes")
 	nextIDCmd.Flags().String("dir", ".", "Diretório alvo do projeto Forge-SDD")
 	nextIDCmd.Flags().String("kind", "discovery", "Tipo de item: discovery ou fix (a numeração é única)")
 	nextIDCmd.Flags().String("workitem", "", "ID do workitem (obrigatório quando naming_convention=workitem)")

@@ -369,34 +369,69 @@ func TestTmux_BordaBadgeDeTokensEStatusRight(t *testing.T) {
 
 	env := lenv("linux", map[string]bool{"tmux": true}, nil)
 	env.Dir = tempDir
-	cfg := config.DefaultForgeConfig()
-	cfg.SessionMode = config.SessionModeLive
+	for _, mode := range []string{config.SessionModeLive, config.SessionModeHeadless} {
+		cfg := config.DefaultForgeConfig()
+		cfg.SessionMode = mode
 
+		plan, err := BuildTmuxPlan(env, cfg, false)
+		require.NoError(t, err)
+
+		var titles []string
+		var foundStatusRight, foundStatusRightLen bool
+		var statusRightVal string
+
+		for _, step := range plan.Create {
+			if step[1] == "select-pane" && len(step) > 4 && step[4] == "-T" {
+				titles = append(titles, step[5])
+			}
+			if step[1] == "set-option" && len(step) > 4 {
+				assert.Equal(t, plan.Session, step[3], "tmux set-option (%s, modo %s) não aceita prefixo '=' no nome da sessão", step[4], mode)
+				assert.False(t, strings.HasPrefix(step[3], "="), "alvo de set-option nunca deve começar com '='")
+				if step[4] == "status-right" {
+					foundStatusRight = true
+					statusRightVal = step[5]
+				}
+				if step[4] == "status-right-length" {
+					foundStatusRightLen = true
+					assert.Equal(t, "140", step[5])
+				}
+			}
+		}
+
+		require.NotEmpty(t, titles)
+		assert.Contains(t, titles[0], "forge-discovery │ 🪙 12k tok")
+		assert.Contains(t, titles[1], "forge-builder │ 🪙 78k tok ⚠️")
+		assert.Contains(t, titles[2], "forge-reviewer │ 🪙 28k tok")
+
+		assert.True(t, foundStatusRight, "deve configurar status-right com dicas e resumo de tokens (modo %s)", mode)
+		assert.True(t, foundStatusRightLen, "deve configurar status-right-length=140 (modo %s)", mode)
+		assert.Contains(t, statusRightVal, "Ctrl+b q abre Fila")
+		assert.Contains(t, statusRightVal, "Tokens Totais: 118k")
+		assert.Contains(t, statusRightVal, "Disc: 12k")
+		assert.Contains(t, statusRightVal, "Bld: 78k")
+		assert.Contains(t, statusRightVal, "Rev: 28k")
+	}
+}
+
+func TestTmux_PopupQueue(t *testing.T) {
+	env := lenv("linux", map[string]bool{"tmux": true}, nil)
+	env.Dir = "/work/meu-app"
+	cfg := config.DefaultForgeConfig()
 	plan, err := BuildTmuxPlan(env, cfg, false)
 	require.NoError(t, err)
 
-	var titles []string
-	var foundStatusRight bool
-	var statusRightVal string
-
+	popupBindCount := 0
 	for _, step := range plan.Create {
-		if step[1] == "select-pane" && len(step) > 4 && step[4] == "-T" {
-			titles = append(titles, step[5])
-		}
-		if step[1] == "set-option" && len(step) > 4 && step[4] == "status-right" {
-			foundStatusRight = true
-			statusRightVal = step[5]
+		if step[1] == "bind-key" && len(step) >= 9 && step[3] == "display-popup" {
+			popupBindCount++
+			assert.Equal(t, "q", step[2])
+			assert.Equal(t, "85%", step[5])
+			assert.Equal(t, "85%", step[7])
+			assert.Contains(t, step[9], "queue --interactive")
 		}
 	}
+	assert.Equal(t, 1, popupBindCount, "deve configurar atalho de popup modal para a fila interativa exatamente uma vez")
 
-	require.NotEmpty(t, titles)
-	assert.Contains(t, titles[0], "forge-discovery │ 🪙 12k tok")
-	assert.Contains(t, titles[1], "forge-builder │ 🪙 78k tok ⚠️")
-	assert.Contains(t, titles[2], "forge-reviewer │ 🪙 28k tok")
-
-	assert.True(t, foundStatusRight, "deve configurar status-right com o resumo de tokens")
-	assert.Contains(t, statusRightVal, "Tokens Totais: 118k")
-	assert.Contains(t, statusRightVal, "Disc: 12k")
-	assert.Contains(t, statusRightVal, "Bld: 78k")
-	assert.Contains(t, statusRightVal, "Rev: 28k")
+	popupCmd := TmuxPopupQueueCommand("/usr/local/bin/forge-sdd")
+	assert.Equal(t, []string{"tmux", "display-popup", "-w", "85%", "-h", "85%", "-E", "'/usr/local/bin/forge-sdd' queue --interactive"}, popupCmd)
 }

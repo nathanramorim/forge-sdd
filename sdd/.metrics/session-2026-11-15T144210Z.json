@@ -1,0 +1,26 @@
+{
+  "$schema": "forge-sdd/metrics/1.0",
+  "feature": "sdd/discovery/84-painel-interativo-chat-e-fila-drilldown/fixes/fix-84-01-tmux-set-option-status-right.md",
+  "agent_path": [
+    "builder"
+  ],
+  "tokens_input": 0,
+  "tokens_output": 0,
+  "turns": 0,
+  "duration_seconds": 0,
+  "criterio_atendido": true,
+  "model": "",
+  "rework_lines": 0,
+  "context7_calls": 0,
+  "git_calls": 0,
+  "files_touched": [
+    "internal/pipeline/tmux.go",
+    "internal/pipeline/tmux_test.go",
+    "internal/pipeline/tmux_real_test.go",
+    "cmd/forge-sdd/main.go",
+    "npm/package.json",
+    "sdd/releases/history.md"
+  ],
+  "outcome": "approved",
+  "sdd_version": "4.5.0-beta"
+}

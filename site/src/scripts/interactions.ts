@@ -17,7 +17,7 @@ window.addEventListener('pointermove', (e) => {
 const copyHeroBtn = document.getElementById('copyHeroBtn');
 if (copyHeroBtn) {
   copyHeroBtn.addEventListener('click', (e) => {
-    navigator.clipboard?.writeText('npm i -g @nathanramorim/forge-sdd@beta');
+    navigator.clipboard?.writeText('npm i -g @nathanramorim/forge-sdd');
     const target = e.target as HTMLElement;
     target.textContent = 'Copiado!';
     setTimeout(() => { target.textContent = 'Copiar'; }, 1800);
