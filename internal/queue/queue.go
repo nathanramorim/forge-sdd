@@ -338,9 +338,7 @@ func EligibleTasks(q *Queue, max int) ([]QueueItem, error) {
 		return []QueueItem{}, nil
 	}
 
-	normalizeID := func(id string) string {
-		return strings.TrimSpace(strings.TrimPrefix(id, "feat-"))
-	}
+	normalizeID := normalizeTaskID
 
 	// 1. Mapeamento de itens por ID normalizado
 	itemMap := make(map[string]QueueItem)
@@ -658,4 +656,9 @@ func FormatExecutivePanel(q *Queue) string {
 	}
 
 	return b.String()
+}
+
+// normalizeTaskID é a regra única de ID de task: sem espaços nas pontas e sem o prefixo "feat-".
+func normalizeTaskID(id string) string {
+	return strings.TrimSpace(strings.TrimPrefix(strings.TrimSpace(id), "feat-"))
 }

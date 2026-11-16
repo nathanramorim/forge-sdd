@@ -2,13 +2,13 @@
   "feature_id": "",
   "branch": "feat/88-modo-pipeline-avancado",
   "spec_status": "reviewed",
-  "updated_at": "2026-11-16T19:33:28Z",
+  "updated_at": "2026-11-16T22:35:22Z",
   "items": [
     {
       "task_id": "feat-88-01",
       "title": "feat-88-01 — Campo `autonomy` na configuração do pipeline",
       "spec_path": "sdd/discovery/88-modo-pipeline-avancado/features/feat-88-01-config-autonomy.md",
-      "status": "queued",
+      "status": "approved",
       "rules": [
         "ARQ-01",
         "COD-03",
@@ -21,7 +21,7 @@
       "task_id": "feat-88-02",
       "title": "feat-88-02 — Gesto →/← no menu para ligar o modo avançado",
       "spec_path": "sdd/discovery/88-modo-pipeline-avancado/features/feat-88-02-gesto-menu-up.md",
-      "status": "queued",
+      "status": "approved",
       "depends_on": [
         "feat-88-01"
       ],
@@ -37,7 +37,7 @@
       "task_id": "feat-88-03",
       "title": "feat-88-03 — ADR-0013: Reviewer como revisor da spec no modo avançado",
       "spec_path": "sdd/discovery/88-modo-pipeline-avancado/features/feat-88-03-adr-0013-reviewer-revisa-spec.md",
-      "status": "queued",
+      "status": "approved",
       "rules": [
         "ARQ-01",
         "COD-03",
@@ -50,7 +50,7 @@
       "task_id": "feat-88-04",
       "title": "feat-88-04 — Job `spec_review` e aplicação do parecer",
       "spec_path": "sdd/discovery/88-modo-pipeline-avancado/features/feat-88-04-job-spec-review-e-parecer.md",
-      "status": "queued",
+      "status": "approved",
       "depends_on": [
         "feat-88-01"
       ],
@@ -66,7 +66,7 @@
       "task_id": "feat-88-05",
       "title": "feat-88-05 — Checklist do Reviewer para spec e entrega",
       "spec_path": "sdd/discovery/88-modo-pipeline-avancado/features/feat-88-05-checklist-do-reviewer.md",
-      "status": "queued",
+      "status": "approved",
       "depends_on": [
         "feat-88-04"
       ],
@@ -82,7 +82,7 @@
       "task_id": "feat-88-06",
       "title": "feat-88-06 — Task `blocked` não para a fila",
       "spec_path": "sdd/discovery/88-modo-pipeline-avancado/features/feat-88-06-blocked-com-continuacao.md",
-      "status": "queued",
+      "status": "approved",
       "depends_on": [
         "feat-88-04"
       ],
@@ -98,7 +98,7 @@
       "task_id": "feat-88-07",
       "title": "feat-88-07 — Salvaguardas do modo avançado e documentação",
       "spec_path": "sdd/discovery/88-modo-pipeline-avancado/features/feat-88-07-salvaguardas-e-docs.md",
-      "status": "queued",
+      "status": "approved",
       "depends_on": [
         "feat-88-02",
         "feat-88-06"
@@ -115,7 +115,7 @@
       "task_id": "feat-88-08",
       "title": "feat-88-08 — Menu Settings e default do card",
       "spec_path": "sdd/discovery/88-modo-pipeline-avancado/features/feat-88-08-settings-e-default-do-card.md",
-      "status": "queued",
+      "status": "approved",
       "rules": [
         "ARQ-01",
         "COD-03",

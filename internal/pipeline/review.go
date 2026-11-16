@@ -38,6 +38,19 @@ type ReviewResult struct {
 	Channels        map[string]string
 	CardInstruction string
 	PRComment       string // comentário sugerido para o PR (quando reviewer.comment_on_pr está ligado)
+	Warning         string // aviso quando os TaskIDs do job não casam com nenhuma task da fila
+}
+
+// unmatchedWarning devolve o aviso quando o job traz TaskIDs e nenhum casa com a fila (fix-84-03).
+func unmatchedWarning(dir string, job bus.Job) string {
+	if len(job.TaskIDs) == 0 || strings.TrimSpace(job.Initiative) == "" {
+		return ""
+	}
+	if n, err := queue.CountMatches(dir, job.Initiative, job.TaskIDs); err != nil || n > 0 {
+		return ""
+	}
+	return fmt.Sprintf("aviso: nenhuma task da fila da iniciativa %s casa com os task_ids do job %s (%s); a fila não foi alterada",
+		job.Initiative, job.ID, strings.Join(job.TaskIDs, ", "))
 }
 
 // ApplyVerdict aplica a regra de fluxo ao veredito do modelo (D-3): conforme aprova e notifica;
@@ -109,6 +122,7 @@ func ApplyVerdict(dir, jobID, worker string, v queue.Verdict, deps notify.Deps, 
 		if _, err := queue.SetTaskStatuses(dir, job.Initiative, job.TaskIDs, queue.StatusApproved); err != nil {
 			return nil, fmt.Errorf("atualizar a fila da iniciativa: %w", err)
 		}
+		res.Warning = unmatchedWarning(dir, job)
 		if _, err := bus.Complete(dir, layout.RoleReviewer, jobID, worker, "aprovado: PR sem inconformidades", now); err != nil {
 			return nil, err
 		}
