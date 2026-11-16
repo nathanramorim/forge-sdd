@@ -62,6 +62,7 @@ type SpecResult struct {
 	BuildJob       *bus.Job
 	Notification   *notify.Notification
 	Channels       map[string]string
+	Warning        string // aviso quando os TaskIDs do job não casam com nenhuma task da fila
 }
 
 // ApplySpecVerdict aplica o parecer do Reviewer sobre a spec (ADR-0013). O Go decide e grava, nunca
@@ -148,13 +149,10 @@ func ApplySpecVerdict(dir, jobID, worker string, v queue.Verdict, deps notify.De
 	default: // escalar (dúvida) ou limite de tentativas: bloqueia e avisa; as independentes seguem
 		res.Action = ActionEscalated
 		reason := fmt.Sprintf("spec não aprovada (veredito %s, tentativa %d de %d)", v.Veredito, job.Attempt, job.MaxReworkAttempts)
-		ids := append([]string{}, job.TaskIDs...)
-		for _, id := range job.TaskIDs {
-			ids = append(ids, "feat-"+id)
-		}
-		if _, err := queue.BlockTasks(dir, job.Initiative, ids, reason); err != nil {
+		if _, err := queue.BlockTasks(dir, job.Initiative, job.TaskIDs, reason); err != nil {
 			return nil, fmt.Errorf("bloquear as tasks: %w", err)
 		}
+		res.Warning = unmatchedWarning(dir, job)
 		n := notify.Notification{
 			ID: notificationID(job.ID, "escalado"), Type: notify.TypeEscalation,
 			Title:   "Spec bloqueada: " + job.Feature,
