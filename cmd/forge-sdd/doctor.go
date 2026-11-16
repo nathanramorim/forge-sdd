@@ -292,6 +292,10 @@ inconsistências de configuração dos agentes de IA e progresso das features.`,
 				summary.Total, summary.Approved, summary.Rejected, summary.Blocked)
 		}
 
+		if w := config.AdvancedWarning(targetDir); w != "" {
+			fmt.Printf("\n⚠️  Modo avançado (experimental): %s\n", w)
+		}
+
 		fmt.Println("\n🩺 Diagnóstico finalizado.")
 		return nil
 	},

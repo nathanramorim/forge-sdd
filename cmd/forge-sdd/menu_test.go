@@ -20,6 +20,7 @@ import (
 type scripted struct {
 	selects  map[string][]string // prefixo do título -> valores em ordem
 	confirms []bool
+	gestures []string // gesto devolvido por SelectGesture, em ordem (vazio = sem gesto)
 	defs     map[string]string // título -> default recebido
 	pauses   int
 	asked    []string
@@ -45,6 +46,15 @@ func (s *scripted) Select(title string, opts []menuOption, def string) (string, 
 		}
 	}
 	return "", errBack
+}
+
+func (s *scripted) SelectGesture(title string, opts []menuOption, def string) (string, string, error) {
+	v, err := s.Select(title, opts, def)
+	g := ""
+	if err == nil && len(s.gestures) > 0 {
+		g, s.gestures = s.gestures[0], s.gestures[1:]
+	}
+	return v, g, err
 }
 
 func (s *scripted) Confirm(title string, def bool) (bool, error) {
@@ -245,21 +255,19 @@ func TestMenu_PipelineSemForgeJSONOfereceAtivar(t *testing.T) {
 	assert.Empty(t, rl.calls, "recusar ativar não faz nada")
 }
 
-func TestMenu_ConfigurarCardEPermissoes(t *testing.T) {
+func TestMenu_ConfigurarPermissoes(t *testing.T) {
 	dir := pipelineDir(t, nil)
 	p := &scripted{
 		selects: map[string][]string{
 			"Forge SDD":              {valConfig, "<esc>"},
-			"Ativar ou reconfigurar": {"card", "perms", valBack},
+			"Ativar ou reconfigurar": {"perms", valBack},
 			"Permissões do Builder e do": {config.PermissionFull},
 		},
-		confirms: []bool{false},
 	}
 	env, _, out := menuFor(t, dir, p, allFound())
 	require.NoError(t, runMenu(env))
 	cfg, _, err := config.LoadForgeConfig(dir)
 	require.NoError(t, err)
-	assert.False(t, cfg.PMMCP.RequireExistingCard, "projeto sem gerenciador despacha sem card")
 	assert.Equal(t, config.PermissionFull, cfg.Permissions)
 	assert.Contains(t, out.String(), "Gravado em .forge/config/forge.json")
 }

@@ -28,6 +28,8 @@ var errBack = survey.ErrBack
 // prompter isola a interação para os testes simularem a entrada.
 type prompter interface {
 	Select(title string, opts []menuOption, def string) (string, error)
+	// SelectGesture é o Select que também informa →/← (survey.GestureRight/GestureLeft).
+	SelectGesture(title string, opts []menuOption, def string) (string, string, error)
 	Confirm(title string, def bool) (bool, error)
 	Pause(msg string) error
 }
@@ -36,6 +38,9 @@ type huhPrompter struct{}
 
 func (huhPrompter) Select(title string, opts []menuOption, def string) (string, error) {
 	return survey.SelectOne(title, opts, def)
+}
+func (huhPrompter) SelectGesture(title string, opts []menuOption, def string) (string, string, error) {
+	return survey.SelectGesture(title, opts, def)
 }
 func (huhPrompter) Confirm(title string, def bool) (bool, error) {
 	return survey.ConfirmYesNo(title, def)
@@ -120,16 +125,17 @@ Sem terminal interativo o menu não abre. Comandos mais usados:
 }
 
 const (
-	valUp      = "up"
-	valLive    = "live"
-	valStatus  = "status"
-	valQueue   = "queue"
-	valDiag    = "diag"
-	valConfig  = "config"
-	valHelp    = "help"
-	valInstall = "install"
-	valExit    = "exit"
-	valBack    = "back"
+	valUp       = "up"
+	valLive     = "live"
+	valStatus   = "status"
+	valQueue    = "queue"
+	valDiag     = "diag"
+	valConfig   = "config"
+	valSettings = "settings"
+	valHelp     = "help"
+	valInstall  = "install"
+	valExit     = "exit"
+	valBack     = "back"
 )
 
 // runMenu mostra o menu principal até a pessoa sair. O menu roda uma ação por vez e não é painel ao vivo.
@@ -169,11 +175,12 @@ func runMenu(env *menuEnv) error {
 			menuOption{Label: "Fila de tasks e inbox de notificações", Value: valQueue},
 			menuOption{Label: "Diagnóstico de saúde e regras (Doctor & Gate)", Value: valDiag},
 			menuOption{Label: "Configurações (agentes, terminal, modo ao vivo/headless)", Value: valConfig},
+			menuOption{Label: "Settings (chaves ativado/desativado)", Value: valSettings},
 			menuOption{Label: "Ajuda e comandos do CLI", Value: valHelp},
 			menuOption{Label: "Sair", Value: valExit},
 		)
 
-		choice, err := env.p.Select(header, opts, def)
+		choice, gesture, err := env.p.SelectGesture(header, opts, def)
 		if errors.Is(err, errBack) || choice == valExit {
 			return nil
 		}
@@ -190,7 +197,7 @@ func runMenu(env *menuEnv) error {
 		case valInstall:
 			installed = env.installOrUpdate() == nil && config.DetectProject(env.dir)
 		case valUp:
-			env.startSessions()
+			env.startSessions(gesture)
 		case valLive:
 			env.act("status", "--live", "--dir", env.dir)
 		case valStatus:
@@ -209,6 +216,10 @@ func runMenu(env *menuEnv) error {
 			_ = env.p.Pause("Enter para voltar ao menu")
 		case valDiag:
 			if err := env.diagMenu(); err != nil && !errors.Is(err, errBack) {
+				return err
+			}
+		case valSettings:
+			if err := env.settingsMenu(); err != nil && !errors.Is(err, errBack) {
 				return err
 			}
 		case valConfig:
@@ -367,9 +378,35 @@ func summary(cfg config.ForgeConfig) string {
 	return strings.Join(parts, " · ")
 }
 
-// startSessions é o fluxo principal: escolher, checar, confirmar, gravar e abrir.
-func (e *menuEnv) startSessions() {
+// applyAutonomyGesture liga (→) ou desliga (←) o modo avançado sobre cfg. Ligar exige a confirmação
+// de ambiente isolado; sem ela devolve ok=false e nada é gravado (ADR-0013).
+func (e *menuEnv) applyAutonomyGesture(cfg config.ForgeConfig, gesture string) (config.ForgeConfig, bool) {
+	switch gesture {
+	case survey.GestureRight:
+		if cfg.IsAdvanced() {
+			return cfg, true
+		}
+		ok, err := e.p.Confirm("Modo avançado (experimental): o Reviewer aprova a spec e as sessões rodam sem pedir permissão. O ambiente é isolado (contêiner, VM ou máquina descartável)?", false)
+		if err != nil || !ok {
+			fmt.Fprintln(e.out, "\nModo avançado não ligado: sem a confirmação de ambiente isolado nada foi gravado.")
+			return cfg, false
+		}
+		cfg.Autonomy, cfg.IsolatedConfirmed, cfg.Permissions = config.AutonomyAdvanced, true, config.PermissionFull
+	case survey.GestureLeft:
+		cfg.Autonomy, cfg.IsolatedConfirmed = config.AutonomyNormal, false
+	}
+	return cfg, true
+}
+
+// startSessions é o fluxo principal: escolher, checar, confirmar, gravar e abrir. gesture vem do
+// menu principal (→ liga e ← desliga o modo avançado).
+func (e *menuEnv) startSessions(gesture string) {
 	cfg, ok := e.loadPipeline()
+	if !ok {
+		_ = e.p.Pause("Enter para voltar ao menu")
+		return
+	}
+	cfg, ok = e.applyAutonomyGesture(cfg, gesture)
 	if !ok {
 		_ = e.p.Pause("Enter para voltar ao menu")
 		return
@@ -378,9 +415,11 @@ func (e *menuEnv) startSessions() {
 	if err != nil {
 		return
 	}
-	cfg, err = e.choosePermissions(cfg)
-	if err != nil {
-		return
+	if !cfg.IsAdvanced() { // o avançado força permissions full
+		cfg, err = e.choosePermissions(cfg)
+		if err != nil {
+			return
+		}
 	}
 	items := pipeline.Preflight(e.dir, cfg, e.preflightEnv)
 	fmt.Fprintf(e.out, "\nChecagem antes de abrir:\n%s\n", pipeline.FormatPreflight(items))
@@ -398,7 +437,11 @@ func (e *menuEnv) startSessions() {
 			break
 		}
 	}
-	ok, err = e.p.Confirm("Abrir agora? "+summary(cfg)+" · permissões "+cfg.Permissions+" · "+e.terminalLabel(cfg), true)
+	mode := ""
+	if cfg.IsAdvanced() {
+		mode = " · avançado"
+	}
+	ok, err = e.p.Confirm("Abrir agora? "+summary(cfg)+" · permissões "+cfg.Permissions+mode+" · "+e.terminalLabel(cfg), true)
 	if err != nil || !ok {
 		return
 	}
@@ -418,7 +461,6 @@ func (e *menuEnv) configMenu() error {
 			{Label: "Permissões do Builder e do Reviewer", Value: "perms"},
 			{Label: "Modo de sessão (ao vivo no painel ou worker headless)", Value: "mode"},
 			{Label: "Contexto entre jobs (limpar ou contínuo)", Value: "context"},
-			{Label: "Usa gerenciador de projeto (card obrigatório no /implementar)?", Value: "card"},
 			{Label: "Voltar", Value: valBack},
 		}, "agents")
 		if errors.Is(err, errBack) || choice == valBack {
@@ -458,10 +500,6 @@ func (e *menuEnv) configMenu() error {
 			if err == nil {
 				cfg.Context = ctx
 			}
-		case "card":
-			var need bool
-			need, err = e.p.Confirm("Exigir que o card exista no gerenciador de projeto antes de despachar? (Não: o /implementar despacha sem card)", cfg.PMMCP.RequireExistingCard)
-			cfg.PMMCP.RequireExistingCard = need
 		}
 		if err != nil {
 			continue
@@ -502,4 +540,60 @@ func (e *menuEnv) terminalLabel(cfg config.ForgeConfig) string {
 		return "em janelas do sistema"
 	}
 	return "no tmux (3 painéis)"
+}
+
+// settingKey é uma chave liga/desliga mostrada no menu Settings.
+type settingKey struct {
+	value string
+	label string
+	get   func(config.ForgeConfig) bool
+	set   func(*config.ForgeConfig, bool)
+}
+
+// settingKeys é a casa única das chaves liga/desliga (DUP-01); por ora só o card.
+var settingKeys = []settingKey{{
+	value: "card",
+	label: "Usa gerenciador de projeto (card obrigatório no /implementar)",
+	get:   func(c config.ForgeConfig) bool { return c.PMMCP.RequireExistingCard },
+	set:   func(c *config.ForgeConfig, v bool) { c.PMMCP.RequireExistingCard = v },
+}}
+
+func onOff(v bool) string {
+	if v {
+		return "ativado"
+	}
+	return "desativado"
+}
+
+// settingsMenu lista as chaves como ativado/desativado e alterna a escolhida, gravando com SaveForgeConfig.
+func (e *menuEnv) settingsMenu() error {
+	for {
+		cfg, ok := e.loadPipeline()
+		if !ok {
+			return errBack
+		}
+		opts := make([]menuOption, 0, len(settingKeys)+1)
+		for _, k := range settingKeys {
+			opts = append(opts, menuOption{Label: fmt.Sprintf("%s: %s", k.label, onOff(k.get(cfg))), Value: k.value})
+		}
+		opts = append(opts, menuOption{Label: "Voltar", Value: valBack})
+		choice, err := e.p.Select("Settings (Enter alterna a chave)", opts, settingKeys[0].value)
+		if errors.Is(err, errBack) || choice == valBack {
+			return errBack
+		}
+		if err != nil {
+			return err
+		}
+		for _, k := range settingKeys {
+			if k.value != choice {
+				continue
+			}
+			k.set(&cfg, !k.get(cfg))
+			if err := config.SaveForgeConfig(e.dir, cfg); err != nil {
+				fmt.Fprintf(e.out, "\n✗ %v\n", err)
+			} else {
+				fmt.Fprintf(e.out, "\n✓ %s: %s (gravado em .forge/config/forge.json)\n", k.label, onOff(k.get(cfg)))
+			}
+		}
+	}
 }

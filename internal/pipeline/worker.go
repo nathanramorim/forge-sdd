@@ -115,6 +115,11 @@ func RunWorker(ctx context.Context, opts WorkerOptions) error {
 		if n, err := bus.Recover(opts.Dir, opts.Role, opts.Now()); err == nil && n > 0 {
 			fmt.Fprintf(opts.Out, "[%s] %d job(s) com lease vencido devolvido(s) à fila\n", opts.Name, n)
 		}
+		if reason := HaltReason(opts.Dir, cfg, opts.Now()); reason != "" {
+			fmt.Fprintf(opts.Out, "[%s] esteira parada: %s\n", opts.Name, reason)
+			notifyHalt(opts.Dir, reason, opts.Now())
+			return nil
+		}
 		entry, err := bus.Claim(opts.Dir, opts.Role, opts.Name, bus.DefaultLeaseTTL, opts.Now())
 		if err == bus.ErrEmpty {
 			if opts.Once {
@@ -135,8 +140,14 @@ func RunWorker(ctx context.Context, opts WorkerOptions) error {
 			return err
 		}
 		wasIdle = false // depois de trabalhar, a próxima ociosidade avisa de novo
+		started := opts.Now()
 		if err := processJob(ctx, opts, cfg, entry); err != nil {
 			return err
+		}
+		if reason := JobOverCeiling(opts.Dir, cfg, opts.Role, entry.Job.ID, opts.Now().Sub(started)); reason != "" {
+			fmt.Fprintf(opts.Out, "[%s] esteira parada: %s\n", opts.Name, reason)
+			notifyHalt(opts.Dir, reason, opts.Now())
+			return nil
 		}
 	}
 }

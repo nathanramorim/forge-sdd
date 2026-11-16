@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/forge-sdd/cli/internal/bus"
 	"github.com/forge-sdd/cli/internal/pipeline"
 	"github.com/spf13/cobra"
 )
@@ -46,7 +47,11 @@ o comando orienta forge pipeline init.`,
 		if dry {
 			fmt.Fprintf(out, "[DRY-RUN] gate aprovado para %s; criaria o job %s (nada foi gravado)\n", res.Initiative, res.Job.ID)
 		} else if res.Created {
-			fmt.Fprintf(out, "Job %s enfileirado em builder/pending (%s)\n", res.Job.ID, strings.TrimPrefix(res.JobPath, dir))
+			queueName := "builder"
+			if res.Job.Type == bus.TypeSpecReview {
+				queueName = "reviewer"
+			}
+			fmt.Fprintf(out, "Job %s enfileirado em %s/pending (%s)\n", res.Job.ID, queueName, strings.TrimPrefix(res.JobPath, dir))
 		} else {
 			fmt.Fprintf(out, "Job %s já estava na fila (idempotente)\n", res.Job.ID)
 		}

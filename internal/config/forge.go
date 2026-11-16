@@ -30,6 +30,18 @@ const (
 	ContextContinuous = "continuous"
 )
 
+// Modos de autonomia do pipeline (feat 88): normal exige a aprovação humana da spec; advanced
+// delega a revisão da spec ao Reviewer (ADR-0013) e exige ambiente isolado.
+const (
+	AutonomyNormal   = "normal"
+	AutonomyAdvanced = "advanced"
+)
+
+// ValidAutonomy diz se a é um modo de autonomia aceito (vazio vale normal).
+func ValidAutonomy(a string) bool {
+	return a == "" || a == AutonomyNormal || a == AutonomyAdvanced
+}
+
 // ValidSessionMode diz se m é um modo de sessão aceito.
 func ValidSessionMode(m string) bool {
 	return m == SessionModeHeadless || m == SessionModeLive
@@ -82,6 +94,13 @@ type ReviewerConfig struct {
 	CommentOnPR       bool `json:"comment_on_pr"`
 }
 
+// SafeguardsConfig são os tetos do modo avançado (feat 88-07). Zero desliga o teto. O tempo por job
+// reaproveita builder.job_timeout_minutes.
+type SafeguardsConfig struct {
+	MaxJobTokens  int `json:"max_job_tokens,omitempty"`
+	MaxJobsPerDay int `json:"max_jobs_per_day,omitempty"`
+}
+
 // ForgeConfig é o conteúdo de .forge/config/forge.json. A existência do arquivo ativa o modo pipeline.
 type ForgeConfig struct {
 	CLI string `json:"cli"`
@@ -96,6 +115,12 @@ type ForgeConfig struct {
 	Context string `json:"context,omitempty"`
 	// Live define parâmetros de tempo do modo live.
 	Live LiveConfig `json:"live,omitempty"`
+	// Autonomy escolhe o modo do pipeline: normal (padrão) ou advanced (Reviewer revisa a spec).
+	Autonomy string `json:"autonomy,omitempty"`
+	// Safeguards são os tetos de tokens por job e de jobs por dia do modo avançado.
+	Safeguards SafeguardsConfig `json:"safeguards,omitempty"`
+	// IsolatedConfirmed registra que a pessoa confirmou rodar em ambiente isolado; o modo advanced o exige.
+	IsolatedConfirmed bool `json:"isolated_confirmed,omitempty"`
 	// AllowCommands são os comandos de shell liberados no nível project (nome do comando apenas).
 	AllowCommands []string              `json:"allow_commands"`
 	CLIProfiles   map[string]CLIProfile `json:"cli_profiles"`
@@ -126,12 +151,13 @@ func DefaultForgeConfig() ForgeConfig {
 		SessionMode:   SessionModeHeadless,
 		Context:       ContextClear,
 		Live:          LiveConfig{StartupWaitSeconds: 8, ReadyQuietSeconds: 3},
+		Safeguards:    SafeguardsConfig{MaxJobTokens: 2000000, MaxJobsPerDay: 30},
 		AllowCommands: []string{"git", "gh", "forge-sdd"},
 		CLIProfiles:   defaultProfiles(),
 		PMMCP: PMConfig{
 			Provider:              "auto",
 			Supported:             []string{"clickup", "github-projects", "azure-devops", "jira"},
-			RequireExistingCard:   true,
+			RequireExistingCard:   false,
 			StatusOnImplement:     "In Progress",
 			StatusOnPRApproved:    "Ready for Review",
 			EvidenceMaxAgeMinutes: 30,
@@ -248,6 +274,20 @@ func (c ForgeConfig) Validate() error {
 	}
 	if c.Context != "" && !ValidContextMode(c.Context) {
 		return fmt.Errorf("context %q inválido (use %s ou %s)", c.Context, ContextClear, ContextContinuous)
+	}
+	if !ValidAutonomy(c.Autonomy) {
+		return fmt.Errorf("autonomy %q inválido (use %s ou %s)", c.Autonomy, AutonomyNormal, AutonomyAdvanced)
+	}
+	if c.Autonomy == AutonomyAdvanced {
+		if c.Permissions != PermissionFull {
+			return fmt.Errorf("autonomy %s exige permissions %q", AutonomyAdvanced, PermissionFull)
+		}
+		if !c.IsolatedConfirmed {
+			return fmt.Errorf("autonomy %s exige isolated_confirmed: true (confirme o ambiente isolado)", AutonomyAdvanced)
+		}
+	}
+	if c.Safeguards.MaxJobTokens < 0 || c.Safeguards.MaxJobsPerDay < 0 || c.Safeguards.MaxJobsPerDay > 10000 {
+		return errors.New("safeguards: max_job_tokens e max_jobs_per_day devem ser >= 0 (jobs por dia até 10000)")
 	}
 	if c.Live.StartupWaitSeconds < 0 || c.Live.StartupWaitSeconds > 60 {
 		return fmt.Errorf("live.startup_wait_seconds %d fora da faixa 0 a 60", c.Live.StartupWaitSeconds)
@@ -458,4 +498,32 @@ func (n NotificationsConfig) Validate() error {
 		return errors.New("channels.webhook.url_env é obrigatório quando o canal está ligado")
 	}
 	return nil
+}
+
+// IsAdvanced diz se o modo avançado (spec revisada pelo Reviewer) está ligado.
+func (c ForgeConfig) IsAdvanced() bool { return c.Autonomy == AutonomyAdvanced }
+
+// AdvancedWarning devolve o aviso do forge doctor quando o modo avançado está ligado sem a
+// confirmação de ambiente isolado (ou sem permissions full). Lê o arquivo cru, porque Validate já
+// recusa essa combinação ao carregar. Sem aviso devolve "".
+func AdvancedWarning(dir string) string {
+	data, err := os.ReadFile(layout.ForgeConfigFile(dir))
+	if err != nil {
+		return ""
+	}
+	var raw struct {
+		Autonomy          string `json:"autonomy"`
+		Permissions       string `json:"permissions"`
+		IsolatedConfirmed bool   `json:"isolated_confirmed"`
+	}
+	if json.Unmarshal(data, &raw) != nil || raw.Autonomy != AutonomyAdvanced {
+		return ""
+	}
+	if !raw.IsolatedConfirmed {
+		return "autonomy: advanced sem ambiente isolado confirmado (isolated_confirmed). Use só em contêiner, VM ou máquina descartável."
+	}
+	if raw.Permissions != PermissionFull {
+		return "autonomy: advanced exige permissions: full."
+	}
+	return ""
 }
