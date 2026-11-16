@@ -8,9 +8,7 @@
     "startup_wait_seconds": 8,
     "ready_quiet_seconds": 3
   },
-  "safeguards": {
-    "max_job_tokens": 2000000
-  },
+  "safeguards": {},
   "allow_commands": [
     "git",
     "gh",

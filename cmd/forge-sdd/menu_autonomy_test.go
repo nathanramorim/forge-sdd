@@ -118,6 +118,21 @@ func TestMenu_Settings_TetoDiario(t *testing.T) {
 	assert.Zero(t, cfg.Safeguards.MaxJobsPerDay, "padrão desligado; duas alternâncias voltam a desligado")
 }
 
+func TestMenu_Settings_TetosPorJob(t *testing.T) {
+	dir := pipelineDir(t, nil)
+	p := &scripted{selects: map[string][]string{
+		"Forge SDD": {valSettings, "<esc>"},
+		"Settings":  {"teto-tokens", "teto-tempo", valBack},
+	}}
+	env, _, _ := menuFor(t, dir, p, allFound())
+	require.NoError(t, runMenu(env))
+	cfg, _, err := config.LoadForgeConfig(dir)
+	require.NoError(t, err)
+	assert.Equal(t, defaultJobTokenCap, cfg.Safeguards.MaxJobTokens)
+	assert.Equal(t, defaultJobMinutesCap, cfg.Safeguards.MaxJobMinutes)
+	assert.Equal(t, config.DefaultForgeConfig().Builder.JobTimeoutMinutes, cfg.Builder.JobTimeoutMinutes, "timeout do runner não é tocado")
+}
+
 func TestPipelineInit_PerguntaCard(t *testing.T) {
 	oldI, oldA := isInteractive, askCard
 	defer func() { isInteractive, askCard = oldI, oldA }()
