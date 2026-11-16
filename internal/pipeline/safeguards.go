@@ -107,7 +107,7 @@ func waitDailyPause(ctx context.Context, opts WorkerOptions, cfg config.ForgeCon
 }
 
 // JobOverCeiling diz se o job passou do teto de tokens (estimado pelo tamanho do log) ou de tempo
-// (builder.job_timeout_minutes). Só vale no modo avançado.
+// (safeguards.max_job_minutes; 0 = sem teto). Só vale no modo avançado.
 func JobOverCeiling(dir string, cfg config.ForgeConfig, role, jobID string, elapsed time.Duration) string {
 	if !cfg.IsAdvanced() {
 		return ""
@@ -119,8 +119,8 @@ func JobOverCeiling(dir string, cfg config.ForgeConfig, role, jobID string, elap
 			}
 		}
 	}
-	if max := time.Duration(cfg.Builder.JobTimeoutMinutes) * time.Minute; max > 0 && elapsed > max {
-		return fmt.Sprintf("job %s passou do teto de %d minutos", jobID, cfg.Builder.JobTimeoutMinutes)
+	if mins := cfg.Safeguards.MaxJobMinutes; mins > 0 && elapsed > time.Duration(mins)*time.Minute {
+		return fmt.Sprintf("job %s passou do teto de %d minutos", jobID, mins)
 	}
 	return ""
 }
