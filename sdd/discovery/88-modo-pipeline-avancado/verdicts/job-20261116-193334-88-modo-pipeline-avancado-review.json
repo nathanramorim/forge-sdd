@@ -1,0 +1,5 @@
+{
+  "veredito": "conforme",
+  "achados": [],
+  "resumo": "PR #83 (iniciativa 88) cobre CA-01 a CA-11: autonomy normal/advanced validado em config (exige permissions full e isolated_confirmed), spec_review roteado ao reviewer e criado só após o gate no Dispatch, ApplySpecVerdict aplicado pelo Go (grava review-spec.md, libera feature_build, ajustar até max_rework_attempts, escalar/limite bloqueia tasks e avisa no inbox), BlockTasks sem travar independentes, salvaguardas (STOP, teto de tokens/tempo/jobs por dia), gesto →/← no menu, Settings e default de card false. Reviewer segue somente leitura (SEG-06), sem comando raiz novo (subcomando de pipeline), sem dependência nova. go build, go vet e go test ./... verdes; cobertura pipeline 83%, queue 83%. Observação não bloqueante: ADR-0013 está com status 'proposto' e deve ser promovida a aprovada após uso real, como já previsto na própria ADR."
+}

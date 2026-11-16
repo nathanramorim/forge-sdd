@@ -4,6 +4,17 @@ Este arquivo registra o histórico de entregas de produto deste projeto.
 
 ## Entregas
 
+### Versão 4.9.0 — Modo Pipeline Avançado e Menu Settings (Beta)
+
+Compatível com a 4.8.0 (Iniciativa 88). Experimental: o modo normal não muda.
+
+*   **Modo pipeline avançado (escondido no menu):** em "Iniciar esteira (up)", a seta **→** liga e a seta **←** desliga (`autonomy: advanced` em `forge.json`). Exige `permissions: full` e a confirmação de que o ambiente é isolado. Pensado para deixar a esteira rodando por dias sem você responder a cada passo.
+*   **Reviewer revisa a spec:** no modo avançado, depois da Discovery o Reviewer confere a spec contra Constitution, rules, ADRs e arquitetura (job `spec_review`, parecer `aprovado`, `ajustar` ou `escalar`). Depois da entrega do Builder, confere o código de novo contra a spec. Descrito na ADR-0013 (proposta).
+*   **Task `blocked` não para a fila:** ao esgotar as tentativas ou escalar, a task fica `blocked` com o motivo no inbox e a esteira segue nas tasks independentes.
+*   **Salvaguardas:** tetos de tokens e de tempo por job e de jobs por dia, e parada limpa por `.forge/runtime/STOP`. O merge do PR continua manual.
+*   **Menu Settings e fim da pergunta de card por padrão:** `pm_mcp.require_existing_card` deixa de nascer `true`; o `forge pipeline init` pergunta se você usa gerenciador de projeto, e o novo menu **Settings** liga e desliga a chave. Esteiras existentes mantêm o valor gravado.
+*   **Como atualizar:** `npm install -g @nathanramorim/forge-sdd@beta` e, nos projetos existentes, `forge update`.
+
 ### Versão 4.8.0 — Painel Interativo e Fila que Acompanha a Aprovação (Estável)
 
 Compatível com a 4.6.1. Consolida em versão estável tudo o que foi entregue na linha 4.7.x.
