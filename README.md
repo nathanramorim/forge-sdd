@@ -66,11 +66,7 @@ Prefere não instalar? Use o `npx`:
 npx @nathanramorim/forge-sdd@latest init
 ```
 
-Para o pipeline com três sessões, use a versão beta:
-
-```bash
-npm install -g @nathanramorim/forge-sdd@beta
-```
+O pipeline de três sessões já vem na versão estável. Para já instalar a próxima prévia, use `@beta`.
 
 ## Como usar
 
@@ -107,7 +103,8 @@ A telemetria é opcional e fica no seu projeto. No modo `forge worker --raw`, a 
 
 | Versão | Novidades |
 |---|---|
-| **4.7.x** | Painel de acompanhamento com abas **Na Fila** e **Concluídas** e tokens por tarefa. |
+| **4.8.0** | Versão estável do painel interativo: stream de chat nos workers, fila com abas e drill-down, popup no tmux e fila que acompanha a aprovação do Reviewer. |
+| **4.6.x** | Comando único `forge`, painel vivo executivo e tokens por janela com reset suave. |
 | **4.2.0-beta** | Pipeline multi-sessão: Discovery, Builder e Reviewer trabalhando juntos. |
 | **3.0.0-beta** | Esteira de 5 especialistas, portão de governança (A/B/C), regras por ID e auto-skills. |
 | **2.2.0-beta** | Regras e comandos compartilhados em `.agents/`, uma fonte para vários agentes. |

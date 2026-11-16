@@ -4,6 +4,18 @@ Este arquivo registra o histórico de entregas de produto deste projeto.
 
 ## Entregas
 
+### Versão 4.8.0 — Painel Interativo e Fila que Acompanha a Aprovação (Estável)
+
+Compatível com a 4.6.1. Consolida em versão estável tudo o que foi entregue na linha 4.7.x.
+
+*   **Veja o que cada sessão está fazendo, em linguagem de gente:** o Builder e o Reviewer mostram um stream narrativo, estilo chat (analisando, editando, validando, concluído), no lugar de contadores secos e saída crua de terminal.
+*   **Fila interativa com drill-down:** `forge queue -i` e `forge status -i` listam todas as tasks, sem o corte "... e mais N tarefas", em duas abas: **Na Fila** e **Concluídas**. Um `Enter` abre o detalhe da task: duração, arquivos alterados, laudo do Reviewer, tokens por etapa e o caminho Discovery → Builder → Reviewer.
+*   **Popup no tmux:** `Ctrl+b q` abre a fila por cima dos três painéis e devolve você exatamente onde estava.
+*   **Painel que não mente:** quando o Reviewer aprova um job, a fila, o `forge status` e o painel passam a mostrar as tasks como aprovadas (antes ficavam em 0/N). A iniciativa concluída pode ser arquivada sozinha, e o veredito fica guardado em `sdd/discovery/<iniciativa>/verdicts/`, sem o Reviewer precisar escrever no repositório.
+*   **Menos surpresas no tmux:** abrir as sessões com tokens acumulados não derruba mais o painel para janelas soltas do sistema.
+*   **Documentação com cara de produto:** novo README com banner, selos e guia de instalação e uso em linguagem simples; `LICENSE` MIT; especificação técnica (`sdd/spec/`) alinhada ao código e quatro novas decisões de arquitetura registradas (ADR-0009 a ADR-0012).
+*   **Como atualizar:** `npm install -g @nathanramorim/forge-sdd` e, nos projetos existentes, `forge update`.
+
 ### Versão 4.7.7 — Fila e Painel Acompanham a Aprovação do Job (Beta)
 
 Compatível com a 4.7.6-beta (Iniciativa 84 — `fix-84-02`).

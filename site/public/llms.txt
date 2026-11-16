@@ -1,10 +1,10 @@
-# Forge-SDD 4.2
+# Forge-SDD 4.8
 > Framework open source (licença MIT) de desenvolvimento guiado por especificações (SDD) com pipeline de 3 sessões (Discovery, Builder e Reviewer) que se falam por uma fila local, 5 estações especializadas, governança em 3 camadas e motor CLI determinístico em Go. Funciona com Claude, Gemini, Copilot e Codex.
 
 - Site Oficial: https://forge-sdd.org
 - Repositório GitHub: https://github.com/nathanramorim/forge-sdd
 - Pacote NPM: https://www.npmjs.com/package/@nathanramorim/forge-sdd
-- Instalação Rápida: npm i -g @nathanramorim/forge-sdd@beta e depois forge (menu)
+- Instalação Rápida: npm i -g @nathanramorim/forge-sdd e depois forge (menu)
 - Guia do pipeline: https://forge-sdd.org/guia-pipeline.html
 - Documentação Técnica: https://forge-sdd.org/
 
