@@ -3,7 +3,7 @@
 **Branch:** `fix/84-03-ids-da-fila-nao-casam-com-o-job` (a partir de `feat/88-modo-pipeline-avancado`; PR contra ela)
 **Origem:** Iniciativa 84, regressão do `fix-84-02` (visto na iniciativa 88, release 4.9.0-beta)
 **Tamanho:** `S`
-**Status:** `ready`
+**Status:** `done`
 
 ## Sintoma
 O Reviewer aprova o job (`aprovado: PR sem inconformidades`, notificação enviada), mas `forge queue list` e `forge status` seguem com todas as tasks `queued`. Ocorreu na iniciativa 88 (8 tasks) e na 84 (6 tasks, mesmo depois da 4.7.7). O auto-archive nunca dispara.

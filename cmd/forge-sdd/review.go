@@ -72,6 +72,9 @@ Aplicar duas vezes o mesmo veredito não repete efeitos.`,
 		case pipeline.ActionEscalated:
 			fmt.Fprintf(out, "escalado para a pessoa: veja o inbox (forge inbox)\n")
 		}
+		if res.Warning != "" {
+			fmt.Fprintln(out, res.Warning)
+		}
 		if res.CardInstruction != "" {
 			fmt.Fprintf(out, "Próximo passo do agente: %s\n", res.CardInstruction)
 		}
@@ -143,5 +146,8 @@ func printSpecResult(out io.Writer, id string, res *pipeline.SpecResult) {
 		fmt.Fprintln(out, "spec devolvida à Discovery para ajuste; veja o inbox (forge inbox)")
 	case pipeline.ActionEscalated:
 		fmt.Fprintln(out, "spec bloqueada: tasks marcadas como blocked; veja o inbox (forge inbox)")
+	}
+	if res.Warning != "" {
+		fmt.Fprintln(out, res.Warning)
 	}
 }

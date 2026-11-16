@@ -2,13 +2,13 @@
   "feature_id": "feat-84",
   "branch": "feat/84-painel-interativo-chat-e-fila-drilldown",
   "spec_status": "reviewed",
-  "updated_at": "2026-11-15T01:27:53Z",
+  "updated_at": "2026-11-16T22:35:22Z",
   "items": [
     {
       "task_id": "feat-84-01-formatador-chat-feed",
       "title": "feat-84-01 — Formatador de Stream Narrativo para Workers (ChatFeedFormatter)",
       "spec_path": "sdd/discovery/84-painel-interativo-chat-e-fila-drilldown/features/feat-84-01-formatador-chat-feed.md",
-      "status": "queued",
+      "status": "approved",
       "rules": [],
       "skills_used": [],
       "attempts": 0
@@ -17,7 +17,7 @@
       "task_id": "feat-84-02-integracao-chat-worker",
       "title": "feat-84-02 — Integração do Stream Narrativo no Ciclo de Vida do Worker",
       "spec_path": "sdd/discovery/84-painel-interativo-chat-e-fila-drilldown/features/feat-84-02-integracao-chat-worker.md",
-      "status": "queued",
+      "status": "approved",
       "rules": [],
       "skills_used": [],
       "attempts": 0
@@ -26,7 +26,7 @@
       "task_id": "feat-84-03-fila-interativa-drilldown",
       "title": "feat-84-03 — Componente TUI de Fila Rolável e Navegável (QueueDrilldownTUI)",
       "spec_path": "sdd/discovery/84-painel-interativo-chat-e-fila-drilldown/features/feat-84-03-fila-interativa-drilldown.md",
-      "status": "queued",
+      "status": "approved",
       "rules": [],
       "skills_used": [],
       "attempts": 0
@@ -35,7 +35,7 @@
       "task_id": "feat-84-04-modal-detalhe-tarefa",
       "title": "feat-84-04 — Modal de Inspeção e Detalhes da Tarefa (Drill-Down)",
       "spec_path": "sdd/discovery/84-painel-interativo-chat-e-fila-drilldown/features/feat-84-04-modal-detalhe-tarefa.md",
-      "status": "queued",
+      "status": "approved",
       "rules": [],
       "skills_used": [],
       "attempts": 0
@@ -44,7 +44,7 @@
       "task_id": "feat-84-05-popup-tmux-e-menu",
       "title": "feat-84-05 — Suporte a Popup Modal no Tmux e Integração In-Place",
       "spec_path": "sdd/discovery/84-painel-interativo-chat-e-fila-drilldown/features/feat-84-05-popup-tmux-e-menu.md",
-      "status": "queued",
+      "status": "approved",
       "rules": [],
       "skills_used": [],
       "attempts": 0
@@ -53,7 +53,7 @@
       "task_id": "feat-84-06-validacao-e-bump-beta",
       "title": "feat-84-06 — Validação Global, Documentação e Bump da Versão Beta (v4.7.0-beta)",
       "spec_path": "sdd/discovery/84-painel-interativo-chat-e-fila-drilldown/features/feat-84-06-validacao-e-bump-beta.md",
-      "status": "queued",
+      "status": "approved",
       "rules": [],
       "skills_used": [],
       "attempts": 0
