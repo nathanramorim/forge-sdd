@@ -1,8 +1,11 @@
 package pipeline
 
 import (
+	"bytes"
+	"context"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
@@ -37,13 +40,65 @@ func TestSalvaguardas_TetoDiario(t *testing.T) {
 	dir := workerProject(t)
 	cfg := advancedCfg()
 	cfg.Safeguards.MaxJobsPerDay = 1
-	assert.Empty(t, HaltReason(dir, cfg, now))
+	reason, _ := DailyPause(dir, cfg, now)
+	assert.Empty(t, reason)
 
 	seedJob(t, dir, layout.RoleBuilder, "job-a", "feature_build", "normal", now)
 	runOnce(t, dir, layout.RoleBuilder, &fakeRunner{fn: func(RunSpec) (RunResult, error) { return RunResult{}, nil }}, nil)
-	assert.Contains(t, HaltReason(dir, cfg, now), "teto diário")
-	assert.Empty(t, HaltReason(dir, config.DefaultForgeConfig(), now), "modo normal sem teto diário")
+	reason, until := DailyPause(dir, cfg, now)
+	assert.Contains(t, reason, "teto diário")
+	assert.True(t, until.After(now))
+	assert.Equal(t, 0, until.Hour())
+	assert.Empty(t, HaltReason(dir, cfg, now), "o teto pausa, não encerra")
+	reason, _ = DailyPause(dir, config.DefaultForgeConfig(), now)
+	assert.Empty(t, reason, "modo normal sem teto diário")
 }
+
+func TestSalvaguardas_ContaJobsDistintos(t *testing.T) {
+	dir := workerProject(t)
+	seedJob(t, dir, layout.RoleBuilder, "job-a", "feature_build", "normal", now)
+	runOnce(t, dir, layout.RoleBuilder, &fakeRunner{fn: func(RunSpec) (RunResult, error) { return RunResult{}, nil }}, nil)
+	runOnce(t, dir, layout.RoleBuilder, &fakeRunner{fn: func(RunSpec) (RunResult, error) { return RunResult{}, nil }}, nil)
+	assert.Equal(t, 1, jobsStartedToday(dir, now))
+}
+
+func TestDefaultSafeguards_SemTetoDiario(t *testing.T) {
+	assert.Zero(t, config.DefaultForgeConfig().Safeguards.MaxJobsPerDay)
+}
+
+func TestRun_PausaNoTeto(t *testing.T) {
+	dir := workerProject(t)
+	cfg := advancedCfg()
+	cfg.Safeguards.MaxJobsPerDay = 1
+	reason, _ := DailyPause(dir, cfg, now)
+	require.Empty(t, reason)
+	seedJob(t, dir, layout.RoleBuilder, "job-a", "feature_build", "normal", now)
+	runOnce(t, dir, layout.RoleBuilder, &fakeRunner{fn: func(RunSpec) (RunResult, error) { return RunResult{}, nil }}, nil)
+	reason, until := DailyPause(dir, cfg, now)
+	require.NotEmpty(t, reason)
+
+	// no dia seguinte a pausa termina sozinha
+	assert.Empty(t, firstReason(DailyPause(dir, cfg, until.Add(time.Minute))))
+
+	// a espera não encerra o worker: só sai pelo contexto
+	ctx, cancel := context.WithCancel(context.Background())
+	sleeps := 0
+	var out bytes.Buffer
+	opts := WorkerOptions{Dir: dir, Out: &out, Now: func() time.Time { return now }, Poll: time.Second,
+		Sleep: func(context.Context, time.Duration) bool {
+			sleeps++
+			if sleeps == 3 {
+				cancel()
+				return false
+			}
+			return true
+		}}
+	assert.False(t, waitDailyPause(ctx, opts, cfg, "w"))
+	assert.Equal(t, 3, sleeps)
+	assert.Equal(t, 1, strings.Count(out.String(), "esteira em pausa"), "avisa uma vez")
+}
+
+func firstReason(r string, _ time.Time) string { return r }
 
 func TestSalvaguardas_Stop(t *testing.T) {
 	dir := workerProject(t)

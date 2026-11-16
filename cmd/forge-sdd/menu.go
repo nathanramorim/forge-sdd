@@ -550,13 +550,26 @@ type settingKey struct {
 	set   func(*config.ForgeConfig, bool)
 }
 
-// settingKeys é a casa única das chaves liga/desliga (DUP-01); por ora só o card.
+// settingKeys é a casa única das chaves liga/desliga (DUP-01); o card e o teto diário de jobs.
 var settingKeys = []settingKey{{
 	value: "card",
 	label: "Usa gerenciador de projeto (card obrigatório no /implementar)",
 	get:   func(c config.ForgeConfig) bool { return c.PMMCP.RequireExistingCard },
 	set:   func(c *config.ForgeConfig, v bool) { c.PMMCP.RequireExistingCard = v },
+}, {
+	value: "teto-diario",
+	label: fmt.Sprintf("Teto diário de jobs (%d/dia; no teto a esteira pausa até o dia seguinte)", defaultDailyJobCap),
+	get:   func(c config.ForgeConfig) bool { return c.Safeguards.MaxJobsPerDay > 0 },
+	set: func(c *config.ForgeConfig, v bool) {
+		c.Safeguards.MaxJobsPerDay = 0
+		if v {
+			c.Safeguards.MaxJobsPerDay = defaultDailyJobCap
+		}
+	},
 }}
+
+// defaultDailyJobCap é o valor gravado ao ligar o teto diário no Settings.
+const defaultDailyJobCap = 30
 
 func onOff(v bool) string {
 	if v {
