@@ -105,6 +105,19 @@ func TestMenu_Settings_AlternaCard(t *testing.T) {
 	assert.Contains(t, out.String(), "ativado")
 }
 
+func TestMenu_Settings_TetoDiario(t *testing.T) {
+	dir := pipelineDir(t, nil)
+	p := &scripted{selects: map[string][]string{
+		"Forge SDD": {valSettings, "<esc>"},
+		"Settings":  {"teto-diario", "teto-diario", valBack},
+	}}
+	env, _, _ := menuFor(t, dir, p, allFound())
+	require.NoError(t, runMenu(env))
+	cfg, _, err := config.LoadForgeConfig(dir)
+	require.NoError(t, err)
+	assert.Zero(t, cfg.Safeguards.MaxJobsPerDay, "padrão desligado; duas alternâncias voltam a desligado")
+}
+
 func TestPipelineInit_PerguntaCard(t *testing.T) {
 	oldI, oldA := isInteractive, askCard
 	defer func() { isInteractive, askCard = oldI, oldA }()

@@ -151,7 +151,7 @@ func DefaultForgeConfig() ForgeConfig {
 		SessionMode:   SessionModeHeadless,
 		Context:       ContextClear,
 		Live:          LiveConfig{StartupWaitSeconds: 8, ReadyQuietSeconds: 3},
-		Safeguards:    SafeguardsConfig{MaxJobTokens: 2000000, MaxJobsPerDay: 30},
+		Safeguards:    SafeguardsConfig{MaxJobTokens: 2000000},
 		AllowCommands: []string{"git", "gh", "forge-sdd"},
 		CLIProfiles:   defaultProfiles(),
 		PMMCP: PMConfig{

@@ -9,8 +9,7 @@
     "ready_quiet_seconds": 3
   },
   "safeguards": {
-    "max_job_tokens": 2000000,
-    "max_jobs_per_day": 30
+    "max_job_tokens": 2000000
   },
   "allow_commands": [
     "git",
