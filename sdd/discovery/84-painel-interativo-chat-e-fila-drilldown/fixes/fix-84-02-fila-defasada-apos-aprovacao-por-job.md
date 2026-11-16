@@ -3,7 +3,7 @@
 **Branch:** `fix/84-02-fila-defasada-apos-aprovacao-por-job` (a partir de `feat/84-painel-interativo-chat-e-fila-drilldown`; PR contra ela)
 **Origem:** Iniciativa 84 (`internal/pipeline/review.go`, `internal/queue/queue.go`)
 **Tamanho:** `M`
-**Status:** `todo`
+**Status:** `done`
 
 ## Sintoma
 Na iniciativa `55e0-credenciais-convites-midia-google-calendar`, o job de rework foi aprovado pelo Reviewer e notificado como "PR #4 pronto para aprovação final". Mesmo assim `forge status` e `forge queue list` seguem em 0/6, as 5 tasks continuam `queued`, a task 02 continua `changes_requested` (registrada à mão com `forge queue review`) e o `status.md` fica em `em_execucao`.
@@ -20,12 +20,12 @@ Na iniciativa `55e0-credenciais-convites-midia-google-calendar`, o job de rework
 - Job sem `TaskIDs`/`Initiative` mantém o comportamento atual (sem erro).
 
 ## Critérios de aceitação
-- [ ] Ao aplicar veredito `conforme`, cada task de `job.TaskIDs` fica `approved` no `queue.json` da iniciativa; `forge status` e `forge queue list` refletem a contagem.
-- [ ] Reaplicar o mesmo veredito é idempotente (sem duplicar efeitos).
-- [ ] O Builder marca as tasks entregues como `review_pending` ao concluir o job de build/rework.
-- [ ] O `status.md` da iniciativa sai de `em_execucao` quando todas as tasks estão `approved`.
-- [ ] O veredito da Camada B é gravado em `sdd/discovery/<iniciativa>/` (não em `/tmp`) e a skill `pr-review.md` (e seus templates e golden) aponta para esse caminho.
-- [ ] Violação e escalação não alteram o status das tasks além do já existente.
+- [x] Ao aplicar veredito `conforme`, cada task de `job.TaskIDs` fica `approved` no `queue.json` da iniciativa; `forge status` e `forge queue list` refletem a contagem.
+- [x] Reaplicar o mesmo veredito é idempotente (sem duplicar efeitos).
+- [x] O Builder marca as tasks entregues como `review_pending` ao concluir o job de build/rework.
+- [x] ~~O `status.md` sai de `em_execucao`~~: nenhum código Go escreve esse arquivo (é atualizado pelo Líder, pelo fechamento da skill); fica fora do escopo. A fila correta já viabiliza o auto-archive.
+- [x] O veredito da Camada B é preservado em `sdd/discovery/<iniciativa>/verdicts/<job>.json`. **Decisão:** a cópia é feita pelo Go em `ApplyVerdict`, não pelo agente, para o Reviewer continuar somente leitura (`SEG-06`); a skill `pr-review.md` (template e golden) só informa isso.
+- [x] Violação e escalação não alteram o status das tasks além do já existente.
 
 ## Escopo
 1. `internal/pipeline/review.go`: propagar `approved` às tasks do job no ramo `conforme`, antes do auto-archive.
@@ -36,3 +36,12 @@ Na iniciativa `55e0-credenciais-convites-midia-google-calendar`, o job de rework
 
 ## Fora do escopo
 Mudar o contrato do veredito ou a regra de tentativas de rework.
+
+## Escopo Aplicado
+1. `internal/queue/taskstatus.go`: `SetTaskStatuses` (por iniciativa, idempotente, sem regredir `approved`, fila ausente ou iniciativa inválida não é erro).
+2. `internal/pipeline/review.go`: `conforme` propaga `approved` antes do `bus.Complete`; `persistVerdict` guarda a cópia do veredito.
+3. `cmd/forge-sdd/worker.go`: `pipeline pr-opened` marca as tasks do job como `review_pending`.
+4. `pr-review.md.tmpl` e golden: mencionam a cópia do veredito.
+5. Testes: `taskstatus_test.go`, `review_queue_test.go`, `worker_test.go`. A remoção da correção faz o teste de aprovação falhar (verificado).
+6. Versão `4.7.7-beta` (`cmd/forge-sdd/main.go`, `npm/package.json`, `sdd/releases/history.md`).
+7. `go build ./...`, `go vet ./...` e `go test -race ./...` passam.

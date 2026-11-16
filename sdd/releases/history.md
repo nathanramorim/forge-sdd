@@ -4,6 +4,15 @@ Este arquivo registra o histórico de entregas de produto deste projeto.
 
 ## Entregas
 
+### Versão 4.7.7 — Fila e Painel Acompanham a Aprovação do Job (Beta)
+
+Compatível com a 4.7.6-beta (Iniciativa 84 — `fix-84-02`).
+
+*   **A aprovação do Reviewer agora atualiza a fila (`internal/pipeline/review.go`):** ao aplicar o veredito `conforme`, as tasks do job (`TaskIDs`, da iniciativa do job) passam a `approved` no `queue.json`, então `forge status`, `forge queue list` e o painel deixam de ficar em 0/N. A mudança é idempotente e nunca faz uma task aprovada regredir.
+*   **O PR aberto entrega as tasks à revisão (`forge pipeline pr-opened`):** as tasks do job passam a `review_pending` quando o Builder registra o PR.
+*   **Veredito preservado:** o Go guarda uma cópia do veredito em `sdd/discovery/<iniciativa>/verdicts/<job>.json`; o Reviewer segue somente leitura e o arquivo temporário pode ser descartado.
+*   **Fila da iniciativa do job, não da branch atual (`internal/queue/taskstatus.go`):** `SetTaskStatuses` abre o `queue.json` da iniciativa pelo nome, já que Builder e Reviewer podem estar em outra branch.
+
 ### Versão 4.7.6 — Legibilidade e Alinhamento em Colunas na Lista de Tarefas (Beta)
 
 Compatível com a 4.7.5-beta (Iniciativa 84 — `feat-84-07`).

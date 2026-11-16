@@ -3,12 +3,15 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"os"
+	"path/filepath"
 	"testing"
 	"time"
 
 	"github.com/forge-sdd/cli/internal/bus"
 	"github.com/forge-sdd/cli/internal/config"
 	"github.com/forge-sdd/cli/internal/layout"
+	"github.com/forge-sdd/cli/internal/queue"
 	"github.com/forge-sdd/cli/internal/testutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -39,6 +42,41 @@ func claimedJob(t *testing.T, dir string) {
 	require.NoError(t, err)
 	_, err = bus.Claim(dir, layout.RoleBuilder, "forge-builder", time.Minute, time.Now())
 	require.NoError(t, err)
+}
+
+func TestPipelinePROpened_EntregaTasksDoJobParaRevisao(t *testing.T) {
+	t.Setenv("FORGE_WORKER", "forge-builder")
+	dir := t.TempDir()
+	resetWorkerFlags()
+	j := bus.Job{
+		ID: "job-1", Type: bus.TypeFeatureBuild, Priority: bus.PriorityNormal, Feature: "auth-oauth", Title: "Auth", Initiative: "77-auth-oauth",
+		TaskIDs:  []string{"01", "02"},
+		SpecPath: "sdd/discovery/77-auth-oauth/criteria.md", PR: bus.PR{Branch: "feat/77-auth-oauth", BaseBranch: "main"}, MaxReworkAttempts: 3,
+	}
+	_, _, err := bus.Enqueue(dir, layout.RoleBuilder, j, time.Now())
+	require.NoError(t, err)
+	_, err = bus.Claim(dir, layout.RoleBuilder, "forge-builder", time.Minute, time.Now())
+	require.NoError(t, err)
+	q, err := json.Marshal(queue.Queue{SpecStatus: "reviewed", Items: []queue.QueueItem{
+		{TaskID: "01", Status: queue.StatusQueued}, {TaskID: "02", Status: queue.StatusBuilding}, {TaskID: "03", Status: queue.StatusQueued},
+	}})
+	require.NoError(t, err)
+	testutil.WriteFile(t, dir, "sdd/discovery/77-auth-oauth/queue.json", string(q))
+
+	_, err = runRoot(t, "pipeline", "pr-opened", "--dir", dir, "--id", "job-1", "--number", "12", "--url", "https://github.com/acme/app/pull/12")
+	require.NoError(t, err)
+
+	base, err := layout.Initiative(dir, "77-auth-oauth")
+	require.NoError(t, err)
+	data, err := os.ReadFile(filepath.Join(base, layout.QueueFileName))
+	require.NoError(t, err)
+	var got queue.Queue
+	require.NoError(t, json.Unmarshal(data, &got))
+	status := map[string]string{}
+	for _, it := range got.Items {
+		status[it.TaskID] = it.Status
+	}
+	assert.Equal(t, map[string]string{"01": queue.StatusReviewPending, "02": queue.StatusReviewPending, "03": queue.StatusQueued}, status)
 }
 
 func TestPipelinePROpened_RegistraEValida(t *testing.T) {
