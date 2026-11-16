@@ -1,47 +1,70 @@
-# Overview — forge-sdd (v3.0.0-beta)
+# Overview — forge-sdd (v4.7.7-beta)
 
-CLI Go e framework de **Spec-Driven Development (SDD)** multi-agente com **Orquestração Independente por 5 Estações**, **Constituição Distribuída por IDs estáveis**, **Portão de Governança em 3 Camadas (A/B/C)** e **Motor de Auto-Skills**.
+CLI Go e framework de **Spec-Driven Development (SDD)** multi-agente. Instala em qualquer projeto uma esteira de **5 estações** (skills por estação), uma **Constituição por IDs estáveis**, o **Portão de Governança em 3 camadas (A/B/C)**, o **Motor de Auto-Skills** e, desde a 4.x, o **Pipeline Multi-Sessão**: Discovery, Builder e Reviewer em sessões de IA separadas, ligadas por um barramento de jobs.
 
 ## Índice da Especificação Arquitetural (`sdd/spec/`)
-- `overview.md` — visão C4 (Contexto e Containers) e comparativo `v2.6.x` → `v3.0.0-beta`
-- `modules.md` — pacotes Go (`cmd/` e `internal/`), templates embarcados e responsabilidades
-- `flows.md` — fluxos operacionais (5 estações, fila determinística, Portão A/B/C e Auto-Skills)
-- `concepts.md` — glossário canônico do domínio (`DUP-01` / `GOV-04`)
-- `stack.md` — tecnologias, versões e layout do projeto
-- `decisions.md` & `adr/` — registro de decisões arquiteturais (ADRs)
+- `overview.md`: visão geral e C4 de contexto.
+- `modules.md`: pacotes Go (`cmd/` e `internal/`), templates embarcados e responsabilidades.
+- `flows.md`: pipeline multi-sessão, estados do job e da task, tokens e reset, painel e Auto-Skills.
+- `concepts.md`: glossário canônico do domínio (`DUP-01` / `GOV-04`).
+- `stack.md`: tecnologias, versões, distribuição e layout.
+- `decisions.md` e `adr/`: decisões arquiteturais (ADR-0001 a ADR-0012).
 
 ---
 
-## Evolução Arquitetural: `v2.6.x` vs `v3.0.0-beta`
+## C4 de Contexto
 
 ```mermaid
 flowchart TB
-    subgraph V2["Antes (v2.6.x) — Sessão Sequencial e Constitution Monolítica"]
-        direction LR
-        U2["Humano"] --> A2["Agente Único (troca de chapéu na mesma sessão)"]
-        A2 --> C2["sdd/memory/constitution.md<br/>(Monolítica: regras 0..13 em prosa)"]
-        A2 --> S2["Discovery → Plan → Implementação → /revisar"]
+    H["Humano<br/>conversa, aprova a spec e o PR"]
+    subgraph FORGE["forge (binário Go)"]
+        CLI["CLI e menu"]
+        BUS["Barramento de jobs<br/>.forge/runtime"]
+        ST["Estado SDD<br/>sdd/ (memória, discovery, queue.json)"]
     end
+    AG["CLIs de agente<br/>claude, gemini, copilot, codex, agy"]
+    TMX["tmux ou janelas do sistema"]
+    GH["GitHub (git, gh, PR)"]
+    NT["Notificações<br/>inbox, toast, e-mail, webhook"]
+    IDE["IDEs via ACP<br/>Zed, Cursor, VS Code"]
 
-    subgraph V3["Agora (v3.0.0-beta) — 5 Estações Independentes + Fila + Portão A/B/C + Auto-Skills"]
-        direction TB
-        H["HUMANO"] <-->|"1. Aprova Spec (FLX-01)<br/>2. Recebe Painel Executivo (Camada C)"| L["01 // Líder (Orquestrador)<br/>.agents/roles/lider.md"]
-
-        L -->|"Aciona Concepção"| PM["02 // PM + Arquiteto<br/>.agents/roles/pm-architect.md<br/>(discovery + criteria + Reuse Check DUP-01)"]
-        PM -->|"Portão Humano Obrigatório (FLX-01)"| L
-
-        L -->|"Spec aprovada"| PL["03 // Planejador (Plan)<br/>.agents/roles/planner.md<br/>(Mapeia IDs Constitution + .agents/rules/sdd-*.md)"]
-        PL -->|"Quebra em P/M/G + depends_on"| Q[("Fila Determinística<br/>sdd/.queue/queue.json<br/>(forge-sdd queue)")]
-
-        Q -->|"Onda Paralela (sem conflito)"| B1["04A // Builder A<br/>.agents/roles/builder.md"]
-        Q -->|"Onda Paralela / Fila"| B2["04B // Builder B<br/>.agents/roles/builder.md"]
-
-        B1 & B2 -->|"Entrega concluída"| GA["Portão Camada A (Determinístico)<br/>forge-sdd gate (P-01..P-23)"]
-        GA -->|"Se Camada A = PASS"| GB["05 // Analista de Governança<br/>.agents/roles/governance.md<br/>(Camada B — Estritamente Read-Only)"]
-        GB -->|"Veredito JSON + Candidatas Auto-Skill"| L
-        L -->|"Regra de Três (DUP-05 / GOV-03)"| SK["Motor Auto-Skills (forge-sdd skills)<br/>.agents/skills/ → .claude/skills/ & .gemini/skills/"]
-    end
+    H --> CLI
+    CLI --> TMX
+    TMX --> AG
+    AG --> CLI
+    CLI <--> BUS
+    CLI <--> ST
+    CLI --> GH
+    BUS --> NT
+    NT --> H
+    IDE --> CLI
 ```
+
+---
+
+## As três sessões do pipeline
+
+```mermaid
+flowchart LR
+    D["1. Discovery<br/>você conversa, planeja e aprova"] -->|"forge dispatch: job feature_build"| B["2. Builder<br/>constrói em ondas paralelas e abre o PR"]
+    B -->|"job pr_review"| R["3. Reviewer<br/>Camada A + Camada B, somente leitura"]
+    R -->|"violação: pr_rework (até 3x)"| B
+    R -->|"conforme: tasks approved + notificação"| D
+```
+
+Cada sessão usa o agente escolhido por ela (`forge.json`). Em modo live, os painéis do tmux ficam abertos e recebem os jobs; em modo headless, cada job abre uma instância nova do agente (ADR-0008).
+
+---
+
+## As 5 estações (skills por estação, ADR-0003)
+
+| Estação | Skill | Papel |
+|---|---|---|
+| Concepção | `sdd-concepcao` | discovery, critérios, Constituição, C4 |
+| Planejamento | `sdd-planejamento` | plano técnico e tasks P/M/G com `depends_on` |
+| Build | `sdd-build` | implementação por task, com `forge context` |
+| Governança | `sdd-governanca` | revisão somente leitura (Camada B) e `pr-review` |
+| Operação | `sdd-operacao` | Líder, painel executivo, inbox e pipeline |
 
 ---
 
@@ -49,22 +72,23 @@ flowchart TB
 
 ```mermaid
 flowchart LR
-    CI["sdd/memory/constitution.md<br/>Enxuta: 'O quê e Por quê'<br/>IDs estáveis: ARQ-*, SEG-*, DUP-*, COD-*, TST-*, FLX-*, GOV-*"]
-    CI --> R1[".agents/rules/sdd-arquitetura.md<br/>(ARQ-01..05)"]
-    CI --> R2[".agents/rules/sdd-seguranca.md<br/>(SEG-01..04)"]
-    CI --> R3[".agents/rules/sdd-reuso-e-duplicacao.md<br/>(DUP-01..05)"]
-    CI --> R4[".agents/rules/sdd-codigo-e-testes.md<br/>(COD-01..05, TST-01..04)"]
-    CI --> R5[".agents/rules/sdd-fluxo-e-portao.md<br/>(FLX-01..05, GOV-01..05)"]
+    CI["sdd/memory/constitution.md<br/>enxuta: o quê e por quê<br/>IDs estáveis: ARQ, SEG, DUP, COD, TST, FLX, GOV"]
+    CI --> R1[".agents/rules/sdd-arquitetura.md"]
+    CI --> R2[".agents/rules/sdd-seguranca.md"]
+    CI --> R3[".agents/rules/sdd-reuso-e-duplicacao.md"]
+    CI --> R4[".agents/rules/sdd-codigo-e-testes.md"]
+    CI --> R5[".agents/rules/sdd-fluxo-e-portao.md"]
+    CI --> R6[".agents/rules/sdd-acp.md"]
 ```
 
 ---
 
-## Escopo do Binário (`forge-sdd`)
-- `forge-sdd init` — inicializa a estrutura Forge-SDD em qualquer repositório
-- `forge-sdd update` — atualiza artefatos de agentes preservando dados do usuário (`sdd/memory/`, `sdd/features/`, `sdd/discovery/`)
-- `forge-sdd doctor` — verifica integridade dos artefatos SDD e versão instalada
-- `forge-sdd status` / `forge-sdd report` — exibe progresso, métricas e telemetria de sessões
-- `forge-sdd queue` — gerencia a fila determinística de tarefas do Builder (`sdd/.queue/queue.json`)
-- `forge-sdd gate` — executa o Portão Determinístico Camada A (`P-01`, `P-02`, `P-03`, `P-13`, `P-21`, `P-23`)
-- `forge-sdd skills` — propõe, aprova, lista e sincroniza Auto-Skills (`DUP-05` / `GOV-03`)
-- `forge-sdd governance` — importa e audita padrões genéricos de governança sem acoplamento a cliente
+## Escopo do binário (`forge`)
+- **Ciclo de vida:** `init`, `update`, `doctor`, `destroy`, `version` e o menu navegável (`forge` sem argumentos).
+- **Pipeline:** `up`, `dispatch`, `worker`, `bus`, `inbox`, `review`, `pipeline`, `attach`.
+- **Visibilidade:** `status` (`--live`), `ps`, `queue` (`list`, `panel`, `activity`).
+- **Contexto e portão:** `brief`, `context`, `gate`, `next-id`.
+- **Memória e métricas:** `session`, `report`, `lessons`, `archive`, `autopilot`.
+- **Extensões:** `skills`, `governance`, `acp`.
+
+O binário é chamado de `forge` em toda a documentação, nos prompts e nos templates (ADR-0010).

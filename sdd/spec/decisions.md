@@ -13,6 +13,11 @@
 | D7 | Subcomandos de runtime | Nenhum (chatmodes Copilot) | CLI mínimo, sem manutenção dupla |
 | D8 | Idioma padrão | pt-BR | Público-alvo primário; `--lang en` para inglês |
 | D9 | Distribuição | goreleaser v2 + GitHub Releases | Multi-OS automatizado, zero manual |
+| D13 | Configurações de MCP | Separadas por agente (`.gemini/`, `.vscode/`, etc.) | Cada agente possui formas distintas de gerenciar MCPs e habilidades. |
+| D14 | Pipeline de trabalho | 3 sessões (Discovery, Builder, Reviewer) ligadas por barramento de jobs | Contexto separado, revisão independente e paralelismo (ADR-0004) |
+| D15 | Nome do comando | `forge` oficial; `forge-sdd` mantido como alias no npm | Um nome só para pessoas e agentes (ADR-0010) |
+| D16 | Reset de contexto | Por job, no mesmo painel, com cartão de handoff | Previsível e sem fechar o tmux (ADR-0009) |
+| D17 | Estado da fila após aprovação | O Go propaga `approved` às tasks do job | O agente não precisa lembrar; o painel fica correto (ADR-0012) |
 
 ## Abertas
 
@@ -21,5 +26,20 @@
 | D10 | [ ] Suportar `--lang en` com templates em inglês? Duplicar templates ou sistema de i18n? |
 | D11 | [ ] `forge-sdd init` em diretório não-vazio: bloquear tudo ou listar conflitos e continuar? |
 | D12 | Embutir versão da metodologia no binário via `ldflags` ou constante em `internal/config`? |
-| D13 | Configurações de MCP | Separadas por agente (`.gemini/`, `.vscode/`, etc.) | Cada agente possui formas distintas de gerenciar MCPs e habilidades. |
 
+## Índice de ADRs (`sdd/spec/adr/`)
+
+| ADR | Título | Status |
+|-----|--------|--------|
+| 0001 | Remoção do Forge Studio | `aprovado` |
+| 0002 | Layout e Estado por Iniciativa | `aprovado` |
+| 0003 | Skills por Estação e Orçamento de Contexto | `aprovado` |
+| 0004 | Pipeline Multi-Sessão (Discovery, Builder e Reviewer) | `aprovado` |
+| 0005 | Menu Navegável e Agente por Sessão do Pipeline | `aprovado` |
+| 0006 | Visibilidade, tmux e Entrega ao Builder | `aprovado` |
+| 0007 | Contexto do Projeto na Discovery, Briefing e Contingência de Terminal | `aprovado` |
+| 0008 | Sessões com CLI Aberta no Tmux (Modo Live e Despachante de Entrega) | `aprovado` |
+| 0009 | Tokens por Janela, Reset Suave de Contexto e Auto-Archive | `proposto` |
+| 0010 | `forge` como Único Nome de Comando | `proposto` |
+| 0011 | Painel Interativo, Stream de Chat nos Workers e Fila com Drill-Down | `proposto` |
+| 0012 | A Aprovação do Job Atualiza a Fila da Iniciativa | `proposto` |
