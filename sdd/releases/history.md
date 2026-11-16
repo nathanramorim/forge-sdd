@@ -4,6 +4,15 @@ Este arquivo registra o histórico de entregas de produto deste projeto.
 
 ## Entregas
 
+### Versão 4.9.1 — Correções do Modo Avançado: Fila, Teto Diário e Tetos no Settings (Beta)
+
+Compatível com a 4.9.0-beta (Iniciativas 84 e 88).
+
+*   **A fila passa a refletir a aprovação do Reviewer (`fix-84-03`):** o job guardava as tasks como `88-01` e a fila como `feat-88-01-<nome>`, então nenhuma casava e tudo seguia `queued` mesmo com o PR aprovado. O casamento agora ignora o prefixo `feat-`, e um aviso aparece quando um job traz tasks que não pertencem à fila. O auto-archive volta a funcionar.
+*   **O teto diário de jobs não derruba mais a esteira (`fix-88-01`):** a contagem passa a ser de jobs distintos (antes, cada nova reivindicação do mesmo job contava), o dia é o do seu fuso e, ao atingir o teto, a esteira entra em pausa até o dia seguinte e retoma sozinha, em vez de encerrar. O `STOP` continua encerrando de forma limpa, inclusive no modo ao vivo.
+*   **Todos os tetos desligados por padrão e no Settings (`fix-88-02`):** o teto diário de jobs, o de tokens por job e o de tempo por job nascem desativados e se ligam no menu **Settings**. Sem nenhum teto ligado, só o `STOP` encerra a esteira avançada. O timeout do runner (`builder.job_timeout_minutes`) não mudou.
+*   **Como atualizar:** `npm install -g @nathanramorim/forge-sdd@beta`. Esteiras que já têm `max_jobs_per_day` e `max_job_tokens` gravados no `forge.json` mantêm esses valores; para desligar, use o Settings.
+
 ### Versão 4.9.0 — Modo Pipeline Avançado e Menu Settings (Beta)
 
 Compatível com a 4.8.0 (Iniciativa 88). Experimental: o modo normal não muda.
