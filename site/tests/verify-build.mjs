@@ -17,7 +17,7 @@ assert(existsSync(join(DIST_DIR, 'robots.txt')), 'dist/robots.txt deve existir')
 assert(existsSync(join(DIST_DIR, 'sitemap-index.xml')), 'dist/sitemap-index.xml deve existir');
 assert(existsSync(join(DIST_DIR, 'llms.txt')), 'dist/llms.txt deve existir');
 assert(existsSync(join(DIST_DIR, 'favicon.svg')), 'dist/favicon.svg deve existir');
-assert(existsSync(join(DIST_DIR, 'og-image.svg')), 'dist/og-image.svg deve existir');
+assert(existsSync(join(DIST_DIR, 'og-image.png')), 'dist/og-image.png deve existir');
 assert(existsSync(join(DIST_DIR, '_headers')), 'dist/_headers deve existir');
 assert(existsSync(join(DIST_DIR, 'video/forge-sdd-v3.mp4')), 'dist/video/forge-sdd-v3.mp4 deve existir');
 assert(existsSync(join(DIST_DIR, 'video/forge-sdd-v3-poster.jpg')), 'dist/video/forge-sdd-v3-poster.jpg deve existir');
@@ -30,7 +30,9 @@ assert(html.includes('<link rel="canonical" href="https://forge-sdd.org/">'), 'C
 assert(html.includes('property="og:url" content="https://forge-sdd.org/"'), 'og:url incorreta');
 assert(html.includes('property="og:title"'), 'og:title ausente');
 assert(html.includes('property="og:description"'), 'og:description ausente');
-assert(html.includes('property="og:image" content="https://forge-sdd.org/og-image.svg"'), 'og:image incorreta');
+assert(html.includes('property="og:image" content="https://forge-sdd.org/og-image.png"'), 'og:image incorreta');
+assert(html.includes('property="og:image:width" content="1200"') && html.includes('property="og:image:height" content="630"'), 'og:image deve declarar 1200x630');
+assert(html.includes('name="twitter:image" content="https://forge-sdd.org/og-image.png"'), 'twitter:image incorreta');
 assert(html.includes('name="twitter:card" content="summary_large_image"'), 'twitter:card incorreta');
 assert(html.includes('application/ld+json'), 'Script JSON-LD ausente');
 assert(html.includes('"SoftwareApplication"'), 'Schema SoftwareApplication ausente no JSON-LD');
@@ -39,6 +41,8 @@ assert(html.includes('"FAQPage"'), 'Schema FAQPage ausente no JSON-LD');
 
 // 3. Estrutura das 5 Seções e De-Para 1:1 (CA-04)
 console.log('3. Verificando presença e pré-renderização de todas as seções...');
+assert(html.includes('id="lancamento"'), 'Seção #lancamento ausente');
+assert(html.includes('Forge-SDD <span') && html.includes('4.8'), 'Chamada de lançamento da 4.8 ausente');
 assert(html.includes('id="estacoes"'), 'Seção #estacoes ausente');
 assert(html.includes('id="emulador"'), 'Seção #emulador ausente');
 assert(html.includes('id="instalacao"'), 'Seção #instalacao ausente');
@@ -64,9 +68,9 @@ assert(html.includes('id="hoTo"'), 'Campo #hoTo ausente');
 assert(html.includes('id="hoPayload"'), 'Campo #hoPayload ausente');
 assert(html.includes('id="hoGateChip"'), 'Campo #hoGateChip ausente');
 
-// SVG Fallbacks dos mascotes pré-renderizados no HTML inicial (evita CLS: 5 na esteira, 1 no emulador e 1 na governança)
+// SVG Fallbacks dos mascotes pré-renderizados no HTML inicial (evita CLS: 5 na esteira, 1 no emulador, 1 na governança e 3 na seção de lançamento)
 const mascotMatches = html.match(/class="mascot-fallback-svg"/g);
-assert(mascotMatches && mascotMatches.length === 7, `Esperado 7 mascotes SVG de fallback pré-renderizados (5 esteira + 1 emulador + 1 governança), encontrados: ${mascotMatches ? mascotMatches.length : 0}`);
+assert(mascotMatches && mascotMatches.length === 10, `Esperado 10 mascotes SVG de fallback pré-renderizados (5 esteira + 1 emulador + 1 governança + 3 lançamento), encontrados: ${mascotMatches ? mascotMatches.length : 0}`);
 
 // 5. Verificação de Scripts e Bundles (CA-06)
 console.log('5. Verificando ausência de scripts CDN externos bloqueantes e presença de bundle Astro...');

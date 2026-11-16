@@ -1,0 +1,148 @@
+---
+import MascotFallbackSvg from './MascotFallbackSvg.astro';
+import { STATE_DEFS, type MascotMark, type MascotState } from '../data/stations';
+
+interface Sessao {
+  nome: string;
+  color: string;
+  mark: MascotMark;
+  state: MascotState;
+}
+
+// As três sessões do pipeline, com as cores das estações da landing.
+const sessoes: Sessao[] = [
+  { nome: '1 · Discovery', color: '#f2a65a', mark: 'ring', state: 'approval' },
+  { nome: '2 · Builder', color: '#4fd1b5', mark: 'wave', state: 'working' },
+  { nome: '3 · Reviewer', color: '#ff8a5c', mark: 'tri', state: 'searching' }
+];
+
+const novidades = [
+  {
+    cor: '#4f8ef7',
+    titulo: 'Chat nos workers',
+    texto: 'Builder e Reviewer mostram cada etapa em linguagem de gente, no lugar de contadores secos e saída crua.'
+  },
+  {
+    cor: '#c9a7ff',
+    titulo: 'Fila com drill-down',
+    texto: 'Todas as tasks em abas Na Fila e Concluídas, com laudo do Reviewer, tempo e tokens por etapa. No tmux, Ctrl+b q abre a fila em popup.'
+  },
+  {
+    cor: '#3ecf8e',
+    titulo: 'Painel que acompanha',
+    texto: 'Aprovou o job? A fila, o forge status e o painel mostram as tasks aprovadas, e a iniciativa concluída pode se arquivar sozinha.'
+  }
+];
+---
+
+<section id="lancamento" class="launch">
+  <div class="launch-card">
+    <div class="launch-head">
+      <div class="launch-copy">
+        <span class="chip"><i style="--o:var(--ok)"></i>Nova versão estável · v4.8.0</span>
+        <h2>Forge-SDD <span class="launch-grad">4.8</span>: veja o que seu time de IA faz, e confie no painel.</h2>
+        <p>
+          A versão estável reúne o painel interativo e corrige o que mais incomodava: a fila agora acompanha a aprovação do Reviewer. Você acompanha cada sessão sem abrir um arquivo.
+        </p>
+      </div>
+
+      <div class="launch-crew" aria-hidden="true">
+        {sessoes.map((s, i) => (
+          <>
+            <div class="crew-item">
+              <MascotFallbackSvg color={s.color} mark={s.mark} state={s.state} width={74} height={82} />
+              <strong>{s.nome}</strong>
+              <span class="mono" style={`color:${STATE_DEFS[s.state].cssOrb}`}>{STATE_DEFS[s.state].label.toLowerCase()}</span>
+            </div>
+            {i < sessoes.length - 1 && <span class="crew-arrow">→</span>}
+          </>
+        ))}
+      </div>
+    </div>
+
+    <div class="launch-grid">
+      {novidades.map((n) => (
+        <article class="launch-feat" style={`--c:${n.cor}`}>
+          <h3>{n.titulo}</h3>
+          <p>{n.texto}</p>
+        </article>
+      ))}
+    </div>
+
+    <div class="launch-cta">
+      <div class="install-pill"><span>$ npm i -g @nathanramorim/forge-sdd</span></div>
+      <a class="btn solid" href="https://github.com/nathanramorim/forge-sdd/releases/tag/v4.8.0" target="_blank" rel="noopener noreferrer">Ver as novidades da 4.8</a>
+      <a class="btn ghost" href="#instalacao">Como instalar &amp; usar</a>
+    </div>
+  </div>
+</section>
+
+<style>
+  .launch { padding-top: 8px; }
+  .launch-card {
+    border: 1px solid var(--line2);
+    border-radius: var(--r-panel);
+    background:
+      radial-gradient(900px 260px at 20% -10%, rgba(79, 142, 247, .16), transparent 70%),
+      var(--bg2);
+    padding: 28px;
+  }
+  .launch-head {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 24px;
+    align-items: center;
+  }
+  .launch-copy h2 {
+    font: 800 clamp(24px, 3.2vw, 34px)/1.15 var(--f-body);
+    letter-spacing: -.02em;
+    margin: 14px 0 10px;
+  }
+  .launch-grad {
+    background: linear-gradient(90deg, #4f8ef7, #8aa4ff 50%, #3ecf8e);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .launch-copy p { color: var(--muted); max-width: 56ch; line-height: 1.6; }
+
+  .launch-crew {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 14px 8px;
+    border: 1px solid var(--line);
+    border-radius: var(--r-card);
+    background: var(--s-focus);
+  }
+  .crew-item { display: grid; justify-items: center; gap: 2px; text-align: center; }
+  .crew-item strong { font: 700 12px var(--f-body); color: var(--fg); margin-top: 4px; }
+  .crew-item .mono { font-size: 10.5px; }
+  .crew-arrow { color: #8aa4ff; font-size: 18px; padding-bottom: 28px; }
+
+  .launch-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin: 22px 0 20px;
+  }
+  .launch-feat {
+    border: 1px solid var(--line);
+    border-top: 3px solid var(--c);
+    border-radius: var(--r-card);
+    background: var(--bg3);
+    padding: 16px 18px;
+  }
+  .launch-feat h3 { font: 700 15px var(--f-body); margin: 0 0 6px; color: var(--fg); }
+  .launch-feat p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.55; }
+
+  .launch-cta { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+  .launch-cta .install-pill { margin: 0; }
+
+  @media (max-width: 860px) {
+    .launch-head { grid-template-columns: 1fr; }
+    .launch-grid { grid-template-columns: 1fr; }
+    .launch-card { padding: 20px; }
+  }
+</style>

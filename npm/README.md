@@ -11,6 +11,8 @@
 
 <h3 align="center">Seu time de IA, com método.<br>Do plano ao PR, sem repetir instruções.</h3>
 
+<p align="center"><strong>Versão atual: 4.8.0 (estável)</strong> · <a href="https://github.com/nathanramorim/forge-sdd/blob/main/sdd/releases/history.md">veja as novidades</a></p>
+
 <p align="center">
   <a href="https://forge-sdd.org">Site oficial</a> ·
   <a href="https://github.com/nathanramorim/forge-sdd/blob/main/docs/comandos.md">Comandos</a> ·
