@@ -224,12 +224,15 @@ func processJob(ctx context.Context, opts WorkerOptions, cfg config.ForgeConfig,
 	}()
 
 	rel, _ := filepath.Rel(opts.Dir, entry.Path)
+	modelArgs, effortArgs := cfg.SessionModelArgs(opts.Role)
 	timeout := time.Duration(cfg.Builder.JobTimeoutMinutes) * time.Minute
 	res, runErr := opts.Runner.Run(ctx, RunSpec{
 		Agent:       opts.Role,
 		Name:        opts.Name,
 		Prompt:      workerPrompt(opts.Role, job, filepath.ToSlash(rel), cfg),
 		Permissions: cfg.WorkerPermissionArgs(opts.CLI),
+		Model:       modelArgs,
+		Effort:      effortArgs,
 		Dir:         opts.Dir,
 		Timeout:     timeout,
 	}, out)

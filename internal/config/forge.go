@@ -108,6 +108,10 @@ type ForgeConfig struct {
 	// Sessions escolhe o agente de cada sessão (discovery, builder, reviewer). Sem a chave, vale cli.
 	Sessions    map[string]string `json:"sessions,omitempty"`
 	Permissions string            `json:"permissions"`
+	// Models e Efforts escolhem o modelo e o esforço de cada sessão (discovery, builder, reviewer).
+	// Sem a chave vale o padrão da CLI; os perfis aplicam por {model} e {effort}.
+	Models  map[string]string `json:"models,omitempty"`
+	Efforts map[string]string `json:"efforts,omitempty"`
 	// Terminal escolhe onde as sessões abrem: auto (tmux se existir), tmux ou native (janelas do sistema).
 	Terminal string `json:"terminal"`
 	// SessionMode escolhe o modo do worker: headless (padrão antigo) ou live (CLI aberta no painel).
@@ -139,7 +143,7 @@ var (
 	relDirRe      = regexp.MustCompile(`^[A-Za-z0-9._-]+(/[A-Za-z0-9._-]+)*$`)
 	branchRe      = regexp.MustCompile(`^[A-Za-z0-9._-]+(/[A-Za-z0-9._-]+)*$`)
 	emailRe       = regexp.MustCompile(`^[^@\s]+@[^@\s]+$`)
-	validMarkers  = map[string]bool{"{agent}": true, "{name}": true, "{prompt}": true, MarkerPermissions: true}
+	validMarkers  = map[string]bool{"{agent}": true, "{name}": true, "{prompt}": true, MarkerPermissions: true, MarkerModel: true, MarkerEffort: true}
 )
 
 // DefaultForgeConfig devolve os valores padrão da especificação do pipeline. Os argumentos do
@@ -339,11 +343,13 @@ func validateProfile(name string, p CLIProfile) error {
 		for _, a := range args {
 			for _, m := range placeholderRe.FindAllString(a, -1) {
 				if !validMarkers[m] {
-					return fmt.Errorf("cli_profiles.%s.%s: marcador %s desconhecido (use {agent}, {name}, {prompt} ou {permissions})", name, field, m)
+					return fmt.Errorf("cli_profiles.%s.%s: marcador %s desconhecido (use {agent}, {name}, {prompt}, {permissions}, {model} ou {effort})", name, field, m)
 				}
 			}
-			if strings.Contains(a, MarkerPermissions) && a != MarkerPermissions {
-				return fmt.Errorf("cli_profiles.%s.%s: %s precisa ser um argumento inteiro", name, field, MarkerPermissions)
+			for _, m := range []string{MarkerPermissions, MarkerModel, MarkerEffort} {
+				if strings.Contains(a, m) && a != m {
+					return fmt.Errorf("cli_profiles.%s.%s: %s precisa ser um argumento inteiro", name, field, m)
+				}
 			}
 			if strings.ContainsAny(a, "\x00\r\n") {
 				return fmt.Errorf("cli_profiles.%s.%s: argumento com caractere de controle", name, field)

@@ -42,7 +42,7 @@ func TestForgeProfiles_ForgeJSONDa41SemSessionsContinuaValido(t *testing.T) {
 	}
 	p, ok := cfg.Profile(CLIClaude)
 	require.True(t, ok)
-	assert.Equal(t, []string{"-n", "{name}", "--agent", "{agent}"}, p.InteractiveArgs, "completa o que a 4.1 não trazia")
+	assert.Equal(t, []string{"-n", "{name}", "--agent", "{agent}", MarkerModel, MarkerEffort}, p.InteractiveArgs, "completa o que a 4.1 não trazia")
 	assert.Equal(t, PermissionProject, cfg.Permissions)
 }
 
@@ -143,8 +143,8 @@ func TestProfile_NormalizaGeminiLegadoParaAgy(t *testing.T) {
 	p, ok := cfg.Profile(CLIGemini)
 	require.True(t, ok)
 	assert.Equal(t, "agy", p.Command, "deve normalizar comando gemini para agy")
-	assert.Equal(t, []string{"-p", "{prompt}", MarkerPermissions}, p.Args, "deve limpar flags legadas de saída de gemini")
-	assert.Equal(t, []string{"-i", "{prompt}"}, p.InteractiveArgs)
+	assert.Equal(t, []string{"-p", "{prompt}", MarkerPermissions, MarkerModel, MarkerEffort}, p.Args, "deve limpar flags legadas de saída de gemini")
+	assert.Equal(t, []string{"-i", "{prompt}", MarkerModel, MarkerEffort}, p.InteractiveArgs)
 	assert.Equal(t, "/clear", p.ResetCommand)
 
 	// Fallback quando gemini não existe mas agy existe
@@ -156,5 +156,71 @@ func TestProfile_NormalizaGeminiLegadoParaAgy(t *testing.T) {
 	pFallback, ok := cfg.Profile(CLIGemini)
 	require.True(t, ok)
 	assert.Equal(t, "agy", pFallback.Command)
-	assert.Equal(t, []string{"-i", "{prompt}"}, pFallback.InteractiveArgs)
+	assert.Equal(t, []string{"-i", "{prompt}", MarkerModel, MarkerEffort}, pFallback.InteractiveArgs)
+}
+
+func TestModeloPorSessao_SemEscolhaArgvIdentico(t *testing.T) {
+	cfg := DefaultForgeConfig()
+	for _, role := range SessionRoles() {
+		m, e := cfg.SessionModelArgs(role)
+		assert.Empty(t, m, role)
+		assert.Empty(t, e, role)
+		assert.Empty(t, cfg.MissingModelMarkers(role), role)
+	}
+}
+
+func TestModeloPorSessao_ClaudeRecebeModeloEEsforco(t *testing.T) {
+	cfg := DefaultForgeConfig()
+	cfg.Models = map[string]string{SessionRoleBuilder: "sonnet"}
+	cfg.Efforts = map[string]string{SessionRoleBuilder: "low"}
+	require.NoError(t, cfg.Validate())
+
+	m, e := cfg.SessionModelArgs(SessionRoleBuilder)
+
+	assert.Equal(t, []string{"--model", "sonnet"}, m)
+	assert.Equal(t, []string{"--effort", "low"}, e)
+	other, _ := cfg.SessionModelArgs(SessionRoleReviewer)
+	assert.Empty(t, other, "só a sessão escolhida muda")
+}
+
+func TestModeloPorSessao_ValoresInvalidosSaoErro(t *testing.T) {
+	for name, mut := range map[string]func(*ForgeConfig){
+		"modelo com espaço":       func(c *ForgeConfig) { c.Models = map[string]string{"builder": "so net"} },
+		"modelo com metacaracter": func(c *ForgeConfig) { c.Models = map[string]string{"builder": "x;rm"} },
+		"modelo longo demais":     func(c *ForgeConfig) { c.Models = map[string]string{"builder": strings.Repeat("a", 81)} },
+		"papel desconhecido":      func(c *ForgeConfig) { c.Models = map[string]string{"chefe": "sonnet"} },
+		"CLI sem flag confirmada": func(c *ForgeConfig) {
+			c.Sessions = map[string]string{"builder": CLICodex}
+			c.Models = map[string]string{"builder": "gpt"}
+		},
+	} {
+		t.Run(name, func(t *testing.T) {
+			cfg := DefaultForgeConfig()
+			mut(&cfg)
+			assert.Error(t, cfg.Validate())
+		})
+	}
+}
+
+func TestEsforco_ForaDaListaDaCLIEErro(t *testing.T) {
+	cfg := DefaultForgeConfig()
+	cfg.Efforts = map[string]string{"builder": "extremo"}
+	assert.Error(t, cfg.Validate())
+
+	cfg.Efforts = map[string]string{"builder": "max"}
+	assert.NoError(t, cfg.Validate())
+
+	cfg.Sessions = map[string]string{"builder": CLICodex}
+	assert.Error(t, cfg.Validate(), "codex não tem flag de esforço confirmada")
+}
+
+func TestModeloPorSessao_PerfilSemMarcadorAvisa(t *testing.T) {
+	cfg := DefaultForgeConfig()
+	cfg.Models = map[string]string{"builder": "sonnet"}
+	p := cfg.CLIProfiles[CLIClaude]
+	p.Args = []string{"-p", "{prompt}", MarkerPermissions}
+	cfg.CLIProfiles[CLIClaude] = p
+
+	assert.Equal(t, []string{MarkerModel}, cfg.MissingModelMarkers("builder"))
+	assert.Empty(t, cfg.MissingModelMarkers("reviewer"), "sem escolha, nada falta")
 }

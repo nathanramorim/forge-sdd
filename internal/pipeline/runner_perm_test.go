@@ -1,6 +1,7 @@
 package pipeline
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/forge-sdd/cli/internal/config"
@@ -55,4 +56,57 @@ func TestBuildArgv_AgyComAsFlagsConfirmadasNoUsoReal(t *testing.T) {
 		assert.Equal(t, "agy", cmd)
 		assert.Equal(t, []string{"-p", "faça o job", "--dangerously-skip-permissions"}, args, level)
 	}
+}
+
+func TestModeloPorSessao_ArgvIdenticoSemEscolhaEComEscolhaNoClaude(t *testing.T) {
+	cfg := config.DefaultForgeConfig()
+	p, _ := cfg.Profile(config.CLIClaude)
+	base := RunSpec{Agent: "builder", Name: "forge-builder", Prompt: "faça", Permissions: cfg.WorkerPermissionArgs(config.CLIClaude)}
+
+	_, semEscolha, err := BuildArgv(p, base)
+	require.NoError(t, err)
+	assert.NotContains(t, semEscolha, "--model")
+	assert.NotContains(t, semEscolha, "--effort")
+	assert.NotContains(t, semEscolha, config.MarkerModel)
+
+	// O perfil antigo, sem marcadores, gera exatamente o mesmo argv.
+	old := p
+	old.Args = []string{"-p", "{prompt}", "--agent", "{agent}", "-n", "{name}", "--output-format", "stream-json", "--verbose", config.MarkerPermissions}
+	_, antigo, err := BuildArgv(old, base)
+	require.NoError(t, err)
+	assert.Equal(t, antigo, semEscolha)
+
+	cfg.Models = map[string]string{"builder": "sonnet"}
+	cfg.Efforts = map[string]string{"builder": "low"}
+	base.Model, base.Effort = cfg.SessionModelArgs("builder")
+	_, comEscolha, err := BuildArgv(p, base)
+	require.NoError(t, err)
+	assert.Equal(t, append(append([]string{}, semEscolha...), "--model", "sonnet", "--effort", "low"), comEscolha)
+
+	// Perfil gravado sem o marcador ignora a escolha (o preflight avisa).
+	_, ignorado, err := BuildArgv(old, base)
+	require.NoError(t, err)
+	assert.Equal(t, antigo, ignorado)
+}
+
+func TestEsforco_PreflightAvisaPerfilSemMarcador(t *testing.T) {
+	cfg := config.DefaultForgeConfig()
+	cfg.Efforts = map[string]string{"reviewer": "low"}
+	p := cfg.CLIProfiles[config.CLIClaude]
+	p.Args = []string{"-p", "{prompt}", "--agent", "{agent}", "-n", "{name}", config.MarkerPermissions}
+	cfg.CLIProfiles[config.CLIClaude] = p
+	env := PreflightEnv{
+		LookPath: func(n string) (string, error) { return "/usr/bin/" + n, nil },
+		Exists:   func(string) bool { return true },
+	}
+
+	items := Preflight(t.TempDir(), cfg, env)
+
+	var warned bool
+	for _, it := range items {
+		if it.Level == LevelWarn && it.Session == config.SessionRoleReviewer && strings.Contains(it.Message, config.MarkerEffort) {
+			warned = true
+		}
+	}
+	assert.True(t, warned, "o perfil sem {effort} deve gerar aviso")
 }

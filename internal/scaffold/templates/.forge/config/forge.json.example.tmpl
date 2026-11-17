@@ -20,11 +20,15 @@
       "args": [
         "-p",
         "{prompt}",
-        "{permissions}"
+        "{permissions}",
+        "{model}",
+        "{effort}"
       ],
       "interactive_args": [
         "-i",
-        "{prompt}"
+        "{prompt}",
+        "{model}",
+        "{effort}"
       ],
       "reset_command": "/clear"
     },
@@ -40,13 +44,17 @@
         "--output-format",
         "stream-json",
         "--verbose",
-        "{permissions}"
+        "{permissions}",
+        "{model}",
+        "{effort}"
       ],
       "interactive_args": [
         "-n",
         "{name}",
         "--agent",
-        "{agent}"
+        "{agent}",
+        "{model}",
+        "{effort}"
       ],
       "reset_command": "/clear"
     },
@@ -86,11 +94,15 @@
       "args": [
         "-p",
         "{prompt}",
-        "{permissions}"
+        "{permissions}",
+        "{model}",
+        "{effort}"
       ],
       "interactive_args": [
         "-i",
-        "{prompt}"
+        "{prompt}",
+        "{model}",
+        "{effort}"
       ],
       "reset_command": "/clear"
     }
