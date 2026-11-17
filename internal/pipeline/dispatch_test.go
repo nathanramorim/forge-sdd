@@ -12,6 +12,7 @@ import (
 	"github.com/forge-sdd/cli/internal/bus"
 	"github.com/forge-sdd/cli/internal/config"
 	"github.com/forge-sdd/cli/internal/layout"
+	"github.com/forge-sdd/cli/internal/queue"
 	"github.com/forge-sdd/cli/internal/testutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -331,4 +332,84 @@ func TestBaseDaIniciativa_DispatchUsaAFilaEDizAFonte(t *testing.T) {
 	assert.Equal(t, "feat/88-modo", res.BaseBranch)
 	assert.Equal(t, "fila", res.BaseSource)
 	assert.Equal(t, "feat/88-modo", builderPending(t, dir)[0].Job.PR.BaseBranch)
+}
+
+const fixSpec = `# fix-77-01 — Corrige o login
+
+**Branch:** fix/77-01-corrige-login
+**Depende de:** feat-77-01
+**Status:** ready
+
+## Modelo do módulo
+- enxuto
+
+## O que já existe (Reuse Check — DUP-02)
+
+| Procurei | Onde | Achei | Decisão | Justificativa |
+|---|---|---|---|---|
+| auth | internal/auth | nada | corrigir | bug |
+
+## Dependências novas
+- Nenhuma.
+
+## Rules e IDs da Constituição Aplicáveis
+- ` + "`ARQ-01`, `SEG-01`, `TST-01`" + `. Rules: ` + "`sdd-seguranca.md`" + `.
+
+## Critérios de Aceitação Executáveis
+` + "```bash\ngo test ./...\n```" + `
+`
+
+func TestDispatchFix_EnfileiraComBaseDaIniciativaEItemNaFila(t *testing.T) {
+	dir := project(t, func(dir string) {
+		testutil.WriteFile(t, dir, "sdd/discovery/77-auth-oauth/fixes/fix-77-01-corrige-login.md", fixSpec)
+	})
+
+	res, err := Dispatch(dir, "auth-oauth", DispatchOptions{Now: now, Fix: "fix-77-01"})
+
+	require.NoError(t, err)
+	require.False(t, res.Blocked(), "%v", res.Pending)
+	jobs := builderPending(t, dir)
+	require.Len(t, jobs, 1)
+	j := jobs[0].Job
+	assert.Equal(t, bus.TypeFeatureBuild, j.Type)
+	assert.Equal(t, []string{"fix-77-01"}, j.TaskIDs)
+	assert.Equal(t, "fix/77-01-corrige-login", j.PR.Branch)
+	assert.Equal(t, "feat/77-auth-oauth", j.PR.BaseBranch)
+	assert.Equal(t, "sdd/discovery/77-auth-oauth/fixes/fix-77-01-corrige-login.md", j.SpecPath)
+	q, err := queue.LoadInitiative(dir, "77-auth-oauth")
+	require.NoError(t, err)
+	require.Len(t, q.Items, 1)
+	assert.Equal(t, "fix-77-01", q.Items[0].TaskID)
+	assert.Equal(t, queue.StatusQueued, q.Items[0].Status)
+
+	again, err := Dispatch(dir, "auth-oauth", DispatchOptions{Now: now, Fix: "fix-77-01"})
+	require.NoError(t, err)
+	assert.False(t, again.Created, "idempotente")
+	q, _ = queue.LoadInitiative(dir, "77-auth-oauth")
+	assert.Len(t, q.Items, 1)
+}
+
+func TestDispatchFix_SpecIncompletaOuFixInexistenteBloqueia(t *testing.T) {
+	dir := project(t, func(dir string) {
+		bad := strings.Replace(fixSpec, "```bash\ngo test ./...\n```", "sem comando", 1)
+		bad = strings.Replace(bad, "feat-77-01", "feat-77-09", 1)
+		testutil.WriteFile(t, dir, "sdd/discovery/77-auth-oauth/fixes/fix-77-01-corrige-login.md", bad)
+	})
+
+	res, err := Dispatch(dir, "auth-oauth", DispatchOptions{Now: now, Fix: "fix-77-01"})
+	require.NoError(t, err)
+	require.True(t, res.Blocked())
+	joined := strings.Join(res.Pending, "\n")
+	assert.Contains(t, joined, "feat-77-09, que não existe")
+	assert.Contains(t, joined, "comando executável")
+	assert.Empty(t, builderPending(t, dir))
+
+	res, err = Dispatch(dir, "auth-oauth", DispatchOptions{Now: now, Fix: "fix-77-99"})
+	require.NoError(t, err)
+	require.True(t, res.Blocked())
+	assert.Contains(t, strings.Join(res.Pending, "\n"), "fix-77-99 não existe")
+
+	res, err = Dispatch(dir, "auth-oauth", DispatchOptions{Now: now, Fix: "../x"})
+	require.NoError(t, err)
+	assert.Contains(t, strings.Join(res.Pending, "\n"), "inválido")
 }

@@ -318,7 +318,7 @@ func EnqueueGoalSteps(dir, initiative string, opts GoalOptions) (*GoalResult, er
 	}
 	if base, berr := layout.Initiative(dir, initiative); berr == nil {
 		// A spec incompleta sai antes de montar o DAG e do build, com tudo o que falta de uma vez.
-		if problems := taskSpecProblems(dir, base); len(problems) > 0 {
+		if problems := taskSpecProblems(dir, base, ""); len(problems) > 0 {
 			return &GoalResult{Initiative: initiative, Pending: problems}, nil
 		}
 	}

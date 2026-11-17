@@ -8,6 +8,7 @@ import (
 	"os/exec"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/forge-sdd/cli/internal/layout"
 )
@@ -138,4 +139,27 @@ func createdFrom(dir, branch string, git GitFunc) string {
 		return ""
 	}
 	return from
+}
+
+// AddItem acrescenta um item à fila da iniciativa (cria o arquivo se não existir). Idempotente: se o
+// task_id já está na fila, não muda nada. Usado pelo dispatch do fix, que não depende da branch atual.
+func AddItem(dir, initiative string, item QueueItem) error {
+	q, path, err := loadInitiativeQueue(dir, initiative)
+	if err != nil {
+		return err
+	}
+	if path == "" {
+		return fmt.Errorf("iniciativa %q inválida", initiative)
+	}
+	if q == nil {
+		q = &Queue{FeatureID: initiative, SpecStatus: "reviewed", Items: []QueueItem{}}
+	}
+	for _, it := range q.Items {
+		if it.TaskID == item.TaskID {
+			return nil
+		}
+	}
+	q.Items = append(q.Items, item)
+	q.UpdatedAt = time.Now().UTC().Format(time.RFC3339)
+	return WriteJSONAtomic(path, q, 0o644)
 }

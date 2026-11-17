@@ -28,9 +28,10 @@ o comando orienta forge pipeline init.`,
 		}
 		evidence, _ := cmd.Flags().GetString("card-evidence")
 		dry, _ := cmd.Flags().GetBool("dry-run")
+		fix, _ := cmd.Flags().GetString("fix")
 		out := cmd.OutOrStdout()
 
-		res, err := pipeline.Dispatch(dir, args[0], pipeline.DispatchOptions{EvidencePath: evidence, DryRun: dry})
+		res, err := pipeline.Dispatch(dir, args[0], pipeline.DispatchOptions{EvidencePath: evidence, DryRun: dry, Fix: fix})
 		if err != nil {
 			if errors.Is(err, pipeline.ErrNotPipelineMode) {
 				return fmt.Errorf("%w (sem .forge/config/forge.json o /implementar segue o fluxo da 4.0.0-beta)", err)
@@ -68,6 +69,7 @@ o comando orienta forge pipeline init.`,
 func init() {
 	dispatchCmd.Flags().String("dir", ".", "Diretório alvo do projeto Forge-SDD")
 	dispatchCmd.Flags().String("card-evidence", "", "Caminho (relativo ao projeto) da evidência do card; padrão: <iniciativa>/card-evidence.json")
+	dispatchCmd.Flags().String("fix", "", "Despacha um fix da iniciativa (ex.: fix-88-01): job com task_ids do fix, branch fix/<id>-<nome> e base na branch da iniciativa")
 	dispatchCmd.Flags().Bool("dry-run", false, "Roda o gate e mostra o job sem gravar")
 	rootCmd.AddCommand(dispatchCmd)
 }
