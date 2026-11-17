@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"bytes"
 	"os"
 	"path/filepath"
@@ -22,6 +23,7 @@ func runRoot(t *testing.T, args ...string) (string, error) {
 	_ = statusCmd.Flags().Set("tmux", "false")
 	_ = statusCmd.Flags().Set("once", "false")
 	_ = statusCmd.Flags().Set("compact", "false")
+	_ = statusCmd.Flags().Set("full", "false")
 	_ = statusCmd.Flags().Set("interactive", "false")
 	_ = queueCmd.Flags().Set("interactive", "false")
 	_ = queuePanelCmd.Flags().Set("interactive", "false")
@@ -73,7 +75,7 @@ func TestStatusENextID_ComIniciativaEmOutraBranch(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, "71\n", out)
 
-	out, err = runRoot(t, "status", "--dir", dir)
+	out, err = runRoot(t, "status", "--dir", dir, "--full")
 	require.NoError(t, err)
 	assert.Contains(t, out, "10-antiga")
 	assert.NotContains(t, out, "70-alfa")
@@ -201,7 +203,7 @@ func TestStatusLiveFlag(t *testing.T) {
 	assert.Equal(t, out, outShort, "flag curta -l deve produzir a mesma saída que --live")
 
 	// Testa forge status padrão (snapshot no CLI)
-	outSnapshot, err := runRoot(t, "status", "--dir", dir)
+	outSnapshot, err := runRoot(t, "status", "--dir", dir, "--full")
 	require.NoError(t, err)
 	assert.Contains(t, outSnapshot, "PROCESSAMENTO & CONSUMO POR SESSÃO")
 	assert.Contains(t, outSnapshot, "PROGRESSO DA ESTEIRA (DAG)")
@@ -222,3 +224,33 @@ func TestCLI_StatusInteractiveFlag(t *testing.T) {
 	assert.Contains(t, outShort, "Nenhuma tarefa na fila ativa.")
 }
 
+
+func TestStatusCurtoSemTerminal(t *testing.T) {
+	dir := t.TempDir()
+	for i := 1; i <= 17; i++ {
+		id := fmt.Sprintf("%02d-iniciativa-com-nome-longo-para-ocupar-espaco", i)
+		base := filepath.Join(dir, "sdd", "discovery", id)
+		require.NoError(t, os.MkdirAll(base, 0o755))
+		status := "approved"
+		if i > 12 {
+			status = "queued" // 5 ativas; as outras 12 já foram aprovadas
+		}
+		require.NoError(t, os.WriteFile(filepath.Join(base, "queue.json"), []byte(`{"items":[{"task_id":"`+fmt.Sprintf("%02d", i)+`-01","status":"`+status+`"}]}`), 0o644))
+	}
+	logs := filepath.Join(dir, ".forge", "runtime", "logs")
+	require.NoError(t, os.MkdirAll(logs, 0o755))
+	require.NoError(t, os.WriteFile(filepath.Join(logs, "builder-j.log"), []byte(`{"type":"assistant","message":{"content":[{"type":"text","text":"ola"}]}}`+"\n"), 0o644))
+
+	out, err := runRoot(t, "status", "--dir", dir)
+
+	require.NoError(t, err)
+	assert.LessOrEqual(t, len(out), 1500)
+	assert.NotContains(t, out, `{"type"`)
+	assert.Contains(t, out, "13-iniciativa")
+	assert.NotContains(t, out, "05-iniciativa", "iniciativa toda aprovada não é ativa")
+
+	full, err := runRoot(t, "status", "--dir", dir, "--full")
+	require.NoError(t, err)
+	assert.Greater(t, len(full), 1500)
+	assert.NotContains(t, full, `{"type"`)
+}

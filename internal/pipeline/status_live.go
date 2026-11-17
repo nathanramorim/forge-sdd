@@ -562,8 +562,7 @@ func extractLastInformativeLines(content string, count int) []string {
 	rawLines := strings.Split(cleaned, "\n")
 	var nonBlank []string
 	for _, line := range rawLines {
-		t := strings.TrimSpace(line)
-		if t != "" {
+		for _, t := range humanizeLine(line) {
 			nonBlank = append(nonBlank, t)
 		}
 	}
@@ -598,4 +597,27 @@ func gitRecentCommits(dir string, max int) ([]string, error) {
 		}
 	}
 	return lines, nil
+}
+
+// humanizeLine traduz uma linha do painel ou do log: evento stream-json vira linhas curtas (o mesmo
+// tradutor do painel do worker) e JSON nunca sai cru; texto comum passa como está.
+func humanizeLine(line string) []string {
+	t := strings.TrimSpace(line)
+	if t == "" {
+		return nil
+	}
+	if strings.HasPrefix(t, "{") || strings.HasPrefix(t, "[{") {
+		var ev map[string]any
+		if json.Unmarshal([]byte(t), &ev) != nil {
+			return nil
+		}
+		var out []string
+		for _, l := range summarizeEvent("", ev) {
+			if l = strings.TrimSpace(l); l != "" {
+				out = append(out, l)
+			}
+		}
+		return out
+	}
+	return []string{t}
 }
