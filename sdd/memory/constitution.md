@@ -59,14 +59,14 @@ As regras abaixo indexam as decisões invioláveis por IDs estáveis. O **como c
 - **ARQ-03:** Templates e assets de scaffold só via `embed.FS` (Regra 3).
 - **ARQ-04:** O binário não depende de nada além da biblioteca padrão em runtime (Regra 8).
 - **ARQ-05:** `--dry-run` não tem efeito colateral no disco (Regra 9).
-- **ARQ-06:** A CLI expõe os comandos de ciclo de vida (`init`, `update`) e subcomandos determinísticos de suporte (`doctor`, `status`, `next-id`, `context`, `session`, `lessons`, `report`, `queue`, `gate`, `skills`, `governance`, `acp`, `attach`, `autopilot`, `destroy`, `pipeline`, `dispatch`, `bus`, `worker`, `inbox`, `up`) com contratos explícitos (Regra 10).
+- **ARQ-06:** A CLI expõe os comandos de ciclo de vida (`init`, `update`) e subcomandos determinísticos de suporte (`doctor`, `status`, `next-id`, `context`, `session`, `lessons`, `report`, `queue`, `gate`, `skills`, `governance`, `acp`, `attach`, `autopilot`, `destroy`, `pipeline`, `dispatch`, `bus`, `worker`, `inbox`, `up`, `archive`, `brief`, `ps`, `version`) com contratos explícitos (Regra 10).
 - **ARQ-10:** Domínio e validação não vazam para handlers de CLI nem para templates.
 - **ARQ-11:** Toda spec declara o modelo do módulo (`completo` ou `enxuto`) com justificativa.
 
 ### Segurança (`SEG`)
 - **SEG-01:** Toda entrada externa (flags, caminhos, JSON, manifestos, refs git) é validada na borda.
 - **SEG-02:** Escritas respeitam o diretório-alvo e preservam arquivos de domínio do usuário (`shouldPreserve`), sem perda de dados nem path traversal.
-- **SEG-03:** Subprocessos (`git`, `go`) usam argumentos explícitos, sem interpolação em shell.
+- **SEG-03:** Subprocessos (`git`, `gh`, `go`) usam argumentos explícitos, sem interpolação em shell.
 - **SEG-04:** Segredos e credenciais nunca entram em código, binário, templates ou repositório (Regra 4).
 - **SEG-05:** Dados sensíveis nunca aparecem em logs, saída padrão nem telemetria.
 - **SEG-06:** Agentes têm privilégio mínimo: a Governança (Camada B) é somente leitura sobre código.
@@ -112,7 +112,7 @@ As regras abaixo indexam as decisões invioláveis por IDs estáveis. O **como c
 
 ## Roteamento para `.agents/rules/`
 
-A relação entre cada rule, o escopo (`globs`) e os IDs que ela cobre (`regras`) vive no frontmatter de cada arquivo de `.agents/rules/`, fonte única (`DUP-06`). `forge-sdd context <task>` resolve as rules de uma task.
+O escopo (`globs`) e os IDs de cada rule (`regras`) vivem só no frontmatter de `.agents/rules/` (`DUP-06`). `forge context <task>` resolve as rules de uma task.
 
 ### Divergências conhecidas
 Nenhuma divergência ativa registrada.

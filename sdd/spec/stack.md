@@ -1,4 +1,4 @@
-# Stack — forge-sdd (v4.7.7-beta)
+# Stack — forge-sdd (v4.9.1-beta + iniciativas 89 e 90, na feat/88)
 
 ## Dependências
 
@@ -20,7 +20,7 @@ Dependências indiretas relevantes: `bubbletea` e `lipgloss` (renderização da 
 ## Ferramentas externas (opcionais, detectadas em runtime)
 - **tmux**: abre as 3 sessões do pipeline em painéis numa tela só (`forge up`); sem ele, há contingência para janelas do sistema ou Windows Terminal (ADR-0007).
 - **CLIs de agente**: `claude`, `gemini`, `copilot`, `codex` ou `agy`, uma por sessão (perfis em `internal/config/forge_profiles.go`).
-- **git** e **gh**: branches por iniciativa, worktrees do Builder e criação de PR.
+- **git** e **gh**: branches por iniciativa, worktrees do Builder e abertura do PR (`forge pipeline pr`, só com argumentos explícitos).
 
 ## Distribuição
 - Pacote npm `@nathanramorim/forge-sdd`: um launcher (`bin/run.js`) baixa o binário da versão do GitHub Releases, confere o SHA256 e o guarda em `~/.cache/forge-sdd/<versão>/`.
@@ -30,7 +30,7 @@ Dependências indiretas relevantes: `bubbletea` e `lipgloss` (renderização da 
 ## Layout do projeto
 ```
 cmd/forge-sdd/           # camada Cobra: init, update, doctor, status, queue, bus, dispatch,
-                         # worker, up, ps, inbox, review, pipeline, brief, context, gate,
+                         # worker, up, ps, inbox, pipeline, brief, context, gate,
                          # skills, session, report, archive, lessons, next-id, acp, menu...
 internal/
   acp/                   # servidor Agent Client Protocol (stdio e HTTP)

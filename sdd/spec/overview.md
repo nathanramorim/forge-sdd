@@ -1,4 +1,4 @@
-# Overview — forge-sdd (v4.7.7-beta)
+# Overview — forge-sdd (v4.9.1-beta + iniciativas 89 e 90, na feat/88)
 
 CLI Go e framework de **Spec-Driven Development (SDD)** multi-agente. Instala em qualquer projeto uma esteira de **5 estações** (skills por estação), uma **Constituição por IDs estáveis**, o **Portão de Governança em 3 camadas (A/B/C)**, o **Motor de Auto-Skills** e, desde a 4.x, o **Pipeline Multi-Sessão**: Discovery, Builder e Reviewer em sessões de IA separadas, ligadas por um barramento de jobs.
 
@@ -8,7 +8,7 @@ CLI Go e framework de **Spec-Driven Development (SDD)** multi-agente. Instala em
 - `flows.md`: pipeline multi-sessão, estados do job e da task, tokens e reset, painel e Auto-Skills.
 - `concepts.md`: glossário canônico do domínio (`DUP-01` / `GOV-04`).
 - `stack.md`: tecnologias, versões, distribuição e layout.
-- `decisions.md` e `adr/`: decisões arquiteturais (ADR-0001 a ADR-0012).
+- `decisions.md` e `adr/`: decisões arquiteturais (ADR-0001 a ADR-0015).
 
 ---
 
@@ -52,7 +52,7 @@ flowchart LR
     R -->|"conforme: tasks approved + notificação"| D
 ```
 
-Cada sessão usa o agente escolhido por ela (`forge.json`). Em modo live, os painéis do tmux ficam abertos e recebem os jobs; em modo headless, cada job abre uma instância nova do agente (ADR-0008).
+Cada sessão usa o agente escolhido por ela (`forge.json`). Em modo live, os painéis do tmux ficam abertos e recebem os jobs; em modo headless, cada job abre uma instância nova do agente (ADR-0008). No modo avançado (`autonomy: advanced`, experimental, ADR-0013) o Reviewer também revisa a spec no lugar da aprovação humana do Gate 1.
 
 ---
 
@@ -85,10 +85,10 @@ flowchart LR
 
 ## Escopo do binário (`forge`)
 - **Ciclo de vida:** `init`, `update`, `doctor`, `destroy`, `version` e o menu navegável (`forge` sem argumentos).
-- **Pipeline:** `up`, `dispatch`, `worker`, `bus`, `inbox`, `review`, `pipeline`, `attach`.
-- **Visibilidade:** `status` (`--live`), `ps`, `queue` (`list`, `panel`, `activity`).
+- **Pipeline:** `up`, `dispatch` (`--fix`), `worker`, `bus` (inclui `bus review`), `inbox`, `attach` e `pipeline` (`init`, `autonomy`, `pr`, `pr-opened`, `toca-ai`, `consent`, `worktree`).
+- **Visibilidade:** `status` (`--live`, `--full`), `ps`, `queue` (`list`, `panel`, `activity`).
 - **Contexto e portão:** `brief`, `context`, `gate`, `next-id`.
-- **Memória e métricas:** `session`, `report`, `lessons`, `archive`, `autopilot`.
+- **Memória e métricas:** `session`, `report` (`--initiative`, `--jobs`), `lessons`, `archive` (`--concluidas`), `autopilot`.
 - **Extensões:** `skills`, `governance`, `acp`.
 
 O binário é chamado de `forge` em toda a documentação, nos prompts e nos templates (ADR-0010).
