@@ -1,0 +1,140 @@
+{
+  "feature_id": "",
+  "branch": "",
+  "spec_status": "reviewed",
+  "updated_at": "2026-11-17T03:28:38Z",
+  "items": [
+    {
+      "task_id": "feat-90-01",
+      "title": "feat-90-01 — ADR-0014: medição real, PR pelo Go, base da iniciativa, archive e modelo por sessão",
+      "spec_path": "sdd/discovery/90-esteira-economica-e-autonoma/features/feat-90-01-adr-0014.md",
+      "status": "queued",
+      "rules": [
+        "FLX-05",
+        "GOV-01"
+      ],
+      "skills_used": [],
+      "attempts": 0
+    },
+    {
+      "task_id": "feat-90-02",
+      "title": "feat-90-02 — Telemetria real por job",
+      "spec_path": "sdd/discovery/90-esteira-economica-e-autonoma/features/feat-90-02-telemetria-real-por-job.md",
+      "status": "queued",
+      "rules": [
+        "ARQ-01",
+        "DUP-04",
+        "SEG-05",
+        "COD-03",
+        "COD-04",
+        "TST-04"
+      ],
+      "skills_used": [],
+      "attempts": 0
+    },
+    {
+      "task_id": "feat-90-03",
+      "title": "feat-90-03 — Um leitor de dependências e checagem das specs antes do build",
+      "spec_path": "sdd/discovery/90-esteira-economica-e-autonoma/features/feat-90-03-leitor-unico-de-dependencias.md",
+      "status": "queued",
+      "rules": [
+        "DUP-01",
+        "DUP-06",
+        "COD-04",
+        "TST-03"
+      ],
+      "skills_used": [],
+      "attempts": 0
+    },
+    {
+      "task_id": "feat-90-04",
+      "title": "feat-90-04 — `forge status` curto para agentes",
+      "spec_path": "sdd/discovery/90-esteira-economica-e-autonoma/features/feat-90-04-status-curto-para-agentes.md",
+      "status": "queued",
+      "rules": [
+        "ARQ-01",
+        "ARQ-10",
+        "COD-01",
+        "TST-02"
+      ],
+      "skills_used": [],
+      "attempts": 0
+    },
+    {
+      "task_id": "feat-90-05",
+      "title": "feat-90-05 — Base da iniciativa e PR aberto pelo Go (`forge pipeline pr`)",
+      "spec_path": "sdd/discovery/90-esteira-economica-e-autonoma/features/feat-90-05-base-da-iniciativa-e-pr-pelo-go.md",
+      "status": "queued",
+      "depends_on": [
+        "feat-90-01"
+      ],
+      "rules": [
+        "FLX-02",
+        "FLX-03",
+        "FLX-07",
+        "SEG-01",
+        "SEG-03",
+        "DUP-01",
+        "ARQ-06",
+        "TST-04"
+      ],
+      "skills_used": [],
+      "attempts": 0
+    },
+    {
+      "task_id": "feat-90-06",
+      "title": "feat-90-06 — Archive que move, no fechamento",
+      "spec_path": "sdd/discovery/90-esteira-economica-e-autonoma/features/feat-90-06-archive-que-move.md",
+      "status": "queued",
+      "depends_on": [
+        "feat-90-01",
+        "feat-90-02"
+      ],
+      "rules": [
+        "DUP-01",
+        "SEG-02",
+        "FLX-04",
+        "COD-04",
+        "TST-03"
+      ],
+      "skills_used": [],
+      "attempts": 0
+    },
+    {
+      "task_id": "feat-90-07",
+      "title": "feat-90-07 — Modelo e esforço por sessão (absorve a iniciativa 85)",
+      "spec_path": "sdd/discovery/90-esteira-economica-e-autonoma/features/feat-90-07-modelo-e-esforco-por-sessao.md",
+      "status": "queued",
+      "depends_on": [
+        "feat-90-02"
+      ],
+      "rules": [
+        "SEG-01",
+        "SEG-03",
+        "ARQ-01",
+        "DUP-01",
+        "TST-02"
+      ],
+      "skills_used": [],
+      "attempts": 0
+    },
+    {
+      "task_id": "feat-90-08",
+      "title": "feat-90-08 — Fix no `dispatch`",
+      "spec_path": "sdd/discovery/90-esteira-economica-e-autonoma/features/feat-90-08-fix-no-dispatch.md",
+      "status": "queued",
+      "depends_on": [
+        "feat-90-03",
+        "feat-90-05"
+      ],
+      "rules": [
+        "FLX-01",
+        "FLX-02",
+        "DUP-03",
+        "TST-03"
+      ],
+      "skills_used": [],
+      "attempts": 0
+    }
+  ]
+}
