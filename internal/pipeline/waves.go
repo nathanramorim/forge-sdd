@@ -1,13 +1,14 @@
 package pipeline
 
 import (
-	"bufio"
 	"fmt"
 	"os"
 	"path/filepath"
 	"regexp"
 	"sort"
 	"strings"
+
+	"github.com/forge-sdd/cli/internal/queue"
 )
 
 // Task é uma task de uma iniciativa e suas dependências, lidas do cabeçalho da spec.
@@ -20,8 +21,6 @@ type Task struct {
 
 var (
 	taskFileRe = regexp.MustCompile(`^(feat-[a-z0-9]+-[0-9]{2}[a-z]?)-`)
-	taskRefRe  = regexp.MustCompile(`feat-[a-z0-9]+-[0-9]{2}[a-z]?`)
-	dependsRe  = regexp.MustCompile(`^\*\*Depende de:\*\*\s*(.*)$`)
 )
 
 // PlanWaves ordena as tasks de featuresDir em lotes de execução: tasks sem dependência pendente
@@ -115,27 +114,17 @@ func PlanWaves(featuresDir string, maxParallel int) ([][]Task, error) {
 }
 
 func readDependsOn(path string) ([]string, error) {
-	f, err := os.Open(path)
+	data, err := os.ReadFile(path)
 	if err != nil {
 		return nil, err
 	}
-	defer f.Close()
-	sc := bufio.NewScanner(f)
-	sc.Buffer(make([]byte, 0, 64*1024), 256*1024)
-	for i := 0; sc.Scan() && i < 40; i++ { // o cabeçalho fica nas primeiras linhas
-		if m := dependsRe.FindStringSubmatch(strings.TrimSpace(sc.Text())); m != nil {
-			seen := map[string]bool{}
-			var deps []string
-			for _, ref := range taskRefRe.FindAllString(m[1], -1) {
-				if !seen[ref] {
-					seen[ref] = true
-					deps = append(deps, ref)
-				}
-			}
-			return deps, nil
+	deps := queue.ParseDependsOn(string(data))
+	for i, d := range deps {
+		if !strings.HasPrefix(d, "feat-") && !strings.HasPrefix(d, "fix-") {
+			deps[i] = "feat-" + d
 		}
 	}
-	return nil, sc.Err()
+	return deps, nil
 }
 
 // FormatWaves descreve os lotes para o agente.

@@ -154,6 +154,7 @@ func Dispatch(dir, feature string, opts DispatchOptions) (*DispatchResult, error
 			}
 		}
 	}
+	res.Pending = append(res.Pending, taskSpecProblems(dir, base)...)
 	for _, f := range []string{"criteria.md"} {
 		if data, err := os.ReadFile(filepath.Join(base, f)); err == nil {
 			for _, tok := range adrTokensIn(sectionBody(string(data), "adrs aplicáveis")) {

@@ -2,6 +2,7 @@ package pipeline
 
 import (
 	"fmt"
+	"github.com/forge-sdd/cli/internal/queue"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -98,4 +99,18 @@ func TestPlanWaves_LeDependeDeApenasDoCabecalho(t *testing.T) {
 	batches, err := PlanWaves(dir, 3)
 	require.NoError(t, err, "uma menção posterior no corpo não conta como dependência")
 	assert.Equal(t, [][]string{{"feat-70-01"}, {"feat-70-02"}}, ids(batches))
+}
+
+func TestPlanWaves_MesmoLeitorDaFila(t *testing.T) {
+	dir := t.TempDir()
+	taskFile(t, dir, "feat-90-01-a", "nenhuma (usa feat-90-09 só como referência)")
+	taskFile(t, dir, "feat-90-02-b", "feat-90-01 e 90-01")
+	taskFile(t, dir, "feat-90-03-c", "`feat-90-02`, 90-01")
+
+	batches, err := PlanWaves(dir, 3)
+
+	require.NoError(t, err)
+	assert.Equal(t, [][]string{{"feat-90-01"}, {"feat-90-02"}, {"feat-90-03"}}, ids(batches))
+	content := "# x\n\n**Depende de:** feat-90-02, 90-01\n"
+	assert.Equal(t, []string{"feat-90-02", "90-01"}, queue.ParseDependsOn(content))
 }
