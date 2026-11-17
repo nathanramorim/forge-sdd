@@ -27,6 +27,7 @@ var commandOrder = []string{
 	"upgrade-sdd",
 	"c4-architecture",
 	"inbox",
+	"toca-ai",
 	"implement",
 }
 
@@ -86,6 +87,7 @@ var commandSkill = map[string]string{
 	"upgrade-sdd":     "sdd-operacao",
 	"tutorial":        "sdd-operacao",
 	"inbox":           "sdd-operacao",
+	"toca-ai":         "sdd-operacao",
 }
 
 // canonicalCommandPath devolve o caminho embutido da referência canônica de um comando.
