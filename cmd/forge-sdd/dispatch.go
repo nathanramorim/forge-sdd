@@ -55,6 +55,7 @@ o comando orienta forge pipeline init.`,
 		} else {
 			fmt.Fprintf(out, "Job %s já estava na fila (idempotente)\n", res.Job.ID)
 		}
+		fmt.Fprintf(out, "Base do PR: %s (fonte: %s)\n", res.BaseBranch, res.BaseSource)
 		if res.CardInstruction != "" {
 			fmt.Fprintf(out, "Próximo passo do agente: %s\n", res.CardInstruction)
 		} else {

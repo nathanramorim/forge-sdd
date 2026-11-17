@@ -53,6 +53,7 @@ type DispatchOptions struct {
 	EvidencePath string // relativo ao projeto; padrão: <iniciativa>/card-evidence.json
 	DryRun       bool
 	Now          time.Time
+	Git          queue.GitFunc // injetável nos testes; padrão: git real
 }
 
 // DispatchResult descreve o resultado do gate e, se passou, do despacho.
@@ -63,6 +64,8 @@ type DispatchResult struct {
 	JobPath         string
 	CardInstruction string
 	Created         bool
+	BaseBranch      string // base do PR da iniciativa
+	BaseSource      string // de onde a base veio (flag, fila, git ou forge.json)
 }
 
 // Blocked informa se o gate reprovou.
@@ -205,6 +208,8 @@ func Dispatch(dir, feature string, opts DispatchOptions) (*DispatchResult, error
 	}
 
 	// 4. Job.
+	baseBranch, baseSource := queue.ResolveBase(dir, initiative, "", cfg.BaseBranch, opts.Git)
+	res.BaseBranch, res.BaseSource = baseBranch, baseSource
 	job := bus.Job{
 		SchemaVersion:     bus.SchemaVersion,
 		ID:                jobID(feature, now),
@@ -218,7 +223,7 @@ func Dispatch(dir, feature string, opts DispatchOptions) (*DispatchResult, error
 		ADRRefs:           sortedKeys(adrFiles),
 		RulesRefs:         sortedKeys(rulesSet),
 		Card:              bus.Card{Provider: ev.Provider, ID: ev.ID, URL: ev.URL},
-		PR:                bus.PR{Branch: "feat/" + initiative, BaseBranch: cfg.BaseBranch},
+		PR:                bus.PR{Branch: layout.InitiativeBranch(initiative), BaseBranch: baseBranch},
 		Attempt:           1,
 		MaxReworkAttempts: cfg.Reviewer.MaxReworkAttempts,
 		ReworkFeedback:    []bus.Feedback{},

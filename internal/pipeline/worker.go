@@ -337,7 +337,7 @@ func VerifyJobHandoff(dir, role, workerName string, now func() time.Time, jobID 
 		}
 		j := e.Job
 		if j.PR.URL == nil || j.PR.Number == nil {
-			return "o agente terminou sem registrar o PR (forge pipeline pr-opened)"
+			return "o agente terminou sem registrar o PR (forge pipeline pr)"
 		}
 		review := j
 		review.ID = reviewJobID(j.ID)
