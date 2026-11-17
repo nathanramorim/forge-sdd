@@ -20,6 +20,7 @@ Papel: Líder (Orquestrador). Coordena as estações, gerencia os gates humanos 
 | `/upgrade-sdd` e Migrator | `references/upgrade-sdd.md` |
 | `/tutorial` | `references/tutorial.md` |
 | `/inbox` | `references/inbox.md` |
+| `/toca-ai` | `references/toca-ai.md` |
 | Pipeline (`up`, `pipeline init`, `bus`) | `references/pipeline.md` |
 
 ## Pipeline

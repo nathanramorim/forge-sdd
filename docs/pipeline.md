@@ -108,6 +108,14 @@ Por padrão, os workers operam em modo `headless` (executam uma nova chamada de 
 *   **Falhas Lidas da Tela:** o despachante inspeciona a tela em tempo real para detectar limites de cota (`DetectUsageLimit` → pausa automática) ou indisponibilidade de conta/tier (`DetectAgentUnavailable` → aviso no inbox).
 *   **Queda Suave:** se `live` estiver ativado sem tmux ou em terminal nativo, o pipeline recai suavemente para `headless` com um aviso no terminal.
 
+## Trabalho longo com `/toca-ai`
+
+`/toca-ai <objetivo>` na sessão Discovery: o Líder gera o plano e as specs de todas as etapas, junta num pré-voo único o que só você pode dar (permissão de comando, ferramenta, arquivo e consentimento) e entrega à esteira com `forge pipeline toca-ai <iniciativa>`. O chat fica livre.
+
+- **Você é interrompido** só no pré-voo (`forge pipeline toca-ai --preflight <iniciativa>` mostra a lista única; consentimento se responde com `forge pipeline consent <id> --iniciativa <iniciativa>`, só em terminal) e para ação irreversível fora do repositório, segredo, gasto externo, merge em `main` ou exceção a regra. Imprevisto vira etapa `blocked` com o item exato em `pendencias-humanas.md`; as independentes seguem.
+- **Retomar:** rode `/toca-ai` ou `forge pipeline toca-ai <iniciativa>` de novo; os jobs não se duplicam. Acompanhe com `forge status`; pare com `.forge/runtime/STOP`.
+- **Sem o modo avançado**, o comando exige a spec aprovada por você (Gate 1) antes de enfileirar; com ele, o Reviewer aprova a spec e o Go libera as etapas.
+
 ## Configuração
 
 - `.forge/config/forge.json`: agente de cada sessão (`sessions`), modo de sessão (`session_mode`: `live` ou `headless`), limpeza de contexto (`context`: `clear` ou `continuous`), nível de permissão, tarefas em paralelo, worktrees, tentativas de rework, status do card. Copie de `forge.json.example` se quiser recomeçar.

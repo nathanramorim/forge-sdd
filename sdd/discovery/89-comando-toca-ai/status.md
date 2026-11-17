@@ -2,9 +2,8 @@
 
 **Iniciativa:** 89-comando-toca-ai
 **Branch:** feat/89-comando-toca-ai
-**Status:** Gate 1 aprovado; 2 tasks enfileiradas e entregues ao Builder
-**Próximo passo:** Builder implementa 89-01, depois 89-02; Reviewer confere.
+**Status:** 89-01 e 89-02 implementadas; PR aberto para o Reviewer
+**Próximo passo:** Reviewer confere o PR.
 
 ## A confirmar
-- [ ] Gate 1 humano das duas specs
-- [ ] Spike: etapa sem PR (conclusão e revisão) na 89-01
+- [ ] Spike: etapa sem PR (conclusão e revisão) — ver nota no PR
