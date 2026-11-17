@@ -313,6 +313,12 @@ func EnqueueGoalSteps(dir, initiative string, opts GoalOptions) (*GoalResult, er
 	if opts.Env.LookPath == nil {
 		opts.Env = DefaultPreflightEnv()
 	}
+	if base, berr := layout.Initiative(dir, initiative); berr == nil {
+		// A spec incompleta sai antes de montar o DAG e do build, com tudo o que falta de uma vez.
+		if problems := taskSpecProblems(dir, base); len(problems) > 0 {
+			return &GoalResult{Initiative: initiative, Pending: problems}, nil
+		}
+	}
 	steps, err := goalSteps(dir, initiative)
 	if err != nil {
 		return nil, err
@@ -325,6 +331,7 @@ func EnqueueGoalSteps(dir, initiative string, opts GoalOptions) (*GoalResult, er
 	if res.Pending, err = PreflightGoal(dir, initiative, cfg, opts.Env); err != nil {
 		return nil, err
 	}
+	sort.Strings(res.Pending)
 	if len(res.Pending) > 0 {
 		return res, nil
 	}

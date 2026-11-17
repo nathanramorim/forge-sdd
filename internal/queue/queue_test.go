@@ -292,3 +292,35 @@ func TestQueueDAGParallelEligibility(t *testing.T) {
 	require.Len(t, loaded.Items, 1)
 	assert.Equal(t, []string{"79-01", "79-02"}, loaded.Items[0].DependsOn)
 }
+
+func TestDependeDe(t *testing.T) {
+	cases := map[string]struct {
+		in   string
+		want []string
+	}{
+		"nenhuma com texto":   {"**Depende de:** nenhuma (usa `queue.Foo` e feat-89-01)", nil},
+		"travessão":           {"**Depende de:** —", nil},
+		"duas referências":    {"**Depende de:** feat-89-01 e 88-02", []string{"feat-89-01", "88-02"}},
+		"fix aceito":          {"**Depende de:** fix-88-01", []string{"fix-88-01"}},
+		"crase e vírgula":     {"**Depende de:** `feat-90-02`, `feat-90-03`", []string{"feat-90-02", "feat-90-03"}},
+		"sem cabeçalho":       {"# só um título", nil},
+		"repetida só uma vez": {"**Depende de:** 90-01, feat-90-01, 90-01", []string{"90-01", "feat-90-01"}},
+	}
+	for name, c := range cases {
+		t.Run(name, func(t *testing.T) {
+			assert.Equal(t, c.want, ParseDependsOn("# t\n\n"+c.in+"\n"))
+		})
+	}
+}
+
+func TestDependeDe_FilaAntigaComLixoLiberaATask(t *testing.T) {
+	q := &Queue{Items: []QueueItem{
+		{TaskID: "89-01", Status: StatusQueued, DependsOn: []string{"nenhuma", "(usa", "—"}},
+	}}
+
+	got, err := EligibleTasks(q, 0)
+
+	require.NoError(t, err)
+	require.Len(t, got, 1)
+	assert.Equal(t, []string{"nenhuma", "(usa", "—"}, q.Items[0].DependsOn, "a leitura não edita a fila")
+}

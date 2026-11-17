@@ -300,3 +300,21 @@ func TestDispatch_SemCardObrigatorio(t *testing.T) {
 	assert.Contains(t, res.Pending[0], "evidência")
 	assert.Empty(t, builderPending(t, dir2))
 }
+
+func TestDispatch_SpecIncompleta(t *testing.T) {
+	base := "sdd/discovery/77-auth-oauth"
+	dir := project(t, func(dir string) {
+		spec := strings.Replace(taskSpec, "**Branch:** feat/77-auth-oauth", "**Branch:** feat/77-auth-oauth\n**Depende de:** feat-77-09", 1)
+		spec = strings.Replace(spec, "```bash\ngo test ./...\n```", "só texto", 1)
+		testutil.WriteFile(t, dir, base+"/features/feat-77-01-autenticacao.md", spec)
+	})
+
+	res, err := Dispatch(dir, "auth-oauth", DispatchOptions{Now: now})
+
+	require.NoError(t, err)
+	require.True(t, res.Blocked())
+	joined := strings.Join(res.Pending, "\n")
+	assert.Contains(t, joined, "feat-77-09, que não existe na iniciativa")
+	assert.Contains(t, joined, "comando executável")
+	assert.Empty(t, builderPending(t, dir))
+}

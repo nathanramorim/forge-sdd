@@ -301,32 +301,52 @@ func extractSpecDependsOn(dir, specPath string) []string {
 	if err != nil {
 		return nil
 	}
-	return parseDependsOnContent(string(data))
+	return ParseDependsOn(string(data))
 }
 
-func parseDependsOnContent(content string) []string {
-	re := regexp.MustCompile(`(?i)\*\*Depende de:\*\*\s*(.*)`)
-	m := re.FindStringSubmatch(content)
-	if len(m) < 2 {
-		return nil
-	}
-	val := strings.TrimSpace(m[1])
-	val = strings.Trim(val, "`*-_ ")
-	if val == "" || val == "—" || val == "-" || strings.ToLower(val) == "nenhuma" || strings.ToLower(val) == "nenhum" {
-		return nil
-	}
-	tokens := strings.FieldsFunc(val, func(r rune) bool {
-		return r == ',' || r == ';' || r == ' ' || r == '\t'
-	})
-	var deps []string
-	for _, tok := range tokens {
-		tok = strings.Trim(tok, "`*-_ ")
-		if tok == "" || tok == "—" || tok == "-" || strings.ToLower(tok) == "e" {
+var (
+	dependsLineRe = regexp.MustCompile(`(?i)^\*\*Depende de:\*\*\s*(.*)$`)
+	parenRe       = regexp.MustCompile(`\([^)]*\)`)
+	depRefRe      = regexp.MustCompile(`\b(?:(?:feat|fix)-[a-z0-9]+-[0-9]{2}[a-z]?|[0-9]+-[0-9]{2}[a-z]?)\b`)
+	cleanDepRe    = regexp.MustCompile(`^[A-Za-z0-9][A-Za-z0-9._-]*$`)
+	junkDeps      = map[string]bool{"nenhuma": true, "nenhum": true, "e": true, "usa": true}
+)
+
+// ParseDependsOn é o único leitor do cabeçalho `**Depende de:**` (DUP-01). Aceita `feat-90-02`,
+// `fix-88-01` e `88-02` (devolvidos como escritos); `nenhuma`, `—` e texto entre parênteses
+// não geram dependência. Lê só as primeiras linhas, onde fica o cabeçalho.
+func ParseDependsOn(content string) []string {
+	for i, line := range strings.Split(content, "\n") {
+		if i >= 40 {
+			break
+		}
+		m := dependsLineRe.FindStringSubmatch(strings.TrimSpace(line))
+		if m == nil {
 			continue
 		}
-		deps = append(deps, tok)
+		val := parenRe.ReplaceAllString(m[1], "")
+		seen := map[string]bool{}
+		var deps []string
+		for _, ref := range depRefRe.FindAllString(strings.ToLower(val), -1) {
+			if !seen[ref] {
+				seen[ref] = true
+				deps = append(deps, ref)
+			}
+		}
+		return deps
 	}
-	return deps
+	return nil
+}
+
+// cleanDependsOn descarta lixo de filas antigas (`nenhuma`, `(usa`) na leitura, sem editar o arquivo.
+func cleanDependsOn(deps []string) []string {
+	var out []string
+	for _, d := range deps {
+		if id := normalizeTaskID(d); cleanDepRe.MatchString(id) && !junkDeps[strings.ToLower(id)] {
+			out = append(out, d)
+		}
+	}
+	return out
 }
 
 // EligibleTasks resolve o grafo de dependências da fila (DAG) e devolve as tarefas com status "queued"
@@ -350,7 +370,7 @@ func EligibleTasks(q *Queue, max int) ([]QueueItem, error) {
 	adj := make(map[string][]string)
 	for _, it := range q.Items {
 		u := normalizeID(it.TaskID)
-		for _, dep := range it.DependsOn {
+		for _, dep := range cleanDependsOn(it.DependsOn) {
 			v := normalizeID(dep)
 			adj[u] = append(adj[u], v)
 		}
@@ -397,7 +417,7 @@ func EligibleTasks(q *Queue, max int) ([]QueueItem, error) {
 			continue
 		}
 		allApproved := true
-		for _, dep := range it.DependsOn {
+		for _, dep := range cleanDependsOn(it.DependsOn) {
 			normDep := normalizeID(dep)
 			parent, exists := itemMap[normDep]
 			if !exists || parent.Status != StatusApproved {
