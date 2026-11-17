@@ -19,8 +19,8 @@ func tocaAiProject(t *testing.T) string {
 	for f, body := range map[string]string{
 		"plan.md":                  "# Plano\n",
 		"queue.json":               `{"spec_status":"reviewed","items":[]}`,
-		"features/feat-90-01-a.md": "# a\n\n**Depende de:** nenhuma\n",
-		"features/feat-90-02-b.md": "# b\n\n**Depende de:** feat-90-01\n",
+		"features/feat-90-01-a.md": "# a\n\n**Depende de:** nenhuma\n\n## Critérios de Aceitação Executáveis\n```bash\ngo test ./...\n```\n",
+		"features/feat-90-02-b.md": "# b\n\n**Depende de:** feat-90-01\n\n## Critérios de Aceitação Executáveis\n```bash\ngo test ./...\n```\n",
 		"requisitos.json":          `{"consentimentos":[{"id":"voz-propria","texto":"a voz é minha"}]}`,
 	} {
 		require.NoError(t, os.WriteFile(filepath.Join(base, f), []byte(body), 0o644))
