@@ -234,3 +234,23 @@ func TestArchive_MoveIdempotente_SobrepoeCopiaAntiga(t *testing.T) {
 	data, _ := os.ReadFile(filepath.Join(dir, "sdd", "archive", "discovery", "79-clareza", "status.md"))
 	assert.Equal(t, "# Status\n", string(data))
 }
+
+func TestArchive_MoveIdempotente_FixPendenteBloqueiaEFixFeitoNao(t *testing.T) {
+	dir := archiveFixture(t, queue.StatusApproved)
+	fixes := filepath.Join(dir, "sdd", "discovery", "79-clareza", "fixes")
+	testutil.WriteFile(t, fixes, "fix-79-01-a.md", "# fix\n\n**Status:** `done`\n")
+	testutil.WriteFile(t, fixes, "fix-79-02-b.md", "# fix\n\n**Status:** `ready`\n")
+	git := onBranch("feat/79-clareza")
+
+	res, err := AutoArchiveInitiative(dir, "79-clareza", now, git)
+	require.NoError(t, err)
+	assert.False(t, res.Archived)
+	assert.Contains(t, res.Reason, "fix fix-79-02 ainda pendente")
+
+	testutil.WriteFile(t, fixes, "fix-79-02-b.md", "# fix\n\n**Status:** `ready`\n")
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "sdd", "discovery", "79-clareza", "queue.json"),
+		[]byte(`{"items":[{"task_id":"79-01","status":"approved"},{"task_id":"fix-79-02","status":"approved"}]}`), 0o644))
+	res, err = AutoArchiveInitiative(dir, "79-clareza", now, git)
+	require.NoError(t, err)
+	assert.True(t, res.Archived, "fix aprovado na fila não bloqueia: %s", res.Reason)
+}

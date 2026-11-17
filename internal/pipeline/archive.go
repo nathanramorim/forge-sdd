@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"time"
 
@@ -64,20 +65,40 @@ func CheckAndAutoArchive(dir string, job bus.Job, now time.Time, ncfg config.Not
 	return &ArchiveResult{Initiative: name, Reason: "pronta para arquivar (aviso enviado)"}, nil
 }
 
+var fixStatusRe = regexp.MustCompile("(?m)^\\*\\*Status:\\*\\*\\s*`?([A-Za-z_-]+)`?")
+
+// fixDoneStatuses são os valores de `**Status:**` de um fix que já foi entregue.
+var fixDoneStatuses = map[string]bool{"done": true, "approved": true, "merged": true}
+
 // pendingReason devolve por que a iniciativa não pode ser arquivada; vazio quando não há pendência.
-// Vale para as tasks e para os fixes que entraram na fila; fix só no disco não bloqueia.
+// Pendente é task ou fix da fila fora de approved e fix de fixes/ cujo `**Status:**` ainda não é de
+// entregue (done, approved ou merged) e que não tem item aprovado na fila.
 func pendingReason(initDir string) string {
-	data, err := os.ReadFile(filepath.Join(initDir, layout.QueueFileName))
-	if err != nil {
-		return ""
+	approved := map[string]bool{}
+	if data, err := os.ReadFile(filepath.Join(initDir, layout.QueueFileName)); err == nil {
+		var q queue.Queue
+		if json.Unmarshal(data, &q) == nil {
+			for _, it := range q.Items {
+				if it.Status != queue.StatusApproved {
+					return fmt.Sprintf("tarefa %s ainda pendente (status: %s)", it.TaskID, it.Status)
+				}
+				approved[it.TaskID] = true
+			}
+		}
 	}
-	var q queue.Queue
-	if json.Unmarshal(data, &q) != nil {
-		return ""
-	}
-	for _, it := range q.Items {
-		if it.Status != queue.StatusApproved {
-			return fmt.Sprintf("tarefa %s ainda pendente (status: %s)", it.TaskID, it.Status)
+	entries, _ := os.ReadDir(filepath.Join(initDir, "fixes"))
+	for _, e := range entries {
+		n := e.Name()
+		m := fixFileRe.FindStringSubmatch(n)
+		if e.IsDir() || m == nil || approved[m[1]] {
+			continue
+		}
+		data, err := os.ReadFile(filepath.Join(initDir, "fixes", n))
+		if err != nil {
+			continue
+		}
+		if st := fixStatusRe.FindStringSubmatch(string(data)); st != nil && !fixDoneStatuses[strings.ToLower(st[1])] {
+			return fmt.Sprintf("fix %s ainda pendente (status: %s)", m[1], st[1])
 		}
 	}
 	return ""

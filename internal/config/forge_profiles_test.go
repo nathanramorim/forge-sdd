@@ -221,6 +221,8 @@ func TestModeloPorSessao_PerfilSemMarcadorAvisa(t *testing.T) {
 	p.Args = []string{"-p", "{prompt}", MarkerPermissions}
 	cfg.CLIProfiles[CLIClaude] = p
 
-	assert.Equal(t, []string{MarkerModel}, cfg.MissingModelMarkers("builder"))
-	assert.Empty(t, cfg.MissingModelMarkers("reviewer"), "sem escolha, nada falta")
+	assert.Equal(t, []string{MarkerModel, MarkerEffort}, cfg.MissingModelMarkers("builder"))
+	assert.Equal(t, []string{MarkerModel, MarkerEffort}, cfg.MissingModelMarkers("reviewer"), "avisa mesmo sem escolha")
+	cfg.Sessions = map[string]string{"reviewer": CLICodex}
+	assert.Empty(t, cfg.MissingModelMarkers("reviewer"), "codex não tem flag confirmada: sem ruído")
 }
