@@ -15,8 +15,9 @@ var fixFileRe = regexp.MustCompile(`^(fix-[a-z0-9]+-[0-9]{2}[a-z]?)-`)
 
 // taskSpecProblems confere, por task (feat-*.md e fix-*.md da iniciativa), o que o build exige da
 // spec: dependências que existem na iniciativa e critério de aceitação com comando executável.
+// Com only preenchido, confere só aquela task (um fix); as demais servem só para achar dependências.
 // Devolve tudo de uma vez, ordenado, para o erro sair antes do build e sem gastar tokens.
-func taskSpecProblems(dir, base string) []string {
+func taskSpecProblems(dir, base, only string) []string {
 	files := map[string]string{} // id -> caminho
 	for _, sub := range []string{"features", "fixes"} {
 		entries, err := os.ReadDir(filepath.Join(base, sub))
@@ -37,6 +38,9 @@ func taskSpecProblems(dir, base string) []string {
 	}
 	var problems []string
 	for id, path := range files {
+		if only != "" && id != only {
+			continue
+		}
 		rel, _ := filepath.Rel(dir, path)
 		rel = filepath.ToSlash(rel)
 		data, err := os.ReadFile(path)
