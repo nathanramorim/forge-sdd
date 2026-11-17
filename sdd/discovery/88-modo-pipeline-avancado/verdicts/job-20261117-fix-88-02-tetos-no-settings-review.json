@@ -1,0 +1,5 @@
+{
+  "veredito": "conforme",
+  "achados": [],
+  "resumo": "Diff cumpre o escopo do fix-88-02: MaxJobTokens padrão 0, nova chave safeguards.max_job_minutes (omitempty, validada \u003e= 0), JobOverCeiling usa MaxJobMinutes e não mais builder.job_timeout_minutes (timeout do runner intacto), duas chaves no Settings via settingKeys (DUP-01), template/golden e docs/pipeline.md atualizados. Testes de regressão cobrem padrão desligado, teto de tempo ligado e Settings; go vet e go test -race de pipeline, config, cmd e scaffold passam. Observação menor: a spec cita LEIA-ME, que não existe no repositório; nenhuma alteração pendente."
+}

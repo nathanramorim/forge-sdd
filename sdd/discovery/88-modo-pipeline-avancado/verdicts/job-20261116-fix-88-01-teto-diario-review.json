@@ -1,0 +1,28 @@
+{
+  "veredito": "violacao",
+  "achados": [
+    {
+      "verificacao": "S-03",
+      "regra": "COD-01",
+      "classificacao": "violacao",
+      "severidade": "media",
+      "arquivo": "internal/pipeline/deliver.go",
+      "linha": 234,
+      "evidencia": "if !waitDailyPause(ctx, opts, cfg, opts.Name) { if opts.Once { return nil }; continue }",
+      "explicacao": "waitDailyPause devolve false quando o STOP aparece durante a pausa, mas RunDeliverWorker não chama HaltReason: o laço faz continue, waitDailyPause devolve false de imediato e o despachante live gira sem dormir (busy loop) e sem encerrar com o STOP, que deveria encerrar de forma limpa. Não há teste do caminho do despachante live (escopo 4).",
+      "correcao": "No RunDeliverWorker, checar HaltReason antes de waitDailyPause e encerrar (como no RunWorker), e cobrir o caminho live com teste de pausa e STOP."
+    },
+    {
+      "verificacao": "S-02",
+      "regra": "TST-01",
+      "classificacao": "duvida",
+      "severidade": "baixa",
+      "arquivo": "internal/pipeline/safeguards_test.go",
+      "linha": 83,
+      "evidencia": "func TestRun_PausaNoTeto(t *testing.T) { ... assert.False(t, waitDailyPause(ctx, opts, cfg, \"w\"))",
+      "explicacao": "O teste não exercita RunWorker, apenas waitDailyPause; o critério pede que o worker não encerre no teto. Além disso, TestDefaultSafeguards_SemTetoDiario está em internal/pipeline, mas o critério o roda em ./internal/config, onde nenhum teste casa. O escopo 6 cita LEIA-ME e o diff não o altera. Confirmar se isso é aceito.",
+      "correcao": "Testar RunWorker no teto, mover o teste de padrão para internal/config e atualizar o LEIA-ME, se ele citar o teto."
+    }
+  ],
+  "resumo": "Teto diário agora pausa, conta IDs distintos, nasce desligado e tem chave no Settings; vet e testes passam. Falta tratar o STOP no despachante live, que hoje entra em laço ocioso sem dormir ao combinar teto e STOP."
+}

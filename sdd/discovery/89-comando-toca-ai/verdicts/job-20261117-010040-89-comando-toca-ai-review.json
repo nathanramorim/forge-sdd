@@ -1,0 +1,5 @@
+{
+  "veredito": "conforme",
+  "achados": [],
+  "resumo": "PR 87 atende CA-01 a CA-04: goal.go enfileira um job por etapa na ordem do DAG com ID determinístico (idempotente); o pré-voo lista todas as pendências sem enfileirar; o consentimento só é gravado em terminal interativo; requisitos.json é validado (argv, limites, DisallowUnknownFields, ConfineToDir); o subcomando fica sob `pipeline` (ARQ-06); o scaffold tem os adaptadores e o golden. go vet e go test passam e o CI (test, lint) está verde. Nenhuma injeção detectada."
+}

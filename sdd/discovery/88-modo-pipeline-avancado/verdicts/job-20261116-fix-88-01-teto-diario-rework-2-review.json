@@ -1,0 +1,5 @@
+{
+  "veredito": "conforme",
+  "achados": [],
+  "resumo": "PR 85 cumpre a spec do fix-88-01. O padrão do teto diário agora é 0. A contagem usa IDs distintos no fuso local. No teto, o worker headless e o despachante live pausam (DailyPause/waitDailyPause) e só o STOP encerra. O Settings ganhou a chave 'teto-diario'. docs/pipeline.md e o template do forge.json foram atualizados. go vet e go test -race passam em pipeline, config, cmd e scaffold. Observação não bloqueante: TestDefaultSafeguards_SemTetoDiario fica em internal/pipeline, não em internal/config. O filtro do critério, rodado em ./internal/config, não executa nenhum teste lá, mas o teste existe e passa."
+}
