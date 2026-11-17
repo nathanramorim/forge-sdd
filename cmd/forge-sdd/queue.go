@@ -58,8 +58,19 @@ var queueEnqueueCmd = &cobra.Command{
 			}
 		}
 
+		base, _ := cmd.Flags().GetString("base")
+		if base != "" {
+			if err := queue.ValidBranchName(base); err != nil {
+				return err
+			}
+		}
 		if err := queue.Enqueue(dir, featureID, branch, taskID, title, specPath, rules); err != nil {
 			return err
+		}
+		if base != "" {
+			if err := queue.SetBase(dir, base); err != nil {
+				return err
+			}
 		}
 		fmt.Printf("✓ Task enfileirada com sucesso (%s)\n", specPath)
 		return nil
@@ -417,6 +428,7 @@ func init() {
 
 	queueEnqueueCmd.Flags().String("dir", ".", "Diretório alvo do projeto Forge-SDD")
 	queueEnqueueCmd.Flags().String("feature", "", "ID da feature (ex: feat-58)")
+	queueEnqueueCmd.Flags().String("base", "", "Branch base do PR da iniciativa (grava base_branch na fila)")
 	queueEnqueueCmd.Flags().String("branch", "", "Branch da feature (ex: feat/58-nome)")
 	queueEnqueueCmd.Flags().String("task-id", "", "ID da task (opcional; inferido do nome do arquivo se omitido)")
 	queueEnqueueCmd.Flags().String("title", "", "Título da task (opcional; inferido do cabeçalho da Spec se omitido)")

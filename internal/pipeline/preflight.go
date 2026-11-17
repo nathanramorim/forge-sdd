@@ -91,6 +91,12 @@ func Preflight(dir string, cfg config.ForgeConfig, env PreflightEnv) []Item {
 			items = append(items, Item{Session: role, Agent: cli, Level: LevelOK, Message: "CLI " + profile.Command + " encontrada"})
 		}
 
+		if missing := cfg.MissingModelMarkers(role); len(missing) > 0 {
+			items = append(items, Item{Session: role, Agent: cli, Level: LevelWarn,
+				Message: fmt.Sprintf("o perfil de %s não tem %s: o modelo e o esforço escolhidos para a sessão não serão aplicados", cli, strings.Join(missing, " nem ")),
+				Action:  "forge → Settings → Modelo e esforço (oferece incluir o marcador) ou adicione-o em cli_profiles." + cli + ".args"})
+		}
+
 		if seen[cli] {
 			continue
 		}

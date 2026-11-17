@@ -155,9 +155,10 @@ func readMetricsTokens(dir string) roleTokens {
 			Phase        string   `json:"phase"`
 			TokensInput  int64    `json:"tokens_input"`
 			TokensOutput int64    `json:"tokens_output"`
+			Medicao      string   `json:"medicao"`
 		}
-		if err := json.Unmarshal(data, &item); err != nil {
-			continue
+		if err := json.Unmarshal(data, &item); err != nil || item.Medicao == monitor.MedicaoResumo {
+			continue // o resumo do archive repete o que as sessões já somaram
 		}
 		toks := item.TokensInput + item.TokensOutput
 		res.Total += toks
@@ -562,10 +563,7 @@ func extractLastInformativeLines(content string, count int) []string {
 	rawLines := strings.Split(cleaned, "\n")
 	var nonBlank []string
 	for _, line := range rawLines {
-		t := strings.TrimSpace(line)
-		if t != "" {
-			nonBlank = append(nonBlank, t)
-		}
+		nonBlank = append(nonBlank, humanizeLine(line)...)
 	}
 	if len(nonBlank) == 0 {
 		return nil
@@ -598,4 +596,27 @@ func gitRecentCommits(dir string, max int) ([]string, error) {
 		}
 	}
 	return lines, nil
+}
+
+// humanizeLine traduz uma linha do painel ou do log: evento stream-json vira linhas curtas (o mesmo
+// tradutor do painel do worker) e JSON nunca sai cru; texto comum passa como está.
+func humanizeLine(line string) []string {
+	t := strings.TrimSpace(line)
+	if t == "" {
+		return nil
+	}
+	if strings.HasPrefix(t, "{") || strings.HasPrefix(t, "[{") {
+		var ev map[string]any
+		if json.Unmarshal([]byte(t), &ev) != nil {
+			return nil
+		}
+		var out []string
+		for _, l := range summarizeEvent("", ev) {
+			if l = strings.TrimSpace(l); l != "" {
+				out = append(out, l)
+			}
+		}
+		return out
+	}
+	return []string{t}
 }

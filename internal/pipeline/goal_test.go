@@ -22,7 +22,7 @@ const goalInit = "77-auth-oauth"
 const goalBase = "sdd/discovery/" + goalInit
 
 func goalStep(dir, n, deps string) {
-	body := "# feat-77-" + n + "\n\n**Depende de:** " + deps + "\n"
+	body := "# feat-77-" + n + "\n\n**Depende de:** " + deps + "\n\n## Critérios de Aceitação Executáveis\n```bash\ngo test ./...\n```\n"
 	_ = os.WriteFile(filepath.Join(dir, goalBase, "features", "feat-77-"+n+"-etapa.md"), []byte(body), 0o644)
 }
 
@@ -265,4 +265,19 @@ func TestPendencias_ListaUnicaBloqueiaEtapaEIndependentesSeguem(t *testing.T) {
 	assert.Contains(t, string(raw), "liberar o comando uv")
 
 	require.Error(t, ReportHumanPending(dir, goalInit, []HumanPending{{TaskID: "x", Item: "y"}}, deps, now))
+}
+
+func TestGoal_SpecIncompleta(t *testing.T) {
+	dir := goalProject(t, false)
+	body := "# feat-77-02\n\n**Depende de:** feat-77-09\n\n## Critérios de Aceitação Executáveis\nsó texto\n"
+	require.NoError(t, os.WriteFile(filepath.Join(dir, goalBase, "features", "feat-77-02-etapa.md"), []byte(body), 0o644))
+
+	res, err := EnqueueGoalSteps(dir, goalInit, GoalOptions{})
+
+	require.NoError(t, err)
+	assert.Empty(t, res.Created)
+	assert.Empty(t, builderIDs(t, dir))
+	joined := strings.Join(res.Pending, "\n")
+	assert.Contains(t, joined, "feat-77-09, que não existe")
+	assert.Contains(t, joined, "comando executável")
 }

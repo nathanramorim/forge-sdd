@@ -96,7 +96,7 @@ func TestWorker_BuilderComPRGeraRevisaoEConclui(t *testing.T) {
 	assert.Equal(t, "forge-builder", runner.specs[0].Name)
 	assert.Equal(t, "builder", runner.specs[0].Agent)
 	assert.True(t, strings.HasPrefix(runner.prompts[0], "Você é o Builder"))
-	assert.Contains(t, runner.prompts[0], "forge-sdd pipeline pr-opened")
+	assert.Contains(t, runner.prompts[0], "forge-sdd pipeline pr --id")
 	assert.FileExists(t, layout.Logs(dir)+"/builder-job-1.log")
 }
 

@@ -224,12 +224,15 @@ func processJob(ctx context.Context, opts WorkerOptions, cfg config.ForgeConfig,
 	}()
 
 	rel, _ := filepath.Rel(opts.Dir, entry.Path)
+	modelArgs, effortArgs := cfg.SessionModelArgs(opts.Role)
 	timeout := time.Duration(cfg.Builder.JobTimeoutMinutes) * time.Minute
 	res, runErr := opts.Runner.Run(ctx, RunSpec{
 		Agent:       opts.Role,
 		Name:        opts.Name,
 		Prompt:      workerPrompt(opts.Role, job, filepath.ToSlash(rel), cfg),
 		Permissions: cfg.WorkerPermissionArgs(opts.CLI),
+		Model:       modelArgs,
+		Effort:      effortArgs,
 		Dir:         opts.Dir,
 		Timeout:     timeout,
 	}, out)
@@ -337,7 +340,7 @@ func VerifyJobHandoff(dir, role, workerName string, now func() time.Time, jobID 
 		}
 		j := e.Job
 		if j.PR.URL == nil || j.PR.Number == nil {
-			return "o agente terminou sem registrar o PR (forge pipeline pr-opened)"
+			return "o agente terminou sem registrar o PR (forge pipeline pr)"
 		}
 		review := j
 		review.ID = reviewJobID(j.ID)

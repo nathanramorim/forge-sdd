@@ -168,3 +168,19 @@ func TestFormatRichDashboard_LimitaTarefasEmFilaGrande(t *testing.T) {
 }
 
 
+
+func TestAoVivoSemJSONCru(t *testing.T) {
+	log := `{"type":"assistant","message":{"content":[{"type":"text","text":"lendo a spec"},{"type":"tool_use","name":"Read","input":{"file_path":"/x/y/criteria.md"}}]}}` + "\n" +
+		`{"type":"result","usage":{"input_tokens":1}}` + "\n" +
+		`{"type":"assistant","message":{"con` + "\n" +
+		"saída em texto comum\n"
+
+	lines := extractLastInformativeLines(log, 5)
+
+	require.NotEmpty(t, lines)
+	for _, l := range lines {
+		assert.NotContains(t, l, `{"`)
+	}
+	assert.Contains(t, strings.Join(lines, "\n"), "lendo a spec")
+	assert.Equal(t, "saída em texto comum", lines[len(lines)-1])
+}

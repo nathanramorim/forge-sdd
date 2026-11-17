@@ -156,6 +156,16 @@ O comando combina simultaneamente:
 - **Permissões do agente:** escolha o nível `project` ou `full` (veja acima, no menu ou em `permissions` de `forge.json`); só edite `cli_profiles` para ajustes finos.
 - Sem `forge.json`, o `/implementar` volta ao fluxo de sessão única da 4.0.0-beta.
 
+## Esteira econômica (ADR-0014)
+
+- **PR pelo Go:** o Builder faz commit e roda `forge pipeline pr --id <job> --body-file <arq>`; o Go roda a Camada A, faz `git push origin <branch>:<branch>`, abre o PR (ou corrige a base de um PR já aberto) e o registra. Recusa branch `main` ou igual à base, corpo fora do `.github/pull_request_template.md` e branch sem commit à frente. `forge pipeline pr-opened` fica para quem abre o PR à mão.
+- **Base da iniciativa:** `forge queue enqueue --base <branch>` grava `base_branch` na fila. A base vale nesta ordem: flag, fila, origem da branch no git ("Created from") e `base_branch` do `forge.json`; `dispatch`, `/toca-ai` e `pr` dizem de onde ela veio.
+- **Fix no despacho:** `forge dispatch <iniciativa> --fix fix-88-01` confere a spec do fix, enfileira o job com a branch `fix/88-01-<nome>` e base na branch da iniciativa, e põe o fix na fila.
+- **Uso real:** o worker lê o evento `result` do log do `claude` e grava tokens, cache, turnos, duração, modelo e custo de tabela (`medicao: real`); sem `result`, estima (`medicao: estimado`). `forge report --initiative <id> [--jobs]` soma separando real e estimado.
+- **Status curto:** sem terminal, `forge status` imprime até 1,5 KB (só iniciativas ativas); `--full` mostra tudo.
+- **Archive:** `forge archive` move a pasta da iniciativa para `sdd/archive/discovery/` (só na branch dela e sem task pendente; rodar de novo não muda nada). Ao aprovar o último job, só a fila `origem: toca-ai` arquiva sozinha; nas demais o inbox avisa "pronta para arquivar". `forge archive --concluidas --dry-run` lista as candidatas.
+- **Modelo e esforço por sessão:** `models` e `efforts` em `forge.json` (por `discovery`, `builder`, `reviewer`) viram `--model` e `--effort` pelos marcadores `{model}` e `{effort}` do perfil (claude e agy; gemini só modelo; as demais CLIs ainda sem flag confirmada). Escolha em **Settings**; sem escolha, o comando é o de sempre. Perfil gravado sem os marcadores gera aviso no preflight.
+
 ## Quando algo não anda
 
 | Sintoma | O que fazer |

@@ -27,6 +27,7 @@ a cada 2 segundos em tempo real no terminal atual (usando Alternate Screen Buffe
 Com --tmux (ou -t), abre ou conecta diretamente ao painel vivo em uma janela/sessão dedicada do tmux.
 
 Com --all-branches, inclui iniciativas de todas as branches locais e remotas.
+Sem terminal (saída lida por agente), imprime só o status curto (até 1,5 KB); --full mostra tudo.
 Com --compact, imprime a versão tríplice enxuta (< 200 tokens) para agentes.`,
 	Args: cobra.NoArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -69,6 +70,17 @@ Com --compact, imprime a versão tríplice enxuta (< 200 tokens) para agentes.`,
 				return err
 			}
 			return renderStatus(cmd.OutOrStdout(), items)
+		}
+
+		// Sem terminal (um agente lendo a saída) o padrão é o status curto; --full traz tudo.
+		full, _ := cmd.Flags().GetBool("full")
+		if !full && !isatty.IsTerminal(os.Stdout.Fd()) {
+			short, err := pipeline.FormatShortStatus(dir)
+			if err != nil {
+				return err
+			}
+			_, err = fmt.Fprint(cmd.OutOrStdout(), short)
+			return err
 		}
 
 		// forge status padrão: snapshot do painel executivo rico da esteira
@@ -185,6 +197,7 @@ func init() {
 	statusCmd.Flags().BoolP("tmux", "t", false, "Abre ou anexa o painel vivo diretamente em uma janela/sessão do tmux")
 	statusCmd.Flags().Bool("once", false, "Executa uma única iteração do painel vivo e encerra")
 	statusCmd.Flags().Bool("compact", false, "Exibe o status tríplice compacto (< 200 tokens) para prompts de IA")
+	statusCmd.Flags().Bool("full", false, "Mostra o painel completo mesmo sem terminal (sem terminal o padrão é o status curto)")
 	statusCmd.Flags().BoolP("interactive", "i", false, "Exibe a fila de tarefas interativa com drill-down de detalhes")
 	nextIDCmd.Flags().String("dir", ".", "Diretório alvo do projeto Forge-SDD")
 	nextIDCmd.Flags().String("kind", "discovery", "Tipo de item: discovery ou fix (a numeração é única)")

@@ -613,6 +613,11 @@ func (e *menuEnv) settingsMenu() error {
 		for _, k := range settingKeys {
 			opts = append(opts, menuOption{Label: fmt.Sprintf("%s: %s", k.label, onOff(k.get(cfg))), Value: k.value})
 		}
+		for _, role := range config.SessionRoles() {
+			opts = append(opts,
+				menuOption{Label: fmt.Sprintf("Modelo do %s: %s", shortRole(role), orDefault(cfg.Models[role])), Value: valModelPrefix + role},
+				menuOption{Label: fmt.Sprintf("Esforço do %s: %s", shortRole(role), orDefault(cfg.Efforts[role])), Value: valEffortPrefix + role})
+		}
 		opts = append(opts, menuOption{Label: "Voltar", Value: valBack})
 		choice, err := e.p.Select("Settings (Enter alterna a chave)", opts, settingKeys[0].value)
 		if errors.Is(err, errBack) || choice == valBack {
@@ -620,6 +625,12 @@ func (e *menuEnv) settingsMenu() error {
 		}
 		if err != nil {
 			return err
+		}
+		if role, effort, ok := parseModelChoice(choice); ok {
+			if err := e.chooseModel(cfg, role, effort); err != nil && !errors.Is(err, errBack) {
+				return err
+			}
+			continue
 		}
 		for _, k := range settingKeys {
 			if k.value != choice {
@@ -633,4 +644,128 @@ func (e *menuEnv) settingsMenu() error {
 			}
 		}
 	}
+}
+
+const (
+	valModelPrefix  = "modelo:"
+	valEffortPrefix = "esforco:"
+	valDefaultCLI   = "__padrao__"
+)
+
+func orDefault(v string) string {
+	if v == "" {
+		return "padrão da CLI"
+	}
+	return v
+}
+
+func parseModelChoice(choice string) (role string, effort, ok bool) {
+	if r, found := strings.CutPrefix(choice, valModelPrefix); found {
+		return r, false, true
+	}
+	if r, found := strings.CutPrefix(choice, valEffortPrefix); found {
+		return r, true, true
+	}
+	return "", false, false
+}
+
+// shortRole é o nome curto da sessão nas linhas do Settings.
+func shortRole(role string) string {
+	return map[string]string{
+		config.SessionRoleDiscovery: "Discovery",
+		config.SessionRoleBuilder:   "Builder",
+		config.SessionRoleReviewer:  "Reviewer",
+	}[role]
+}
+
+// economicRole diz se o papel é de trabalho mais mecânico: nele o menu sugere um modelo ou esforço menor.
+func economicRole(role string) bool {
+	return role == config.SessionRoleBuilder || role == config.SessionRoleReviewer
+}
+
+// chooseModel escolhe e grava o modelo ou o esforço da sessão. "Padrão da CLI" é a primeira opção e
+// remove a escolha. Se o perfil gravado não tem o marcador, oferece incluí-lo.
+func (e *menuEnv) chooseModel(cfg config.ForgeConfig, role string, effort bool) error {
+	cli := cfg.CLIFor(role)
+	profile, ok := cfg.Profile(cli)
+	if !ok {
+		return nil
+	}
+	flags, supported := config.FlagsForCommand(profile.Command)
+	if !supported || (effort && flags.Effort == "") || (!effort && flags.Model == "") {
+		fmt.Fprintf(e.out, "\n✗ A CLI %s ainda não tem a flag confirmada para isso; nada a escolher.\n", profile.Command)
+		return nil
+	}
+	label, values := "Modelo", config.ModelPresets(profile.Command)
+	if effort {
+		label, values = "Esforço", flags.Efforts
+	}
+	opts := []menuOption{{Label: "Padrão da CLI", Value: valDefaultCLI}}
+	for _, v := range values {
+		suggestion := ""
+		if economicRole(role) && (v == "haiku" || v == "sonnet" || v == "low" || v == "medium") {
+			suggestion = " (econômico)"
+		}
+		opts = append(opts, menuOption{Label: v + suggestion, Value: v})
+	}
+	opts = append(opts, menuOption{Label: "Voltar", Value: valBack})
+	choice, err := e.p.Select(fmt.Sprintf("%s do %s (%s)", label, shortRole(role), cli), opts, valDefaultCLI)
+	if err != nil {
+		return err
+	}
+	if choice == valBack {
+		return errBack
+	}
+	target, marker := &cfg.Models, config.MarkerModel
+	if effort {
+		target, marker = &cfg.Efforts, config.MarkerEffort
+	}
+	if choice == valDefaultCLI {
+		delete(*target, role)
+	} else {
+		if *target == nil {
+			*target = map[string]string{}
+		}
+		(*target)[role] = choice
+		if !hasMarker(profile.Args, marker) {
+			yes, err := e.p.Confirm(fmt.Sprintf("O perfil de %s não tem %s e a escolha não seria aplicada. Incluir o marcador?", cli, marker), true)
+			if err != nil {
+				return err
+			}
+			if yes {
+				addMarker(&cfg, cli, marker)
+			}
+		}
+	}
+	if err := config.SaveForgeConfig(e.dir, cfg); err != nil {
+		fmt.Fprintf(e.out, "\n✗ %v\n", err)
+		return nil
+	}
+	shown := choice
+	if choice == valDefaultCLI {
+		shown = ""
+	}
+	fmt.Fprintf(e.out, "\n✓ %s do %s: %s (gravado em .forge/config/forge.json)\n", label, shortRole(role), orDefault(shown))
+	return nil
+}
+
+func hasMarker(args []string, m string) bool { return contains(args, m) }
+
+// addMarker inclui o marcador nos argumentos do perfil gravado da CLI (e nos interativos).
+func addMarker(cfg *config.ForgeConfig, cli, marker string) {
+	key := cli
+	if _, ok := cfg.CLIProfiles[key]; !ok && cli == config.CLIGemini {
+		key = config.CLIAgy
+	}
+	p, ok := cfg.CLIProfiles[key]
+	if !ok {
+		return
+	}
+	if !hasMarker(p.Args, marker) {
+		p.Args = append(append([]string{}, p.Args...), marker)
+	}
+	if len(p.InteractiveArgs) > 0 && !hasMarker(p.InteractiveArgs, marker) {
+		p.InteractiveArgs = append(append([]string{}, p.InteractiveArgs...), marker)
+	}
+	cfg.CLIProfiles[key] = p
 }
