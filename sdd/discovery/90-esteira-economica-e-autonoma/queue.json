@@ -2,13 +2,13 @@
   "feature_id": "",
   "branch": "",
   "spec_status": "reviewed",
-  "updated_at": "2026-11-17T03:28:38Z",
+  "updated_at": "2026-11-17T04:17:47Z",
   "items": [
     {
       "task_id": "feat-90-01",
       "title": "feat-90-01 — ADR-0014: medição real, PR pelo Go, base da iniciativa, archive e modelo por sessão",
       "spec_path": "sdd/discovery/90-esteira-economica-e-autonoma/features/feat-90-01-adr-0014.md",
-      "status": "queued",
+      "status": "approved",
       "rules": [
         "FLX-05",
         "GOV-01"
@@ -20,7 +20,7 @@
       "task_id": "feat-90-02",
       "title": "feat-90-02 — Telemetria real por job",
       "spec_path": "sdd/discovery/90-esteira-economica-e-autonoma/features/feat-90-02-telemetria-real-por-job.md",
-      "status": "queued",
+      "status": "approved",
       "rules": [
         "ARQ-01",
         "DUP-04",
@@ -36,7 +36,7 @@
       "task_id": "feat-90-03",
       "title": "feat-90-03 — Um leitor de dependências e checagem das specs antes do build",
       "spec_path": "sdd/discovery/90-esteira-economica-e-autonoma/features/feat-90-03-leitor-unico-de-dependencias.md",
-      "status": "queued",
+      "status": "approved",
       "rules": [
         "DUP-01",
         "DUP-06",
@@ -50,7 +50,7 @@
       "task_id": "feat-90-04",
       "title": "feat-90-04 — `forge status` curto para agentes",
       "spec_path": "sdd/discovery/90-esteira-economica-e-autonoma/features/feat-90-04-status-curto-para-agentes.md",
-      "status": "queued",
+      "status": "approved",
       "rules": [
         "ARQ-01",
         "ARQ-10",
@@ -64,7 +64,7 @@
       "task_id": "feat-90-05",
       "title": "feat-90-05 — Base da iniciativa e PR aberto pelo Go (`forge pipeline pr`)",
       "spec_path": "sdd/discovery/90-esteira-economica-e-autonoma/features/feat-90-05-base-da-iniciativa-e-pr-pelo-go.md",
-      "status": "queued",
+      "status": "approved",
       "depends_on": [
         "feat-90-01"
       ],
@@ -85,7 +85,7 @@
       "task_id": "feat-90-06",
       "title": "feat-90-06 — Archive que move, no fechamento",
       "spec_path": "sdd/discovery/90-esteira-economica-e-autonoma/features/feat-90-06-archive-que-move.md",
-      "status": "queued",
+      "status": "approved",
       "depends_on": [
         "feat-90-01",
         "feat-90-02"
@@ -104,7 +104,7 @@
       "task_id": "feat-90-07",
       "title": "feat-90-07 — Modelo e esforço por sessão (absorve a iniciativa 85)",
       "spec_path": "sdd/discovery/90-esteira-economica-e-autonoma/features/feat-90-07-modelo-e-esforco-por-sessao.md",
-      "status": "queued",
+      "status": "approved",
       "depends_on": [
         "feat-90-02"
       ],
@@ -122,7 +122,7 @@
       "task_id": "feat-90-08",
       "title": "feat-90-08 — Fix no `dispatch`",
       "spec_path": "sdd/discovery/90-esteira-economica-e-autonoma/features/feat-90-08-fix-no-dispatch.md",
-      "status": "queued",
+      "status": "approved",
       "depends_on": [
         "feat-90-03",
         "feat-90-05"

@@ -1,0 +1,5 @@
+{
+  "veredito": "conforme",
+  "achados": [],
+  "resumo": "Diff confere com os CA-01 a CA-13 e com as ADRs citadas. go build, go vet e go test ./... passam. O PR pelo Go usa git e gh com argv explícito (SEG-03) e valida o nome da branch. O PR recusa main e a própria base, e exige as seções do template e um commit à frente da base. O PR registra o job e marca as tasks como review_pending sem mesclar nem aprovar (ADR-0004). A ADR-0014 foi incluída. Revisão por amostragem: li pr.go por inteiro e não li os demais arquivos do diff linha a linha."
+}
