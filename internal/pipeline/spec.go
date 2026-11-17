@@ -114,6 +114,20 @@ func ApplySpecVerdict(dir, jobID, worker string, v queue.Verdict, deps notify.De
 	switch {
 	case v.Veredito == queue.VerdictConforme:
 		res.Action = ActionApproved
+		if isGoalJob(job) {
+			// /toca-ai: a aprovação libera as etapas (um job por etapa), não um build único.
+			if _, err := bus.Complete(dir, layout.RoleReviewer, jobID, worker, "spec: aprovada; etapas liberadas ao Builder", now); err != nil {
+				return nil, err
+			}
+			goal, err := EnqueueGoalSteps(dir, job.Initiative, GoalOptions{Now: now})
+			if err != nil {
+				return nil, fmt.Errorf("liberar as etapas ao Builder: %w", err)
+			}
+			if len(goal.Pending) > 0 {
+				res.Warning = "etapas não enfileiradas por pendência humana: " + strings.Join(goal.Pending, "; ")
+			}
+			break
+		}
 		build := job
 		build.ID = strings.TrimSuffix(job.ID, "-spec")
 		build.Type = bus.TypeFeatureBuild

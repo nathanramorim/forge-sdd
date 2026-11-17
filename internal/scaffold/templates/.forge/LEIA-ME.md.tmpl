@@ -141,6 +141,14 @@ O comando combina simultaneamente:
 2. **Commits recentes:** últimos 5 commits da branch no git (`git log --oneline -n 5`).
 3. **Fila de tarefas:** checklist consolidado da iniciativa (`queue panel`).
 
+## Trabalho longo com `/toca-ai`
+
+`/toca-ai <objetivo>` na sessão Discovery: o Líder gera o plano e as specs de todas as etapas, junta num pré-voo único o que só você pode dar (permissão de comando, ferramenta, arquivo e consentimento) e entrega à esteira com `forge pipeline toca-ai <iniciativa>`. O chat fica livre.
+
+- **Você é interrompido** só no pré-voo (`forge pipeline toca-ai --preflight <iniciativa>` mostra a lista única; consentimento se responde com `forge pipeline consent <id> --iniciativa <iniciativa>`, só em terminal) e para ação irreversível fora do repositório, segredo, gasto externo, merge em `main` ou exceção a regra. Imprevisto vira etapa `blocked` com o item exato em `pendencias-humanas.md`; as independentes seguem.
+- **Retomar:** rode `/toca-ai` ou `forge pipeline toca-ai <iniciativa>` de novo; os jobs não se duplicam. Acompanhe com `forge status`; pare com `.forge/runtime/STOP`.
+- **Sem o modo avançado**, o comando exige a spec aprovada por você (Gate 1) antes de enfileirar; com ele, o Reviewer aprova a spec e o Go libera as etapas.
+
 ## Configuração
 
 - `.forge/config/forge.json`: agente de cada sessão (`sessions`), modo de sessão (`session_mode`: `live` ou `headless`), limpeza de contexto (`context`: `clear` ou `continuous`), nível de permissão, tarefas em paralelo, worktrees, tentativas de rework, status do card. Copie de `forge.json.example` se quiser recomeçar.
