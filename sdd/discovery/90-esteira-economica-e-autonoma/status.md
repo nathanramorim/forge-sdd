@@ -1,9 +1,10 @@
 # Status — Iniciativa 90
 
 **Branch:** `feat/90-esteira-economica-e-autonoma` (a partir de `feat/88-modo-pipeline-avancado`)
-**Status:** specs das 8 tasks criadas e na fila (`queued`); discovery aprovada.
-**Próximo passo:** `forge dispatch` com base `feat/88-modo-pipeline-avancado` (o resolvedor de base nasce na 90-05; o `dispatch` atual usaria `main`).
+**Status:** 90-01 a 90-08 implementadas; PR aberto contra a 88, em revisão.
+**Próximo passo:** Reviewer revisa o PR; depois comparar `forge report --initiative 90-esteira-economica-e-autonoma --jobs` com a linha de base (RN-1).
 
-## A confirmar
-- Flags de modelo de agy, gemini, codex e copilot: confirmar no build (90-07).
-- Premissas assumidas: fix abre PR contra a branch da iniciativa; `forge status` curto sem terminal (`--full`); comando `forge pipeline pr`.
+## Confirmado no build (90-07)
+- `claude` e `agy`: `--model` e `--effort low|medium|high|xhigh|max`; `gemini`: só `--model`.
+- `codex` e `copilot` não estão instalados: nenhuma flag emitida; escolher modelo ou esforço neles é erro.
+- Lint: `golangci-lint` (latest) sem achados.

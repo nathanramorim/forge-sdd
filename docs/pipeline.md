@@ -125,6 +125,16 @@ Por padrão, os workers operam em modo `headless` (executam uma nova chamada de 
 - **Modo avançado (experimental, ADR-0013):** `autonomy: advanced` faz o Reviewer revisar a spec no lugar da aprovação humana (job `spec_review`, parecer em `review-spec.md`, aplicado pelo Go). Exige `permissions: full` e `isolated_confirmed: true`; use só em contêiner, VM ou máquina descartável. Liga com → sobre "Iniciar esteira (up)" no menu, desliga com ←, ou por `forge pipeline autonomy advanced --isolated` / `normal`. Parecer `ajustar` volta à Discovery até `reviewer.max_rework_attempts`; `escalar` ou o limite marcam as tasks `blocked` (as independentes seguem). Salvaguardas (todas desligadas por padrão; ligam em Settings): `safeguards.max_job_tokens` e `safeguards.max_job_minutes` (ao passar, a esteira para com motivo no inbox), `safeguards.max_jobs_per_day` ( conta jobs distintos no dia local e, ao atingir o teto, a esteira **pausa até o dia seguinte** e retoma sozinha). `builder.job_timeout_minutes` segue só como timeout do runner, em todos os modos. Sem teto ligado, só o arquivo `.forge/runtime/STOP`, que para a esteira de forma limpa. `forge doctor` avisa se estiver ligado sem ambiente isolado confirmado.
 - Sem `forge.json`, o `/implementar` volta ao fluxo de sessão única da 4.0.0-beta.
 
+## Esteira econômica (ADR-0014)
+
+- **PR pelo Go:** o Builder faz commit e roda `forge pipeline pr --id <job> --body-file <arq>`; o Go roda a Camada A, faz `git push origin <branch>:<branch>`, abre o PR (ou corrige a base de um PR já aberto) e o registra. Recusa branch `main` ou igual à base, corpo fora do `.github/pull_request_template.md` e branch sem commit à frente. `forge pipeline pr-opened` fica para quem abre o PR à mão.
+- **Base da iniciativa:** `forge queue enqueue --base <branch>` grava `base_branch` na fila. A base vale nesta ordem: flag, fila, origem da branch no git ("Created from") e `base_branch` do `forge.json`; `dispatch`, `/toca-ai` e `pr` dizem de onde ela veio.
+- **Fix no despacho:** `forge dispatch <iniciativa> --fix fix-88-01` confere a spec do fix, enfileira o job com a branch `fix/88-01-<nome>` e base na branch da iniciativa, e põe o fix na fila.
+- **Uso real:** o worker lê o evento `result` do log do `claude` e grava tokens, cache, turnos, duração, modelo e custo de tabela (`medicao: real`); sem `result`, estima (`medicao: estimado`). `forge report --initiative <id> [--jobs]` soma separando real e estimado.
+- **Status curto:** sem terminal, `forge status` imprime até 1,5 KB (só iniciativas ativas); `--full` mostra tudo.
+- **Archive:** `forge archive` move a pasta da iniciativa para `sdd/archive/discovery/` (só na branch dela e sem task pendente; rodar de novo não muda nada). Ao aprovar o último job, só a fila `origem: toca-ai` arquiva sozinha; nas demais o inbox avisa "pronta para arquivar". `forge archive --concluidas --dry-run` lista as candidatas.
+- **Modelo e esforço por sessão:** `models` e `efforts` em `forge.json` (por `discovery`, `builder`, `reviewer`) viram `--model` e `--effort` pelos marcadores `{model}` e `{effort}` do perfil (claude e agy; gemini só modelo; as demais CLIs ainda sem flag confirmada). Escolha em **Settings**; sem escolha, o comando é o de sempre. Perfil gravado sem os marcadores gera aviso no preflight.
+
 ## Quando algo não anda
 
 | Sintoma | O que fazer |

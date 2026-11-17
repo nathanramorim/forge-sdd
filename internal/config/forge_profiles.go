@@ -304,20 +304,23 @@ func (c ForgeConfig) SessionModelArgs(role string) (model, effort []string) {
 	return model, effort
 }
 
-// MissingModelMarkers lista os marcadores que faltam no perfil da sessão e que a escolha de modelo
-// ou esforço precisaria; sem escolha, nada falta. Perfil gravado em forge.json não ganha marcador novo sozinho.
+// MissingModelMarkers lista os marcadores que faltam no perfil da sessão, quando a CLI tem flag
+// confirmada para eles (claude, agy e, só para modelo, gemini). Vale com ou sem escolha: um perfil
+// gravado sem o marcador (como o de forge.json antigo) não deixaria o Settings aplicar nada.
 func (c ForgeConfig) MissingModelMarkers(role string) []string {
-	cli := c.CLIFor(role)
-	profile, ok := c.Profile(cli)
+	profile, ok := c.Profile(c.CLIFor(role))
 	if !ok {
 		return nil
 	}
-	has := func(m string) bool { return contains(profile.Args, m) }
+	flags, supported := FlagsForCommand(profile.Command)
+	if !supported {
+		return nil
+	}
 	var missing []string
-	if c.Models[role] != "" && !has(MarkerModel) {
+	if flags.Model != "" && !contains(profile.Args, MarkerModel) {
 		missing = append(missing, MarkerModel)
 	}
-	if c.Efforts[role] != "" && !has(MarkerEffort) {
+	if flags.Effort != "" && !contains(profile.Args, MarkerEffort) {
 		missing = append(missing, MarkerEffort)
 	}
 	return missing

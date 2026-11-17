@@ -563,9 +563,7 @@ func extractLastInformativeLines(content string, count int) []string {
 	rawLines := strings.Split(cleaned, "\n")
 	var nonBlank []string
 	for _, line := range rawLines {
-		for _, t := range humanizeLine(line) {
-			nonBlank = append(nonBlank, t)
-		}
+		nonBlank = append(nonBlank, humanizeLine(line)...)
 	}
 	if len(nonBlank) == 0 {
 		return nil
