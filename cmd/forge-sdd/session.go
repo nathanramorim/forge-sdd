@@ -66,6 +66,10 @@ e retorna sucesso (silencioso, por design).`,
 		reworkLines, _ := cmd.Flags().GetInt("rework-lines")
 		context7Calls, _ := cmd.Flags().GetInt("context7-calls")
 		gitCalls, _ := cmd.Flags().GetInt("git-calls")
+		cacheRead, _ := cmd.Flags().GetInt("tokens-cache-read")
+		cacheCreation, _ := cmd.Flags().GetInt("tokens-cache-creation")
+		costTabela, _ := cmd.Flags().GetFloat64("cost-usd-tabela")
+		medicao, _ := cmd.Flags().GetString("medicao")
 		filesTouchedCsv, _ := cmd.Flags().GetString("files-touched")
 
 		if feature == "" {
@@ -73,22 +77,26 @@ e retorna sucesso (silencioso, por design).`,
 		}
 
 		metrics := sessionMetrics{
-			Schema:           "forge-sdd/metrics/1.0",
-			Feature:          feature,
-			Phase:            phase,
-			AgentPath:        splitCsv(agentPathCsv),
-			TokensInput:      tokensInput,
-			TokensOutput:     tokensOutput,
-			Turns:            turns,
-			DurationSeconds:  duration,
-			CriterioAtendido: criterio,
-			Model:            model,
-			ReworkLines:      reworkLines,
-			Context7Calls:    context7Calls,
-			GitCalls:         gitCalls,
-			FilesTouched:     splitCsv(filesTouchedCsv),
-			Outcome:          outcome,
-			SddVersion:       rc.Version,
+			Schema:              "forge-sdd/metrics/1.0",
+			Feature:             feature,
+			Phase:               phase,
+			AgentPath:           splitCsv(agentPathCsv),
+			TokensInput:         tokensInput,
+			TokensOutput:        tokensOutput,
+			Turns:               turns,
+			DurationSeconds:     duration,
+			CriterioAtendido:    criterio,
+			Model:               model,
+			ReworkLines:         reworkLines,
+			Context7Calls:       context7Calls,
+			GitCalls:            gitCalls,
+			FilesTouched:        splitCsv(filesTouchedCsv),
+			Outcome:             outcome,
+			SddVersion:          config.BinaryVersion(),
+			TokensCacheRead:     cacheRead,
+			TokensCacheCreation: cacheCreation,
+			CostUSDTabela:       costTabela,
+			Medicao:             medicao,
 		}
 
 		path, err := WriteSessionMetrics(targetDir, metrics, time.Now().UTC())
@@ -242,6 +250,10 @@ func init() {
 	sessionRecordCmd.Flags().Int("context7-calls", 0, "Número de chamadas ao MCP context7")
 	sessionRecordCmd.Flags().Int("git-calls", 0, "Número de chamadas ao MCP git")
 	sessionRecordCmd.Flags().String("files-touched", "", "Arquivos tocados na sessão, separados por vírgula")
+	sessionRecordCmd.Flags().Int("tokens-cache-read", 0, "Tokens lidos do cache (medição real)")
+	sessionRecordCmd.Flags().Int("tokens-cache-creation", 0, "Tokens gravados no cache (medição real)")
+	sessionRecordCmd.Flags().Float64("cost-usd-tabela", 0, "Custo em dólares a preço de tabela (não é a fatura)")
+	sessionRecordCmd.Flags().String("medicao", "", "Origem dos tokens: real ou estimado")
 	sessionRecordCmd.Flags().String("outcome", "", "Resultado da sessão: approved, rejected ou blocked (obrigatório)")
 
 	sessionCmd.AddCommand(sessionRecordCmd)

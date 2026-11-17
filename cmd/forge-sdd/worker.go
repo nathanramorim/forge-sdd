@@ -6,7 +6,6 @@ import (
 	"os"
 	"os/exec"
 	"os/signal"
-	"path/filepath"
 	"strconv"
 	"syscall"
 	"time"
@@ -79,37 +78,22 @@ func recordJobTelemetry(dir, role string) func(job bus.Job, outcome string) {
 		if !ok {
 			result = "blocked"
 		}
-		tokensIn, tokensOut := estimateJobTokens(dir, role, job)
+		u := monitor.ReadJobUsage(dir, role, job.ID, job.SpecPath)
 		ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 		defer cancel()
 		_ = exec.CommandContext(ctx, self, "session", "record", "--dir", dir, "--feature", job.SpecPath, "--phase", job.ID,
 			"--agent-path", role, "--outcome", result, fmt.Sprintf("--criterio-atendido=%t", ok),
-			"--tokens-input", strconv.Itoa(tokensIn),
-			"--tokens-output", strconv.Itoa(tokensOut),
+			"--tokens-input", strconv.Itoa(u.TokensInput),
+			"--tokens-output", strconv.Itoa(u.TokensOutput),
+			"--tokens-cache-read", strconv.Itoa(u.TokensCacheRead),
+			"--tokens-cache-creation", strconv.Itoa(u.TokensCacheCreation),
+			"--turns", strconv.Itoa(u.Turns),
+			"--duration-seconds", strconv.Itoa(u.DurationSeconds),
+			"--model", u.Model,
+			"--cost-usd-tabela", strconv.FormatFloat(u.CostUSDTabela, 'f', 4, 64),
+			"--medicao", u.Medicao,
 		).Run()
 	}
-}
-
-// estimateJobTokens estima os tokens de entrada e saída do job a partir da Spec e do log do worker.
-func estimateJobTokens(dir, role string, job bus.Job) (int, int) {
-	specBytes := 4000
-	if job.SpecPath != "" {
-		specFull := job.SpecPath
-		if dir != "" && !filepath.IsAbs(specFull) {
-			specFull = filepath.Join(dir, specFull)
-		}
-		if info, err := os.Stat(specFull); err == nil && !info.IsDir() && info.Size() > 0 {
-			specBytes = int(info.Size())
-		}
-	}
-	logPath := filepath.Join(layout.Logs(dir), role+"-"+job.ID+".log")
-	logBytes := 2000
-	if info, err := os.Stat(logPath); err == nil && !info.IsDir() && info.Size() > 0 {
-		logBytes = int(info.Size())
-	}
-	tokensIn := monitor.EstimateTokensFromBytes(specBytes * 4)
-	tokensOut := monitor.EstimateTokensFromBytes(logBytes)
-	return tokensIn, tokensOut
 }
 
 var pipelinePROpenedCmd = &cobra.Command{

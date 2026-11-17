@@ -9,6 +9,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/forge-sdd/cli/internal/config"
 	"github.com/forge-sdd/cli/internal/queue"
 )
 
@@ -35,13 +36,13 @@ type RPCDispatcher struct {
 
 // NewDispatcher instancia um despachador com versão padrão e métodos base registrados.
 func NewDispatcher() *RPCDispatcher {
-	return NewDispatcherWithVersion("4.5.0-beta")
+	return NewDispatcherWithVersion(config.BinaryVersion())
 }
 
 // NewDispatcherWithVersion instancia o despachador com versão configurada.
 func NewDispatcherWithVersion(version string) *RPCDispatcher {
 	if version == "" {
-		version = "4.5.0-beta"
+		version = config.BinaryVersion()
 	}
 	sm := NewSessionManager()
 	d := &RPCDispatcher{
