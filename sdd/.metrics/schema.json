@@ -14,5 +14,9 @@
   "git_calls": "integer",
   "files_touched": ["string"],
   "outcome": "approved | rejected | blocked",
-  "sdd_version": "string"
+  "sdd_version": "string",
+  "tokens_cache_read": "integer (opcional)",
+  "tokens_cache_creation": "integer (opcional)",
+  "cost_usd_tabela": "number (opcional; preço de tabela, não é fatura)",
+  "medicao": "real | estimado (opcional)"
 }

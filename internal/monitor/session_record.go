@@ -28,6 +28,11 @@ type SessionMetrics struct {
 	FilesTouched     []string `json:"files_touched"`
 	Outcome          string   `json:"outcome"`
 	SddVersion       string   `json:"sdd_version"`
+
+	TokensCacheRead     int     `json:"tokens_cache_read,omitempty"`
+	TokensCacheCreation int     `json:"tokens_cache_creation,omitempty"`
+	CostUSDTabela       float64 `json:"cost_usd_tabela,omitempty"`
+	Medicao             string  `json:"medicao,omitempty"`
 }
 
 // RecordSessionMetrics grava um arquivo de telemetria em sdd/.metrics/session-<ISO8601>.json.
