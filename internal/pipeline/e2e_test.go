@@ -80,10 +80,16 @@ func TestE2E_PipelineCompleto(t *testing.T) {
 	assert.Equal(t, []string{ActionRework, ActionApproved}, applied)
 
 	// 3. Resultado: inbox com o link do PR; filas sem pendências; tudo em done.
+	// Além do PR pronto, a última task aprovada avisa que a iniciativa está pronta para arquivar.
 	items := mustInbox(t, dir)
-	require.Len(t, items, 1)
-	assert.Equal(t, notify.TypePRApproved, items[0].Type)
-	assert.Equal(t, "https://github.com/acme/app/pull/12", items[0].PRURL)
+	require.Len(t, items, 2)
+	var approved notify.Notification
+	for _, it := range items {
+		if it.Type == notify.TypePRApproved {
+			approved = it.Notification
+		}
+	}
+	assert.Equal(t, "https://github.com/acme/app/pull/12", approved.PRURL)
 	assert.Contains(t, notify.FormatInbox(items, true), "https://github.com/acme/app/pull/12")
 	assert.NotEmpty(t, *toasts)
 

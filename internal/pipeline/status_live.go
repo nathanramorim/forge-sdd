@@ -155,9 +155,10 @@ func readMetricsTokens(dir string) roleTokens {
 			Phase        string   `json:"phase"`
 			TokensInput  int64    `json:"tokens_input"`
 			TokensOutput int64    `json:"tokens_output"`
+			Medicao      string   `json:"medicao"`
 		}
-		if err := json.Unmarshal(data, &item); err != nil {
-			continue
+		if err := json.Unmarshal(data, &item); err != nil || item.Medicao == monitor.MedicaoResumo {
+			continue // o resumo do archive repete o que as sessões já somaram
 		}
 		toks := item.TokensInput + item.TokensOutput
 		res.Total += toks
