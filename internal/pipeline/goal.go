@@ -214,6 +214,7 @@ type GoalOptions struct {
 	DryRun bool
 	Now    time.Time
 	Env    PreflightEnv
+	Git    queue.GitFunc // injetável nos testes; padrão: git real
 	// SkipSpecGate é usado pelo próprio Go depois do parecer aprovado da spec.
 	SkipSpecGate bool
 }
@@ -227,6 +228,8 @@ type GoalResult struct {
 	SpecJobID  string
 	Created    []string // jobs novos (ids)
 	Existing   []string // jobs que já estavam na fila
+	BaseBranch string   // base do PR das etapas
+	BaseSource string   // de onde a base veio
 }
 
 // goalStepJobID é determinístico (sem horário): reenviar não duplica.
@@ -324,6 +327,8 @@ func EnqueueGoalSteps(dir, initiative string, opts GoalOptions) (*GoalResult, er
 		return nil, err
 	}
 	res := &GoalResult{Initiative: initiative}
+	base, baseSource := queue.ResolveBase(dir, initiative, "", cfg.BaseBranch, opts.Git)
+	res.BaseBranch, res.BaseSource = base, baseSource
 	for _, s := range steps {
 		res.Steps = append(res.Steps, s.ID)
 	}
@@ -341,7 +346,7 @@ func EnqueueGoalSteps(dir, initiative string, opts GoalOptions) (*GoalResult, er
 			res.Awaiting = "a spec ainda não foi aprovada por uma pessoa (Gate 1): aprove e rode de novo; nenhuma etapa foi enfileirada"
 			return res, nil
 		}
-		job := goalJob(cfg, initiative, "sdd/discovery/"+initiative+"/plan.md", res.Steps, goalSpecJobID(initiative, 1), now)
+		job := goalJob(cfg, base, initiative, "sdd/discovery/"+initiative+"/plan.md", res.Steps, goalSpecJobID(initiative, 1), now)
 		job.Type = bus.TypeSpecReview
 		job.Attempt = nextSpecAttempt(dir, initiative, job.MaxReworkAttempts)
 		job.ID = goalSpecJobID(initiative, job.Attempt)
@@ -355,13 +360,19 @@ func EnqueueGoalSteps(dir, initiative string, opts GoalOptions) (*GoalResult, er
 		return res, nil
 	}
 
+	if !opts.DryRun {
+		// O motor do /toca-ai é quem pede o archive automático ao aprovar a última etapa.
+		if err := queue.SetOrigem(dir, initiative, queue.OrigemTocaAi); err != nil {
+			return nil, err
+		}
+	}
 	for i, s := range steps {
 		// CreatedAt crescente: a fila é FIFO, então a ordem do DAG vira a ordem de consumo.
 		at := now.UTC().Add(time.Duration(i) * time.Millisecond)
 		spec, _ := filepath.Rel(dir, s.File)
-		job := goalJob(cfg, initiative, filepath.ToSlash(spec), []string{s.ID}, goalStepJobID(initiative, s.ID), at)
+		job := goalJob(cfg, base, initiative, filepath.ToSlash(spec), []string{s.ID}, goalStepJobID(initiative, s.ID), at)
 		job.Type = bus.TypeFeatureBuild
-		job.PR.Branch = "feat/" + initiative + "-" + s.ID
+		job.PR.Branch = layout.InitiativeBranch(initiative) + "-" + s.ID
 		job.Title = s.ID + " — " + initiative
 		if opts.DryRun {
 			res.Created = append(res.Created, job.ID)
@@ -381,7 +392,7 @@ func EnqueueGoalSteps(dir, initiative string, opts GoalOptions) (*GoalResult, er
 	return res, nil
 }
 
-func goalJob(cfg config.ForgeConfig, initiative, specPath string, taskIDs []string, id string, at time.Time) bus.Job {
+func goalJob(cfg config.ForgeConfig, base, initiative, specPath string, taskIDs []string, id string, at time.Time) bus.Job {
 	return bus.Job{
 		SchemaVersion:     bus.SchemaVersion,
 		ID:                id,
@@ -391,7 +402,7 @@ func goalJob(cfg config.ForgeConfig, initiative, specPath string, taskIDs []stri
 		Initiative:        initiative,
 		TaskIDs:           taskIDs,
 		SpecPath:          filepath.ToSlash(specPath),
-		PR:                bus.PR{Branch: "feat/" + initiative, BaseBranch: cfg.BaseBranch},
+		PR:                bus.PR{Branch: layout.InitiativeBranch(initiative), BaseBranch: base},
 		Attempt:           1,
 		MaxReworkAttempts: cfg.Reviewer.MaxReworkAttempts,
 		ReworkFeedback:    []bus.Feedback{},

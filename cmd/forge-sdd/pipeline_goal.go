@@ -63,6 +63,7 @@ uma vez, sem enfileirar nada. Com --block registra um imprevisto: bloqueia a eta
 		if dry {
 			verb = "enfileiraria"
 		}
+		fmt.Fprintf(out, "Base do PR: %s (fonte: %s)\n", res.BaseBranch, res.BaseSource)
 		fmt.Fprintf(out, "Etapas %s: %d novas, %d já estavam na fila (ordem: %s)\n", verb, len(res.Created), len(res.Existing), strings.Join(res.Steps, " → "))
 		return nil
 	},

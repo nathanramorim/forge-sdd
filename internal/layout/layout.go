@@ -335,3 +335,6 @@ func CurrentBranch(dir string) (string, error) {
 	}
 	return strings.TrimSpace(out), nil
 }
+
+// InitiativeBranch é a branch de trabalho de uma iniciativa; único lugar que a monta (DUP-04).
+func InitiativeBranch(id string) string { return "feat/" + id }

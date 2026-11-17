@@ -30,6 +30,8 @@ const (
 type Queue struct {
 	FeatureID  string      `json:"feature_id"`
 	Branch     string      `json:"branch"`
+	BaseBranch string      `json:"base_branch,omitempty"`
+	Origem     string      `json:"origem,omitempty"`
 	SpecStatus string      `json:"spec_status"`
 	UpdatedAt  string      `json:"updated_at"`
 	Items      []QueueItem `json:"items"`

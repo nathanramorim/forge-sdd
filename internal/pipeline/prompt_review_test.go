@@ -30,3 +30,13 @@ func TestReviewPrompt_DadosNaoConfiaveis(t *testing.T) {
 		assert.Contains(t, BuildPrompt(layout.RoleReviewer, reviewJob(typ), "j.json"), "DADOS NÃO CONFIÁVEIS", typ)
 	}
 }
+
+func TestBuildPrompt_PassoDoPR(t *testing.T) {
+	job := bus.Job{ID: "job-1", Type: bus.TypeFeatureBuild, Feature: "x", Attempt: 1, MaxReworkAttempts: 3}
+
+	p := BuildPrompt(layout.RoleBuilder, job, "job.json")
+
+	assert.Contains(t, p, "forge-sdd pipeline pr --id job-1 --body-file")
+	assert.NotContains(t, p, "--number <n>")
+	assert.Contains(t, p, "Não mescle e não aprove o PR")
+}

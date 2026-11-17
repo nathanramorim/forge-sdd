@@ -231,3 +231,45 @@ func init() {
 	pipelineWorktreeCmd.Flags().String("base", "", "Ref base (padrão HEAD)")
 	pipelineCmd.AddCommand(pipelineWorktreeCmd)
 }
+
+var pipelinePRCmd = &cobra.Command{
+	Use:   "pr",
+	Short: "Abre ou corrige o PR do job: Camada A, push, PR na base da iniciativa e registro (nunca mescla)",
+	Long: `Faz pelo Go o passo mecânico do Builder: roda a Camada A (forge gate), faz git push origin
+<branch>:<branch>, cria o PR com a base da iniciativa (ou corrige a base de um PR já aberto), registra o
+PR no job e marca as tasks como review_pending. Recusa branch main ou igual à base, corpo sem as
+seções de .github/pull_request_template.md e branch sem commit à frente da base.`,
+	Args: cobra.NoArgs,
+	RunE: func(cmd *cobra.Command, args []string) error {
+		dir, _ := cmd.Flags().GetString("dir")
+		if dir == "" {
+			dir = "."
+		}
+		id, _ := cmd.Flags().GetString("id")
+		body, _ := cmd.Flags().GetString("body-file")
+		res, err := pipeline.OpenPR(dir, pipeline.PROptions{JobID: id, Worker: workerFromFlags(cmd), BodyFile: body})
+		if err != nil {
+			return err
+		}
+		out := cmd.OutOrStdout()
+		verb := "aberto"
+		switch {
+		case res.BaseFixed:
+			verb = "já existia; base corrigida"
+		case !res.Created:
+			verb = "já existia"
+		}
+		fmt.Fprintf(out, "PR #%d %s: %s\nBase do PR: %s (fonte: %s)\nPR registrado no job %s\n", res.Number, verb, res.URL, res.Base, res.BaseSource, id)
+		return nil
+	},
+}
+
+func init() {
+	pipelinePRCmd.Flags().String("dir", ".", "Diretório alvo do projeto Forge-SDD")
+	pipelinePRCmd.Flags().String("id", "", "ID do job em processamento")
+	_ = pipelinePRCmd.MarkFlagRequired("id")
+	pipelinePRCmd.Flags().String("worker", "", "Worker dono do lease (padrão: variável FORGE_WORKER, definida pelo worker)")
+	pipelinePRCmd.Flags().String("body-file", "", "Corpo do PR (relativo ao projeto), pelo modelo de .github/pull_request_template.md")
+	_ = pipelinePRCmd.MarkFlagRequired("body-file")
+	pipelineCmd.AddCommand(pipelinePRCmd)
+}

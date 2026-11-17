@@ -318,3 +318,17 @@ func TestDispatch_SpecIncompleta(t *testing.T) {
 	assert.Contains(t, joined, "comando executável")
 	assert.Empty(t, builderPending(t, dir))
 }
+
+func TestBaseDaIniciativa_DispatchUsaAFilaEDizAFonte(t *testing.T) {
+	dir := project(t, func(dir string) {
+		testutil.WriteFile(t, dir, "sdd/discovery/77-auth-oauth/queue.json", `{"base_branch":"feat/88-modo","items":[]}`)
+	})
+
+	res, err := Dispatch(dir, "auth-oauth", DispatchOptions{Now: now})
+
+	require.NoError(t, err)
+	require.False(t, res.Blocked(), "%v", res.Pending)
+	assert.Equal(t, "feat/88-modo", res.BaseBranch)
+	assert.Equal(t, "fila", res.BaseSource)
+	assert.Equal(t, "feat/88-modo", builderPending(t, dir)[0].Job.PR.BaseBranch)
+}
