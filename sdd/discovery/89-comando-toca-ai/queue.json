@@ -2,13 +2,13 @@
   "feature_id": "",
   "branch": "feat/89-comando-toca-ai",
   "spec_status": "reviewed",
-  "updated_at": "2026-11-17T01:00:26Z",
+  "updated_at": "2026-11-17T01:11:16Z",
   "items": [
     {
       "task_id": "feat-89-01",
       "title": "feat-89-01 — Motor do `/toca-ai`: `forge pipeline toca-ai` enfileira as etapas e o Go cuida do resto",
       "spec_path": "sdd/discovery/89-comando-toca-ai/features/feat-89-01-motor-toca-ai-no-pipeline.md",
-      "status": "queued",
+      "status": "approved",
       "depends_on": [
         "nenhuma",
         "(usa",
@@ -40,7 +40,7 @@
       "task_id": "feat-89-02",
       "title": "feat-89-02 — Comando `/toca-ai`: o Líder planeja e gera todas as specs, o motor executa",
       "spec_path": "sdd/discovery/89-comando-toca-ai/features/feat-89-02-comando-toca-ai-e-skill.md",
-      "status": "queued",
+      "status": "approved",
       "depends_on": [
         "feat-89-01"
       ],
