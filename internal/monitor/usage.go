@@ -15,6 +15,8 @@ import (
 const (
 	MedicaoReal     = "real"
 	MedicaoEstimado = "estimado"
+	// MedicaoResumo marca o registro do archive: resume a iniciativa e não entra nas somas.
+	MedicaoResumo = "resumo"
 )
 
 // JobUsage é o uso de um job: medido pelo evento `result` do log stream-json ou estimado por bytes.
@@ -157,6 +159,9 @@ func BelongsToInitiative(m SessionMetrics, initiative string) bool {
 func SumUsage(ms []SessionMetrics) UsageTotals {
 	var t UsageTotals
 	for _, m := range ms {
+		if m.Medicao == MedicaoResumo {
+			continue
+		}
 		b := &t.Estimado
 		if m.Medicao == MedicaoReal {
 			b = &t.Real
@@ -170,4 +175,28 @@ func SumUsage(ms []SessionMetrics) UsageTotals {
 		b.CostUSDTabela += m.CostUSDTabela
 	}
 	return t
+}
+
+// ReadSessions lê as sessões de sdd/.metrics que pertencem à iniciativa (arquivos inválidos são ignorados).
+func ReadSessions(dir, initiative string) []SessionMetrics {
+	entries, err := os.ReadDir(layout.Metrics(dir))
+	if err != nil {
+		return nil
+	}
+	var out []SessionMetrics
+	for _, e := range entries {
+		n := e.Name()
+		if e.IsDir() || !strings.HasPrefix(n, "session-") || !strings.HasSuffix(n, ".json") {
+			continue
+		}
+		data, err := os.ReadFile(filepath.Join(layout.Metrics(dir), n))
+		if err != nil {
+			continue
+		}
+		var m SessionMetrics
+		if json.Unmarshal(data, &m) == nil && BelongsToInitiative(m, initiative) {
+			out = append(out, m)
+		}
+	}
+	return out
 }

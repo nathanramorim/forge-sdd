@@ -126,8 +126,8 @@ func ApplyVerdict(dir, jobID, worker string, v queue.Verdict, deps notify.Deps, 
 		if _, err := bus.Complete(dir, layout.RoleReviewer, jobID, worker, "aprovado: PR sem inconformidades", now); err != nil {
 			return nil, err
 		}
-		// Gatilho de auto-archive de features concluídas sem tarefas pendentes (CA-04, feat 81-03)
-		_, _ = CheckAndAutoArchive(dir, job, now)
+		// Última task aprovada: arquiva (origem toca-ai) ou avisa que está pronta (ADR-0014 D-4)
+		_, _ = CheckAndAutoArchive(dir, job, now, ncfg, deps)
 
 	case v.Veredito == "violacao" && job.Attempt < job.MaxReworkAttempts:
 		res.Action = ActionRework

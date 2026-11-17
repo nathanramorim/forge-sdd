@@ -59,6 +59,9 @@ Determinístico: não depende de o agente de IA montar a tabela manualmente.`,
 
 		for _, r := range records {
 			m := r.Metrics
+			if m.Medicao == monitor.MedicaoResumo {
+				continue
+			}
 			key := m.Feature
 			if key == "" {
 				key = "(sem feature)"

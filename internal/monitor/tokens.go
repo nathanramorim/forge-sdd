@@ -33,6 +33,7 @@ type sessionRecord struct {
 	TokensInput     int      `json:"tokens_input"`
 	TokensOutput    int      `json:"tokens_output"`
 	DurationSeconds int      `json:"duration_seconds"`
+	Medicao         string   `json:"medicao"`
 }
 
 // TaskTokenMetrics consolida o gasto de tokens de uma tarefa por etapa (Discovery -> Builder -> Reviewer) e total.
@@ -115,8 +116,8 @@ func CalculateTokenMetrics(dir string) (*ProjectTokenMetrics, error) {
 		}
 
 		var rec sessionRecord
-		if err := json.Unmarshal(data, &rec); err != nil {
-			continue
+		if err := json.Unmarshal(data, &rec); err != nil || rec.Medicao == MedicaoResumo {
+			continue // o resumo do archive repete o que as sessões já somaram
 		}
 
 		role := inferRoleFromSession(rec)
