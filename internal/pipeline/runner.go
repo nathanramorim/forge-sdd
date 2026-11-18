@@ -143,6 +143,7 @@ func (r ExecRunner) Run(ctx context.Context, spec RunSpec, out io.Writer) (RunRe
 	cmd.Dir = spec.Dir
 	cmd.Stdout = out
 	cmd.Stderr = out
+	cmd.Stdin = strings.NewReader("") // stdin fechado: evita que o agente herde CONIN$/CONOUT$ no Windows (fix-90-01)
 	cmd.Env = append(os.Environ(), "FORGE_WORKER="+spec.Name)
 	cmd.WaitDelay = 10 * time.Second
 	err = cmd.Run()

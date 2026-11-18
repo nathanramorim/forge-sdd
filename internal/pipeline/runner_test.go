@@ -114,3 +114,28 @@ func TestExpandArgs_FlagPromptVazio(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, []string{"-i", "iniciar"}, args)
 }
+
+func TestExecRunner_StdinDefinido(t *testing.T) {
+	// O ExecRunner deve definir cmd.Stdin = strings.NewReader("") antes de cmd.Run().
+	// Isso garante que o agente receba EOF imediato em stdin, evitando herança do
+	// console (CONIN$/CONOUT$) no Windows que trava o subprocesso (fix-90-01).
+	//
+	// O script lê stdin com `cat` e deve terminar imediatamente ao receber EOF;
+	// um timeout de 5 s detecta regressão em que stdin ficaria bloqueado.
+	profile := fakeCLI(t, `cat; echo "stdin-read-ok"`)
+	var out strings.Builder
+	done := make(chan error, 1)
+	go func() {
+		_, err := ExecRunner{Profile: profile}.Run(context.Background(),
+			RunSpec{Agent: "builder", Name: "forge-builder", Prompt: "x", Dir: t.TempDir()},
+			&out)
+		done <- err
+	}()
+	select {
+	case err := <-done:
+		require.NoError(t, err)
+		assert.Contains(t, out.String(), "stdin-read-ok", "o agente deve ter lido stdin e terminado")
+	case <-time.After(5 * time.Second):
+		t.Fatal("ExecRunner travou aguardando stdin — cmd.Stdin pode não estar definido")
+	}
+}

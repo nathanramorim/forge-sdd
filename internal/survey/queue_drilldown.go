@@ -301,7 +301,7 @@ func (tui *QueueDrilldownTUI) SelectTask() (string, error) {
 			Height(tui.Height).
 			Value(&choice)
 
-		err := huh.NewForm(huh.NewGroup(sel)).WithKeyMap(menuKeyMap()).Run()
+		err := huh.NewForm(huh.NewGroup(sel)).WithKeyMap(menuKeyMap()).WithAccessible(!isTTY()).Run()
 		if errors.Is(err, huh.ErrUserAborted) || choice == "__exit__" {
 			return "", ErrBack
 		}
