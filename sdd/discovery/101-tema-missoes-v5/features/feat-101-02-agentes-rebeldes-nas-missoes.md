@@ -12,7 +12,7 @@ Enquanto a edição estiver vigente, os mascotes 3D dos agentes da landing page 
 ## Decisões registradas (Nathan, 19/11/2026)
 
 - Pedido: "considere colocar os agentes de IA rebelde com arminhas purrete sem perder qualidade e nas fases".
-- Leitura adotada: arminhas e porrete, nos 5 cartões da seção de estações (as fases). **A confirmar no Gate 1:** "purrete" é porrete?
+- Leitura adotada, aceita no Gate 1 (19/11/2026): arminhas e porrete, nos 5 cartões da seção de estações (as fases).
 - Os personagens são os mascotes do próprio forge-sdd. Nenhum personagem do jogo entra (critério 1 da iniciativa).
 
 ## Modelo do módulo

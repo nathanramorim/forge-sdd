@@ -36,14 +36,16 @@ O visual do site não depende deste PR: a troca acontece na hora, pelo porteiro 
 
 O agendamento do GitHub pode atrasar alguns minutos. Isso só afeta a hora em que o PR aparece.
 
-### Pré-requisito no repositório
+### Como o PR é aberto
 
-Hoje a opção "Allow GitHub Actions to create and approve pull requests" está desligada (`can_approve_pull_request_reviews=false`). Com ela desligada, o workflow não consegue abrir PR.
+Hoje a opção "Allow GitHub Actions to create and approve pull requests" está desligada no repositório (`can_approve_pull_request_reviews=false`). Com ela desligada, o Actions não consegue abrir PR.
 
-- **Caminho principal:** o Nathan liga a opção em Settings → Actions → General.
-- **Sem a opção:** o workflow envia a branch e abre uma issue com o link que cria o PR em um clique.
+**Decidido no Gate 1 (19/11/2026):** o workflow não depende dessa opção.
 
-**A confirmar no Gate 1:** qual dos dois caminhos vale.
+1. Envia a branch `chore/101-encerrar-edicao` e tenta abrir o PR com `gh pr create`.
+2. Se o repositório recusar, abre uma issue com `gh issue create`, com o link que cria o PR em um clique.
+
+Ligar a opção em Settings → Actions → General é opcional: com ela, o passo 1 já resolve.
 
 ## Fora do escopo
 
@@ -122,7 +124,7 @@ git worktree remove --force "$copia"
 
 # 6. Workflow: agenda diária, disparo manual, PR em vez de push no main, data vinda do parâmetro único
 w=.github/workflows/encerrar-edicao.yml
-grep -q 'schedule:' "$w" && grep -q 'workflow_dispatch' "$w" && grep -q 'gh pr create' "$w"
+grep -q 'schedule:' "$w" && grep -q 'workflow_dispatch' "$w" && grep -q 'gh pr create' "$w" && grep -q 'gh issue create' "$w"
 grep -q 'docs/edicao/edicao.js' "$w"
 test "$(grep -c -E 'push origin (HEAD:)?main' "$w")" = "0"
 test "$(grep -c '2026-11-23' "$w" .github/scripts/encerrar-edicao/encerrar.sh | awk -F: '{s+=$2} END{print s}')" = "0"

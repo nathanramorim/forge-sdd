@@ -62,7 +62,7 @@ A virada usa o relógio do visitante, comparado em tempo absoluto: o fuso de que
 | 05. Governança | Governança | Missão 4: o vigia |
 | 01. O Líder | Operação | Missão 5: missão cumprida |
 
-**A confirmar no Gate 1:** a LP abre com o Líder (cartão 01), que nesta tabela fica com a Missão 5. A alternativa é deixar o Líder sem rótulo de missão.
+**Decidido no Gate 1 (19/11/2026):** vale a tabela. A LP abre com o Líder (cartão 01) e ele fica com a Missão 5.
 
 ## Fora do escopo
 

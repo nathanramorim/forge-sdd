@@ -1,0 +1,120 @@
+{
+  "feature_id": "feat-101",
+  "branch": "feat/101-tema-missoes-v5",
+  "spec_status": "reviewed",
+  "updated_at": "2026-11-19T21:51:41Z",
+  "items": [
+    {
+      "task_id": "fix-101-01-alinhar-readme-e-design-system",
+      "title": "fix-101-01 — Alinhar README, banner e design system à Edição Missões",
+      "spec_path": "sdd/discovery/101-tema-missoes-v5/fixes/fix-101-01-alinhar-readme-e-design-system.md",
+      "status": "building",
+      "rules": [
+        "ARQ-11",
+        "DUP-02",
+        "COD-01",
+        "COD-04",
+        "COD-05",
+        "SEG-07",
+        "TST-01",
+        "TST-05",
+        "FLX-01",
+        "FLX-02"
+      ],
+      "skills_used": [],
+      "attempts": 1
+    },
+    {
+      "task_id": "feat-101-01-lp-e-wiki-na-edicao-com-validade",
+      "title": "feat-101-01 — LP e wiki na Edição Missões, com vigência e retorno automático",
+      "spec_path": "sdd/discovery/101-tema-missoes-v5/features/feat-101-01-lp-e-wiki-na-edicao-com-validade.md",
+      "status": "queued",
+      "depends_on": [
+        "fix-101-01",
+        "(nomes",
+        "do",
+        "design",
+        "system",
+        "missoes.json`)"
+      ],
+      "rules": [
+        "ARQ-11",
+        "DUP-02",
+        "COD-01",
+        "COD-04",
+        "COD-05",
+        "SEG-01",
+        "SEG-07",
+        "TST-01",
+        "TST-05",
+        "FLX-01",
+        "FLX-02"
+      ],
+      "skills_used": [],
+      "attempts": 0
+    },
+    {
+      "task_id": "feat-101-02-agentes-rebeldes-nas-missoes",
+      "title": "feat-101-02 — Agentes rebeldes nas 5 missões",
+      "spec_path": "sdd/discovery/101-tema-missoes-v5/features/feat-101-02-agentes-rebeldes-nas-missoes.md",
+      "status": "queued",
+      "depends_on": [
+        "feat-101-01",
+        "(camada",
+        "da",
+        "edição",
+        "porteiro",
+        "de",
+        "vigência)"
+      ],
+      "rules": [
+        "ARQ-11",
+        "DUP-01",
+        "DUP-02",
+        "COD-01",
+        "COD-04",
+        "COD-05",
+        "SEG-07",
+        "TST-01",
+        "TST-05",
+        "FLX-01",
+        "FLX-02"
+      ],
+      "skills_used": [],
+      "attempts": 0
+    },
+    {
+      "task_id": "feat-101-03-retorno-agendado-da-edicao",
+      "title": "feat-101-03 — Retorno agendado: o PR que encerra a edição",
+      "spec_path": "sdd/discovery/101-tema-missoes-v5/features/feat-101-03-retorno-agendado-da-edicao.md",
+      "status": "queued",
+      "depends_on": [
+        "fix-101-01",
+        "(marcadores",
+        "nos",
+        "READMEs)",
+        "feat-101-01",
+        "(camada",
+        "data",
+        "de",
+        "fim)"
+      ],
+      "rules": [
+        "ARQ-11",
+        "DUP-02",
+        "COD-01",
+        "COD-04",
+        "COD-05",
+        "SEG-01",
+        "SEG-04",
+        "SEG-07",
+        "TST-01",
+        "TST-05",
+        "FLX-01",
+        "FLX-02"
+      ],
+      "skills_used": [],
+      "attempts": 0
+    }
+  ]
+}

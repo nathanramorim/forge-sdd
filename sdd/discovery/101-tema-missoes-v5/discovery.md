@@ -40,5 +40,11 @@ Contexto: o PR #113 publicou no README um banner e um design system "GTA VI", me
 8. **Agentes rebeldes nas fases.** Os mascotes dos agentes aparecem como rebeldes, com arminhas e porrete de brinquedo, nos cartões das estações, sem perder qualidade (`feat-101-02`). São personagens do próprio forge-sdd.
 9. **O site entra agora**, como a segunda etapa prevista na decisão 2.
 
+## Gate 1 das tasks (Nathan, 19/11/2026: "só vai")
+Aprovadas `fix-101-01`, `feat-101-01`, `feat-101-02` e `feat-101-03`, nessa ordem. Os três pontos em aberto ficaram como propostos:
+- O Líder (cartão 01 da LP) fica com a "Missão 5: missão cumprida".
+- "Purrete" é porrete: Planejador e Governança com porrete, os outros três com arminha.
+- O workflow de encerramento tenta abrir o PR e, se o repositório recusar, abre uma issue com o link. Não depende de mudar a configuração do Actions.
+
 ## Dono
 Departamento de TI da Busize (modelo Hub Enterprise) para o produto; Marketing para as peças de divulgação.
