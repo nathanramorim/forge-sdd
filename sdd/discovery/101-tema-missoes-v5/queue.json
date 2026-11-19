@@ -2,7 +2,7 @@
   "feature_id": "feat-101",
   "branch": "feat/101-tema-missoes-v5",
   "spec_status": "reviewed",
-  "updated_at": "2026-11-19T23:34:36Z",
+  "updated_at": "2026-11-19T23:38:24Z",
   "items": [
     {
       "task_id": "fix-101-01-alinhar-readme-e-design-system",
@@ -62,7 +62,7 @@
       "task_id": "feat-101-02-agentes-rebeldes-nas-missoes",
       "title": "feat-101-02 — Agentes rebeldes nas 5 missões",
       "spec_path": "sdd/discovery/101-tema-missoes-v5/features/feat-101-02-agentes-rebeldes-nas-missoes.md",
-      "status": "review_pending",
+      "status": "approved",
       "depends_on": [
         "feat-101-01-lp-e-wiki-na-edicao-com-validade"
       ],
@@ -80,7 +80,12 @@
         "FLX-02"
       ],
       "skills_used": [],
-      "attempts": 1
+      "attempts": 1,
+      "governance_verdict": {
+        "veredito": "conforme",
+        "achados": [],
+        "resumo": "A task feat-101-02-agentes-rebeldes-nas-missoes (branch feat/101-tema-missoes-v5, commit f83d3fd) está conforme na Camada A e na Camada B. Todos os 6 critérios executáveis da spec, go test -count=1 ./..., go vet ./... e forge gate --mode bloqueio passaram com saída 0. O arquivo docs/edicao/edicao-mascotes.js expõe window.forgeEdicao.acessoriosPorMarca com as 5 marcas (ring, diamond, bar, wave, tri) conforme a tabela da spec, carrega sem Three.js, não cria WebGLRenderer, não referencia arquivos externos ou URLs, usa geometrias \u003e= 16 segmentos e cores exatas de docs/design/edicao-missoes/tokens.css; docs/index.html mantém uma única function createForgeMascot3D com apenas a carga do script no \u003chead\u003e e uma linha entre marcadores edicao:inicio/edicao:fim, permanecendo byte-a-byte idêntico a git merge-base HEAD origin/main (58d96db) fora dos marcadores. S-01 a S-07 e FLX-08 sem violações."
+      }
     },
     {
       "task_id": "feat-101-03-retorno-agendado-da-edicao",
