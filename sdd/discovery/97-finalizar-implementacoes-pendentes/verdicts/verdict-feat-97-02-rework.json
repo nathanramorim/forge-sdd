@@ -1,0 +1,60 @@
+{
+  "task_id": "feat-97-02",
+  "pr": 103,
+  "tentativa": 2,
+  "head_sha": "657a7b74f207b70dc30701373d4d04363c616c2c",
+  "veredito": "duvida",
+  "achados": [
+    {
+      "verificacao": "DUP-01",
+      "regra": "DUP-01",
+      "regra_descricao": "Um conceito, uma casa: cada conceito central tem um único pacote dono em sdd/spec/concepts.md.",
+      "classificacao": "conforme",
+      "severidade": null,
+      "arquivo": "internal/pipeline/worktree_gc.go",
+      "linha": null,
+      "evidencia": "gcNormalizeTaskID removida do worktree_gc.go (commit bcae0eb). queue.go:684-685: // NormalizeTaskID é a regra única de ID de task [...] func NormalizeTaskID(id string) string { ... }. gcMatchesTask usa queue.NormalizeTaskID. taskstatus.go:18: itemID, id = NormalizeTaskID(itemID), NormalizeTaskID(id). Todos os callers atualizados consistentemente.",
+      "explicacao": "A duplicação gcNormalizeTaskID/normalizeTaskID foi eliminada. normalizeTaskID foi exportada como NormalizeTaskID em internal/queue/queue.go e todos os callers em queue.go, taskstatus.go e worktree_gc.go passaram a usar a função exportada. Uma única fonte de verdade para normalização de IDs.",
+      "correcao": null
+    },
+    {
+      "verificacao": "TST-01",
+      "regra": "TST-01",
+      "regra_descricao": "Toda feature ou fix tem critério executável com go build ou go test (Regra 6).",
+      "classificacao": "conforme",
+      "severidade": null,
+      "arquivo": "internal/pipeline/worktree_gc_test.go",
+      "linha": null,
+      "evidencia": "TestWorktreeGC_JobEmExecucao (linha ~65): enfileira job, claims (StateProcessing), asserta Safe=false e Reason='job em execução'. TestWorktreeGC_TaskAprovada (linha ~100): enfileira job, complete (StateDone), cria queue.json com StatusApproved, asserta Safe=true e TaskStatus=StatusApproved. Ambos passam: go test ./internal/pipeline/... -run TestWorktreeGC → 6/6 PASS.",
+      "explicacao": "Os dois testes faltantes na tentativa 1 foram adicionados com cobertura completa das ramificações centrais do algoritmo. TestWorktreeGC_JobEmExecucao exercita StateProcessing→Safe=false e TestWorktreeGC_TaskAprovada exercita StateDone+StatusApproved→Safe=true. Os testes usam bus.Enqueue/Claim/Complete reais, garantindo integração com o barramento.",
+      "correcao": null
+    },
+    {
+      "verificacao": "S-01",
+      "regra": null,
+      "regra_descricao": null,
+      "classificacao": "conforme",
+      "severidade": null,
+      "arquivo": "cmd/forge-sdd/worker.go",
+      "linha": 278,
+      "evidencia": "worker.go:238: var gcAskConfirm = func(text string) (bool, error) { return survey.ConfirmYesNo(text, false) }. worker.go:278: ok, err := gcAskConfirm(fmt.Sprintf(\"Remover %d worktree(s)?\", len(safe))). import: \"github.com/forge-sdd/cli/internal/survey\". survey.ConfirmYesNo em internal/survey/select.go:48.",
+      "explicacao": "A confirmação antes de SweepWorktrees (sem --dry-run) foi implementada corretamente. Usa internal/survey.ConfirmYesNo (não huh diretamente, respeitando ARQ-01). O padrão gcAskConfirm permite substituição em testes.",
+      "correcao": null
+    },
+    {
+      "verificacao": "S-01",
+      "regra": "ARQ-01",
+      "regra_descricao": "cmd/ só adapta a CLI (flags); regras e domínio ficam em internal/, que nunca importa cmd/.",
+      "classificacao": "duvida",
+      "severidade": "baixa",
+      "arquivo": "cmd/forge-sdd/up.go",
+      "linha": 148,
+      "evidencia": "Spec §4: 'Exibe lista formatada e oferece seleção com survey.MultiSelect / Chama SweepWorktrees com os selecionados'. Implementação (up.go:148-174): exibe lista e imprime '→ rode forge pipeline worktree gc para limpar.' sem chamar survey.MultiSelect nem SweepWorktrees. Comentário no código: 'Silencioso em ambientes não interativos; a remoção real é feita via forge pipeline worktree gc.'",
+      "explicacao": "checkStaleWorktrees em up.go é intencionalmente informativa (sem remoção inline), delegando a remoção ao subcomando gc. O design é razoável mas desvia da spec §4 que especifica MultiSelect. A spec não foi atualizada para refletir a decisão. Achado inalterado da tentativa 1; não estava no escopo do rework.",
+      "correcao": "Confirmar com o autor: se informativo é deliberado, atualizar spec §4 para refletir o design simplificado (apenas notificar, sem MultiSelect/SweepWorktrees inline em forge up). Se MultiSelect é requisito, implementá-lo."
+    }
+  ],
+  "candidate_skill": null,
+  "resumo": "Tentativa 2 (SHA 657a7b7). Os dois achados bloqueantes da tentativa 1 foram corrigidos: DUP-01 (gcNormalizeTaskID removida, NormalizeTaskID exportada em queue.go, callers atualizados em queue.go e taskstatus.go) e TST-01 (TestWorktreeGC_JobEmExecucao e TestWorktreeGC_TaskAprovada adicionados e passando). A confirmação antes de SweepWorktrees também foi implementada via internal/survey.ConfirmYesNo (duvida anterior resolvida). Permanece uma duvida de baixa severidade: checkStaleWorktrees em up.go é informativa sem MultiSelect/SweepWorktrees, desviando da spec §4, porém o comentário do código indica decisão deliberada e a remoção real está no subcomando gc. go build ./..., go test ./internal/pipeline/... -run TestWorktreeGC (6/6 PASS) e go test ./internal/queue/... passam. forge bus review não foi executado: job ID não fornecido no prompt.",
+  "revisado_em": "2026-11-19T09:57:15Z"
+}

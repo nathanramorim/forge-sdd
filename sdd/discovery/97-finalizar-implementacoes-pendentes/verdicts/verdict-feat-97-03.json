@@ -1,0 +1,9 @@
+{
+  "task_id": "feat-97-03",
+  "pr": 102,
+  "veredito": "conforme",
+  "achados": [],
+  "candidate_skill": null,
+  "resumo": "PR #102 (já mergeado) adiciona o bloco 'Visualizar artefatos (antes do Gate 1)' nos 4 arquivos de skill vivos e nos 4 .tmpl correspondentes, acrescenta a seção '## Visualização pós-spec' em sdd/memory/clarify.md e em seu .tmpl, e regenera os 5 goldens afetados. Nenhum arquivo .go foi alterado. Todos os critérios de aceitação da spec e as regras ARQ-01, ARQ-03, ARQ-04, ARQ-06, DUP-06 e TST-02 estão atendidos.",
+  "revisado_em": "2026-11-19T06:20:04Z"
+}
