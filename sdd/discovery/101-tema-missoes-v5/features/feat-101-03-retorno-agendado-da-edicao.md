@@ -138,3 +138,7 @@ go test ./... && go vet ./...
 - Disparo manual do workflow antes da data: termina sem alterar nada.
 - Ensaio em um fork ou com a data adiantada em uma branch de teste: o PR abre com o resultado dos critérios 1 a 4.
 - O corpo do PR explica o que sai, o que fica e que o arquivo do workflow pode ser apagado à mão.
+
+## Status
+
+- [x] Implementado em `feat-101-03` (19/11/2026): critérios 1 a 7 (incluindo ensaio em worktree temporário descartável e idempotência), validação YAML/bash do workflow, `go test ./...`, `go vet ./...` e `forge gate --mode bloqueio` aprovados.

@@ -2,7 +2,7 @@
   "feature_id": "feat-101",
   "branch": "feat/101-tema-missoes-v5",
   "spec_status": "reviewed",
-  "updated_at": "2026-11-19T23:38:24Z",
+  "updated_at": "2026-11-19T23:43:20Z",
   "items": [
     {
       "task_id": "fix-101-01-alinhar-readme-e-design-system",
@@ -91,7 +91,7 @@
       "task_id": "feat-101-03-retorno-agendado-da-edicao",
       "title": "feat-101-03 — Retorno agendado: o PR que encerra a edição",
       "spec_path": "sdd/discovery/101-tema-missoes-v5/features/feat-101-03-retorno-agendado-da-edicao.md",
-      "status": "queued",
+      "status": "review_pending",
       "depends_on": [
         "fix-101-01-alinhar-readme-e-design-system",
         "feat-101-01-lp-e-wiki-na-edicao-com-validade"
@@ -111,7 +111,7 @@
         "FLX-02"
       ],
       "skills_used": [],
-      "attempts": 0
+      "attempts": 1
     }
   ]
 }
