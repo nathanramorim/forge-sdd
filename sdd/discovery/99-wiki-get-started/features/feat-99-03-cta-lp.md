@@ -35,6 +35,10 @@ Nenhuma. Depende de feat-99-01 estar publicada.
 - **COD-01:** só o arquivo da LP é alterado; sem efeito colateral.
 - **DUP-02:** tabela "O que já existe" preenchida.
 
+## Status
+
+- [x] Implementado em feat-99-03
+
 ## Critérios de Aceitação Executáveis
 
 ```bash
