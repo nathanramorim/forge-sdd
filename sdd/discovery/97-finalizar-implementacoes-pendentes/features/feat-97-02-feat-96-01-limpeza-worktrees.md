@@ -66,22 +66,25 @@ func SweepWorktrees(dir string, targets []StaleWorktree) []error
 
 ### 4. `cmd/forge-sdd/up.go` — hook `checkStaleWorktrees`
 
-Ao iniciar, antes do menu de sessões:
+Ao iniciar, antes do menu de sessões, `checkStaleWorktrees` apenas **informa** o usuário sobre worktrees ociosos encontrados, sem remover nem perguntar. A remoção real fica em `forge pipeline worktree gc` (§5), separando preocupações (ARQ-01).
+
 ```go
 func checkStaleWorktrees(dir string, out io.Writer) {
     if !isInteractive() { return }
     stale, err := pipeline.ListStaleWorktrees(dir)
     if err != nil || len(stale) == 0 { return }
-    safeOnes := filter(stale, func(w) bool { return w.Safe })
-    if len(safeOnes) == 0 { return }
-    // Exibe lista formatada e oferece seleção com survey.MultiSelect
-    // Chama SweepWorktrees com os selecionados
+    var safe []pipeline.StaleWorktree
+    for _, w := range stale { if w.Safe { safe = append(safe, w) } }
+    if len(safe) == 0 { return }
+    fmt.Fprintf(out, "\n%d worktree(s) ocioso(s) encontrado(s):\n", len(safe))
+    for _, w := range safe {
+        fmt.Fprintf(out, "  %s/%s — %s\n", w.JobID, w.TaskID, w.Reason)
+    }
+    fmt.Fprintln(out, "  → rode `forge pipeline worktree gc` para limpar.")
 }
 ```
 
-A mesma função `checkStaleWorktrees` é adicionada ao início de `cmd/forge-sdd/worker.go` (forge worker) e `cmd/forge-sdd/inbox.go` (forge inbox) — antes de qualquer ação principal.
-
-Usar `internal/survey` para MultiSelect (nunca `huh` diretamente em `cmd/`; `ARQ-01`).
+A mesma função é adicionada ao início de `cmd/forge-sdd/worker.go` (forge worker) e `cmd/forge-sdd/inbox.go` (forge inbox) — antes de qualquer ação principal.
 
 ### 5. `cmd/forge-sdd/worker.go` — subcomando `forge pipeline worktree gc`
 
