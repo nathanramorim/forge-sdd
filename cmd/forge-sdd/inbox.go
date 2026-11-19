@@ -27,6 +27,10 @@ não repetir a mesma mensagem a cada prompt); sem notificações não imprime na
 		markAll, _ := cmd.Flags().GetBool("mark-all")
 		archive, _ := cmd.Flags().GetBool("archive")
 
+		if !hook {
+			checkStaleWorktrees(dir, out)
+		}
+
 		if markID != "" {
 			if err := notify.MarkRead(dir, markID); err != nil {
 				return err

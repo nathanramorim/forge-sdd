@@ -16,6 +16,7 @@ import (
 	"github.com/forge-sdd/cli/internal/monitor"
 	"github.com/forge-sdd/cli/internal/pipeline"
 	"github.com/forge-sdd/cli/internal/queue"
+	"github.com/forge-sdd/cli/internal/survey"
 	"github.com/spf13/cobra"
 )
 
@@ -34,6 +35,7 @@ Reviewer: exige que o agente aplique o veredito (forge bus review).`,
 		if dir == "" {
 			dir = "."
 		}
+		checkStaleWorktrees(dir, cmd.OutOrStdout())
 		role, _ := cmd.Flags().GetString("role")
 		name, _ := cmd.Flags().GetString("name")
 		once, _ := cmd.Flags().GetBool("once")
@@ -230,6 +232,68 @@ func init() {
 	_ = pipelineWorktreeCmd.MarkFlagRequired("task")
 	pipelineWorktreeCmd.Flags().String("base", "", "Ref base (padrão HEAD)")
 	pipelineCmd.AddCommand(pipelineWorktreeCmd)
+}
+
+// gcAskConfirm pede confirmação antes de remover worktrees; pode ser substituído em testes.
+var gcAskConfirm = func(text string) (bool, error) { return survey.ConfirmYesNo(text, false) }
+
+var pipelineWorktreeGcCmd = &cobra.Command{
+	Use:   "gc",
+	Short: "Lista e remove worktrees ociosos (jobs concluídos/aprovados ou orphans)",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		dir, _ := cmd.Flags().GetString("dir")
+		dry, _ := cmd.Flags().GetBool("dry-run")
+		out := cmd.OutOrStdout()
+
+		stale, err := pipeline.ListStaleWorktrees(dir)
+		if err != nil {
+			return err
+		}
+		if len(stale) == 0 {
+			fmt.Fprintln(out, "nenhum worktree ocioso encontrado.")
+			return nil
+		}
+
+		fmt.Fprintf(out, "%d worktree(s) encontrado(s):\n", len(stale))
+		var safe []pipeline.StaleWorktree
+		for _, w := range stale {
+			status := "protegido"
+			if w.Safe {
+				status = "pode remover"
+				safe = append(safe, w)
+			}
+			fmt.Fprintf(out, "  [%s] %s/%s — %s\n", status, w.JobID, w.TaskID, w.Reason)
+		}
+
+		if len(safe) == 0 {
+			fmt.Fprintln(out, "nenhum worktree seguro para remover.")
+			return nil
+		}
+
+		if dry {
+			fmt.Fprintf(out, "[dry-run] removeria %d worktree(s).\n", len(safe))
+			return nil
+		}
+
+		ok, err := gcAskConfirm(fmt.Sprintf("Remover %d worktree(s)?", len(safe)))
+		if err != nil || !ok {
+			fmt.Fprintln(out, "cancelado.")
+			return nil
+		}
+
+		errs := pipeline.SweepWorktrees(dir, safe)
+		fmt.Fprintf(out, "%d worktree(s) removido(s).\n", len(safe)-len(errs))
+		for _, e := range errs {
+			fmt.Fprintf(out, "  erro: %s\n", e)
+		}
+		return nil
+	},
+}
+
+func init() {
+	pipelineWorktreeGcCmd.Flags().String("dir", ".", "Diretório alvo")
+	pipelineWorktreeGcCmd.Flags().Bool("dry-run", false, "Lista sem remover")
+	pipelineWorktreeCmd.AddCommand(pipelineWorktreeGcCmd)
 }
 
 var pipelinePRCmd = &cobra.Command{

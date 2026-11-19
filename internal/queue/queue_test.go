@@ -324,3 +324,13 @@ func TestDependeDe_FilaAntigaComLixoLiberaATask(t *testing.T) {
 	require.Len(t, got, 1)
 	assert.Equal(t, []string{"nenhuma", "(usa", "—"}, q.Items[0].DependsOn, "a leitura não edita a fila")
 }
+
+func TestLoadForInitiative_NaoExiste(t *testing.T) {
+	dir := t.TempDir()
+
+	q, err := LoadForInitiative(dir, "97-teste")
+
+	require.NoError(t, err)
+	require.NotNil(t, q)
+	assert.Empty(t, q.Items)
+}

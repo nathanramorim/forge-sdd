@@ -15,7 +15,7 @@ import (
 // matchesTask casa o ID de uma task do job com o da fila ignorando o prefixo "feat-" (o job grava
 // "88-01"; a fila, "feat-88-01-<nome>"): id exato ou prefixo "<id>-". Nunca casa "88-1" com "88-10".
 func matchesTask(itemID, id string) bool {
-	itemID, id = normalizeTaskID(itemID), normalizeTaskID(id)
+	itemID, id = NormalizeTaskID(itemID), NormalizeTaskID(id)
 	if id == "" {
 		return false
 	}

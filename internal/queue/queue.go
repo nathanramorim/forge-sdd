@@ -345,7 +345,7 @@ func ParseDependsOn(content string) []string {
 func cleanDependsOn(deps []string) []string {
 	var out []string
 	for _, d := range deps {
-		if id := normalizeTaskID(d); cleanDepRe.MatchString(id) && !junkDeps[strings.ToLower(id)] {
+		if id := NormalizeTaskID(d); cleanDepRe.MatchString(id) && !junkDeps[strings.ToLower(id)] {
 			out = append(out, d)
 		}
 	}
@@ -361,7 +361,7 @@ func EligibleTasks(q *Queue, max int) ([]QueueItem, error) {
 		return []QueueItem{}, nil
 	}
 
-	normalizeID := normalizeTaskID
+	normalizeID := NormalizeTaskID
 
 	// 1. Mapeamento de itens por ID normalizado
 	itemMap := make(map[string]QueueItem)
@@ -681,7 +681,23 @@ func FormatExecutivePanel(q *Queue) string {
 	return b.String()
 }
 
-// normalizeTaskID é a regra única de ID de task: sem espaços nas pontas e sem o prefixo "feat-".
-func normalizeTaskID(id string) string {
+// NormalizeTaskID é a regra única de ID de task: sem espaços nas pontas e sem o prefixo "feat-".
+func NormalizeTaskID(id string) string {
 	return strings.TrimSpace(strings.TrimPrefix(strings.TrimSpace(id), "feat-"))
+}
+
+// LoadForInitiative lê a fila de uma iniciativa específica pelo ID, sem depender da branch ativa.
+// Retorna fila vazia (não erro) quando queue.json não existe.
+func LoadForInitiative(dir, initiative string) (*Queue, error) {
+	q, err := LoadInitiative(dir, initiative)
+	if err != nil {
+		return nil, err
+	}
+	if q == nil {
+		return &Queue{Items: []QueueItem{}}, nil
+	}
+	if q.Items == nil {
+		q.Items = []QueueItem{}
+	}
+	return q, nil
 }
