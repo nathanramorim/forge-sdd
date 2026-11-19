@@ -47,6 +47,10 @@ Nenhuma. CDN de fontes já usada na LP (Google Fonts: JetBrains Mono + Montserra
 - **COD-01:** responsabilidade única — wiki.html tem apenas conteúdo Get Started; wiki.css tem apenas estilos da wiki.
 - **DUP-02:** tabela "O que já existe" preenchida.
 
+## Status
+
+- [x] Implementado em feat-99-01
+
 ## Critérios de Aceitação Executáveis
 
 ```bash

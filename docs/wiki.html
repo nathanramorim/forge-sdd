@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wiki — Forge-SDD</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="wiki.css">
+</head>
+<body>
+
+<header class="wiki-header">
+  <a href="/" class="wiki-brand">Forge-SDD <span class="wiki-badge">v4.8</span></a>
+  <a href="/" class="wiki-back">&#8592; forge-sdd.org</a>
+</header>
+
+<div class="layout">
+  <aside class="sidebar">
+    <nav class="sidebar-nav">
+      <a href="#get-started" class="sidebar-link" data-pt="Get Started" data-en="Get Started">Get Started</a>
+      <a href="#jornada" class="sidebar-link" data-pt="Jornada" data-en="Journey">Jornada</a>
+      <a href="#exemplos" class="sidebar-link" data-pt="Exemplos" data-en="Examples">Exemplos</a>
+    </nav>
+  </aside>
+
+  <main class="content">
+
+    <section id="get-started">
+      <h2 class="section-title" data-pt="Começando com o Forge-SDD" data-en="Getting Started with Forge-SDD">Começando com o Forge-SDD</h2>
+      <p class="section-lead">O Forge-SDD é um orquestrador de desenvolvimento que conecta você e sua IA num fluxo de trabalho claro: você decide, a IA implementa, você aprova.</p>
+
+      <h3 class="subsection-title">Instalação</h3>
+      <p>Instale o CLI globalmente com npm:</p>
+      <pre class="code-block">npm i -g @nathanramorim/forge-sdd</pre>
+
+      <h3 class="subsection-title">Inicialize no seu projeto</h3>
+      <p>Dentro do seu repositório, rode:</p>
+      <pre class="code-block">forge init</pre>
+      <p>Isso cria a estrutura <code>sdd/</code> com tudo que a IA precisa para trabalhar.</p>
+
+      <div class="ai-prompt">
+        <div class="ai-prompt__header">
+          <span class="ai-prompt__label">Prompt para IA</span>
+          <button class="ai-prompt__copy" onclick="copyPrompt(this)">Copiar</button>
+        </div>
+        <pre class="ai-prompt__code">Instale o forge-sdd neste projeto:
+npm i -g @nathanramorim/forge-sdd
+forge init
+Me diga quando estiver pronto e mostre o que foi criado.</pre>
+      </div>
+
+      <h3 class="subsection-title">Primeira feature</h3>
+      <p>Com o forge-sdd instalado, você pode pedir à sua IA para criar a primeira feature:</p>
+
+      <div class="ai-prompt">
+        <div class="ai-prompt__header">
+          <span class="ai-prompt__label">Prompt para IA</span>
+          <button class="ai-prompt__copy" onclick="copyPrompt(this)">Copiar</button>
+        </div>
+        <pre class="ai-prompt__code">Vamos criar nossa primeira feature com o forge-sdd.
+Execute: /discovery adicionar comando forge greet que imprime "Olá, mundo!"
+Aguarde minha aprovação antes de implementar.</pre>
+      </div>
+    </section>
+
+    <section id="jornada">
+      <h2 class="section-title" data-pt="Jornada ideal" data-en="Ideal Journey">Jornada ideal</h2>
+      <p class="section-lead">O Forge-SDD organiza o trabalho em três papéis simples. Você não precisa saber programar — só precisa tomar decisões.</p>
+
+      <div class="steps">
+        <div class="step">
+          <div class="step-number">1</div>
+          <div class="step-body">
+            <h3 class="step-title">Discovery</h3>
+            <p class="step-desc">Você descreve o que quer. A IA analisa o projeto, levanta riscos e monta um plano detalhado. Você lê e decide se faz sentido.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-number">2</div>
+          <div class="step-body">
+            <h3 class="step-title">Builder implementa</h3>
+            <p class="step-desc">Depois da sua aprovação, a IA segue exatamente o plano: escreve o código, cria os testes e abre um PR pronto para revisar.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-number">3</div>
+          <div class="step-body">
+            <h3 class="step-title">Você aprova</h3>
+            <p class="step-desc">O PR chega sem surpresas. Você revisa o diff, aprova e faz o merge. Se não estiver bom, a IA corrige até ficar.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="exemplos">
+      <h2 class="section-title" data-pt="Exemplos práticos" data-en="Practical Examples">Exemplos práticos</h2>
+      <p class="section-lead">Veja como adicionar uma feature real do início ao fim.</p>
+
+      <h3 class="subsection-title">Adicionar comando <code>forge greet</code></h3>
+      <p>Neste exemplo, vamos adicionar um comando que imprime "Olá, mundo!" no terminal.</p>
+
+      <ol class="example-steps">
+        <li>
+          <strong>Inicie o discovery.</strong>
+          <p>Mande o prompt abaixo para sua IA:</p>
+          <div class="ai-prompt">
+            <div class="ai-prompt__header">
+              <span class="ai-prompt__label">Prompt para IA</span>
+              <button class="ai-prompt__copy" onclick="copyPrompt(this)">Copiar</button>
+            </div>
+            <pre class="ai-prompt__code">Inicie o discovery para: adicionar comando forge greet
+Execute /discovery e me mostre o plano antes de implementar.</pre>
+          </div>
+        </li>
+        <li>
+          <strong>Aprove o plano.</strong>
+          <p>A IA vai mostrar o que pretende criar. Se estiver certo, diga "aprovado" ou "pode implementar".</p>
+        </li>
+        <li>
+          <strong>Revise o PR no GitHub.</strong>
+          <p>Quando a IA terminar, ela abre um PR com o código. Você revisa o diff e faz o merge.</p>
+        </li>
+      </ol>
+    </section>
+
+  </main>
+</div>
+
+<script>
+function copyPrompt(btn) {
+  const code = btn.closest('.ai-prompt').querySelector('.ai-prompt__code').textContent;
+  navigator.clipboard.writeText(code).catch(() => {
+    const ta = document.createElement('textarea');
+    ta.value = code;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+  });
+  btn.textContent = 'Copiado!';
+  setTimeout(() => { btn.textContent = 'Copiar'; }, 2000);
+}
+
+// i18n mínimo
+(function() {
+  const lang = navigator.language || 'pt-BR';
+  const isEn = lang.startsWith('en');
+  if (isEn) {
+    document.querySelectorAll('[data-en]').forEach(el => {
+      el.textContent = el.getAttribute('data-en');
+    });
+  }
+})();
+</script>
+
+</body>
+</html>
