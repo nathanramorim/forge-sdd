@@ -5,3 +5,5 @@
 3. As 5 estações aparecem como missões com o mesmo texto em README, site e posts (fonte única).
 4. O número da versão continua 5.0.0; nenhuma tag nova é criada por causa do tema.
 5. Banner e og-image passam no verificador de README do readme-studio e funcionam em tema claro e escuro do GitHub.
+6. A edição termina em 23/11/2026, 0h de Brasília: o site volta sozinho ao layout anterior, a data fica em um único parâmetro e o README volta por PR agendado.
+7. Os agentes rebeldes são os mascotes do próprio forge-sdd, com arminhas e porrete de brinquedo, e mantêm a qualidade dos mascotes atuais.

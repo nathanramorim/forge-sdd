@@ -32,5 +32,13 @@ Mudar o nome do produto, criar logo novo do Forge SDD, usar qualquer áudio, ima
 3. O tema vale como **edição de lançamento da série 5.0.x**; depois do lançamento, decidir se vira a identidade da série 5.x.
 4. Enviar a decisão ao repositório como PR em rascunho.
 
+## Segunda rodada de decisões (Nathan, 19/11/2026)
+Contexto: o PR #113 publicou no README um banner e um design system "GTA VI", medidos no conceito de interface de Matías Rodríguez (Behance, galeria 224512205), sem conhecer esta discovery.
+5. **A identidade segue esta discovery.** Do design system ficam a paleta do pôr do sol, o neon e as molduras. O nome é "Edição Missões", sem "GTA VI" escrito, sem letreiro parecido e com o "5" como destaque próprio. O que o #113 publicou fora disso é corrigido no `fix-101-01`.
+6. **O tema é temporário.** Vale até segunda-feira, 23/11/2026, 0h de Brasília. A data fica em um parâmetro único e o site volta sozinho ao layout anterior (`feat-101-01`). Isso responde à dúvida 3 e substitui a decisão 3.
+7. **O README volta por PR agendado**, aberto por workflow na virada e mesclado pelo Nathan, sem commit automático no `main` (`feat-101-03`).
+8. **Agentes rebeldes nas fases.** Os mascotes dos agentes aparecem como rebeldes, com arminhas e porrete de brinquedo, nos cartões das estações, sem perder qualidade (`feat-101-02`). São personagens do próprio forge-sdd.
+9. **O site entra agora**, como a segunda etapa prevista na decisão 2.
+
 ## Dono
 Departamento de TI da Busize (modelo Hub Enterprise) para o produto; Marketing para as peças de divulgação.
