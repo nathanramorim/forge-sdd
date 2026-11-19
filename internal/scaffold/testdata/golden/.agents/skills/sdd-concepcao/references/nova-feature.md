@@ -8,6 +8,17 @@
 4. **ID:** `forge next-id`.
 5. **Local:** dentro de uma iniciativa existente, `sdd/discovery/<id>-<nome>/features/feat-<id>-<nn>-<nome>.md`. Sem discovery, crie uma iniciativa enxuta `sdd/discovery/<id>-<nome>/` com `status.md` e `features/`.
 6. **Conteúdo:** as seis seções obrigatórias da skill `sdd-concepcao` (incluindo `## Decisões do projeto aplicadas`).
+
+**Visualizar artefatos (antes do Gate 1)**
+
+Use AskUserQuestion com as opções:
+- "Abrir pasta no Finder" → `open sdd/discovery/<id>-<nome>/`
+- "Abrir no VS Code" → verifique `command -v code && code sdd/discovery/<id>-<nome>/` (fallback: Finder se VS Code ausente)
+- "Ver lista dos arquivos" → liste os arquivos em `sdd/discovery/<id>-<nome>/`
+- "Pular"
+
+Execute a ação escolhida. Consulte `sdd/memory/clarify.md` → seção "Visualização pós-spec" para comportamento detalhado (macOS-only, fallbacks).
+
 7. **Gate e fila:** submeta ao Líder (`FLX-01`); aprovada, enfileire com `forge queue enqueue`.
 8. **Telemetria:** `forge session record --feature "<arquivo criado>" --outcome blocked --criterio-atendido=false` (ainda não implementada).
 

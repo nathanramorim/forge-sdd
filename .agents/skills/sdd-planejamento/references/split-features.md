@@ -9,6 +9,17 @@
 5. **Branch única (Regra 15):** `git branch --list feat/<id>-*`; pergunte a branch de partida (padrão `main`) e se retoma branch existente; `git checkout -b feat/<id>-<nome>` antes de criar as specs.
 6. **Tasks:** crie `sdd/discovery/<id>-<nome>/features/feat-<id>-<nn>-<nome>.md` com `Modelo do módulo`, `Decisões do projeto aplicadas`, `O que já existe`, `Dependências novas`, `Rules e IDs da Constituição Aplicáveis` e `Critérios de Aceitação Executáveis`.
 7. **Estado:** atualize `status.md` da iniciativa; não escreva índice nem progresso globais.
+
+**Visualizar artefatos (antes do Gate 1)**
+
+Use AskUserQuestion com as opções:
+- "Abrir pasta no Finder" → `open sdd/discovery/<id>-<nome>/`
+- "Abrir no VS Code" → verifique `command -v code && code sdd/discovery/<id>-<nome>/` (fallback: Finder se VS Code ausente)
+- "Ver lista dos arquivos" → liste os arquivos em `sdd/discovery/<id>-<nome>/`
+- "Pular"
+
+Execute a ação escolhida. Consulte `sdd/memory/clarify.md` → seção "Visualização pós-spec" para comportamento detalhado (macOS-only, fallbacks).
+
 8. **Fila:** com a confirmação do humano, `forge queue enqueue --task <spec> --task-id <id> --rules <IDs>` para cada task, na ordem de dependência.
 9. **Pipeline (existe `.forge/config/forge.json`):** depois da confirmação humana que enfileirou as tasks, rode `forge dispatch <iniciativa>` (gate e job para o Builder), informe "entregue ao Builder" e **pare**: o Builder e o Reviewer rodam nas outras sessões. Esta sessão não implementa, não edita `forge.json`, `card-evidence.json` nem o código da feature; pendência do gate vai para a pessoa. Com `pm_mcp.require_existing_card: false` o despacho não pede card.
 10. **Telemetria:** `forge session record --feature "sdd/discovery/<id>-<nome>/features/" --outcome approved --criterio-atendido=true`.
