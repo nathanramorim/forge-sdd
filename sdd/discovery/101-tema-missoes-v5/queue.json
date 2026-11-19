@@ -2,13 +2,13 @@
   "feature_id": "feat-101",
   "branch": "feat/101-tema-missoes-v5",
   "spec_status": "reviewed",
-  "updated_at": "2026-11-19T21:59:57Z",
+  "updated_at": "2026-11-19T22:58:31Z",
   "items": [
     {
       "task_id": "fix-101-01-alinhar-readme-e-design-system",
       "title": "fix-101-01 — Alinhar README, banner e design system à Edição Missões",
       "spec_path": "sdd/discovery/101-tema-missoes-v5/fixes/fix-101-01-alinhar-readme-e-design-system.md",
-      "status": "review_pending",
+      "status": "approved",
       "rules": [
         "ARQ-11",
         "DUP-02",
@@ -22,7 +22,12 @@
         "FLX-02"
       ],
       "skills_used": [],
-      "attempts": 1
+      "attempts": 1,
+      "governance_verdict": {
+        "veredito": "conforme",
+        "achados": [],
+        "resumo": "A task fix-101-01-alinhar-readme-e-design-system está conforme na Camada A (critérios 1 a 9 da spec, go test -count=1 ./..., go vet ./... e forge gate --mode bloqueio com saída 0) e na Camada B (S-01 a S-07 e FLX-08 sem violações). O diff completo (3f253e0..HEAD) e o commit 1b63fe8 removeram os três itens fora da spec (Voltar/Selecionar, Navegação lateral com AJUSTES e seletores com seta), ajustaram o link do Behance sem slug do jogo, atualizaram o comentário de tokens.css citando documento.py, corrigiram os depends_on de queue.json com os task_id reais e alinharam revisao-pi.md ao espécime final."
+      }
     },
     {
       "task_id": "feat-101-01-lp-e-wiki-na-edicao-com-validade",
