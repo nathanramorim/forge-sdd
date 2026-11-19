@@ -111,7 +111,7 @@ func SweepWorktrees(dir string, targets []StaleWorktree) []error
 4. Busca o job:
    - `bus.Find(dir, layout.RoleBuilder, jobID)` — percorre pending/processing/done/failed.
    - Se `ErrNotFound` para o builder, também tenta `bus.Find(dir, layout.RoleReviewer, jobID)`.
-   - Se não encontrado em nenhum papel → orphan: `Safe=false`, `Reason="job não encontrado no barramento"`.
+   - Se não encontrado em nenhum papel → orphan: `Safe=true`, `Reason="job não encontrado no barramento (orphan)"` — usuário decide remover com aviso visual no prompt.
 5. Se job encontrado em `StateProcessing` (qualquer papel) → `Safe=false`, `Reason="job em execução"`.
 6. Se job encontrado em `StatePending` → `Safe=false`, `Reason="job aguardando execução"`.
 7. Se job encontrado em `StateFailed` → `Safe=false`, `Reason="job falhou; pode ser retentado"`.
@@ -128,13 +128,19 @@ func SweepWorktrees(dir string, targets []StaleWorktree) []error
 antes de remover cada item (workers do `forge up` anterior podem ter reclamado um job enquanto
 o prompt estava aberto). Remove somente se ainda `Safe=true`.
 
-### 3. `cmd/forge-sdd/up.go` — hook pré-launch
+### 3. Hooks nos comandos `forge up`, `forge worker` e `forge inbox`
 
-Antes de `env.LaunchAll(...)`, quando `isInteractive() && !dry`:
+Mesmo padrão nos três pontos de entrada:
+
+| Arquivo | Momento de execução |
+|---|---|
+| `cmd/forge-sdd/up.go` | Antes de `env.LaunchAll(...)` |
+| `cmd/forge-sdd/worker.go` | Antes de iniciar a sessão do worker |
+| `cmd/forge-sdd/inbox.go` | No início de `runInbox`, antes de listar notificações |
 
 ```go
 stale, _ := pipeline.ListStaleWorktrees(abs)
-safe := filterSafe(stale)
+safe := filterSafe(stale) // inclui orphans com Safe=true
 if len(safe) > 0 {
     chosen, err := survey.ChooseWorktreesToClean(safe)
     if err == nil && len(chosen) > 0 {
@@ -145,7 +151,7 @@ if len(safe) > 0 {
 }
 ```
 
-A confirmação não bloqueia `forge up` em caso de recusa ou erro: o pipeline abre normalmente.
+Não bloqueia o comando principal em caso de recusa ou erro.
 Com `--dry-run` ou sem TTY: listar em stdout, sem promover nem remover.
 
 ### 4. `internal/survey/survey.go` — prompt de múltipla escolha
@@ -183,7 +189,7 @@ forge pipeline worktree gc [--dir <dir>] [--dry-run]
 |---|---|
 | `--dry-run` | Lista todos (safe e protegidos), sem remover |
 | Sem TTY / autopilot | Apenas lista safe em stdout, sem prompt, sem remover |
-| Worktree orphan (sem job) | `PROTECTED`, nunca oferecido para remoção |
+| Worktree orphan (sem job) | `SAFE` com aviso no prompt: "job não encontrado — pode ser resíduo de branch excluída" |
 | Job `failed` | `PROTECTED`, nunca oferecido |
 | Task `review_pending` | `PROTECTED`; PR pode retornar como `pr_rework` |
 | Task não encontrada na fila | `PROTECTED` (fail closed) |

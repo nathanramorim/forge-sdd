@@ -11,7 +11,7 @@
 
 <h3 align="center">Seu time de IA, com método.<br>Do plano ao PR, sem repetir instruções.</h3>
 
-<p align="center"><strong>Versão atual: 4.8.0 (estável)</strong> · <a href="sdd/releases/history.md">veja as novidades</a></p>
+<p align="center"><strong>Versão atual: 4.9.1 (estável)</strong> · <a href="sdd/releases/history.md">veja as novidades</a></p>
 
 <p align="center">
   <a href="https://forge-sdd.org">Site oficial</a> ·
@@ -39,6 +39,35 @@ Você usa três sessões de IA ao mesmo tempo:
 | **3. Reviewer** | Confere as regras e as decisões, e devolve com comentários (até 3 vezes). |
 
 Quando o PR está conforme, você é avisado na sessão de Discovery e faz a aprovação final.
+
+```mermaid
+flowchart LR
+    You(["👤 Você\n(Discovery)"])
+
+    subgraph pipeline ["Pipeline forge-sdd"]
+        direction TB
+        up["forge up\nAbre o menu e lança\nas 3 sessões no tmux"]
+        worker["forge worker\nO Builder pega o job\ne abre o PR"]
+        inbox["forge inbox\nVocê vê o aviso e\naprova ou rejeita"]
+    end
+
+    You -- "/implementar feature" --> up
+    up -- "job na fila" --> worker
+    worker -- "PR criado / Reviewer aprovou" --> inbox
+    inbox -- "aprovação final" --> You
+```
+
+### O que faz cada sessão
+
+| Comando | Quando usar | O que acontece |
+|---|---|---|
+| `forge up` | Para iniciar o trabalho | Abre o menu do pipeline, configura qual agente roda em cada sessão e lança as três janelas no tmux. É o ponto de partida. |
+| `forge worker` | Sessão do Builder (fica aberta em background) | Fica escutando a fila. Quando você despacha uma feature com `/implementar`, o worker a pega, implementa e abre o PR automaticamente. |
+| `forge inbox` | Para ver o que está esperando você | Mostra aprovações pendentes, avisos do Reviewer e a fila ativa. É aqui que você vê "PR conforme — deseja mergear agora?" |
+
+> **Por que esses três comandos existem?**
+> Antes da versão 4.9, todo o ciclo passava pela sessão Discovery — você pedia, esperava, aprovava, tudo no mesmo lugar.
+> Com o pipeline multi-sessão, o Builder trabalha enquanto você planeja a próxima feature. O `forge up` orquestra a abertura, o `forge worker` mantém o Builder escutando, e o `forge inbox` traz as notificações até você — sem você precisar ficar verificando.
 
 ## Por que usar
 
@@ -105,6 +134,7 @@ A telemetria é opcional e fica no seu projeto. No modo `forge worker --raw`, a 
 
 | Versão | Novidades |
 |---|---|
+| **4.9.1** | Modo pipeline avançado: Reviewer revisa a spec, salvaguardas de tokens/tempo, `forge rules`, veredito autoexplicado com `regra_descricao`. |
 | **4.8.0** | Versão estável do painel interativo: stream de chat nos workers, fila com abas e drill-down, popup no tmux e fila que acompanha a aprovação do Reviewer. |
 | **4.6.x** | Comando único `forge`, painel vivo executivo e tokens por janela com reset suave. |
 | **4.2.0-beta** | Pipeline multi-sessão: Discovery, Builder e Reviewer trabalhando juntos. |
