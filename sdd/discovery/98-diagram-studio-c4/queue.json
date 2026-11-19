@@ -1,0 +1,22 @@
+{
+  "feature_id": "feat-98-01",
+  "branch": "feat/98-diagram-studio-c4",
+  "base_branch": "main",
+  "spec_status": "reviewed",
+  "updated_at": "2026-11-19T10:37:45Z",
+  "items": [
+    {
+      "task_id": "feat-98-01-diagrama-studio-c4",
+      "title": "feat-98-01 — skill diagramas-c4-mermaid: escolha entre Mermaid e diagram-studio",
+      "spec_path": "sdd/discovery/98-diagram-studio-c4/features/feat-98-01-diagrama-studio-c4.md",
+      "status": "queued",
+      "rules": [
+        "ARQ-11",
+        "DUP-01",
+        "COD-01"
+      ],
+      "skills_used": [],
+      "attempts": 0
+    }
+  ]
+}
