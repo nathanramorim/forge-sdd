@@ -391,9 +391,9 @@ func (e *menuEnv) applyAutonomyGesture(cfg config.ForgeConfig, gesture string) (
 			fmt.Fprintln(e.out, "\nModo avançado não ligado: sem a confirmação de ambiente isolado nada foi gravado.")
 			return cfg, false
 		}
-		cfg.Autonomy, cfg.IsolatedConfirmed, cfg.Permissions = config.AutonomyAdvanced, true, config.PermissionFull
+		config.ApplyAdvanced(&cfg)
 	case survey.GestureLeft:
-		cfg.Autonomy, cfg.IsolatedConfirmed = config.AutonomyNormal, false
+		config.ApplyNormal(&cfg)
 	}
 	return cfg, true
 }
@@ -588,11 +588,11 @@ var settingKeys = []settingKey{{
 	},
 }}
 
-// Valores gravados ao ligar cada teto no Settings.
+// aliases locais das constantes de internal/config (DUP-04 fix).
 const (
-	defaultDailyJobCap   = 30
-	defaultJobTokenCap   = 2000000
-	defaultJobMinutesCap = 60
+	defaultDailyJobCap   = config.DefaultDailyJobCap
+	defaultJobTokenCap   = config.DefaultJobTokenCap
+	defaultJobMinutesCap = config.DefaultJobMinutesCap
 )
 
 func onOff(v bool) string {
