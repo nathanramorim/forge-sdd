@@ -2,46 +2,61 @@
   "feature_id": "feat-99-03",
   "branch": "feat/99-wiki-get-started",
   "spec_status": "reviewed",
-  "updated_at": "2026-11-19T13:34:46Z",
+  "updated_at": "2026-11-19T13:42:00Z",
   "items": [
     {
       "task_id": "feat-99-01-wiki-shell-get-started",
       "title": "feat-99-01 — Wiki shell + Get Started + componente ai-prompt",
       "spec_path": "sdd/discovery/99-wiki-get-started/features/feat-99-01-wiki-shell-get-started.md",
-      "status": "review_pending",
+      "status": "approved",
       "rules": [
         "ARQ-11",
         "COD-01",
         "DUP-02"
       ],
       "skills_used": [],
-      "attempts": 1
+      "attempts": 1,
+      "governance_verdict": {
+        "veredito": "conforme",
+        "achados": [],
+        "resumo": "feat-99-01/02/03 aprovadas. Camada A 11/11: arquivos criados, 3 seções obrigatórias, 5 ai-prompts, i18n (10 atributos), clipboard JS, hub-mode com 2+ prompts, 2 hrefs /wiki na LP, Get Started presente, 0 arquivos Go alterados, go vet limpo. Camada B S-01..S-07: sem violações. S-01 clean (nenhum Go tocado), S-02 honesto (criado do zero), S-03 sem duplicação, S-04 sem segredos, S-05 conforme com dúvida menor (class=btn vs btn solid no CTA — não viola critério), S-06 sem acoplamento externo indevido (só Google Fonts CDN já usado), S-07 sem candidato a auto-skill."
+      }
     },
     {
       "task_id": "feat-99-02-hub-mode",
       "title": "feat-99-02 — Seção Hub mode",
       "spec_path": "sdd/discovery/99-wiki-get-started/features/feat-99-02-hub-mode.md",
-      "status": "review_pending",
+      "status": "approved",
       "rules": [
         "ARQ-11",
         "COD-01",
         "DUP-02"
       ],
       "skills_used": [],
-      "attempts": 1
+      "attempts": 1,
+      "governance_verdict": {
+        "veredito": "conforme",
+        "achados": [],
+        "resumo": "feat-99-01/02/03 aprovadas. Camada A 11/11: arquivos criados, 3 seções obrigatórias, 5 ai-prompts, i18n (10 atributos), clipboard JS, hub-mode com 2+ prompts, 2 hrefs /wiki na LP, Get Started presente, 0 arquivos Go alterados, go vet limpo. Camada B S-01..S-07: sem violações. S-01 clean (nenhum Go tocado), S-02 honesto (criado do zero), S-03 sem duplicação, S-04 sem segredos, S-05 conforme com dúvida menor (class=btn vs btn solid no CTA — não viola critério), S-06 sem acoplamento externo indevido (só Google Fonts CDN já usado), S-07 sem candidato a auto-skill."
+      }
     },
     {
       "task_id": "feat-99-03-cta-lp",
       "title": "feat-99-03 — CTA \"Get Started\" na landing page",
       "spec_path": "sdd/discovery/99-wiki-get-started/features/feat-99-03-cta-lp.md",
-      "status": "review_pending",
+      "status": "approved",
       "rules": [
         "ARQ-11",
         "COD-01",
         "DUP-02"
       ],
       "skills_used": [],
-      "attempts": 1
+      "attempts": 1,
+      "governance_verdict": {
+        "veredito": "conforme",
+        "achados": [],
+        "resumo": "feat-99-01/02/03 aprovadas. Camada A 11/11: arquivos criados, 3 seções obrigatórias, 5 ai-prompts, i18n (10 atributos), clipboard JS, hub-mode com 2+ prompts, 2 hrefs /wiki na LP, Get Started presente, 0 arquivos Go alterados, go vet limpo. Camada B S-01..S-07: sem violações. S-01 clean (nenhum Go tocado), S-02 honesto (criado do zero), S-03 sem duplicação, S-04 sem segredos, S-05 conforme com dúvida menor (class=btn vs btn solid no CTA — não viola critério), S-06 sem acoplamento externo indevido (só Google Fonts CDN já usado), S-07 sem candidato a auto-skill."
+      }
     }
   ]
 }
