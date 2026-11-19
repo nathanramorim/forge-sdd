@@ -122,12 +122,12 @@ advanced  o Reviewer revisa a spec no lugar da pessoa (ADR-0013); exige permissi
 		}
 		switch args[0] {
 		case config.AutonomyNormal:
-			cfg.Autonomy, cfg.IsolatedConfirmed = config.AutonomyNormal, false
+			config.ApplyNormal(&cfg)
 		case config.AutonomyAdvanced:
 			if !isolated {
 				return fmt.Errorf("o modo avançado exige confirmar o ambiente isolado: repita com --isolated")
 			}
-			cfg.Autonomy, cfg.IsolatedConfirmed, cfg.Permissions = config.AutonomyAdvanced, true, config.PermissionFull
+			config.ApplyAdvanced(&cfg)
 		default:
 			return fmt.Errorf("modo %q inválido (use normal ou advanced)", args[0])
 		}

@@ -42,6 +42,24 @@ func ValidAutonomy(a string) bool {
 	return a == "" || a == AutonomyNormal || a == AutonomyAdvanced
 }
 
+// Valores padrão dos tetos do modo avançado (SafeguardsConfig). Zero desliga o teto.
+const (
+	DefaultDailyJobCap   = 30
+	DefaultJobTokenCap   = 2_000_000
+	DefaultJobMinutesCap = 60
+)
+
+// ApplyAdvanced ativa o modo avançado em cfg: Autonomy, IsolatedConfirmed e Permissions.
+// Centraliza a tríade que aparecia duplicada em menu.go e pipeline.go (DUP-06).
+func ApplyAdvanced(cfg *ForgeConfig) {
+	cfg.Autonomy, cfg.IsolatedConfirmed, cfg.Permissions = AutonomyAdvanced, true, PermissionFull
+}
+
+// ApplyNormal reverte para o modo normal.
+func ApplyNormal(cfg *ForgeConfig) {
+	cfg.Autonomy, cfg.IsolatedConfirmed = AutonomyNormal, false
+}
+
 // ValidSessionMode diz se m é um modo de sessão aceito.
 func ValidSessionMode(m string) bool {
 	return m == SessionModeHeadless || m == SessionModeLive
