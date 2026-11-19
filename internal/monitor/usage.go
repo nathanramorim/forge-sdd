@@ -11,6 +11,12 @@ import (
 	"github.com/forge-sdd/cli/internal/layout"
 )
 
+// Fallbacks de bytes para EstimateJobUsage e EstimateSessionUsage quando o arquivo não está disponível.
+const (
+	estimateFallbackInputBytes  = 4000
+	estimateFallbackOutputBytes = 2000
+)
+
 // Valores de SessionMetrics.Medicao.
 const (
 	MedicaoReal     = "real"
@@ -97,7 +103,7 @@ func ParseJobUsage(logPath string) (JobUsage, bool) {
 
 // EstimateJobUsage estima o uso pelo tamanho da spec e do log, para CLIs sem evento `result`.
 func EstimateJobUsage(dir, role, jobID, specPath string) JobUsage {
-	specBytes := 4000
+	specBytes := estimateFallbackInputBytes
 	if specPath != "" {
 		full := specPath
 		if dir != "" && !filepath.IsAbs(full) {
@@ -107,7 +113,7 @@ func EstimateJobUsage(dir, role, jobID, specPath string) JobUsage {
 			specBytes = int(info.Size())
 		}
 	}
-	logBytes := 2000
+	logBytes := estimateFallbackOutputBytes
 	if info, err := os.Stat(jobLogPath(dir, role, jobID)); err == nil && !info.IsDir() && info.Size() > 0 {
 		logBytes = int(info.Size())
 	}
@@ -122,9 +128,6 @@ func EstimateJobUsage(dir, role, jobID, specPath string) JobUsage {
 // do arquivo de feature (proxy para input) e dos arquivos tocados (proxy para output).
 // Tenta o feature como caminho relativo direto; se não encontrar, busca via glob de ID.
 func EstimateSessionUsage(dir, feature string, filesTouched []string) JobUsage {
-	const fallbackInput  = 4000
-	const fallbackOutput = 2000
-
 	var inputBytes int64
 	if feature != "" {
 		if info, err := os.Stat(filepath.Join(dir, feature)); err == nil && !info.IsDir() && info.Size() > 0 {
@@ -142,7 +145,7 @@ func EstimateSessionUsage(dir, feature string, filesTouched []string) JobUsage {
 		}
 	}
 	if inputBytes == 0 {
-		inputBytes = fallbackInput
+		inputBytes = estimateFallbackInputBytes
 	}
 
 	var outputBytes int64
@@ -152,11 +155,11 @@ func EstimateSessionUsage(dir, feature string, filesTouched []string) JobUsage {
 		}
 	}
 	if outputBytes == 0 {
-		outputBytes = fallbackOutput
+		outputBytes = estimateFallbackOutputBytes
 	}
 
 	return JobUsage{
-		TokensInput:  EstimateTokensFromBytes(int(inputBytes)),
+		TokensInput:  EstimateTokensFromBytes(int(inputBytes) * 4),
 		TokensOutput: EstimateTokensFromBytes(int(outputBytes)),
 		Medicao:      MedicaoEstimado,
 	}

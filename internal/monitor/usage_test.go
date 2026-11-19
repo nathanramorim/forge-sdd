@@ -82,12 +82,16 @@ func TestEstimateSessionUsage_SemFeature(t *testing.T) {
 	assert.Positive(t, u.TokensInput)
 	assert.Positive(t, u.TokensOutput)
 	assert.Equal(t, MedicaoEstimado, u.Medicao)
+	expectedInput := EstimateTokensFromBytes(estimateFallbackInputBytes * 4)
+	assert.Equal(t, expectedInput, u.TokensInput)
 }
 
 func TestEstimateSessionUsage_SemFiles(t *testing.T) {
 	dir := t.TempDir()
 	u := EstimateSessionUsage(dir, "", []string{})
 	assert.Positive(t, u.TokensOutput)
+	expectedOutput := EstimateTokensFromBytes(estimateFallbackOutputBytes)
+	assert.Equal(t, expectedOutput, u.TokensOutput)
 }
 
 func TestEstimateSessionUsage_ComFeature(t *testing.T) {
@@ -101,8 +105,8 @@ func TestEstimateSessionUsage_ComFeature(t *testing.T) {
 	u := EstimateSessionUsage(dir, "sdd/discovery/97-test/features/feat-97-01-test.md", nil)
 	assert.Positive(t, u.TokensInput)
 	assert.Equal(t, MedicaoEstimado, u.Medicao)
-	// 4000 bytes → EstimateTokensFromBytes(4000) = 1000 tokens (mínimo 50)
-	assert.Equal(t, EstimateTokensFromBytes(4000), u.TokensInput)
+	// 4000 bytes × 4 (mesmo multiplicador de EstimateJobUsage) → EstimateTokensFromBytes(16000) = 4000 tokens
+	assert.Equal(t, EstimateTokensFromBytes(4000*4), u.TokensInput)
 }
 
 func TestEstimateSessionUsage_ComFilesTouched(t *testing.T) {
