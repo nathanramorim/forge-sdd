@@ -179,3 +179,7 @@ go test ./... && go vet ./...
 - Texto branco sobre superfícies escuras; rótulo sobre chip sempre com contorno ou sombra escura (tabela de contraste do design system).
 - Nenhuma animação nova roda com `prefers-reduced-motion: reduce`.
 - Peça registrada em `sdd/discovery/101-tema-missoes-v5/revisao-pi.md`.
+
+## Status
+
+- [x] Implementado em `feat-101-01` (19/11/2026): critérios 1 a 9 e conferência visual em 1280 px e 390 px (`?edicao=on` e `?edicao=off`), com `go test ./...`, `go vet ./...` e `forge gate --mode bloqueio` aprovados.

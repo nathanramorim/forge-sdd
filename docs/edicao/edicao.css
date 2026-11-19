@@ -1,0 +1,160 @@
+/* Camada da Edição Missões. Toda regra só vale com a marca no <html>. */
+@import url("../design/edicao-missoes/tokens.css");
+
+html[data-edicao="missoes"] {
+  --bg: var(--missoes-superficie-preto-moldura);
+  --bg2: var(--missoes-superficie-botao-escuro);
+  --bg3: var(--missoes-superficie-disco);
+  --fg: var(--missoes-texto-branco);
+  --muted: #cdbdd3;
+  --faint: var(--missoes-texto-inativo);
+  --accent: var(--missoes-acento-pessego);
+  --accent2: var(--missoes-acento-coral);
+  --ok: var(--missoes-apoio-salvia);
+  --warn: var(--missoes-texto-aviso);
+  --s-focus: var(--missoes-superficie-preto-lateral);
+  --s-terminal: var(--missoes-superficie-preto-fundo);
+  --s-dock: var(--missoes-superficie-preto-lateral);
+  --text: var(--missoes-texto-branco);
+  --text2: #cdbdd3;
+  --border: rgba(255, 255, 255, .14);
+}
+
+html[data-edicao="missoes"] body {
+  background-image:
+    radial-gradient(1200px 500px at 50% -60px, rgba(254, 129, 141, .34), rgba(130, 76, 200, .18) 48%, transparent 76%),
+    linear-gradient(rgba(240, 97, 175, .045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(240, 97, 175, .045) 1px, transparent 1px);
+  background-size: auto, 44px 44px, 44px 44px;
+  background-repeat: no-repeat, repeat, repeat;
+  background-position: center top;
+}
+
+/* Molduras: barra preta no topo e rodapé com linha neon */
+html[data-edicao="missoes"] .site-header,
+html[data-edicao="missoes"] .wiki-header {
+  background: rgba(21, 21, 21, .94);
+  border-bottom: 2px solid transparent;
+  border-image: var(--missoes-degrade-assinatura) 1;
+  box-shadow: 0 2px 16px rgba(254, 129, 141, .28);
+}
+html[data-edicao="missoes"] footer {
+  border-top: 2px solid transparent;
+  border-image: var(--missoes-degrade-assinatura) 1;
+  box-shadow: 0 -2px 14px rgba(254, 129, 141, .16);
+}
+
+/* Chips e abas ativas em degradê: branco em negrito com sombra escura (tabela de contraste) */
+html[data-edicao="missoes"] nav a.nav-sec.active,
+html[data-edicao="missoes"] .sidebar-link.active,
+html[data-edicao="missoes"] .btn.solid,
+html[data-edicao="missoes"] .wiki-badge,
+html[data-edicao="missoes"] .step-number,
+html[data-edicao="missoes"] .edicao-selo,
+html[data-edicao="missoes"] .edicao-nome,
+html[data-edicao="missoes"] .edicao-missao {
+  background: var(--missoes-degrade-chip);
+  border-color: transparent;
+  color: var(--missoes-texto-branco);
+  font-weight: 700;
+  text-shadow: 0 1px 2px rgba(6, 5, 6, .9), 0 0 2px rgba(6, 5, 6, .85);
+}
+
+html[data-edicao="missoes"] nav a.nav-sec:hover,
+html[data-edicao="missoes"] .sidebar-link:hover {
+  background: var(--missoes-superficie-disco);
+  color: var(--missoes-texto-branco);
+}
+html[data-edicao="missoes"] .btn.ghost {
+  background: var(--missoes-superficie-botao-escuro);
+  color: var(--missoes-texto-branco);
+}
+html[data-edicao="missoes"] .install-pill button:hover {
+  background: var(--missoes-degrade-chip);
+  color: var(--missoes-texto-branco);
+  text-shadow: 0 1px 2px rgba(6, 5, 6, .9);
+}
+
+/* Ajustes da wiki na edição */
+html[data-edicao="missoes"] .ai-prompt__header {
+  background: rgba(254, 129, 141, .08);
+}
+html[data-edicao="missoes"] .code-block {
+  color: var(--missoes-texto-ativo);
+}
+
+/* Selo da edição ao lado da marca */
+html[data-edicao="missoes"] .edicao-selo {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 3px;
+  font: 700 11px/1.2 var(--missoes-fonte-marca);
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+html[data-edicao="missoes"] .wiki-brand .edicao-selo {
+  margin-left: 4px;
+}
+@media (max-width: 560px) {
+  html[data-edicao="missoes"] .wiki-header {
+    flex-wrap: wrap;
+    gap: 8px 12px;
+  }
+  html[data-edicao="missoes"] .wiki-brand {
+    flex-wrap: wrap;
+  }
+}
+
+/* Destaque do 5.0 e promessa no topo da LP */
+html[data-edicao="missoes"] .edicao-faixa {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  margin-bottom: 18px;
+}
+html[data-edicao="missoes"] .edicao-cinco {
+  font: 800 clamp(64px, 11vw, 112px)/.9 var(--missoes-fonte-marca);
+  letter-spacing: -.04em;
+  background: var(--missoes-degrade-assinatura);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 6px 14px rgba(6, 5, 6, .55));
+}
+html[data-edicao="missoes"] .edicao-nome {
+  padding: 5px 12px;
+  border-radius: 3px;
+  font: 800 12px/1.2 var(--missoes-fonte-marca);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+html[data-edicao="missoes"] .edicao-promessa {
+  flex-basis: 100%;
+  font: 700 15px/1.3 var(--missoes-fonte-marca);
+  color: var(--missoes-texto-branco);
+}
+
+/* Rótulo da missão em cada cartão de estação */
+html[data-edicao="missoes"] .edicao-missao {
+  display: inline-block;
+  margin: 6px 0 2px;
+  padding: 3px 9px;
+  border-radius: 3px;
+  font: 700 11px/1.3 var(--missoes-fonte-marca);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-edicao="missoes"] .edicao-selo,
+  html[data-edicao="missoes"] .edicao-faixa,
+  html[data-edicao="missoes"] .edicao-missao,
+  html[data-edicao="missoes"] nav a.nav-sec,
+  html[data-edicao="missoes"] .sidebar-link,
+  html[data-edicao="missoes"] .btn {
+    animation: none !important;
+    transition: none !important;
+  }
+}

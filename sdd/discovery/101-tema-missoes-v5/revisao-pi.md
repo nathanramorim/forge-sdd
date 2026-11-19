@@ -8,5 +8,6 @@ Uma linha por peça publicada. A régua é o critério 1 da iniciativa: nenhuma 
 | Espécime (`docs/design/edicao-missoes/especime.svg`) | Mesmos pontos do banner. Componentes mostrados: moldura, linha neon, abas em chip, lista de opções e painel de descrição (sem botões de console, navegação lateral AJUSTES ou seletores com seta). Rodapé com o aviso "conteúdo original, sem ligação com a Rockstar/Take-Two" e link sem slug do jogo. | Conforme | Builder (`fix-101-01`) | 19/11/2026 |
 | README (`README.md` e `npm/README.md`) | Nome da edição, link e bloco das missões sem citar terceiros. As 5 missões batem com `missoes.json`. | Conforme | Builder (`fix-101-01`) | 19/11/2026 |
 | Documento e tokens (`docs/design/edicao-missoes/`) | A referência de cor aparece em uma única linha de crédito, com o aviso. Pilhas tipográficas só com fontes da marca. Nenhum arquivo de fonte ou imagem de terceiros. | Conforme | Builder (`fix-101-01`) | 19/11/2026 |
+| LP e wiki (`docs/index.html`, `docs/wiki.html`, `docs/edicao/edicao.js`, `docs/edicao/edicao.css`) | Paleta do pôr do sol, molduras com linha neon, destaque "5.0" e selo "Edição Missões" na tipografia da marca, sem nome de jogo/empresa, sem numeral "VI" e sem elementos de interface de jogo. Missões lidas de `missoes.json` em runtime e tema removido automaticamente em `2026-11-23T00:00:00-03:00`. | Conforme | Builder (`feat-101-01`) | 19/11/2026 |
 
-As próximas peças (LP e wiki, mascotes) entram nesta tabela nas tasks `feat-101-01` e `feat-101-02`.
+A próxima peça (mascotes) entra nesta tabela na task `feat-101-02`.
