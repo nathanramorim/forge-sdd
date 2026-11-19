@@ -23,3 +23,17 @@ Quando há lacuna e uma pergunta precisa ser feita:
 - **No Claude Code (agentes):** use `AskUserQuestion` para toda pergunta de múltipla escolha ou sim/não — apresente 2–4 opções objetivas. Reserve texto plano apenas para respostas abertas sem alternativas fixas.
 - **No forge CLI:** use `env.p.Select` ou `env.p.Confirm` (interface `Prompter`/huh). Não use `fmt.Scan`, `fmt.Scanf` nem leitura direta de `os.Stdin`.
 - **Outros agentes (Gemini, Copilot):** siga o mecanismo interativo da ferramenta; se não houver equivalente, plain text é aceitável.
+
+## Visualização pós-spec
+
+Ao concluir `/discovery`, `/nova-feature`, `/novo-fix` ou `/split-features`, antes do Gate 1, apresente um AskUserQuestion:
+
+**Opções:**
+- **Abrir pasta no Finder** — `open sdd/discovery/<id>-<nome>/` (macOS-only; omitir em Linux/Windows)
+- **Abrir no VS Code** — `command -v code && code sdd/discovery/<id>-<nome>/`; se `code` não estiver no PATH, use Finder como fallback; se ambos indisponíveis, omitir esta opção
+- **Ver lista dos arquivos** — liste os arquivos em `sdd/discovery/<id>-<nome>/`
+- **Pular** — continua sem abrir nada
+
+Execute apenas a ação escolhida. Depois, prossiga normalmente ao Gate 1.
+
+**Nota:** `open` é nativo no macOS. Em outros sistemas, omita a opção "Finder". Para renderizar Mermaid no VS Code, o usuário precisa da extensão `bierner.markdown-mermaid`.

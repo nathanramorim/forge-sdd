@@ -12,4 +12,15 @@
 8. **Estado:** crie `status.md` (até 1 KB) com `Status`, `Próximo passo` e `A confirmar`.
 9. Se `Nível de Linguagem` na Constitution for `iniciante`, explique C4 e critério de aceitação com exemplos simples, sem alterar os critérios.
 10. **Telemetria:** `forge session record --feature "sdd/discovery/<id>-<nome>/discovery.md" --outcome approved --criterio-atendido=true`.
+
+**Visualizar artefatos (antes do Gate 1)**
+
+Use AskUserQuestion com as opções:
+- "Abrir pasta no Finder" → `open sdd/discovery/<id>-<nome>/`
+- "Abrir no VS Code" → verifique `command -v code && code sdd/discovery/<id>-<nome>/` (fallback: Finder se VS Code ausente)
+- "Ver lista dos arquivos" → liste os arquivos em `sdd/discovery/<id>-<nome>/`
+- "Pular"
+
+Execute a ação escolhida. Consulte `sdd/memory/clarify.md` → seção "Visualização pós-spec" para comportamento detalhado (macOS-only, fallbacks).
+
 11. **Gate 1 (`FLX-01`):** submeta ao humano; após aprovar, sugira `/split-features`. Em modo pipeline (existe `.forge/config/forge.json`) esta sessão nunca constrói: o `/split-features` termina entregando ao Builder.

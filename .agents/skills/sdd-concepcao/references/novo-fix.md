@@ -10,4 +10,14 @@
 6. **Conteúdo:** as seis seções obrigatórias da skill `sdd-concepcao` (incluindo `## Decisões do projeto aplicadas`) e a seção `## Feature Correlacionada` (arquivo de origem, causa-raiz e evidência do defeito).
 7. **Telemetria:** `forge session record --feature "<arquivo criado>" --outcome blocked --criterio-atendido=false`.
 
+**Visualizar artefatos (antes do Gate 1)**
+
+Use AskUserQuestion com as opções:
+- "Abrir pasta no Finder" → `open sdd/discovery/<id>-<nome>/`
+- "Abrir no VS Code" → verifique `command -v code && code sdd/discovery/<id>-<nome>/` (fallback: Finder se VS Code ausente)
+- "Ver lista dos arquivos" → liste os arquivos em `sdd/discovery/<id>-<nome>/`
+- "Pular"
+
+Execute a ação escolhida. Consulte `sdd/memory/clarify.md` → seção "Visualização pós-spec" para comportamento detalhado (macOS-only, fallbacks).
+
 Handoff: `/implementar`.
