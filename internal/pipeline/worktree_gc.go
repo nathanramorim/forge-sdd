@@ -23,15 +23,10 @@ type StaleWorktree struct {
 	Reason     string
 }
 
-// gcNormalizeTaskID remove espaços e o prefixo "feat-" de um ID de task (mesma regra da fila).
-func gcNormalizeTaskID(id string) string {
-	return strings.TrimSpace(strings.TrimPrefix(strings.TrimSpace(id), "feat-"))
-}
-
 // gcMatchesTask casa o ID de uma task do worktree com o da fila, tolerando o prefixo "feat-" e
 // sufixos de nome (ex.: "88-01" casa com "feat-88-01-nome").
 func gcMatchesTask(itemID, id string) bool {
-	a, b := gcNormalizeTaskID(itemID), gcNormalizeTaskID(id)
+	a, b := queue.NormalizeTaskID(itemID), queue.NormalizeTaskID(id)
 	if b == "" {
 		return false
 	}

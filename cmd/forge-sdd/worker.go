@@ -16,6 +16,7 @@ import (
 	"github.com/forge-sdd/cli/internal/monitor"
 	"github.com/forge-sdd/cli/internal/pipeline"
 	"github.com/forge-sdd/cli/internal/queue"
+	"github.com/forge-sdd/cli/internal/survey"
 	"github.com/spf13/cobra"
 )
 
@@ -233,6 +234,9 @@ func init() {
 	pipelineCmd.AddCommand(pipelineWorktreeCmd)
 }
 
+// gcAskConfirm pede confirmação antes de remover worktrees; pode ser substituído em testes.
+var gcAskConfirm = func(text string) (bool, error) { return survey.ConfirmYesNo(text, false) }
+
 var pipelineWorktreeGcCmd = &cobra.Command{
 	Use:   "gc",
 	Short: "Lista e remove worktrees ociosos (jobs concluídos/aprovados ou orphans)",
@@ -268,6 +272,12 @@ var pipelineWorktreeGcCmd = &cobra.Command{
 
 		if dry {
 			fmt.Fprintf(out, "[dry-run] removeria %d worktree(s).\n", len(safe))
+			return nil
+		}
+
+		ok, err := gcAskConfirm(fmt.Sprintf("Remover %d worktree(s)?", len(safe)))
+		if err != nil || !ok {
+			fmt.Fprintln(out, "cancelado.")
 			return nil
 		}
 
