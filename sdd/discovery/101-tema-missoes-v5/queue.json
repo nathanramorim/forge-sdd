@@ -30,12 +30,7 @@
       "spec_path": "sdd/discovery/101-tema-missoes-v5/features/feat-101-01-lp-e-wiki-na-edicao-com-validade.md",
       "status": "queued",
       "depends_on": [
-        "fix-101-01",
-        "(nomes",
-        "do",
-        "design",
-        "system",
-        "missoes.json`)"
+        "fix-101-01-alinhar-readme-e-design-system"
       ],
       "rules": [
         "ARQ-11",
@@ -59,13 +54,7 @@
       "spec_path": "sdd/discovery/101-tema-missoes-v5/features/feat-101-02-agentes-rebeldes-nas-missoes.md",
       "status": "queued",
       "depends_on": [
-        "feat-101-01",
-        "(camada",
-        "da",
-        "edição",
-        "porteiro",
-        "de",
-        "vigência)"
+        "feat-101-01-lp-e-wiki-na-edicao-com-validade"
       ],
       "rules": [
         "ARQ-11",
@@ -89,15 +78,8 @@
       "spec_path": "sdd/discovery/101-tema-missoes-v5/features/feat-101-03-retorno-agendado-da-edicao.md",
       "status": "queued",
       "depends_on": [
-        "fix-101-01",
-        "(marcadores",
-        "nos",
-        "READMEs)",
-        "feat-101-01",
-        "(camada",
-        "data",
-        "de",
-        "fim)"
+        "fix-101-01-alinhar-readme-e-design-system",
+        "feat-101-01-lp-e-wiki-na-edicao-com-validade"
       ],
       "rules": [
         "ARQ-11",

@@ -1,4 +1,4 @@
-/* Design system da Edição Missões (forge-sdd 5.0). Espelha tokens.json: ao mudar um, mude o outro. */
+/* Design system da Edição Missões (forge-sdd 5.0). Gerado por documento.py junto com tokens.json: altere tokens.py/documento.py e regenere. */
 :root {
   --missoes-superficie-preto-moldura: #151515;
   --missoes-superficie-preto-fundo: #060506;

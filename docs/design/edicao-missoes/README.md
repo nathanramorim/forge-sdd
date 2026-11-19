@@ -12,7 +12,7 @@ As regras de marca desta edição estão em `sdd/discovery/101-tema-missoes-v5/`
 
 | | |
 |---|---|
-| **Referência de cor** | [Conceito de interface de Matías Rodríguez no Behance](https://www.behance.net/gallery/224512205/Grand-theft-Auto-VI-UI-Concept), publicado em 25/04/2025. Conteúdo original, sem ligação com a Rockstar/Take-Two. |
+| **Referência de cor** | [Conceito de interface de Matías Rodríguez no Behance](https://www.behance.net/gallery/224512205), publicado em 25/04/2025. Conteúdo original, sem ligação com a Rockstar/Take-Two. |
 | **O que foi medido** | Cores e degradês, amostrados por script nas pranchas publicadas, em 19/11/2026. Tolerância de ±2 por canal. |
 | **O que é nosso** | Marca, tipografia, ilustrações, textos e as 5 missões. |
 | **O que não entra** | Logotipos, letreiros, numerais, personagens, fontes e interface de jogos. |
@@ -125,10 +125,8 @@ A edição usa a tipografia da marca. O destaque da versão é o "5.0" em Montse
 | **Abas** | Fila de rótulos na barra. A aba ativa é um chip em degradê com rótulo branco; as inativas são só o rótulo. | `chip` |
 | **Destaque da versão** | O "5.0" em degradê, na tipografia da marca, à esquerda do bloco de título. | `assinatura` |
 | **Bloco de título** | Selo da edição, título em caixa alta, a promessa e um parágrafo curto, sobre um véu preto. | `preto-fundo`, `branco` |
-| **Navegação lateral** | Cabeçalho em chip. Itens em faixa translúcida; o item ativo muda só a cor do rótulo. | `chip`, `faixa-inativa`, `inativo`, `ativo` |
 | **Lista de opções** | Linhas escuras translúcidas. A linha ativa é âmbar sólido, com o valor em caixa alta à direita. | `ambar`, `preto-fundo` |
 | **Painel de descrição** | Barra de título escura com rótulo centralizado; corpo translúcido; aviso em amarelo. | `painel`, `aviso` |
-| **Botão escuro** | Botão arredondado escuro com contorno em degradê. | `botao-escuro`, `assinatura` |
 | **Fundos** | Degradê horizontal atrás das molduras; pôr do sol com sol listrado, palmeiras e silhueta de cidade. | `prancha`, `ceu`, `sol-crepusculo`, `sol-orquidea`, `sol-ambar` |
 
 ## Contraste

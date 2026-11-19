@@ -17,11 +17,6 @@ def note(x, y, text, anchor="start", size=12):
     return f'<text x="{x}" y="{y}" text-anchor="{anchor}" font-family="{FONT}" font-weight="500" font-size="{size}" fill="{SOFT}">{text}</text>'
 
 
-def botao(x, y, w, texto):
-    return (f'<rect x="{x}" y="{y}" width="{w}" height="24" rx="5" fill="{c("superficie", "botao-escuro")}" stroke="url(#gSig)" stroke-width="1.2"/>'
-            f'<text x="{x + w / 2}" y="{y + 16}" text-anchor="middle" font-family="{FONT}" font-weight="700" font-size="11.5" fill="#ffffff">{texto}</text>')
-
-
 def build():
     m = missoes()
     titulos = [x["titulo"] for x in m["missoes"]]
@@ -89,7 +84,7 @@ def build():
             o.append(f'<text x="{x}" y="{y + 55}" font-family="{FONT}" font-weight="600" font-size="10.5" fill="#ffffff">{nome}</text>')
             o.append(f'<text x="{x}" y="{y + 69}" font-family="{MONO}" font-size="10" fill="{SOFT}">{hexv}</text>')
 
-    # componentes: uma moldura com abas, navegação, lista, painel e botões
+    # componentes: uma moldura com abas em chip, lista de opções e painel de descrição
     o.append(label(40, 950, "Componentes"))
     fx, fy, fw = 40, 962, 1200
     o.append(f'<rect x="{fx}" y="{fy}" width="{fw}" height="290" fill="{c("superficie", "preto-fundo")}"/>')
@@ -102,7 +97,7 @@ def build():
     o.append(f'<rect x="{fx}" y="1218" width="{fw}" height="34" fill="{c("superficie", "preto-moldura")}"/>')
     o.append(neon(fx, 996, fw))
     o.append(neon(fx, 1216, fw))
-    # abas: as 5 missões, com a terceira ativa
+    # abas em chip: as 5 missões, com a terceira ativa
     passo = fw / len(titulos)
     for i, t in enumerate(titulos):
         cx = fx + passo * (i + 0.5)
@@ -111,45 +106,30 @@ def build():
             o.append(f'<rect x="{cx - 82:.0f}" y="968" width="164" height="22" rx="3" fill="url(#gChip)"/>')
         extra = f' {CONTORNO}' if ativa else ''
         o.append(f'<text x="{cx:.0f}" y="983.5" text-anchor="middle" font-family="{FONT}" font-weight="700" font-size="12" fill="#ffffff"{extra}>{t}</text>')
-    # navegação lateral
-    o.append('<rect x="70" y="1016" width="176" height="28" rx="2" fill="url(#gChip)"/>')
-    o.append(f'<text x="84" y="1035" font-family="{FONT}" font-weight="800" font-size="13" letter-spacing="1" fill="#ffffff" {CONTORNO}>AJUSTES</text>')
-    for i, (nome, ativo) in enumerate([("Sessões", False), ("Agentes", True), ("Tetos", False), ("Telemetria", False)]):
-        y = 1050 + i * 30
-        o.append(f'<rect x="70" y="{y}" width="176" height="26" fill="{c("superficie", "faixa-inativa")}" fill-opacity="0.78"/>')
-        cor = c("texto", "ativo") if ativo else c("texto", "inativo")
-        o.append(f'<text x="84" y="{y + 17.5}" font-family="{FONT}" font-weight="{700 if ativo else 600}" font-size="12.5" fill="{cor}">{nome}</text>')
     # lista de opções
     for i, (nome, valor, ativo) in enumerate([("Agente da Discovery", "CLAUDE", False), ("Agente do Builder", "CODEX", True), ("Agente do Reviewer", "GEMINI", False), ("Permissões", "FULL", False), ("Teto de tokens", "OFF", False)]):
         y = 1016 + i * 34
         if ativo:
-            o.append(f'<rect x="266" y="{y}" width="420" height="30" fill="{c("acento", "ambar")}"/>')
+            o.append(f'<rect x="70" y="{y}" width="510" height="30" fill="{c("acento", "ambar")}"/>')
         else:
-            o.append(f'<rect x="266" y="{y}" width="420" height="30" fill="{c("superficie", "preto-fundo")}" fill-opacity="0.42"/>')
-        o.append(f'<text x="280" y="{y + 19.5}" font-family="{FONT}" font-weight="700" font-size="12.5" fill="#ffffff"{" " + CONTORNO if ativo else ""}>{nome}</text>')
-        o.append(f'<rect x="566" y="{y + 7}" width="16" height="16" fill="#ffffff" stroke="{c("superficie", "preto-moldura")}" stroke-width="1.2"/>')
-        o.append(f'<path d="M577,{y + 10.5} L571,{y + 15} L577,{y + 19.5} Z" fill="{c("superficie", "preto-moldura")}"/>')
-        o.append(f'<text x="674" y="{y + 19.5}" text-anchor="end" font-family="{FONT}" font-weight="700" font-size="11.5" letter-spacing="0.8" fill="#ffffff"{" " + CONTORNO if ativo else ""}>{valor}</text>')
+            o.append(f'<rect x="70" y="{y}" width="510" height="30" fill="{c("superficie", "preto-fundo")}" fill-opacity="0.42"/>')
+        o.append(f'<text x="86" y="{y + 19.5}" font-family="{FONT}" font-weight="700" font-size="12.5" fill="#ffffff"{" " + CONTORNO if ativo else ""}>{nome}</text>')
+        o.append(f'<text x="564" y="{y + 19.5}" text-anchor="end" font-family="{FONT}" font-weight="700" font-size="11.5" letter-spacing="0.8" fill="#ffffff"{" " + CONTORNO if ativo else ""}>{valor}</text>')
     # painel de descrição
-    o.append(f'<rect x="706" y="1016" width="250" height="26" fill="{c("superficie", "preto-fundo")}" fill-opacity="0.6"/>')
-    o.append(f'<text x="831" y="1033.5" text-anchor="middle" font-family="{FONT}" font-weight="700" font-size="11" letter-spacing="1.4" fill="#ffffff">DESCRIÇÃO</text>')
-    o.append(f'<rect x="706" y="1046" width="250" height="136" fill="{c("superficie", "painel")}" fill-opacity="0.9"/>')
-    for i, linha in enumerate(["Escolhe o agente que roda em cada", "sessão do pipeline. O Reviewer só", "lê: quem confere não é quem", "construiu."]):
-        o.append(f'<text x="720" y="{1068 + i * 17}" font-family="{FONT}" font-weight="500" font-size="12" fill="#ffffff">{linha}</text>')
-    for i, linha in enumerate(["Trocar o agente no meio de um job", "reinicia a sessão."]):
-        o.append(f'<text x="720" y="{1148 + i * 16}" font-family="{FONT}" font-weight="600" font-size="12" fill="{c("texto", "aviso")}">{linha}</text>')
+    o.append(f'<rect x="606" y="1016" width="330" height="26" fill="{c("superficie", "preto-fundo")}" fill-opacity="0.6"/>')
+    o.append(f'<text x="771" y="1033.5" text-anchor="middle" font-family="{FONT}" font-weight="700" font-size="11" letter-spacing="1.4" fill="#ffffff">DESCRIÇÃO</text>')
+    o.append(f'<rect x="606" y="1046" width="330" height="136" fill="{c("superficie", "painel")}" fill-opacity="0.9"/>')
+    for i, linha in enumerate(["Escolhe o agente que roda em cada sessão do", "pipeline. O Reviewer só lê: quem confere não é", "quem construiu."]):
+        o.append(f'<text x="622" y="{1072 + i * 18}" font-family="{FONT}" font-weight="500" font-size="12" fill="#ffffff">{linha}</text>')
+    for i, linha in enumerate(["Trocar o agente no meio de um job reinicia a sessão."]):
+        o.append(f'<text x="622" y="{1150 + i * 16}" font-family="{FONT}" font-weight="600" font-size="12" fill="{c("texto", "aviso")}">{linha}</text>')
     # destaque da versão e estados de aba
-    o.append(f'<text x="988" y="1092" font-family="{FONT}" font-weight="800" font-size="78" letter-spacing="-3" fill="url(#gSig)" stroke="#151515" stroke-opacity="0.5" stroke-width="2" paint-order="stroke fill">5.0</text>')
-    o.append('<rect x="990" y="1118" width="74" height="22" rx="3" fill="url(#gChip)"/>')
-    o.append(f'<text x="1027" y="1133.5" text-anchor="middle" font-family="{FONT}" font-weight="700" font-size="11.5" fill="#ffffff" {CONTORNO}>Ativa</text>')
-    o.append(f'<text x="1084" y="1133.5" font-family="{FONT}" font-weight="700" font-size="11.5" fill="#ffffff">Inativa</text>')
-    o.append(f'<circle cx="1004" cy="1166" r="13" fill="{c("superficie", "disco")}"/>')
-    o.append(f'<path d="M998,1166 l4.5,4.5 l8,-9" fill="none" stroke="{c("acento", "rosa-foco")}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>')
-    o.append(f'<text x="1026" y="1170" font-family="{FONT}" font-weight="600" font-size="12" fill="#ffffff">Conforme</text>')
-    # barra inferior: promessa e botões
-    o.append(f'<text x="64" y="1240" font-family="{FONT}" font-weight="600" font-size="12.5" fill="#ffffff">{m["promessa"]}</text>')
-    o.append(botao(1022, 1223, 84, "Voltar"))
-    o.append(botao(1116, 1223, 100, "Selecionar"))
+    o.append(f'<text x="988" y="1096" font-family="{FONT}" font-weight="800" font-size="78" letter-spacing="-3" fill="url(#gSig)" stroke="#151515" stroke-opacity="0.5" stroke-width="2" paint-order="stroke fill">5.0</text>')
+    o.append('<rect x="990" y="1128" width="74" height="22" rx="3" fill="url(#gChip)"/>')
+    o.append(f'<text x="1027" y="1143.5" text-anchor="middle" font-family="{FONT}" font-weight="700" font-size="11.5" fill="#ffffff" {CONTORNO}>Ativa</text>')
+    o.append(f'<text x="1084" y="1143.5" font-family="{FONT}" font-weight="700" font-size="11.5" fill="#ffffff">Inativa</text>')
+    # barra inferior: promessa
+    o.append(f'<text x="70" y="1240" font-family="{FONT}" font-weight="600" font-size="12.5" fill="#ffffff">{m["promessa"]}</text>')
 
     # rodapé
     o.append(note(40, 1288, "Conteúdo original, sem ligação com a Rockstar/Take-Two. Nenhuma arte, logotipo, letreiro ou fonte de terceiros é distribuída aqui."))
