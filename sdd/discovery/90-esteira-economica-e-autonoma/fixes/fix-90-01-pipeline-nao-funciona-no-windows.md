@@ -29,10 +29,10 @@ No Windows, após `forge pipeline up` abrir as janelas corretamente (wt.exe ou c
 ## O que já existe
 | Procurei | Onde | Achei | Decisão | Justificativa |
 |---|---|---|---|---|
-| Suporte Windows no worker (SIGTERM) | `cmd/forge-sdd/worker.go:45` | `syscall.SIGTERM` em `signal.NotifyContext` | **remover** `syscall.SIGTERM`; manter só `os.Interrupt` | Go/Windows não entrega `SIGTERM` via `signal.Notify` |
-| Stdin do subprocesso no runner | `internal/pipeline/runner.go:142` | `cmd.Stdin` não atribuído | **definir** `cmd.Stdin = io.NopCloser(strings.NewReader(""))` para runs não interativas | Evita que o Claude CLI herde o console e tente abrir `CONIN$` |
-| Modo acessível no huh | `internal/survey/select.go:40` e `gesture.go` | Nenhuma detecção de TTY | **adicionar** detecção de VT/TTY; passar `WithAccessible(true)` quando não suportado | huh v0.3 suporta modo acessível (texto plano); preserva UX no Windows Terminal |
-| Detecção VT no Windows | `internal/survey/` | Nenhuma | **usar** `term.IsTerminal(int(os.Stdout.Fd()))` (já disponível via `golang.org/x/term` ou verificação manual no Windows) | Decisão: `golang.org/x/term` já indiretamente usado pelo bubbletea; verificar se já é transitivo antes de adicionar `go get` |
+| Suporte Windows no worker (SIGTERM) | `cmd/forge-sdd/worker.go:45` | `syscall.SIGTERM` em `signal.NotifyContext` | estender `cmd/forge-sdd/worker.go` removendo `syscall.SIGTERM` | Go/Windows não entrega `SIGTERM` via `signal.Notify` |
+| Stdin do subprocesso no runner | `internal/pipeline/runner.go:142` | `cmd.Stdin` não atribuído | estender `internal/pipeline/runner.go` definindo `cmd.Stdin` vazio | Evita que o Claude CLI herde o console e tente abrir `CONIN$` |
+| Modo acessível no huh | `internal/survey/select.go:40` e `gesture.go` | Nenhuma detecção de TTY | estender `internal/survey/` adicionando helper `isTTY()` e `WithAccessible` | huh v0.3 suporta modo acessível (texto plano); preserva UX no Windows Terminal |
+| Detecção VT no Windows | `internal/survey/` | Nenhuma | reusar `golang.org/x/term` (já transitivo via bubbletea) para `term.IsTerminal` | Evita nova dependência direta; funciona em Windows, Linux e macOS |
 
 ## Dependências novas
 - `golang.org/x/term` para `term.IsTerminal` — verificar se já é dependência transitiva de `github.com/charmbracelet/bubbletea` antes de declarar (Regra 5: consultar context7 na versão exata); se já transitivo, não adicionar diretamente.
