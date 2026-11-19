@@ -2,7 +2,7 @@
   "feature_id": "feat-101",
   "branch": "feat/101-tema-missoes-v5",
   "spec_status": "reviewed",
-  "updated_at": "2026-11-19T23:11:40Z",
+  "updated_at": "2026-11-19T23:23:45Z",
   "items": [
     {
       "task_id": "fix-101-01-alinhar-readme-e-design-system",
@@ -33,7 +33,7 @@
       "task_id": "feat-101-01-lp-e-wiki-na-edicao-com-validade",
       "title": "feat-101-01 — LP e wiki na Edição Missões, com vigência e retorno automático",
       "spec_path": "sdd/discovery/101-tema-missoes-v5/features/feat-101-01-lp-e-wiki-na-edicao-com-validade.md",
-      "status": "review_pending",
+      "status": "approved",
       "depends_on": [
         "fix-101-01-alinhar-readme-e-design-system"
       ],
@@ -51,7 +51,12 @@
         "FLX-02"
       ],
       "skills_used": [],
-      "attempts": 1
+      "attempts": 1,
+      "governance_verdict": {
+        "veredito": "conforme",
+        "achados": [],
+        "resumo": "A task feat-101-01-lp-e-wiki-na-edicao-com-validade (branch feat/101-tema-missoes-v5, diff ca28be2..HEAD nos commits 268b528 e e0ea64d) está conforme na Camada A e na Camada B. O commit e0ea64d sanou os dois pontos anteriores em docs/edicao/edicao.css ao incluir html[data-edicao=\"missoes\"] .emu-cmd-btn.active no bloco de chips/abas ativas (linhas 48-62) e adicionar font-weight: 700 em html[data-edicao=\"missoes\"] .install-pill button:hover (linhas 73-78). Todos os 9 critérios executáveis da spec, go test -count=1 ./internal/scaffold/, go test ./..., go vet ./... e forge gate --mode bloqueio passaram com saída 0, e S-01 a S-07 e FLX-08 não apresentam violações."
+      }
     },
     {
       "task_id": "feat-101-02-agentes-rebeldes-nas-missoes",
