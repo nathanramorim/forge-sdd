@@ -1,4 +1,4 @@
-# Discovery 100 — Tema "Missões" para o lançamento da v5.0.0
+# Discovery 101 — Tema "Missões" para o lançamento da v5.0.0
 
 ## Problema
 A v5.0.0 do Forge SDD saiu em 19/11/2026, a mesma semana em que todo mundo fala do lançamento do GTA VI. O Nathan quer aproveitar esse momento: "se o Forge SDD tivesse a temática idêntica do GTA VI, como seria", com o número da versão e um letreiro parecido com o do jogo.
@@ -25,6 +25,12 @@ Mudar o nome do produto, criar logo novo do Forge SDD, usar qualquer áudio, ima
 1. Aprova o tema "Missões" como homenagem, sem letreiro parecido?
 2. Onde aplicar primeiro: README + site, ou só posts?
 3. O tema fica só no lançamento (temporário) ou vira identidade da série 5.x?
+
+## Decisões do Gate 1 (Nathan, 19/11/2026: "seguir recomendações")
+1. Tema "Missões" aprovado como **homenagem ao clima**, sem letreiro, logo, "VI", personagens, trilha ou interface do jogo.
+2. Aplicar primeiro no **README (banner), nas notas da versão 5.0.0 e nos posts**; o site `forge-sdd.org` e a imagem de compartilhamento vêm numa segunda etapa.
+3. O tema vale como **edição de lançamento da série 5.0.x**; depois do lançamento, decidir se vira a identidade da série 5.x.
+4. Enviar a decisão ao repositório como PR em rascunho.
 
 ## Dono
 Departamento de TI da Busize (modelo Hub Enterprise) para o produto; Marketing para as peças de divulgação.
