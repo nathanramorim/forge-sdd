@@ -1,0 +1,17 @@
+{
+  "veredito": "conforme",
+  "achados": [
+    {
+      "verificacao": "escopo-item-4",
+      "regra": "GOV-01",
+      "classificacao": "duvida",
+      "severidade": "baixa",
+      "arquivo": "sdd/discovery/88-modo-pipeline-avancado/fixes/fix-88-03-ask-user-e-seletor-obrigatorios.md",
+      "linha": 51,
+      "evidencia": "Escopo item 4: 'Atualizar fix-90-01 como dependência' vs linha 36: 'Dependências novas: Nenhuma'",
+      "explicacao": "O escopo item 4 instrui a listar fix-90-01 como dependência, mas a seção Dependências novas diz 'Nenhuma'. Os commits do fix-90-01 já estão presentes na árvore, o que justifica não bloquear, mas a spec cria contradição interna. Nenhum achado de violação real: o critério executável de auditoria (grep fmt.Scan) retornou vazio e os testes passam.",
+      "correcao": "Se fix-90-01 já está resolvido, remover escopo item 4 ou adicionar nota 'fix-90-01 já mesclado' para eliminar a contradição."
+    }
+  ],
+  "resumo": "Fix conforme. Todos os 5 SKILL.md dos agentes receberam '## Como perguntar ao usuário'; sdd/memory/clarify.md e todos os templates/golden foram atualizados em sincronia; auditoria de fmt.Scan em cmd/ retornou vazio; go vet ./... e go test ./... verdes. Critérios de aceitação executáveis 100% satisfeitos. Único achado: duvida de baixa severidade — contradição cosmética entre Escopo item 4 e Dependências=Nenhuma, inócua pois fix-90-01 já está implementado."
+}

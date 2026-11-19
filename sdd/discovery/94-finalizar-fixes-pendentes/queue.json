@@ -1,0 +1,36 @@
+{
+  "feature_id": "94-finalizar-fixes-pendentes",
+  "branch": "",
+  "spec_status": "reviewed",
+  "updated_at": "2026-11-19T01:15:31Z",
+  "items": [
+    {
+      "task_id": "feat-94-01",
+      "title": "feat-94-01 — Merge PR #91 (fix-88-03 aprovado)",
+      "spec_path": "sdd/discovery/94-finalizar-fixes-pendentes/features/feat-94-01-merge-pr-91.md",
+      "status": "approved",
+      "rules": [
+        "FLX-02",
+        "GOV-01"
+      ],
+      "skills_used": [],
+      "attempts": 0
+    },
+    {
+      "task_id": "feat-94-02",
+      "title": "feat-94-02 — Dispatch e finalizar fix-88-04",
+      "spec_path": "sdd/discovery/94-finalizar-fixes-pendentes/features/feat-94-02-dispatch-e-finalizar-fix-88-04.md",
+      "status": "queued",
+      "depends_on": [
+        "feat-94-01"
+      ],
+      "rules": [
+        "FLX-01",
+        "FLX-02",
+        "GOV-01"
+      ],
+      "skills_used": [],
+      "attempts": 0
+    }
+  ]
+}

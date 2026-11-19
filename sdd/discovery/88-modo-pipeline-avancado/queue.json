@@ -1,0 +1,17 @@
+{
+  "feature_id": "88-modo-pipeline-avancado",
+  "branch": "",
+  "spec_status": "reviewed",
+  "updated_at": "2026-11-19T01:19:02Z",
+  "items": [
+    {
+      "task_id": "fix-88-04",
+      "title": "fix-88-04-ask-user-merge-apos-aprovacao",
+      "spec_path": "sdd/discovery/88-modo-pipeline-avancado/fixes/fix-88-04-ask-user-merge-apos-aprovacao.md",
+      "status": "queued",
+      "rules": [],
+      "skills_used": [],
+      "attempts": 0
+    }
+  ]
+}
