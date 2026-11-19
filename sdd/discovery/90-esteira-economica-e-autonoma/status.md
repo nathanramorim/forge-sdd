@@ -12,3 +12,6 @@
 - Skills do Líder (`novo-fix`, `implementar`, `split-features`) não citam `dispatch --fix` nem `enqueue --base`.
 - Modelo e esforço: `claude` e `agy` confirmados; `gemini` só modelo; `codex` e `copilot` sem flag confirmada.
 - Guia simples: `docs/novidades-esteira-economica.md`.
+
+## Fixes abertos
+- **fix-90-02** (`fix/90-02-metrics-token-e-complexidade`): tokens zerados em sessões de skill-template call e campo `complexidade` reservado no schema. Spec em `fixes/fix-90-02-metrics-token-e-complexidade.md`. Status: `ready` (aguarda Builder).
