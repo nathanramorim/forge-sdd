@@ -125,3 +125,7 @@ go test ./... && go vet ./...
 - Cada item da barra de qualidade conferido e anotado.
 - Com `?edicao=off`, os mascotes são iguais aos de hoje.
 - Peça registrada em `sdd/discovery/101-tema-missoes-v5/revisao-pi.md`.
+
+## Status
+
+- [x] Implementado em `feat-101-02` (19/11/2026): critérios 1 a 6, conferência WebGL (SwiftShader) dos 5 cartões em 1280 px e 390 px (`?edicao=on` vs `?edicao=off`) e medição da barra de qualidade (curvas >= 16 segmentos, sem sobreposição, alturas 18,2% a 42,7% <= 45%, olhos e marcas das estações livres, sem laço extra nem `WebGLRenderer`). `go test ./...`, `go vet ./...` e `forge gate --mode bloqueio` aprovados.

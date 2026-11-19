@@ -2,7 +2,7 @@
   "feature_id": "feat-101",
   "branch": "feat/101-tema-missoes-v5",
   "spec_status": "reviewed",
-  "updated_at": "2026-11-19T23:23:45Z",
+  "updated_at": "2026-11-19T23:34:36Z",
   "items": [
     {
       "task_id": "fix-101-01-alinhar-readme-e-design-system",
@@ -62,7 +62,7 @@
       "task_id": "feat-101-02-agentes-rebeldes-nas-missoes",
       "title": "feat-101-02 — Agentes rebeldes nas 5 missões",
       "spec_path": "sdd/discovery/101-tema-missoes-v5/features/feat-101-02-agentes-rebeldes-nas-missoes.md",
-      "status": "queued",
+      "status": "review_pending",
       "depends_on": [
         "feat-101-01-lp-e-wiki-na-edicao-com-validade"
       ],
@@ -80,7 +80,7 @@
         "FLX-02"
       ],
       "skills_used": [],
-      "attempts": 0
+      "attempts": 1
     },
     {
       "task_id": "feat-101-03-retorno-agendado-da-edicao",
