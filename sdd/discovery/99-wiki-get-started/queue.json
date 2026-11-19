@@ -1,0 +1,47 @@
+{
+  "feature_id": "feat-99-03",
+  "branch": "feat/99-wiki-get-started",
+  "spec_status": "reviewed",
+  "updated_at": "2026-11-19T10:55:14Z",
+  "items": [
+    {
+      "task_id": "feat-99-01-wiki-shell-get-started",
+      "title": "feat-99-01 — Wiki shell + Get Started + componente ai-prompt",
+      "spec_path": "sdd/discovery/99-wiki-get-started/features/feat-99-01-wiki-shell-get-started.md",
+      "status": "queued",
+      "rules": [
+        "ARQ-11",
+        "COD-01",
+        "DUP-02"
+      ],
+      "skills_used": [],
+      "attempts": 0
+    },
+    {
+      "task_id": "feat-99-02-hub-mode",
+      "title": "feat-99-02 — Seção Hub mode",
+      "spec_path": "sdd/discovery/99-wiki-get-started/features/feat-99-02-hub-mode.md",
+      "status": "queued",
+      "rules": [
+        "ARQ-11",
+        "COD-01",
+        "DUP-02"
+      ],
+      "skills_used": [],
+      "attempts": 0
+    },
+    {
+      "task_id": "feat-99-03-cta-lp",
+      "title": "feat-99-03 — CTA \"Get Started\" na landing page",
+      "spec_path": "sdd/discovery/99-wiki-get-started/features/feat-99-03-cta-lp.md",
+      "status": "queued",
+      "rules": [
+        "ARQ-11",
+        "COD-01",
+        "DUP-02"
+      ],
+      "skills_used": [],
+      "attempts": 0
+    }
+  ]
+}
