@@ -1,0 +1,10 @@
+{
+  "comandos": [
+    ["gh", "pr", "merge", "91", "--squash", "--delete-branch"],
+    ["gh", "pr", "view", "91", "--json", "state"],
+    ["gh", "pr", "merge", "--squash", "--delete-branch"]
+  ],
+  "ferramentas": [],
+  "arquivos": [],
+  "consentimentos": []
+}

@@ -1,0 +1,5 @@
+{
+  "veredito": "conforme",
+  "achados": [],
+  "resumo": "Todos os critérios de aceitação satisfeitos com evidência literal: (1) Veredito do fix-88-03 é 'conforme' (sdd/discovery/88-modo-pipeline-avancado/verdicts/job-20261119-000439-88-modo-pipeline-avancado-fix-88-03-review.json); (2) PR #91 state=MERGED (gh pr view 91 --json state); (3) Branch fix/88-03-ask-user-e-seletor-obrigatorios removida (HTTP 404); (4) Merge commit OID 399fde014efa6ae60e0dfb151703ade32aec88fc presente; (5) Diff do PR #92 contém apenas a spec feat-94-01-merge-pr-91.md, sem injeções (FLX-08 limpo); (6) Seção 'O que já existe' preenchida e coerente; (7) Critérios de aceitação executáveis presentes e verificados."
+}
