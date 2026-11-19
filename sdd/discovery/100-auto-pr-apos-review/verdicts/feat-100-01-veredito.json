@@ -1,0 +1,6 @@
+{
+  "veredito": "conforme",
+  "achados": [],
+  "candidate_skill": null,
+  "resumo": "feat-100-01 aprovada. Camada A: C1 (--no-pr: 2 ocorrências), C2 (func OpenPR em pr.go), C3 (prLookPath/\"gh\" presente), C5 (go vet exit 0), C6 (go build exit 0), C4 (6 testes passando). Camada B S-01..S-07 sem violações: fronteiras respeitadas (lógica em internal/queue), reuso de extractSpecTitle (DUP-01), sem segredos, whitelist git/gh em prRunCmd (SEG-03), sem dependência nova, sem candidato a auto-skill."
+}
