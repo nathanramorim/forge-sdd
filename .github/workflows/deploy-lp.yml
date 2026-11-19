@@ -6,6 +6,8 @@ on:
     paths:
       - 'docs/**'
       - 'site/wrangler.jsonc'
+      - '.github/workflows/deploy-lp.yml'
+  workflow_dispatch:
 
 jobs:
   deploy:
@@ -18,3 +20,5 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           workingDirectory: site
+          # O padrão da action (3.90) não lê wrangler.jsonc e falha com "Missing entry-point".
+          wranglerVersion: "4.165.0"

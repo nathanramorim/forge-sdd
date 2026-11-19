@@ -2,5 +2,7 @@
 .vercel
 .DS_Store
 *.local
+.gitignore
+.assetsignore
 video-pipeline/
-video/
+# video/ não entra aqui: a LP (index.html) carrega o vídeo e o pôster dessa pasta.
