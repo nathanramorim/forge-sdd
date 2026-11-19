@@ -1,0 +1,55 @@
+/* Design system GTA VI (forge-sdd 5.0). Espelha tokens.json: ao mudar um, mude o outro. */
+:root {
+  --gta-superficie-preto-moldura: #151515;
+  --gta-superficie-preto-fundo: #060506;
+  --gta-superficie-preto-lateral: #141414;
+  --gta-superficie-tecla: #232123;
+  --gta-superficie-disco: #333334;
+  --gta-superficie-grafite: #343434;
+  --gta-superficie-vinho: #6b193c;
+  --gta-superficie-ameixa: #451b3b;
+  --gta-superficie-painel: #563f5e;
+  --gta-superficie-faixa-inativa: #775882;
+
+  --gta-texto-branco: #ffffff;
+  --gta-texto-inativo: #a48cad;
+  --gta-texto-ativo: #dfa351;
+  --gta-texto-aviso: #e6d364;
+
+  --gta-acento-pessego: #ffaa6e;
+  --gta-acento-coral: #fe818d;
+  --gta-acento-rosa-choque: #f061af;
+  --gta-acento-orquidea: #e446c4;
+  --gta-acento-violeta: #824cc8;
+  --gta-acento-indigo: #4053c6;
+  --gta-acento-ambar: #e28642;
+  --gta-acento-rosa-vida: #fe7694;
+  --gta-acento-laranja-energia: #dd9a48;
+
+  --gta-apoio-salvia: #87a77c;
+  --gta-apoio-salvia-escura: #677c5e;
+  --gta-apoio-lavanda: #9396c0;
+  --gta-apoio-malva: #8774a2;
+  --gta-apoio-azul-baia: #5c7caf;
+  --gta-apoio-azul-claro: #769ac6;
+  --gta-apoio-estrela-apagada: #434a68;
+  --gta-apoio-lilas: #a485aa;
+  --gta-apoio-rosa-antigo: #c283ac;
+  --gta-apoio-mar: #5fa2b9;
+  --gta-apoio-mar-fundo: #5397ac;
+  --gta-apoio-flamingo: #be50db;
+
+  --gta-degrade-assinatura: linear-gradient(90deg, #ffaa6e 0%, #fda96a 20%, #fd967d 35%, #fe818d 51%, #fd749b 66%, #f668aa 82%, #f061af 100%);
+  --gta-degrade-chip: linear-gradient(90deg, #f7a164 0%, #f88b7a 25%, #f77191 50%, #f05e9e 75%, #e850af 100%);
+  --gta-degrade-prancha: linear-gradient(90deg, #fea96a 0%, #ff927f 25%, #ff818c 37%, #f87795 50%, #e57999 62%, #cd7c9e 75%, #a780a6 100%);
+  --gta-degrade-ceu: linear-gradient(180deg, #5764b0 0%, #845d9e 30%, #ca84a9 62%, #e9949c 82%, #ffb06d 100%);
+  --gta-degrade-sol-crepusculo: linear-gradient(180deg, #4053c6 0%, #824cc8 12%, #a849c7 25%, #e747c9 37%, #f161ae 50%, #f66e9f 62%, #f0798f 75%, #d16f58 87%, #cc7743 100%);
+  --gta-degrade-sol-orquidea: linear-gradient(180deg, #e446c4 0%, #ee4fbc 37%, #f35caf 50%, #f269a5 75%, #e8698e 100%);
+  --gta-degrade-sol-ambar: linear-gradient(180deg, #de8640 0%, #e28642 25%, #e1884e 62%, #cd7745 100%);
+
+  --gta-fonte-display: Pricedown, 'Arial Black', Impact, 'Helvetica Neue', sans-serif;
+  --gta-fonte-titulo-corpo: GTAArtDeco, 'Avenir Next', Avenir, Futura, 'Century Gothic', Montserrat, 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif;
+  --gta-fonte-rotulo: 'Zilla Slab', Rockwell, 'Roboto Slab', Georgia, serif;
+  --gta-fonte-script: SignPainter, 'Brush Script MT', 'Segoe Script', cursive;
+  --gta-fonte-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}

@@ -1,0 +1,6 @@
+.env*
+.vercel
+.DS_Store
+*.local
+video-pipeline/
+video/

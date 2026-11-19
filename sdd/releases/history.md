@@ -4,6 +4,21 @@ Este arquivo registra o histórico de entregas de produto deste projeto.
 
 ## Entregas
 
+### Versão 5.0.0 — Wiki Get Started, PR Automático e Edição GTA VI (Estável)
+
+Compatível com a 4.8.0. Consolida em versão estável tudo o que foi entregue na linha 4.9.x e nas Iniciativas 97 a 100.
+
+*   **Wiki Get Started (`forge-sdd.org/wiki`):** uma jornada guiada de instalação, primeira feature e ciclo completo. Cada passo traz um bloco "Prompt para IA", pronto para copiar e colar no seu agente. Inclui o modo Hub, para usar o forge-sdd em vários repositórios, e uma seção sobre `/constitution`. O botão "Get Started" da landing page leva direto para lá (Iniciativa 99).
+*   **PR automático depois da revisão (`forge queue review`):** quando o veredito é `conforme`, o comando envia a branch e abre o PR com `gh pr create`, sem perguntar. Use `--no-pr` para pular (Iniciativa 100).
+*   **Revise a spec sem sair da conversa:** ao encerrar `/discovery`, `/nova-feature`, `/novo-fix` ou `/split-features`, o agente pergunta se você quer revisar os artefatos gerados antes de seguir para o Gate 1, sem navegar pelas pastas (`feat-97-03`).
+*   **Worktrees ociosos não se acumulam:** ao iniciar `forge up`, `forge worker` ou `forge inbox`, o forge detecta worktrees em `.forge/runtime/worktrees/` que podem ser removidos com segurança e oferece a limpeza (`feat-97-02`).
+*   **Métricas de sessão com tokens de verdade:** corrigidos os `tokens_input: 0` e `tokens_output: 0` em `sdd/.metrics/session-*.json`. O campo `complexidade` fica reservado no schema, ainda sem preenchimento (`feat-97-01`).
+*   **Diagramas C4 com dois motores:** a skill de diagramas pergunta, a cada uso, se você quer Mermaid ou diagram-studio (Iniciativa 98).
+*   **`forge rules` volta a achar os IDs da Constituição** (`fix-88-05`).
+*   **Vindo da linha 4.9.x:** o modo pipeline avançado (experimental), o menu Settings e os tetos desligados por padrão passam a fazer parte da versão estável. O modo normal não muda.
+*   **Edição GTA VI:** o README ganha um banner temático e o projeto ganha um design system próprio para a edição, em `docs/design/gta-vi/`, com cores, degradês, tipografia e componentes medidos em um conceito de interface publicado no Behance. É uma homenagem de fã, sem vínculo com a Rockstar Games.
+*   **Como atualizar:** `npm install -g @nathanramorim/forge-sdd` e, nos projetos existentes, `forge update`.
+
 ### Versão 4.9.1 — Correções do Modo Avançado: Fila, Teto Diário e Tetos no Settings (Beta)
 
 Compatível com a 4.9.0-beta (Iniciativas 84 e 88).

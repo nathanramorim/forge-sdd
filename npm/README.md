@@ -1,17 +1,17 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/nathanramorim/forge-sdd/main/docs/img/banner.png" alt="forge-sdd: seu time de IA, com método" width="100%">
+  <img src="https://raw.githubusercontent.com/nathanramorim/forge-sdd/main/docs/img/banner-v5-gta-vi.png" alt="forge-sdd 5.0, edição GTA VI: seu time de IA, com método" width="100%">
 </p>
 
 <p align="center">
-  <a href="https://www.npmjs.com/package/@nathanramorim/forge-sdd"><img alt="npm" src="https://img.shields.io/npm/v/@nathanramorim/forge-sdd?label=npm&color=cb3837&labelColor=0d0f14"></a>
-  <a href="https://github.com/nathanramorim/forge-sdd/releases"><img alt="versão" src="https://img.shields.io/github/v/tag/nathanramorim/forge-sdd?label=vers%C3%A3o&color=4f8ef7&labelColor=0d0f14"></a>
-  <img alt="licença" src="https://img.shields.io/badge/licen%C3%A7a-MIT-3ecf8e?labelColor=0d0f14">
-  <img alt="agentes" src="https://img.shields.io/badge/agentes-Claude%20·%20Gemini%20·%20Copilot%20·%20Codex-8aa4ff?labelColor=0d0f14">
+  <a href="https://www.npmjs.com/package/@nathanramorim/forge-sdd"><img alt="npm" src="https://img.shields.io/npm/v/@nathanramorim/forge-sdd?label=npm&color=f061af&labelColor=151515"></a>
+  <a href="https://github.com/nathanramorim/forge-sdd/releases"><img alt="versão" src="https://img.shields.io/github/v/tag/nathanramorim/forge-sdd?label=vers%C3%A3o&color=e28642&labelColor=151515"></a>
+  <img alt="licença" src="https://img.shields.io/badge/licen%C3%A7a-MIT-87a77c?labelColor=151515">
+  <img alt="agentes" src="https://img.shields.io/badge/agentes-Claude%20·%20Gemini%20·%20Copilot%20·%20Codex-824cc8?labelColor=151515">
 </p>
 
 <h3 align="center">Seu time de IA, com método.<br>Do plano ao PR, sem repetir instruções.</h3>
 
-<p align="center"><strong>Versão atual: 4.8.0 (estável)</strong> · <a href="https://github.com/nathanramorim/forge-sdd/blob/main/sdd/releases/history.md">veja as novidades</a></p>
+<p align="center"><strong>Versão atual: 5.0.0 (estável)</strong> · <a href="https://github.com/nathanramorim/forge-sdd/blob/main/sdd/releases/history.md">veja as novidades</a> · <a href="https://github.com/nathanramorim/forge-sdd/blob/main/docs/design/gta-vi/README.md">edição GTA VI</a></p>
 
 <p align="center">
   <a href="https://forge-sdd.org">Site oficial</a> ·
@@ -105,6 +105,7 @@ A telemetria é opcional e fica no seu projeto. No modo `forge worker --raw`, a 
 
 | Versão | Novidades |
 |---|---|
+| **5.0.0** | Edição GTA VI: wiki Get Started com prompts prontos para IA e modo Hub, PR aberto sozinho quando a revisão dá conforme, limpeza de worktrees ociosos e revisão dos artefatos da spec sem sair da conversa. |
 | **4.8.0** | Versão estável do painel interativo: stream de chat nos workers, fila com abas e drill-down, popup no tmux e fila que acompanha a aprovação do Reviewer. |
 | **4.6.x** | Comando único `forge`, painel vivo executivo e tokens por janela com reset suave. |
 | **4.2.0-beta** | Pipeline multi-sessão: Discovery, Builder e Reviewer trabalhando juntos. |
