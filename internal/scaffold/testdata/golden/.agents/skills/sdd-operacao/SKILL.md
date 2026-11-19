@@ -30,3 +30,6 @@ Concepção (`sdd-concepcao`) → Gate 1 humano (`FLX-01`) → Planejamento (`sd
 - Cada estação recebe só as rules e skills da task ativa (`GOV-04`).
 - Estado vive na pasta da iniciativa (`status.md`, `queue.json`); nada de índice ou progresso globais.
 - Antes de agir, reporte a intenção e pergunte se a atividade deve ir para um subagente.
+
+## Como perguntar ao usuário
+`AskUserQuestion`; ver `sdd/memory/clarify.md`.
