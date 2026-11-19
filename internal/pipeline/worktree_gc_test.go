@@ -72,8 +72,7 @@ func TestWorktreeGC_JobEmExecucao(t *testing.T) {
 	// Monta worktree falso.
 	jobID := "gc-job-01"
 	taskID := "97-02"
-	wtRoot := filepath.Join(dir, ".forge", "runtime", "worktrees")
-	require.NoError(t, os.MkdirAll(filepath.Join(wtRoot, jobID, taskID), 0o755))
+	require.NoError(t, os.MkdirAll(filepath.Join(layout.Worktrees(dir), jobID, taskID), 0o755))
 
 	// Cria e reivindica o job no barramento (coloca em processing).
 	j := bus.Job{
@@ -111,8 +110,7 @@ func TestWorktreeGC_TaskAprovada(t *testing.T) {
 	jobID := "gc-job-02"
 	taskID := "97-02"
 	initiative := "97-gc-test"
-	wtRoot := filepath.Join(dir, ".forge", "runtime", "worktrees")
-	require.NoError(t, os.MkdirAll(filepath.Join(wtRoot, jobID, taskID), 0o755))
+	require.NoError(t, os.MkdirAll(filepath.Join(layout.Worktrees(dir), jobID, taskID), 0o755))
 
 	// Cria job no barramento, reivindica e conclui (coloca em done).
 	j := bus.Job{
@@ -146,7 +144,8 @@ func TestWorktreeGC_TaskAprovada(t *testing.T) {
 			},
 		},
 	}
-	queuePath := filepath.Join(dir, "sdd", "discovery", initiative, "queue.json")
+	queuePath, err := layout.InitiativeQueue(dir, initiative)
+	require.NoError(t, err)
 	require.NoError(t, os.MkdirAll(filepath.Dir(queuePath), 0o755))
 	raw, err := json.Marshal(queueData)
 	require.NoError(t, err)
