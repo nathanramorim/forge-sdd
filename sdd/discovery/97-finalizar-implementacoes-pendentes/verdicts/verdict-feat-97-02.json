@@ -1,0 +1,58 @@
+{
+  "task_id": "feat-97-02",
+  "pr": 103,
+  "veredito": "violacao",
+  "achados": [
+    {
+      "verificacao": "S-03",
+      "regra": "DUP-01",
+      "regra_descricao": "Um conceito, uma casa: cada conceito central tem um único pacote dono em sdd/spec/concepts.md.",
+      "classificacao": "violacao",
+      "severidade": "media",
+      "arquivo": "internal/pipeline/worktree_gc.go",
+      "linha": 27,
+      "evidencia": "worktree_gc.go:26-28: // gcNormalizeTaskID remove espaços e o prefixo \"feat-\" de um ID de task (mesma regra da fila).\nfunc gcNormalizeTaskID(id string) string {\n    return strings.TrimSpace(strings.TrimPrefix(strings.TrimSpace(id), \"feat-\"))\n}\nqueue.go:684-687: // normalizeTaskID é a regra única de ID de task: sem espaços nas pontas e sem o prefixo \"feat-\".\nfunc normalizeTaskID(id string) string {\n    return strings.TrimSpace(strings.TrimPrefix(strings.TrimSpace(id), \"feat-\"))\n}",
+      "explicacao": "A função gcNormalizeTaskID em internal/pipeline/worktree_gc.go é semanticamente idêntica a normalizeTaskID em internal/queue/queue.go. O comentário \"mesma regra da fila\" no próprio código confirma que o autor reconheceu a duplicação. A solução correta é exportar a função do pacote queue como NormalizeTaskID e reutilizá-la em worktree_gc.go, mantendo uma única fonte de verdade para a normalização de IDs de task.",
+      "correcao": "Renomear normalizeTaskID para NormalizeTaskID em internal/queue/queue.go (exportar) e substituir gcNormalizeTaskID em worktree_gc.go pela chamada queue.NormalizeTaskID."
+    },
+    {
+      "verificacao": "S-04",
+      "regra": "TST-01",
+      "regra_descricao": "Toda feature ou fix tem critério executável com go build ou go test (Regra 6).",
+      "classificacao": "violacao",
+      "severidade": "media",
+      "arquivo": "internal/pipeline/worktree_gc_test.go",
+      "linha": 60,
+      "evidencia": "Spec §3 lista 5 testes obrigatórios:\n- TestListStaleWorktrees_DirAusente ✓ (presente como TestWorktreeGC_ListDirAusente)\n- TestListStaleWorktrees_OrphanDetectado ✓ (presente como TestWorktreeGC_OrphanSafe)\n- TestListStaleWorktrees_JobEmExecucao ✗ AUSENTE (Safe=false quando StateProcessing)\n- TestListStaleWorktrees_TaskAprovada ✗ AUSENTE (Safe=true quando StateDone+StatusApproved)\n- TestSweepWorktrees_RemoveApenas SafeTrue ✗ PARCIAL: TestWorktreeGC_SweepNaoRemoveProt verifica que Safe=false não é removido, mas não verifica que Safe=true É removido.\nArquivo termina na linha 60; os 4 testes presentes cobrem apenas o subconjunto de casos básicos.",
+      "explicacao": "Faltam dois dos cinco testes exigidos pela spec: TestListStaleWorktrees_JobEmExecucao (ramificação StateProcessing → Safe=false) e TestListStaleWorktrees_TaskAprovada (ramificação StateDone+StatusApproved → Safe=true). Esses dois casos são justamente as ramificações principais do algoritmo de classificação, que é o coração da feature. Sem eles, a lógica central de classificação não tem cobertura executável. O teste de sweep também cobre apenas metade do contrato (não-remoção de Safe=false sem verificar a remoção de Safe=true).",
+      "correcao": "Adicionar TestListStaleWorktrees_JobEmExecucao com job no estado StateProcessing (via bus mock ou arquivo JSON de bus real) e assertar Safe=false; adicionar TestListStaleWorktrees_TaskAprovada com job no estado StateDone e task com StatusApproved na fila e assertar Safe=true; estender o teste de sweep para verificar que worktrees Safe=true são de fato removidos."
+    },
+    {
+      "verificacao": "S-01",
+      "regra": "ARQ-01",
+      "regra_descricao": "cmd/ só adapta a CLI (flags); regras e domínio ficam em internal/, que nunca importa cmd/.",
+      "classificacao": "duvida",
+      "severidade": "baixa",
+      "arquivo": "cmd/forge-sdd/up.go",
+      "linha": 151,
+      "evidencia": "Spec §4 (checkStaleWorktrees): \"oferecer seleção com survey.MultiSelect / Chama SweepWorktrees com os selecionados\" e \"Usar internal/survey para MultiSelect (nunca huh diretamente em cmd/; ARQ-01)\".\nImplementação atual (linhas 151-174): apenas imprime lista e diz \"rode forge pipeline worktree gc para limpar\" — não chama survey.MultiSelect nem SweepWorktrees.",
+      "explicacao": "A spec exige que checkStaleWorktrees ofereça seleção interativa via internal/survey.MultiSelect e chame SweepWorktrees com os itens selecionados. A implementação atual é apenas informativa. O prompt de revisão pergunta \"Apenas informa, não bloqueia?\" — sugerindo que o chamador pode considerar o comportamento simplificado aceitável. Fica como dúvida se a redução de escopo (informar em vez de selecionar/remover inline) foi intencional ou é uma omissão.",
+      "correcao": "Confirmar com o autor: se o design simplificado (apenas informar) é deliberado, atualizar a spec §4 para refletir isso; se a seleção interativa é requisito, implementar survey.MultiSelect em checkStaleWorktrees e chamar SweepWorktrees com os itens selecionados."
+    },
+    {
+      "verificacao": "S-01",
+      "regra": null,
+      "regra_descricao": null,
+      "classificacao": "duvida",
+      "severidade": "media",
+      "arquivo": "cmd/forge-sdd/worker.go",
+      "linha": 274,
+      "evidencia": "Spec §5: \"Sem --dry-run: lista Safe=true, pede confirmação, chama SweepWorktrees\".\nImplementação (linha 274): errs := pipeline.SweepWorktrees(dir, safe) — chamada direta sem prompt de confirmação.\nRemoveWorktree (internal/pipeline/worktree.go:66): usa git worktree remove --force, que descarta mudanças não commitadas.",
+      "explicacao": "O comando forge pipeline worktree gc sem --dry-run chama SweepWorktrees imediatamente sem pedir confirmação ao usuário. Como RemoveWorktree usa --force (remove mesmo com work-tree sujo), uma classificação equivocada como Safe=true poderia levar à perda de trabalho não commitado sem aviso. A spec exige confirmação explícita neste passo. Nenhuma regra da Constituição cobre especificamente confirmação antes de operações destrutivas, mas a ausência viola o critério de aceitação §5.",
+      "correcao": "Adicionar prompt de confirmação antes de chamar SweepWorktrees, ex.: ok, err := survey.ConfirmYesNo(out, fmt.Sprintf(\"Remover %d worktree(s)?\", len(safe))); se !ok { return nil }."
+    }
+  ],
+  "candidate_skill": null,
+  "resumo": "Duas violacoes bloqueantes: DUP-01 (gcNormalizeTaskID em internal/pipeline/worktree_gc.go duplica normalizeTaskID de internal/queue/queue.go — o comentário \"mesma regra da fila\" confirma a duplicação; fix: exportar NormalizeTaskID de queue) e TST-01 (faltam TestListStaleWorktrees_JobEmExecucao e TestListStaleWorktrees_TaskAprovada, os dois casos centrais do algoritmo de classificação, além do lado positivo do teste de sweep). Duas dúvidas: checkStaleWorktrees não implementa o survey.MultiSelect exigido pela spec §4 (pode ser redução de escopo intencional, confirmar com o autor); forge pipeline worktree gc sem --dry-run chama SweepWorktrees com --force sem pedir confirmação, violando o critério §5 e arriscando perda de trabalho não commitado. go build, go vet e go test ./internal/pipeline/... -run TestWorktreeGC passam. forge bus review não foi executado: job ID não fornecido no prompt.",
+  "revisado_em": "2026-11-19T06:25:23Z"
+}
