@@ -40,94 +40,37 @@
           <span class="ai-prompt__label" data-pt="Prompt para IA" data-en="AI Prompt">Prompt para IA</span>
           <button class="ai-prompt__copy" onclick="copyPrompt(this)" data-pt="Copiar" data-en="Copy">Copiar</button>
         </div>
-        <pre class="ai-prompt__code" data-pt="Vou instalar e configurar o forge-sdd neste projeto.
-Antes de rodar qualquer comando, preciso de algumas informações.
-Para cada pergunta: se você não souber, diga &quot;não sei&quot; e eu sugiro o que faz mais sentido.
+        <pre class="ai-prompt__code" data-pt="Quero instalar o forge-sdd aqui. Me ajude a configurar.
 
-1. Qual é o nome deste projeto?
-   (qualquer nome curto, ex: &quot;minha-api&quot;, &quot;app-vendas&quot;, &quot;site-pessoal&quot;)
+Primeira pergunta: o que você está construindo?
+Descreva com suas palavras — pode ser simples, ex:
+&quot;um app de agendamentos&quot;, &quot;uma API para meu e-commerce&quot;, &quot;um script que lê planilhas&quot;.
 
-2. Com qual tecnologia principal você está programando?
-   • Go         — backend, APIs, CLIs
-   • Node.js    — JavaScript ou TypeScript
-   • Python     — scripts, dados, IA
-   • Rust       — sistemas, performance extrema
-   • Outra      — qualquer outra linguagem
+Com base no que você me contar, vou sugerir a melhor configuração
+seguindo boas práticas de mercado e confirmar antes de instalar.
 
-3. Este projeto usa banco de dados?
-   • PostgreSQL — banco relacional (recomendado para produção)
-   • SQLite     — banco local sem servidor (ótimo para começar)
-   • MongoDB    — banco de documentos
-   • Nenhum     — sem banco de dados por enquanto
+Se preferir instalar agora com configuração padrão e ajustar depois,
+responda apenas: padrão" data-en="I want to install forge-sdd here. Help me set it up.
 
-4. Qual IA você está usando para programar?
-   • Claude     — Anthropic (você está usando agora)
-   • Copilot    — GitHub / Microsoft
-   • Gemini     — Google
+First question: what are you building?
+Describe in your own words — keep it simple, e.g.:
+&quot;a scheduling app&quot;, &quot;an API for my e-commerce&quot;, &quot;a script that reads spreadsheets&quot;.
 
-Com as respostas, vou rodar:
-npm i -g @nathanramorim/forge-sdd
-forge init --yes --name &quot;[nome]&quot; --stack [stack] --db [db] --agent [agente]
+Based on what you tell me, I'll suggest the best configuration
+following market best practices and confirm before installing.
 
-Ao final, me mostre a estrutura sdd/ criada e explique em 2 frases o que cada pasta faz." data-en="I'll install and configure forge-sdd in this project.
-Before running any command, I need some information.
-For each question: if you don't know, say &quot;not sure&quot; and I'll suggest what makes sense.
+If you'd rather install now with default settings and adjust later,
+just reply: default">Quero instalar o forge-sdd aqui. Me ajude a configurar.
 
-1. What is the project name?
-   (any short name, e.g. &quot;my-api&quot;, &quot;sales-app&quot;, &quot;personal-site&quot;)
+Primeira pergunta: o que você está construindo?
+Descreva com suas palavras — pode ser simples, ex:
+"um app de agendamentos", "uma API para meu e-commerce", "um script que lê planilhas".
 
-2. What is the main technology you're using?
-   • Go         — backend, APIs, CLIs
-   • Node.js    — JavaScript or TypeScript
-   • Python     — scripts, data, AI
-   • Rust       — systems, extreme performance
-   • Other      — any other language
+Com base no que você me contar, vou sugerir a melhor configuração
+seguindo boas práticas de mercado e confirmar antes de instalar.
 
-3. Does this project use a database?
-   • PostgreSQL — relational database (recommended for production)
-   • SQLite     — local database, no server needed (great to start)
-   • MongoDB    — document database
-   • None       — no database for now
-
-4. Which AI are you using to code?
-   • Claude     — Anthropic (you're using it right now)
-   • Copilot    — GitHub / Microsoft
-   • Gemini     — Google
-
-With the answers, I'll run:
-npm i -g @nathanramorim/forge-sdd
-forge init --yes --name &quot;[name]&quot; --stack [stack] --db [db] --agent [agent]
-
-Afterward, show me the sdd/ structure and explain in 2 sentences what each folder does.">Vou instalar e configurar o forge-sdd neste projeto.
-Antes de rodar qualquer comando, preciso de algumas informações.
-Para cada pergunta: se você não souber, diga "não sei" e eu sugiro o que faz mais sentido.
-
-1. Qual é o nome deste projeto?
-   (qualquer nome curto, ex: "minha-api", "app-vendas", "site-pessoal")
-
-2. Com qual tecnologia principal você está programando?
-   • Go         — backend, APIs, CLIs
-   • Node.js    — JavaScript ou TypeScript
-   • Python     — scripts, dados, IA
-   • Rust       — sistemas, performance extrema
-   • Outra      — qualquer outra linguagem
-
-3. Este projeto usa banco de dados?
-   • PostgreSQL — banco relacional (recomendado para produção)
-   • SQLite     — banco local sem servidor (ótimo para começar)
-   • MongoDB    — banco de documentos
-   • Nenhum     — sem banco de dados por enquanto
-
-4. Qual IA você está usando para programar?
-   • Claude     — Anthropic (você está usando agora)
-   • Copilot    — GitHub / Microsoft
-   • Gemini     — Google
-
-Com as respostas, vou rodar:
-npm i -g @nathanramorim/forge-sdd
-forge init --yes --name "[nome]" --stack [stack] --db [db] --agent [agente]
-
-Ao final, me mostre a estrutura sdd/ criada e explique em 2 frases o que cada pasta faz.</pre>
+Se preferir instalar agora com configuração padrão e ajustar depois,
+responda apenas: padrão</pre>
       </div>
 
       <h3 class="subsection-title" id="constitution">2. Defina as regras do projeto (<code>/constitution</code>)</h3>
