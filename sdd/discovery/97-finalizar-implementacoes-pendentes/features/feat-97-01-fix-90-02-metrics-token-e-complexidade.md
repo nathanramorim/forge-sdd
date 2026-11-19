@@ -4,6 +4,10 @@
 **Status:** ready
 **Tamanho:** M
 
+## Modelo do módulo
+
+**Enxuto** (ARQ-11): sem pacote novo. Altera arquivos existentes em `internal/monitor/`, `cmd/forge-sdd/`, `.agents/skills/`, `internal/scaffold/templates/` e `sdd/.metrics/`. Nenhum novo package Go é criado.
+
 ## Objetivo
 
 Corrigir o bug de `tokens_input: 0` / `tokens_output: 0` em `sdd/.metrics/session-*.json` nos paths de skill-template call, e reservar o campo `complexidade` no schema e na struct Go (sem lógica de preenchimento).
