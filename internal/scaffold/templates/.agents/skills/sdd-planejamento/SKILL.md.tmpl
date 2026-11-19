@@ -23,3 +23,6 @@ Comando: `/split-features` (`references/split-features.md`).
 
 ## Handoff
 Devolva plano e tasks ao Líder; o humano aprova a quebra e o enfileiramento (`forge queue enqueue`).
+
+## Como perguntar ao usuário
+`AskUserQuestion`; ver `sdd/memory/clarify.md`.
