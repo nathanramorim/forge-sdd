@@ -1,0 +1,264 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="1330" viewBox="0 0 1280 1330" role="img" aria-label="Espécime do design system GTA VI do forge-sdd: tipografia, paleta, degradês, cores e componentes.">
+<title>Design system GTA VI — espécime</title>
+<defs>
+<linearGradient id="gSig" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#ffaa6e"/><stop offset="0.2" stop-color="#fda96a"/><stop offset="0.35" stop-color="#fd967d"/><stop offset="0.51" stop-color="#fe818d"/><stop offset="0.66" stop-color="#fd749b"/><stop offset="0.82" stop-color="#f668aa"/><stop offset="1" stop-color="#f061af"/></linearGradient>
+<linearGradient id="gChip" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#f7a164"/><stop offset="0.25" stop-color="#f88b7a"/><stop offset="0.5" stop-color="#f77191"/><stop offset="0.75" stop-color="#f05e9e"/><stop offset="1" stop-color="#e850af"/></linearGradient>
+<linearGradient id="gPr" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fea96a"/><stop offset="0.25" stop-color="#ff927f"/><stop offset="0.37" stop-color="#ff818c"/><stop offset="0.5" stop-color="#f87795"/><stop offset="0.62" stop-color="#e57999"/><stop offset="0.75" stop-color="#cd7c9e"/><stop offset="1" stop-color="#a780a6"/></linearGradient>
+<linearGradient id="gSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5764b0"/><stop offset="0.3" stop-color="#845d9e"/><stop offset="0.62" stop-color="#ca84a9"/><stop offset="0.82" stop-color="#e9949c"/><stop offset="1" stop-color="#ffb06d"/></linearGradient>
+<linearGradient id="gS1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4053c6"/><stop offset="0.12" stop-color="#824cc8"/><stop offset="0.25" stop-color="#a849c7"/><stop offset="0.37" stop-color="#e747c9"/><stop offset="0.5" stop-color="#f161ae"/><stop offset="0.62" stop-color="#f66e9f"/><stop offset="0.75" stop-color="#f0798f"/><stop offset="0.87" stop-color="#d16f58"/><stop offset="1" stop-color="#cc7743"/></linearGradient>
+<linearGradient id="gS2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e446c4"/><stop offset="0.37" stop-color="#ee4fbc"/><stop offset="0.5" stop-color="#f35caf"/><stop offset="0.75" stop-color="#f269a5"/><stop offset="1" stop-color="#e8698e"/></linearGradient>
+<linearGradient id="gS3" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#de8640"/><stop offset="0.25" stop-color="#e28642"/><stop offset="0.62" stop-color="#e1884e"/><stop offset="1" stop-color="#cd7745"/></linearGradient>
+<linearGradient id="gSkyH" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#5764b0"/><stop offset="0.3" stop-color="#845d9e"/><stop offset="0.62" stop-color="#ca84a9"/><stop offset="0.82" stop-color="#e9949c"/><stop offset="1" stop-color="#ffb06d"/></linearGradient>
+<filter id="fGlow" x="-5%" y="-400%" width="110%" height="900%"><feGaussianBlur stdDeviation="3"/></filter>
+<clipPath id="cHead"><rect x="0" y="0" width="1280" height="150"/></clipPath>
+<clipPath id="cBody"><rect x="40" y="996" width="1200" height="222"/></clipPath>
+</defs>
+<rect width="1280" height="1330" fill="#6b193c"/>
+<g clip-path="url(#cHead)">
+<rect width="1280" height="150" fill="url(#gPr)"/>
+<g fill="#451b3b" opacity="0.42"><path d="M1083.7,156 Q1082.6,91.1 1069.8,38.0 L1074.2,38.0 Q1088.6,91.1 1092.3,156 Z"/><path d="M1072.0,38.0 Q1048.6,44.4 1029.4,71.8 Q1053.0,53.8 1072.0,38.0 Z M1072.0,38.0 Q1037.3,19.9 1008.9,55.9 Q1035.3,33.8 1072.0,38.0 Z M1072.0,38.0 Q1041.4,-2.2 1016.4,24.8 Q1033.2,10.0 1072.0,38.0 Z M1072.0,38.0 Q1055.8,-11.0 1042.5,5.7 Q1044.5,-4.5 1072.0,38.0 Z M1072.0,38.0 Q1070.1,-8.1 1068.5,3.4 Q1059.2,-7.3 1072.0,38.0 Z M1072.0,38.0 Q1085.2,-13.1 1096.0,2.5 Q1097.1,-7.8 1072.0,38.0 Z M1072.0,38.0 Q1101.1,-5.0 1124.9,20.4 Q1110.2,6.6 1072.0,38.0 Z M1072.0,38.0 Q1106.5,18.2 1134.8,53.4 Q1109.0,32.0 1072.0,38.0 Z M1072.0,38.0 Q1095.9,42.7 1115.5,70.3 Q1092.1,52.3 1072.0,38.0 Z"/><circle cx="1072.0" cy="38.0" r="4.3"/></g>
+<g fill="#451b3b" opacity="0.5"><path d="M1184.8,156 Q1188.4,73.5 1201.4,6.0 L1206.6,6.0 Q1195.8,73.5 1195.2,156 Z"/><path d="M1204.0,6.0 Q1175.4,13.9 1152.0,47.2 Q1180.8,25.3 1204.0,6.0 Z M1204.0,6.0 Q1161.6,-16.1 1127.0,27.9 Q1159.2,0.8 1204.0,6.0 Z M1204.0,6.0 Q1166.7,-43.1 1136.1,-10.2 Q1156.6,-28.2 1204.0,6.0 Z M1204.0,6.0 Q1184.2,-53.8 1168.0,-33.4 Q1170.4,-45.9 1204.0,6.0 Z M1204.0,6.0 Q1201.7,-50.3 1199.8,-36.3 Q1188.4,-49.3 1204.0,6.0 Z M1204.0,6.0 Q1220.1,-56.4 1233.3,-37.3 Q1234.6,-49.9 1204.0,6.0 Z M1204.0,6.0 Q1239.5,-46.6 1268.5,-15.4 Q1250.6,-32.4 1204.0,6.0 Z M1204.0,6.0 Q1246.1,-18.1 1280.6,24.8 Q1249.1,-1.3 1204.0,6.0 Z M1204.0,6.0 Q1233.2,11.8 1257.2,45.4 Q1228.5,23.5 1204.0,6.0 Z"/><circle cx="1204.0" cy="6.0" r="5.2"/></g>
+</g>
+<text x="40" y="84" font-family="'Arial Black', 'Avenir Next', 'Helvetica Neue', 'Segoe UI', system-ui, sans-serif" font-weight="900" font-size="44" letter-spacing="0.5" fill="#ffffff">DESIGN SYSTEM GTA VI</text>
+<text x="40" y="116" font-family="'Avenir Next', Avenir, Futura, 'Century Gothic', Montserrat, 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif" font-weight="600" font-size="15" fill="#ffffff">forge-sdd 5.0 · tokens medidos nas pranchas do conceito de UI de Matías Rodríguez (Behance, 2025)</text>
+<text x="40" y="200" font-family="'Zilla Slab', Rockwell, 'Roboto Slab', Georgia, serif" font-size="20" fill="#ffffff">Tipografia</text>
+<text x="40" y="244" font-family="'Arial Black', 'Avenir Next', 'Helvetica Neue', 'Segoe UI', system-ui, sans-serif" font-weight="900" font-size="26" letter-spacing="0.6" fill="#ffffff" stroke="#151515" stroke-width="5" stroke-linejoin="round" paint-order="stroke fill">DISCOVERY · BUILDER · REVIEWER</text>
+<text x="40" y="266" text-anchor="start" font-family="'Avenir Next', Avenir, Futura, 'Century Gothic', Montserrat, 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif" font-weight="500" font-size="12" fill="#e7c9d5">Display · Pricedown no conceito · botões, abas, menus em jogo e dinheiro</text>
+<text x="40" y="312" font-family="'Avenir Next', Avenir, Futura, 'Century Gothic', Montserrat, 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif" font-weight="700" font-size="22" letter-spacing="1.8" fill="#ffffff">SEU TIME DE IA, COM MÉTODO.</text>
+<text x="40" y="336" font-family="'Avenir Next', Avenir, Futura, 'Century Gothic', Montserrat, 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif" font-weight="500" font-size="15" fill="#ffffff">Do plano ao PR, sem repetir instruções.</text>
+<text x="40" y="358" text-anchor="start" font-family="'Avenir Next', Avenir, Futura, 'Century Gothic', Montserrat, 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif" font-weight="500" font-size="12" fill="#e7c9d5">Títulos e corpo · GTAArtDeco no conceito · título em caixa alta espaçada</text>
+<text x="40" y="402" font-family="'Zilla Slab', Rockwell, 'Roboto Slab', Georgia, serif" font-size="19" fill="#ffffff">Rótulo de seção</text>
+<text x="212" y="404" font-family="SignPainter, 'Brush Script MT', 'Segoe Script', cursive" font-size="30" fill="#ffffff">Tela de loading</text>
+<text x="40" y="424" text-anchor="start" font-family="'Avenir Next', Avenir, Futura, 'Century Gothic', Montserrat, 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif" font-weight="500" font-size="12" fill="#e7c9d5">Rótulos em serifa egípcia e títulos de prancha em script (observados, não declarados)</text>
+<g transform="translate(40 448) scale(0.56)"><g fill="none" stroke="#151515" stroke-width="24" stroke-linejoin="round" stroke-linecap="round"><path transform="translate(0 0)" d="M17,64 V7 H48"/><path transform="translate(0 0)" d="M0,30 H38"/><path transform="translate(56 0)" d="M7,7 H41 V57 H7 Z"/><path transform="translate(112 0)" d="M7,64 V7 H41 V35 H7"/><path transform="translate(168 0)" d="M48,7 H7 V57 H41 V33 H23"/><path transform="translate(224 0)" d="M7,32 H41 V7 H7 V57 H48"/><path transform="translate(280 0)" d="M2,32 H28"/><path transform="translate(318 0)" d="M48,7 H7 V32 H41 V57 H0"/><path transform="translate(374 0)" d="M41,0 V57 H7 V25 H41"/><path transform="translate(430 0)" d="M41,0 V57 H7 V25 H41"/></g><g fill="#151515" stroke="#151515" stroke-width="10" stroke-linejoin="round"><polygon transform="translate(112 0)" points="14,35 30,35 48,64 31,64"/></g><g fill="none" stroke="#ffffff" stroke-width="14" stroke-linejoin="miter" stroke-linecap="butt"><path transform="translate(0 0)" d="M17,64 V7 H48"/><path transform="translate(0 0)" d="M0,30 H38"/><path transform="translate(56 0)" d="M7,7 H41 V57 H7 Z"/><path transform="translate(112 0)" d="M7,64 V7 H41 V35 H7"/><path transform="translate(168 0)" d="M48,7 H7 V57 H41 V33 H23"/><path transform="translate(224 0)" d="M7,32 H41 V7 H7 V57 H48"/><path transform="translate(280 0)" d="M2,32 H28"/><path transform="translate(318 0)" d="M48,7 H7 V32 H41 V57 H0"/><path transform="translate(374 0)" d="M41,0 V57 H7 V25 H41"/><path transform="translate(430 0)" d="M41,0 V57 H7 V25 H41"/></g><g fill="#ffffff"><polygon transform="translate(112 0)" points="14,35 30,35 48,64 31,64"/></g></g>
+<text x="40" y="506" text-anchor="start" font-family="'Avenir Next', Avenir, Futura, 'Century Gothic', Montserrat, 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif" font-weight="500" font-size="12" fill="#e7c9d5">Letreiro do forge-sdd · desenho próprio em bloco, sem arquivo de fonte</text>
+<text x="700" y="200" font-family="'Zilla Slab', Rockwell, 'Roboto Slab', Georgia, serif" font-size="20" fill="#ffffff">Paleta</text>
+<mask id="mS0"><circle cx="770" cy="270" r="46" fill="#fff"/><rect x="722" y="272.8" width="96" height="0.9" fill="#000"/><rect x="722" y="279.0" width="96" height="1.5" fill="#000"/><rect x="722" y="285.2" width="96" height="2.2" fill="#000"/><rect x="722" y="291.4" width="96" height="2.8" fill="#000"/><rect x="722" y="297.6" width="96" height="3.4" fill="#000"/><rect x="722" y="303.8" width="96" height="4.0" fill="#000"/><rect x="722" y="310.0" width="96" height="4.6" fill="#000"/></mask><circle cx="770" cy="270" r="46" fill="url(#gS1)" mask="url(#mS0)"/>
+<text x="770" y="340" text-anchor="middle" font-family="'Avenir Next', Avenir, Futura, 'Century Gothic', Montserrat, 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif" font-weight="700" font-size="13" fill="#ffffff">sol crepúsculo</text>
+<text x="770" y="357" text-anchor="middle" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" fill="#e7c9d5">#4053c6 → #f161ae → #cc7743</text>
+<mask id="mS1"><circle cx="956" cy="270" r="46" fill="#fff"/><rect x="908" y="272.8" width="96" height="0.9" fill="#000"/><rect x="908" y="279.0" width="96" height="1.5" fill="#000"/><rect x="908" y="285.2" width="96" height="2.2" fill="#000"/><rect x="908" y="291.4" width="96" height="2.8" fill="#000"/><rect x="908" y="297.6" width="96" height="3.4" fill="#000"/><rect x="908" y="303.8" width="96" height="4.0" fill="#000"/><rect x="908" y="310.0" width="96" height="4.6" fill="#000"/></mask><circle cx="956" cy="270" r="46" fill="url(#gS2)" mask="url(#mS1)"/>
+<text x="956" y="340" text-anchor="middle" font-family="'Avenir Next', Avenir, Futura, 'Century Gothic', Montserrat, 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif" font-weight="700" font-size="13" fill="#ffffff">sol orquídea</text>
+<text x="956" y="357" text-anchor="middle" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" fill="#e7c9d5">#e446c4 → #f35caf → #e8698e</text>
+<mask id="mS2"><circle cx="1142" cy="270" r="46" fill="#fff"/><rect x="1094" y="272.8" width="96" height="0.9" fill="#000"/><rect x="1094" y="279.0" width="96" height="1.5" fill="#000"/><rect x="1094" y="285.2" width="96" height="2.2" fill="#000"/><rect x="1094" y="291.4" width="96" height="2.8" fill="#000"/><rect x="1094" y="297.6" width="96" height="3.4" fill="#000"/><rect x="1094" y="303.8" width="96" height="4.0" fill="#000"/><rect x="1094" y="310.0" width="96" height="4.6" fill="#000"/></mask><circle cx="1142" cy="270" r="46" fill="url(#gS3)" mask="url(#mS2)"/>
+<text x="1142" y="340" text-anchor="middle" font-family="'Avenir Next', Avenir, Futura, 'Century Gothic', Montserrat, 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif" font-weight="700" font-size="13" fill="#ffffff">sol âmbar</text>
+<text x="1142" y="357" text-anchor="middle" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" fill="#e7c9d5">#de8640 → #e28642 → #cd7745</text>
+<rect x="700" y="384" width="230" height="18" rx="3" fill="url(#gSig)"/>
+<text x="942" y="397" font-family="'Avenir Next', Avenir, Futura, 'Century Gothic', Montserrat, 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif" font-size="12" fill="#ffffff"><tspan font-weight="700">assinatura</tspan><tspan fill="#e7c9d5"> · linha neon das molduras</tspan></text>
+<text x="1240" y="414" text-anchor="end" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" fill="#e7c9d5">#ffaa6e → #fe818d → #f061af</text>
+<rect x="700" y="420" width="230" height="18" rx="3" fill="url(#gChip)"/>
+<text x="942" y="433" font-family="'Avenir Next', Avenir, Futura, 'Century Gothic', Montserrat, 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif" font-size="12" fill="#ffffff"><tspan font-weight="700">chip</tspan><tspan fill="#e7c9d5"> · aba ou seção ativa</tspan></text>
+<text x="1240" y="450" text-anchor="end" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" fill="#e7c9d5">#f7a164 → #f77191 → #e850af</text>
+<rect x="700" y="456" width="230" height="18" rx="3" fill="url(#gPr)"/>
+<text x="942" y="469" font-family="'Avenir Next', Avenir, Futura, 'Century Gothic', Montserrat, 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif" font-size="12" fill="#ffffff"><tspan font-weight="700">prancha</tspan><tspan fill="#e7c9d5"> · fundo atrás das molduras</tspan></text>
+<text x="1240" y="486" text-anchor="end" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" fill="#e7c9d5">#fea96a → #f87795 → #a780a6</text>
+<rect x="700" y="492" width="230" height="18" rx="3" fill="url(#gSkyH)"/>
+<text x="942" y="505" font-family="'Avenir Next', Avenir, Futura, 'Century Gothic', Montserrat, 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif" font-size="12" fill="#ffffff"><tspan font-weight="700">céu</tspan><tspan fill="#e7c9d5"> · vertical na arte; aqui deitado</tspan></text>
+<text x="1240" y="522" text-anchor="end" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" fill="#e7c9d5">#5764b0 → #ca84a9 → #ffb06d</text>
+<text x="40" y="566" font-family="'Zilla Slab', Rockwell, 'Roboto Slab', Georgia, serif" font-size="20" fill="#ffffff">Cores</text>
+<text x="40" y="616" font-family="'Zilla Slab', Rockwell, 'Roboto Slab', Georgia, serif" font-size="15" fill="#e7c9d5">Superfícies</text>
+<rect x="150" y="590" width="83" height="40" rx="4" fill="#151515" stroke="#ffffff" stroke-opacity="0.22"/>
+<text x="150" y="645" font-family="'Avenir Next', Avenir, Futura, 'Century Gothic', Montserrat, 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif" font-weight="600" font-size="10.5" fill="#ffffff">preto-moldura</text>
+<text x="150" y="659" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" fill="#e7c9d5">#151515</text>
+<rect x="241" y="590" width="83" height="40" rx="4" fill="#060506" stroke="#ffffff" stroke-opacity="0.22"/>
+<text x="241" y="645" font-family="'Avenir Next', Avenir, Futura, 'Century Gothic', Montserrat, 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif" font-weight="600" font-size="10.5" fill="#ffffff">preto-fundo</text>
+<text x="241" y="659" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" fill="#e7c9d5">#060506</text>
+<rect x="332" y="590" width="83" height="40" rx="4" fill="#141414" stroke="#ffffff" stroke-opacity="0.22"/>
+<text x="332" y="645" font-family="'Avenir Next', Avenir, Futura, 'Century Gothic', Montserrat, 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif" font-weight="600" font-size="10.5" fill="#ffffff">preto-lateral</text>
+<text x="332" y="659" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" fill="#e7c9d5">#141414</text>
+<rect x="423" y="590" width="83" height="40" rx="4" fill="#232123" stroke="#ffffff" stroke-opacity="0.22"/>
+<text x="423" y="645" font-family="'Avenir Next', Avenir, Futura, 'Century Gothic', Montserrat, 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif" font-weight="600" font-size="10.5" fill="#ffffff">tecla</text>
+<text x="423" y="659" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" fill="#e7c9d5">#232123</text>
+<rect x="514" y="590" width="83" height="40" rx="4" fill="#333334" stroke="#ffffff" stroke-opacity="0.22"/>
+<text x="514" y="645" font-family="'Avenir Next', Avenir, Futura, 'Century Gothic', Montserrat, 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif" font-weight="600" font-size="10.5" fill="#ffffff">disco</text>
+<text x="514" y="659" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" fill="#e7c9d5">#333334</text>
+<rect x="605" y="590" width="83" height="40" rx="4" fill="#343434" stroke="#ffffff" stroke-opacity="0.22"/>
+<text x="605" y="645" font-family="'Avenir Next', Avenir, Futura, 'Century Gothic', Montserrat, 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif" font-weight="600" font-size="10.5" fill="#ffffff">grafite</text>
+<text x="605" y="659" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" fill="#e7c9d5">#343434</text>
+<rect x="696" y="590" width="83" height="40" rx="4" fill="#6b193c" stroke="#ffffff" stroke-opacity="0.22"/>
+<text x="696" y="645" font-family="'Avenir Next', Avenir, Futura, 'Century Gothic', Montserrat, 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif" font-weight="600" font-size="10.5" fill="#ffffff">vinho</text>
+<text x="696" y="659" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" fill="#e7c9d5">#6b193c</text>
+<rect x="787" y="590" width="83" height="40" rx="4" fill="#451b3b" stroke="#ffffff" stroke-opacity="0.22"/>
+<text x="787" y="645" font-family="'Avenir Next', Avenir, Futura, 'Century Gothic', Montserrat, 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif" font-weight="600" font-size="10.5" fill="#ffffff">ameixa</text>
+<text x="787" y="659" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" fill="#e7c9d5">#451b3b</text>
+<rect x="878" y="590" width="83" height="40" rx="4" fill="#563f5e" stroke="#ffffff" stroke-opacity="0.22"/>
+<text x="878" y="645" font-family="'Avenir Next', Avenir, Futura, 'Century Gothic', Montserrat, 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif" font-weight="600" font-size="10.5" fill="#ffffff">painel</text>
+<text x="878" y="659" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" fill="#e7c9d5">#563f5e</text>
+<rect x="969" y="590" width="83" height="40" rx="4" fill="#775882" stroke="#ffffff" stroke-opacity="0.22"/>
+<text x="969" y="645" font-family="'Avenir Next', Avenir, Futura, 'Century Gothic', Montserrat, 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif" font-weight="600" font-size="10.5" fill="#ffffff">faixa-inativa</text>
+<text x="969" y="659" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" fill="#e7c9d5">#775882</text>
+<text x="40" y="702" font-family="'Zilla Slab', Rockwell, 'Roboto Slab', Georgia, serif" font-size="15" fill="#e7c9d5">Texto</text>
+<rect x="150" y="676" width="83" height="40" rx="4" fill="#ffffff" stroke="#ffffff" stroke-opacity="0.22"/>
+<text x="150" y="731" font-family="'Avenir Next', Avenir, Futura, 'Century Gothic', Montserrat, 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif" font-weight="600" font-size="10.5" fill="#ffffff">branco</text>
+<text x="150" y="745" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" fill="#e7c9d5">#ffffff</text>
+<rect x="241" y="676" width="83" height="40" rx="4" fill="#a48cad" stroke="#ffffff" stroke-opacity="0.22"/>
+<text x="241" y="731" font-family="'Avenir Next', Avenir, Futura, 'Century Gothic', Montserrat, 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif" font-weight="600" font-size="10.5" fill="#ffffff">inativo</text>
+<text x="241" y="745" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" fill="#e7c9d5">#a48cad</text>
+<rect x="332" y="676" width="83" height="40" rx="4" fill="#dfa351" stroke="#ffffff" stroke-opacity="0.22"/>
+<text x="332" y="731" font-family="'Avenir Next', Avenir, Futura, 'Century Gothic', Montserrat, 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif" font-weight="600" font-size="10.5" fill="#ffffff">ativo</text>
+<text x="332" y="745" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" fill="#e7c9d5">#dfa351</text>
+<rect x="423" y="676" width="83" height="40" rx="4" fill="#e6d364" stroke="#ffffff" stroke-opacity="0.22"/>
+<text x="423" y="731" font-family="'Avenir Next', Avenir, Futura, 'Century Gothic', Montserrat, 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif" font-weight="600" font-size="10.5" fill="#ffffff">aviso</text>
+<text x="423" y="745" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" fill="#e7c9d5">#e6d364</text>
+<text x="40" y="788" font-family="'Zilla Slab', Rockwell, 'Roboto Slab', Georgia, serif" font-size="15" fill="#e7c9d5">Acentos</text>
+<rect x="150" y="762" width="83" height="40" rx="4" fill="#ffaa6e" stroke="#ffffff" stroke-opacity="0.22"/>
+<text x="150" y="817" font-family="'Avenir Next', Avenir, Futura, 'Century Gothic', Montserrat, 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif" font-weight="600" font-size="10.5" fill="#ffffff">pessego</text>
+<text x="150" y="831" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" fill="#e7c9d5">#ffaa6e</text>
+<rect x="241" y="762" width="83" height="40" rx="4" fill="#fe818d" stroke="#ffffff" stroke-opacity="0.22"/>
+<text x="241" y="817" font-family="'Avenir Next', Avenir, Futura, 'Century Gothic', Montserrat, 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif" font-weight="600" font-size="10.5" fill="#ffffff">coral</text>
+<text x="241" y="831" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" fill="#e7c9d5">#fe818d</text>
+<rect x="332" y="762" width="83" height="40" rx="4" fill="#f061af" stroke="#ffffff" stroke-opacity="0.22"/>
+<text x="332" y="817" font-family="'Avenir Next', Avenir, Futura, 'Century Gothic', Montserrat, 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif" font-weight="600" font-size="10.5" fill="#ffffff">rosa-choque</text>
+<text x="332" y="831" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" fill="#e7c9d5">#f061af</text>
+<rect x="423" y="762" width="83" height="40" rx="4" fill="#e446c4" stroke="#ffffff" stroke-opacity="0.22"/>
+<text x="423" y="817" font-family="'Avenir Next', Avenir, Futura, 'Century Gothic', Montserrat, 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif" font-weight="600" font-size="10.5" fill="#ffffff">orquidea</text>
+<text x="423" y="831" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" fill="#e7c9d5">#e446c4</text>
+<rect x="514" y="762" width="83" height="40" rx="4" fill="#824cc8" stroke="#ffffff" stroke-opacity="0.22"/>
+<text x="514" y="817" font-family="'Avenir Next', Avenir, Futura, 'Century Gothic', Montserrat, 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif" font-weight="600" font-size="10.5" fill="#ffffff">violeta</text>
+<text x="514" y="831" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" fill="#e7c9d5">#824cc8</text>
+<rect x="605" y="762" width="83" height="40" rx="4" fill="#4053c6" stroke="#ffffff" stroke-opacity="0.22"/>
+<text x="605" y="817" font-family="'Avenir Next', Avenir, Futura, 'Century Gothic', Montserrat, 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif" font-weight="600" font-size="10.5" fill="#ffffff">indigo</text>
+<text x="605" y="831" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" fill="#e7c9d5">#4053c6</text>
+<rect x="696" y="762" width="83" height="40" rx="4" fill="#e28642" stroke="#ffffff" stroke-opacity="0.22"/>
+<text x="696" y="817" font-family="'Avenir Next', Avenir, Futura, 'Century Gothic', Montserrat, 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif" font-weight="600" font-size="10.5" fill="#ffffff">ambar</text>
+<text x="696" y="831" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" fill="#e7c9d5">#e28642</text>
+<rect x="787" y="762" width="83" height="40" rx="4" fill="#fe7694" stroke="#ffffff" stroke-opacity="0.22"/>
+<text x="787" y="817" font-family="'Avenir Next', Avenir, Futura, 'Century Gothic', Montserrat, 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif" font-weight="600" font-size="10.5" fill="#ffffff">rosa-vida</text>
+<text x="787" y="831" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" fill="#e7c9d5">#fe7694</text>
+<rect x="878" y="762" width="83" height="40" rx="4" fill="#dd9a48" stroke="#ffffff" stroke-opacity="0.22"/>
+<text x="878" y="817" font-family="'Avenir Next', Avenir, Futura, 'Century Gothic', Montserrat, 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif" font-weight="600" font-size="10.5" fill="#ffffff">laranja-energia</text>
+<text x="878" y="831" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" fill="#e7c9d5">#dd9a48</text>
+<text x="40" y="874" font-family="'Zilla Slab', Rockwell, 'Roboto Slab', Georgia, serif" font-size="15" fill="#e7c9d5">Apoio</text>
+<rect x="150" y="848" width="83" height="40" rx="4" fill="#87a77c" stroke="#ffffff" stroke-opacity="0.22"/>
+<text x="150" y="903" font-family="'Avenir Next', Avenir, Futura, 'Century Gothic', Montserrat, 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif" font-weight="600" font-size="10.5" fill="#ffffff">salvia</text>
+<text x="150" y="917" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" fill="#e7c9d5">#87a77c</text>
+<rect x="241" y="848" width="83" height="40" rx="4" fill="#677c5e" stroke="#ffffff" stroke-opacity="0.22"/>
+<text x="241" y="903" font-family="'Avenir Next', Avenir, Futura, 'Century Gothic', Montserrat, 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif" font-weight="600" font-size="10.5" fill="#ffffff">salvia-escura</text>
+<text x="241" y="917" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" fill="#e7c9d5">#677c5e</text>
+<rect x="332" y="848" width="83" height="40" rx="4" fill="#9396c0" stroke="#ffffff" stroke-opacity="0.22"/>
+<text x="332" y="903" font-family="'Avenir Next', Avenir, Futura, 'Century Gothic', Montserrat, 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif" font-weight="600" font-size="10.5" fill="#ffffff">lavanda</text>
+<text x="332" y="917" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" fill="#e7c9d5">#9396c0</text>
+<rect x="423" y="848" width="83" height="40" rx="4" fill="#8774a2" stroke="#ffffff" stroke-opacity="0.22"/>
+<text x="423" y="903" font-family="'Avenir Next', Avenir, Futura, 'Century Gothic', Montserrat, 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif" font-weight="600" font-size="10.5" fill="#ffffff">malva</text>
+<text x="423" y="917" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" fill="#e7c9d5">#8774a2</text>
+<rect x="514" y="848" width="83" height="40" rx="4" fill="#5c7caf" stroke="#ffffff" stroke-opacity="0.22"/>
+<text x="514" y="903" font-family="'Avenir Next', Avenir, Futura, 'Century Gothic', Montserrat, 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif" font-weight="600" font-size="10.5" fill="#ffffff">azul-baia</text>
+<text x="514" y="917" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" fill="#e7c9d5">#5c7caf</text>
+<rect x="605" y="848" width="83" height="40" rx="4" fill="#769ac6" stroke="#ffffff" stroke-opacity="0.22"/>
+<text x="605" y="903" font-family="'Avenir Next', Avenir, Futura, 'Century Gothic', Montserrat, 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif" font-weight="600" font-size="10.5" fill="#ffffff">azul-claro</text>
+<text x="605" y="917" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" fill="#e7c9d5">#769ac6</text>
+<rect x="696" y="848" width="83" height="40" rx="4" fill="#434a68" stroke="#ffffff" stroke-opacity="0.22"/>
+<text x="696" y="903" font-family="'Avenir Next', Avenir, Futura, 'Century Gothic', Montserrat, 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif" font-weight="600" font-size="10.5" fill="#ffffff">estrela-apagada</text>
+<text x="696" y="917" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" fill="#e7c9d5">#434a68</text>
+<rect x="787" y="848" width="83" height="40" rx="4" fill="#a485aa" stroke="#ffffff" stroke-opacity="0.22"/>
+<text x="787" y="903" font-family="'Avenir Next', Avenir, Futura, 'Century Gothic', Montserrat, 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif" font-weight="600" font-size="10.5" fill="#ffffff">lilas</text>
+<text x="787" y="917" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" fill="#e7c9d5">#a485aa</text>
+<rect x="878" y="848" width="83" height="40" rx="4" fill="#c283ac" stroke="#ffffff" stroke-opacity="0.22"/>
+<text x="878" y="903" font-family="'Avenir Next', Avenir, Futura, 'Century Gothic', Montserrat, 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif" font-weight="600" font-size="10.5" fill="#ffffff">rosa-antigo</text>
+<text x="878" y="917" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" fill="#e7c9d5">#c283ac</text>
+<rect x="969" y="848" width="83" height="40" rx="4" fill="#5fa2b9" stroke="#ffffff" stroke-opacity="0.22"/>
+<text x="969" y="903" font-family="'Avenir Next', Avenir, Futura, 'Century Gothic', Montserrat, 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif" font-weight="600" font-size="10.5" fill="#ffffff">mar</text>
+<text x="969" y="917" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" fill="#e7c9d5">#5fa2b9</text>
+<rect x="1060" y="848" width="83" height="40" rx="4" fill="#5397ac" stroke="#ffffff" stroke-opacity="0.22"/>
+<text x="1060" y="903" font-family="'Avenir Next', Avenir, Futura, 'Century Gothic', Montserrat, 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif" font-weight="600" font-size="10.5" fill="#ffffff">mar-fundo</text>
+<text x="1060" y="917" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" fill="#e7c9d5">#5397ac</text>
+<rect x="1151" y="848" width="83" height="40" rx="4" fill="#be50db" stroke="#ffffff" stroke-opacity="0.22"/>
+<text x="1151" y="903" font-family="'Avenir Next', Avenir, Futura, 'Century Gothic', Montserrat, 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif" font-weight="600" font-size="10.5" fill="#ffffff">flamingo</text>
+<text x="1151" y="917" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" fill="#e7c9d5">#be50db</text>
+<text x="40" y="950" font-family="'Zilla Slab', Rockwell, 'Roboto Slab', Georgia, serif" font-size="20" fill="#ffffff">Componentes</text>
+<rect x="40" y="962" width="1200" height="290" fill="#060506"/>
+<g clip-path="url(#cBody)">
+<rect x="40" y="996" width="1200" height="222" fill="url(#gSky)"/>
+<g fill="#451b3b" opacity="0.38"><path d="M90.5,1226 Q95.5,1121.5 115.2,1036.0 L120.8,1036.0 Q103.1,1121.5 101.5,1226 Z"/><path d="M118.0,1036.0 Q88.1,1044.2 63.6,1079.2 Q93.6,1056.2 118.0,1036.0 Z M118.0,1036.0 Q73.6,1012.8 37.3,1058.9 Q71.1,1030.6 118.0,1036.0 Z M118.0,1036.0 Q78.9,984.6 46.9,1019.1 Q68.3,1000.2 118.0,1036.0 Z M118.0,1036.0 Q97.2,973.4 80.2,994.7 Q82.9,981.7 118.0,1036.0 Z M118.0,1036.0 Q115.6,977.1 113.6,991.7 Q101.6,978.0 118.0,1036.0 Z M118.0,1036.0 Q134.9,970.7 148.7,990.6 Q150.1,977.4 118.0,1036.0 Z M118.0,1036.0 Q155.2,980.9 185.6,1013.5 Q166.8,995.8 118.0,1036.0 Z M118.0,1036.0 Q162.1,1010.7 198.3,1055.7 Q165.3,1028.4 118.0,1036.0 Z M118.0,1036.0 Q148.6,1042.1 173.7,1077.3 Q143.7,1054.3 118.0,1036.0 Z"/><circle cx="118.0" cy="1036.0" r="5.5"/></g>
+</g>
+<rect x="40" y="962" width="1200" height="34" fill="#151515"/>
+<rect x="40" y="1218" width="1200" height="34" fill="#151515"/>
+<rect x="40" y="995" width="1200" height="4" fill="url(#gSig)" opacity="0.7" filter="url(#fGlow)"/>
+<rect x="40" y="996" width="1200" height="2" fill="url(#gSig)"/>
+<rect x="40" y="1215" width="1200" height="4" fill="url(#gSig)" opacity="0.7" filter="url(#fGlow)"/>
+<rect x="40" y="1216" width="1200" height="2" fill="url(#gSig)"/>
+<rect x="894" y="969" width="26" height="20" rx="5" fill="#232123" stroke="url(#gSig)" stroke-width="1.2"/><text x="907.0" y="982.6" text-anchor="middle" font-family="'Avenir Next', Avenir, Futura, 'Century Gothic', Montserrat, 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif" font-weight="700" font-size="10.5" fill="#ffffff">L1</text>
+<rect x="928" y="968" width="84" height="22" rx="3" fill="url(#gChip)"/>
+<text x="970" y="983" font-family="'Arial Black', 'Avenir Next', 'Helvetica Neue', 'Segoe UI', system-ui, sans-serif" font-weight="900" font-size="11" letter-spacing="0.8" fill="#ffffff" text-anchor="middle" stroke="#151515" stroke-opacity="0.5" stroke-width="2.4" stroke-linejoin="round" paint-order="stroke fill">AJUSTES</text><text x="1056" y="983" font-family="'Arial Black', 'Avenir Next', 'Helvetica Neue', 'Segoe UI', system-ui, sans-serif" font-weight="900" font-size="11" letter-spacing="0.8" fill="#ffffff" text-anchor="middle">FILA</text><text x="1134" y="983" font-family="'Arial Black', 'Avenir Next', 'Helvetica Neue', 'Segoe UI', system-ui, sans-serif" font-weight="900" font-size="11" letter-spacing="0.8" fill="#ffffff" text-anchor="middle">SESSÕES</text>
+<rect x="1196" y="969" width="26" height="20" rx="5" fill="#232123" stroke="url(#gSig)" stroke-width="1.2"/><text x="1209.0" y="982.6" text-anchor="middle" font-family="'Avenir Next', Avenir, Futura, 'Century Gothic', Montserrat, 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif" font-weight="700" font-size="10.5" fill="#ffffff">R1</text>
+<rect x="70" y="1016" width="176" height="28" rx="2" fill="url(#gChip)"/>
+<text x="84" y="1035" font-family="'Avenir Next', Avenir, Futura, 'Century Gothic', Montserrat, 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif" font-weight="800" font-size="13" letter-spacing="1" fill="#ffffff" stroke="#151515" stroke-opacity="0.5" stroke-width="2.4" stroke-linejoin="round" paint-order="stroke fill">AJUSTES</text>
+<rect x="70" y="1050" width="176" height="26" fill="#775882" fill-opacity="0.78"/>
+<text x="84" y="1067.5" font-family="'Avenir Next', Avenir, Futura, 'Century Gothic', Montserrat, 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif" font-weight="600" font-size="12.5" fill="#a48cad">Sessões</text>
+<rect x="70" y="1080" width="176" height="26" fill="#775882" fill-opacity="0.78"/>
+<text x="84" y="1097.5" font-family="'Avenir Next', Avenir, Futura, 'Century Gothic', Montserrat, 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif" font-weight="700" font-size="12.5" fill="#dfa351">Agentes</text>
+<rect x="70" y="1110" width="176" height="26" fill="#775882" fill-opacity="0.78"/>
+<text x="84" y="1127.5" font-family="'Avenir Next', Avenir, Futura, 'Century Gothic', Montserrat, 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif" font-weight="600" font-size="12.5" fill="#a48cad">Tetos</text>
+<rect x="70" y="1140" width="176" height="26" fill="#775882" fill-opacity="0.78"/>
+<text x="84" y="1157.5" font-family="'Avenir Next', Avenir, Futura, 'Century Gothic', Montserrat, 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif" font-weight="600" font-size="12.5" fill="#a48cad">Telemetria</text>
+<rect x="266" y="1016" width="420" height="30" fill="#060506" fill-opacity="0.42"/>
+<text x="280" y="1035.5" font-family="'Avenir Next', Avenir, Futura, 'Century Gothic', Montserrat, 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif" font-weight="700" font-size="12.5" fill="#ffffff">Agente da Discovery</text>
+<rect x="566" y="1023" width="16" height="16" fill="#ffffff" stroke="#151515" stroke-width="1.2"/>
+<path d="M577,1026.5 L571,1031 L577,1035.5 Z" fill="#151515"/>
+<text x="674" y="1035.5" text-anchor="end" font-family="'Avenir Next', Avenir, Futura, 'Century Gothic', Montserrat, 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif" font-weight="700" font-size="11.5" letter-spacing="0.8" fill="#ffffff">CLAUDE</text>
+<rect x="266" y="1050" width="420" height="30" fill="#e28642"/>
+<text x="280" y="1069.5" font-family="'Avenir Next', Avenir, Futura, 'Century Gothic', Montserrat, 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif" font-weight="700" font-size="12.5" fill="#ffffff">Agente do Builder</text>
+<rect x="566" y="1057" width="16" height="16" fill="#ffffff" stroke="#151515" stroke-width="1.2"/>
+<path d="M577,1060.5 L571,1065 L577,1069.5 Z" fill="#151515"/>
+<text x="674" y="1069.5" text-anchor="end" font-family="'Avenir Next', Avenir, Futura, 'Century Gothic', Montserrat, 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif" font-weight="700" font-size="11.5" letter-spacing="0.8" fill="#ffffff">CODEX</text>
+<rect x="266" y="1084" width="420" height="30" fill="#060506" fill-opacity="0.42"/>
+<text x="280" y="1103.5" font-family="'Avenir Next', Avenir, Futura, 'Century Gothic', Montserrat, 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif" font-weight="700" font-size="12.5" fill="#ffffff">Agente do Reviewer</text>
+<rect x="566" y="1091" width="16" height="16" fill="#ffffff" stroke="#151515" stroke-width="1.2"/>
+<path d="M577,1094.5 L571,1099 L577,1103.5 Z" fill="#151515"/>
+<text x="674" y="1103.5" text-anchor="end" font-family="'Avenir Next', Avenir, Futura, 'Century Gothic', Montserrat, 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif" font-weight="700" font-size="11.5" letter-spacing="0.8" fill="#ffffff">GEMINI</text>
+<rect x="266" y="1118" width="420" height="30" fill="#060506" fill-opacity="0.42"/>
+<text x="280" y="1137.5" font-family="'Avenir Next', Avenir, Futura, 'Century Gothic', Montserrat, 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif" font-weight="700" font-size="12.5" fill="#ffffff">Permissões</text>
+<rect x="566" y="1125" width="16" height="16" fill="#ffffff" stroke="#151515" stroke-width="1.2"/>
+<path d="M577,1128.5 L571,1133 L577,1137.5 Z" fill="#151515"/>
+<text x="674" y="1137.5" text-anchor="end" font-family="'Avenir Next', Avenir, Futura, 'Century Gothic', Montserrat, 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif" font-weight="700" font-size="11.5" letter-spacing="0.8" fill="#ffffff">FULL</text>
+<rect x="266" y="1152" width="420" height="30" fill="#060506" fill-opacity="0.42"/>
+<text x="280" y="1171.5" font-family="'Avenir Next', Avenir, Futura, 'Century Gothic', Montserrat, 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif" font-weight="700" font-size="12.5" fill="#ffffff">Teto de tokens</text>
+<rect x="566" y="1159" width="16" height="16" fill="#ffffff" stroke="#151515" stroke-width="1.2"/>
+<path d="M577,1162.5 L571,1167 L577,1171.5 Z" fill="#151515"/>
+<text x="674" y="1171.5" text-anchor="end" font-family="'Avenir Next', Avenir, Futura, 'Century Gothic', Montserrat, 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif" font-weight="700" font-size="11.5" letter-spacing="0.8" fill="#ffffff">OFF</text>
+<rect x="706" y="1016" width="250" height="26" fill="#060506" fill-opacity="0.6"/>
+<text x="831" y="1033.5" text-anchor="middle" font-family="'Avenir Next', Avenir, Futura, 'Century Gothic', Montserrat, 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif" font-weight="700" font-size="11" letter-spacing="1.4" fill="#ffffff">DESCRIÇÃO</text>
+<rect x="706" y="1046" width="250" height="136" fill="#563f5e" fill-opacity="0.9"/>
+<text x="720" y="1068" font-family="'Avenir Next', Avenir, Futura, 'Century Gothic', Montserrat, 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif" font-weight="500" font-size="12" fill="#ffffff">Escolhe o agente que roda em cada</text>
+<text x="720" y="1085" font-family="'Avenir Next', Avenir, Futura, 'Century Gothic', Montserrat, 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif" font-weight="500" font-size="12" fill="#ffffff">sessão do pipeline. O Reviewer só</text>
+<text x="720" y="1102" font-family="'Avenir Next', Avenir, Futura, 'Century Gothic', Montserrat, 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif" font-weight="500" font-size="12" fill="#ffffff">lê: quem confere não é quem</text>
+<text x="720" y="1119" font-family="'Avenir Next', Avenir, Futura, 'Century Gothic', Montserrat, 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif" font-weight="500" font-size="12" fill="#ffffff">construiu.</text>
+<text x="720" y="1148" font-family="'Avenir Next', Avenir, Futura, 'Century Gothic', Montserrat, 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif" font-weight="600" font-size="12" fill="#e6d364">Trocar o agente no meio de um job</text>
+<text x="720" y="1164" font-family="'Avenir Next', Avenir, Futura, 'Century Gothic', Montserrat, 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif" font-weight="600" font-size="12" fill="#e6d364">reinicia a sessão.</text>
+<circle cx="1014" cy="1036" r="16" fill="#333334"/>
+<circle cx="1014" cy="1036" r="19.5" fill="none" stroke="#fe7694" stroke-width="3" stroke-dasharray="38 200" transform="rotate(-80 1014 1036)" stroke-linecap="round"/>
+<path transform="translate(1014 1031)" d="M0,3.2 C-5,-4.4 -11.5,1.6 0,11 C11.5,1.6 5,-4.4 0,3.2 Z" fill="#fe7694"/>
+<circle cx="1066" cy="1036" r="16" fill="#333334"/>
+<circle cx="1066" cy="1036" r="19.5" fill="none" stroke="#dd9a48" stroke-width="3" stroke-dasharray="38 200" transform="rotate(-80 1066 1036)" stroke-linecap="round"/>
+<path transform="translate(1066 1036)" d="M2,-9 L-6,1.5 H-0.6 L-2.4,9 L6,-1.8 H0.6 Z" fill="#dd9a48"/>
+<polygon points="1120.0,1021.5 1122.1,1027.1 1128.1,1027.4 1123.4,1031.1 1125.0,1036.9 1120.0,1033.6 1115.0,1036.9 1116.6,1031.1 1111.9,1027.4 1117.9,1027.1" fill="#434a68"/>
+<polygon points="1140.0,1021.5 1142.1,1027.1 1148.1,1027.4 1143.4,1031.1 1145.0,1036.9 1140.0,1033.6 1135.0,1036.9 1136.6,1031.1 1131.9,1027.4 1137.9,1027.1" fill="#434a68"/>
+<polygon points="1160.0,1021.5 1162.1,1027.1 1168.1,1027.4 1163.4,1031.1 1165.0,1036.9 1160.0,1033.6 1155.0,1036.9 1156.6,1031.1 1151.9,1027.4 1157.9,1027.1" fill="#434a68"/>
+<polygon points="1180.0,1021.5 1182.1,1027.1 1188.1,1027.4 1183.4,1031.1 1185.0,1036.9 1180.0,1033.6 1175.0,1036.9 1176.6,1031.1 1171.9,1027.4 1177.9,1027.1" fill="#ffffff"/>
+<polygon points="1200.0,1021.5 1202.1,1027.1 1208.1,1027.4 1203.4,1031.1 1205.0,1036.9 1200.0,1033.6 1195.0,1036.9 1196.6,1031.1 1191.9,1027.4 1197.9,1027.1" fill="#ffffff"/>
+<text x="1210" y="1064" text-anchor="end" font-family="'Arial Black', 'Avenir Next', 'Helvetica Neue', 'Segoe UI', system-ui, sans-serif" font-weight="900" font-size="17" fill="#ffffff" stroke="#151515" stroke-width="4" stroke-linejoin="round" paint-order="stroke fill">$5000</text>
+<circle cx="1042" cy="1136" r="42" fill="#8d8b93"/>
+<path d="M1002,1128 L1082,1148 M1032,1096 L1046,1177" stroke="#bdbcc4" stroke-width="7" fill="none" clip-path="none" opacity="0.9"/>
+<circle cx="1042" cy="1136" r="42" fill="none" stroke="#6b193c" stroke-width="10" opacity="0"/>
+<circle cx="1054" cy="1124" r="13" fill="#b5403f" fill-opacity="0.55"/>
+<circle cx="1050" cy="1120" r="2.4" fill="#a8272f" stroke="#5c1016" stroke-width="0.8"/>
+<circle cx="1057" cy="1126" r="2.4" fill="#a8272f" stroke="#5c1016" stroke-width="0.8"/>
+<circle cx="1053" cy="1130" r="2.4" fill="#a8272f" stroke="#5c1016" stroke-width="0.8"/>
+<circle cx="1060" cy="1121" r="2.4" fill="#a8272f" stroke="#5c1016" stroke-width="0.8"/>
+<path d="M1036,1150 l5,-11 l5,11 l-5,-3 Z" fill="#ffffff" stroke="#151515" stroke-width="0.8"/>
+<circle cx="1042" cy="1136" r="42" fill="none" stroke="url(#gSig)" stroke-width="3"/>
+<rect x="1100" y="1112" width="38" height="38" rx="5" fill="#677c5e" fill-opacity="0.92"/>
+<rect x="1112" y="1126" width="14" height="11" rx="2" fill="#ffffff" fill-opacity="0.55"/>
+<rect x="1116" y="1122" width="6" height="5" rx="1.5" fill="none" stroke="#ffffff" stroke-opacity="0.55" stroke-width="1.4"/>
+<rect x="1146" y="1112" width="38" height="38" rx="5" fill="#677c5e" fill-opacity="0.92" stroke="#fe7694" stroke-width="2.2"/>
+<rect x="1158" y="1126" width="14" height="11" rx="2" fill="#ffffff" fill-opacity="0.95"/>
+<rect x="1162" y="1122" width="6" height="5" rx="1.5" fill="none" stroke="#ffffff" stroke-opacity="0.95" stroke-width="1.4"/>
+<rect x="1192" y="1112" width="38" height="38" rx="5" fill="#677c5e" fill-opacity="0.92"/>
+<rect x="1204" y="1126" width="14" height="11" rx="2" fill="#ffffff" fill-opacity="0.55"/>
+<rect x="1208" y="1122" width="6" height="5" rx="1.5" fill="none" stroke="#ffffff" stroke-opacity="0.55" stroke-width="1.4"/>
+<text x="1100" y="1170" text-anchor="start" font-family="'Avenir Next', Avenir, Futura, 'Century Gothic', Montserrat, 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif" font-weight="500" font-size="10.5" fill="#e7c9d5">slots de ação</text>
+<text x="924" y="1240" font-family="'Avenir Next', Avenir, Futura, 'Century Gothic', Montserrat, 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif" font-weight="600" font-size="12.5" fill="#ffffff" text-anchor="end">Restaurar padrão</text><circle cx="942" cy="1235" r="9" fill="#232123" stroke="#f6dfe6" stroke-width="1.3"/><path d="M942,1230.6200000000001 L946.38,1238.3799999999999 L937.62,1238.3799999999999 Z" fill="none" stroke="#f6dfe6" stroke-width="1.5" stroke-linejoin="round"/>
+<text x="1040" y="1240" font-family="'Avenir Next', Avenir, Futura, 'Century Gothic', Montserrat, 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif" font-weight="600" font-size="12.5" fill="#ffffff" text-anchor="end">Voltar</text><circle cx="1058" cy="1235" r="9" fill="#232123" stroke="#f6dfe6" stroke-width="1.3"/><circle cx="1058" cy="1235" r="3.78" fill="none" stroke="#f6dfe6" stroke-width="1.6"/>
+<text x="1186" y="1240" font-family="'Avenir Next', Avenir, Futura, 'Century Gothic', Montserrat, 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif" font-weight="600" font-size="12.5" fill="#ffffff" text-anchor="end">Selecionar</text><circle cx="1204" cy="1235" r="9" fill="#232123" stroke="#f6dfe6" stroke-width="1.3"/><path d="M1200.22,1231.22 L1207.78,1238.78 M1207.78,1231.22 L1200.22,1238.78" stroke="#f6dfe6" stroke-width="1.6" stroke-linecap="round"/>
+<text x="40" y="1288" text-anchor="start" font-family="'Avenir Next', Avenir, Futura, 'Century Gothic', Montserrat, 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif" font-weight="500" font-size="12" fill="#e7c9d5">Homenagem não oficial, sem vínculo com a Rockstar Games ou a Take-Two. Nenhuma arte, logotipo ou fonte do jogo ou do conceito é distribuída aqui.</text>
+<text x="40" y="1308" text-anchor="start" font-family="'Avenir Next', Avenir, Futura, 'Century Gothic', Montserrat, 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif" font-weight="500" font-size="12" fill="#e7c9d5">Cores amostradas das pranchas publicadas (tolerância de ±2 por canal). Fonte: behance.net/gallery/224512205</text>
+</svg>

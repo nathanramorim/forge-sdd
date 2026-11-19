@@ -1,0 +1,15 @@
+{
+  "fundo": "#151515",
+  "brilho": "#6b193c",
+  "texto": "#ffffff",
+  "suave": "#a48cad",
+  "acento": ["#ffaa6e", "#fe818d", "#f061af"],
+  "painel": "#232123",
+  "borda": "#563f5e",
+  "terminal_fundo": "#060506",
+  "terminal_borda": "#775882",
+  "ok": "#dfa351",
+  "fonte": "'Avenir Next', Avenir, Futura, 'Century Gothic', Montserrat, 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif",
+  "fonte_mono": "'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace",
+  "logo": "logo.svg.frag"
+}
