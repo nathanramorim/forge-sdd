@@ -270,7 +270,7 @@ func TestScaffold_DocsCitamBriefConstituicaoETmux(t *testing.T) {
 	}
 }
 
-func validarMarcadoresEdicao(conteudo string) error {
+func validarMarcadoresEdicao(conteudo string, exigirPresente bool) error {
 	linhas := strings.Split(conteudo, "\n")
 	abertos := 0
 	pares := 0
@@ -297,16 +297,31 @@ func validarMarcadoresEdicao(conteudo string) error {
 	if abertos != 0 {
 		return fmt.Errorf("edicao:inicio sem edicao:fim correspondente")
 	}
-	if pares == 0 {
+	if exigirPresente && pares == 0 {
 		return fmt.Errorf("nenhum par edicao:inicio/edicao:fim encontrado")
+	}
+	if !exigirPresente && pares > 0 {
+		return fmt.Errorf("marcador edicao:inicio/edicao:fim residual encontrado após encerramento")
 	}
 	return nil
 }
 
 func TestScaffold_DocsEdicao(t *testing.T) {
 	root := filepath.Join("..", "..")
+	edicaoDir := filepath.Join(root, "docs", "edicao")
 
-	edicaoJS, err := os.ReadFile(filepath.Join(root, "docs", "edicao", "edicao.js"))
+	_, dirErr := os.Stat(edicaoDir)
+	if os.IsNotExist(dirErr) {
+		for _, rel := range []string{"docs/index.html", "docs/wiki.html", "README.md", "npm/README.md"} {
+			raw, err := os.ReadFile(filepath.Join(root, filepath.FromSlash(rel)))
+			require.NoError(t, err, "arquivo %s deve existir", rel)
+			assert.NoError(t, validarMarcadoresEdicao(string(raw), false), "sem marcadores após encerramento em %s", rel)
+		}
+		return
+	}
+	require.NoError(t, dirErr, "erro ao inspecionar docs/edicao")
+
+	edicaoJS, err := os.ReadFile(filepath.Join(edicaoDir, "edicao.js"))
 	require.NoError(t, err, "docs/edicao/edicao.js deve existir")
 
 	reRFC3339 := regexp.MustCompile(`\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})`)
@@ -319,9 +334,10 @@ func TestScaffold_DocsEdicao(t *testing.T) {
 		caminho := filepath.Join(root, "docs", rel)
 		raw, readErr := os.ReadFile(caminho)
 		require.NoError(t, readErr, "arquivo %s deve existir", caminho)
-		assert.NoError(t, validarMarcadoresEdicao(string(raw)), "marcadores em docs/%s", rel)
+		assert.NoError(t, validarMarcadoresEdicao(string(raw), true), "marcadores em docs/%s", rel)
 	}
 
-	assert.Error(t, validarMarcadoresEdicao("<!-- edicao:inicio -->\nsem fim"), "marcador sem fechamento deve falhar")
-	assert.Error(t, validarMarcadoresEdicao("<!-- edicao:fim -->"), "fechamento sem abertura deve falhar")
+	assert.Error(t, validarMarcadoresEdicao("<!-- edicao:inicio -->\nsem fim", true), "marcador sem fechamento deve falhar")
+	assert.Error(t, validarMarcadoresEdicao("<!-- edicao:fim -->", true), "fechamento sem abertura deve falhar")
+	assert.Error(t, validarMarcadoresEdicao("<!-- edicao:inicio -->\n<!-- edicao:fim -->", false), "marcador residual pós-encerramento deve falhar")
 }
