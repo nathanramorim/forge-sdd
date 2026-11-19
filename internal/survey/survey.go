@@ -90,7 +90,7 @@ func Run(defaultProject string) (config.Config, error) {
 		),
 	)
 
-	if err := form.Run(); err != nil {
+	if err := form.WithAccessible(!isTTY()).Run(); err != nil {
 		return config.Config{}, err
 	}
 
@@ -159,7 +159,7 @@ func RunUpdate(existing []string, currentVersion, binaryVersion string) (UpdateC
 			Value(&toAdd),
 	))
 
-	if err := huh.NewForm(groups...).Run(); err != nil {
+	if err := huh.NewForm(groups...).WithAccessible(!isTTY()).Run(); err != nil {
 		return UpdateChoice{}, err
 	}
 
@@ -204,7 +204,7 @@ func RunSmartUpgradePrompt(currentVersion, latestVersion, betaVersion string, pr
 		),
 	)
 
-	if err := form.Run(); err != nil {
+	if err := form.WithAccessible(!isTTY()).Run(); err != nil {
 		return "", err
 	}
 
@@ -228,5 +228,3 @@ func RunConfirm(title, description string, defaultVal bool) (bool, error) {
 		Run()
 	return result, err
 }
-
-

@@ -37,7 +37,7 @@ func SelectOne(title string, opts []Option, def string) (string, error) {
 	if len(opts) > 0 {
 		sel = sel.Height(min(len(opts)+2, 16))
 	}
-	err := huh.NewForm(huh.NewGroup(sel)).WithKeyMap(menuKeyMap()).Run()
+	err := huh.NewForm(huh.NewGroup(sel)).WithKeyMap(menuKeyMap()).WithAccessible(!isTTY()).Run()
 	if errors.Is(err, huh.ErrUserAborted) {
 		return "", ErrBack
 	}
@@ -48,7 +48,7 @@ func SelectOne(title string, opts []Option, def string) (string, error) {
 func ConfirmYesNo(title string, def bool) (bool, error) {
 	v := def
 	err := huh.NewForm(huh.NewGroup(huh.NewConfirm().Title(title).Affirmative("Sim").Negative("Não").Value(&v))).
-		WithKeyMap(menuKeyMap()).Run()
+		WithKeyMap(menuKeyMap()).WithAccessible(!isTTY()).Run()
 	if errors.Is(err, huh.ErrUserAborted) {
 		return false, ErrBack
 	}
@@ -64,7 +64,7 @@ func Pause(msg string) error {
 		Options(huh.NewOption("← Voltar ao menu", "back")).
 		Height(4).
 		Value(&choice)
-	err := huh.NewForm(huh.NewGroup(sel)).WithKeyMap(menuKeyMap()).Run()
+	err := huh.NewForm(huh.NewGroup(sel)).WithKeyMap(menuKeyMap()).WithAccessible(!isTTY()).Run()
 	if errors.Is(err, huh.ErrUserAborted) {
 		return nil
 	}

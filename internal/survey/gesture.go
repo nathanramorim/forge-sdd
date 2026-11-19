@@ -52,6 +52,8 @@ func (m *gestureModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 // SelectGesture é o SelectOne que também captura → e ←: devolve o valor sob o cursor e o gesto.
 // Enter devolve o valor sem gesto; Esc devolve ErrBack.
+// Em modo acessível (sem TTY), os gestos → e ← não são capturáveis; a função cai para o SelectOne
+// padrão e devolve sempre GestureNone.
 func SelectGesture(title string, opts []Option, def string) (choice, gesture string, err error) {
 	choice = def
 	hopts := make([]huh.Option[string], len(opts))
@@ -63,6 +65,19 @@ func SelectGesture(title string, opts []Option, def string) (choice, gesture str
 		sel = sel.Height(min(len(opts)+2, 16))
 	}
 	form := huh.NewForm(huh.NewGroup(sel)).WithKeyMap(menuKeyMap())
+
+	// Sem TTY (cmd.exe sem VT, pipe, etc.) o bubbletea não pode entrar em modo raw;
+	// usa o modo acessível do huh (texto plano) e retorna sem gesto.
+	if !isTTY() {
+		if err := form.WithAccessible(true).Run(); err != nil {
+			if errors.Is(err, huh.ErrUserAborted) {
+				return "", GestureNone, ErrBack
+			}
+			return "", GestureNone, err
+		}
+		return choice, GestureNone, nil
+	}
+
 	final, err := tea.NewProgram(&gestureModel{form: form}).Run()
 	if err != nil {
 		return "", GestureNone, err

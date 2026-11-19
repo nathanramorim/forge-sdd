@@ -114,3 +114,27 @@ func TestExpandArgs_FlagPromptVazio(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, []string{"-i", "iniciar"}, args)
 }
+
+func TestExecRunner_StdinDefinido(t *testing.T) {
+	// O ExecRunner define cmd.Stdin = strings.NewReader("") antes de cmd.Run() (fix-90-01).
+	// O script detecta se stdin é um pipe (como esperado) ou outro tipo de fd.
+	// Em qualquer plataforma, strings.NewReader("") vira um pipe via os.Pipe interno do Go;
+	// nil Stdin → os.DevNull (NUL no Windows), que NOT é pipe.
+	profile := fakeCLI(t, `if [ -p /dev/stdin ]; then echo "stdin=pipe"; else echo "stdin=other"; fi`)
+	var out strings.Builder
+	done := make(chan error, 1)
+	go func() {
+		_, err := ExecRunner{Profile: profile}.Run(context.Background(),
+			RunSpec{Agent: "builder", Name: "forge-builder", Prompt: "x", Dir: t.TempDir()},
+			&out)
+		done <- err
+	}()
+	select {
+	case err := <-done:
+		require.NoError(t, err)
+		assert.Contains(t, out.String(), "stdin=pipe",
+			"cmd.Stdin deve ser strings.NewReader (pipe), não nil→devnull")
+	case <-time.After(5 * time.Second):
+		t.Fatal("ExecRunner travou aguardando stdin")
+	}
+}

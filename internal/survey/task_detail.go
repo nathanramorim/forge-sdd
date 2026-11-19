@@ -225,7 +225,7 @@ func ShowTaskDetail(view *TaskDetailView) error {
 				Negative("✕ Fechar painel").
 				Value(&backToList),
 		),
-	).WithKeyMap(menuKeyMap()).Run()
+	).WithKeyMap(menuKeyMap()).WithAccessible(!isTTY()).Run()
 
 	if errors.Is(err, huh.ErrUserAborted) {
 		return ErrBack
