@@ -14,4 +14,4 @@ Crie ou valide a branch única da iniciativa (Regra 15). Envie cada task (`forge
 1. Atualize `status.md` da iniciativa (até 1 KB; acima disso acione o Archivist).
 2. Release note no topo de `sdd/releases/history.md`, seção `## Entregas`.
 3. Push e PR conforme `VCS / Work Item System` da Constitution.
-4. Telemetria: `forge session record` com `--agent-path`, `--outcome`, `--criterio-atendido` e `--files-touched`.
+4. Telemetria: `forge session record` com `--agent-path`, `--outcome`, `--criterio-atendido`, `--tokens-input`, `--tokens-output` e `--files-touched`. Nunca passe zeros: se não souber os tokens, omita as flags (o CLI vai estimar).

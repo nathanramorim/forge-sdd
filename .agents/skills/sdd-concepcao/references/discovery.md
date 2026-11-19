@@ -11,7 +11,7 @@
 7. **Plano (`plan.md`):** quebra ordenada de baixo para cima (limite de 7 tasks por onda), dependências, paralelismo e rules/IDs por task.
 8. **Estado:** crie `status.md` (até 1 KB) com `Status`, `Próximo passo` e `A confirmar`.
 9. Se `Nível de Linguagem` na Constitution for `iniciante`, explique C4 e critério de aceitação com exemplos simples, sem alterar os critérios.
-10. **Telemetria:** `forge session record --feature "sdd/discovery/<id>-<nome>/discovery.md" --outcome approved --criterio-atendido=true`.
+10. **Telemetria:** `forge session record --feature "sdd/discovery/<id>-<nome>/discovery.md" --tokens-input <N> --tokens-output <N> --outcome approved --criterio-atendido=true --files-touched <lista>`. Nunca passe zeros: se não souber os tokens, omita as flags (o CLI vai estimar).
 
 **Visualizar artefatos (antes do Gate 1)**
 
@@ -22,5 +22,4 @@ Use AskUserQuestion com as opções:
 - "Pular"
 
 Execute a ação escolhida. Consulte `sdd/memory/clarify.md` → seção "Visualização pós-spec" para comportamento detalhado (macOS-only, fallbacks).
-
 11. **Gate 1 (`FLX-01`):** submeta ao humano; após aprovar, sugira `/split-features`. Em modo pipeline (existe `.forge/config/forge.json`) esta sessão nunca constrói: o `/split-features` termina entregando ao Builder.

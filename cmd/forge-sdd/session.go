@@ -71,9 +71,23 @@ e retorna sucesso (silencioso, por design).`,
 		costTabela, _ := cmd.Flags().GetFloat64("cost-usd-tabela")
 		medicao, _ := cmd.Flags().GetString("medicao")
 		filesTouchedCsv, _ := cmd.Flags().GetString("files-touched")
+		ft := splitCsv(filesTouchedCsv)
 
 		if feature == "" {
 			return fmt.Errorf("--feature é obrigatório")
+		}
+
+		if !cmd.Flags().Changed("tokens-input") || !cmd.Flags().Changed("tokens-output") {
+			est := monitor.EstimateSessionUsage(targetDir, feature, ft)
+			if !cmd.Flags().Changed("tokens-input") {
+				tokensInput = est.TokensInput
+			}
+			if !cmd.Flags().Changed("tokens-output") {
+				tokensOutput = est.TokensOutput
+			}
+			if medicao == "" {
+				medicao = est.Medicao
+			}
 		}
 
 		metrics := sessionMetrics{
@@ -90,7 +104,7 @@ e retorna sucesso (silencioso, por design).`,
 			ReworkLines:         reworkLines,
 			Context7Calls:       context7Calls,
 			GitCalls:            gitCalls,
-			FilesTouched:        splitCsv(filesTouchedCsv),
+			FilesTouched:        ft,
 			Outcome:             outcome,
 			SddVersion:          config.BinaryVersion(),
 			TokensCacheRead:     cacheRead,

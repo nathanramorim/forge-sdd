@@ -3,6 +3,7 @@ package monitor
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/forge-sdd/cli/internal/layout"
@@ -73,4 +74,43 @@ func TestVersaoDoBinario_TelemetriaNaoTemVersaoFixa(t *testing.T) {
 	data, err := os.ReadFile("session_record.go")
 	require.NoError(t, err)
 	assert.NotContains(t, string(data), "4.5.0")
+}
+
+func TestEstimateSessionUsage_SemFeature(t *testing.T) {
+	dir := t.TempDir()
+	u := EstimateSessionUsage(dir, "", nil)
+	assert.Positive(t, u.TokensInput)
+	assert.Positive(t, u.TokensOutput)
+	assert.Equal(t, MedicaoEstimado, u.Medicao)
+}
+
+func TestEstimateSessionUsage_SemFiles(t *testing.T) {
+	dir := t.TempDir()
+	u := EstimateSessionUsage(dir, "", []string{})
+	assert.Positive(t, u.TokensOutput)
+}
+
+func TestEstimateSessionUsage_ComFeature(t *testing.T) {
+	dir := t.TempDir()
+	featDir := filepath.Join(dir, "sdd", "discovery", "97-test", "features")
+	require.NoError(t, os.MkdirAll(featDir, 0o755))
+	featFile := filepath.Join(featDir, "feat-97-01-test.md")
+	require.NoError(t, os.WriteFile(featFile, []byte(strings.Repeat("x", 4000)), 0o644))
+
+	// Testa com caminho relativo direto
+	u := EstimateSessionUsage(dir, "sdd/discovery/97-test/features/feat-97-01-test.md", nil)
+	assert.Positive(t, u.TokensInput)
+	assert.Equal(t, MedicaoEstimado, u.Medicao)
+	// 4000 bytes → EstimateTokensFromBytes(4000) = 1000 tokens (mínimo 50)
+	assert.Equal(t, EstimateTokensFromBytes(4000), u.TokensInput)
+}
+
+func TestEstimateSessionUsage_ComFilesTouched(t *testing.T) {
+	dir := t.TempDir()
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "file1.go"), []byte(strings.Repeat("x", 2000)), 0o644))
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "file2.go"), []byte(strings.Repeat("x", 2000)), 0o644))
+
+	u := EstimateSessionUsage(dir, "", []string{"file1.go", "file2.go"})
+	// 4000 bytes total → EstimateTokensFromBytes(4000) = 1000 tokens
+	assert.Equal(t, EstimateTokensFromBytes(4000), u.TokensOutput)
 }

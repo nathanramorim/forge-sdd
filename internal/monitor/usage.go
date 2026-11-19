@@ -118,6 +118,50 @@ func EstimateJobUsage(dir, role, jobID, specPath string) JobUsage {
 	}
 }
 
+// EstimateSessionUsage estima o uso de tokens de uma sessão de skill a partir do tamanho
+// do arquivo de feature (proxy para input) e dos arquivos tocados (proxy para output).
+// Tenta o feature como caminho relativo direto; se não encontrar, busca via glob de ID.
+func EstimateSessionUsage(dir, feature string, filesTouched []string) JobUsage {
+	const fallbackInput  = 4000
+	const fallbackOutput = 2000
+
+	var inputBytes int64
+	if feature != "" {
+		if info, err := os.Stat(filepath.Join(dir, feature)); err == nil && !info.IsDir() && info.Size() > 0 {
+			inputBytes = info.Size()
+		} else {
+			matches, _ := filepath.Glob(filepath.Join(dir, "sdd", "discovery", "*", "features", feature+"*.md"))
+			if len(matches) == 0 {
+				matches, _ = filepath.Glob(filepath.Join(dir, "sdd", "discovery", "*", "fixes", feature+"*.md"))
+			}
+			if len(matches) > 0 {
+				if info, err := os.Stat(matches[0]); err == nil {
+					inputBytes = info.Size()
+				}
+			}
+		}
+	}
+	if inputBytes == 0 {
+		inputBytes = fallbackInput
+	}
+
+	var outputBytes int64
+	for _, f := range filesTouched {
+		if info, err := os.Stat(filepath.Join(dir, f)); err == nil {
+			outputBytes += info.Size()
+		}
+	}
+	if outputBytes == 0 {
+		outputBytes = fallbackOutput
+	}
+
+	return JobUsage{
+		TokensInput:  EstimateTokensFromBytes(int(inputBytes)),
+		TokensOutput: EstimateTokensFromBytes(int(outputBytes)),
+		Medicao:      MedicaoEstimado,
+	}
+}
+
 // ReadJobUsage devolve o uso real do log do job e, sem evento `result`, a estimativa.
 func ReadJobUsage(dir, role, jobID, specPath string) JobUsage {
 	if u, ok := ParseJobUsage(jobLogPath(dir, role, jobID)); ok {
