@@ -3,7 +3,7 @@
 **Branch:** `fix/90-01-pipeline-nao-funciona-no-windows`
 **Origem:** Iniciativa 90, `internal/pipeline/runner.go`, `cmd/forge-sdd/worker.go`, `internal/survey/select.go`, `internal/pipeline/launcher.go`
 **Tamanho:** `M`
-**Status:** `done`
+**Status:** `in-review`
 
 ## Sintoma
 No Windows, após `forge pipeline up` abrir as janelas corretamente (wt.exe ou cmd.exe), o `forge worker` (Builder/Reviewer) trava ou o agente Claude não inicia. As janelas aparecem, mas não avançam. Em alguns cenários o seletor interativo do `huh` não renderiza no cmd.exe nativo (exige digitação em vez de setas).

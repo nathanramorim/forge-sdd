@@ -7,6 +7,7 @@ import (
 	"os/exec"
 	"os/signal"
 	"strconv"
+	"syscall"
 	"time"
 
 	"github.com/forge-sdd/cli/internal/bus"
@@ -41,7 +42,7 @@ Reviewer: exige que o agente aplique o veredito (forge bus review).`,
 		raw, _ := cmd.Flags().GetBool("raw")
 		deliver, _ := cmd.Flags().GetString("deliver")
 
-		ctx, cancel := signal.NotifyContext(cmd.Context(), os.Interrupt)
+		ctx, cancel := signal.NotifyContext(cmd.Context(), os.Interrupt, syscall.SIGTERM)
 		defer cancel()
 		return pipeline.RunWorker(ctx, pipeline.WorkerOptions{
 			Dir: dir, Role: role, Name: name, CLI: cli, Raw: raw, Once: once, Poll: poll,

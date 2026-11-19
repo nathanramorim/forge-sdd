@@ -116,13 +116,11 @@ func TestExpandArgs_FlagPromptVazio(t *testing.T) {
 }
 
 func TestExecRunner_StdinDefinido(t *testing.T) {
-	// O ExecRunner deve definir cmd.Stdin = strings.NewReader("") antes de cmd.Run().
-	// Isso garante que o agente receba EOF imediato em stdin, evitando herança do
-	// console (CONIN$/CONOUT$) no Windows que trava o subprocesso (fix-90-01).
-	//
-	// O script lê stdin com `cat` e deve terminar imediatamente ao receber EOF;
-	// um timeout de 5 s detecta regressão em que stdin ficaria bloqueado.
-	profile := fakeCLI(t, `cat; echo "stdin-read-ok"`)
+	// O ExecRunner define cmd.Stdin = strings.NewReader("") antes de cmd.Run() (fix-90-01).
+	// O script detecta se stdin é um pipe (como esperado) ou outro tipo de fd.
+	// Em qualquer plataforma, strings.NewReader("") vira um pipe via os.Pipe interno do Go;
+	// nil Stdin → os.DevNull (NUL no Windows), que NOT é pipe.
+	profile := fakeCLI(t, `if [ -p /dev/stdin ]; then echo "stdin=pipe"; else echo "stdin=other"; fi`)
 	var out strings.Builder
 	done := make(chan error, 1)
 	go func() {
@@ -134,8 +132,9 @@ func TestExecRunner_StdinDefinido(t *testing.T) {
 	select {
 	case err := <-done:
 		require.NoError(t, err)
-		assert.Contains(t, out.String(), "stdin-read-ok", "o agente deve ter lido stdin e terminado")
+		assert.Contains(t, out.String(), "stdin=pipe",
+			"cmd.Stdin deve ser strings.NewReader (pipe), não nil→devnull")
 	case <-time.After(5 * time.Second):
-		t.Fatal("ExecRunner travou aguardando stdin — cmd.Stdin pode não estar definido")
+		t.Fatal("ExecRunner travou aguardando stdin")
 	}
 }

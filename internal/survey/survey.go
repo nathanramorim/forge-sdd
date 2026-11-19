@@ -228,5 +228,3 @@ func RunConfirm(title, description string, defaultVal bool) (bool, error) {
 		Run()
 	return result, err
 }
-
-
