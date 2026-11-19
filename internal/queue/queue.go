@@ -61,15 +61,16 @@ type Verdict struct {
 
 // Finding representa um achado individual dentro do parecer da Camada B.
 type Finding struct {
-	Verificacao   string `json:"verificacao"`
-	Regra         string `json:"regra"`
-	Classificacao string `json:"classificacao"`
-	Severidade    string `json:"severidade"`
-	Arquivo       string `json:"arquivo"`
-	Linha         int    `json:"linha"`
-	Evidencia     string `json:"evidencia"`
-	Explicacao    string `json:"explicacao"`
-	Correcao      string `json:"correcao"`
+	Verificacao     string `json:"verificacao"`
+	Regra           string `json:"regra"`
+	RegraDescricao  string `json:"regra_descricao,omitempty"`
+	Classificacao   string `json:"classificacao"`
+	Severidade      string `json:"severidade"`
+	Arquivo         string `json:"arquivo"`
+	Linha           int    `json:"linha"`
+	Evidencia       string `json:"evidencia"`
+	Explicacao      string `json:"explicacao"`
+	Correcao        string `json:"correcao"`
 }
 
 // CandidateSkill representa uma proposta de auto-skill identificada durante a execução/revisão.
