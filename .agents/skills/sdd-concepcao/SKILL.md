@@ -28,3 +28,6 @@ Carregue só a linha do comando pedido.
 4. **Seções obrigatórias da Spec:** `## Modelo do módulo` (`ARQ-11`), `## Decisões do projeto aplicadas` (ADR, ID, módulo e fluxo que a spec respeita; `GOV-01`), `## O que já existe` (`DUP-02`, consulte `sdd/spec/concepts.md` e `.agents/skills/`), `## Dependências novas` (`SEG-07`), `## Rules e IDs da Constituição Aplicáveis`, `## Critérios de Aceitação Executáveis`.
 5. **Não aprove** Spec sem `Decisões do projeto aplicadas`, sem `O que já existe`, com critério não executável ou em conflito com a Constitution sem ADR (`GOV-01`).
 6. **Handoff:** entregue ao Líder para o Gate 1 (`FLX-01`). Telemetria: `forge session record`.
+
+## Como perguntar ao usuário
+`AskUserQuestion` em escolhas/sim-não; ver `sdd/memory/clarify.md`.

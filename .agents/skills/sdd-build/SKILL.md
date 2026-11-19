@@ -28,3 +28,6 @@ Comando: `/implementar [feature]` (`references/implementar.md`); `/proxima-featu
 2. Marque `[x]` na spec e rode `forge queue complete <task-id>`.
 3. Commit na branch da iniciativa, nunca em `main` (`FLX-02`).
 4. Handoff ao Líder para o Portão de Governança.
+
+## Como perguntar ao usuário
+`AskUserQuestion` em escolhas/sim-não; ver `sdd/memory/clarify.md`.
