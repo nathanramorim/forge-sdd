@@ -2,13 +2,13 @@
   "feature_id": "feat-101",
   "branch": "feat/101-tema-missoes-v5",
   "spec_status": "reviewed",
-  "updated_at": "2026-11-19T21:51:41Z",
+  "updated_at": "2026-11-19T21:59:57Z",
   "items": [
     {
       "task_id": "fix-101-01-alinhar-readme-e-design-system",
       "title": "fix-101-01 — Alinhar README, banner e design system à Edição Missões",
       "spec_path": "sdd/discovery/101-tema-missoes-v5/fixes/fix-101-01-alinhar-readme-e-design-system.md",
-      "status": "building",
+      "status": "review_pending",
       "rules": [
         "ARQ-11",
         "DUP-02",

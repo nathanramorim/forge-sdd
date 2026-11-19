@@ -79,12 +79,13 @@ O gerador usado no #113 está em `sdd/discovery/101-tema-missoes-v5/anexos/gerad
 
 ```bash
 cd sdd/discovery/101-tema-missoes-v5/anexos/gerador-banner
+python3 documento.py
 python3 banner.py   ../../../../../docs/img/banner-v5-missoes.svg
 python3 specimen.py ../../../../../docs/design/edicao-missoes/especime.svg
 ./render.sh ../../../../../docs/img/banner-v5-missoes.svg ../../../../../docs/img/banner-v5-missoes.png 1280 420 1.5
 ```
 
-`tokens.py` guarda os valores e `parts.py` as peças (palmeira, sol, tecla). O letreiro em bloco e o V estão em `parts.py` (`GLYPHS` e `word`) e em `banner.py`, e saem neste fix. O `render.sh` só roda no macOS, com o Chrome instalado.
+`tokens.py` guarda os valores, `parts.py` as peças (palmeira, sol, linha neon) e `documento.py` gera `tokens.json`, `tokens.css`, `identidade.json` e o documento do design system. As missões são lidas de `missoes.json`. O letreiro em bloco e o V do #113 saíram do gerador neste fix. O `render.sh` só roda no macOS, com o Chrome instalado.
 
 ## O que já existe
 
@@ -171,6 +172,10 @@ test "$(grep -c -i -E 'banner|espécime|README' sdd/discovery/101-tema-missoes-v
 # 9. Portão do projeto
 go test ./... && go vet ./...
 ```
+
+## Status
+
+- [x] Implementado em `fix-101-01` (19/11/2026): critérios 1 a 9 com saída 0 e `forge gate` em modo bloqueio sem pendências.
 
 ## Conferência visual (Gate 2)
 

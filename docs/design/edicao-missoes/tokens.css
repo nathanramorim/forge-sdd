@@ -1,0 +1,52 @@
+/* Design system da Edição Missões (forge-sdd 5.0). Espelha tokens.json: ao mudar um, mude o outro. */
+:root {
+  --missoes-superficie-preto-moldura: #151515;
+  --missoes-superficie-preto-fundo: #060506;
+  --missoes-superficie-preto-lateral: #141414;
+  --missoes-superficie-botao-escuro: #232123;
+  --missoes-superficie-disco: #333334;
+  --missoes-superficie-grafite: #343434;
+  --missoes-superficie-vinho: #6b193c;
+  --missoes-superficie-ameixa: #451b3b;
+  --missoes-superficie-painel: #563f5e;
+  --missoes-superficie-faixa-inativa: #775882;
+
+  --missoes-texto-branco: #ffffff;
+  --missoes-texto-inativo: #a48cad;
+  --missoes-texto-ativo: #dfa351;
+  --missoes-texto-aviso: #e6d364;
+
+  --missoes-acento-pessego: #ffaa6e;
+  --missoes-acento-coral: #fe818d;
+  --missoes-acento-rosa-choque: #f061af;
+  --missoes-acento-orquidea: #e446c4;
+  --missoes-acento-violeta: #824cc8;
+  --missoes-acento-indigo: #4053c6;
+  --missoes-acento-ambar: #e28642;
+  --missoes-acento-rosa-foco: #fe7694;
+  --missoes-acento-laranja-quente: #dd9a48;
+
+  --missoes-apoio-salvia: #87a77c;
+  --missoes-apoio-salvia-escura: #677c5e;
+  --missoes-apoio-lavanda: #9396c0;
+  --missoes-apoio-malva: #8774a2;
+  --missoes-apoio-azul-baia: #5c7caf;
+  --missoes-apoio-azul-claro: #769ac6;
+  --missoes-apoio-azul-noite: #434a68;
+  --missoes-apoio-lilas: #a485aa;
+  --missoes-apoio-rosa-antigo: #c283ac;
+  --missoes-apoio-mar: #5fa2b9;
+  --missoes-apoio-mar-fundo: #5397ac;
+  --missoes-apoio-flamingo: #be50db;
+
+  --missoes-degrade-assinatura: linear-gradient(90deg, #ffaa6e 0%, #fda96a 20%, #fd967d 35%, #fe818d 51%, #fd749b 66%, #f668aa 82%, #f061af 100%);
+  --missoes-degrade-chip: linear-gradient(90deg, #f7a164 0%, #f88b7a 25%, #f77191 50%, #f05e9e 75%, #e850af 100%);
+  --missoes-degrade-prancha: linear-gradient(90deg, #fea96a 0%, #ff927f 25%, #ff818c 37%, #f87795 50%, #e57999 62%, #cd7c9e 75%, #a780a6 100%);
+  --missoes-degrade-ceu: linear-gradient(180deg, #5764b0 0%, #845d9e 30%, #ca84a9 62%, #e9949c 82%, #ffb06d 100%);
+  --missoes-degrade-sol-crepusculo: linear-gradient(180deg, #4053c6 0%, #824cc8 12%, #a849c7 25%, #e747c9 37%, #f161ae 50%, #f66e9f 62%, #f0798f 75%, #d16f58 87%, #cc7743 100%);
+  --missoes-degrade-sol-orquidea: linear-gradient(180deg, #e446c4 0%, #ee4fbc 37%, #f35caf 50%, #f269a5 75%, #e8698e 100%);
+  --missoes-degrade-sol-ambar: linear-gradient(180deg, #de8640 0%, #e28642 25%, #e1884e 62%, #cd7745 100%);
+
+  --missoes-fonte-marca: Montserrat, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --missoes-fonte-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}

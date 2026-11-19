@@ -1,53 +1,33 @@
+"""Peças compartilhadas pelo banner e pelo espécime da Edição Missões."""
 import math
-from tokens import TOKENS, GRADIENTS, FONTS, c
 
-FONT = "'Avenir Next', Avenir, Futura, 'Century Gothic', Montserrat, 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif"
-HEAVY = "'Arial Black', 'Avenir Next', 'Helvetica Neue', 'Segoe UI', system-ui, sans-serif"
+from tokens import FONTS, GRADIENTS, c
+
+FONT = FONTS["marca"]["pilha"]
 MONO = FONTS["mono"]["pilha"]
-SLAB = FONTS["rotulo"]["pilha"]
+CONTORNO = 'stroke="#151515" stroke-opacity="0.5" stroke-width="2.4" stroke-linejoin="round" paint-order="stroke fill"'
 
-def grad(gid, name, x1=0, y1=0, x2=None, y2=None, units=None):
+
+def grad(gid, name, horizontal=None):
     direction, _, stops = GRADIENTS[name]
-    if x2 is None:
-        x2, y2 = (0, 1) if direction == "vertical" else (1, 0)
-    u = f' gradientUnits="{units}"' if units else ''
+    vertical = direction == "vertical" if horizontal is None else not horizontal
+    x2, y2 = (0, 1) if vertical else (1, 0)
     s = ''.join(f'<stop offset="{o / 100:g}" stop-color="{col}"/>' for o, col in stops)
-    return f'<linearGradient id="{gid}" x1="{x1}" y1="{y1}" x2="{x2}" y2="{y2}"{u}>{s}</linearGradient>'
+    return f'<linearGradient id="{gid}" x1="0" y1="0" x2="{x2}" y2="{y2}">{s}</linearGradient>'
 
-# Letreiro próprio (unicase em bloco): traços de linha central numa caixa 48x64, peso 14.
-GLYPHS = {
-    'f': (48, ["M17,64 V7 H48", "M0,30 H38"], []),
-    'o': (48, ["M7,7 H41 V57 H7 Z"], []),
-    'r': (48, ["M7,64 V7 H41 V35 H7"], [[(14, 35), (30, 35), (48, 64), (31, 64)]]),
-    'g': (48, ["M48,7 H7 V57 H41 V33 H23"], []),
-    'e': (48, ["M7,32 H41 V7 H7 V57 H48"], []),
-    's': (48, ["M48,7 H7 V32 H41 V57 H0"], []),
-    'd': (48, ["M41,0 V57 H7 V25 H41"], []),
-    '-': (30, ["M2,32 H28"], []),
-}
 
-def word_width(text, gap=8):
-    return sum(GLYPHS[ch][0] for ch in text) + gap * (len(text) - 1)
+def logo(x, y, scale):
+    return (f'<g transform="translate({x} {y}) scale({scale})">'
+            '<path d="M16 2.2 L28.4 9.1 V22.9 L16 29.8 L3.6 22.9 V9.1 Z" fill="none" stroke="url(#gSig)" stroke-width="2" stroke-linejoin="round"/>'
+            '<path d="M16 9 L22.5 12.6 V13.4 L16 17 L9.5 13.4 V12.6 Z" fill="#ffffff"/>'
+            '<path d="M9.5 13.4 L16 17 V23.8 L9.5 20.2 Z" fill="#f6dfe6"/>'
+            '<path d="M22.5 13.4 L16 17 V23.8 L22.5 20.2 Z" fill="#e2bccb"/></g>')
 
-def word(text, x, y, scale=1.0, gap=8, weight=14, outline=5, fill="#ffffff", edge="#151515"):
-    strokes, polys = [], []
-    cx = 0
-    for ch in text:
-        w, paths, pg = GLYPHS[ch]
-        for d in paths:
-            strokes.append(f'<path transform="translate({cx} 0)" d="{d}"/>')
-        for pts in pg:
-            polys.append('<polygon transform="translate(%d 0)" points="%s"/>' % (cx, ' '.join(f'{a},{b}' for a, b in pts)))
-        cx += w + gap
-    s, p = ''.join(strokes), ''.join(polys)
-    return (
-        f'<g transform="translate({x} {y}) scale({scale})">'
-        f'<g fill="none" stroke="{edge}" stroke-width="{weight + 2 * outline}" stroke-linejoin="round" stroke-linecap="round">{s}</g>'
-        f'<g fill="{edge}" stroke="{edge}" stroke-width="{2 * outline}" stroke-linejoin="round">{p}</g>'
-        f'<g fill="none" stroke="{fill}" stroke-width="{weight}" stroke-linejoin="miter" stroke-linecap="butt">{s}</g>'
-        f'<g fill="{fill}">{p}</g>'
-        f'</g>'
-    )
+
+def neon(x, y, w):
+    return (f'<rect x="{x}" y="{y - 1}" width="{w}" height="4" fill="url(#gSig)" opacity="0.72" filter="url(#fGlow)"/>'
+            f'<rect x="{x}" y="{y}" width="{w}" height="2" fill="url(#gSig)"/>')
+
 
 def palm(x, by, h, lean, s, fill, op=1.0):
     tx, ty = x + lean, by - h
@@ -73,29 +53,6 @@ def palm(x, by, h, lean, s, fill, op=1.0):
     return (f'<g fill="{fill}" opacity="{op}"><path d="{trunk}"/><path d="{" ".join(fr)}"/>'
             f'<circle cx="{tx:.1f}" cy="{ty:.1f}" r="{5 * s:.1f}"/></g>')
 
-def star(cx, cy, R, fill):
-    pts = []
-    for i in range(10):
-        r = R if i % 2 == 0 else R * 0.42
-        a = math.radians(-90 + i * 36)
-        pts.append(f'{cx + r * math.cos(a):.1f},{cy + r * math.sin(a):.1f}')
-    return f'<polygon points="{" ".join(pts)}" fill="{fill}"/>'
-
-def keycap(x, y, label, w=26, h=20, stroke="url(#gSig)"):
-    return (f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="5" fill="{c("superficie", "tecla")}" stroke="{stroke}" stroke-width="1.2"/>'
-            f'<text x="{x + w / 2}" y="{y + h / 2 + 3.6}" text-anchor="middle" font-family="{FONT}" font-weight="700" font-size="10.5" fill="#ffffff">{label}</text>')
-
-def face_button(cx, cy, kind, r=10):
-    light = "#f6dfe6"
-    base = f'<circle cx="{cx}" cy="{cy}" r="{r}" fill="{c("superficie", "tecla")}" stroke="{light}" stroke-width="1.3"/>'
-    k = r * 0.42
-    if kind == "x":
-        g = f'<path d="M{cx - k},{cy - k} L{cx + k},{cy + k} M{cx + k},{cy - k} L{cx - k},{cy + k}" stroke="{light}" stroke-width="1.6" stroke-linecap="round"/>'
-    elif kind == "o":
-        g = f'<circle cx="{cx}" cy="{cy}" r="{k}" fill="none" stroke="{light}" stroke-width="1.6"/>'
-    else:
-        g = f'<path d="M{cx},{cy - k - 0.6} L{cx + k + 0.6},{cy + k - 0.4} L{cx - k - 0.6},{cy + k - 0.4} Z" fill="none" stroke="{light}" stroke-width="1.5" stroke-linejoin="round"/>'
-    return base + g
 
 def striped_sun(mask_id, cx, cy, r, fill):
     bars = []
@@ -104,3 +61,22 @@ def striped_sun(mask_id, cx, cy, r, fill):
         bars.append(f'<rect x="{cx - r - 2}" y="{y:.1f}" width="{2 * r + 4}" height="{r * (0.02 + 0.0135 * i):.1f}" fill="#000"/>')
     return (f'<mask id="{mask_id}"><circle cx="{cx}" cy="{cy}" r="{r}" fill="#fff"/>{"".join(bars)}</mask>'
             f'<circle cx="{cx}" cy="{cy}" r="{r}" fill="{fill}" mask="url(#{mask_id})"/>')
+
+
+def skyline(base_y, blds, cor):
+    g, win = [], []
+    for i, (bx, bw, bh) in enumerate(blds):
+        top = base_y - bh
+        g.append(f'<rect x="{bx}" y="{top}" width="{bw}" height="{bh + 32}"/>')
+        g.append(f'<rect x="{bx + bw * 0.22:.0f}" y="{top - 7}" width="{bw * 0.56:.0f}" height="8"/>')
+        if i % 3 == 1:
+            g.append(f'<rect x="{bx + bw / 2 - 1:.0f}" y="{top - 22}" width="2" height="16"/>')
+        if i % 2:
+            continue
+        for row in range(int(bh // 11)):
+            for col in range(int((bw - 10) // 9)):
+                if (row * 3 + col * 5 + i) % 4:
+                    win.append(f'<rect x="{bx + 6 + col * 9}" y="{top + 7 + row * 11}" width="4" height="5"/>')
+    return (f'<g fill="{cor}" opacity="0.92">{"".join(g)}</g>'
+            f'<g fill="#ffb06d" opacity="0.55">{"".join(win)}</g>'
+            f'<rect x="0" y="{base_y}" width="1280" height="32" fill="{c("superficie", "ameixa")}"/>')
