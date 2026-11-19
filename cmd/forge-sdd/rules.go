@@ -52,7 +52,7 @@ Com argumentos: exibe apenas os IDs solicitados.`,
 				}
 			}
 			if len(missing) > 0 {
-				fmt.Fprintf(os.Stderr, "ID(s) não encontrado(s) na Constituição: %s\n", strings.Join(missing, ", "))
+				fmt.Fprintf(cmd.ErrOrStderr(), "ID(s) não encontrado(s) na Constituição: %s\n", strings.Join(missing, ", "))
 				if len(ids) == 0 {
 					return fmt.Errorf("nenhum ID válido encontrado")
 				}
