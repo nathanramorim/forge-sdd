@@ -1,0 +1,26 @@
+%%{init: {"flowchart": {"curve": "linear", "nodeSpacing": 40, "rankSpacing": 80, "htmlLabels": true}}}%%
+flowchart LR
+  classDef pessoa fill:#08427b,stroke:#052e56,color:#ffffff
+  classDef cont fill:#438dd5,stroke:#2e6295,color:#ffffff
+
+  u(["<b>Você</b><br/>[Humano]<br/>planeja e aprova"]):::pessoa
+
+  subgraph disc["1 · Discovery"]
+    direction TB
+    d["<b>PM + Arquiteto</b><br/>[Claude · Gemini · Copilot]<br/>transforma ideia em spec"]:::cont
+  end
+
+  subgraph build["2 · Builder"]
+    direction TB
+    b["<b>Builder</b><br/>[worktree isolado]<br/>implementa e abre PR"]:::cont
+  end
+
+  subgraph rev["3 · Reviewer"]
+    direction TB
+    r["<b>Reviewer</b><br/>[somente leitura]<br/>confere regras (até 3×)"]:::cont
+  end
+
+  u -->|"/discovery + plan"| disc
+  disc -->|"tasks na fila"| build
+  build -->|"PR aberto"| rev
+  rev -->|"conforme ✓"| u

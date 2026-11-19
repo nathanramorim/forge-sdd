@@ -1,0 +1,16 @@
+sequenceDiagram
+  actor Você
+  participant D as Discovery
+  participant B as Builder
+  participant R as Reviewer
+  participant G as GitHub
+
+  Você->>D: /discovery + /split-features
+  D->>B: spec + tasks
+  B->>G: implementa e abre PR
+  B->>R: notifica
+  loop até 3 vezes
+    R->>R: confere regras e decisões
+  end
+  R->>Você: PR conforme ✓
+  Você->>G: aprova e faz merge

@@ -40,6 +40,35 @@ Você usa três sessões de IA ao mesmo tempo:
 
 Quando o PR está conforme, você é avisado na sessão de Discovery e faz a aprovação final.
 
+```mermaid
+%%{init: {"flowchart": {"curve": "linear", "nodeSpacing": 40, "rankSpacing": 80, "htmlLabels": true}}}%%
+flowchart LR
+  classDef pessoa fill:#08427b,stroke:#052e56,color:#ffffff
+  classDef cont fill:#438dd5,stroke:#2e6295,color:#ffffff
+
+  u(["<b>Você</b><br/>[Humano]<br/>planeja e aprova"]):::pessoa
+
+  subgraph disc["1 · Discovery"]
+    direction TB
+    d["<b>PM + Arquiteto</b><br/>[Claude · Gemini · Copilot]<br/>transforma ideia em spec"]:::cont
+  end
+
+  subgraph build["2 · Builder"]
+    direction TB
+    b["<b>Builder</b><br/>[worktree isolado]<br/>implementa e abre PR"]:::cont
+  end
+
+  subgraph rev["3 · Reviewer"]
+    direction TB
+    r["<b>Reviewer</b><br/>[somente leitura]<br/>confere regras (até 3×)"]:::cont
+  end
+
+  u -->|"/discovery + plan"| disc
+  disc -->|"tasks na fila"| build
+  build -->|"PR aberto"| rev
+  rev -->|"conforme ✓"| u
+```
+
 ## Por que usar
 
 | | |
@@ -88,6 +117,29 @@ O pipeline de três sessões já vem na versão estável. Para já instalar a pr
 | `/tutorial` | Aprender o ciclo com um exemplo |
 
 Veja todos em [docs/comandos.md](docs/comandos.md).
+
+**Como o ciclo de uma feature funciona, da ideia ao merge:**
+
+```mermaid
+sequenceDiagram
+  actor Você
+  participant D as Discovery
+  participant B as Builder
+  participant R as Reviewer
+  participant G as GitHub
+
+  Você->>D: /discovery + /split-features
+  D->>B: spec + tasks
+  B->>G: implementa e abre PR
+  B->>R: notifica
+  loop até 3 vezes
+    R->>R: confere regras e decisões
+  end
+  R->>Você: PR conforme ✓
+  Você->>G: aprova e faz merge
+```
+
+> *Convenção: pipeline em flowchart LR com cores C4; ciclo em sequenceDiagram. Versões PNG em [docs/img/](docs/img/).*
 
 ## Guias
 
