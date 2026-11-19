@@ -2,11 +2,13 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"sort"
 	"strings"
 	"text/tabwriter"
 	"time"
 
+	"github.com/forge-sdd/cli/internal/monitor"
 	"github.com/spf13/cobra"
 )
 
@@ -41,6 +43,11 @@ Determinístico: não depende de o agente de IA montar a tabela manualmente.`,
 			return err
 		}
 		out := cmd.OutOrStdout()
+		initiative, _ := cmd.Flags().GetString("initiative")
+		jobs, _ := cmd.Flags().GetBool("jobs")
+		if initiative != "" || jobs {
+			return writeUsageReport(out, records, initiative, jobs)
+		}
 		if len(records) == 0 {
 			fmt.Fprintln(out, "Nenhuma métrica encontrada em sdd/.metrics — nada para relatar.")
 			return nil
@@ -52,6 +59,9 @@ Determinístico: não depende de o agente de IA montar a tabela manualmente.`,
 
 		for _, r := range records {
 			m := r.Metrics
+			if m.Medicao == monitor.MedicaoResumo {
+				continue
+			}
 			key := m.Feature
 			if key == "" {
 				key = "(sem feature)"
@@ -115,6 +125,48 @@ Determinístico: não depende de o agente de IA montar a tabela manualmente.`,
 	},
 }
 
+// writeUsageReport imprime o uso por origem de medição (real x estimado) e, com jobs, cada job.
+func writeUsageReport(out io.Writer, records []sessionFileEntry, initiative string, jobs bool) error {
+	var ms []sessionMetrics
+	for _, r := range records {
+		if monitor.BelongsToInitiative(r.Metrics, initiative) {
+			ms = append(ms, r.Metrics)
+		}
+	}
+	if len(ms) == 0 {
+		fmt.Fprintln(out, "Nenhuma métrica encontrada para o filtro — nada para relatar.")
+		return nil
+	}
+	t := monitor.SumUsage(ms)
+	w := tabwriter.NewWriter(out, 0, 2, 2, ' ', 0)
+	fmt.Fprintln(w, "MEDICAO\tJOBS\tTURNOS\tIN\tCACHE LIDO\tCACHE GRAVADO\tOUT\tCUSTO TABELA (USD)")
+	for _, row := range []struct {
+		name string
+		b    monitor.UsageBucket
+	}{{monitor.MedicaoReal, t.Real}, {monitor.MedicaoEstimado, t.Estimado}} {
+		fmt.Fprintf(w, "%s\t%d\t%d\t%d\t%d\t%d\t%d\t%.2f\n", row.name, row.b.Sessions, row.b.Turns,
+			row.b.TokensInput, row.b.TokensCacheRead, row.b.TokensCacheCreation, row.b.TokensOutput, row.b.CostUSDTabela)
+	}
+	w.Flush()
+	if !jobs {
+		return nil
+	}
+	fmt.Fprintln(out)
+	jw := tabwriter.NewWriter(out, 0, 2, 2, ' ', 0)
+	fmt.Fprintln(jw, "JOB\tMEDICAO\tTURNOS\tIN\tCACHE LIDO\tOUT\tMODELO")
+	for _, m := range ms {
+		model, medicao := m.Model, m.Medicao
+		if model == "" {
+			model = "-"
+		}
+		if medicao == "" {
+			medicao = monitor.MedicaoEstimado
+		}
+		fmt.Fprintf(jw, "%s\t%s\t%d\t%d\t%d\t%d\t%s\n", m.Phase, medicao, m.Turns, m.TokensInput, m.TokensCacheRead, m.TokensOutput, model)
+	}
+	return jw.Flush()
+}
+
 // formatDuration imprime uma duração em segundos como "XdYhZm", omitindo
 // unidades zeradas à esquerda (ex: "3h12m", "45m").
 func formatDuration(seconds int) string {
@@ -133,4 +185,6 @@ func formatDuration(seconds int) string {
 
 func init() {
 	reportCmd.Flags().String("dir", ".", "Diretório alvo do projeto Forge-SDD")
+	reportCmd.Flags().String("initiative", "", "Soma só os jobs da iniciativa, separando uso real de estimado")
+	reportCmd.Flags().Bool("jobs", false, "Lista cada job com turnos, tokens e modelo")
 }

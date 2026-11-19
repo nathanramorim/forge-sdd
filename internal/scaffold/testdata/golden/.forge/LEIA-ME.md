@@ -141,12 +141,30 @@ O comando combina simultaneamente:
 2. **Commits recentes:** últimos 5 commits da branch no git (`git log --oneline -n 5`).
 3. **Fila de tarefas:** checklist consolidado da iniciativa (`queue panel`).
 
+## Trabalho longo com `/toca-ai`
+
+`/toca-ai <objetivo>` na sessão Discovery: o Líder gera o plano e as specs de todas as etapas, junta num pré-voo único o que só você pode dar (permissão de comando, ferramenta, arquivo e consentimento) e entrega à esteira com `forge pipeline toca-ai <iniciativa>`. O chat fica livre.
+
+- **Você é interrompido** só no pré-voo (`forge pipeline toca-ai --preflight <iniciativa>` mostra a lista única; consentimento se responde com `forge pipeline consent <id> --iniciativa <iniciativa>`, só em terminal) e para ação irreversível fora do repositório, segredo, gasto externo, merge em `main` ou exceção a regra. Imprevisto vira etapa `blocked` com o item exato em `pendencias-humanas.md`; as independentes seguem.
+- **Retomar:** rode `/toca-ai` ou `forge pipeline toca-ai <iniciativa>` de novo; os jobs não se duplicam. Acompanhe com `forge status`; pare com `.forge/runtime/STOP`.
+- **Sem o modo avançado**, o comando exige a spec aprovada por você (Gate 1) antes de enfileirar; com ele, o Reviewer aprova a spec e o Go libera as etapas.
+
 ## Configuração
 
 - `.forge/config/forge.json`: agente de cada sessão (`sessions`), modo de sessão (`session_mode`: `live` ou `headless`), limpeza de contexto (`context`: `clear` ou `continuous`), nível de permissão, tarefas em paralelo, worktrees, tentativas de rework, status do card. Copie de `forge.json.example` se quiser recomeçar.
 - `.forge/config/notifications.json`: canais (inbox sempre ligado; toast, e-mail, webhook e comentário no card opcionais). URLs e senhas **só por variável de ambiente** (`url_env`, `password_env`), nunca no arquivo.
 - **Permissões do agente:** escolha o nível `project` ou `full` (veja acima, no menu ou em `permissions` de `forge.json`); só edite `cli_profiles` para ajustes finos.
 - Sem `forge.json`, o `/implementar` volta ao fluxo de sessão única da 4.0.0-beta.
+
+## Esteira econômica (ADR-0014)
+
+- **PR pelo Go:** o Builder faz commit e roda `forge pipeline pr --id <job> --body-file <arq>`; o Go roda a Camada A, faz `git push origin <branch>:<branch>`, abre o PR (ou corrige a base de um PR já aberto) e o registra. Recusa branch `main` ou igual à base, corpo fora do `.github/pull_request_template.md` e branch sem commit à frente. `forge pipeline pr-opened` fica para quem abre o PR à mão.
+- **Base da iniciativa:** `forge queue enqueue --base <branch>` grava `base_branch` na fila. A base vale nesta ordem: flag, fila, origem da branch no git ("Created from") e `base_branch` do `forge.json`; `dispatch`, `/toca-ai` e `pr` dizem de onde ela veio.
+- **Fix no despacho:** `forge dispatch <iniciativa> --fix fix-88-01` confere a spec do fix, enfileira o job com a branch `fix/88-01-<nome>` e base na branch da iniciativa, e põe o fix na fila.
+- **Uso real:** o worker lê o evento `result` do log do `claude` e grava tokens, cache, turnos, duração, modelo e custo de tabela (`medicao: real`); sem `result`, estima (`medicao: estimado`). `forge report --initiative <id> [--jobs]` soma separando real e estimado.
+- **Status curto:** sem terminal, `forge status` imprime até 1,5 KB (só iniciativas ativas); `--full` mostra tudo.
+- **Archive:** `forge archive` move a pasta da iniciativa para `sdd/archive/discovery/` (só na branch dela e sem task pendente; rodar de novo não muda nada). Ao aprovar o último job, só a fila `origem: toca-ai` arquiva sozinha; nas demais o inbox avisa "pronta para arquivar". `forge archive --concluidas --dry-run` lista as candidatas.
+- **Modelo e esforço por sessão:** `models` e `efforts` em `forge.json` (por `discovery`, `builder`, `reviewer`) viram `--model` e `--effort` pelos marcadores `{model}` e `{effort}` do perfil (claude e agy; gemini só modelo; as demais CLIs ainda sem flag confirmada). Escolha em **Settings**; sem escolha, o comando é o de sempre. Perfil gravado sem os marcadores gera aviso no preflight.
 
 ## Quando algo não anda
 

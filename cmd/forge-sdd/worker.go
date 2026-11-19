@@ -6,7 +6,6 @@ import (
 	"os"
 	"os/exec"
 	"os/signal"
-	"path/filepath"
 	"strconv"
 	"syscall"
 	"time"
@@ -79,37 +78,22 @@ func recordJobTelemetry(dir, role string) func(job bus.Job, outcome string) {
 		if !ok {
 			result = "blocked"
 		}
-		tokensIn, tokensOut := estimateJobTokens(dir, role, job)
+		u := monitor.ReadJobUsage(dir, role, job.ID, job.SpecPath)
 		ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 		defer cancel()
 		_ = exec.CommandContext(ctx, self, "session", "record", "--dir", dir, "--feature", job.SpecPath, "--phase", job.ID,
 			"--agent-path", role, "--outcome", result, fmt.Sprintf("--criterio-atendido=%t", ok),
-			"--tokens-input", strconv.Itoa(tokensIn),
-			"--tokens-output", strconv.Itoa(tokensOut),
+			"--tokens-input", strconv.Itoa(u.TokensInput),
+			"--tokens-output", strconv.Itoa(u.TokensOutput),
+			"--tokens-cache-read", strconv.Itoa(u.TokensCacheRead),
+			"--tokens-cache-creation", strconv.Itoa(u.TokensCacheCreation),
+			"--turns", strconv.Itoa(u.Turns),
+			"--duration-seconds", strconv.Itoa(u.DurationSeconds),
+			"--model", u.Model,
+			"--cost-usd-tabela", strconv.FormatFloat(u.CostUSDTabela, 'f', 4, 64),
+			"--medicao", u.Medicao,
 		).Run()
 	}
-}
-
-// estimateJobTokens estima os tokens de entrada e saída do job a partir da Spec e do log do worker.
-func estimateJobTokens(dir, role string, job bus.Job) (int, int) {
-	specBytes := 4000
-	if job.SpecPath != "" {
-		specFull := job.SpecPath
-		if dir != "" && !filepath.IsAbs(specFull) {
-			specFull = filepath.Join(dir, specFull)
-		}
-		if info, err := os.Stat(specFull); err == nil && !info.IsDir() && info.Size() > 0 {
-			specBytes = int(info.Size())
-		}
-	}
-	logPath := filepath.Join(layout.Logs(dir), role+"-"+job.ID+".log")
-	logBytes := 2000
-	if info, err := os.Stat(logPath); err == nil && !info.IsDir() && info.Size() > 0 {
-		logBytes = int(info.Size())
-	}
-	tokensIn := monitor.EstimateTokensFromBytes(specBytes * 4)
-	tokensOut := monitor.EstimateTokensFromBytes(logBytes)
-	return tokensIn, tokensOut
 }
 
 var pipelinePROpenedCmd = &cobra.Command{
@@ -246,4 +230,46 @@ func init() {
 	_ = pipelineWorktreeCmd.MarkFlagRequired("task")
 	pipelineWorktreeCmd.Flags().String("base", "", "Ref base (padrão HEAD)")
 	pipelineCmd.AddCommand(pipelineWorktreeCmd)
+}
+
+var pipelinePRCmd = &cobra.Command{
+	Use:   "pr",
+	Short: "Abre ou corrige o PR do job: Camada A, push, PR na base da iniciativa e registro (nunca mescla)",
+	Long: `Faz pelo Go o passo mecânico do Builder: roda a Camada A (forge gate), faz git push origin
+<branch>:<branch>, cria o PR com a base da iniciativa (ou corrige a base de um PR já aberto), registra o
+PR no job e marca as tasks como review_pending. Recusa branch main ou igual à base, corpo sem as
+seções de .github/pull_request_template.md e branch sem commit à frente da base.`,
+	Args: cobra.NoArgs,
+	RunE: func(cmd *cobra.Command, args []string) error {
+		dir, _ := cmd.Flags().GetString("dir")
+		if dir == "" {
+			dir = "."
+		}
+		id, _ := cmd.Flags().GetString("id")
+		body, _ := cmd.Flags().GetString("body-file")
+		res, err := pipeline.OpenPR(dir, pipeline.PROptions{JobID: id, Worker: workerFromFlags(cmd), BodyFile: body})
+		if err != nil {
+			return err
+		}
+		out := cmd.OutOrStdout()
+		verb := "aberto"
+		switch {
+		case res.BaseFixed:
+			verb = "já existia; base corrigida"
+		case !res.Created:
+			verb = "já existia"
+		}
+		fmt.Fprintf(out, "PR #%d %s: %s\nBase do PR: %s (fonte: %s)\nPR registrado no job %s\n", res.Number, verb, res.URL, res.Base, res.BaseSource, id)
+		return nil
+	},
+}
+
+func init() {
+	pipelinePRCmd.Flags().String("dir", ".", "Diretório alvo do projeto Forge-SDD")
+	pipelinePRCmd.Flags().String("id", "", "ID do job em processamento")
+	_ = pipelinePRCmd.MarkFlagRequired("id")
+	pipelinePRCmd.Flags().String("worker", "", "Worker dono do lease (padrão: variável FORGE_WORKER, definida pelo worker)")
+	pipelinePRCmd.Flags().String("body-file", "", "Corpo do PR (relativo ao projeto), pelo modelo de .github/pull_request_template.md")
+	_ = pipelinePRCmd.MarkFlagRequired("body-file")
+	pipelineCmd.AddCommand(pipelinePRCmd)
 }

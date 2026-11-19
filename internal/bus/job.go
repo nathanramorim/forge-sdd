@@ -33,6 +33,8 @@ const (
 	TypeFeatureBuild = "feature_build"
 	TypePRRework     = "pr_rework"
 	TypePRReview     = "pr_review"
+	// TypeSpecReview é a revisão da spec pelo Reviewer no modo avançado (ADR-0013).
+	TypeSpecReview = "spec_review"
 )
 
 // Prioridades.
@@ -125,7 +127,7 @@ func RoleForType(t string) (string, bool) {
 	switch t {
 	case TypeFeatureBuild, TypePRRework:
 		return layout.RoleBuilder, true
-	case TypePRReview:
+	case TypePRReview, TypeSpecReview:
 		return layout.RoleReviewer, true
 	}
 	return "", false

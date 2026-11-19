@@ -53,6 +53,9 @@ type DispatchOptions struct {
 	EvidencePath string // relativo ao projeto; padrão: <iniciativa>/card-evidence.json
 	DryRun       bool
 	Now          time.Time
+	// Fix despacha um fix da iniciativa (ex.: fix-88-01) em vez das tasks de features/.
+	Fix string
+	Git queue.GitFunc // injetável nos testes; padrão: git real
 }
 
 // DispatchResult descreve o resultado do gate e, se passou, do despacho.
@@ -63,6 +66,8 @@ type DispatchResult struct {
 	JobPath         string
 	CardInstruction string
 	Created         bool
+	BaseBranch      string // base do PR da iniciativa
+	BaseSource      string // de onde a base veio (flag, fila, git ou forge.json)
 }
 
 // Blocked informa se o gate reprovou.
@@ -114,7 +119,14 @@ func Dispatch(dir, feature string, opts DispatchOptions) (*DispatchResult, error
 
 	// 2. Quebra em tasks, cada uma com as cinco seções e IDs que existem na Constitution.
 	tasks, taskIDs := listTasks(base)
-	if len(tasks) == 0 {
+	var fixName string
+	if opts.Fix != "" {
+		var perr string
+		tasks, taskIDs, fixName, perr = listFix(base, opts.Fix)
+		if perr != "" {
+			res.Pending = append(res.Pending, perr)
+		}
+	} else if len(tasks) == 0 {
 		res.Pending = append(res.Pending, fmt.Sprintf("nenhuma task em %s/features (rode /split-features)", rel(base)))
 	}
 	rulesSet := map[string]bool{}
@@ -154,6 +166,7 @@ func Dispatch(dir, feature string, opts DispatchOptions) (*DispatchResult, error
 			}
 		}
 	}
+	res.Pending = append(res.Pending, taskSpecProblems(dir, base, opts.Fix)...)
 	for _, f := range []string{"criteria.md"} {
 		if data, err := os.ReadFile(filepath.Join(base, f)); err == nil {
 			for _, tok := range adrTokensIn(sectionBody(string(data), "adrs aplicáveis")) {
@@ -204,6 +217,14 @@ func Dispatch(dir, feature string, opts DispatchOptions) (*DispatchResult, error
 	}
 
 	// 4. Job.
+	baseBranch, baseSource := queue.ResolveBase(dir, initiative, "", cfg.BaseBranch, opts.Git)
+	prBranch := layout.InitiativeBranch(initiative)
+	if opts.Fix != "" {
+		// O fix abre o PR contra a branch da iniciativa, em uma branch própria.
+		baseBranch, baseSource = layout.InitiativeBranch(initiative), "branch da iniciativa"
+		prBranch = "fix/" + strings.TrimPrefix(fixName, "fix-")
+	}
+	res.BaseBranch, res.BaseSource = baseBranch, baseSource
 	job := bus.Job{
 		SchemaVersion:     bus.SchemaVersion,
 		ID:                jobID(feature, now),
@@ -217,10 +238,23 @@ func Dispatch(dir, feature string, opts DispatchOptions) (*DispatchResult, error
 		ADRRefs:           sortedKeys(adrFiles),
 		RulesRefs:         sortedKeys(rulesSet),
 		Card:              bus.Card{Provider: ev.Provider, ID: ev.ID, URL: ev.URL},
-		PR:                bus.PR{Branch: "feat/" + initiative, BaseBranch: cfg.BaseBranch},
+		PR:                bus.PR{Branch: prBranch, BaseBranch: baseBranch},
 		Attempt:           1,
 		MaxReworkAttempts: cfg.Reviewer.MaxReworkAttempts,
 		ReworkFeedback:    []bus.Feedback{},
+	}
+	role := layout.RoleBuilder
+	if opts.Fix != "" {
+		job.ID = jobID(feature+"-"+opts.Fix, now)
+		job.Title = fixName
+		job.SpecPath = rel(tasks[0])
+	}
+	if cfg.IsAdvanced() && opts.Fix == "" {
+		// Modo avançado (ADR-0013): a spec passou na Camada A; o Reviewer a revisa antes da fila.
+		role = layout.RoleReviewer
+		job.Type = bus.TypeSpecReview
+		job.ID = specJobID(job.ID)
+		job.Attempt = nextSpecAttempt(dir, initiative, job.MaxReworkAttempts)
 	}
 	res.Job = &job
 	if cfg.PMMCP.RequireExistingCard {
@@ -229,11 +263,19 @@ func Dispatch(dir, feature string, opts DispatchOptions) (*DispatchResult, error
 	if opts.DryRun {
 		return res, nil
 	}
-	path, created, err := bus.Enqueue(dir, layout.RoleBuilder, job, now)
+	path, created, err := bus.Enqueue(dir, role, job, now)
 	if err != nil {
 		return nil, err
 	}
 	res.JobPath, res.Created = path, created
+	if opts.Fix != "" {
+		if err := queue.AddItem(dir, initiative, queue.QueueItem{
+			TaskID: opts.Fix, Title: fixName, SpecPath: job.SpecPath, Status: queue.StatusQueued,
+			Rules: []string{}, SkillsUsed: []string{},
+		}); err != nil {
+			return nil, err
+		}
+	}
 	return res, nil
 }
 
@@ -291,6 +333,24 @@ func listTasks(base string) (paths []string, ids []string) {
 	sort.Strings(paths)
 	sort.Strings(ids)
 	return paths, ids
+}
+
+var fixIDRe = regexp.MustCompile(`^fix-[a-z0-9]+-[0-9]{2}[a-z]?$`)
+
+// listFix acha fixes/<id>-*.md da iniciativa. Devolve o caminho, o ID, o nome do arquivo sem
+// extensão e, quando não acha, a pendência.
+func listFix(base, id string) (paths, ids []string, name, pending string) {
+	if !fixIDRe.MatchString(id) {
+		return nil, nil, "", fmt.Sprintf("fix %q inválido: use o formato fix-<id>-<nn> (ex.: fix-88-01)", id)
+	}
+	entries, _ := os.ReadDir(filepath.Join(base, "fixes"))
+	for _, e := range entries {
+		n := e.Name()
+		if !e.IsDir() && strings.HasSuffix(n, ".md") && strings.HasPrefix(n, id+"-") {
+			return []string{filepath.Join(base, "fixes", n)}, []string{id}, strings.TrimSuffix(n, ".md"), ""
+		}
+	}
+	return nil, nil, "", fmt.Sprintf("o fix %s não existe em %s/fixes", id, filepath.Base(base))
 }
 
 func missingSections(content string) []string {

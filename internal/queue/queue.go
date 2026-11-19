@@ -19,6 +19,7 @@ const (
 	StatusReviewPending    = "review_pending"
 	StatusApproved         = "approved"
 	StatusChangesRequested = "changes_requested"
+	StatusBlocked          = "blocked"
 
 	VerdictConforme = "conforme"
 	VerdictViolacao = "violacao"
@@ -29,6 +30,8 @@ const (
 type Queue struct {
 	FeatureID  string      `json:"feature_id"`
 	Branch     string      `json:"branch"`
+	BaseBranch string      `json:"base_branch,omitempty"`
+	Origem     string      `json:"origem,omitempty"`
 	SpecStatus string      `json:"spec_status"`
 	UpdatedAt  string      `json:"updated_at"`
 	Items      []QueueItem `json:"items"`
@@ -44,6 +47,7 @@ type QueueItem struct {
 	Rules             []string `json:"rules"`
 	SkillsUsed        []string `json:"skills_used"`
 	Attempts          int      `json:"attempts"`
+	BlockedReason     string   `json:"blocked_reason,omitempty"`
 	GovernanceVerdict *Verdict `json:"governance_verdict,omitempty"`
 }
 
@@ -57,15 +61,16 @@ type Verdict struct {
 
 // Finding representa um achado individual dentro do parecer da Camada B.
 type Finding struct {
-	Verificacao   string `json:"verificacao"`
-	Regra         string `json:"regra"`
-	Classificacao string `json:"classificacao"`
-	Severidade    string `json:"severidade"`
-	Arquivo       string `json:"arquivo"`
-	Linha         int    `json:"linha"`
-	Evidencia     string `json:"evidencia"`
-	Explicacao    string `json:"explicacao"`
-	Correcao      string `json:"correcao"`
+	Verificacao     string `json:"verificacao"`
+	Regra           string `json:"regra"`
+	RegraDescricao  string `json:"regra_descricao,omitempty"`
+	Classificacao   string `json:"classificacao"`
+	Severidade      string `json:"severidade"`
+	Arquivo         string `json:"arquivo"`
+	Linha           int    `json:"linha"`
+	Evidencia       string `json:"evidencia"`
+	Explicacao      string `json:"explicacao"`
+	Correcao        string `json:"correcao"`
 }
 
 // CandidateSkill representa uma proposta de auto-skill identificada durante a execução/revisão.
@@ -299,32 +304,52 @@ func extractSpecDependsOn(dir, specPath string) []string {
 	if err != nil {
 		return nil
 	}
-	return parseDependsOnContent(string(data))
+	return ParseDependsOn(string(data))
 }
 
-func parseDependsOnContent(content string) []string {
-	re := regexp.MustCompile(`(?i)\*\*Depende de:\*\*\s*(.*)`)
-	m := re.FindStringSubmatch(content)
-	if len(m) < 2 {
-		return nil
-	}
-	val := strings.TrimSpace(m[1])
-	val = strings.Trim(val, "`*-_ ")
-	if val == "" || val == "—" || val == "-" || strings.ToLower(val) == "nenhuma" || strings.ToLower(val) == "nenhum" {
-		return nil
-	}
-	tokens := strings.FieldsFunc(val, func(r rune) bool {
-		return r == ',' || r == ';' || r == ' ' || r == '\t'
-	})
-	var deps []string
-	for _, tok := range tokens {
-		tok = strings.Trim(tok, "`*-_ ")
-		if tok == "" || tok == "—" || tok == "-" || strings.ToLower(tok) == "e" {
+var (
+	dependsLineRe = regexp.MustCompile(`(?i)^\*\*Depende de:\*\*\s*(.*)$`)
+	parenRe       = regexp.MustCompile(`\([^)]*\)`)
+	depRefRe      = regexp.MustCompile(`\b(?:(?:feat|fix)-[a-z0-9]+-[0-9]{2}[a-z]?|[0-9]+-[0-9]{2}[a-z]?)\b`)
+	cleanDepRe    = regexp.MustCompile(`^[A-Za-z0-9][A-Za-z0-9._-]*$`)
+	junkDeps      = map[string]bool{"nenhuma": true, "nenhum": true, "e": true, "usa": true}
+)
+
+// ParseDependsOn é o único leitor do cabeçalho `**Depende de:**` (DUP-01). Aceita `feat-90-02`,
+// `fix-88-01` e `88-02` (devolvidos como escritos); `nenhuma`, `—` e texto entre parênteses
+// não geram dependência. Lê só as primeiras linhas, onde fica o cabeçalho.
+func ParseDependsOn(content string) []string {
+	for i, line := range strings.Split(content, "\n") {
+		if i >= 40 {
+			break
+		}
+		m := dependsLineRe.FindStringSubmatch(strings.TrimSpace(line))
+		if m == nil {
 			continue
 		}
-		deps = append(deps, tok)
+		val := parenRe.ReplaceAllString(m[1], "")
+		seen := map[string]bool{}
+		var deps []string
+		for _, ref := range depRefRe.FindAllString(strings.ToLower(val), -1) {
+			if !seen[ref] {
+				seen[ref] = true
+				deps = append(deps, ref)
+			}
+		}
+		return deps
 	}
-	return deps
+	return nil
+}
+
+// cleanDependsOn descarta lixo de filas antigas (`nenhuma`, `(usa`) na leitura, sem editar o arquivo.
+func cleanDependsOn(deps []string) []string {
+	var out []string
+	for _, d := range deps {
+		if id := normalizeTaskID(d); cleanDepRe.MatchString(id) && !junkDeps[strings.ToLower(id)] {
+			out = append(out, d)
+		}
+	}
+	return out
 }
 
 // EligibleTasks resolve o grafo de dependências da fila (DAG) e devolve as tarefas com status "queued"
@@ -336,9 +361,7 @@ func EligibleTasks(q *Queue, max int) ([]QueueItem, error) {
 		return []QueueItem{}, nil
 	}
 
-	normalizeID := func(id string) string {
-		return strings.TrimSpace(strings.TrimPrefix(id, "feat-"))
-	}
+	normalizeID := normalizeTaskID
 
 	// 1. Mapeamento de itens por ID normalizado
 	itemMap := make(map[string]QueueItem)
@@ -350,7 +373,7 @@ func EligibleTasks(q *Queue, max int) ([]QueueItem, error) {
 	adj := make(map[string][]string)
 	for _, it := range q.Items {
 		u := normalizeID(it.TaskID)
-		for _, dep := range it.DependsOn {
+		for _, dep := range cleanDependsOn(it.DependsOn) {
 			v := normalizeID(dep)
 			adj[u] = append(adj[u], v)
 		}
@@ -397,7 +420,7 @@ func EligibleTasks(q *Queue, max int) ([]QueueItem, error) {
 			continue
 		}
 		allApproved := true
-		for _, dep := range it.DependsOn {
+		for _, dep := range cleanDependsOn(it.DependsOn) {
 			normDep := normalizeID(dep)
 			parent, exists := itemMap[normDep]
 			if !exists || parent.Status != StatusApproved {
@@ -582,7 +605,7 @@ func FormatExecutivePanel(q *Queue) string {
 		switch item.Status {
 		case StatusApproved:
 			approved = append(approved, item)
-		case StatusBuilding, StatusReviewPending, StatusChangesRequested:
+		case StatusBuilding, StatusReviewPending, StatusChangesRequested, StatusBlocked:
 			inProgress = append(inProgress, item)
 		case StatusQueued:
 			queued = append(queued, item)
@@ -628,6 +651,9 @@ func FormatExecutivePanel(q *Queue) string {
 			if it.GovernanceVerdict != nil && it.GovernanceVerdict.Resumo != "" {
 				detail = " — " + it.GovernanceVerdict.Resumo
 			}
+			if it.Status == StatusBlocked && it.BlockedReason != "" {
+				detail = " — bloqueada: " + it.BlockedReason
+			}
 			fmt.Fprintf(&b, "- [~] `%s`: %s (`%s`, tentativas: %d)%s\n", it.TaskID, it.Title, it.Status, it.Attempts, detail)
 		}
 		b.WriteString("\n")
@@ -653,4 +679,9 @@ func FormatExecutivePanel(q *Queue) string {
 	}
 
 	return b.String()
+}
+
+// normalizeTaskID é a regra única de ID de task: sem espaços nas pontas e sem o prefixo "feat-".
+func normalizeTaskID(id string) string {
+	return strings.TrimSpace(strings.TrimPrefix(strings.TrimSpace(id), "feat-"))
 }

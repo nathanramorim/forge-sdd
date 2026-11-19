@@ -12,9 +12,25 @@ import (
 	"github.com/forge-sdd/cli/internal/layout"
 )
 
-// matchesTask segue a mesma regra de Review: id exato ou prefixo "<id>-".
+// matchesTask casa o ID de uma task do job com o da fila ignorando o prefixo "feat-" (o job grava
+// "88-01"; a fila, "feat-88-01-<nome>"): id exato ou prefixo "<id>-". Nunca casa "88-1" com "88-10".
 func matchesTask(itemID, id string) bool {
+	itemID, id = normalizeTaskID(itemID), normalizeTaskID(id)
+	if id == "" {
+		return false
+	}
 	return itemID == id || strings.HasPrefix(itemID, id+"-")
+}
+
+// CountMatches devolve quantas tasks da fila da iniciativa casam com algum dos IDs, em qualquer
+// status. Zero com IDs informados indica IDs que não pertencem à fila (aviso, não erro).
+func CountMatches(dir, initiative string, taskIDs []string) (int, error) {
+	matched := 0
+	_, err := mutateTasks(dir, initiative, taskIDs, func(*QueueItem) bool {
+		matched++
+		return false
+	})
+	return matched, err
 }
 
 // SetTaskStatuses atualiza o status das tasks informadas na fila de uma iniciativa específica,
@@ -22,13 +38,38 @@ func matchesTask(itemID, id string) bool {
 // estar em outra). Tasks já aprovadas nunca regridem. Fila ausente ou tasks desconhecidas não são
 // erro: devolve quantas tasks mudaram de status.
 func SetTaskStatuses(dir, initiative string, taskIDs []string, to string) (int, error) {
+	return mutateTasks(dir, initiative, taskIDs, func(it *QueueItem) bool {
+		if it.Status == to || it.Status == StatusApproved {
+			return false
+		}
+		it.Status = to
+		return true
+	})
+}
+
+// BlockTasks marca as tasks como blocked com o motivo (feat 88-06). Tasks já aprovadas não
+// regridem. Tasks dependentes ficam paradas porque a dependência não chega a approved; as
+// independentes continuam elegíveis. Devolve quantas tasks mudaram.
+func BlockTasks(dir, initiative string, taskIDs []string, reason string) (int, error) {
+	return mutateTasks(dir, initiative, taskIDs, func(it *QueueItem) bool {
+		if it.Status == StatusApproved || (it.Status == StatusBlocked && it.BlockedReason == reason) {
+			return false
+		}
+		it.Status = StatusBlocked
+		it.BlockedReason = reason
+		return true
+	})
+}
+
+// mutateTasks aplica fn às tasks citadas e grava a fila de forma atômica quando algo mudou.
+func mutateTasks(dir, initiative string, taskIDs []string, fn func(*QueueItem) bool) (int, error) {
 	if len(taskIDs) == 0 || strings.TrimSpace(initiative) == "" {
 		return 0, nil
 	}
 	base, err := layout.Initiative(dir, initiative)
 	if err != nil {
 		if errors.Is(err, layout.ErrInvalidInitiative) {
-			return 0, nil // job sem iniciativa válida: não há fila a atualizar
+			return 0, nil
 		}
 		return 0, err
 	}
@@ -44,18 +85,15 @@ func SetTaskStatuses(dir, initiative string, taskIDs []string, to string) (int, 
 	if err := json.Unmarshal(data, &q); err != nil {
 		return 0, fmt.Errorf("falha ao decodificar %s: %w", path, err)
 	}
-
 	changed := 0
 	for i := range q.Items {
 		for _, id := range taskIDs {
-			if !matchesTask(q.Items[i].TaskID, id) {
-				continue
+			if matchesTask(q.Items[i].TaskID, id) {
+				if fn(&q.Items[i]) {
+					changed++
+				}
+				break
 			}
-			if q.Items[i].Status != to && q.Items[i].Status != StatusApproved {
-				q.Items[i].Status = to
-				changed++
-			}
-			break
 		}
 	}
 	if changed == 0 {

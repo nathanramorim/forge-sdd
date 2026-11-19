@@ -51,6 +51,8 @@ func StatusBadge(status string) string {
 		return "[✗] Falhou"
 	case queue.StatusReviewPending, "review":
 		return "[?] Revisão Pendente"
+	case queue.StatusBlocked:
+		return "[■] Bloqueada"
 	default:
 		if status == "" {
 			return "[⌛] Na Fila"

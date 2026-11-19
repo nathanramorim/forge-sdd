@@ -27,8 +27,12 @@ type RunSpec struct {
 	// Permissions são os argumentos de permissão já traduzidos (config.PermissionArgs); expandem o
 	// marcador {permissions} do perfil em argumentos separados.
 	Permissions []string
-	Dir         string
-	Timeout     time.Duration
+	// Model e Effort são os argumentos de modelo e esforço (config.SessionModelArgs); expandem {model}
+	// e {effort}. Vazios, os marcadores somem e o argv fica como antes.
+	Model   []string
+	Effort  []string
+	Dir     string
+	Timeout time.Duration
 }
 
 // RunResult é o desfecho da execução.
@@ -65,7 +69,7 @@ func BuildArgv(p config.CLIProfile, spec RunSpec) (string, []string, error) {
 	return p.Command, args, nil
 }
 
-// expandArgs substitui {agent}, {name} e {prompt} e expande {permissions} em argumentos separados.
+// expandArgs substitui {agent}, {name} e {prompt} e expande {permissions}, {model} e {effort} em argumentos separados.
 func expandArgs(tpl []string, spec RunSpec) ([]string, error) {
 	repl := strings.NewReplacer("{agent}", spec.Agent, "{name}", spec.Name, "{prompt}", spec.Prompt)
 	args := make([]string, 0, len(tpl)+len(spec.Permissions))
@@ -79,6 +83,19 @@ func expandArgs(tpl []string, spec RunSpec) ([]string, error) {
 					return nil, errors.New("argumento de permissão com caractere de controle")
 				}
 				args = append(args, perm)
+			}
+			continue
+		}
+		if a == config.MarkerModel || a == config.MarkerEffort {
+			extra := spec.Model
+			if a == config.MarkerEffort {
+				extra = spec.Effort
+			}
+			for _, v := range extra {
+				if strings.ContainsAny(v, "\x00\r\n") {
+					return nil, errors.New("argumento de modelo ou esforço com caractere de controle")
+				}
+				args = append(args, v)
 			}
 			continue
 		}

@@ -115,6 +115,17 @@ func RunWorker(ctx context.Context, opts WorkerOptions) error {
 		if n, err := bus.Recover(opts.Dir, opts.Role, opts.Now()); err == nil && n > 0 {
 			fmt.Fprintf(opts.Out, "[%s] %d job(s) com lease vencido devolvido(s) à fila\n", opts.Name, n)
 		}
+		if reason := HaltReason(opts.Dir, cfg, opts.Now()); reason != "" {
+			fmt.Fprintf(opts.Out, "[%s] esteira parada: %s\n", opts.Name, reason)
+			notifyHalt(opts.Dir, reason, opts.Now())
+			return nil
+		}
+		if !waitDailyPause(ctx, opts, cfg, opts.Name) {
+			if opts.Once {
+				return nil
+			}
+			continue
+		}
 		entry, err := bus.Claim(opts.Dir, opts.Role, opts.Name, bus.DefaultLeaseTTL, opts.Now())
 		if err == bus.ErrEmpty {
 			if opts.Once {
@@ -135,8 +146,14 @@ func RunWorker(ctx context.Context, opts WorkerOptions) error {
 			return err
 		}
 		wasIdle = false // depois de trabalhar, a próxima ociosidade avisa de novo
+		started := opts.Now()
 		if err := processJob(ctx, opts, cfg, entry); err != nil {
 			return err
+		}
+		if reason := JobOverCeiling(opts.Dir, cfg, opts.Role, entry.Job.ID, opts.Now().Sub(started)); reason != "" {
+			fmt.Fprintf(opts.Out, "[%s] esteira parada: %s\n", opts.Name, reason)
+			notifyHalt(opts.Dir, reason, opts.Now())
+			return nil
 		}
 	}
 }
@@ -207,12 +224,15 @@ func processJob(ctx context.Context, opts WorkerOptions, cfg config.ForgeConfig,
 	}()
 
 	rel, _ := filepath.Rel(opts.Dir, entry.Path)
+	modelArgs, effortArgs := cfg.SessionModelArgs(opts.Role)
 	timeout := time.Duration(cfg.Builder.JobTimeoutMinutes) * time.Minute
 	res, runErr := opts.Runner.Run(ctx, RunSpec{
 		Agent:       opts.Role,
 		Name:        opts.Name,
 		Prompt:      workerPrompt(opts.Role, job, filepath.ToSlash(rel), cfg),
 		Permissions: cfg.WorkerPermissionArgs(opts.CLI),
+		Model:       modelArgs,
+		Effort:      effortArgs,
 		Dir:         opts.Dir,
 		Timeout:     timeout,
 	}, out)
@@ -320,7 +340,7 @@ func VerifyJobHandoff(dir, role, workerName string, now func() time.Time, jobID 
 		}
 		j := e.Job
 		if j.PR.URL == nil || j.PR.Number == nil {
-			return "o agente terminou sem registrar o PR (forge pipeline pr-opened)"
+			return "o agente terminou sem registrar o PR (forge pipeline pr)"
 		}
 		review := j
 		review.ID = reviewJobID(j.ID)

@@ -20,6 +20,7 @@ import (
 type scripted struct {
 	selects  map[string][]string // prefixo do título -> valores em ordem
 	confirms []bool
+	gestures []string          // gesto devolvido por SelectGesture, em ordem (vazio = sem gesto)
 	defs     map[string]string // título -> default recebido
 	pauses   int
 	asked    []string
@@ -45,6 +46,15 @@ func (s *scripted) Select(title string, opts []menuOption, def string) (string, 
 		}
 	}
 	return "", errBack
+}
+
+func (s *scripted) SelectGesture(title string, opts []menuOption, def string) (string, string, error) {
+	v, err := s.Select(title, opts, def)
+	g := ""
+	if err == nil && len(s.gestures) > 0 {
+		g, s.gestures = s.gestures[0], s.gestures[1:]
+	}
+	return v, g, err
 }
 
 func (s *scripted) Confirm(title string, def bool) (bool, error) {
@@ -245,21 +255,19 @@ func TestMenu_PipelineSemForgeJSONOfereceAtivar(t *testing.T) {
 	assert.Empty(t, rl.calls, "recusar ativar não faz nada")
 }
 
-func TestMenu_ConfigurarCardEPermissoes(t *testing.T) {
+func TestMenu_ConfigurarPermissoes(t *testing.T) {
 	dir := pipelineDir(t, nil)
 	p := &scripted{
 		selects: map[string][]string{
-			"Forge SDD":              {valConfig, "<esc>"},
-			"Ativar ou reconfigurar": {"card", "perms", valBack},
+			"Forge SDD":                  {valConfig, "<esc>"},
+			"Ativar ou reconfigurar":     {"perms", valBack},
 			"Permissões do Builder e do": {config.PermissionFull},
 		},
-		confirms: []bool{false},
 	}
 	env, _, out := menuFor(t, dir, p, allFound())
 	require.NoError(t, runMenu(env))
 	cfg, _, err := config.LoadForgeConfig(dir)
 	require.NoError(t, err)
-	assert.False(t, cfg.PMMCP.RequireExistingCard, "projeto sem gerenciador despacha sem card")
 	assert.Equal(t, config.PermissionFull, cfg.Permissions)
 	assert.Contains(t, out.String(), "Gravado em .forge/config/forge.json")
 }
@@ -322,4 +330,48 @@ func TestMenu_AcaoEMesmoResultadoDoSubcomando(t *testing.T) {
 		rootCmd.SetOut(nil)
 		assert.Equal(t, viaCLI.String(), viaMenu.String(), "o menu e a linha de comando imprimem o mesmo: %v", args)
 	}
+}
+
+func TestMenu_SettingsModelo(t *testing.T) {
+	dir := pipelineDir(t, func(c *config.ForgeConfig) {
+		p := c.CLIProfiles[config.CLIClaude]
+		p.Args = []string{"-p", "{prompt}", "--agent", "{agent}", "-n", "{name}", config.MarkerPermissions} // perfil gravado sem marcadores
+		c.CLIProfiles[config.CLIClaude] = p
+	})
+	p := &scripted{
+		selects: map[string][]string{
+			"Settings":           {valModelPrefix + config.SessionRoleBuilder, valEffortPrefix + config.SessionRoleBuilder, valBack},
+			"Modelo do Builder":  {"sonnet"},
+			"Esforço do Builder": {"low"},
+		},
+		confirms: []bool{true, true},
+	}
+	env, _, out := menuFor(t, dir, p, allFound())
+
+	require.ErrorIs(t, env.settingsMenu(), errBack)
+
+	cfg, _, err := config.LoadForgeConfig(dir)
+	require.NoError(t, err)
+	assert.Equal(t, "sonnet", cfg.Models[config.SessionRoleBuilder])
+	assert.Equal(t, "low", cfg.Efforts[config.SessionRoleBuilder])
+	assert.Empty(t, cfg.MissingModelMarkers(config.SessionRoleBuilder), "o menu incluiu os marcadores que faltavam")
+	assert.Contains(t, out.String(), "Modelo do Builder: sonnet")
+	assert.Contains(t, strings.Join(p.asked, "|"), "Incluir o marcador")
+}
+
+func TestMenu_SettingsModelo_PadraoDaCLIRemoveAEscolha(t *testing.T) {
+	dir := pipelineDir(t, func(c *config.ForgeConfig) {
+		c.Models = map[string]string{config.SessionRoleReviewer: "haiku"}
+	})
+	p := &scripted{selects: map[string][]string{
+		"Settings":           {valModelPrefix + config.SessionRoleReviewer, valBack},
+		"Modelo do Reviewer": {valDefaultCLI},
+	}}
+	env, _, _ := menuFor(t, dir, p, allFound())
+
+	require.ErrorIs(t, env.settingsMenu(), errBack)
+
+	cfg, _, err := config.LoadForgeConfig(dir)
+	require.NoError(t, err)
+	assert.Empty(t, cfg.Models)
 }

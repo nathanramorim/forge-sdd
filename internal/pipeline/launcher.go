@@ -100,6 +100,7 @@ func interactiveLineForRole(windows bool, cfg config.ForgeConfig, role, name, ag
 		Agent: agent,
 		Name:  name,
 	}
+	spec.Model, spec.Effort = cfg.SessionModelArgs(role)
 	if role == config.SessionRoleDiscovery {
 		spec.Prompt = DiscoveryPrompt
 	} else {

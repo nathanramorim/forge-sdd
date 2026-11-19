@@ -28,6 +28,8 @@ var errBack = survey.ErrBack
 // prompter isola a interação para os testes simularem a entrada.
 type prompter interface {
 	Select(title string, opts []menuOption, def string) (string, error)
+	// SelectGesture é o Select que também informa →/← (survey.GestureRight/GestureLeft).
+	SelectGesture(title string, opts []menuOption, def string) (string, string, error)
 	Confirm(title string, def bool) (bool, error)
 	Pause(msg string) error
 }
@@ -36,6 +38,9 @@ type huhPrompter struct{}
 
 func (huhPrompter) Select(title string, opts []menuOption, def string) (string, error) {
 	return survey.SelectOne(title, opts, def)
+}
+func (huhPrompter) SelectGesture(title string, opts []menuOption, def string) (string, string, error) {
+	return survey.SelectGesture(title, opts, def)
 }
 func (huhPrompter) Confirm(title string, def bool) (bool, error) {
 	return survey.ConfirmYesNo(title, def)
@@ -120,16 +125,17 @@ Sem terminal interativo o menu não abre. Comandos mais usados:
 }
 
 const (
-	valUp      = "up"
-	valLive    = "live"
-	valStatus  = "status"
-	valQueue   = "queue"
-	valDiag    = "diag"
-	valConfig  = "config"
-	valHelp    = "help"
-	valInstall = "install"
-	valExit    = "exit"
-	valBack    = "back"
+	valUp       = "up"
+	valLive     = "live"
+	valStatus   = "status"
+	valQueue    = "queue"
+	valDiag     = "diag"
+	valConfig   = "config"
+	valSettings = "settings"
+	valHelp     = "help"
+	valInstall  = "install"
+	valExit     = "exit"
+	valBack     = "back"
 )
 
 // runMenu mostra o menu principal até a pessoa sair. O menu roda uma ação por vez e não é painel ao vivo.
@@ -169,11 +175,12 @@ func runMenu(env *menuEnv) error {
 			menuOption{Label: "Fila de tasks e inbox de notificações", Value: valQueue},
 			menuOption{Label: "Diagnóstico de saúde e regras (Doctor & Gate)", Value: valDiag},
 			menuOption{Label: "Configurações (agentes, terminal, modo ao vivo/headless)", Value: valConfig},
+			menuOption{Label: "Settings (chaves ativado/desativado)", Value: valSettings},
 			menuOption{Label: "Ajuda e comandos do CLI", Value: valHelp},
 			menuOption{Label: "Sair", Value: valExit},
 		)
 
-		choice, err := env.p.Select(header, opts, def)
+		choice, gesture, err := env.p.SelectGesture(header, opts, def)
 		if errors.Is(err, errBack) || choice == valExit {
 			return nil
 		}
@@ -190,7 +197,7 @@ func runMenu(env *menuEnv) error {
 		case valInstall:
 			installed = env.installOrUpdate() == nil && config.DetectProject(env.dir)
 		case valUp:
-			env.startSessions()
+			env.startSessions(gesture)
 		case valLive:
 			env.act("status", "--live", "--dir", env.dir)
 		case valStatus:
@@ -209,6 +216,10 @@ func runMenu(env *menuEnv) error {
 			_ = env.p.Pause("Enter para voltar ao menu")
 		case valDiag:
 			if err := env.diagMenu(); err != nil && !errors.Is(err, errBack) {
+				return err
+			}
+		case valSettings:
+			if err := env.settingsMenu(); err != nil && !errors.Is(err, errBack) {
 				return err
 			}
 		case valConfig:
@@ -367,9 +378,35 @@ func summary(cfg config.ForgeConfig) string {
 	return strings.Join(parts, " · ")
 }
 
-// startSessions é o fluxo principal: escolher, checar, confirmar, gravar e abrir.
-func (e *menuEnv) startSessions() {
+// applyAutonomyGesture liga (→) ou desliga (←) o modo avançado sobre cfg. Ligar exige a confirmação
+// de ambiente isolado; sem ela devolve ok=false e nada é gravado (ADR-0013).
+func (e *menuEnv) applyAutonomyGesture(cfg config.ForgeConfig, gesture string) (config.ForgeConfig, bool) {
+	switch gesture {
+	case survey.GestureRight:
+		if cfg.IsAdvanced() {
+			return cfg, true
+		}
+		ok, err := e.p.Confirm("Modo avançado (experimental): o Reviewer aprova a spec e as sessões rodam sem pedir permissão. O ambiente é isolado (contêiner, VM ou máquina descartável)?", false)
+		if err != nil || !ok {
+			fmt.Fprintln(e.out, "\nModo avançado não ligado: sem a confirmação de ambiente isolado nada foi gravado.")
+			return cfg, false
+		}
+		config.ApplyAdvanced(&cfg)
+	case survey.GestureLeft:
+		config.ApplyNormal(&cfg)
+	}
+	return cfg, true
+}
+
+// startSessions é o fluxo principal: escolher, checar, confirmar, gravar e abrir. gesture vem do
+// menu principal (→ liga e ← desliga o modo avançado).
+func (e *menuEnv) startSessions(gesture string) {
 	cfg, ok := e.loadPipeline()
+	if !ok {
+		_ = e.p.Pause("Enter para voltar ao menu")
+		return
+	}
+	cfg, ok = e.applyAutonomyGesture(cfg, gesture)
 	if !ok {
 		_ = e.p.Pause("Enter para voltar ao menu")
 		return
@@ -378,9 +415,11 @@ func (e *menuEnv) startSessions() {
 	if err != nil {
 		return
 	}
-	cfg, err = e.choosePermissions(cfg)
-	if err != nil {
-		return
+	if !cfg.IsAdvanced() { // o avançado força permissions full
+		cfg, err = e.choosePermissions(cfg)
+		if err != nil {
+			return
+		}
 	}
 	items := pipeline.Preflight(e.dir, cfg, e.preflightEnv)
 	fmt.Fprintf(e.out, "\nChecagem antes de abrir:\n%s\n", pipeline.FormatPreflight(items))
@@ -398,7 +437,11 @@ func (e *menuEnv) startSessions() {
 			break
 		}
 	}
-	ok, err = e.p.Confirm("Abrir agora? "+summary(cfg)+" · permissões "+cfg.Permissions+" · "+e.terminalLabel(cfg), true)
+	mode := ""
+	if cfg.IsAdvanced() {
+		mode = " · avançado"
+	}
+	ok, err = e.p.Confirm("Abrir agora? "+summary(cfg)+" · permissões "+cfg.Permissions+mode+" · "+e.terminalLabel(cfg), true)
 	if err != nil || !ok {
 		return
 	}
@@ -418,7 +461,6 @@ func (e *menuEnv) configMenu() error {
 			{Label: "Permissões do Builder e do Reviewer", Value: "perms"},
 			{Label: "Modo de sessão (ao vivo no painel ou worker headless)", Value: "mode"},
 			{Label: "Contexto entre jobs (limpar ou contínuo)", Value: "context"},
-			{Label: "Usa gerenciador de projeto (card obrigatório no /implementar)?", Value: "card"},
 			{Label: "Voltar", Value: valBack},
 		}, "agents")
 		if errors.Is(err, errBack) || choice == valBack {
@@ -458,10 +500,6 @@ func (e *menuEnv) configMenu() error {
 			if err == nil {
 				cfg.Context = ctx
 			}
-		case "card":
-			var need bool
-			need, err = e.p.Confirm("Exigir que o card exista no gerenciador de projeto antes de despachar? (Não: o /implementar despacha sem card)", cfg.PMMCP.RequireExistingCard)
-			cfg.PMMCP.RequireExistingCard = need
 		}
 		if err != nil {
 			continue
@@ -502,4 +540,232 @@ func (e *menuEnv) terminalLabel(cfg config.ForgeConfig) string {
 		return "em janelas do sistema"
 	}
 	return "no tmux (3 painéis)"
+}
+
+// settingKey é uma chave liga/desliga mostrada no menu Settings.
+type settingKey struct {
+	value string
+	label string
+	get   func(config.ForgeConfig) bool
+	set   func(*config.ForgeConfig, bool)
+}
+
+// settingKeys é a casa única das chaves liga/desliga (DUP-01); o card e os tetos do modo avançado (todos desligados por padrão).
+var settingKeys = []settingKey{{
+	value: "card",
+	label: "Usa gerenciador de projeto (card obrigatório no /implementar)",
+	get:   func(c config.ForgeConfig) bool { return c.PMMCP.RequireExistingCard },
+	set:   func(c *config.ForgeConfig, v bool) { c.PMMCP.RequireExistingCard = v },
+}, {
+	value: "teto-diario",
+	label: fmt.Sprintf("Teto diário de jobs (%d/dia; no teto a esteira pausa até o dia seguinte)", defaultDailyJobCap),
+	get:   func(c config.ForgeConfig) bool { return c.Safeguards.MaxJobsPerDay > 0 },
+	set: func(c *config.ForgeConfig, v bool) {
+		c.Safeguards.MaxJobsPerDay = 0
+		if v {
+			c.Safeguards.MaxJobsPerDay = defaultDailyJobCap
+		}
+	},
+}, {
+	value: "teto-tokens",
+	label: fmt.Sprintf("Teto de tokens por job (%d; ao passar, a esteira para)", defaultJobTokenCap),
+	get:   func(c config.ForgeConfig) bool { return c.Safeguards.MaxJobTokens > 0 },
+	set: func(c *config.ForgeConfig, v bool) {
+		c.Safeguards.MaxJobTokens = 0
+		if v {
+			c.Safeguards.MaxJobTokens = defaultJobTokenCap
+		}
+	},
+}, {
+	value: "teto-tempo",
+	label: fmt.Sprintf("Teto de tempo por job (%d min; ao passar, a esteira para)", defaultJobMinutesCap),
+	get:   func(c config.ForgeConfig) bool { return c.Safeguards.MaxJobMinutes > 0 },
+	set: func(c *config.ForgeConfig, v bool) {
+		c.Safeguards.MaxJobMinutes = 0
+		if v {
+			c.Safeguards.MaxJobMinutes = defaultJobMinutesCap
+		}
+	},
+}}
+
+// aliases locais das constantes de internal/config (DUP-04 fix).
+const (
+	defaultDailyJobCap   = config.DefaultDailyJobCap
+	defaultJobTokenCap   = config.DefaultJobTokenCap
+	defaultJobMinutesCap = config.DefaultJobMinutesCap
+)
+
+func onOff(v bool) string {
+	if v {
+		return "ativado"
+	}
+	return "desativado"
+}
+
+// settingsMenu lista as chaves como ativado/desativado e alterna a escolhida, gravando com SaveForgeConfig.
+func (e *menuEnv) settingsMenu() error {
+	for {
+		cfg, ok := e.loadPipeline()
+		if !ok {
+			return errBack
+		}
+		opts := make([]menuOption, 0, len(settingKeys)+1)
+		for _, k := range settingKeys {
+			opts = append(opts, menuOption{Label: fmt.Sprintf("%s: %s", k.label, onOff(k.get(cfg))), Value: k.value})
+		}
+		for _, role := range config.SessionRoles() {
+			opts = append(opts,
+				menuOption{Label: fmt.Sprintf("Modelo do %s: %s", shortRole(role), orDefault(cfg.Models[role])), Value: valModelPrefix + role},
+				menuOption{Label: fmt.Sprintf("Esforço do %s: %s", shortRole(role), orDefault(cfg.Efforts[role])), Value: valEffortPrefix + role})
+		}
+		opts = append(opts, menuOption{Label: "Voltar", Value: valBack})
+		choice, err := e.p.Select("Settings (Enter alterna a chave)", opts, settingKeys[0].value)
+		if errors.Is(err, errBack) || choice == valBack {
+			return errBack
+		}
+		if err != nil {
+			return err
+		}
+		if role, effort, ok := parseModelChoice(choice); ok {
+			if err := e.chooseModel(cfg, role, effort); err != nil && !errors.Is(err, errBack) {
+				return err
+			}
+			continue
+		}
+		for _, k := range settingKeys {
+			if k.value != choice {
+				continue
+			}
+			k.set(&cfg, !k.get(cfg))
+			if err := config.SaveForgeConfig(e.dir, cfg); err != nil {
+				fmt.Fprintf(e.out, "\n✗ %v\n", err)
+			} else {
+				fmt.Fprintf(e.out, "\n✓ %s: %s (gravado em .forge/config/forge.json)\n", k.label, onOff(k.get(cfg)))
+			}
+		}
+	}
+}
+
+const (
+	valModelPrefix  = "modelo:"
+	valEffortPrefix = "esforco:"
+	valDefaultCLI   = "__padrao__"
+)
+
+func orDefault(v string) string {
+	if v == "" {
+		return "padrão da CLI"
+	}
+	return v
+}
+
+func parseModelChoice(choice string) (role string, effort, ok bool) {
+	if r, found := strings.CutPrefix(choice, valModelPrefix); found {
+		return r, false, true
+	}
+	if r, found := strings.CutPrefix(choice, valEffortPrefix); found {
+		return r, true, true
+	}
+	return "", false, false
+}
+
+// shortRole é o nome curto da sessão nas linhas do Settings.
+func shortRole(role string) string {
+	return map[string]string{
+		config.SessionRoleDiscovery: "Discovery",
+		config.SessionRoleBuilder:   "Builder",
+		config.SessionRoleReviewer:  "Reviewer",
+	}[role]
+}
+
+// economicRole diz se o papel é de trabalho mais mecânico: nele o menu sugere um modelo ou esforço menor.
+func economicRole(role string) bool {
+	return role == config.SessionRoleBuilder || role == config.SessionRoleReviewer
+}
+
+// chooseModel escolhe e grava o modelo ou o esforço da sessão. "Padrão da CLI" é a primeira opção e
+// remove a escolha. Se o perfil gravado não tem o marcador, oferece incluí-lo.
+func (e *menuEnv) chooseModel(cfg config.ForgeConfig, role string, effort bool) error {
+	cli := cfg.CLIFor(role)
+	profile, ok := cfg.Profile(cli)
+	if !ok {
+		return nil
+	}
+	flags, supported := config.FlagsForCommand(profile.Command)
+	if !supported || (effort && flags.Effort == "") || (!effort && flags.Model == "") {
+		fmt.Fprintf(e.out, "\n✗ A CLI %s ainda não tem a flag confirmada para isso; nada a escolher.\n", profile.Command)
+		return nil
+	}
+	label, values := "Modelo", config.ModelPresets(profile.Command)
+	if effort {
+		label, values = "Esforço", flags.Efforts
+	}
+	opts := []menuOption{{Label: "Padrão da CLI", Value: valDefaultCLI}}
+	for _, v := range values {
+		suggestion := ""
+		if economicRole(role) && (v == "haiku" || v == "sonnet" || v == "low" || v == "medium") {
+			suggestion = " (econômico)"
+		}
+		opts = append(opts, menuOption{Label: v + suggestion, Value: v})
+	}
+	opts = append(opts, menuOption{Label: "Voltar", Value: valBack})
+	choice, err := e.p.Select(fmt.Sprintf("%s do %s (%s)", label, shortRole(role), cli), opts, valDefaultCLI)
+	if err != nil {
+		return err
+	}
+	if choice == valBack {
+		return errBack
+	}
+	target, marker := &cfg.Models, config.MarkerModel
+	if effort {
+		target, marker = &cfg.Efforts, config.MarkerEffort
+	}
+	if choice == valDefaultCLI {
+		delete(*target, role)
+	} else {
+		if *target == nil {
+			*target = map[string]string{}
+		}
+		(*target)[role] = choice
+		if !hasMarker(profile.Args, marker) {
+			yes, err := e.p.Confirm(fmt.Sprintf("O perfil de %s não tem %s e a escolha não seria aplicada. Incluir o marcador?", cli, marker), true)
+			if err != nil {
+				return err
+			}
+			if yes {
+				addMarker(&cfg, cli, marker)
+			}
+		}
+	}
+	if err := config.SaveForgeConfig(e.dir, cfg); err != nil {
+		fmt.Fprintf(e.out, "\n✗ %v\n", err)
+		return nil
+	}
+	shown := choice
+	if choice == valDefaultCLI {
+		shown = ""
+	}
+	fmt.Fprintf(e.out, "\n✓ %s do %s: %s (gravado em .forge/config/forge.json)\n", label, shortRole(role), orDefault(shown))
+	return nil
+}
+
+func hasMarker(args []string, m string) bool { return contains(args, m) }
+
+// addMarker inclui o marcador nos argumentos do perfil gravado da CLI (e nos interativos).
+func addMarker(cfg *config.ForgeConfig, cli, marker string) {
+	key := cli
+	if _, ok := cfg.CLIProfiles[key]; !ok && cli == config.CLIGemini {
+		key = config.CLIAgy
+	}
+	p, ok := cfg.CLIProfiles[key]
+	if !ok {
+		return
+	}
+	if !hasMarker(p.Args, marker) {
+		p.Args = append(append([]string{}, p.Args...), marker)
+	}
+	if len(p.InteractiveArgs) > 0 && !hasMarker(p.InteractiveArgs, marker) {
+		p.InteractiveArgs = append(append([]string{}, p.InteractiveArgs...), marker)
+	}
+	cfg.CLIProfiles[key] = p
 }

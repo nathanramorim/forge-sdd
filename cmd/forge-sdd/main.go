@@ -12,8 +12,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// version é injetada via ldflags: -X main.version=4.8.0
-var version = "4.8.0"
+// version é injetada via ldflags: -X main.version=4.9.1-beta
+var version = "4.9.1-beta"
+
+func init() { config.SetBinaryVersion(version) }
 
 var rootCmd = &cobra.Command{
 	Use:   "forge",

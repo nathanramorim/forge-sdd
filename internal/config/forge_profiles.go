@@ -45,6 +45,13 @@ func ValidTerminal(v string) bool {
 	return v == TerminalAuto || v == TerminalTmux || v == TerminalNative
 }
 
+// MarkerModel e MarkerEffort expandem em zero ou mais argumentos, como MarkerPermissions: sem
+// escolha de modelo ou esforço o argv fica idêntico ao de antes (ADR-0014 D-5).
+const (
+	MarkerModel  = "{model}"
+	MarkerEffort = "{effort}"
+)
+
 // MarkerPermissions é expandido pelo runner em zero ou mais argumentos (PermissionArgs).
 const MarkerPermissions = "{permissions}"
 
@@ -72,14 +79,14 @@ func defaultProfiles() map[string]CLIProfile {
 	return map[string]CLIProfile{
 		CLIClaude: {
 			Command:         "claude",
-			Args:            []string{"-p", "{prompt}", "--agent", "{agent}", "-n", "{name}", "--output-format", "stream-json", "--verbose", MarkerPermissions},
-			InteractiveArgs: []string{"-n", "{name}", "--agent", "{agent}"},
+			Args:            []string{"-p", "{prompt}", "--agent", "{agent}", "-n", "{name}", "--output-format", "stream-json", "--verbose", MarkerPermissions, MarkerModel, MarkerEffort},
+			InteractiveArgs: []string{"-n", "{name}", "--agent", "{agent}", MarkerModel, MarkerEffort},
 			ResetCommand:    "/clear",
 		},
 		CLIGemini: {
 			Command:         "agy",
-			Args:            []string{"-p", "{prompt}", MarkerPermissions},
-			InteractiveArgs: []string{"-i", "{prompt}"},
+			Args:            []string{"-p", "{prompt}", MarkerPermissions, MarkerModel, MarkerEffort},
+			InteractiveArgs: []string{"-i", "{prompt}", MarkerModel, MarkerEffort},
 			ResetCommand:    "/clear",
 		},
 		CLICopilot: {
@@ -97,8 +104,8 @@ func defaultProfiles() map[string]CLIProfile {
 		// agy: `-p` e `--dangerously-skip-permissions` confirmados no uso real (barbearia-app, 2026-11-14).
 		CLIAgy: {
 			Command:         "agy",
-			Args:            []string{"-p", "{prompt}", MarkerPermissions},
-			InteractiveArgs: []string{"-i", "{prompt}"},
+			Args:            []string{"-p", "{prompt}", MarkerPermissions, MarkerModel, MarkerEffort},
+			InteractiveArgs: []string{"-i", "{prompt}", MarkerModel, MarkerEffort},
 			ResetCommand:    "/clear",
 		},
 	}
@@ -211,6 +218,9 @@ func (c ForgeConfig) validateSessions() error {
 			return fmt.Errorf("sessions.%s: cli_profiles sem perfil para %q", role, cli)
 		}
 	}
+	if err := c.validateModels(); err != nil {
+		return err
+	}
 	if !ValidTerminal(c.Terminal) {
 		return fmt.Errorf("terminal %q inválido (use auto, tmux ou native)", c.Terminal)
 	}
@@ -239,4 +249,111 @@ func SaveForgeConfig(dir string, cfg ForgeConfig) error {
 		return err
 	}
 	return queue.WriteFileAtomic(path, append(data, '\n'), 0o644)
+}
+
+// ModelEffortFlags são as flags de modelo e esforço que cada CLI (pelo comando do perfil) aceita.
+// Confirmadas no `--help` do build: claude e agy (--model, --effort) e gemini (--model, sem esforço).
+// codex e copilot ficam de fora até a flag ser confirmada: só se emite flag que a CLI aceita.
+type ModelEffortFlags struct {
+	Model   string
+	Effort  string
+	Efforts []string
+}
+
+var modelEffortByCommand = map[string]ModelEffortFlags{
+	"claude": {Model: "--model", Effort: "--effort", Efforts: []string{"low", "medium", "high", "xhigh", "max"}},
+	"agy":    {Model: "--model", Effort: "--effort", Efforts: []string{"low", "medium", "high", "xhigh", "max"}},
+	"gemini": {Model: "--model"},
+}
+
+var modelNameRe = regexp.MustCompile(`^[A-Za-z0-9._:-]{1,80}$`)
+
+// ValidModel diz se o nome do modelo é aceito (SEG-01).
+func ValidModel(m string) bool { return modelNameRe.MatchString(m) }
+
+// FlagsForCommand devolve as flags de modelo e esforço de uma CLI; ok=false quando não há flag confirmada.
+func FlagsForCommand(command string) (ModelEffortFlags, bool) {
+	f, ok := modelEffortByCommand[filepath.Base(command)]
+	return f, ok
+}
+
+// ModelPresets são as sugestões do Settings por comando da CLI; a primeira opção do menu é sempre "padrão da CLI".
+func ModelPresets(command string) []string {
+	if filepath.Base(command) == "claude" {
+		return []string{"haiku", "sonnet", "opus"}
+	}
+	return nil
+}
+
+// SessionModelArgs devolve os argumentos de modelo e de esforço da sessão do papel; vazios sem escolha.
+func (c ForgeConfig) SessionModelArgs(role string) (model, effort []string) {
+	profile, ok := c.Profile(c.CLIFor(role))
+	if !ok {
+		return nil, nil
+	}
+	flags, ok := FlagsForCommand(profile.Command)
+	if !ok {
+		return nil, nil
+	}
+	if m := c.Models[role]; m != "" && flags.Model != "" {
+		model = []string{flags.Model, m}
+	}
+	if e := c.Efforts[role]; e != "" && flags.Effort != "" {
+		effort = []string{flags.Effort, e}
+	}
+	return model, effort
+}
+
+// MissingModelMarkers lista os marcadores que faltam no perfil da sessão, quando a CLI tem flag
+// confirmada para eles (claude, agy e, só para modelo, gemini). Vale com ou sem escolha: um perfil
+// gravado sem o marcador (como o de forge.json antigo) não deixaria o Settings aplicar nada.
+func (c ForgeConfig) MissingModelMarkers(role string) []string {
+	profile, ok := c.Profile(c.CLIFor(role))
+	if !ok {
+		return nil
+	}
+	flags, supported := FlagsForCommand(profile.Command)
+	if !supported {
+		return nil
+	}
+	var missing []string
+	if flags.Model != "" && !contains(profile.Args, MarkerModel) {
+		missing = append(missing, MarkerModel)
+	}
+	if flags.Effort != "" && !contains(profile.Args, MarkerEffort) {
+		missing = append(missing, MarkerEffort)
+	}
+	return missing
+}
+
+func (c ForgeConfig) validateModels() error {
+	check := func(field string, values map[string]string, effort bool) error {
+		for role, v := range values {
+			if !contains(SessionRoles(), role) {
+				return fmt.Errorf("%s: papel %q desconhecido (use discovery, builder ou reviewer)", field, role)
+			}
+			if v == "" {
+				continue
+			}
+			cli := c.CLIFor(role)
+			profile, ok := c.Profile(cli)
+			if !ok {
+				return fmt.Errorf("%s.%s: cli_profiles sem perfil para %q", field, role, cli)
+			}
+			flags, supported := FlagsForCommand(profile.Command)
+			switch {
+			case !effort && !ValidModel(v):
+				return fmt.Errorf("%s.%s: %q inválido (use letras, números, ponto, dois-pontos, hífen e sublinhado, até 80)", field, role, v)
+			case !supported || (!effort && flags.Model == "") || (effort && flags.Effort == ""):
+				return fmt.Errorf("%s.%s: a CLI %q não tem a flag confirmada (remova a escolha)", field, role, profile.Command)
+			case effort && !contains(flags.Efforts, v):
+				return fmt.Errorf("%s.%s: esforço %q fora da lista da CLI %s (%s)", field, role, v, profile.Command, strings.Join(flags.Efforts, ", "))
+			}
+		}
+		return nil
+	}
+	if err := check("models", c.Models, false); err != nil {
+		return err
+	}
+	return check("efforts", c.Efforts, true)
 }

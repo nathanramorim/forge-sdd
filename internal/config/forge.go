@@ -30,6 +30,36 @@ const (
 	ContextContinuous = "continuous"
 )
 
+// Modos de autonomia do pipeline (feat 88): normal exige a aprovação humana da spec; advanced
+// delega a revisão da spec ao Reviewer (ADR-0013) e exige ambiente isolado.
+const (
+	AutonomyNormal   = "normal"
+	AutonomyAdvanced = "advanced"
+)
+
+// ValidAutonomy diz se a é um modo de autonomia aceito (vazio vale normal).
+func ValidAutonomy(a string) bool {
+	return a == "" || a == AutonomyNormal || a == AutonomyAdvanced
+}
+
+// Valores padrão dos tetos do modo avançado (SafeguardsConfig). Zero desliga o teto.
+const (
+	DefaultDailyJobCap   = 30
+	DefaultJobTokenCap   = 2_000_000
+	DefaultJobMinutesCap = 60
+)
+
+// ApplyAdvanced ativa o modo avançado em cfg: Autonomy, IsolatedConfirmed e Permissions.
+// Centraliza a tríade que aparecia duplicada em menu.go e pipeline.go (DUP-06).
+func ApplyAdvanced(cfg *ForgeConfig) {
+	cfg.Autonomy, cfg.IsolatedConfirmed, cfg.Permissions = AutonomyAdvanced, true, PermissionFull
+}
+
+// ApplyNormal reverte para o modo normal.
+func ApplyNormal(cfg *ForgeConfig) {
+	cfg.Autonomy, cfg.IsolatedConfirmed = AutonomyNormal, false
+}
+
 // ValidSessionMode diz se m é um modo de sessão aceito.
 func ValidSessionMode(m string) bool {
 	return m == SessionModeHeadless || m == SessionModeLive
@@ -82,12 +112,24 @@ type ReviewerConfig struct {
 	CommentOnPR       bool `json:"comment_on_pr"`
 }
 
+// SafeguardsConfig são os tetos do modo avançado (feat 88-07). Zero desliga o teto (padrão: todos
+// desligados). O teto de tempo é próprio e não se confunde com builder.job_timeout_minutes (timeout do runner).
+type SafeguardsConfig struct {
+	MaxJobTokens  int `json:"max_job_tokens,omitempty"`
+	MaxJobMinutes int `json:"max_job_minutes,omitempty"`
+	MaxJobsPerDay int `json:"max_jobs_per_day,omitempty"`
+}
+
 // ForgeConfig é o conteúdo de .forge/config/forge.json. A existência do arquivo ativa o modo pipeline.
 type ForgeConfig struct {
 	CLI string `json:"cli"`
 	// Sessions escolhe o agente de cada sessão (discovery, builder, reviewer). Sem a chave, vale cli.
 	Sessions    map[string]string `json:"sessions,omitempty"`
 	Permissions string            `json:"permissions"`
+	// Models e Efforts escolhem o modelo e o esforço de cada sessão (discovery, builder, reviewer).
+	// Sem a chave vale o padrão da CLI; os perfis aplicam por {model} e {effort}.
+	Models  map[string]string `json:"models,omitempty"`
+	Efforts map[string]string `json:"efforts,omitempty"`
 	// Terminal escolhe onde as sessões abrem: auto (tmux se existir), tmux ou native (janelas do sistema).
 	Terminal string `json:"terminal"`
 	// SessionMode escolhe o modo do worker: headless (padrão antigo) ou live (CLI aberta no painel).
@@ -96,6 +138,12 @@ type ForgeConfig struct {
 	Context string `json:"context,omitempty"`
 	// Live define parâmetros de tempo do modo live.
 	Live LiveConfig `json:"live,omitempty"`
+	// Autonomy escolhe o modo do pipeline: normal (padrão) ou advanced (Reviewer revisa a spec).
+	Autonomy string `json:"autonomy,omitempty"`
+	// Safeguards são os tetos de tokens por job e de jobs por dia do modo avançado.
+	Safeguards SafeguardsConfig `json:"safeguards,omitempty"`
+	// IsolatedConfirmed registra que a pessoa confirmou rodar em ambiente isolado; o modo advanced o exige.
+	IsolatedConfirmed bool `json:"isolated_confirmed,omitempty"`
 	// AllowCommands são os comandos de shell liberados no nível project (nome do comando apenas).
 	AllowCommands []string              `json:"allow_commands"`
 	CLIProfiles   map[string]CLIProfile `json:"cli_profiles"`
@@ -113,7 +161,7 @@ var (
 	relDirRe      = regexp.MustCompile(`^[A-Za-z0-9._-]+(/[A-Za-z0-9._-]+)*$`)
 	branchRe      = regexp.MustCompile(`^[A-Za-z0-9._-]+(/[A-Za-z0-9._-]+)*$`)
 	emailRe       = regexp.MustCompile(`^[^@\s]+@[^@\s]+$`)
-	validMarkers  = map[string]bool{"{agent}": true, "{name}": true, "{prompt}": true, MarkerPermissions: true}
+	validMarkers  = map[string]bool{"{agent}": true, "{name}": true, "{prompt}": true, MarkerPermissions: true, MarkerModel: true, MarkerEffort: true}
 )
 
 // DefaultForgeConfig devolve os valores padrão da especificação do pipeline. Os argumentos do
@@ -126,12 +174,13 @@ func DefaultForgeConfig() ForgeConfig {
 		SessionMode:   SessionModeHeadless,
 		Context:       ContextClear,
 		Live:          LiveConfig{StartupWaitSeconds: 8, ReadyQuietSeconds: 3},
+		Safeguards:    SafeguardsConfig{},
 		AllowCommands: []string{"git", "gh", "forge-sdd"},
 		CLIProfiles:   defaultProfiles(),
 		PMMCP: PMConfig{
 			Provider:              "auto",
 			Supported:             []string{"clickup", "github-projects", "azure-devops", "jira"},
-			RequireExistingCard:   true,
+			RequireExistingCard:   false,
 			StatusOnImplement:     "In Progress",
 			StatusOnPRApproved:    "Ready for Review",
 			EvidenceMaxAgeMinutes: 30,
@@ -249,6 +298,20 @@ func (c ForgeConfig) Validate() error {
 	if c.Context != "" && !ValidContextMode(c.Context) {
 		return fmt.Errorf("context %q inválido (use %s ou %s)", c.Context, ContextClear, ContextContinuous)
 	}
+	if !ValidAutonomy(c.Autonomy) {
+		return fmt.Errorf("autonomy %q inválido (use %s ou %s)", c.Autonomy, AutonomyNormal, AutonomyAdvanced)
+	}
+	if c.Autonomy == AutonomyAdvanced {
+		if c.Permissions != PermissionFull {
+			return fmt.Errorf("autonomy %s exige permissions %q", AutonomyAdvanced, PermissionFull)
+		}
+		if !c.IsolatedConfirmed {
+			return fmt.Errorf("autonomy %s exige isolated_confirmed: true (confirme o ambiente isolado)", AutonomyAdvanced)
+		}
+	}
+	if c.Safeguards.MaxJobTokens < 0 || c.Safeguards.MaxJobMinutes < 0 || c.Safeguards.MaxJobsPerDay < 0 || c.Safeguards.MaxJobsPerDay > 10000 {
+		return errors.New("safeguards: max_job_tokens, max_job_minutes e max_jobs_per_day devem ser >= 0 (jobs por dia até 10000)")
+	}
 	if c.Live.StartupWaitSeconds < 0 || c.Live.StartupWaitSeconds > 60 {
 		return fmt.Errorf("live.startup_wait_seconds %d fora da faixa 0 a 60", c.Live.StartupWaitSeconds)
 	}
@@ -298,11 +361,13 @@ func validateProfile(name string, p CLIProfile) error {
 		for _, a := range args {
 			for _, m := range placeholderRe.FindAllString(a, -1) {
 				if !validMarkers[m] {
-					return fmt.Errorf("cli_profiles.%s.%s: marcador %s desconhecido (use {agent}, {name}, {prompt} ou {permissions})", name, field, m)
+					return fmt.Errorf("cli_profiles.%s.%s: marcador %s desconhecido (use {agent}, {name}, {prompt}, {permissions}, {model} ou {effort})", name, field, m)
 				}
 			}
-			if strings.Contains(a, MarkerPermissions) && a != MarkerPermissions {
-				return fmt.Errorf("cli_profiles.%s.%s: %s precisa ser um argumento inteiro", name, field, MarkerPermissions)
+			for _, m := range []string{MarkerPermissions, MarkerModel, MarkerEffort} {
+				if strings.Contains(a, m) && a != m {
+					return fmt.Errorf("cli_profiles.%s.%s: %s precisa ser um argumento inteiro", name, field, m)
+				}
 			}
 			if strings.ContainsAny(a, "\x00\r\n") {
 				return fmt.Errorf("cli_profiles.%s.%s: argumento com caractere de controle", name, field)
@@ -458,4 +523,32 @@ func (n NotificationsConfig) Validate() error {
 		return errors.New("channels.webhook.url_env é obrigatório quando o canal está ligado")
 	}
 	return nil
+}
+
+// IsAdvanced diz se o modo avançado (spec revisada pelo Reviewer) está ligado.
+func (c ForgeConfig) IsAdvanced() bool { return c.Autonomy == AutonomyAdvanced }
+
+// AdvancedWarning devolve o aviso do forge doctor quando o modo avançado está ligado sem a
+// confirmação de ambiente isolado (ou sem permissions full). Lê o arquivo cru, porque Validate já
+// recusa essa combinação ao carregar. Sem aviso devolve "".
+func AdvancedWarning(dir string) string {
+	data, err := os.ReadFile(layout.ForgeConfigFile(dir))
+	if err != nil {
+		return ""
+	}
+	var raw struct {
+		Autonomy          string `json:"autonomy"`
+		Permissions       string `json:"permissions"`
+		IsolatedConfirmed bool   `json:"isolated_confirmed"`
+	}
+	if json.Unmarshal(data, &raw) != nil || raw.Autonomy != AutonomyAdvanced {
+		return ""
+	}
+	if !raw.IsolatedConfirmed {
+		return "autonomy: advanced sem ambiente isolado confirmado (isolated_confirmed). Use só em contêiner, VM ou máquina descartável."
+	}
+	if raw.Permissions != PermissionFull {
+		return "autonomy: advanced exige permissions: full."
+	}
+	return ""
 }

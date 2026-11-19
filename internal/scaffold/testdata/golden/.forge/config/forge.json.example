@@ -8,6 +8,7 @@
     "startup_wait_seconds": 8,
     "ready_quiet_seconds": 3
   },
+  "safeguards": {},
   "allow_commands": [
     "git",
     "gh",
@@ -19,11 +20,15 @@
       "args": [
         "-p",
         "{prompt}",
-        "{permissions}"
+        "{permissions}",
+        "{model}",
+        "{effort}"
       ],
       "interactive_args": [
         "-i",
-        "{prompt}"
+        "{prompt}",
+        "{model}",
+        "{effort}"
       ],
       "reset_command": "/clear"
     },
@@ -39,13 +44,17 @@
         "--output-format",
         "stream-json",
         "--verbose",
-        "{permissions}"
+        "{permissions}",
+        "{model}",
+        "{effort}"
       ],
       "interactive_args": [
         "-n",
         "{name}",
         "--agent",
-        "{agent}"
+        "{agent}",
+        "{model}",
+        "{effort}"
       ],
       "reset_command": "/clear"
     },
@@ -85,11 +94,15 @@
       "args": [
         "-p",
         "{prompt}",
-        "{permissions}"
+        "{permissions}",
+        "{model}",
+        "{effort}"
       ],
       "interactive_args": [
         "-i",
-        "{prompt}"
+        "{prompt}",
+        "{model}",
+        "{effort}"
       ],
       "reset_command": "/clear"
     }
@@ -102,7 +115,7 @@
       "azure-devops",
       "jira"
     ],
-    "require_existing_card": true,
+    "require_existing_card": false,
     "status_on_implement": "In Progress",
     "status_on_pr_approved": "Ready for Review",
     "evidence_max_age_minutes": 30

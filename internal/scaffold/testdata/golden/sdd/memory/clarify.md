@@ -15,3 +15,11 @@ Antes de iniciar o passo seguinte do comando (criação de branch em `/nova-feat
 - **Nenhum sinal detectado:** siga direto, sem pergunta forçada. Descrições já claras e completas não geram fricção.
 - **Algum sinal detectado:** faça uma rodada objetiva de perguntas ao usuário (curta, focada nos sinais encontrados — não um questionário genérico) antes de prosseguir. Registre a resposta recebida no artefato criado (spec de feature/fix, ou discovery), para não perder o contexto que motivou a pergunta.
 - Este passo é **condicional, não obrigatório a cada invocação** — não é um checklist a marcar sempre, é um filtro que só ativa quando há lacuna real.
+
+## Como perguntar
+
+Quando há lacuna e uma pergunta precisa ser feita:
+
+- **No Claude Code (agentes):** use `AskUserQuestion` para toda pergunta de múltipla escolha ou sim/não — apresente 2–4 opções objetivas. Reserve texto plano apenas para respostas abertas sem alternativas fixas.
+- **No forge CLI:** use `env.p.Select` ou `env.p.Confirm` (interface `Prompter`/huh). Não use `fmt.Scan`, `fmt.Scanf` nem leitura direta de `os.Stdin`.
+- **Outros agentes (Gemini, Copilot):** siga o mecanismo interativo da ferramenta; se não houver equivalente, plain text é aceitável.

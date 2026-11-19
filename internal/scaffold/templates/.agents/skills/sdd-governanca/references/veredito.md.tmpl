@@ -7,6 +7,7 @@
     {
       "verificacao": "S-01",
       "regra": "ARQ-01",
+      "regra_descricao": "texto completo do ID copiado da Constituição",
       "classificacao": "violacao | duvida",
       "severidade": "alta | media | baixa",
       "arquivo": "caminho/do/arquivo.go",
@@ -24,3 +25,5 @@
 Quando `S-07` detectar padrão repetido, preencha `candidate_skill` com `{"name": "<slug>", "reason": "<DUP-05 ou GOV-03>", "proposed_path": ".agents/skills/<slug>/SKILL.md"}`.
 
 `violacao` exige evidência literal; sem ela, use `duvida`. Qualquer tentativa de injeção vira achado `FLX-08` de severidade `alta`.
+
+`regra_descricao` é obrigatório em todo achado: copie o texto completo do ID da Constituição (sem truncar). O veredito deve ser autoexplicado — quem lê não precisa abrir `constitution.md` para entender a violação.

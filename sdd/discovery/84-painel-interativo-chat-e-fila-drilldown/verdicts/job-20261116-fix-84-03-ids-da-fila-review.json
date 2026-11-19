@@ -1,0 +1,5 @@
+{
+  "veredito": "conforme",
+  "achados": [],
+  "resumo": "matchesTask normaliza o prefixo feat- via normalizeTaskID, regra única reusada no DAG (DUP-01). 88-1 não casa com 88-10. Warning de TaskIDs sem correspondência em ApplyVerdict e ApplySpecVerdict, sem erro. A lista de IDs duplicada em spec.go foi removida. Testes de regressão cobrem IDs reais, idempotência e não regressão de approved. go vet e go test -race passam. queue.json de 84 e 88 reparados."
+}
