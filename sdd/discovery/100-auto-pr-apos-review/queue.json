@@ -1,0 +1,24 @@
+{
+  "feature_id": "feat-100-01",
+  "branch": "feat/100-auto-pr-apos-review",
+  "spec_status": "reviewed",
+  "updated_at": "2026-11-19T12:12:33Z",
+  "items": [
+    {
+      "task_id": "feat-100-01-auto-pr-apos-review",
+      "title": "feat-100-01 — forge queue review: abrir PR automaticamente após veredito conforme",
+      "spec_path": "sdd/discovery/100-auto-pr-apos-review/features/feat-100-01-auto-pr-apos-review.md",
+      "status": "queued",
+      "rules": [
+        "ARQ-01",
+        "ARQ-04",
+        "ARQ-10",
+        "ARQ-11",
+        "COD-01",
+        "COD-03"
+      ],
+      "skills_used": [],
+      "attempts": 0
+    }
+  ]
+}
