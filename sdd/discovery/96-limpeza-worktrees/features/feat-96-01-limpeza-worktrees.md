@@ -1,55 +1,58 @@
-# feat-96-01 — Deteccao e limpeza de worktrees ociosos na inicializacao da sessao
+# feat-96-01 — Detecção e limpeza de worktrees ociosos na inicialização da sessão
 
 **Iniciativa:** 96-limpeza-worktrees
 **Branch:** feat/96-limpeza-worktrees
 **Status:** ready
 **Depende de:** nenhuma
 
-## Modelo do modulo
+## Modelo do módulo
 
 - **Modelo:** enxuto.
-- **Justificativa:** a logica de GC pertence a `internal/pipeline` (ja dono de `CreateWorktree`,
-  `RemoveWorktree` e `WorktreePath`; `DUP-01`, conceitos.md). Nenhum pacote novo. Um arquivo
-  `worktree_gc.go` e um arquivo de testes `worktree_gc_test.go` sao adicionados ao mesmo pacote. A
-  integracao no CLI e feita em `cmd/forge-sdd/up.go` (hook pre-launch) e em um novo subcomando
-  `forge pipeline worktree gc` (estende o `pipelineWorktreeCmd` existente em `worker.go`).
+- **Justificativa:** a lógica de GC pertence a `internal/pipeline` (já dono de `CreateWorktree`,
+  `RemoveWorktree` e `WorktreePath`; `DUP-01`, conceitos.md). Nenhum pacote novo. Dois arquivos
+  (`worktree_gc.go` e `worktree_gc_test.go`) são adicionados ao pacote existente. A integração
+  no CLI fica em `cmd/forge-sdd/up.go` (hook pré-launch) e num novo subcomando
+  `forge pipeline worktree gc` (estende `pipelineWorktreeCmd` em `worker.go`). A lógica
+  interativa de remoção fica em `pipeline.SweepWorktrees` (não em `cmd/`), respeitando `ARQ-01`.
 
-## Decisoes do projeto aplicadas
+## Decisões do projeto aplicadas
 
-- ADR-0004 (Pipeline Multi-Sessao, `internal/bus` como barramento, `internal/queue` como fila de
-  tasks; workers nao promovem interacao, so relatam).
-- ADR-0010 (`forge pipeline worktree gc`, nao um novo toplevel).
-- ARQ-01: logica de GC fica em `internal/pipeline`, nao em `cmd/`.
-- ARQ-02: `internal/pipeline` ja importa `internal/bus` e `internal/queue`; sem ciclo novo.
-- ARQ-04: nenhuma dependencia nova de runtime.
+- ADR-0004 (Pipeline Multi-Sessão; workers não promovem interação, apenas relatam; `ARQ-06`
+  lista os subcomandos do pipeline).
+- ARQ-01: lógica de GC fica em `internal/pipeline`, não em `cmd/`.
+- ARQ-02: `internal/pipeline` já importa `internal/bus` e `internal/queue`; sem ciclo novo.
+- ARQ-04: nenhuma dependência nova de runtime.
 - ARQ-05: `--dry-run` lista worktrees ociosos sem remover nada.
-- SEG-01: caminhos de worktree validados via `WorktreePath` (regex existente) antes de qualquer
-  operacao. `RemoveWorktree` ja verifica que o caminho esta dentro de `.forge/runtime/worktrees`.
+- SEG-01: caminhos validados via `WorktreePath` (regex existente) antes de qualquer operação;
+  `RemoveWorktree` já verifica que o caminho está dentro de `.forge/runtime/worktrees`.
 - Rules: `.agents/rules/sdd-arquitetura.md`, `.agents/rules/sdd-codigo-e-testes.md`.
 
-## O que ja existe
+## O que já existe
 
-| Procurei | Onde | Achei | Decisao |
-|---|---|---|---|
-| Remocao de worktree | `internal/pipeline/worktree.go` (`RemoveWorktree`) | Funcao completa com validacao de path e branch | reusar direto; nao re-implementar |
-| Criacao de worktree | `internal/pipeline/worktree.go` (`CreateWorktree`) | Funcao completa | sem alteracao |
-| Caminho dos worktrees | `internal/layout/layout.go` (`Worktrees`) | `.forge/runtime/worktrees` | reusar |
-| Estados de job no barramento | `internal/bus/job.go`, `internal/layout/layout.go` | `StatePending`, `StateProcessing`, `StateDone`, `StateFailed` | reusar como criterio de protecao |
-| Estados de task na fila | `internal/queue/queue.go` | `StatusQueued`, `StatusBuilding`, `StatusReviewPending`, `StatusApproved`, `StatusChangesRequested`, `StatusBlocked` | reusar; task e segura so quando `StatusApproved` |
-| Listagem de jobs por estado | `internal/bus/store.go` (`List`) | `bus.List(dir, role, state)` | reusar para detectar jobs `processing` |
-| Leitura da fila de tasks | `internal/queue/queue.go` (`Load`) | Carrega `queue.json` de uma iniciativa | reusar |
-| Comando worktree CLI | `cmd/forge-sdd/worker.go` (`pipelineWorktreeCmd`) | `forge pipeline worktree add/remove` | estender com subacao `gc` |
-| Verificacao de TTY | `cmd/forge-sdd/menu.go` (`isInteractive`) | Variavel injetavel para testes | reusar; GC nunca promove se nao-interativo |
-| `--dry-run` | `cmd/forge-sdd/up.go`, convencao geral | Flag Cobra padrao | reusar; GC em dry-run so lista |
-| Limpeza de metadados git | `git worktree prune` | Sem chamada atual pos-remocao | novo: chamar apos cada `RemoveWorktree` bem-sucedido |
+| Procurei | Onde | Achei | Decisão | Justificativa |
+|---|---|---|---|---|
+| Remoção de worktree | `internal/pipeline/worktree.go` (`RemoveWorktree`) | Função completa com validação de caminho e branch | reusar | Já valida path traversal e chama `git worktree remove --force` |
+| Caminho dos worktrees | `internal/layout/layout.go` (`Worktrees`) | `.forge/runtime/worktrees` | reusar | Fonte única do caminho (DUP-01) |
+| Busca de job por ID | `internal/bus/store.go` (`Find`) | `bus.Find(dir, role, id)` — percorre todos os estados | reusar | Busca atômica por role; chamar para builder e reviewer separadamente |
+| Estados de job no barramento | `internal/layout/layout.go` | `StatePending`, `StateProcessing`, `StateDone`, `StateFailed` | reusar como critério de proteção | |
+| Estados de task na fila | `internal/queue/queue.go` | `StatusQueued`, `StatusBuilding`, `StatusReviewPending`, `StatusApproved`, `StatusChangesRequested`, `StatusBlocked` | reusar; task segura apenas com `StatusApproved` | |
+| Caminho do queue.json por iniciativa | `internal/layout/layout.go` (`InitiativeQueue`) | `layout.InitiativeQueue(dir, id)` devolve `sdd/discovery/<id>/queue.json` | reusar | Permite ler a fila de uma iniciativa específica sem depender da branch ativa |
+| Carregamento da fila | `internal/queue/queue.go` (`Load`) | `queue.Load(dir)` lê da iniciativa ativa (via branch git) | **não adequado** — ler de iniciativa específica exige path direto | O Builder precisa verificar qualquer iniciativa, não só a ativa |
+| Prompt MultiSelect | `internal/survey/survey.go` (`huh.NewMultiSelect`) | `huh.NewMultiSelect[string]()` já usado em `survey.go:52` e `survey.go:155` | reusar via `internal/survey` | `cmd/` nunca chama `huh` diretamente; `ARQ-01` |
+| Subcomando worktree CLI | `cmd/forge-sdd/worker.go` (`pipelineWorktreeCmd`) | `forge pipeline worktree add/remove` | estender com ação `gc` | Evita novo toplevel (ADR-0004, ARQ-06) |
+| Verificação de TTY | `cmd/forge-sdd/menu.go` (`isInteractive`) | Variável injetável para testes | reusar | GC nunca promove se não-interativo |
+| Limpeza de metadados git | `git worktree prune` | Sem chamada atual pós-remoção | novo | Necessário para remover entradas obsoletas do `.git/worktrees` |
 
-## Dependencias novas
+## Dependências novas
 
-- Nenhuma (`ARQ-04`, `SEG-07`). `internal/pipeline` ja depende de `internal/bus`, `internal/queue`
-  e `internal/layout`. O unico comando git novo e `git worktree prune`, chamado via
-  `layout.Git(dir, "worktree", "prune")`, sem flags de caminho (sem risco de path injection).
+- Nenhuma dependência de runtime nova (`ARQ-04`, `SEG-07`). `internal/pipeline` já importa
+  `internal/bus`, `internal/queue` e `internal/layout`. O único comando git novo é
+  `git worktree prune`, chamado via `layout.Git(dir, "worktree", "prune")`, sem flags de
+  caminho (sem risco de path injection).
+- Novo helper interno: `queue.LoadForInitiative(dir, initiative string) (*Queue, error)` —
+  lê `layout.InitiativeQueue(dir, initiative)` diretamente, sem depender da branch ativa.
 
-## Rules e IDs da Constituicao Aplicaveis
+## Rules e IDs da Constituição Aplicáveis
 
 - `ARQ-01`, `ARQ-02`, `ARQ-04`, `ARQ-05`, `ARQ-10`, `ARQ-11`
 - `COD-01`, `COD-03`, `COD-06`
@@ -61,7 +64,20 @@
 
 ## Escopo
 
-### 1. `internal/pipeline/worktree_gc.go` — funcao de deteccao
+### 1. `internal/queue/queue.go` — helper novo
+
+```go
+// LoadForInitiative lê a fila de uma iniciativa específica pelo ID, independentemente da
+// branch git ativa. Retorna fila vazia (não erro) quando queue.json não existe.
+func LoadForInitiative(dir, initiative string) (*Queue, error)
+```
+
+Implementação: `layout.InitiativeQueue(dir, initiative)` → `os.ReadFile` → `json.Unmarshal`.
+Se `ErrNotExist` → retorna `&Queue{Items: []QueueItem{}}` sem erro (fila vazia = sem tasks
+ativas = conservador: o chamador verifica ausência de task como "não encontrada", não como
+"aprovada"). Qualquer outro erro de I/O → retorna o erro (fail closed).
+
+### 2. `internal/pipeline/worktree_gc.go` — detecção e varredura
 
 ```go
 // StaleWorktree representa um worktree encontrado em disco com o estado do job associado.
@@ -69,76 +85,86 @@ type StaleWorktree struct {
     JobID      string
     TaskID     string
     Path       string   // caminho absoluto
-    JobState   string   // bus state; "" se nao encontrado (orphan)
-    TaskStatus string   // queue status; "" se nao encontrado
-    Safe       bool     // verdadeiro se pode ser removido
-    Reason     string   // motivo legivel para o usuario
+    JobState   string   // estado no barramento; "" se não encontrado (orphan)
+    TaskStatus string   // status da task em queue.json; "" se não encontrada
+    Safe       bool     // verdadeiro se pode ser removido com segurança
+    Reason     string   // mensagem legível para o usuário
 }
 
-// ListStaleWorktrees varre .forge/runtime/worktrees/<jobID>/<taskID> e classifica cada worktree
-// como seguro (Safe=true) ou protegido/orphan (Safe=false).
-//
-// Regra de seguranca (task pode ser removida quando TODOS os criterios abaixo sao verdadeiros):
-//  1. O job existe no barramento com estado "done" para o papel builder OU reviewer.
-//  2. A task tem status "approved" em queue.json da iniciativa do job.
-//     Se queue.json nao existir, a task e tratada como terminal (aprovada).
-//  3. Nenhum job com o mesmo Feature em qualquer papel esta em "processing" no barramento.
-//
-// Jobs em "failed" nao sao oferecidos (podem ser retentados; evita perda de contexto).
-// Worktrees sem job correspondente no barramento (orphans) sao listados com Safe=false,
-// Reason="job nao encontrado no barramento".
+// ListStaleWorktrees varre .forge/runtime/worktrees/<jobID>/<taskID> e classifica cada
+// worktree encontrado. Escopo: somente worktrees criados pelo forge (caminhos que existem
+// como subdiretórios dentro de layout.Worktrees(dir)).
 func ListStaleWorktrees(dir string) ([]StaleWorktree, error)
+
+// SweepWorktrees remove os worktrees listados (apenas os com Safe=true) e chama
+// git worktree prune uma única vez ao final. Erros de remoção individual são acumulados
+// e reportados sem abortar os demais.
+func SweepWorktrees(dir string, targets []StaleWorktree) []error
 ```
 
-**Algoritmo detalhado:**
+**Algoritmo de `ListStaleWorktrees`:**
 
-1. Chama `os.ReadDir(layout.Worktrees(dir))` para listar subdiretorios de primeiro nivel
-   (`<jobID>`). Se o diretorio nao existir, retorna slice vazio sem erro.
-2. Para cada `<jobID>`, chama `os.ReadDir(filepath.Join(wtRoot, jobID))` para listar `<taskID>`.
-3. Para cada par `(jobID, taskID)`, constroi `path = layout.Worktrees(dir)/<jobID>/<taskID>` e
-   verifica que e um diretorio (nao um arquivo ou link que aponte para fora — ja coberto por
-   `RemoveWorktree`, mas filtrar aqui evita exibir lixo ao usuario).
-4. Busca o job no barramento:
-   - `bus.List(dir, layout.RoleBuilder, layout.StateDone)`
-   - `bus.List(dir, layout.RoleBuilder, layout.StateProcessing)`
-   - `bus.List(dir, layout.RoleReviewer, layout.StateDone)`
-   - `bus.List(dir, layout.RoleReviewer, layout.StateProcessing)`
-   - Filtra pelo `jobID`. Se nao encontrado em nenhum estado, marca como orphan.
-5. Se encontrado em `processing` (qualquer papel) → `Safe=false`, `Reason="job em execucao"`.
-6. Se encontrado em `failed` → `Safe=false`, `Reason="job falhou; pode ser retentado"`.
-7. Se encontrado em `done`:
-   - Le queue.json via `queue.Load(layout.InitiativeQueuePath(dir, job.Initiative))`.
-   - Se falhar ao ler queue.json, trata como terminal (Safe para remoção).
-   - Verifica o status da task `taskID` na fila; so permite remoção se `StatusApproved`.
-   - Se task esta em estado nao-terminal (`queued`, `building`, `review_pending`,
-     `changes_requested`, `blocked`) → `Safe=false`, `Reason="task ainda na fila (<status>)"`.
-   - Verifica adicionalmente: se qualquer job com o mesmo `job.Feature` esta em `processing`
-     (resultado do passo 4 reutilizado) → `Safe=false`,
-     `Reason="outra tarefa do mesmo feature em execucao"`.
-   - Se nao ha restricao → `Safe=true`, `Reason="job concluido e todas as tasks aprovadas"`.
+1. `os.ReadDir(layout.Worktrees(dir))` lista subdirs de primeiro nível (`<jobID>`).
+   Se o diretório não existir → retorna slice vazio, sem erro.
+2. Para cada `<jobID>`, `os.ReadDir(wtRoot/<jobID>)` lista `<taskID>` (apenas diretórios).
+3. Para cada par `(jobID, taskID)`, constrói `path` e verifica que é diretório.
+4. Busca o job:
+   - `bus.Find(dir, layout.RoleBuilder, jobID)` — percorre pending/processing/done/failed.
+   - Se `ErrNotFound` para o builder, também tenta `bus.Find(dir, layout.RoleReviewer, jobID)`.
+   - Se não encontrado em nenhum papel → orphan: `Safe=false`, `Reason="job não encontrado no barramento"`.
+5. Se job encontrado em `StateProcessing` (qualquer papel) → `Safe=false`, `Reason="job em execução"`.
+6. Se job encontrado em `StatePending` → `Safe=false`, `Reason="job aguardando execução"`.
+7. Se job encontrado em `StateFailed` → `Safe=false`, `Reason="job falhou; pode ser retentado"`.
+8. Se job encontrado em `StateDone`:
+   a. Chama `queue.LoadForInitiative(dir, job.Job.Initiative)`.
+   b. Busca task `taskID` nos `Items`. Se não encontrada → trata como **não terminal**:
+      `Safe=false`, `Reason="task não encontrada na fila"` (fail closed).
+   c. Se task encontrada com `StatusApproved` → `Safe=true`,
+      `Reason="job concluído e task aprovada"`.
+   d. Para qualquer outro status (`queued`, `building`, `review_pending`,
+      `changes_requested`, `blocked`) → `Safe=false`, `Reason="task ainda na fila (<status>)"`.
 
-### 2. `cmd/forge-sdd/up.go` — hook pre-launch
+**Reclassificação antes da remoção:** `SweepWorktrees` chama `ListStaleWorktrees` novamente
+antes de remover cada item (workers do `forge up` anterior podem ter reclamado um job enquanto
+o prompt estava aberto). Remove somente se ainda `Safe=true`.
 
-Antes de chamar `env.LaunchAll(...)`, quando `isInteractive() && !dry`:
+### 3. `cmd/forge-sdd/up.go` — hook pré-launch
+
+Antes de `env.LaunchAll(...)`, quando `isInteractive() && !dry`:
 
 ```go
-if err := runWorktreeGCSweep(cmd.OutOrStdout(), dir, false); err != nil {
-    // log de aviso, nao bloqueia o launch
+stale, _ := pipeline.ListStaleWorktrees(abs)
+safe := filterSafe(stale)
+if len(safe) > 0 {
+    chosen, err := survey.ChooseWorktreesToClean(safe)
+    if err == nil && len(chosen) > 0 {
+        for _, e := range pipeline.SweepWorktrees(abs, chosen) {
+            fmt.Fprintln(out, "aviso:", e)
+        }
+    }
 }
 ```
 
-`runWorktreeGCSweep` chama `pipeline.ListStaleWorktrees(dir)`, filtra os `Safe=true` e, se houver
-pelo menos um, exibe a lista com `huh.NewSelect` (ou `huh.NewMultiSelect` se disponivel) e remove
-os escolhidos via `pipeline.RemoveWorktree`. Apos cada remocao bem-sucedida, chama
-`layout.Git(dir, "worktree", "prune")`. Em dry-run, apenas imprime a lista.
+A confirmação não bloqueia `forge up` em caso de recusa ou erro: o pipeline abre normalmente.
+Com `--dry-run` ou sem TTY: listar em stdout, sem promover nem remover.
 
-A confirmacao nao bloqueia `forge up` em caso de recusa ou erro: o pipeline abre normalmente.
+### 4. `internal/survey/survey.go` — prompt de múltipla escolha
 
-**Opcoes apresentadas ao usuario:**
-- `[x] Limpar <jobID>/<taskID> (job <jobID> — concluido e aprovado)` — um item por worktree seguro
-- `[ ] Manter todos`
+```go
+// ChooseWorktreesToClean exibe a lista de worktrees seguros e retorna os que o usuário
+// escolheu remover. Retorna slice vazio (sem erro) se o usuário escolher "Manter todos".
+func ChooseWorktreesToClean(entries []pipeline.StaleWorktree) ([]pipeline.StaleWorktree, error)
+```
 
-### 3. `forge pipeline worktree gc` — subcomando CLI
+Usa `huh.NewMultiSelect[string]()` já disponível em v0.3. Opções: uma por worktree seguro
+(`<jobID>/<taskID> — job concluído e task aprovada`) mais "Manter todos" como ação de saída.
+
+**Nota de dependência cruzada:** `internal/survey` importar `internal/pipeline` cria ciclo
+se `internal/pipeline` importar `internal/survey`. Verificar importações antes de implementar;
+se houver ciclo, mover `ChooseWorktreesToClean` para um novo `internal/pipeline/gc_prompt.go`
+usando `huh` diretamente (já é dependência do módulo).
+
+### 5. `forge pipeline worktree gc` — subcomando CLI
 
 Novo `ValidArgs` `gc` no `pipelineWorktreeCmd` existente:
 
@@ -146,52 +172,59 @@ Novo `ValidArgs` `gc` no `pipelineWorktreeCmd` existente:
 forge pipeline worktree gc [--dir <dir>] [--dry-run]
 ```
 
-- Sem TTY (`isInteractive() == false`): lista todos os stale worktrees em stdout (formato
-  `SAFE|PROTECTED <jobID>/<taskID> <reason>`) e retorna sem remover. Exit 0.
-- Com TTY e sem `--dry-run`: mesma interacao do hook de `forge up`.
-- Com `--dry-run`: lista, sem promover interacao.
+- **Com `--dry-run` ou sem TTY:** lista todos os stale em stdout no formato
+  `SAFE|PROTECTED <jobID>/<taskID>  <reason>`, sem promover, sem remover. Exit 0.
+- **Com TTY e sem `--dry-run`:** mesma interação do hook de `forge up`.
+- **Lógica de remoção:** delega a `pipeline.SweepWorktrees` (não reimplemeneta em `cmd/`).
 
-**Integracao com `forge status`:** a saida de `forge status` ja chama `forge ps` internamente;
-nao e necessario alterar `status.go` nesta feature. Worktrees ociosos sao visivels via
-`forge pipeline worktree gc --dry-run`.
+### 6. Comportamento em cenários especiais
 
-### 4. Comportamento em cenarios especiais
-
-| Cenario | Comportamento |
+| Cenário | Comportamento |
 |---|---|
-| `--dry-run` | Lista todos os stale (safe e protegidos), sem remover |
+| `--dry-run` | Lista todos (safe e protegidos), sem remover |
 | Sem TTY / autopilot | Apenas lista safe em stdout, sem prompt, sem remover |
-| Worktree orphan (sem job) | Listado com `PROTECTED`, nunca oferecido para remocao automatica |
-| Job `failed` | Listado com `PROTECTED`, nunca oferecido |
-| Task `review_pending` | Protegido; PR pode retornar como `pr_rework` |
-| Erro em `RemoveWorktree` | Aviso no stderr; continua com os proximos; nao aborta |
+| Worktree orphan (sem job) | `PROTECTED`, nunca oferecido para remoção |
+| Job `failed` | `PROTECTED`, nunca oferecido |
+| Task `review_pending` | `PROTECTED`; PR pode retornar como `pr_rework` |
+| Task não encontrada na fila | `PROTECTED` (fail closed) |
+| Erro em `RemoveWorktree` | Aviso no stderr; continua com os próximos |
 | `.forge/runtime/worktrees` inexistente | Retorna vazio silenciosamente |
-| `git worktree prune` falha | Aviso no stderr; nao aborta |
+| `git worktree prune` falha | Aviso no stderr; não aborta |
+| Workers ativos reclamam job entre prompt e remoção | `SweepWorktrees` reclassifica antes de cada remoção |
 
-## Criterios de Aceitacao Executaveis
+## Critérios de Aceitação Executáveis
 
 ```bash
 go test -v -race ./internal/pipeline/... -run TestWorktreeGC
+go test -v -race ./internal/queue/... -run TestLoadForInitiative
 go test -v -race ./cmd/forge-sdd/... -run TestPipelineWorktreeGCCmd
 go vet ./...
 ```
 
-Cenarios obrigatorios (cada um = um `Test*` independente):
+Cenários obrigatórios (cada um = um `Test*` independente):
 
-1. **TestWorktreeGC_JobDoneTaskAprovada**: worktree presente, job em `done` no barramento e task
-   `approved` em queue.json → `Safe=true`.
-2. **TestWorktreeGC_JobProcessing**: job em `processing` no barramento → `Safe=false`,
-   reason contem "em execucao".
-3. **TestWorktreeGC_JobFailed**: job em `failed` → `Safe=false`, reason contem "falhou".
-4. **TestWorktreeGC_TaskReviewPending**: job `done` mas task `review_pending` → `Safe=false`,
-   reason contem "review_pending".
-5. **TestWorktreeGC_Orphan**: nenhum job com esse ID encontrado no barramento → `Safe=false`,
-   reason contem "nao encontrado".
-6. **TestWorktreeGC_SemWorktreeDir**: `.forge/runtime/worktrees` nao existe → retorna slice vazio,
+1. **TestWorktreeGC_JobDoneTaskAprovada**: worktree presente, job `done` no barramento e task
+   `StatusApproved` em queue.json via `LoadForInitiative` → `Safe=true`.
+2. **TestWorktreeGC_JobProcessing**: job `StateProcessing` → `Safe=false`, reason contém
+   "em execução".
+3. **TestWorktreeGC_JobPending**: job `StatePending` → `Safe=false`, reason contém
+   "aguardando".
+4. **TestWorktreeGC_JobFailed**: job `StateFailed` → `Safe=false`, reason contém "falhou".
+5. **TestWorktreeGC_TaskReviewPending**: job `done` mas task `review_pending` → `Safe=false`,
+   reason contém "review_pending".
+6. **TestWorktreeGC_TaskNaoEncontrada**: job `done` mas task ausente em queue.json →
+   `Safe=false`, reason contém "não encontrada" (fail closed).
+7. **TestWorktreeGC_Orphan**: nenhum job com esse ID encontrado no barramento → `Safe=false`,
+   reason contém "não encontrado".
+8. **TestWorktreeGC_SemWorktreeDir**: `.forge/runtime/worktrees` não existe → slice vazio,
    sem erro.
-7. **TestWorktreeGC_FeatureIrmaEmProcessing**: job `done` e task `approved`, mas outro job com
-   mesmo `Feature` esta `processing` → `Safe=false`.
-8. **TestPipelineWorktreeGCCmd_DryRun**: `forge pipeline worktree gc --dry-run` lista sem remover.
-9. **TestPipelineWorktreeGCCmd_SemTTY**: sem TTY imprime lista e retorna exit 0 sem prompt.
+9. **TestWorktreeGC_ReclassificacaoAntesRemocao**: job `done`/`approved` ao listar, mas
+   `processing` no momento da remoção → `SweepWorktrees` não remove.
+10. **TestLoadForInitiative_SemFila**: queue.json ausente → fila vazia, sem erro.
+11. **TestLoadForInitiative_IOError**: erro de leitura diferente de `ErrNotExist` → erro
+    propagado (fail closed).
+12. **TestPipelineWorktreeGCCmd_DryRun**: `forge pipeline worktree gc --dry-run` imprime lista
+    e retorna exit 0 sem remover nada.
+13. **TestPipelineWorktreeGCCmd_SemTTY**: sem TTY imprime lista e retorna exit 0 sem prompt.
 
 Todos os testes passam em `go test -race`. `go vet ./...` limpo.
