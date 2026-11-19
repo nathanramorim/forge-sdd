@@ -1,0 +1,57 @@
+{
+  "feature_id": "97-finalizar-implementacoes-pendentes",
+  "branch": "",
+  "origem": "toca-ai",
+  "spec_status": "reviewed",
+  "updated_at": "2026-11-19T05:00:00Z",
+  "items": [
+    {
+      "task_id": "feat-97-01",
+      "title": "feat-97-01 — fix-90-02: tokens zerados em sessões de métricas e campo complexidade reservado",
+      "spec_path": "sdd/discovery/97-finalizar-implementacoes-pendentes/features/feat-97-01-fix-90-02-metrics-token-e-complexidade.md",
+      "status": "approved",
+      "rules": [
+        "ARQ-01",
+        "ARQ-11",
+        "COD-04",
+        "COD-06",
+        "DUP-01",
+        "TST-01"
+      ],
+      "skills_used": [],
+      "attempts": 0
+    },
+    {
+      "task_id": "feat-97-02",
+      "title": "feat-97-02 — feat-96-01: detecção e limpeza de worktrees ociosos",
+      "spec_path": "sdd/discovery/97-finalizar-implementacoes-pendentes/features/feat-97-02-feat-96-01-limpeza-worktrees.md",
+      "status": "approved",
+      "rules": [
+        "ARQ-01",
+        "ARQ-02",
+        "ARQ-04",
+        "ARQ-05",
+        "DUP-01",
+        "SEG-01",
+        "TST-01"
+      ],
+      "skills_used": [],
+      "attempts": 0
+    },
+    {
+      "task_id": "feat-97-03",
+      "title": "feat-97-03 — feat-95-01: visualizador de artefatos da spec após conclusão",
+      "spec_path": "sdd/discovery/97-finalizar-implementacoes-pendentes/features/feat-97-03-feat-95-01-visualizador-discovery-apos-spec.md",
+      "status": "approved",
+      "rules": [
+        "ARQ-01",
+        "ARQ-03",
+        "ARQ-04",
+        "DUP-06",
+        "TST-02"
+      ],
+      "skills_used": [],
+      "attempts": 0
+    }
+  ]
+}

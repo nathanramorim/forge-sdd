@@ -1,0 +1,13 @@
+{
+  "comandos": [
+    ["go", "build", "./..."],
+    ["go", "test", "./..."],
+    ["go", "test", "./internal/scaffold/...", "-run", "TestGolden", "-update"],
+    ["gh", "pr", "create"],
+    ["git", "push", "--force-with-lease"],
+    ["git", "worktree", "prune"]
+  ],
+  "ferramentas": [],
+  "arquivos": [],
+  "consentimentos": []
+}

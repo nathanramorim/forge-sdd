@@ -20,6 +20,6 @@ Use AskUserQuestion com as opções:
 Execute a ação escolhida. Consulte `sdd/memory/clarify.md` → seção "Visualização pós-spec" para comportamento detalhado (macOS-only, fallbacks).
 
 7. **Gate e fila:** submeta ao Líder (`FLX-01`); aprovada, enfileire com `forge queue enqueue`.
-8. **Telemetria:** `forge session record --feature "<arquivo criado>" --outcome blocked --criterio-atendido=false` (ainda não implementada).
+8. **Telemetria:** `forge session record --feature "<arquivo criado>" --tokens-input <N> --tokens-output <N> --outcome blocked --criterio-atendido=false --files-touched <lista>`. Nunca passe zeros: se não souber os tokens, omita as flags (o CLI vai estimar).
 
 Handoff: `/implementar`.

@@ -33,6 +33,8 @@ type SessionMetrics struct {
 	TokensCacheCreation int     `json:"tokens_cache_creation,omitempty"`
 	CostUSDTabela       float64 `json:"cost_usd_tabela,omitempty"`
 	Medicao             string  `json:"medicao,omitempty"`
+
+	Complexidade *string `json:"complexidade"` // reservado; preenchimento definido por ADR futura
 }
 
 // RecordSessionMetrics grava um arquivo de telemetria em sdd/.metrics/session-<ISO8601>.json.

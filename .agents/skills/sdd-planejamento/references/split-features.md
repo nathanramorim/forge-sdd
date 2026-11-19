@@ -22,6 +22,6 @@ Execute a ação escolhida. Consulte `sdd/memory/clarify.md` → seção "Visual
 
 8. **Fila:** com a confirmação do humano, `forge queue enqueue --task <spec> --task-id <id> --rules <IDs>` para cada task, na ordem de dependência.
 9. **Pipeline (existe `.forge/config/forge.json`):** depois da confirmação humana que enfileirou as tasks, rode `forge dispatch <iniciativa>` (gate e job para o Builder), informe "entregue ao Builder" e **pare**: o Builder e o Reviewer rodam nas outras sessões. Esta sessão não implementa, não edita `forge.json`, `card-evidence.json` nem o código da feature; pendência do gate vai para a pessoa. Com `pm_mcp.require_existing_card: false` o despacho não pede card.
-10. **Telemetria:** `forge session record --feature "sdd/discovery/<id>-<nome>/features/" --outcome approved --criterio-atendido=true`.
+10. **Telemetria:** `forge session record --feature "sdd/discovery/<id>-<nome>/features/" --tokens-input <N> --tokens-output <N> --outcome approved --criterio-atendido=true --files-touched <lista>`. Nunca passe zeros: se não souber os tokens, omita as flags (o CLI vai estimar).
 
 Use `/nova-feature` apenas para adições manuais e isoladas.
