@@ -2,13 +2,13 @@
   "feature_id": "feat-100-01",
   "branch": "feat/100-auto-pr-apos-review",
   "spec_status": "reviewed",
-  "updated_at": "2026-11-19T12:12:33Z",
+  "updated_at": "2026-11-19T15:57:51Z",
   "items": [
     {
       "task_id": "feat-100-01-auto-pr-apos-review",
       "title": "feat-100-01 — forge queue review: abrir PR automaticamente após veredito conforme",
       "spec_path": "sdd/discovery/100-auto-pr-apos-review/features/feat-100-01-auto-pr-apos-review.md",
-      "status": "queued",
+      "status": "approved",
       "rules": [
         "ARQ-01",
         "ARQ-04",
@@ -18,7 +18,12 @@
         "COD-03"
       ],
       "skills_used": [],
-      "attempts": 0
+      "attempts": 0,
+      "governance_verdict": {
+        "veredito": "conforme",
+        "achados": [],
+        "resumo": "feat-100-01 aprovada. Camada A: C1 (--no-pr: 2 ocorrências), C2 (func OpenPR em pr.go), C3 (prLookPath/\"gh\" presente), C5 (go vet exit 0), C6 (go build exit 0), C4 (6 testes passando). Camada B S-01..S-07 sem violações: fronteiras respeitadas (lógica em internal/queue), reuso de extractSpecTitle (DUP-01), sem segredos, whitelist git/gh em prRunCmd (SEG-03), sem dependência nova, sem candidato a auto-skill."
+      }
     }
   ]
 }
