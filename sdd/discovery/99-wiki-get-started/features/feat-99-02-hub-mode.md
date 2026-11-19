@@ -39,6 +39,10 @@ Nenhuma. Depende de feat-99-01 (wiki.html existente).
 - **COD-01:** seção isolada dentro do HTML; sem misturar com Get Started.
 - **DUP-02:** tabela "O que já existe" preenchida.
 
+## Status
+
+- [x] Implementado em feat-99-02
+
 ## Critérios de Aceitação Executáveis
 
 ```bash

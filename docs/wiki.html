@@ -22,6 +22,7 @@
       <a href="#get-started" class="sidebar-link" data-pt="Get Started" data-en="Get Started">Get Started</a>
       <a href="#jornada" class="sidebar-link" data-pt="Jornada" data-en="Journey">Jornada</a>
       <a href="#exemplos" class="sidebar-link" data-pt="Exemplos" data-en="Examples">Exemplos</a>
+      <a href="#hub-mode" class="sidebar-link" data-pt="Hub mode" data-en="Hub mode">Hub mode</a>
     </nav>
   </aside>
 
@@ -123,6 +124,51 @@ Execute /discovery e me mostre o plano antes de implementar.</pre>
           <p>Quando a IA terminar, ela abre um PR com o código. Você revisa o diff e faz o merge.</p>
         </li>
       </ol>
+    </section>
+
+    <section id="hub-mode">
+      <h2 class="section-title" data-pt="Hub mode — um forge para vários repos" data-en="Hub mode — one forge for many repos">Hub mode — um forge para vários repos</h2>
+      <p class="section-lead">Em vez de rodar <code>forge init</code> em cada repo separado, você elege um repo como hub e os outros como satélites. O hub rastreia o status de todos os projetos do time em um único lugar.</p>
+
+      <h3 class="subsection-title">Passo a passo</h3>
+      <ol class="example-steps">
+        <li>
+          <strong>Inicialize o repo hub.</strong>
+          <p>No repositório que será o hub central, rode:</p>
+          <pre class="code-block">forge init</pre>
+        </li>
+        <li>
+          <strong>Vincule os repos satélites.</strong>
+          <p>Para cada repo do time que você quer rastrear:</p>
+          <pre class="code-block">forge init --link ../outro-repo</pre>
+        </li>
+        <li>
+          <strong>Veja o status de todos.</strong>
+          <p>No repo hub, rode <code>forge pipeline</code> para ver o estado de cada repo vinculado:</p>
+          <pre class="code-block">forge pipeline</pre>
+        </li>
+      </ol>
+
+      <div class="ai-prompt">
+        <div class="ai-prompt__header">
+          <span class="ai-prompt__label">Prompt para IA</span>
+          <button class="ai-prompt__copy" onclick="copyPrompt(this)">Copiar</button>
+        </div>
+        <pre class="ai-prompt__code">Configure o forge-sdd como hub neste workspace.
+O repo atual é o hub. Para cada repo satélite, rode:
+forge init --link &lt;caminho-do-repo&gt;
+Me diga quando terminar e mostre os repos vinculados.</pre>
+      </div>
+
+      <div class="ai-prompt">
+        <div class="ai-prompt__header">
+          <span class="ai-prompt__label">Prompt para IA</span>
+          <button class="ai-prompt__copy" onclick="copyPrompt(this)">Copiar</button>
+        </div>
+        <pre class="ai-prompt__code">Liste todos os repos vinculados ao hub e o status de cada um:
+forge pipeline
+Mostre quais têm features abertas e quais estão sem atividade.</pre>
+      </div>
     </section>
 
   </main>
