@@ -49,3 +49,5 @@ Restricoes: zero deps runtime (ARQ-03/04), sem emojis, UI em pt-BR.
 - 2026-06-12 — feat-17-unified-onboarding-docs concluída: Criado o Guia de Início Rápido (Getting Started) com trilhas para projetos Novos e Existentes em todos os READMEs e no novo HOWTO.md template.
 - 2026-06-12 — feat-16-constitution-command concluída: Novo comando /constitution adicionado. Realiza scan do codebase para alinhar constitution.md e stack.md com a realidade técnica do projeto.
 - 2026-06-12 — feat-14-discovery-command concluída: Novo comando /discovery adicionado a todos os agentes. Gera artefatos de produto e critérios técnicos simulando personas sênior. Pasta sdd/discovery criada.
+- 2026-11-18: Iniciativa 88-modo-pipeline-avancado concluída e arquivada com sucesso.
+- 2026-11-19: Iniciativa 94-finalizar-fixes-pendentes concluída e arquivada com sucesso.
