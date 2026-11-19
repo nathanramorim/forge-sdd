@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -38,6 +39,7 @@ não tiverem escolha própria. --dry-run só imprime os comandos.`,
 		if !found {
 			return fmt.Errorf("%w (sem .forge/config/forge.json não há pipeline para abrir)", pipeline.ErrNotPipelineMode)
 		}
+		checkStaleWorktrees(dir, cmd.OutOrStdout())
 		cfg, err = applySessionFlags(cmd, cfg)
 		if err != nil {
 			return err
@@ -144,6 +146,32 @@ func absDir(dir string) (string, error) {
 		return "", fmt.Errorf("resolver %q: %w", dir, err)
 	}
 	return abs, nil
+}
+
+// checkStaleWorktrees informa o usuário sobre worktrees ociosos encontrados em disco.
+// Silencioso em ambientes não interativos; a remoção real é feita via forge pipeline worktree gc.
+func checkStaleWorktrees(dir string, out io.Writer) {
+	if !isInteractive() {
+		return
+	}
+	stale, err := pipeline.ListStaleWorktrees(dir)
+	if err != nil || len(stale) == 0 {
+		return
+	}
+	var safe []pipeline.StaleWorktree
+	for _, w := range stale {
+		if w.Safe {
+			safe = append(safe, w)
+		}
+	}
+	if len(safe) == 0 {
+		return
+	}
+	fmt.Fprintf(out, "\n%d worktree(s) ocioso(s) encontrado(s):\n", len(safe))
+	for _, w := range safe {
+		fmt.Fprintf(out, "  %s/%s — %s\n", w.JobID, w.TaskID, w.Reason)
+	}
+	fmt.Fprintln(out, "  → rode `forge pipeline worktree gc` para limpar.")
 }
 
 // applySessionFlags aplica --cli e --discovery/--builder/--reviewer sobre a configuração, sem gravar.

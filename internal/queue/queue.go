@@ -685,3 +685,19 @@ func FormatExecutivePanel(q *Queue) string {
 func normalizeTaskID(id string) string {
 	return strings.TrimSpace(strings.TrimPrefix(strings.TrimSpace(id), "feat-"))
 }
+
+// LoadForInitiative lê a fila de uma iniciativa específica pelo ID, sem depender da branch ativa.
+// Retorna fila vazia (não erro) quando queue.json não existe.
+func LoadForInitiative(dir, initiative string) (*Queue, error) {
+	q, err := LoadInitiative(dir, initiative)
+	if err != nil {
+		return nil, err
+	}
+	if q == nil {
+		return &Queue{Items: []QueueItem{}}, nil
+	}
+	if q.Items == nil {
+		q.Items = []QueueItem{}
+	}
+	return q, nil
+}
