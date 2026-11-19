@@ -32,37 +32,84 @@
       <h2 class="section-title" data-pt="Começando com o Forge-SDD" data-en="Getting Started with Forge-SDD">Começando com o Forge-SDD</h2>
       <p class="section-lead">O Forge-SDD é um orquestrador de desenvolvimento que conecta você e sua IA num fluxo de trabalho claro: você decide, a IA implementa, você aprova.</p>
 
-      <h3 class="subsection-title">Instalação</h3>
-      <p>Instale o CLI globalmente com npm:</p>
-      <pre class="code-block">npm i -g @nathanramorim/forge-sdd</pre>
-
-      <h3 class="subsection-title">Inicialize no seu projeto</h3>
-      <p>Dentro do seu repositório, rode:</p>
-      <pre class="code-block">forge init</pre>
-      <p>Isso cria a estrutura <code>sdd/</code> com tudo que a IA precisa para trabalhar.</p>
+      <h3 class="subsection-title">1. Instalação e setup</h3>
+      <p>O <code>forge init</code> faz perguntas interativas sobre o projeto (nome, stack, banco). Se a sua IA faz o setup por você, use o prompt abaixo — ele coleta essas respostas antes de rodar o comando, sem travar em prompts interativos.</p>
 
       <div class="ai-prompt">
         <div class="ai-prompt__header">
-          <span class="ai-prompt__label">Prompt para IA</span>
-          <button class="ai-prompt__copy" onclick="copyPrompt(this)">Copiar</button>
+          <span class="ai-prompt__label" data-pt="Prompt para IA" data-en="AI Prompt">Prompt para IA</span>
+          <button class="ai-prompt__copy" onclick="copyPrompt(this)" data-pt="Copiar" data-en="Copy">Copiar</button>
         </div>
-        <pre class="ai-prompt__code">Instale o forge-sdd neste projeto:
+        <pre class="ai-prompt__code" data-pt="Vou instalar o forge-sdd neste projeto. Antes de rodar, me responda:
+1. Qual é o nome deste projeto?
+2. Qual a stack principal? (go, node, python, rust, other)
+3. Qual banco de dados? (postgres, sqlite, mongo, none)
+
+Com as respostas, rode:
 npm i -g @nathanramorim/forge-sdd
-forge init
-Me diga quando estiver pronto e mostre o que foi criado.</pre>
+forge init --yes --name &quot;[nome]&quot; --stack [stack] --db [db] --agent claude
+
+Me mostre a estrutura sdd/ criada ao final." data-en="I'll install forge-sdd in this project. First, answer:
+1. What is the project name?
+2. Main stack? (go, node, python, rust, other)
+3. Database? (postgres, sqlite, mongo, none)
+
+Then run:
+npm i -g @nathanramorim/forge-sdd
+forge init --yes --name &quot;[name]&quot; --stack [stack] --db [db] --agent claude
+
+Show me the sdd/ structure when done.">Vou instalar o forge-sdd neste projeto. Antes de rodar, me responda:
+1. Qual é o nome deste projeto?
+2. Qual a stack principal? (go, node, python, rust, other)
+3. Qual banco de dados? (postgres, sqlite, mongo, none)
+
+Com as respostas, rode:
+npm i -g @nathanramorim/forge-sdd
+forge init --yes --name "[nome]" --stack [stack] --db [db] --agent claude
+
+Me mostre a estrutura sdd/ criada ao final.</pre>
       </div>
 
-      <h3 class="subsection-title">Primeira feature</h3>
-      <p>Com o forge-sdd instalado, você pode pedir à sua IA para criar a primeira feature:</p>
+      <h3 class="subsection-title" id="constitution">2. Defina as regras do projeto (<code>/constitution</code>)</h3>
+      <p>Antes da primeira feature, você precisa registrar as decisões invioláveis do projeto: qual banco usar, como nomear branches, se usa ORM ou SQL direto, qualquer escolha que a IA não deve questionar. Essas regras formam a <strong>Constitution</strong> — um arquivo que todos os agentes leem antes de trabalhar.</p>
+      <p>Sem a Constitution, a IA toma decisões arbitrárias que você vai reverter mais tarde. Com ela, cada feature nasce alinhada com o que você decidiu.</p>
+
+      <p class="tip-label">Exemplo de instrução para a Constitution:</p>
+      <pre class="code-block">Nunca use ORM; acesso a banco sempre via SQL direto com prepared statements.</pre>
+      <pre class="code-block">Branches de feature seguem o padrão feat/[número]-[nome-curto].</pre>
 
       <div class="ai-prompt">
         <div class="ai-prompt__header">
-          <span class="ai-prompt__label">Prompt para IA</span>
-          <button class="ai-prompt__copy" onclick="copyPrompt(this)">Copiar</button>
+          <span class="ai-prompt__label" data-pt="Prompt para IA" data-en="AI Prompt">Prompt para IA</span>
+          <button class="ai-prompt__copy" onclick="copyPrompt(this)" data-pt="Copiar" data-en="Copy">Copiar</button>
         </div>
-        <pre class="ai-prompt__code">Vamos criar nossa primeira feature com o forge-sdd.
-Execute: /discovery adicionar comando forge greet que imprime "Olá, mundo!"
-Aguarde minha aprovação antes de implementar.</pre>
+        <pre class="ai-prompt__code" data-pt="Vamos definir as regras do projeto com /constitution.
+Execute /constitution e me ajude a cadastrar as primeiras decisões arquiteturais.
+Comece me fazendo as 3 perguntas mais importantes para este tipo de projeto:
+quais são as decisões que mais causam atrito se não forem definidas logo no início?" data-en="Let's define the project rules with /constitution.
+Run /constitution and help me register the first architectural decisions.
+Start by asking me the 3 most important questions for this type of project:
+which decisions cause the most friction when left undefined at the start?">Vamos definir as regras do projeto com /constitution.
+Execute /constitution e me ajude a cadastrar as primeiras decisões arquiteturais.
+Comece me fazendo as 3 perguntas mais importantes para este tipo de projeto:
+quais são as decisões que mais causam atrito se não forem definidas logo no início?</pre>
+      </div>
+
+      <h3 class="subsection-title">3. Primeira feature</h3>
+      <p>Com o setup e a Constitution no lugar, peça à IA para criar a primeira feature. Ela vai rodar o discovery, montar um plano e aguardar sua aprovação antes de escrever uma linha de código.</p>
+
+      <div class="ai-prompt">
+        <div class="ai-prompt__header">
+          <span class="ai-prompt__label" data-pt="Prompt para IA" data-en="AI Prompt">Prompt para IA</span>
+          <button class="ai-prompt__copy" onclick="copyPrompt(this)" data-pt="Copiar" data-en="Copy">Copiar</button>
+        </div>
+        <pre class="ai-prompt__code" data-pt="Vamos criar a primeira feature com o forge-sdd.
+Execute /discovery [descreva aqui o que você quer construir].
+Me mostre o plano antes de implementar." data-en="Let's create the first feature with forge-sdd.
+Run /discovery [describe what you want to build here].
+Show me the plan before implementing.">Vamos criar a primeira feature com o forge-sdd.
+Execute /discovery [descreva aqui o que você quer construir].
+Me mostre o plano antes de implementar.</pre>
       </div>
     </section>
 
