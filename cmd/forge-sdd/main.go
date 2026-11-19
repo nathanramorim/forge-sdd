@@ -12,8 +12,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// version é injetada via ldflags: -X main.version=4.9.1-beta
-var version = "4.9.1-beta"
+// version é injetada via ldflags: -X main.version=5.0.0
+var version = "5.0.0"
 
 func init() { config.SetBinaryVersion(version) }
 
@@ -390,7 +390,7 @@ func init() {
 	initCmd.Flags().String("stack", "", "Stack principal: go, node, python, rust, other")
 	initCmd.Flags().String("db", "", "Banco de dados: postgres, sqlite, mongo, none")
 	initCmd.Flags().String("lang", "", "Idioma: pt-BR, en")
-	initCmd.Flags().String("version", "", "Versão Forge-SDD (default: 2.4.0)")
+	initCmd.Flags().String("version", "", "Versão Forge-SDD (default: 5.0.0)")
 	initCmd.Flags().Bool("no-telemetry", false, "Desabilitar telemetria local")
 	initCmd.Flags().String("agent", "", "Agente(s) de IA: copilot, claude, gemini (csv, default: copilot)")
 	initCmd.Flags().String("naming-convention", "", "Convenção de nomenclatura: sequencial, hash, workitem")
@@ -400,7 +400,7 @@ func init() {
 	updateCmd.Flags().Bool("dry-run", false, "Mostrar a migração de layout e a limpeza de obsoletos sem gravar nada")
 	updateCmd.Flags().String("agent", "", "Agente(s) a adicionar: copilot, claude, gemini, openai (csv)")
 	updateCmd.Flags().Bool("upgrade", false, "Atualizar estrutura para a versão mais recente do binário")
-	updateCmd.Flags().String("version", "", "Atualizar estrutura para uma versão específica (ex: 2.4.0)")
+	updateCmd.Flags().String("version", "", "Atualizar estrutura para uma versão específica (ex: 5.0.0)")
 	updateCmd.Flags().String("naming-convention", "", "Convenção de nomenclatura: sequencial, hash, workitem")
 	rootCmd.AddCommand(updateCmd)
 
