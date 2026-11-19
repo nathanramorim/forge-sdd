@@ -3,7 +3,7 @@
 **Branch:** `fix/88-05-forge-rules-lookup`
 **Origem:** Iniciativa 88, `internal/gate/brief.go`, seção `IDs` do `forge brief`
 **Tamanho:** `S`
-**Status:** `draft`
+**Status:** `done`
 
 ## Sintoma
 
