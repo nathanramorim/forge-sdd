@@ -172,7 +172,7 @@ Hoje: veredito conforme, depois PR criado sem draft: `queue.OpenPR` (`cmd/forge-
 ## Decisões para o Gate 1
 **Aprovadas e mantidas** (dono, 2026-11-20): (i) `feat/`; (ii) PR de teste de draft em repositório pessoal; (iii) job "pronto?" só na principal; (iv) primeira leva hub-busize, hub-enterprise, forge-sdd, gerador-videos; (v) migrar o `lessons.md`; (vi) atestado GitHub: Environment com revisor, fallback assinado; (vii) teto 3 (2 devoluções); (viii) assinatura Forge SDD; (ix) BPMN simplificado (aprovado manter, regerar mais limpo); `FLX-01` com split pelo Builder; (xi) atestado Azure: Environment com aprovadores, opcional e com fallback; (xii) `nenhum` só local; (xiii) MCP versus CLI a medir; adaptador de VCS e as ondas de VCS agnóstico.
 
-**Aprovadas na reabertura "spec volta à principal"** (dono, 2026-11-20, parcial):
+**Aprovadas na reabertura "spec volta à principal"** (dono, 2026-11-20):
 - **(xvi) Estado de execução: opção B.** Um arquivo de estado por feature, na branch da feature (`sdd/discovery/<id>/state/<sid>.json`); a fila é **calculada na leitura** a partir da principal (plano em `plan.md` e `features/`) mais os estados por feature; o **claim é a existência da branch** (o segundo `git push` do mesmo nome falha). Vira a task 0.7, que cobre: `layout.Current` pelo maior prefixo existente (ele alimenta `ActiveInitiative`, `QueuePath` e `StatusPath`); `goalSpecApproved` (o marcador do Gate 1 passa a ser `Gate 1: aprovado` no `status.md` da principal, não `queue.json`); `archive` (`branchGuard` e leitura de `queue.json` passam a rodar a partir da principal e a ler os estados por feature); `queue.json` deixa de receber status por feature (vira plano, escrito uma vez); leitura da fila a partir da principal (`forge status`, `Load`); `Claim`, `Review`, `SetTaskStatuses` e `BlockTasks` passam a gravar o arquivo da feature.
 - **(xvii) Constituição por ADR e `GOV-01`**, na task 2.7 (o plano numera a ADR e a Constituição na 2.7; a 2.6 é a dos passos dos comandos). Redação exata da Regra 15 e do `FLX-02` no rascunho da ADR acima.
 - **(xviii) Quem mescla a spec:** o [Seguir] do Nathan autoriza e o adaptador de VCS executa o merge; automático no modo sem humano; no VCS `nenhum` o merge é local.
@@ -183,6 +183,8 @@ Hoje: veredito conforme, depois PR criado sem draft: `queue.OpenPR` (`cmd/forge-
 - **(xxii) Leque:** `PrepararLeque` mantido (worktree por task e lock); `Base` passa a ser a principal (`base_branch`); a branch da task vira a publicável `feat/<id>-<nome>-<sid>`; `Juntar` deixa de ser a entrega e vira só o merge local do VCS `nenhum`, com `Publicar` (push e PR em draft pelo adaptador) em `github` e `azure-devops`; o menu de conflito (`resolver`, `pular`, `abortar`) continua; os testes de `leque_test.go` migram junto. Evidência: `PrepararLeque` e `Juntar` não têm chamador fora de `leque.go` e dos testes (`git grep`).
 A pergunta "PRs de task do leque em draft?" está respondida: cada feature abre PR em draft.
 
-**Abertas** (o dono ainda não respondeu):
-- **(xxi) Atestado do PR da spec.** Recomendo modo `local` (é documentação; o veredito da Conferência 1 mais o [Seguir]); atestado por PR só nas features.
-- **Hooks só no Claude Code** (Gemini e Copilot dependem dos passos dos comandos): segue em aberto.
+**Fechadas pelo dono em 2026-11-20 (Gate 1 completo):**
+- **(xxi) Atestado do PR da spec: sempre `local`** (veredito conforme da Conferência 1 com SHA mais o [Seguir] do Nathan, ou o modo sem humano). O campo `Modo do atestado` da Constituição vale **só para PRs de feature**.
+- **Hooks só no Claude Code: aceito**, com a pipeline como rede de segurança. Hooks no Claude Code; nos outros agentes (Gemini, Copilot) valem os passos dos comandos; o job leve "pronto?" na principal (decisão iii, aprovada) barra o merge de PR em draft ou sem atestado; o `doctor` informa qual agente tem hook (task 0.4); o `pr_guard.py` e o instalador (tasks 1.4 e 1.5) cobrem só o Claude Code, e o aviso de instalação diz isso.
+
+Sem itens em aberto de decisão. O que falta é **medir**: a task 0.1 (Azure DevOps e custo de tokens MCP versus CLI).

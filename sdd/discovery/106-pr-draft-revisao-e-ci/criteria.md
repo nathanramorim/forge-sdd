@@ -140,7 +140,8 @@ go test ./internal/queue/... -run 'TestReviewConformeNaoCriaPR'
 go test ./internal/scaffold/... -run 'TestMergePreToolUseHook'
 go test ./internal/vcs/... -run 'TestGitHubCriaPRComDraft|TestAzureDevOpsCriaPRSemGitHub|TestNenhumDeixaABranchPronta|TestLeVCSDaConstituicao'
 go test ./internal/pipeline/... -run 'TestDesvioAbreNovoFixComPrioridade|TestBuilderFazSplitSemSegundaAprovacao|TestFixesParalelosNaOnda'
-go test ./internal/vcs/... -run 'TestLeModosDaConstituicaoDaBranchBase|TestAtestadoPadraoELocal'
+go test ./internal/vcs/... -run 'TestLeModosDaConstituicaoDaBranchBase|TestAtestadoPadraoELocal|TestPRDaSpecSempreAtestadoLocal'
+go test ./cmd/... ./internal/scaffold/... -run 'TestDoctorInformaQualAgenteTemHook'
 go test ./internal/pipeline/... -run 'TestPrepararLequeUsaAPrincipalComoBase|TestJuntarSoNoMergeLocalDoNenhum|TestPublicarAbrePRDraftPeloAdaptador'
 go test ./internal/layout/... -run 'TestCurrentResolveIniciativaPorPrefixo|TestBranchDeFeatureLeAFilaDaPrincipal'
 go test ./internal/pipeline/... -run 'TestClaimPelaExistenciaDaBranch|TestSpecMescladaPeloAdaptadorAposSeguir|TestNenhumMesclaLocal|TestContinuarAgrupadoPorOnda|TestGoalSpecApprovedPeloStatusDaPrincipal|TestArchiveRodaDaPrincipal|TestSpecVoltaAPrincipalAntesDoBuilder|TestBuilderParteDaPrincipal|TestUmaBranchEUmPRDraftPorFeature|TestEstadoDeFeaturesParalelasSemConflito|TestConferencia1AntesDoRetornoDaSpec|TestConferencia2PorFeature'
@@ -168,6 +169,8 @@ go test ./internal/vcs/... -list 'TestVCSDesconhecidoRecusado' | grep -F 'TestVC
 go test ./internal/vcs/... -run 'TestVCSDesconhecidoRecusado'
 if uv run scripts/pr_guard.py --check 'az repos pr create --title x'; then exit 1; fi
 if uv run scripts/pr_guard.py --check 'az repos pr update --id 7 --draft false'; then exit 1; fi
+go test ./internal/vcs/... -list 'TestPRDaSpecIgnoraModoVCS' | grep -F 'TestPRDaSpecIgnoraModoVCS'
+go test ./internal/vcs/... -run 'TestPRDaSpecIgnoraModoVCS'
 go test ./internal/vcs/... -list 'TestModoNaBranchDaFeatureNaoSobrepoeABase' | grep -F 'TestModoNaBranchDaFeatureNaoSobrepoeABase'
 go test ./internal/vcs/... -run 'TestModoNaBranchDaFeatureNaoSobrepoeABase'
 go test ./internal/pipeline/... -list 'TestJuntarNaoEhEntregaNoGitHub' | grep -F 'TestJuntarNaoEhEntregaNoGitHub'
@@ -209,6 +212,7 @@ if uv run scripts/pr_guard.py --check 'gh pr create --fill'; then exit 1; fi
 if uv run scripts/pr_guard.py --check 'gh pr merge 7'; then exit 1; fi
 ```
 - Spec volta à principal (RN-21): após o [Seguir], `git log <base> -- sdd/discovery/<id>/discovery.md` mostra a spec na principal e a branch da spec não existe mais; o Builder só inicia com `Gate 1: aprovado` no `status.md` da principal (task 2.2).
+- Hooks só no Claude Code (aceito): `forge doctor` informa qual agente tem hook; sem hook (Gemini, Copilot) o job "pronto?" na principal barra o PR em draft ou sem atestado (tasks 0.4, 1.5 e 3.1).
 - Uma branch e um PR em draft por feature (RN-22): com 3 features independentes, o VCS mostra 3 branches `feat/<id>-<nome>-<sid>` com base na principal e 3 PRs em draft; nenhum PR tem base em branch de iniciativa (task 2.4).
 - Estado sem conflito (RN-23): duas branches de feature mescladas na principal sem conflito de estado; o teste reproduz o caso de `queue.json` com `updated_at` como falha de referência e prova que o arquivo por feature não conflita (task 0.7).
 - Conferências (RN-3): `status.md` mostra `spec-para-revisao` antes de a spec voltar e `pronto-para-revisao` por feature; o teto vale por feature (task 1.6).
