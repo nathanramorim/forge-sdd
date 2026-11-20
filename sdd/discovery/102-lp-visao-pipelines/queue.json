@@ -1,0 +1,28 @@
+{
+  "feature_id": "feat-102",
+  "branch": "feat/102-lp-visao-pipelines",
+  "spec_status": "reviewed",
+  "updated_at": "2026-11-20T01:37:24Z",
+  "items": [
+    {
+      "task_id": "feat-102-01-hero-e-esteira-de-3-sessoes",
+      "title": "feat-102-01 — Título, hero e esteira de 3 sessões",
+      "spec_path": "sdd/discovery/102-lp-visao-pipelines/features/feat-102-01-hero-e-esteira-de-3-sessoes.md",
+      "status": "review_pending",
+      "rules": [
+        "ARQ-11",
+        "DUP-02",
+        "COD-01",
+        "COD-04",
+        "COD-05",
+        "SEG-07",
+        "TST-01",
+        "TST-05",
+        "FLX-01",
+        "FLX-02"
+      ],
+      "skills_used": [],
+      "attempts": 1
+    }
+  ]
+}
