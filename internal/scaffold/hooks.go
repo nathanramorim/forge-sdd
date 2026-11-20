@@ -179,24 +179,39 @@ func SyncClaudeIntegration(targetDir string, dryRun bool) (changed, warnings []s
 // diretório pai que seja link simbólico ou resolva para fora do projeto. Arquivo ou pai ausentes
 // são aceitos (serão criados).
 func checkSafeTarget(targetDir, path string) error {
+	// Base única e absoluta: `init .`, `./x` e `a/../b` precisam comparar com o EvalSymlinks do projeto.
+	if abs, err := filepath.Abs(targetDir); err == nil {
+		targetDir = abs
+	}
+	if abs, err := filepath.Abs(path); err == nil {
+		path = abs
+	}
 	root, err := filepath.EvalSymlinks(targetDir)
 	if err != nil {
 		return fmt.Errorf("resolver %s: %w", targetDir, err)
 	}
 	dir := filepath.Dir(path)
-	if filepath.Clean(dir) != filepath.Clean(targetDir) {
-		fi, err := os.Lstat(dir)
-		switch {
-		case errors.Is(err, os.ErrNotExist):
-		case err != nil:
-			return fmt.Errorf("verificar %s: %w", dir, err)
-		case fi.Mode()&os.ModeSymlink != 0 || !fi.IsDir():
-			return fmt.Errorf("%s é link simbólico ou não é diretório; recusado (SEG-02)", dir)
-		default:
-			real, err := filepath.EvalSymlinks(dir)
-			if err != nil || (real != root && !strings.HasPrefix(real, root+string(filepath.Separator))) {
-				return fmt.Errorf("%s resolve para fora do projeto; recusado (SEG-02)", dir)
+	if rel, err := filepath.Rel(targetDir, dir); err != nil || rel == ".." || strings.HasPrefix(rel, ".."+string(filepath.Separator)) {
+		return fmt.Errorf("%s está fora do projeto; recusado (SEG-02)", dir)
+	} else if rel != "." {
+		// Cada componente existente entre o projeto e o destino precisa ser diretório real: um
+		// ancestral simbólico faria o MkdirAll criar pastas fora do projeto.
+		cur := targetDir
+		for _, part := range strings.Split(rel, string(filepath.Separator)) {
+			cur = filepath.Join(cur, part)
+			fi, err := os.Lstat(cur)
+			if errors.Is(err, os.ErrNotExist) {
+				break
 			}
+			if err != nil {
+				return fmt.Errorf("verificar %s: %w", cur, err)
+			}
+			if fi.Mode()&os.ModeSymlink != 0 || !fi.IsDir() {
+				return fmt.Errorf("%s é link simbólico ou não é diretório; recusado (SEG-02)", cur)
+			}
+		}
+		if real, err := filepath.EvalSymlinks(nearestExisting(dir)); err != nil || (real != root && !strings.HasPrefix(real, root+string(filepath.Separator))) {
+			return fmt.Errorf("%s resolve para fora do projeto; recusado (SEG-02)", dir)
 		}
 	}
 	fi, err := os.Lstat(path)
@@ -214,13 +229,42 @@ func checkSafeTarget(targetDir, path string) error {
 // writeFileSafe grava via arquivo temporário exclusivo no mesmo diretório e rename, preservando o
 // modo do arquivo existente (novo: 0644). Revalida o alvo logo antes de gravar.
 func writeFileSafe(targetDir, path string, data []byte) error {
+	return writeFileSafeMode(targetDir, path, data, 0o644)
+}
+
+// WriteFileSafe expõe writeFileSafe (SEG-02) aos comandos que gravam no projeto do usuário.
+func WriteFileSafe(targetDir, path string, data []byte) error {
+	return writeFileSafe(targetDir, path, data)
+}
+
+// nearestExisting devolve o ancestral existente mais próximo de dir.
+func nearestExisting(dir string) string {
+	for {
+		if _, err := os.Lstat(dir); err == nil || filepath.Dir(dir) == dir {
+			return dir
+		}
+		dir = filepath.Dir(dir)
+	}
+}
+
+// writeFileSafeMode é writeFileSafe com o modo de arquivo novo explícito (ex.: 0755 para scripts).
+func writeFileSafeMode(targetDir, path string, data []byte, newMode os.FileMode) error {
+	if abs, err := filepath.Abs(targetDir); err == nil {
+		targetDir = abs
+	}
+	if abs, err := filepath.Abs(path); err == nil {
+		path = abs
+	}
+	if err := checkSafeTarget(targetDir, path); err != nil {
+		return err
+	}
 	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
 		return err
 	}
 	if err := checkSafeTarget(targetDir, path); err != nil {
 		return err
 	}
-	mode := os.FileMode(0o644)
+	mode := newMode
 	if fi, err := os.Lstat(path); err == nil {
 		mode = fi.Mode().Perm()
 	}
