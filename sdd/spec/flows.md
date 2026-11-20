@@ -1,4 +1,4 @@
-# Fluxos Operacionais — forge-sdd (v4.7.7-beta)
+# Fluxos Operacionais — forge-sdd (v5.0.0)
 
 ## 1. Pipeline Multi-Sessão: da ideia ao PR aprovado (ADR-0004)
 
@@ -115,3 +115,20 @@ flowchart LR
     R --> A["forge skills approve<br/>(status: active + sdd/skills/index.md)"]
     A --> S["forge skills sync<br/>propaga para .claude/skills/ e .gemini/skills/"]
 ```
+
+---
+
+## 7. Modo `chat`: pipeline em subagentes (ADR-0015)
+
+```mermaid
+flowchart LR
+    H["Humano<br/>Gate 1"] --> C["Chat<br/>papéis como skills"]
+    C -->|"RunChat"| L["Laço no Go<br/>internal/pipeline"]
+    L --> K["Lock por iniciativa<br/>.forge/runtime/chat/locks"]
+    L --> W["Leque: worktree<br/>por task"]
+    W --> V["Reviewer<br/>somente leitura"]
+    V -->|"violação, até 3x"| L
+    V -->|"conforme"| H
+```
+
+O Go grava o estado do laço e valida contratos (`internal/harness`); o modelo só devolve conteúdo. `Retomar` continua um laço interrompido. O modo `sessions` (seções 1 a 5) segue válido.

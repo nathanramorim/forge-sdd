@@ -1,6 +1,6 @@
-# Overview — forge-sdd (v4.7.7-beta)
+# Overview — forge-sdd (v5.0.0)
 
-CLI Go e framework de **Spec-Driven Development (SDD)** multi-agente. Instala em qualquer projeto uma esteira de **5 estações** (skills por estação), uma **Constituição por IDs estáveis**, o **Portão de Governança em 3 camadas (A/B/C)**, o **Motor de Auto-Skills** e, desde a 4.x, o **Pipeline Multi-Sessão**: Discovery, Builder e Reviewer em sessões de IA separadas, ligadas por um barramento de jobs.
+CLI Go e framework de **Spec-Driven Development (SDD)** multi-agente. Instala em qualquer projeto a esteira de **3 sessões** (Discovery, Builder e Reviewer) mais a **aprovação humana**, uma **Constituição por IDs estáveis**, o **Portão de Governança em 3 camadas (A/B/C)**, o **Motor de Auto-Skills** o **Pipeline Multi-Sessão** (sessões de IA separadas, ligadas por um barramento de jobs) e, desde a iniciativa 104, o **modo `chat`** (`pipeline_mode: chat`, opt-in): os mesmos três papéis no mesmo chat, com subagentes e o Go como dono do laço (ADR-0015).
 
 ## Índice da Especificação Arquitetural (`sdd/spec/`)
 - `overview.md`: visão geral e C4 de contexto.
@@ -8,7 +8,7 @@ CLI Go e framework de **Spec-Driven Development (SDD)** multi-agente. Instala em
 - `flows.md`: pipeline multi-sessão, estados do job e da task, tokens e reset, painel e Auto-Skills.
 - `concepts.md`: glossário canônico do domínio (`DUP-01` / `GOV-04`).
 - `stack.md`: tecnologias, versões, distribuição e layout.
-- `decisions.md` e `adr/`: decisões arquiteturais (ADR-0001 a ADR-0012).
+- `decisions.md` e `adr/`: decisões arquiteturais (ADR-0001 a ADR-0020).
 
 ---
 
@@ -56,10 +56,11 @@ Cada sessão usa o agente escolhido por ela (`forge.json`). Em modo live, os pai
 
 ---
 
-## As 5 estações (skills por estação, ADR-0003)
+## Skills por papel (ADR-0003, histórico de 5 estações)
 
-| Estação | Skill | Papel |
-|---|---|---|
+O modelo atual são as **3 sessões** acima mais a aprovação humana. As cinco skills `sdd-concepcao`, `sdd-planejamento`, `sdd-build`, `sdd-governanca` e `sdd-operacao` (em `.agents/skills/`) continuam como material de apoio carregado sob demanda; a visão de "5 estações" é histórica (ADR-0003) e não descreve o fluxo atual.
+
+---|---|---|
 | Concepção | `sdd-concepcao` | discovery, critérios, Constituição, C4 |
 | Planejamento | `sdd-planejamento` | plano técnico e tasks P/M/G com `depends_on` |
 | Build | `sdd-build` | implementação por task, com `forge context` |
@@ -89,6 +90,6 @@ flowchart LR
 - **Visibilidade:** `status` (`--live`), `ps`, `queue` (`list`, `panel`, `activity`).
 - **Contexto e portão:** `brief`, `context`, `gate`, `next-id`.
 - **Memória e métricas:** `session`, `report`, `lessons`, `archive`, `autopilot`.
-- **Extensões:** `skills`, `governance`, `acp`.
+- **Extensões:** `skills`, `governance`, `acp`, `mcp` (`serve`), `eval`, `rules`.
 
 O binário é chamado de `forge` em toda a documentação, nos prompts e nos templates (ADR-0010).
