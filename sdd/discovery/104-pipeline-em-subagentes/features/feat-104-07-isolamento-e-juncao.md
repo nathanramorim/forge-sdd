@@ -43,7 +43,9 @@ go test -list 'TestWorktreePorSubagente|TestJuncaoConflitoEscala|TestRecusaWorkt
 go test ./internal/pipeline -run 'TestWorktreePorSubagente|TestJuncaoConflitoEscala|TestRecusaWorktreeOcupado'
 # negativo: duas tasks que editam o mesmo arquivo geram conflito marcado; worktree ocupado é recusado; falha de merge sem conflito não vira conflito
 go test -list 'TestJuncaoFalhaSemConflitoNaoViraConflito|TestJuncaoSemIdentidadeUsaFallback' ./internal/pipeline | grep -F 'TestJuncaoFalhaSemConflitoNaoViraConflito' >/dev/null
-go test ./internal/pipeline -run 'TestJuncaoFalhaSemConflitoNaoViraConflito|TestJuncaoSemIdentidadeUsaFallback|TestJuncaoNaoSobrescreve|TestJuncaoIdentidadeGlobal'
+go test -list 'TestJuncaoNaoSobrescreveIdentidadeDoRepositorio' ./internal/pipeline | grep -F 'TestJuncaoNaoSobrescreveIdentidadeDoRepositorio' >/dev/null
+go test -list 'TestJuncaoIdentidadeGlobalNaoSobrescrita' ./internal/pipeline | grep -F 'TestJuncaoIdentidadeGlobalNaoSobrescrita' >/dev/null
+go test ./internal/pipeline -run 'TestJuncaoFalhaSemConflitoNaoViraConflito|TestJuncaoSemIdentidadeUsaFallback|TestJuncaoNaoSobrescreveIdentidadeDoRepositorio|TestJuncaoIdentidadeGlobalNaoSobrescrita'
 go test ./internal/pipeline -run 'TestJuncaoConflitoEscala|TestRecusaWorktreeOcupado'
 go vet ./... && go test ./...
 ```
