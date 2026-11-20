@@ -8,7 +8,7 @@
 4. **Origem:** identifique (ou pergunte) a feature ou iniciativa que gerou o bug.
 5. **Local:** `sdd/discovery/<id>-<nome>/fixes/fix-<id>-<nn>-<nome>.md`, na pasta da iniciativa de origem.
 6. **Conteúdo:** as seis seções obrigatórias da skill `sdd-concepcao` (incluindo `## Decisões do projeto aplicadas`) e a seção `## Feature Correlacionada` (arquivo de origem, causa-raiz e evidência do defeito).
-7. **Telemetria:** `forge session record --feature "<arquivo criado>" --tokens-input <N> --tokens-output <N> --outcome blocked --criterio-atendido=false --files-touched <lista>`. Nunca passe zeros: se não souber os tokens, omita as flags (o CLI vai estimar).
+7. **Telemetria:** `forge session record --sessao spec --feature "<arquivo criado>" --tokens-input <N> --tokens-output <N> --outcome blocked --criterio-atendido=false --files-touched <lista>`. Nunca passe zeros: se não souber os tokens, omita as flags (o CLI vai estimar).
 
 **Visualizar artefatos (antes do Gate 1)**
 
