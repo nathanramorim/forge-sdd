@@ -1,0 +1,265 @@
+{
+  "feature_id": "feat-101",
+  "branch": "feat/101-tema-missoes-v5",
+  "spec_status": "reviewed",
+  "updated_at": "2026-11-20T01:26:58Z",
+  "items": [
+    {
+      "task_id": "fix-101-01-alinhar-readme-e-design-system",
+      "title": "fix-101-01 — Alinhar README, banner e design system à Edição Missões",
+      "spec_path": "sdd/discovery/101-tema-missoes-v5/fixes/fix-101-01-alinhar-readme-e-design-system.md",
+      "status": "approved",
+      "rules": [
+        "ARQ-11",
+        "DUP-02",
+        "COD-01",
+        "COD-04",
+        "COD-05",
+        "SEG-07",
+        "TST-01",
+        "TST-05",
+        "FLX-01",
+        "FLX-02"
+      ],
+      "skills_used": [],
+      "attempts": 1,
+      "governance_verdict": {
+        "veredito": "conforme",
+        "achados": [],
+        "resumo": "A task fix-101-01-alinhar-readme-e-design-system está conforme na Camada A (critérios 1 a 9 da spec, go test -count=1 ./..., go vet ./... e forge gate --mode bloqueio com saída 0) e na Camada B (S-01 a S-07 e FLX-08 sem violações). O diff completo (3f253e0..HEAD) e o commit 1b63fe8 removeram os três itens fora da spec (Voltar/Selecionar, Navegação lateral com AJUSTES e seletores com seta), ajustaram o link do Behance sem slug do jogo, atualizaram o comentário de tokens.css citando documento.py, corrigiram os depends_on de queue.json com os task_id reais e alinharam revisao-pi.md ao espécime final."
+      }
+    },
+    {
+      "task_id": "feat-101-01-lp-e-wiki-na-edicao-com-validade",
+      "title": "feat-101-01 — LP e wiki na Edição Missões, com vigência e retorno automático",
+      "spec_path": "sdd/discovery/101-tema-missoes-v5/features/feat-101-01-lp-e-wiki-na-edicao-com-validade.md",
+      "status": "approved",
+      "depends_on": [
+        "fix-101-01-alinhar-readme-e-design-system"
+      ],
+      "rules": [
+        "ARQ-11",
+        "DUP-02",
+        "COD-01",
+        "COD-04",
+        "COD-05",
+        "SEG-01",
+        "SEG-07",
+        "TST-01",
+        "TST-05",
+        "FLX-01",
+        "FLX-02"
+      ],
+      "skills_used": [],
+      "attempts": 1,
+      "governance_verdict": {
+        "veredito": "conforme",
+        "achados": [],
+        "resumo": "A task feat-101-01-lp-e-wiki-na-edicao-com-validade (branch feat/101-tema-missoes-v5, diff ca28be2..HEAD nos commits 268b528 e e0ea64d) está conforme na Camada A e na Camada B. O commit e0ea64d sanou os dois pontos anteriores em docs/edicao/edicao.css ao incluir html[data-edicao=\"missoes\"] .emu-cmd-btn.active no bloco de chips/abas ativas (linhas 48-62) e adicionar font-weight: 700 em html[data-edicao=\"missoes\"] .install-pill button:hover (linhas 73-78). Todos os 9 critérios executáveis da spec, go test -count=1 ./internal/scaffold/, go test ./..., go vet ./... e forge gate --mode bloqueio passaram com saída 0, e S-01 a S-07 e FLX-08 não apresentam violações."
+      }
+    },
+    {
+      "task_id": "feat-101-02-agentes-rebeldes-nas-missoes",
+      "title": "feat-101-02 — Agentes rebeldes nas 5 missões",
+      "spec_path": "sdd/discovery/101-tema-missoes-v5/features/feat-101-02-agentes-rebeldes-nas-missoes.md",
+      "status": "approved",
+      "depends_on": [
+        "feat-101-01-lp-e-wiki-na-edicao-com-validade"
+      ],
+      "rules": [
+        "ARQ-11",
+        "DUP-01",
+        "DUP-02",
+        "COD-01",
+        "COD-04",
+        "COD-05",
+        "SEG-07",
+        "TST-01",
+        "TST-05",
+        "FLX-01",
+        "FLX-02"
+      ],
+      "skills_used": [],
+      "attempts": 1,
+      "governance_verdict": {
+        "veredito": "conforme",
+        "achados": [],
+        "resumo": "A task feat-101-02-agentes-rebeldes-nas-missoes (branch feat/101-tema-missoes-v5, commit f83d3fd) está conforme na Camada A e na Camada B. Todos os 6 critérios executáveis da spec, go test -count=1 ./..., go vet ./... e forge gate --mode bloqueio passaram com saída 0. O arquivo docs/edicao/edicao-mascotes.js expõe window.forgeEdicao.acessoriosPorMarca com as 5 marcas (ring, diamond, bar, wave, tri) conforme a tabela da spec, carrega sem Three.js, não cria WebGLRenderer, não referencia arquivos externos ou URLs, usa geometrias \u003e= 16 segmentos e cores exatas de docs/design/edicao-missoes/tokens.css; docs/index.html mantém uma única function createForgeMascot3D com apenas a carga do script no \u003chead\u003e e uma linha entre marcadores edicao:inicio/edicao:fim, permanecendo byte-a-byte idêntico a git merge-base HEAD origin/main (58d96db) fora dos marcadores. S-01 a S-07 e FLX-08 sem violações."
+      }
+    },
+    {
+      "task_id": "feat-101-03-retorno-agendado-da-edicao",
+      "title": "feat-101-03 — Retorno agendado: o PR que encerra a edição",
+      "spec_path": "sdd/discovery/101-tema-missoes-v5/features/feat-101-03-retorno-agendado-da-edicao.md",
+      "status": "approved",
+      "depends_on": [
+        "fix-101-01-alinhar-readme-e-design-system",
+        "feat-101-01-lp-e-wiki-na-edicao-com-validade"
+      ],
+      "rules": [
+        "ARQ-11",
+        "DUP-02",
+        "COD-01",
+        "COD-04",
+        "COD-05",
+        "SEG-01",
+        "SEG-04",
+        "SEG-07",
+        "TST-01",
+        "TST-05",
+        "FLX-01",
+        "FLX-02"
+      ],
+      "skills_used": [],
+      "attempts": 1,
+      "governance_verdict": {
+        "veredito": "conforme",
+        "achados": [
+          {
+            "verificacao": "S-05",
+            "regra": "FLX-03",
+            "classificacao": "duvida",
+            "severidade": "baixa",
+            "arquivo": ".github/scripts/encerrar-edicao/encerrar.sh",
+            "linha": 22,
+            "evidencia": "/edicao:inicio/ { skip = 1; next }",
+            "explicacao": "Com edicao:inicio sem edicao:fim, o awk descarta o resto do arquivo. O teste Go barra marcador desbalanceado, mas só enquanto docs/edicao/ existe. A spec não pede essa proteção.",
+            "correcao": "Opcional: abortar sem gravar quando o número de marcadores de abertura e de fechamento diferir."
+          }
+        ],
+        "resumo": "Camada A toda verde. Segurança do workflow, aderência à spec e o ajuste do teste Go estão corretos. Sem violação; uma dúvida de baixa severidade, não bloqueante."
+      }
+    },
+    {
+      "task_id": "feat-101-04-visual-mais-intenso-da-edicao",
+      "title": "feat-101-04 — Visual mais intenso da Edição Missões na LP",
+      "spec_path": "sdd/discovery/101-tema-missoes-v5/features/feat-101-04-visual-mais-intenso-da-edicao.md",
+      "status": "approved",
+      "depends_on": [
+        "feat-101-01",
+        "(camada",
+        "porteiro",
+        "de",
+        "vigência)",
+        "feat-101-02",
+        "(mascotes)"
+      ],
+      "rules": [
+        "ARQ-11",
+        "DUP-02",
+        "COD-01",
+        "COD-04",
+        "COD-05",
+        "SEG-07",
+        "TST-01",
+        "TST-05",
+        "FLX-01",
+        "FLX-02"
+      ],
+      "skills_used": [],
+      "attempts": 1,
+      "governance_verdict": {
+        "veredito": "conforme",
+        "achados": [],
+        "resumo": "Dois achados corrigidos em 5a7ed87 (bytecode fora do índice e só tokens do design system). Critérios da spec, go vet e forge gate passam; arte sem marca de terceiros."
+      }
+    },
+    {
+      "task_id": "feat-101-05-visual-de-malandro-nos-mascotes",
+      "title": "feat-101-05 — Visual de malandro de cidade tropical nos mascotes",
+      "spec_path": "sdd/discovery/101-tema-missoes-v5/features/feat-101-05-visual-de-malandro-nos-mascotes.md",
+      "status": "approved",
+      "depends_on": [
+        "feat-101-02",
+        "(acessórios",
+        "dos",
+        "mascotes)"
+      ],
+      "rules": [
+        "ARQ-11",
+        "DUP-02",
+        "COD-01",
+        "COD-04",
+        "COD-05",
+        "SEG-07",
+        "TST-01",
+        "TST-05",
+        "FLX-01",
+        "FLX-02"
+      ],
+      "skills_used": [],
+      "attempts": 1,
+      "governance_verdict": {
+        "veredito": "conforme",
+        "achados": [],
+        "resumo": "Figurino genérico (panamá, charuto de brinquedo, corrente e brinco de ouro, gola florida, boné de aba reta) respeita os critérios 1 e 7. Sem nome de jogo, personagem, logo, texto ou arquivo externo; critérios da spec, go vet e forge gate passam."
+      }
+    },
+    {
+      "task_id": "feat-101-06-robos-em-arte-de-tela-de-carregamento",
+      "title": "feat-101-06 — Robôs como personagens em arte de tela de carregamento",
+      "spec_path": "sdd/discovery/101-tema-missoes-v5/features/feat-101-06-robos-em-arte-de-tela-de-carregamento.md",
+      "status": "approved",
+      "depends_on": [
+        "feat-101-05",
+        "(figurino)",
+        "feat-101-04",
+        "(topo",
+        "em",
+        "tela",
+        "cheia)"
+      ],
+      "rules": [
+        "ARQ-11",
+        "DUP-02",
+        "COD-01",
+        "COD-04",
+        "COD-05",
+        "SEG-07",
+        "TST-01",
+        "TST-05",
+        "FLX-01",
+        "FLX-02"
+      ],
+      "skills_used": [],
+      "attempts": 1,
+      "governance_verdict": {
+        "veredito": "conforme",
+        "achados": [],
+        "resumo": "Robôs 2D do forge-sdd (contorno grosso, cor chapada) respeitam os critérios 1 e 7: sem marca, personagem, pose de capa ou interface do jogo. Critério 2 da spec corrigido (xmlns do SVG); critérios, go vet e forge gate passam."
+      }
+    },
+    {
+      "task_id": "feat-101-07-edicao-alinhada-aos-pipelines",
+      "title": "feat-101-07 — Edição alinhada aos pipelines: 3 missões, 3 robôs",
+      "spec_path": "sdd/discovery/101-tema-missoes-v5/features/feat-101-07-edicao-alinhada-aos-pipelines.md",
+      "status": "approved",
+      "depends_on": [
+        "feat-101-06",
+        "(robôs",
+        "2D)",
+        "fix-101-01",
+        "(`missoes.json`)"
+      ],
+      "rules": [
+        "ARQ-11",
+        "DUP-02",
+        "COD-01",
+        "COD-04",
+        "COD-05",
+        "SEG-07",
+        "TST-01",
+        "TST-05",
+        "FLX-01",
+        "FLX-02"
+      ],
+      "skills_used": [],
+      "attempts": 1,
+      "governance_verdict": {
+        "veredito": "conforme",
+        "achados": [],
+        "resumo": "Edição alinhada aos pipelines: 3 missões e o fecho vindos da fonte única, equipe de 3 robôs, LP intacta. Critérios, go vet e forge gate passam; sobras de texto corrigidas depois do parecer."
+      }
+    }
+  ]
+}

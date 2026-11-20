@@ -1096,6 +1096,11 @@ footer {
   box-shadow: 0 0 10px var(--accent);
 }
 </style>
+<!-- edicao:inicio -->
+<link rel="stylesheet" href="edicao/edicao.css">
+<script src="edicao/edicao.js"></script>
+<script src="edicao/edicao-mascotes.js"></script>
+<!-- edicao:fim -->
 </head>
 <body>
 
@@ -1766,6 +1771,9 @@ function createForgeMascot3D(mountEl, agentHex, initialState, markType) {
   }
 
   setState(currentState);
+  /* edicao:inicio */
+  if (window.forgeEdicao && window.forgeEdicao.vestirMascote) window.forgeEdicao.vestirMascote(botGroup, markType);
+  /* edicao:fim */
 
   return {
     setState,
