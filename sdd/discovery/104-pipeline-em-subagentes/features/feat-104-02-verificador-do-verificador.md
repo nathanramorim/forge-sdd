@@ -46,6 +46,8 @@ go vet ./... && go test ./...
 - Os critérios das features desta iniciativa passam em `forge gate --criterios`.
 
 ## Decisões da implementação
+
+- Depois da segunda revisão da Governança (20/11/2026): nas specs 104-10 e 104-12 o nome do teste negativo ganhou o seu próprio `go test -list ... | grep -F '<nome>'`, para o critério falhar enquanto o teste não existir. Limite conhecido do P-25: ele confere que o nome aparece num `-list`, não que ele é o alvo do `grep -F`; fica como melhoria futura.
 - Flag `--criterios` no `forge gate` (decisão 8 do Gate 1); o resultado é o check `P-25` (`TST-01`), que só roda com a flag e com `--spec`.
 - Execução com `bash -e` fica na flag opcional `--executar-criterios`: a checagem padrão é estática para não rodar `go test ./...` dentro do portão nem reprovar specs ainda não implementadas.
 - `grep -c` é reprovado sempre (com ou sem `-o`, pois `-c` conta linhas mesmo com `-o`); a forma aceita é `grep -o ... | wc -l`.
