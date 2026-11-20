@@ -21,6 +21,14 @@ Estado atual nos SVGs (ordem do fluxo, lida em `<ellipse cx="13" ... fill=...>` 
 | Builder | `#ff8a5c` `tri` | `#4fd1b5` `wave` |
 | Reviewer | `#f2a65a` `ring` (do Líder da LP antiga) | `#ff8a5c` `tri` |
 
+Estado (orbe e olhos): a LP define o estado padrão de cada sessão (`defaultState` em `docs/index.html` e `STATE_DEFS`, ~linha 1600). O `bots.py` fixava orbe e olhos em `#4fd1b5` com olhos cápsula para todos os bots, o que não é cor de nenhum estado da LP.
+
+| Papel | Estado | Orbe | Olhos |
+|---|---|---|---|
+| Discovery | `approval` | `#f5b04a` | `round` (círculos `cx=45`/`75 cy=86 r=6.5`) |
+| Builder | `working` | `#4f8ef7` | `cap` (retângulos `x=41.5`/`71.5 y=78 w=7 h=16 rx=3.5`) |
+| Reviewer | `searching` | `#38c6e8` | `round` |
+
 `docs/diagramas/bots.py` tem `MARCAS` com `bar`, `ring`, `wave`, `tri`; não tem `diamond`. O `.astro` (`site/src/components/MascotFallbackSvg.astro`, linha 65) desenha `diamond` como `<polygon points="60,45.5 66.5,52 60,58.5 53.5,52" fill="rgba(18,24,48,0.6)" />`.
 
 ## Feature Correlacionada
@@ -40,13 +48,13 @@ Estado atual nos SVGs (ordem do fluxo, lida em `<ellipse cx="13" ... fill=...>` 
 
 ## Correção
 
-1. `docs/diagramas/bots.py`: adicionar em `MARCAS` a chave `diamond` com `<polygon points="60,45.5 66.5,52 60,58.5 53.5,52" fill="rgba(18,24,48,0.6)"/>`. Não remover as outras marcas.
+1. `docs/diagramas/bots.py`: adicionar em `MARCAS` a chave `diamond` com `<polygon points="60,45.5 66.5,52 60,58.5 53.5,52" fill="rgba(18,24,48,0.6)"/>`. Não remover as outras marcas. Acrescentar `ESTADOS` (`approval`, `working`, `searching`, com orbe e olhos como na tabela de estado) e o argumento `estado` por bot: `cor:marca:estado:cx:y[:escala]`. A entrada é validada (cor `^#[0-9a-fA-F]{6}$`, marca em `MARCAS`, estado em `ESTADOS`); valor desconhecido encerra com mensagem e código diferente de 0.
 2. Regerar cada diagrama (plugin 0.2.0; largura 1280; os JSON de `docs/diagramas/` não mudam, os bots são injetados depois):
    - `uv run ~/.claude/plugins/cache/diagram-studio/diagram-studio/0.2.0/scripts/diagrama.py docs/diagramas/<nome>.json --sem-assinatura --saida docs/img/<nome>`
    - `uv run --with resvg-py docs/diagramas/bots.py docs/img/<nome>.svg 1280 <bots>`
 3. Bots, sempre na ordem do fluxo (Discovery, Builder, Reviewer):
-   - `esteira-3-sessoes` (escala 0.6, y 112; posições iguais às atuais): `"#8aa4ff:diamond:340:112" "#4fd1b5:wave:740:112" "#ff8a5c:tri:940:112"`
-   - `agentes` (escala 0.5, y 168; posições iguais às atuais): `"#8aa4ff:diamond:240:168:0.5" "#4fd1b5:wave:640:168:0.5" "#ff8a5c:tri:1040:168:0.5"`
+   - `esteira-3-sessoes` (escala 0.6, y 112; posições iguais às atuais): `"#8aa4ff:diamond:approval:340:112" "#4fd1b5:wave:working:740:112" "#ff8a5c:tri:searching:940:112"`
+   - `agentes` (escala 0.5, y 168; posições iguais às atuais): `"#8aa4ff:diamond:approval:240:168:0.5" "#4fd1b5:wave:working:640:168:0.5" "#ff8a5c:tri:searching:1040:168:0.5"`
    (cx = translate x atual + 60 vezes a escala: 304+36, 704+36, 904+36; 210+30, 610+30, 1010+30.)
 4. O PNG sai a 2560 px de largura (1280 x 2), como hoje. `README.md` referencia as imagens por caminho e o `alt` não cita cor: não muda.
 5. Abrir cada PNG e conferir os três bots (Discovery azul com losango, Builder verde-água com onda, Reviewer laranja com triângulo, sem sobreposição com o texto).
@@ -101,8 +109,25 @@ for n in esteira-3-sessoes agentes; do
   test "$(grep -oF '#f2a65a' docs/img/$n.svg | wc -l)" -eq 0
   test "$(grep -oF '<rect x="52" y="49.7" width="16" height="4.6" rx="2.3"' docs/img/$n.svg | wc -l)" -eq 0
   test "$(grep -oF '<circle cx="60" cy="52" r="4.6" fill="none"' docs/img/$n.svg | wc -l)" -eq 0
+  # P-25: orbes dos estados da LP presentes (3 de cada: halo, orbe e olhos de cada bot)
+  test "$(grep -oF '#f5b04a' docs/img/$n.svg | wc -l)" -eq 3
+  test "$(grep -oF '#38c6e8' docs/img/$n.svg | wc -l)" -eq 3
+  # o orbe (círculo da antena) tem a cor do estado: exatamente um por cor, e #4fd1b5 só no corpo do Builder
+  test "$(grep -oF 'r="7.8" fill="#f5b04a"' docs/img/$n.svg | wc -l)" -eq 1
+  test "$(grep -oF 'r="7.8" fill="#4f8ef7"' docs/img/$n.svg | wc -l)" -eq 1
+  test "$(grep -oF 'r="7.8" fill="#38c6e8"' docs/img/$n.svg | wc -l)" -eq 1
+  # negativo: nenhum bot usa o orbe antigo #4fd1b5
+  test "$(grep -oF 'r="7.8" fill="#4fd1b5"' docs/img/$n.svg | wc -l)" -eq 0
+  # olhos: 2 cápsulas (Builder) e 4 círculos (Discovery e Reviewer)
+  test "$(grep -oF '<rect x="41.5" y="78" width="7" height="16" rx="3.5"/>' docs/img/$n.svg | wc -l)" -eq 1
+  test "$(grep -oF '<circle cx="45" cy="86" r="6.5"/>' docs/img/$n.svg | wc -l)" -eq 2
   # PNG com o dobro da largura do SVG (1280 x 2)
   file docs/img/$n.png | grep -F '2560 x' >/dev/null
+done
+# negativo: o bots.py recusa estado, marca e cor desconhecidos (código diferente de 0)
+cp docs/img/agentes.svg /tmp/p25-bots.svg
+for a in "#8aa4ff:tri:nada:1:1" "#8aa4ff:nada:working:1:1" "nada:tri:working:1:1"; do
+  if uv run --with resvg-py docs/diagramas/bots.py /tmp/p25-bots.svg 1280 "$a" >/dev/null 2>&1; then exit 1; fi
 done
 # negativo: Edição Missões, README e JSON de origem intactos
 test "$(git diff --name-only origin/main -- docs/edicao docs/design/edicao-missoes README.md npm/README.md docs/diagramas/esteira-3-sessoes.json docs/diagramas/agentes.json | wc -l)" -eq 0
