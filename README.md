@@ -90,7 +90,7 @@ flowchart LR
 ## Quem faz o quê
 
 <p align="center">
-  <img src="docs/img/agentes.svg" alt="Cartões dos agentes por sessão: Discovery tem pm-architect e planner; Builder tem builder; Reviewer tem reviewer e governance; apoio tem archivist e migrator; o agente lider aparece marcado como obsoleto." width="45%">
+  <img src="docs/img/agentes.svg" alt="Os agentes por sessão: o Discovery tem pm-architect e planner; o Builder tem builder; o Reviewer tem reviewer e governance. Os agentes de apoio e o obsoleto estão na tabela abaixo." width="45%">
 </p>
 
 | Agente | O que faz | Como acionar | Definição |
