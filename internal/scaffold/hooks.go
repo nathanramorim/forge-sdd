@@ -179,6 +179,13 @@ func SyncClaudeIntegration(targetDir string, dryRun bool) (changed, warnings []s
 // diretório pai que seja link simbólico ou resolva para fora do projeto. Arquivo ou pai ausentes
 // são aceitos (serão criados).
 func checkSafeTarget(targetDir, path string) error {
+	// Base única e absoluta: `init .`, `./x` e `a/../b` precisam comparar com o EvalSymlinks do projeto.
+	if abs, err := filepath.Abs(targetDir); err == nil {
+		targetDir = abs
+	}
+	if abs, err := filepath.Abs(path); err == nil {
+		path = abs
+	}
 	root, err := filepath.EvalSymlinks(targetDir)
 	if err != nil {
 		return fmt.Errorf("resolver %s: %w", targetDir, err)
@@ -225,6 +232,11 @@ func writeFileSafe(targetDir, path string, data []byte) error {
 	return writeFileSafeMode(targetDir, path, data, 0o644)
 }
 
+// WriteFileSafe expõe writeFileSafe (SEG-02) aos comandos que gravam no projeto do usuário.
+func WriteFileSafe(targetDir, path string, data []byte) error {
+	return writeFileSafe(targetDir, path, data)
+}
+
 // nearestExisting devolve o ancestral existente mais próximo de dir.
 func nearestExisting(dir string) string {
 	for {
@@ -237,6 +249,12 @@ func nearestExisting(dir string) string {
 
 // writeFileSafeMode é writeFileSafe com o modo de arquivo novo explícito (ex.: 0755 para scripts).
 func writeFileSafeMode(targetDir, path string, data []byte, newMode os.FileMode) error {
+	if abs, err := filepath.Abs(targetDir); err == nil {
+		targetDir = abs
+	}
+	if abs, err := filepath.Abs(path); err == nil {
+		path = abs
+	}
 	if err := checkSafeTarget(targetDir, path); err != nil {
 		return err
 	}

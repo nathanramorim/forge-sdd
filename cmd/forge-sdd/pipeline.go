@@ -8,6 +8,7 @@ import (
 
 	"github.com/forge-sdd/cli/internal/config"
 	"github.com/forge-sdd/cli/internal/layout"
+	"github.com/forge-sdd/cli/internal/scaffold"
 	"github.com/forge-sdd/cli/internal/survey"
 	"github.com/spf13/cobra"
 )
@@ -69,10 +70,7 @@ func runPipelineInit(cmd *cobra.Command, dir string, dry bool) error {
 		if err != nil {
 			return fmt.Errorf("serializar %s: %w", rel, err)
 		}
-		if err := os.MkdirAll(filepath.Dir(it.path), 0o755); err != nil {
-			return fmt.Errorf("criar %s: %w", filepath.Dir(it.path), err)
-		}
-		if err := os.WriteFile(it.path, append(data, '\n'), 0o644); err != nil {
+		if err := scaffold.WriteFileSafe(dir, it.path, append(data, '\n')); err != nil {
 			return fmt.Errorf("gravar %s: %w", rel, err)
 		}
 		fmt.Fprintf(out, "criado    %s\n", filepath.ToSlash(rel))
@@ -81,10 +79,7 @@ func runPipelineInit(cmd *cobra.Command, dir string, dry bool) error {
 	// O estado de execução nunca é versionado: o diretório ignora tudo menos o próprio .gitignore.
 	ignore := filepath.Join(layout.ForgeRuntime(dir), ".gitignore")
 	if _, err := os.Lstat(ignore); err != nil && !dry {
-		if err := os.MkdirAll(filepath.Dir(ignore), 0o755); err != nil {
-			return fmt.Errorf("criar %s: %w", filepath.Dir(ignore), err)
-		}
-		if err := os.WriteFile(ignore, []byte(runtimeGitignore), 0o644); err != nil {
+		if err := scaffold.WriteFileSafe(dir, ignore, []byte(runtimeGitignore)); err != nil {
 			return fmt.Errorf("gravar %s: %w", ignore, err)
 		}
 	}
