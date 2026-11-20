@@ -146,6 +146,8 @@ go test ./internal/pipeline/... -run 'TestPrepararLequeUsaAPrincipalComoBase|Tes
 go test ./internal/layout/... -run 'TestCurrentResolveIniciativaPorPrefixo|TestBranchDeFeatureLeAFilaDaPrincipal'
 go test ./internal/pipeline/... -run 'TestClaimPelaExistenciaDaBranch|TestSpecMescladaPeloAdaptadorAposSeguir|TestNenhumMesclaLocal|TestContinuarAgrupadoPorOnda|TestGoalSpecApprovedPeloStatusDaPrincipal|TestArchiveRodaDaPrincipal|TestSpecVoltaAPrincipalAntesDoBuilder|TestBuilderParteDaPrincipal|TestUmaBranchEUmPRDraftPorFeature|TestEstadoDeFeaturesParalelasSemConflito|TestConferencia1AntesDoRetornoDaSpec|TestConferencia2PorFeature'
 uv run --no-project python -m unittest discover -s scripts/tests -p 'test_*.py'
+uv run scripts/ci-politica.py --selftest
+uv run scripts/ci-politica.py --offline --csv scripts/tests/fixtures/runs.json
 uv run scripts/validar_entrega.py --json --sem-llm
 uv run scripts/atestado.py --verificar --sha HEAD --modo local
 uv run scripts/atestado.py --verificar --sha HEAD --modo desligado
@@ -169,6 +171,10 @@ go test ./internal/vcs/... -list 'TestVCSDesconhecidoRecusado' | grep -F 'TestVC
 go test ./internal/vcs/... -run 'TestVCSDesconhecidoRecusado'
 if uv run scripts/pr_guard.py --check 'az repos pr create --title x'; then exit 1; fi
 if uv run scripts/pr_guard.py --check 'az repos pr update --id 7 --draft false'; then exit 1; fi
+rc=0; CI_POLITICA_TOKEN= uv run scripts/ci-politica.py --usar-api || rc=$?; test "$rc" -ne 0
+if CI_POLITICA_TOKEN=segredo-de-teste-123 uv run scripts/ci-politica.py --offline --csv scripts/tests/fixtures/runs.json | grep -F 'segredo-de-teste-123'; then exit 1; fi
+if uv run scripts/ci-politica.py --offline --csv scripts/tests/fixtures/runs_com_formula.json | grep -E '^[=+@-]'; then exit 1; fi
+if uv run scripts/ci-politica.py --congelar-linha-de-base --sem-data --offline; then exit 1; fi
 go test ./internal/vcs/... -list 'TestPRDaSpecIgnoraModoVCS' | grep -F 'TestPRDaSpecIgnoraModoVCS'
 go test ./internal/vcs/... -run 'TestPRDaSpecIgnoraModoVCS'
 go test ./internal/vcs/... -list 'TestModoNaBranchDaFeatureNaoSobrepoeABase' | grep -F 'TestModoNaBranchDaFeatureNaoSobrepoeABase'
@@ -212,6 +218,7 @@ if uv run scripts/pr_guard.py --check 'gh pr create --fill'; then exit 1; fi
 if uv run scripts/pr_guard.py --check 'gh pr merge 7'; then exit 1; fi
 ```
 - Spec volta à principal (RN-21): após o [Seguir], `git log <base> -- sdd/discovery/<id>/discovery.md` mostra a spec na principal e a branch da spec não existe mais; o Builder só inicia com `Gate 1: aprovado` no `status.md` da principal (task 2.2).
+- `ci-politica.py` (task 3.3): sem token e com `--usar-api` falha com mensagem clara e código diferente de zero; nunca imprime o token; o modo padrão não grava arquivo (conferido com `git status --porcelain` antes e depois); o CSV neutraliza células que começam com `=`, `+`, `-` ou `@`; a linha de base versionada tem data e método; os endpoints e escopos verificados ficam registrados na spec. Os testes são `unittest` rodados por `uv run`, como os dos outros scripts (`pr_guard.py`, `licoes.py`).
 - Hooks só no Claude Code (aceito): `forge doctor` informa qual agente tem hook; sem hook (Gemini, Copilot) o job "pronto?" na principal barra o PR em draft ou sem atestado (tasks 0.4, 1.5 e 3.1).
 - Uma branch e um PR em draft por feature (RN-22): com 3 features independentes, o VCS mostra 3 branches `feat/<id>-<nome>-<sid>` com base na principal e 3 PRs em draft; nenhum PR tem base em branch de iniciativa (task 2.4).
 - Estado sem conflito (RN-23): duas branches de feature mescladas na principal sem conflito de estado; o teste reproduz o caso de `queue.json` com `updated_at` como falha de referência e prova que o arquivo por feature não conflita (task 0.7).
