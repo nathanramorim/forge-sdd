@@ -18,7 +18,7 @@ var attachCmd = &cobra.Command{
 	Use:   "attach [estacao]",
 	Short: "Conecta o terminal interativo à sessão de uma estação ACP",
 	Long: `Conecta os fluxos de entrada e saída do terminal à sessão pré-aquecida
-de uma das 5 estações canônicas do Forge-SDD (lider, pm-architect, planner, builder, governance).
+de uma das 5 estações canônicas legadas do Forge-SDD (o fluxo atual são 3 sessões: Discovery, Builder, Reviewer) (lider, pm-architect, planner, builder, governance).
 Permite visualização de logs em tempo real e envio de comandos interativos.
 A desconexão via Ctrl+C ou comando 'exit' é graciosa e não encerra a sessão subjacente no pool.`,
 	Args: func(cmd *cobra.Command, args []string) error {
