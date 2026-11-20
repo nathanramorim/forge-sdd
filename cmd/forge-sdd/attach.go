@@ -16,7 +16,8 @@ import (
 
 var attachCmd = &cobra.Command{
 	Use:   "attach [estacao]",
-	Short: "Conecta o terminal interativo à sessão de uma estação ACP",
+	PreRun: avisoDepreciado("`forge status` (as 3 sessões: Discovery, Builder, Reviewer)"),
+	Short: "[depreciado] Conecta o terminal interativo à sessão de uma estação ACP",
 	Long: `Conecta os fluxos de entrada e saída do terminal à sessão pré-aquecida
 de uma das 5 estações canônicas do Forge-SDD (lider, pm-architect, planner, builder, governance).
 Permite visualização de logs em tempo real e envio de comandos interativos.
