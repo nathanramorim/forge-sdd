@@ -37,7 +37,7 @@ Legenda dos diagramas (todos): **HUMANO** (decisões e aprovações do Nathan), 
 | Prioridade de fix | `internal/bus/job.go:42-43` (`PriorityHigh`), `review.go:138` | Prioridade por job, não por tipo de task | **Estender**: fix de código já entregue entra antes de feature na fila | RN-16 |
 | Validação determinística | `forge gate` (`internal/gate`: P-01 a P-25), `forge doctor --harness` (104, só em `bbd26d6`) | Checagens por ID de rule, spec, orçamento; sem validação de ADR citada nem de lições | **Estender** com `scripts/validar_entrega.py` que reúne o checável e lista o resto para o LLM | RN-12; reusa `forge gate --json` como entrada |
 | Verificação do atestado | `.github/workflows/*.yml` | Nenhum job de atestado | **Criar** um job ubuntu que lê veredito e prova | RN-13; escolha da prova na Decisão vi |
-| Configuração do modo de atestado | `internal/config/forge.go:123,198-200` (esquema estrito do `forge.json`; a existência ativa o modo pipeline); `.gitignore` (`.forge/` ignorado); `sdd/memory/constitution.md:28` (campo versionado) | `forge.json` é local, não versionado e rejeita campo desconhecido; a Constituição é versionada e lida por todos | **Criar** o campo no lugar escolhido (Decisão xv, em aberto: recomendo a Constituição) | `SEG-01`, `GOV-01` |
+| Configuração do modo de atestado | `internal/config/forge.go:123,198-200` (esquema estrito do `forge.json`; a existência ativa o modo pipeline); `.gitignore` (`.forge/` ignorado); `sdd/memory/constitution.md:28` (campo versionado) | `forge.json` é local, não versionado e rejeita campo desconhecido; a Constituição é versionada e lida por todos | **Criar** os campos `Modo do atestado` e `Modo de revisão humana` na Constituição (Decisão xv, aprovada), lidos da branch base | `SEG-01`, `GOV-01` |
 | Modo da sessão | `status.md` (teto 1 KB, P-21), `forge.json` | Sem campo de modo humano | **Estender** com uma linha `Modo:` no `status.md` e `modo` no veredito | RN-14 |
 | Veredito e SHA | `internal/harness/parecer.go:16-21`; `internal/pipeline/review.go:298-318` (`persistVerdict` em `sdd/discovery/<id>/verdicts/<job>.json`) | `Parecer` sem SHA; amostra `sdd/discovery/100-auto-pr-apos-review/verdicts/feat-100-01-veredito.json` | **Estender** `Parecer` com `head_sha` e `ponto`; o Go os preenche | Contrato único (`DUP-06`) |
 | Auto-PR da 100 | `sdd/discovery/100-auto-pr-apos-review/` | Veredito conforme abre PR sem pedir | **Substituir a ordem** (não o código de PR) | Conflito declarado no discovery |
@@ -140,6 +140,8 @@ go test ./internal/queue/... -run 'TestReviewConformeNaoCriaPR'
 go test ./internal/scaffold/... -run 'TestMergePreToolUseHook'
 go test ./internal/vcs/... -run 'TestGitHubCriaPRComDraft|TestAzureDevOpsCriaPRSemGitHub|TestNenhumDeixaABranchPronta|TestLeVCSDaConstituicao'
 go test ./internal/pipeline/... -run 'TestDesvioAbreNovoFixComPrioridade|TestBuilderFazSplitSemSegundaAprovacao|TestFixesParalelosNaOnda'
+go test ./internal/vcs/... -run 'TestLeModosDaConstituicaoDaBranchBase|TestAtestadoPadraoELocal'
+go test ./internal/pipeline/... -run 'TestPrepararLequeUsaAPrincipalComoBase|TestJuntarSoNoMergeLocalDoNenhum|TestPublicarAbrePRDraftPeloAdaptador'
 go test ./internal/layout/... -run 'TestCurrentResolveIniciativaPorPrefixo|TestBranchDeFeatureLeAFilaDaPrincipal'
 go test ./internal/pipeline/... -run 'TestClaimPelaExistenciaDaBranch|TestSpecMescladaPeloAdaptadorAposSeguir|TestNenhumMesclaLocal|TestContinuarAgrupadoPorOnda|TestGoalSpecApprovedPeloStatusDaPrincipal|TestArchiveRodaDaPrincipal|TestSpecVoltaAPrincipalAntesDoBuilder|TestBuilderParteDaPrincipal|TestUmaBranchEUmPRDraftPorFeature|TestEstadoDeFeaturesParalelasSemConflito|TestConferencia1AntesDoRetornoDaSpec|TestConferencia2PorFeature'
 uv run --no-project python -m unittest discover -s scripts/tests -p 'test_*.py'
@@ -166,6 +168,10 @@ go test ./internal/vcs/... -list 'TestVCSDesconhecidoRecusado' | grep -F 'TestVC
 go test ./internal/vcs/... -run 'TestVCSDesconhecidoRecusado'
 if uv run scripts/pr_guard.py --check 'az repos pr create --title x'; then exit 1; fi
 if uv run scripts/pr_guard.py --check 'az repos pr update --id 7 --draft false'; then exit 1; fi
+go test ./internal/vcs/... -list 'TestModoNaBranchDaFeatureNaoSobrepoeABase' | grep -F 'TestModoNaBranchDaFeatureNaoSobrepoeABase'
+go test ./internal/vcs/... -run 'TestModoNaBranchDaFeatureNaoSobrepoeABase'
+go test ./internal/pipeline/... -list 'TestJuntarNaoEhEntregaNoGitHub' | grep -F 'TestJuntarNaoEhEntregaNoGitHub'
+go test ./internal/pipeline/... -run 'TestJuntarNaoEhEntregaNoGitHub'
 go test ./internal/pipeline/... -list 'TestSegundoClaimDaMesmaFeatureFalha' | grep -F 'TestSegundoClaimDaMesmaFeatureFalha'
 go test ./internal/pipeline/... -run 'TestSegundoClaimDaMesmaFeatureFalha'
 go test ./internal/pipeline/... -list 'TestDependenteNaoComecaAntesDaPredecessoraMesclada' | grep -F 'TestDependenteNaoComecaAntesDaPredecessoraMesclada'
