@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Forge-SDD 5.0 — Orquestração Autônoma em 5 Estações & Governança IA (Open Source · MIT)</title>
+<title>Forge-SDD 5.0 — Pipeline de 3 sessões: Discovery, Builder e Reviewer (Open Source · MIT)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Montserrat:wght@500;600;700;800&display=swap" rel="stylesheet">
@@ -310,7 +310,7 @@ section {
 
 .stepper-track {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 10px;
   position: relative;
 }
@@ -1096,6 +1096,11 @@ footer {
   box-shadow: 0 0 10px var(--accent);
 }
 </style>
+<!-- edicao:inicio -->
+<link rel="stylesheet" href="edicao/edicao.css">
+<script src="edicao/edicao.js"></script>
+<script src="edicao/edicao-mascotes.js"></script>
+<!-- edicao:fim -->
 </head>
 <body>
 
@@ -1129,7 +1134,7 @@ footer {
       <span class="chip chip-mit" title="Licença MIT Open Source"><i style="--o:var(--ok)"></i>MIT License</span>
     </a>
     <nav aria-label="Navegação Principal">
-      <a href="#estacoes" class="nav-sec active">Fluxo Processual</a>
+      <a href="#estacoes" class="nav-sec active">Pipeline</a>
       <a href="#emulador" class="nav-sec">Emulador Real</a>
       <a href="#instalacao" class="nav-sec">Instalação &amp; Comandos</a>
       <a href="/wiki" class="nav-sec">Wiki</a>
@@ -1159,10 +1164,10 @@ footer {
   <main>
     <!-- HERO COM CTAs OPEN SOURCE + COMANDO RÁPIDO -->
     <div class="hero">
-      <p class="eyebrow">Framework Open Source (MIT) · Orquestração em 5 Estações</p>
-      <h1>De um agente fazendo tudo sozinho para 5 especialistas em esteira.</h1>
+      <p class="eyebrow">Framework Open Source (MIT) · Pipeline de 3 sessões</p>
+      <h1>De um agente fazendo tudo sozinho para 3 sessões que planejam, constroem e conferem.</h1>
       <p class="lead">
-        Instale em qualquer repositório com um comando. Cada estação recebe um artefato validado, executa sua especialidade em fila ou em paralelo e passa pela auditoria de Governança Read-Only antes de voltar para você.
+        Instale em qualquer repositório com um comando. Você conversa e aprova na Discovery; o Builder constrói em paralelo e abre o PR; o Reviewer, que só lê, confere as regras e devolve com comentários antes de voltar para você.
       </p>
 
       <div class="hero-cta">
@@ -1187,13 +1192,13 @@ footer {
       </div>
     </div>
 
-    <!-- SEÇÃO 1: VISÃO PROCESSUAL CONECTADA + CARDS DOS 5 AGENTES COM 3D EMBUTIDO -->
+    <!-- SEÇÃO 1: ESTEIRA DO PIPELINE (3 SESSÕES) + CARDS COM 3D EMBUTIDO -->
     <section id="estacoes">
       <div class="sec-h">
         <div>
-          <p class="eyebrow">01 · Visão Processual entre os Agentes</p>
-          <h2>Como o bastão passa de uma estação para a outra.</h2>
-          <p>Clique em qualquer etapa da esteira processual abaixo (ou aguarde a transição automática) para inspecionar o que cada agente recebe, o que ele produz e qual portão valida a passagem.</p>
+          <p class="eyebrow">01 · Visão do Pipeline</p>
+          <h2>Como o trabalho passa de uma sessão para a outra.</h2>
+          <p>Clique em qualquer sessão da esteira abaixo (ou aguarde a transição automática) para ver o que ela recebe, o que produz e qual portão valida a passagem.</p>
         </div>
         <div style="display:flex;gap:8px;align-items:center">
           <button class="btn ghost sm" id="prevStepBtn" type="button">← Anterior</button>
@@ -1202,21 +1207,21 @@ footer {
         </div>
       </div>
 
-      <!-- ESTEIRA PROCESSUAL INTERATIVA (PASSO 1 → 2 → 3 → 4 → 5 ↺ 1) -->
+      <!-- ESTEIRA INTERATIVA (SESSÃO 1 → 2 → 3 ↺ 2) -->
       <div class="process-rail-box">
         <div class="stepper-track" id="stepperTrack"></div>
 
         <!-- Barra Viva de Handoff -->
         <div class="handoff-bar" id="handoffBar">
           <div class="handoff-route">
-            <span class="handoff-pill" id="hoFrom">01. O Líder</span>
+            <span class="handoff-pill" id="hoFrom">01. Discovery</span>
             <div class="handoff-pipe"><div class="handoff-packet" id="hoPacket"></div></div>
-            <span class="handoff-pill" id="hoTo">02. PM & Arquiteto</span>
+            <span class="handoff-pill" id="hoTo">02. Builder</span>
           </div>
 
           <div class="handoff-payload">
             <b>Artefato em trânsito (Handoff)</b>
-            <span id="hoPayload">Demanda contextualizada + acionamento do Reuse Check (DUP-01)</span>
+            <span id="hoPayload">Job na fila (forge dispatch): spec aprovada, critérios e rules aplicáveis</span>
           </div>
 
           <div class="handoff-gate">
@@ -1226,7 +1231,7 @@ footer {
         </div>
       </div>
 
-      <!-- CARDS DOS 5 ESPECIALISTAS COM MINI-PALCO 3D E CONTROLES EMBUTIDOS -->
+      <!-- CARDS DAS 3 SESSÕES COM MINI-PALCO 3D E CONTROLES EMBUTIDOS -->
       <div class="agents-grid" id="agentsGrid"></div>
     </section>
 
@@ -1236,7 +1241,7 @@ footer {
         <div>
           <p class="eyebrow" style="color:var(--warn)">02 · Emulador Interativo Fiel</p>
           <h2>Veja como uma feature real nasce, roda em paralelo e passa na auditoria.</h2>
-          <p>Clique nos 5 comandos abaixo na ordem em que você usa no dia a dia. À esquerda você vê o terminal/chat real; à direita, a estação ativa e os arquivos gerados em <span class="mono">sdd/</span>.</p>
+          <p>Clique nos 5 passos abaixo na ordem em que o trabalho acontece. À esquerda você vê o terminal e o chat; à direita, a sessão ativa e os arquivos gerados em <span class="mono">sdd/</span>.</p>
         </div>
         <div>
           <button class="btn solid sm" id="emuNextStepBtn" type="button">Executar próximo passo →</button>
@@ -1248,10 +1253,10 @@ footer {
           <div class="emu-dots"><i></i><i></i><i></i><span class="mono" style="margin-left:6px">meu-projeto — forge-sdd v5.0.0</span></div>
           <div class="emu-cmd-tabs" id="emuTabs">
             <button type="button" class="emu-cmd-btn active" data-emu="0">1. $ forge init</button>
-            <button type="button" class="emu-cmd-btn" data-emu="1">2. /discovery</button>
-            <button type="button" class="emu-cmd-btn" data-emu="2">3. /split-features</button>
-            <button type="button" class="emu-cmd-btn" data-emu="3">4. /proxima-feature</button>
-            <button type="button" class="emu-cmd-btn" data-emu="4">5. /revisar</button>
+            <button type="button" class="emu-cmd-btn" data-emu="1">2. $ forge up</button>
+            <button type="button" class="emu-cmd-btn" data-emu="2">3. /discovery</button>
+            <button type="button" class="emu-cmd-btn" data-emu="3">4. Builder</button>
+            <button type="button" class="emu-cmd-btn" data-emu="4">5. Reviewer</button>
           </div>
         </div>
 
@@ -1271,10 +1276,10 @@ footer {
               <div class="emu-avatar-mount" id="emuAvatarMount"></div>
               <div style="flex:1;min-width:0">
                 <div style="display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:4px">
-                  <span class="eyebrow" id="emuStationLabel" style="font-size:10px">Estação Ativa</span>
+                  <span class="eyebrow" id="emuStationLabel" style="font-size:10px">Sessão Ativa</span>
                   <span class="chip" id="emuStateChip"><i style="--o:var(--accent)"></i>Trabalhando</span>
                 </div>
-                <h3 id="emuAgentName" style="font:700 15px var(--f-body)">01. O Líder (Orquestrador)</h3>
+                <h3 id="emuAgentName" style="font:700 15px var(--f-body)">forge init</h3>
                 <p id="emuAgentSpeech" style="font:500 12px/1.45 var(--f-body);color:var(--muted);margin-top:3px">
                   Estrutura SDD instalada e pronta para iniciar o ciclo.
                 </p>
@@ -1324,7 +1329,7 @@ footer {
           <div class="term" style="margin-top:10px">
             <div># Inicialização interativa (escolha Claude, Gemini, Copilot)</div>
             <div style="color:#fff;font-weight:600">npx @nathanramorim/forge-sdd@latest init</div>
-            <div style="margin-top:8px"># Atualizar para v3.0 preservando seu histórico</div>
+            <div style="margin-top:8px"># Atualizar um projeto existente preservando o histórico</div>
             <div style="color:#fff;font-weight:600">forge update</div>
           </div>
         </div>
@@ -1334,7 +1339,7 @@ footer {
       <div class="sec-h" style="margin-top:28px;margin-bottom:14px">
         <div>
           <h3 style="font:700 18px var(--f-body)">Principais comandos do dia a dia</h3>
-          <p style="margin-top:4px">Você conversa com o time por comandos de barra (<span class="mono">/comando</span>) no chat da IDE, enquanto o binário <span class="mono">forge-sdd</span> garante fila, portões e skills no terminal.</p>
+          <p style="margin-top:4px">Na sessão Discovery você conversa por comandos de barra (<span class="mono">/comando</span>); o binário <span class="mono">forge</span> abre as sessões e cuida da fila, dos portões e das skills no terminal.</p>
         </div>
       </div>
 
@@ -1342,33 +1347,33 @@ footer {
         <div class="cmd-item">
           <div class="cmd-item-head">
             <code>/discovery [ideia]</code>
-            <span class="chip"><i style="--o:#8aa4ff"></i>Estação 02</span>
+            <span class="chip"><i style="--o:#8aa4ff"></i>Discovery</span>
           </div>
-          <p class="cmd-desc">Faz o Reuse Check ("O que já existe"), gera a Spec e os critérios e aguarda seu OK no Portão FLX-01.</p>
+          <p class="cmd-desc">Faz o Reuse Check ("O que já existe"), gera a spec e os critérios e espera o seu OK no Portão FLX-01.</p>
         </div>
 
         <div class="cmd-item">
           <div class="cmd-item-head">
             <code>/split-features</code>
-            <span class="chip"><i style="--o:#c9a7ff"></i>Estação 03</span>
+            <span class="chip"><i style="--o:#8aa4ff"></i>Discovery</span>
           </div>
-          <p class="cmd-desc">Quebra o plano técnico em subtarefas P/M/G, vincula as rules aplicáveis e alimenta a fila determinística.</p>
+          <p class="cmd-desc">Divide o plano em tarefas para o Builder, com as rules de cada uma; tarefas sem conflito rodam em paralelo.</p>
         </div>
 
         <div class="cmd-item">
           <div class="cmd-item-head">
-            <code>/proxima-feature</code>
-            <span class="chip"><i style="--o:#4fd1b5"></i>Estação 04</span>
+            <code>/implementar [feature]</code>
+            <span class="chip"><i style="--o:#4fd1b5"></i>Discovery → Builder</span>
           </div>
-          <p class="cmd-desc">Aciona os Builders para consumirem os próximos itens da fila (em paralelo quando sem conflito).</p>
+          <p class="cmd-desc">Envia o job da feature ao Builder (<span class="mono">forge dispatch</span>): ele constrói, abre o PR e o Reviewer confere.</p>
         </div>
 
         <div class="cmd-item">
           <div class="cmd-item-head">
             <code>/revisar</code>
-            <span class="chip"><i style="--o:#ff8a5c"></i>Estação 05 → 01</span>
+            <span class="chip"><i style="--o:#ff8a5c"></i>Reviewer</span>
           </div>
-          <p class="cmd-desc">Roda o Portão A (<span class="mono">forge-sdd gate</span>), a auditoria Read-Only (Camada B) e entrega o Painel do Líder.</p>
+          <p class="cmd-desc">Confere o resultado: roda os critérios e o Portão A (<span class="mono">forge gate</span>) e a revisão somente leitura (Camada B), e devolve o parecer.</p>
         </div>
 
         <div class="cmd-item">
@@ -1398,7 +1403,7 @@ footer {
         <div class="cmd-item">
           <div class="cmd-item-head">
             <code>/status &amp; forge report</code>
-            <span class="chip"><i style="--o:#f2a65a"></i>Estação 01</span>
+            <span class="chip"><i style="--o:#f2a65a"></i>Qualquer sessão</span>
           </div>
           <p class="cmd-desc">Mostra o progresso atual, divergências com o Git remoto e relatório de telemetria por sessão.</p>
         </div>
@@ -1425,7 +1430,7 @@ footer {
           <button class="gov-tab active" data-gov="0" style="--k:var(--bad)" type="button">
             <div class="gov-tab-top">
               <span class="chip"><i style="--o:var(--bad)"></i>Segurança · SEG-01 / P-13</span>
-              <span class="mono">Retorna 05 ↺ 04</span>
+              <span class="mono">Volta ao Builder</span>
             </div>
             <h4>1. Vazamento de chave de API ou commit direto na main</h4>
             <p>O binário determinístico intercepta segredos expostos ou tentativa de alterar a branch principal antes do código sair da máquina.</p>
@@ -1434,34 +1439,34 @@ footer {
           <button class="gov-tab" data-gov="1" style="--k:var(--warn)" type="button">
             <div class="gov-tab-top">
               <span class="chip"><i style="--o:var(--warn)"></i>Reuso · DUP-01 / DUP-02</span>
-              <span class="mono">Retorna 05 ↺ 04</span>
+              <span class="mono">Volta ao Builder</span>
             </div>
             <h4>2. Código duplicado que ignora o que já existe no projeto</h4>
-            <p>O Analista de Governança compara a entrega com a seção "O que já existe" da Spec e barra funções recriadas do zero.</p>
+            <p>O Reviewer compara a entrega com a seção "O que já existe" da spec e barra funções recriadas do zero.</p>
           </button>
 
           <button class="gov-tab" data-gov="2" style="--k:var(--bad)" type="button">
             <div class="gov-tab-top">
               <span class="chip"><i style="--o:var(--bad)"></i>Arquitetura · ARQ-01 / TST-01</span>
-              <span class="mono">Retorna 05 ↺ 04</span>
+              <span class="mono">Volta ao Builder</span>
             </div>
             <h4>3. Regra de negócio na camada errada e sem testes</h4>
-            <p>Por ser estritamente somente leitura, o auditor não faz remendos silenciosos: ele reprova com evidência e exige testes verdes.</p>
+            <p>Por ser estritamente somente leitura, o Reviewer não faz remendos silenciosos: ele reprova com evidência e exige testes verdes.</p>
           </button>
 
           <button class="gov-tab" data-gov="3" style="--k:var(--ok)" type="button">
             <div class="gov-tab-top">
               <span class="chip"><i style="--o:var(--ok)"></i>Entrega Limpa · DUP-05</span>
-              <span class="mono">Avança 05 → 01 (Você)</span>
+              <span class="mono">Avança para você</span>
             </div>
             <h4>4. Entrega validada e transformada em habilidade automática</h4>
-            <p>Passando pelas Camadas A e B, o Líder atualiza seu Painel Executivo e cataloga padrões repetidos 3 vezes como Auto-Skill.</p>
+            <p>Passando pelas Camadas A e B, a entrega chega ao seu painel para a aprovação final, e padrões repetidos 3 vezes viram Auto-Skill.</p>
           </button>
         </div>
 
         <div class="gov-inspector" id="govInspector" style="--k:var(--bad)">
           <div class="gov-head">
-            <div class="gov-avatar-wrap" id="govAvatarMount" title="Clique para interagir com o Analista de Governança"></div>
+            <div class="gov-avatar-wrap" id="govAvatarMount" title="Clique para interagir com o Reviewer"></div>
             <div style="flex:1;min-width:0">
               <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:6px">
                 <span class="chip" id="govStateChip"><i style="--o:var(--bad)"></i>Bloqueado na Auditoria</span>
@@ -1469,7 +1474,7 @@ footer {
               </div>
               <h3 id="govInspectorTitle" style="font:700 16px/1.3 var(--f-body)">Chave privada detectada no diff da tarefa</h3>
               <p id="govInspectorSub" style="font:500 12.5px/1.45 var(--f-body);color:var(--muted);margin-top:4px">
-                O Analista de Governança opera sem permissão de escrita: ele bloqueia a passagem e devolve a evidência exata para o Builder corrigir.
+                O Reviewer opera sem permissão de escrita: ele bloqueia a passagem e devolve a evidência exata para o Builder corrigir.
               </p>
             </div>
           </div>
@@ -1481,7 +1486,7 @@ footer {
               <button class="btn warn sm" id="govBtnFix" type="button">Simular correção do Builder</button>
               <button class="btn ghost sm" id="govBtnNext" type="button">Próximo cenário →</button>
             </div>
-            <span class="mono" id="govFooterNote">Permissão de escrita do Auditor: 0 arquivos</span>
+            <span class="mono" id="govFooterNote">Permissão de escrita do Reviewer: 0 arquivos</span>
           </div>
         </div>
       </div>
@@ -1516,11 +1521,11 @@ footer {
         </div>
 
         <div class="comp-card v3">
-          <span class="chip"><i style="--o:var(--accent)"></i>Agora (v5.0) · 5 Estações em Esteira</span>
+          <span class="chip"><i style="--o:var(--accent)"></i>Agora (v5.0) · 3 Sessões em Pipeline</span>
           <ul class="comp-list" style="--dot:var(--accent)">
             <li>
-              <strong>Handoff explícito entre 5 especialistas</strong>
-              Líder recebe a demanda → PM/Arquiteto especifica com seu aval → Planejador fatia → Builders constroem em paralelo → Governança audita em modo Read-Only.
+              <strong>Quem confere não é quem construiu</strong>
+              A Discovery planeja com você e só segue com o seu aval → o Builder constrói em paralelo e abre o PR → o Reviewer confere em modo somente leitura e devolve com comentários, até 3 vezes.
             </li>
             <li>
               <strong>Constituição por IDs + Regras sob demanda</strong>
@@ -1541,7 +1546,7 @@ footer {
         <div>
           <p class="eyebrow" style="color:var(--accent)">06 · Demonstração Oficial em Vídeo</p>
           <h2>Veja o Forge-SDD 5.0 em ação em 60 segundos.</h2>
-          <p>Assista à demonstração oficial apresentando a esteira autônoma em 5 estações, o portão determinístico Camada A e a governança somente-leitura na prática.</p>
+          <p>Assista à demonstração oficial apresentando o portão determinístico Camada A e a revisão somente leitura na prática. O vídeo é anterior ao pipeline de 3 sessões.</p>
         </div>
         <div style="display:flex;gap:8px;align-items:center">
           <span class="chip"><i style="--o:var(--accent)"></i>Vídeo Oficial</span>
@@ -1589,7 +1594,7 @@ footer {
 
 <script>
 /* ==========================================================================
-   MOTOR DE PERSONAGENS DAS 5 ESTAÇÕES
+   MOTOR DE PERSONAGENS DAS SESSÕES DO PIPELINE
    ========================================================================== */
 const STATE_DEFS = {
   working:  { label: 'Trabalhando',  orb: 0x4f8ef7, cssOrb: '#4f8ef7', eyes: 'cap' },
@@ -1766,6 +1771,9 @@ function createForgeMascot3D(mountEl, agentHex, initialState, markType) {
   }
 
   setState(currentState);
+  /* edicao:inicio */
+  if (window.forgeEdicao && window.forgeEdicao.vestirMascote) window.forgeEdicao.vestirMascote(botGroup, markType);
+  /* edicao:fim */
 
   return {
     setState,
@@ -1817,117 +1825,73 @@ document.getElementById('copyHeroBtn').addEventListener('click', (e) => {
 });
 
 /* ==========================================================================
-   DADOS DAS 5 ESTAÇÕES E TRANSIÇÕES PROCESSUAIS
+   DADOS DAS 3 SESSÕES DO PIPELINE E TRANSIÇÕES PROCESSUAIS
    ========================================================================== */
-const STATIONS = [
+const SESSIONS = [
   {
-    step: 'Estação 01',
-    shortName: '01. O Líder',
-    name: 'O Líder (Orquestrador)',
-    trait: 'Maestro da operação · Seu ponto de contato',
-    color: '#f2a65a',
-    hex: 0xf2a65a,
-    mark: 'ring',
-    defaultState: 'working',
-    inputArtifact: 'Pedido do Humano / Laudo Camada B',
-    outputArtifact: 'Demanda estruturada → Estação 02',
-    handoffTo: '02. PM & Arquiteto',
-    handoffPayload: 'Contexto do projeto (progress.md) + abertura de Discovery & Reuse Check',
-    handoffGate: 'Passo 1 → 2 · Início da Esteira',
-    handoffNote: 'O Líder nunca implementa código direto: delega à estação certa',
-    desc: 'Recebe sua demanda, coordena os especialistas em sequência ou paralelo e consolida o Painel Executivo.',
-    states: {
-      working:  'Recebendo sua demanda e acionando o PM + Arquiteto para concepção…',
-      approval: 'Painel Executivo (Camada C) pronto: aguardando sua validação final.',
-      finished: 'Ciclo completo! Entrega validada e progresso atualizado.'
-    }
-  },
-  {
-    step: 'Estação 02',
-    shortName: '02. PM & Arquiteto',
-    name: 'Produto & Arquiteto',
-    trait: 'Concepção da Spec · Reuse Check (DUP-01)',
+    step: 'Sessão 01',
+    shortName: '01. Discovery',
+    name: 'Discovery',
+    trait: 'Você conversa e planeja · Spec e critérios',
     color: '#8aa4ff',
     hex: 0x8aa4ff,
     mark: 'diamond',
     defaultState: 'approval',
-    inputArtifact: 'Demanda do Líder + Código atual',
-    outputArtifact: 'discovery.md + criteria.md',
-    handoffTo: '03. O Planejador',
-    handoffPayload: 'discovery.md + criteria.md (com seção "O que já existe" validada por você)',
-    handoffGate: 'Portão FLX-01 · Aprovação Humana da Spec',
-    handoffNote: 'Bloqueio estrito: o Planejador só recebe a Spec após o seu "De Acordo"',
-    desc: 'Mapeia o que já existe para evitar duplicação e estrutura os critérios de aceite antes de qualquer código.',
+    inputArtifact: 'Sua ideia + contexto do projeto (forge brief)',
+    outputArtifact: 'Spec + critérios + tasks na fila',
+    handoffTo: '02. Builder',
+    handoffPayload: 'Job na fila (forge dispatch): spec aprovada, critérios e rules aplicáveis',
+    handoffGate: 'Portão FLX-01 · Sua aprovação da Spec',
+    handoffNote: 'O Builder só recebe o job depois do seu "De Acordo"',
+    desc: 'É onde você conversa e planeja a ideia: o agente faz o Reuse Check ("O que já existe"), escreve a spec e os critérios e divide o trabalho em tarefas para o Builder.',
     states: {
-      working:  'Mapeando ativos existentes no repositório (Reuse Check DUP-01)…',
+      working:  'Lendo o contexto do projeto (forge brief) e mapeando o que já existe…',
       approval: 'Portão FLX-01 aberto: aguardando seu "De Acordo" na especificação.',
-      finished: 'Spec aprovada por você! Passando bastão para o Planejador.'
+      finished: 'Spec aprovada por você! Job enviado para o Builder.'
     }
   },
   {
-    step: 'Estação 03',
-    shortName: '03. O Planejador',
-    name: 'O Planejador',
-    trait: 'Fatiamento P/M/G · Regras sob demanda',
-    color: '#c9a7ff',
-    hex: 0xc9a7ff,
-    mark: 'bar',
-    defaultState: 'thinking',
-    inputArtifact: 'Spec aprovada (FLX-01)',
-    outputArtifact: 'plan.md + sdd/.queue/queue.json',
-    handoffTo: '04. Fila de Builders',
-    handoffPayload: 'Tarefas P/M/G enfileiradas em queue.json + seleção de .agents/rules/sdd-*.md',
-    handoffGate: 'Regra GOV-04 · Contexto Seletivo',
-    handoffNote: 'Separa tarefas independentes (paralelo) das que têm depends_on (fila)',
-    desc: 'Quebra a Spec em tarefas atômicas e anexa apenas os módulos de regras necessários para cada Builder.',
-    states: {
-      thinking: 'Mapeando IDs da Constituição (ARQ, SEG, TST) por subtarefa…',
-      working:  'Verificando colisão de arquivos para liberar execução em paralelo…',
-      finished: 'Fila gravada em sdd/.queue/queue.json! Despachando para os Builders.'
-    }
-  },
-  {
-    step: 'Estação 04',
-    shortName: '04. Builders',
-    name: 'Fila de Builders',
-    trait: 'Execução isolada · Paralelismo seguro',
+    step: 'Sessão 02',
+    shortName: '02. Builder',
+    name: 'Builder',
+    trait: 'Constrói em paralelo · Worktrees isolados',
     color: '#4fd1b5',
     hex: 0x4fd1b5,
     mark: 'wave',
     defaultState: 'working',
-    inputArtifact: 'Tarefa da fila + Rules do escopo',
-    outputArtifact: 'Código + Testes + Portão A (PASS)',
-    handoffTo: '05. Governança Read-Only',
-    handoffPayload: 'Diff completo da implementação + relatório determinístico forge-sdd gate (P-01..P-23)',
-    handoffGate: 'Portão Camada A · Testes & Segredos',
-    handoffNote: 'Só avança para o Analista de Governança quando go test e P-13 passam',
-    desc: 'Consome a fila determinística: tarefas sem conflito rodam em paralelo; dependências aguardam liberação.',
+    inputArtifact: 'Job da fila + spec + rules do escopo',
+    outputArtifact: 'Código + testes + PR aberto',
+    handoffTo: '03. Reviewer',
+    handoffPayload: 'PR aberto com o diff e o relatório do forge gate (Camada A)',
+    handoffGate: 'Portão Camada A · Testes e Segredos',
+    handoffNote: 'Só abre o PR quando go test, go vet e forge gate passam',
+    desc: 'Pega o job da fila, implementa em worktrees isolados (tarefas sem conflito rodam em paralelo) e abre o PR.',
     states: {
       working:  'Construindo em paralelo tarefas sem conflito de arquivos…',
-      approval: 'Executando Portão A (forge-sdd gate): validando testes e limites…',
-      finished: 'Portão A aprovado! Entregando pacote para auditoria da Governança.'
+      approval: 'Executando o Portão A (forge gate): testes, vet e segredos…',
+      finished: 'Portão A aprovado! PR aberto e enviado ao Reviewer.'
     }
   },
   {
-    step: 'Estação 05',
-    shortName: '05. Governança',
-    name: 'Analista de Governança',
-    trait: 'Auditoria Somente Leitura · Camada B',
+    step: 'Sessão 03',
+    shortName: '03. Reviewer',
+    name: 'Reviewer',
+    trait: 'Somente leitura · Quem confere não construiu',
     color: '#ff8a5c',
     hex: 0xff8a5c,
     mark: 'tri',
     defaultState: 'searching',
-    inputArtifact: 'Diff + Spec + IDs Constituição',
-    outputArtifact: 'Laudo JSON → Líder (ou ↺ Builder)',
-    handoffTo: '01. O Líder (Painel Camada C)',
-    handoffPayload: 'Veredito JSON ("conforme") + proposta de Auto-Skill (DUP-05) → Painel do Líder',
-    handoffGate: 'Portão Camada B → Camada C',
-    handoffNote: 'Se reprovar, devolve direto ao Builder (05 ↺ 04); se aprovar, fecha no Líder',
-    desc: 'Proibido de editar código. Audita arquitetura, segurança e reuso antes de devolver o laudo ao Líder.',
+    inputArtifact: 'PR + spec + ADRs + rules',
+    outputArtifact: 'Parecer: conforme ou devolvido com comentários',
+    handoffTo: 'Você aprova e faz o merge',
+    handoffPayload: 'Veredito "conforme": o PR fica pronto e você é avisado na sessão de Discovery',
+    handoffGate: 'Portão Camada B → sua aprovação final',
+    handoffNote: 'Se reprovar, devolve ao Builder com comentários (até 3 vezes); se aprovar, o merge é seu',
+    desc: 'Confere o PR contra a spec, as decisões (ADRs) e as regras, sem poder editar código. Devolve com comentários, até 3 vezes, ou marca como conforme.',
     states: {
-      searching:'Inspecionando conformidade com ARQ-*, SEG-*, DUP-* e TST-*…',
-      error:    'Não-conformidade detectada: devolvendo tarefa para a fila do Builder (05 ↺ 04).',
-      finished: 'Veredito CONFORME! Retornando resumo executivo e Auto-Skill para o Líder.'
+      searching:'Conferindo o PR contra spec, ADRs e rules (ARQ-*, SEG-*, DUP-*, TST-*)…',
+      error:    'Não conforme: devolvendo ao Builder com comentários (03 ↺ 02).',
+      finished: 'Veredito CONFORME! Você foi avisado na Discovery para aprovar.'
     }
   }
 ];
@@ -1939,13 +1903,13 @@ let activeStationIdx = 0;
 let autoCycleEnabled = true;
 let cycleProgress = 0;
 
-STATIONS.forEach((st, idx) => {
+SESSIONS.forEach((st, idx) => {
   const node = document.createElement('button');
   node.type = 'button';
   node.className = 'step-node' + (idx === 0 ? ' active' : '');
   node.style.setProperty('--c', st.color);
   node.id = `step-node-${idx}`;
-  const nextLabel = idx < 4 ? `──► 0${idx + 2}` : '↺ 01 / 04';
+  const nextLabel = idx < SESSIONS.length - 1 ? `──► 0${idx + 2}` : '↺ 02';
 
   node.innerHTML = `
     <div class="step-node-top">
@@ -1960,7 +1924,7 @@ STATIONS.forEach((st, idx) => {
   stepperTrackEl.appendChild(node);
 });
 
-STATIONS.forEach((st, idx) => {
+SESSIONS.forEach((st, idx) => {
   const stateKeys = Object.keys(st.states);
   const initialKey = st.defaultState;
   const def = STATE_DEFS[initialKey];
@@ -2055,7 +2019,7 @@ function setCardState(idx, stateKey) {
 }
 
 function updateProcessHandoffBar(idx) {
-  const st = STATIONS[idx];
+  const st = SESSIONS[idx];
   const bar = document.getElementById('handoffBar');
   bar.style.setProperty('--c', st.color);
 
@@ -2065,7 +2029,7 @@ function updateProcessHandoffBar(idx) {
   document.getElementById('hoGateChip').innerHTML = `<i style="--o:${st.color}"></i>${st.handoffGate}`;
   document.getElementById('hoLoopNote').textContent = st.handoffNote;
 
-  STATIONS.forEach((_, i) => {
+  SESSIONS.forEach((_, i) => {
     const node = document.getElementById(`step-node-${i}`);
     if (!node) return;
     node.classList.toggle('active', i === idx);
@@ -2074,7 +2038,7 @@ function updateProcessHandoffBar(idx) {
 }
 
 function setActiveStation(idx, pauseAuto) {
-  activeStationIdx = (idx + STATIONS.length) % STATIONS.length;
+  activeStationIdx = (idx + SESSIONS.length) % SESSIONS.length;
   cycleProgress = 0;
 
   document.querySelectorAll('.agent-card').forEach((c, i) => {
@@ -2106,126 +2070,128 @@ updateProcessHandoffBar(0);
    ========================================================================== */
 const EMU_STEPS = [
   {
-    stationLabel: 'Bootstrap CLI Go',
-    agentName: '01. O Líder (Orquestrador)',
-    agentHex: 0xf2a65a,
+    stationLabel: 'Instalação',
+    agentName: 'forge init',
+    agentHex: 0x8aa4ff,
     agentState: 'finished',
     chipColor: 'var(--ok)',
     chipText: 'Estrutura Pronta',
-    speech: 'Instalei os papéis das 5 estações (.agents/roles/), as regras modulares (.agents/rules/) e a Constitution por IDs.',
+    speech: 'Instalei as regras (.agents/rules/), as skills de cada etapa (.agents/skills/) e a Constituição por IDs. O projeto está pronto para o pipeline.',
     logHtml: `
       <div class="cmd-input">$ forge init . --agent claude,gemini --name checkout-api</div>
-      <div class="dim">→ Gerando papéis canônicos em .agents/roles/{lider,pm-architect,planner,builder,governance}.md</div>
       <div class="dim">→ Distribuindo regras em .agents/rules/sdd-{arquitetura,seguranca,reuso-e-duplicacao,codigo-e-testes,fluxo-e-portao}.md</div>
+      <div class="dim">→ Instalando skills em .agents/skills/sdd-{concepcao,planejamento,build,governanca,operacao}</div>
       <div class="dim">→ Criando sdd/memory/constitution.md (IDs estáveis: ARQ-*, SEG-*, DUP-*, COD-*, TST-*, FLX-*, GOV-*)</div>
       <div class="ok">✓ Estrutura Forge-SDD v5.0.0 criada com sucesso!</div>
     `,
     files: [
-      ['.agents/roles/ (5 estações)', 'criado', 'var(--ok)'],
       ['.agents/rules/sdd-*.md', 'criado', 'var(--ok)'],
-      ['sdd/memory/constitution.md', 'criado', 'var(--ok)'],
-      ['sdd/memory/progress.md', '240 bytes ≤ 1 KB', 'var(--accent)']
+      ['.agents/skills/sdd-*/', 'criado', 'var(--ok)'],
+      ['sdd/memory/constitution.md', 'criado', 'var(--ok)']
     ],
-    actionBtn: { label: 'Rodar /discovery no chat →', nextStep: 1 }
+    actionBtn: { label: 'Abrir as 3 sessões (forge up) →', nextStep: 1 }
   },
   {
-    stationLabel: 'Estação 02 · Concepção',
-    agentName: '02. Produto & Arquiteto',
+    stationLabel: 'Pipeline · 3 sessões',
+    agentName: 'forge up',
+    agentHex: 0x4fd1b5,
+    agentState: 'finished',
+    chipColor: 'var(--ok)',
+    chipText: 'Sessões Abertas',
+    speech: 'Abri as 3 sessões: forge-discovery para você conversar, e forge-builder e forge-reviewer aguardando jobs na fila.',
+    logHtml: `
+      <div class="cmd-input">$ forge pipeline init</div>
+      <div class="ok">✓ Modo pipeline ativo (.forge/config/forge.json)</div>
+      <div class="cmd-input">$ forge up --cli claude</div>
+      <div class="dim">→ forge-discovery: você + claude</div>
+      <div class="dim">→ forge-builder (worker): Aguardando jobs na fila...</div>
+      <div class="dim">→ forge-reviewer (worker): Aguardando jobs na fila...</div>
+    `,
+    files: [
+      ['.forge/config/forge.json', 'criado', 'var(--ok)'],
+      ['forge-discovery', 'você + agente', 'var(--accent)'],
+      ['forge-builder · forge-reviewer', 'aguardando jobs', 'var(--faint)']
+    ],
+    actionBtn: { label: 'Planejar na Discovery (/discovery) →', nextStep: 2 }
+  },
+  {
+    stationLabel: 'Sessão 01 · Discovery',
+    agentName: '01. Discovery',
     agentHex: 0x8aa4ff,
     agentState: 'approval',
     chipColor: 'var(--warn)',
     chipText: 'Portão FLX-01 (Aguarda Você)',
-    speech: 'Mapeei o que já existe para não duplicar código e gerei a Spec. Preciso do seu "De Acordo" antes de acionar o Planejador.',
+    speech: 'Mapeei o que já existe, escrevi a spec e dividi o trabalho em 3 tarefas. Com o seu "De Acordo", o /implementar envia o job para o Builder.',
     logHtml: `
       <div class="cmd-input">&gt; /discovery adicionar pagamento PIX com webhook idempotente</div>
-      <div class="accent">[Estação 02 · PM &amp; Arquiteto] Executando Reuse Check obrigatório (DUP-01 / DUP-02)…</div>
+      <div class="accent">[Discovery] Executando Reuse Check obrigatório (DUP-02)…</div>
       <div class="dim">  • Reaproveitado: internal/http/middleware/hmac.go e internal/db/tx.go</div>
-      <div class="ok">✓ Gerado: sdd/discovery/discovery-01-pagamento-pix.md</div>
-      <div class="ok">✓ Gerado: sdd/discovery/criteria-01-pagamento-pix.md (CA-01..CA-05)</div>
-      <div class="warn">! PORTÃO HUMANO FLX-01: Revise a Spec antes de prosseguir para o plano técnico.</div>
-    `,
-    files: [
-      ['sdd/discovery/discovery-01-pagamento-pix.md', 'Reuse Check OK', 'var(--ok)'],
-      ['sdd/discovery/criteria-01-pagamento-pix.md', 'aguarda seu OK', 'var(--warn)'],
-      ['sdd/discovery/plan-01-*.md', 'bloqueado (FLX-01)', 'var(--faint)']
-    ],
-    actionBtn: { label: 'Aprovar Spec (FLX-01) e Planejar →', nextStep: 2, style: 'warn' }
-  },
-  {
-    stationLabel: 'Estação 03 · Planejamento & Fila',
-    agentName: '03. O Planejador',
-    agentHex: 0xc9a7ff,
-    agentState: 'thinking',
-    chipColor: 'var(--accent)',
-    chipText: 'Fila Calculada',
-    speech: 'Dividi a Spec em 3 tarefas: 01 e 02 não tocam nos mesmos arquivos e vão rodar em paralelo; a 03 aguarda na fila.',
-    logHtml: `
+      <div class="ok">✓ Gerado: sdd/discovery/01-pagamento-pix/discovery.md e criteria.md</div>
       <div class="cmd-input">&gt; /split-features</div>
-      <div class="accent">[Estação 03 · Planejador] Vinculando IDs da Constitution e rules por subtarefa (GOV-04)…</div>
-      <div class="dim">  • feat-01-01 (P): Domínio PIX [ARQ-01, TST-01] → sem conflito (Onda Paralela 1)</div>
-      <div class="dim">  • feat-01-02 (M): Cliente Banco [SEG-01, TST-01] → sem conflito (Onda Paralela 1)</div>
-      <div class="dim">  • feat-01-03 (M): Webhook Handler [SEG-02, DUP-01] → depends_on: [01, 02] (Onda 2)</div>
-      <div class="cmd-input">$ forge-sdd queue enqueue sdd/features/feat-01-pagamento-pix/*.md</div>
-      <div class="ok">✓ 3 tarefas gravadas em sdd/.queue/queue.json (0 colisões na Onda 1)</div>
+      <div class="dim">  • feat-01-01 (P): Domínio PIX → sem conflito (paralelo)</div>
+      <div class="dim">  • feat-01-02 (M): Cliente Banco → sem conflito (paralelo)</div>
+      <div class="dim">  • feat-01-03 (M): Webhook Handler → depende de 01 e 02</div>
+      <div class="warn">! PORTÃO FLX-01: revise a spec; com o seu OK, rode /implementar.</div>
+      <div class="cmd-input">&gt; /implementar pagamento-pix</div>
+      <div class="ok">✓ Job enviado ao Builder (forge dispatch)</div>
     `,
     files: [
-      ['sdd/discovery/plan-01-pagamento-pix.md', 'gerado', 'var(--ok)'],
-      ['sdd/.queue/queue.json (feat-01-01 & 02)', 'queued (paralelo)', 'var(--accent)'],
-      ['sdd/.queue/queue.json (feat-01-03)', 'queued (depends_on)', 'var(--warn)']
+      ['sdd/discovery/01-pagamento-pix/discovery.md', 'Reuse Check OK', 'var(--ok)'],
+      ['sdd/discovery/01-pagamento-pix/queue.json', '3 tarefas', 'var(--accent)'],
+      ['job → forge-builder', 'enfileirado', 'var(--warn)']
     ],
-    actionBtn: { label: 'Disparar Builders (/proxima-feature) →', nextStep: 3 }
+    actionBtn: { label: 'Aprovar e enviar ao Builder →', nextStep: 3, style: 'warn' }
   },
   {
-    stationLabel: 'Estação 04 · Execução & Portão A',
-    agentName: '04. Fila de Builders',
+    stationLabel: 'Sessão 02 · Builder',
+    agentName: '02. Builder',
     agentHex: 0x4fd1b5,
     agentState: 'working',
     chipColor: 'var(--ok)',
     chipText: 'Portão A: PASS',
-    speech: 'Executamos as tarefas da fila respeitando as dependências e validamos tudo no Portão Determinístico Camada A!',
+    speech: 'Construí as tarefas 01 e 02 em paralelo, cada uma no seu worktree, e depois a 03. Portão A verde: abri o PR e enviei ao Reviewer.',
     logHtml: `
-      <div class="cmd-input">&gt; /proxima-feature</div>
-      <div class="accent">[Builder A &amp; Builder B] Executando Onda 1 em paralelo (feat-01-01 + feat-01-02)…</div>
-      <div class="dim">[Builder A] concluído → liberando dependência de feat-01-03…</div>
-      <div class="cmd-input">$ forge-sdd gate --mode bloqueio --branch feat/01-pagamento-pix</div>
+      <div class="accent">[forge-builder] Job recebido: 3 tarefas (01 e 02 em paralelo)</div>
+      <div class="dim">[worktree 01] Domínio PIX… concluído</div>
+      <div class="dim">[worktree 02] Cliente Banco… concluído</div>
+      <div class="dim">[worktree 03] Webhook Handler (depende de 01 e 02)… concluído</div>
+      <div class="cmd-input">$ forge gate --mode bloqueio --branch feat/01-pagamento-pix</div>
       <div class="ok">  ✓ [P-01] Branch feat/01-pagamento-pix válida</div>
       <div class="ok">  ✓ [P-13] Zero segredos expostos no diff</div>
-      <div class="ok">  ✓ [P-23] go test ./... &amp; go vet ./... (100% PASS)</div>
+      <div class="ok">  ✓ go test ./... &amp; go vet ./... (100% PASS)</div>
+      <div class="ok">✓ PR #42 aberto: feat(01): pagamento PIX</div>
     `,
     files: [
-      ['feat-01-01 & feat-01-02', 'done (Portão A PASS)', 'var(--ok)'],
-      ['feat-01-03 (Webhook Handler)', 'done (Portão A PASS)', 'var(--ok)'],
-      ['sdd/memory/progress.md', '712 bytes ≤ 1024 B', 'var(--ok)']
+      ['feat-01-01 · feat-01-02 · feat-01-03', 'Portão A PASS', 'var(--ok)'],
+      ['PR #42', 'aberto', 'var(--accent)']
     ],
-    actionBtn: { label: 'Rodar Auditoria Read-Only (/revisar) →', nextStep: 4 }
+    actionBtn: { label: 'Conferir no Reviewer →', nextStep: 4 }
   },
   {
-    stationLabel: 'Estação 05 → 01 · Governança & Líder',
-    agentName: '05. Governança → 01. Líder',
-    agentHex: 0x3ecf8e,
+    stationLabel: 'Sessão 03 · Reviewer',
+    agentName: '03. Reviewer',
+    agentHex: 0xff8a5c,
     agentState: 'finished',
     chipColor: 'var(--ok)',
     chipText: 'Veredito: Conforme',
-    speech: 'Auditoria Read-Only aprovada sem ressalvas! O Líder consolidou seu Painel Executivo e sincronizou 1 nova Auto-Skill.',
+    speech: 'Conferi o PR contra a spec, os ADRs e as regras, sem editar nada. Conforme: você foi avisado na Discovery para a aprovação final.',
     logHtml: `
-      <div class="cmd-input">&gt; /revisar</div>
-      <div class="accent">[Estação 05 · Governança Read-Only] Auditando diff contra ARQ-01, SEG-01, DUP-01, TST-01…</div>
-      <div class="ok">✓ Parecer Camada B: {"veredito": "conforme", "bloqueios": [], "auto_skills_candidatas": ["webhook-hmac-idempotente"]}</div>
-      <div class="cmd-input">$ forge-sdd skills approve webhook-hmac-idempotente</div>
-      <div class="ok">✓ Auto-Skill sincronizada em .agents/skills/, .claude/skills/ e .gemini/skills/</div>
-      <div class="ok">✓ Painel Executivo do Líder (Camada C): 3/3 tarefas aprovadas · 0 pendências na fila!</div>
+      <div class="accent">[forge-reviewer] Conferindo o PR #42 contra spec, ADRs e rules (ARQ, SEG, DUP, TST)…</div>
+      <div class="ok">✓ Parecer: {"veredito": "conforme", "achados": []}</div>
+      <div class="dim">  (se não estivesse conforme, voltaria ao Builder com comentários, até 3 vezes)</div>
+      <div class="ok">✓ Aviso na forge-discovery: PR #42 pronto para a sua aprovação</div>
     `,
     files: [
-      ['sdd/.queue/queue.json (3/3 tarefas)', 'status: approved', 'var(--ok)'],
-      ['.agents/skills/webhook-hmac-idempotente/', 'Auto-Skill ativa', 'var(--ok)'],
-      ['Painel Executivo (Camada C)', 'entregue ao humano', 'var(--ok)']
+      ['PR #42', 'conforme', 'var(--ok)'],
+      ['sdd/discovery/01-pagamento-pix/queue.json', '3/3 aprovadas', 'var(--ok)'],
+      ['Aprovação final e merge', 'com você', 'var(--warn)']
     ],
     actionBtn: { label: 'Reiniciar demonstração ↺', nextStep: 0, style: 'ghost' }
   }
 ];
 
 const emuAvatarMount = document.getElementById('emuAvatarMount');
-const emuMascot = createForgeMascot3D(emuAvatarMount, 0xf2a65a, 'finished', 'ring');
+const emuMascot = createForgeMascot3D(emuAvatarMount, 0x8aa4ff, 'finished', 'diamond');
 let currentEmuIdx = 0;
 
 function renderEmuStep(idx) {
@@ -2285,17 +2251,17 @@ const GOV_SCENARIOS = [
     chipColor: 'var(--bad)',
     ruleCode: 'SEG-01 · P-13',
     title: 'Chave privada detectada no diff da tarefa',
-    sub: 'O Analista de Governança opera sem permissão de escrita: ele bloqueia a passagem e devolve a evidência exata para o Builder corrigir (05 ↺ 04).',
+    sub: 'O Reviewer opera sem permissão de escrita: ele bloqueia a passagem e devolve a evidência exata para o Builder corrigir.',
     termHtml: `
       <div>$ forge-sdd gate --mode bloqueio</div>
       <span class="bad-line">- [P-13 FALHOU] Credencial exposta detectada em internal/auth/client.go:42</span>
-      <span class="bad-line">- Veredito Camada B: "bloqueado" (violação SEG-01 — retorna à Estação 04)</span>
+      <span class="bad-line">- Veredito Camada B: "bloqueado" (violação SEG-01 — volta ao Builder com comentários)</span>
     `,
-    fixTitle: 'Segredo removido pelo Builder · Reinspeção aprovada (05 → 01)!',
+    fixTitle: 'Segredo removido pelo Builder · Nova conferência aprovada!',
     fixTerm: `
       <div>$ forge-sdd gate --mode bloqueio</div>
       <span class="ok-line">+ [P-13 PASS] Zero segredos expostos (lendo via variável de ambiente)</span>
-      <span class="ok-line">+ Veredito Camada B: "conforme" (liberado para o Painel do Líder)</span>
+      <span class="ok-line">+ Veredito Camada B: "conforme" (liberado para a sua aprovação)</span>
     `
   },
   {
@@ -2305,11 +2271,11 @@ const GOV_SCENARIOS = [
     chipColor: 'var(--warn)',
     ruleCode: 'DUP-01 · DUP-02',
     title: 'Função duplicada ignorou módulo que já existia no projeto',
-    sub: 'O Auditor cruza a entrega com o Reuse Check da Spec e exige que o Builder reaproveite o pacote existente em vez de duplicar código.',
+    sub: 'O Reviewer cruza a entrega com o Reuse Check da spec e exige que o Builder reaproveite o pacote existente em vez de duplicar código.',
     termHtml: `
       <div>$ forge-sdd governance audit --feature feat-58</div>
       <span class="bad-line">- [DUP-01 RESSALVA] Novo helper criado em internal/util/hash.go duplica internal/gate</span>
-      <span class="bad-line">- Ação exigida: reutilizar função canônica mapeada na Spec (retorna 05 ↺ 04)</span>
+      <span class="bad-line">- Ação exigida: reutilizar função canônica mapeada na Spec (volta ao Builder com comentários)</span>
     `,
     fixTitle: 'Código refatorado reaproveitando o módulo existente!',
     fixTerm: `
@@ -2325,7 +2291,7 @@ const GOV_SCENARIOS = [
     chipColor: 'var(--bad)',
     ruleCode: 'ARQ-01 · TST-01',
     title: 'Regra de negócio dentro de cmd/ e sem teste unitário',
-    sub: 'Como o Auditor tem as mãos atadas (Read-Only), ele não faz gambiarras silenciosas: reprova a entrega e exige separação limpa em internal/.',
+    sub: 'Como o Reviewer tem as mãos atadas (somente leitura), ele não faz gambiarras silenciosas: reprova a entrega e exige separação limpa em internal/.',
     termHtml: `
       <div>$ forge-sdd gate --mode bloqueio</div>
       <span class="bad-line">- [ARQ-01 FALHOU] Lógica de domínio detectada em cmd/forge-sdd/queue.go</span>
@@ -2345,7 +2311,7 @@ const GOV_SCENARIOS = [
     chipColor: 'var(--ok)',
     ruleCode: 'FLX-03 · DUP-05',
     title: 'Entrega íntegra aprovada nas Camadas A e B',
-    sub: 'O pacote sobe limpo para o Painel Executivo do Líder e o padrão repetido 3x vira uma Auto-Skill sincronizada para toda a equipe.',
+    sub: 'O PR fica pronto para a sua aprovação final e o padrão repetido 3x vira uma Auto-Skill sincronizada para toda a equipe.',
     termHtml: `
       <div>$ forge-sdd skills approve novo-subcomando-cli-sdd</div>
       <span class="ok-line">+ [PORTÃO A & B PASS] Arquitetura, Segurança, Reuso e Testes validados</span>
@@ -2447,7 +2413,7 @@ function animateAll() {
     const progBar = document.getElementById(`prog-${activeStationIdx}`);
     if (progBar) progBar.style.width = Math.min(100, cycleProgress * 100) + '%';
     if (cycleProgress >= 1) {
-      const nextStation = (activeStationIdx + 1) % STATIONS.length;
+      const nextStation = (activeStationIdx + 1) % SESSIONS.length;
       setActiveStation(nextStation, false);
       const item = mascotControllers[nextStation];
       const nextStateIdx = (item.stateKeys.indexOf(item.currentKey) + 1) % item.stateKeys.length;

@@ -1,0 +1,28 @@
+{
+  "$schema": "forge-sdd/metrics/1.0",
+  "feature": "sdd/discovery/101-tema-missoes-v5/features/feat-101-01-lp-e-wiki-na-edicao-com-validade.md",
+  "phase": "101-01",
+  "agent_path": [
+    "concepcao"
+  ],
+  "tokens_input": 0,
+  "tokens_output": 0,
+  "turns": 0,
+  "duration_seconds": 0,
+  "criterio_atendido": false,
+  "model": "claude-fable-5-2",
+  "rework_lines": 0,
+  "context7_calls": 0,
+  "git_calls": 0,
+  "files_touched": [
+    "sdd/discovery/101-tema-missoes-v5/features/feat-101-01-lp-e-wiki-na-edicao-com-validade.md",
+    "sdd/discovery/101-tema-missoes-v5/features/feat-101-02-agentes-rebeldes-nas-missoes.md",
+    "sdd/discovery/101-tema-missoes-v5/features/feat-101-03-retorno-agendado-da-edicao.md",
+    "sdd/discovery/101-tema-missoes-v5/fixes/fix-101-01-alinhar-readme-e-design-system.md",
+    "sdd/discovery/101-tema-missoes-v5/discovery.md",
+    "sdd/discovery/101-tema-missoes-v5/criteria.md",
+    "sdd/discovery/101-tema-missoes-v5/status.md"
+  ],
+  "outcome": "blocked",
+  "sdd_version": "4.5.0-beta"
+}

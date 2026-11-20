@@ -1,0 +1,119 @@
+name: Encerrar Edição Missões
+
+on:
+  schedule:
+    - cron: '10 3 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  encerrar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Conferir vigência pelo parâmetro único
+        id: vigencia
+        run: |
+          node -e '
+            const fs = require("fs");
+            const vm = require("vm");
+            const path = "docs/edicao/edicao.js";
+            if (!fs.existsSync(path)) {
+              console.log("Edição já removida (docs/edicao/edicao.js ausente). Nada a fazer.");
+              fs.appendFileSync(process.env.GITHUB_OUTPUT, "deve_encerrar=false\n");
+              process.exit(0);
+            }
+            const raiz = { setAttribute() {}, removeAttribute() {} };
+            const ctx = { window: {}, document: { documentElement: raiz }, location: { search: "" } };
+            vm.runInNewContext(fs.readFileSync(path, "utf8"), ctx);
+            const e = ctx.window.forgeEdicao;
+            const rfc3339 = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/;
+            if (!e || typeof e.fim !== "string" || !rfc3339.test(e.fim)) {
+              console.log("Data de fim ausente ou inválida em docs/edicao/edicao.js. Nada a fazer.");
+              fs.appendFileSync(process.env.GITHUB_OUTPUT, "deve_encerrar=false\n");
+              process.exit(0);
+            }
+            const fimMs = Date.parse(e.fim);
+            if (!Number.isFinite(fimMs)) {
+              console.log("Data de fim inválida em docs/edicao/edicao.js. Nada a fazer.");
+              fs.appendFileSync(process.env.GITHUB_OUTPUT, "deve_encerrar=false\n");
+              process.exit(0);
+            }
+            if (e.vigente(Date.now())) {
+              console.log("Edição ainda vigente até " + e.fim + ". Nada a fazer.");
+              fs.appendFileSync(process.env.GITHUB_OUTPUT, "deve_encerrar=false\n");
+              process.exit(0);
+            }
+            console.log("Vigência encerrada em " + e.fim + ". Preparando PR de encerramento.");
+            fs.appendFileSync(process.env.GITHUB_OUTPUT, "deve_encerrar=true\n");
+          '
+
+      - name: Aplicar encerramento e abrir PR ou issue
+        if: steps.vigencia.outputs.deve_encerrar == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          branch="chore/101-encerrar-edicao"
+          titulo="chore(101): encerra Edição Missões e restaura cabeçalho padrão"
+
+          abertos="$(gh pr list --head "$branch" --state open --json number --jq 'length')"
+          if [ "$abertos" != "0" ]; then
+            echo "Já existe PR aberto para $branch."
+            exit 0
+          fi
+
+          bash .github/scripts/encerrar-edicao/encerrar.sh .
+
+          if [ -z "$(git status --porcelain)" ]; then
+            echo "Nenhuma alteração pendente após encerrar.sh."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -B "$branch"
+          git add -A
+          git commit -m "$titulo"
+          git push -f origin "$branch"
+
+          corpo="$(cat <<'EOF'
+          Encerra a **Edição Missões** após o prazo definido no parâmetro único (`docs/edicao/edicao.js`), restaurando o layout padrão sem commits automáticos na `main`.
+
+          ## O que sai
+          - `docs/edicao/` (`edicao.js`, `edicao.css` e `edicao-mascotes.js`)
+          - Blocos entre `edicao:inicio` e `edicao:fim` em `docs/index.html` e `docs/wiki.html`
+          - Cabeçalho temático de `README.md` e `npm/README.md` (restaurado para o cabeçalho padrão da versão `5.0.0`)
+          - `.github/scripts/encerrar-edicao/`
+
+          ## O que fica
+          - Design system em `docs/design/edicao-missoes/`
+          - Banner em `docs/img/banner-v5-missoes.*`
+          - Histórico da versão `5.0.0` em `sdd/releases/history.md`
+
+          > **Observação:** o arquivo `.github/workflows/encerrar-edicao.yml` fica inerte após o merge (o token do Actions não tem permissão para remover workflows) e pode ser apagado manualmente em um commit posterior.
+          EOF
+          )"
+
+          if gh pr create --base main --head "$branch" --title "$titulo" --body "$corpo"; then
+            echo "PR criado com sucesso."
+            exit 0
+          fi
+
+          echo "Não foi possível abrir o PR diretamente; verificando issue de aviso."
+          issues_abertas="$(gh issue list --state open --search "in:title \"$titulo\"" --json number --jq 'length')"
+          if [ "$issues_abertas" != "0" ]; then
+            echo "Issue de aviso já existe."
+            exit 0
+          fi
+
+          pr_link="https://github.com/${GITHUB_REPOSITORY}/compare/main...${branch}?expand=1"
+          gh issue create \
+            --title "$titulo" \
+            --body "$(printf 'O workflow preparou a branch `%s` para encerrar a Edição Missões.\n\n[Abrir Pull Request em um clique](%s)\n\n%s\n' "$branch" "$pr_link" "$corpo")"
