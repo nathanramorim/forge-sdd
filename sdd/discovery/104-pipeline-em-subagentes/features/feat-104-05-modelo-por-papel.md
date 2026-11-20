@@ -41,10 +41,10 @@ go test ./internal/scaffold -run 'TestAgentModelsEscreveCabecalho|TestAgentModel
 # negativo: modelo inválido é recusado
 go test -list 'TestAgentModelsRecusaValorInvalido' ./internal/scaffold | grep -F 'TestAgentModelsRecusaValorInvalido' >/dev/null
 go test ./internal/scaffold -run 'TestAgentModelsRecusaValorInvalido'
+go test ./cmd/forge-sdd -run 'TestUpdateAgentModels_AplicaSemAtualizacaoDeVersao|TestUpdateAgentModels_DryRunNaoGrava'
 # negativo: update pelo comando recusa valor inválido sem gravar
 go test -list 'TestUpdateAgentModels_ValorInvalidoErraSemGravar' ./cmd/forge-sdd | grep -F 'TestUpdateAgentModels_ValorInvalidoErraSemGravar' >/dev/null
 go test ./cmd/forge-sdd -run 'TestUpdateAgentModels_ValorInvalidoErraSemGravar'
-go test ./cmd/forge-sdd -run 'TestUpdateAgentModels'
 go vet ./... && go test ./...
 ```
 - Teste negativo: modelo fora da lista é recusado; sem chave o cabeçalho segue `inherit`.
