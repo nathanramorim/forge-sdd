@@ -114,7 +114,7 @@ A telemetria é opcional e fica no seu projeto. No modo `forge worker --raw`, a 
 | **4.8.0** | Versão estável do painel interativo: stream de chat nos workers, fila com abas e drill-down, popup no tmux e fila que acompanha a aprovação do Reviewer. |
 | **4.6.x** | Comando único `forge`, painel vivo executivo e tokens por janela com reset suave. |
 | **4.2.0-beta** | Pipeline multi-sessão: Discovery, Builder e Reviewer trabalhando juntos. |
-| **3.0.0-beta** | Esteira de 5 especialistas, portão de governança (A/B/C), regras por ID e auto-skills. |
+| **3.0.0-beta** | *(histórico, obsoleto como fluxo)* Esteira de 5 especialistas, portão de governança (A/B/C), regras por ID e auto-skills. O fluxo atual são 3 sessões. |
 | **2.2.0-beta** | Regras e comandos compartilhados em `.agents/`, uma fonte para vários agentes. |
 | **2.0.0-beta** | Versão enxuta: telemetria confiável, `lessons.md` e um fluxo único em `sdd/FLOW.md`. |
 

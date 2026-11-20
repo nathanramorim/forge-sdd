@@ -1,0 +1,113 @@
+{
+ "kicker": "// forge-sdd · quem faz o quê",
+ "titulo": "Cada sessão tem os seus agentes",
+ "largura": 1280,
+ "altura": 448,
+ "elementos": [
+  {
+   "tipo": "caixa",
+   "id": "g1",
+   "x": 56,
+   "y": 120,
+   "w": 368,
+   "h": 296,
+   "texto": "1 · Discovery",
+   "estilo": "grupo"
+  },
+  {
+   "tipo": "caixa",
+   "id": "pm",
+   "x": 88,
+   "y": 256,
+   "w": 304,
+   "h": 56,
+   "texto": "pm-architect",
+   "sub": "discovery e critérios",
+   "estilo": "normal"
+  },
+  {
+   "tipo": "caixa",
+   "id": "pl",
+   "x": 88,
+   "y": 336,
+   "w": 304,
+   "h": 56,
+   "texto": "planner",
+   "sub": "plano e tasks",
+   "estilo": "normal"
+  },
+  {
+   "tipo": "seta",
+   "de": "pm.baixo",
+   "para": "pl.cima"
+  },
+  {
+   "tipo": "caixa",
+   "id": "g2",
+   "x": 456,
+   "y": 120,
+   "w": 368,
+   "h": 296,
+   "texto": "2 · Builder",
+   "estilo": "grupo"
+  },
+  {
+   "tipo": "caixa",
+   "id": "bu",
+   "x": 488,
+   "y": 256,
+   "w": 304,
+   "h": 56,
+   "texto": "builder",
+   "sub": "código, testes e PR",
+   "estilo": "normal"
+  },
+  {
+   "tipo": "caixa",
+   "id": "g3",
+   "x": 856,
+   "y": 120,
+   "w": 368,
+   "h": 296,
+   "texto": "3 · Reviewer",
+   "estilo": "grupo"
+  },
+  {
+   "tipo": "caixa",
+   "id": "rv",
+   "x": 888,
+   "y": 256,
+   "w": 304,
+   "h": 56,
+   "texto": "reviewer",
+   "sub": "veredito em JSON",
+   "estilo": "normal"
+  },
+  {
+   "tipo": "caixa",
+   "id": "gv",
+   "x": 888,
+   "y": 336,
+   "w": 304,
+   "h": 56,
+   "texto": "governance",
+   "sub": "Camada B, só leitura",
+   "estilo": "normal"
+  },
+  {
+   "tipo": "seta",
+   "de": "rv.baixo",
+   "para": "gv.cima"
+  },
+  {
+   "tipo": "seta",
+   "de": "g1.dir",
+   "para": "g2.esq"
+  },
+  {
+   "tipo": "seta",
+   "de": "g2.dir",
+   "para": "g3.esq"
+  }
+ ]
+}

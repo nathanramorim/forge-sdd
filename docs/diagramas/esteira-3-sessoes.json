@@ -1,0 +1,152 @@
+{
+ "kicker": "// forge-sdd · a esteira",
+ "titulo": "Três sessões, e a decisão final é sua",
+ "largura": 1280,
+ "altura": 470,
+ "elementos": [
+  {
+   "tipo": "caixa",
+   "id": "u1",
+   "x": 56,
+   "y": 216,
+   "w": 168,
+   "h": 96,
+   "texto": "Você",
+   "sub": "conversa com o Discovery",
+   "estilo": "pill"
+  },
+  {
+   "tipo": "caixa",
+   "id": "d",
+   "x": 256,
+   "y": 216,
+   "w": 168,
+   "h": 96,
+   "texto": "1 · Discovery",
+   "sub": "spec, plano e tasks",
+   "estilo": "normal"
+  },
+  {
+   "tipo": "caixa",
+   "id": "g",
+   "x": 456,
+   "y": 216,
+   "w": 168,
+   "h": 96,
+   "texto": "Você aprova",
+   "sub": "a spec",
+   "estilo": "destaque"
+  },
+  {
+   "tipo": "caixa",
+   "id": "b",
+   "x": 656,
+   "y": 216,
+   "w": 168,
+   "h": 96,
+   "texto": "2 · Builder",
+   "sub": "implementa e abre o PR",
+   "estilo": "normal"
+  },
+  {
+   "tipo": "caixa",
+   "id": "r",
+   "x": 856,
+   "y": 216,
+   "w": 168,
+   "h": 96,
+   "texto": "3 · Reviewer",
+   "sub": "só leitura: gate + parecer",
+   "estilo": "normal"
+  },
+  {
+   "tipo": "caixa",
+   "id": "u2",
+   "x": 1056,
+   "y": 216,
+   "w": 168,
+   "h": 96,
+   "texto": "Você aprova",
+   "sub": "o PR e faz o merge",
+   "estilo": "destaque"
+  },
+  {
+   "tipo": "seta",
+   "de": "u1.dir",
+   "para": "d.esq"
+  },
+  {
+   "tipo": "seta",
+   "de": "d.dir",
+   "para": "g.esq"
+  },
+  {
+   "tipo": "seta",
+   "de": "g.dir",
+   "para": "b.esq"
+  },
+  {
+   "tipo": "seta",
+   "de": "b.dir",
+   "para": "r.esq"
+  },
+  {
+   "tipo": "seta",
+   "de": "r.dir",
+   "para": "u2.esq"
+  },
+  {
+   "tipo": "seta",
+   "de": [
+    940,
+    312
+   ],
+   "para": [
+    940,
+    368
+   ],
+   "estilo": "fraca"
+  },
+  {
+   "tipo": "seta",
+   "de": [
+    940,
+    368
+   ],
+   "para": [
+    740,
+    368
+   ],
+   "forma": "horizontal",
+   "estilo": "fraca"
+  },
+  {
+   "tipo": "seta",
+   "de": [
+    740,
+    368
+   ],
+   "para": [
+    740,
+    312
+   ],
+   "estilo": "fraca"
+  },
+  {
+   "tipo": "texto",
+   "x": 840,
+   "y": 392,
+   "texto": "devolve com ajustes, até 3 vezes",
+   "estilo": "legenda",
+   "alinha": "meio"
+  },
+  {
+   "tipo": "texto",
+   "x": 56,
+   "y": 440,
+   "texto": "Modo chat (opcional, proposto): o mesmo fluxo em subagentes.",
+   "estilo": "nota",
+   "alinha": "inicio"
+  }
+ ]
+}

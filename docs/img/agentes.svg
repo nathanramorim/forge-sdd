@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="448" viewBox="0 0 1280 448">
+<defs>
+<pattern id="g" width="32" height="32" patternUnits="userSpaceOnUse"><path d="M32 0H0V32" fill="none" stroke="#1a1f2b"/></pattern>
+<marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10z" fill="#4f8ef7"/></marker>
+<marker id="ar-fraca" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10z" fill="#6b7489"/></marker>
+<clipPath id="av"><circle cx="0" cy="0" r="16"/></clipPath>
+</defs>
+<rect width="1280" height="448" rx="16" fill="#0d0f14"/>
+<rect width="1280" height="448" rx="16" fill="url(#g)"/>
+<text x="56.0" y="52.0" font-family="'JetBrains Mono', Consolas, 'Courier New', monospace" font-size="14.0" font-weight="400" fill="#4f8ef7" text-anchor="start" letter-spacing="2">// FORGE-SDD · QUEM FAZ O QUÊ</text>
+<text x="56.0" y="88.0" font-family="Montserrat, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="28.0" font-weight="800" fill="#f5f7fb" text-anchor="start">Cada sessão tem os seus agentes</text>
+<rect x="56" y="120" width="368" height="296" rx="10" fill="#101a2e" stroke="#4f8ef7" stroke-width="1.5"/>
+<text x="240.0" y="142.0" font-family="'JetBrains Mono', Consolas, 'Courier New', monospace" font-size="12.0" font-weight="700" fill="#4f8ef7" text-anchor="middle">1 · Discovery</text>
+<rect x="88" y="256" width="304" height="56" rx="10" fill="#141925" stroke="#2a3245" stroke-width="1.5"/>
+<text x="240.0" y="282.0" font-family="Montserrat, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15.0" font-weight="600" fill="#f5f7fb" text-anchor="middle">pm-architect</text>
+<text x="240.0" y="301.0" font-family="Montserrat, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13.0" font-weight="500" fill="#c3cad8" text-anchor="middle">discovery e critérios</text>
+<rect x="88" y="336" width="304" height="56" rx="10" fill="#141925" stroke="#2a3245" stroke-width="1.5"/>
+<text x="240.0" y="362.0" font-family="Montserrat, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15.0" font-weight="600" fill="#f5f7fb" text-anchor="middle">planner</text>
+<text x="240.0" y="381.0" font-family="Montserrat, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13.0" font-weight="500" fill="#c3cad8" text-anchor="middle">plano e tasks</text>
+<path d="M240.0 312.0 L240.0 334.0" fill="none" stroke="#4f8ef7" stroke-width="2" marker-end="url(#ar)"/>
+<rect x="456" y="120" width="368" height="296" rx="10" fill="#101a2e" stroke="#4f8ef7" stroke-width="1.5"/>
+<text x="640.0" y="142.0" font-family="'JetBrains Mono', Consolas, 'Courier New', monospace" font-size="12.0" font-weight="700" fill="#4f8ef7" text-anchor="middle">2 · Builder</text>
+<rect x="488" y="256" width="304" height="56" rx="10" fill="#141925" stroke="#2a3245" stroke-width="1.5"/>
+<text x="640.0" y="282.0" font-family="Montserrat, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15.0" font-weight="600" fill="#f5f7fb" text-anchor="middle">builder</text>
+<text x="640.0" y="301.0" font-family="Montserrat, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13.0" font-weight="500" fill="#c3cad8" text-anchor="middle">código, testes e PR</text>
+<rect x="856" y="120" width="368" height="296" rx="10" fill="#101a2e" stroke="#4f8ef7" stroke-width="1.5"/>
+<text x="1040.0" y="142.0" font-family="'JetBrains Mono', Consolas, 'Courier New', monospace" font-size="12.0" font-weight="700" fill="#4f8ef7" text-anchor="middle">3 · Reviewer</text>
+<rect x="888" y="256" width="304" height="56" rx="10" fill="#141925" stroke="#2a3245" stroke-width="1.5"/>
+<text x="1040.0" y="282.0" font-family="Montserrat, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15.0" font-weight="600" fill="#f5f7fb" text-anchor="middle">reviewer</text>
+<text x="1040.0" y="301.0" font-family="Montserrat, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13.0" font-weight="500" fill="#c3cad8" text-anchor="middle">veredito em JSON</text>
+<rect x="888" y="336" width="304" height="56" rx="10" fill="#141925" stroke="#2a3245" stroke-width="1.5"/>
+<text x="1040.0" y="362.0" font-family="Montserrat, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15.0" font-weight="600" fill="#f5f7fb" text-anchor="middle">governance</text>
+<text x="1040.0" y="381.0" font-family="Montserrat, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13.0" font-weight="500" fill="#c3cad8" text-anchor="middle">Camada B, só leitura</text>
+<path d="M1040.0 312.0 L1040.0 334.0" fill="none" stroke="#4f8ef7" stroke-width="2" marker-end="url(#ar)"/>
+<path d="M424.0 268.0 L454.0 268.0" fill="none" stroke="#4f8ef7" stroke-width="2" marker-end="url(#ar)"/>
+<path d="M824.0 268.0 L854.0 268.0" fill="none" stroke="#4f8ef7" stroke-width="2" marker-end="url(#ar)"/>
+<g aria-hidden="true"><g transform="translate(210.0,168.0) scale(0.5)">
+<ellipse cx="60" cy="127" rx="32" ry="4.5" fill="rgba(0,0,0,0.38)"/>
+<ellipse cx="13" cy="90" rx="7" ry="11" fill="#8aa4ff"/><ellipse cx="107" cy="90" rx="7" ry="11" fill="#8aa4ff"/>
+<line x1="60" y1="30" x2="60" y2="17" stroke="#8aa4ff" stroke-width="3.2" stroke-linecap="round"/>
+<circle cx="60" cy="11" r="14" fill="#4fd1b5" opacity="0.3"/><circle cx="60" cy="11" r="7.8" fill="#4fd1b5"/>
+<path d="M60 28 C86 28 102 52 105 80 C108 106 92 118 60 118 C28 118 12 106 15 80 C18 52 34 28 60 28 Z" fill="#8aa4ff"/>
+<path d="M15 80 C12 106 28 118 60 118 C92 118 108 106 105 80 C97 98 80 106 60 106 C40 106 23 98 15 80 Z" fill="rgba(0,0,0,0.22)"/>
+<rect x="52" y="49.7" width="16" height="4.6" rx="2.3" fill="rgba(18,24,48,0.6)"/>
+<rect x="25" y="70" width="70" height="32" rx="16" fill="#10131a" stroke="rgba(255,255,255,0.1)"/>
+<g fill="#4fd1b5"><rect x="41.5" y="78" width="7" height="16" rx="3.5"/><rect x="71.5" y="78" width="7" height="16" rx="3.5"/></g>
+</g><g transform="translate(610.0,168.0) scale(0.5)">
+<ellipse cx="60" cy="127" rx="32" ry="4.5" fill="rgba(0,0,0,0.38)"/>
+<ellipse cx="13" cy="90" rx="7" ry="11" fill="#ff8a5c"/><ellipse cx="107" cy="90" rx="7" ry="11" fill="#ff8a5c"/>
+<line x1="60" y1="30" x2="60" y2="17" stroke="#ff8a5c" stroke-width="3.2" stroke-linecap="round"/>
+<circle cx="60" cy="11" r="14" fill="#4fd1b5" opacity="0.3"/><circle cx="60" cy="11" r="7.8" fill="#4fd1b5"/>
+<path d="M60 28 C86 28 102 52 105 80 C108 106 92 118 60 118 C28 118 12 106 15 80 C18 52 34 28 60 28 Z" fill="#ff8a5c"/>
+<path d="M15 80 C12 106 28 118 60 118 C92 118 108 106 105 80 C97 98 80 106 60 106 C40 106 23 98 15 80 Z" fill="rgba(0,0,0,0.22)"/>
+<polygon points="60,46.5 66,57 54,57" fill="rgba(18,24,48,0.6)"/>
+<rect x="25" y="70" width="70" height="32" rx="16" fill="#10131a" stroke="rgba(255,255,255,0.1)"/>
+<g fill="#4fd1b5"><rect x="41.5" y="78" width="7" height="16" rx="3.5"/><rect x="71.5" y="78" width="7" height="16" rx="3.5"/></g>
+</g><g transform="translate(1010.0,168.0) scale(0.5)">
+<ellipse cx="60" cy="127" rx="32" ry="4.5" fill="rgba(0,0,0,0.38)"/>
+<ellipse cx="13" cy="90" rx="7" ry="11" fill="#f2a65a"/><ellipse cx="107" cy="90" rx="7" ry="11" fill="#f2a65a"/>
+<line x1="60" y1="30" x2="60" y2="17" stroke="#f2a65a" stroke-width="3.2" stroke-linecap="round"/>
+<circle cx="60" cy="11" r="14" fill="#4fd1b5" opacity="0.3"/><circle cx="60" cy="11" r="7.8" fill="#4fd1b5"/>
+<path d="M60 28 C86 28 102 52 105 80 C108 106 92 118 60 118 C28 118 12 106 15 80 C18 52 34 28 60 28 Z" fill="#f2a65a"/>
+<path d="M15 80 C12 106 28 118 60 118 C92 118 108 106 105 80 C97 98 80 106 60 106 C40 106 23 98 15 80 Z" fill="rgba(0,0,0,0.22)"/>
+<circle cx="60" cy="52" r="4.6" fill="none" stroke="rgba(18,24,48,0.6)" stroke-width="2.6"/>
+<rect x="25" y="70" width="70" height="32" rx="16" fill="#10131a" stroke="rgba(255,255,255,0.1)"/>
+<g fill="#4fd1b5"><rect x="41.5" y="78" width="7" height="16" rx="3.5"/><rect x="71.5" y="78" width="7" height="16" rx="3.5"/></g>
+</g></g></svg>
