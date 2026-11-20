@@ -18,6 +18,8 @@ func TestCompararVersao(t *testing.T) {
 		{"5.0.0", "4.9.1", VersaoBinarioAntigo},
 		{"5.0.0", "dev", VersaoNaoComparavel},
 		{"", "5.0.0", VersaoNaoComparavel},
+		{"5.0.0", "5.0.0-beta", VersaoBinarioAntigo},
+		{"5.0.0-beta", "5.0.0", VersaoProjetoAntigo},
 	}
 	for _, c := range casos {
 		got, _ := CompararVersao(c.p, c.b)
