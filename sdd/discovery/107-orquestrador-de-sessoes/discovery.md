@@ -65,7 +65,7 @@ Recomendação: **D**. Não decido por vocês: é a Decisão 1 do Gate 1.
 | Verificação | `forge gate` (Camada A) e `--criterios` (P-25) estáticos (`internal/gate/criteria.go:170`) | Contrato de "entrega verificada" por rota (commit, PR, diagramas, testes reexecutados); nada impede o orquestrador de repassar o relatório sem checar |
 | Menus (RN-9) | `Opcao` e `Recomendada` em `laco.go:85`; regra na 104 | Padrão de menu do orquestrador, incluindo "abrir pasta" |
 | Segurança de entrada | FLX-08 trata spec, descrição e diff como dado não confiável; achados sanitizados (`sanitizarAchados`, `laco.go:333`) | Regra equivalente para relatório de subagente e mensagem de sessão par |
-| Teto de custo | Salvaguardas por job: `max_job_tokens`, `max_jobs_per_day` (`internal/config/forge.go:118-120`); `max_parallel_tasks` padrão 5; `max_rework_attempts` padrão 3 (`forge_test.go:35,37`) | Teto de delegações simultâneas e de reentregas **do orquestrador** |
+| Teto de custo | Salvaguardas por job: `max_job_tokens`, `max_jobs_per_day` (`internal/config/forge.go:118-120`); `max_parallel_tasks` padrão 3; `max_rework_attempts` padrão 3 (`forge_test.go:35,37`) | Teto de delegações simultâneas e de reentregas **do orquestrador** |
 | Retomada | Estado do laço e `status.md` por iniciativa | Registro de delegações abertas legível depois de `/compact` |
 
 ## Independência de ferramenta de agente
