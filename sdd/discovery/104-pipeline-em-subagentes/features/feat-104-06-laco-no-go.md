@@ -2,7 +2,7 @@
 
 **Iniciativa:** 104-pipeline-em-subagentes
 **Branch:** feat/104-pipeline-em-subagentes
-**Status:** draft (aguarda Gate 1)
+**Status:** implementada em 2026-11-20
 **Depende de:** feat-104-01
 
 ## Problema
@@ -40,13 +40,19 @@ Nenhuma (`SEG-07`).
 ```bash
 set -o pipefail
 go test -list 'TestLockPorIniciativa|TestRetornoEscalaNoTeto|TestLegueParcialRepeteSoFalho|TestRetomaDoUltimoEstado' ./internal/pipeline | grep -F 'TestLockPorIniciativa' >/dev/null
+go test -list 'TestRetornoEscalaNoTeto' ./internal/pipeline | grep -F 'TestRetornoEscalaNoTeto' >/dev/null
 go test ./internal/pipeline -run 'TestLockPorIniciativa|TestRetornoEscalaNoTeto|TestLegueParcialRepeteSoFalho|TestRetomaDoUltimoEstado'
 # negativo: segundo coordenador na mesma iniciativa falha; na 4a devolução escala
 go test ./internal/pipeline -run 'TestLockPorIniciativa|TestRetornoEscalaNoTeto'
 go vet ./... && go test ./...
 ```
 - Teste negativo: segundo coordenador na mesma iniciativa falha; na 4a devolução escala em vez de voltar.
-- Spike registrado com comando e saída literais.
+- Spike registrado com comando e saída literais em `spike-aninhamento.md`.
 
-## A confirmar no Gate 1
-Resultado do spike muda o desenho? Teto de voltas continua 3?
+## Decisões da implementação
+- **Teto de voltas continua 3:** `LimiteDeVoltas` lê o `max_rework_attempts` de `forge.json` (padrão 3). Com teto 3, as 3 primeiras violações voltam ao Builder e a 4ª escala, como em `ApplyVerdict`.
+- **Spike não muda o desenho:** a evidência local não contradiz a opção A (ver `spike-aninhamento.md`); D e C ficam sem decisão, pendentes de execução real fora de `go test` e de nova ADR.
+- **Lock em `harness`, não no `bus`:** o `bus` reivindica jobs, não iniciativas. O lock é publicado por `os.Link` (atômico, sem sobrescrever) e `os.Rename` para tomar órfão, com lease de 15 min renovada a cada task. Processo morto: o arquivo `.forge/runtime/chat/locks/<iniciativa>.lock` fica até a lease vencer; depois o próximo coordenador o recupera sozinho. Não se checa PID vivo (portabilidade).
+- **Escalada pelo retorno, não pelo inbox:** o laço devolve `Retorno` com achados (arquivo e linha, sanitizados, FLX-08) e o menu (`Opcoes`, `Recomendada`, RN-9); notificar a pessoa fica para a camada de entrada (feat-104-09), para não duplicar `ApplyVerdict` do modo `sessions`.
+- **Leque sequencial:** as tasks do lote rodam em ordem; paralelismo com worktree por subagente é a feat-104-07. Falha de build ou review deixa a task em `falhou` e o lote em `parcial`; `Retomar` repete só o que falhou ou parou no meio.
+- Estado gravado em `.forge/runtime/chat/<iniciativa>.json`.
