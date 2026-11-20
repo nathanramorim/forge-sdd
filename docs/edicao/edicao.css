@@ -3,8 +3,10 @@
 
 html[data-edicao="missoes"] {
   --bg: var(--missoes-superficie-preto-moldura);
-  --bg2: var(--missoes-superficie-botao-escuro);
-  --bg3: var(--missoes-superficie-disco);
+  --bg2: var(--missoes-superficie-ameixa);
+  --bg3: #5a2650;
+  --line: rgba(255, 170, 190, .2);
+  --line2: rgba(255, 170, 190, .38);
   --fg: var(--missoes-texto-branco);
   --muted: #cdbdd3;
   --faint: var(--missoes-texto-inativo);
@@ -21,13 +23,85 @@ html[data-edicao="missoes"] {
 }
 
 html[data-edicao="missoes"] body {
+  background-color: var(--missoes-superficie-ameixa);
   background-image:
-    radial-gradient(1200px 500px at 50% -60px, rgba(254, 129, 141, .34), rgba(130, 76, 200, .18) 48%, transparent 76%),
-    linear-gradient(rgba(240, 97, 175, .045) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(240, 97, 175, .045) 1px, transparent 1px);
-  background-size: auto, 44px 44px, 44px 44px;
+    linear-gradient(180deg, var(--missoes-superficie-preto-moldura) 0, var(--missoes-superficie-ameixa) 640px, #2b1230 100%),
+    linear-gradient(rgba(240, 97, 175, .05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(240, 97, 175, .05) 1px, transparent 1px);
+  background-size: 100% 100%, 44px 44px, 44px 44px;
   background-repeat: no-repeat, repeat, repeat;
   background-position: center top;
+  overflow-x: clip;
+}
+
+/* Topo em tela cheia: pôr do sol com sol listrado, palmeiras e skyline */
+html[data-edicao="missoes"] .hero {
+  position: relative;
+  isolation: isolate;
+  min-height: clamp(520px, 62vw, 640px);
+  padding-top: clamp(28px, 5vw, 56px);
+  text-shadow: 0 2px 10px rgba(6, 5, 6, .75);
+}
+html[data-edicao="missoes"] .hero::before {
+  content: "";
+  position: absolute;
+  inset: 0 calc(50% - 50vw);
+  z-index: -1;
+  background: url("hero-arte.svg") center bottom / cover no-repeat;
+}
+
+html[data-edicao="missoes"] .hero .eyebrow,
+html[data-edicao="missoes"] .hero p.lead {
+  color: var(--missoes-texto-branco);
+  font-weight: 600;
+  text-shadow: 0 1px 3px rgba(6, 5, 6, .95), 0 2px 16px rgba(6, 5, 6, .85);
+}
+html[data-edicao="missoes"] .hero p.lead {
+  background: rgba(21, 21, 21, .38);
+  border-radius: 10px;
+  padding: 10px 16px;
+}
+
+html[data-edicao="missoes"] .hero .btn,
+html[data-edicao="missoes"] .hero .install-pill {
+  text-shadow: none;
+}
+
+/* Placa de neon com a última missão */
+html[data-edicao="missoes"] .edicao-placa {
+  display: inline-block;
+  margin: 4px auto 22px;
+  padding: 8px 22px;
+  border: 3px solid var(--missoes-texto-branco);
+  border-radius: 10px;
+  font: 800 clamp(16px, 2.6vw, 24px)/1.1 var(--missoes-fonte-marca);
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--missoes-texto-branco);
+  text-shadow: 0 0 6px #fff, 0 0 14px var(--missoes-acento-coral), 0 0 30px var(--missoes-acento-rosa-choque);
+  box-shadow: 0 0 10px var(--missoes-acento-coral), 0 0 26px var(--missoes-acento-rosa-choque), inset 0 0 12px rgba(240, 97, 175, .55);
+  background: rgba(21, 21, 21, .55);
+  transform: rotate(-2.5deg);
+}
+@media (prefers-reduced-motion: no-preference) {
+  html[data-edicao="missoes"] .edicao-placa { animation: edicao-cintilar 5s steps(1, end) infinite; }
+  @keyframes edicao-cintilar {
+    0%, 90%, 94%, 100% { opacity: 1; }
+    92%, 96% { opacity: .78; }
+  }
+}
+
+/* Cartões em mosaico: contorno grosso e sombra dura */
+html[data-edicao="missoes"] .agent-card,
+html[data-edicao="missoes"] .step-node {
+  border: 3px solid var(--missoes-acento-coral);
+  border-radius: 6px;
+  box-shadow: 6px 6px 0 var(--missoes-acento-rosa-choque);
+}
+html[data-edicao="missoes"] .agent-card.active,
+html[data-edicao="missoes"] .step-node.active {
+  border-color: var(--c, var(--missoes-acento-pessego));
+  box-shadow: 6px 6px 0 var(--c, var(--missoes-acento-pessego));
 }
 
 /* Molduras: barra preta no topo e rodapé com linha neon */
@@ -125,6 +199,7 @@ html[data-edicao="missoes"] .edicao-cinco {
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+  text-shadow: none;
   filter: drop-shadow(0 6px 14px rgba(6, 5, 6, .55));
 }
 html[data-edicao="missoes"] .edicao-nome {

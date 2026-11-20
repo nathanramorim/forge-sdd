@@ -59,6 +59,11 @@
       faixa.appendChild(criar("span", "edicao-nome", dados.edicao));
       faixa.appendChild(criar("span", "edicao-promessa", dados.promessa));
       hero.insertBefore(faixa, hero.firstChild);
+      var ultima = dados.missoes[dados.missoes.length - 1];
+      if (ultima && typeof ultima.titulo === "string") {
+        var texto = ultima.titulo.split(": ").pop();
+        faixa.parentNode.insertBefore(criar("div", "edicao-placa", texto), faixa.nextSibling);
+      }
     }
 
     var estacoes = document.getElementById("estacoes");

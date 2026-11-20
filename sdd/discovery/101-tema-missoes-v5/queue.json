@@ -2,7 +2,7 @@
   "feature_id": "feat-101",
   "branch": "feat/101-tema-missoes-v5",
   "spec_status": "reviewed",
-  "updated_at": "2026-11-20T00:36:05Z",
+  "updated_at": "2026-11-20T00:47:11Z",
   "items": [
     {
       "task_id": "fix-101-01-alinhar-readme-e-design-system",
@@ -129,6 +129,35 @@
         ],
         "resumo": "Camada A toda verde. Segurança do workflow, aderência à spec e o ajuste do teste Go estão corretos. Sem violação; uma dúvida de baixa severidade, não bloqueante."
       }
+    },
+    {
+      "task_id": "feat-101-04-visual-mais-intenso-da-edicao",
+      "title": "feat-101-04 — Visual mais intenso da Edição Missões na LP",
+      "spec_path": "sdd/discovery/101-tema-missoes-v5/features/feat-101-04-visual-mais-intenso-da-edicao.md",
+      "status": "review_pending",
+      "depends_on": [
+        "feat-101-01",
+        "(camada",
+        "porteiro",
+        "de",
+        "vigência)",
+        "feat-101-02",
+        "(mascotes)"
+      ],
+      "rules": [
+        "ARQ-11",
+        "DUP-02",
+        "COD-01",
+        "COD-04",
+        "COD-05",
+        "SEG-07",
+        "TST-01",
+        "TST-05",
+        "FLX-01",
+        "FLX-02"
+      ],
+      "skills_used": [],
+      "attempts": 1
     }
   ]
 }

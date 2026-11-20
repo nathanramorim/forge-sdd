@@ -63,7 +63,7 @@ def striped_sun(mask_id, cx, cy, r, fill):
             f'<circle cx="{cx}" cy="{cy}" r="{r}" fill="{fill}" mask="url(#{mask_id})"/>')
 
 
-def skyline(base_y, blds, cor):
+def skyline(base_y, blds, cor, largura=1280, chao=32):
     g, win = [], []
     for i, (bx, bw, bh) in enumerate(blds):
         top = base_y - bh
@@ -79,4 +79,4 @@ def skyline(base_y, blds, cor):
                     win.append(f'<rect x="{bx + 6 + col * 9}" y="{top + 7 + row * 11}" width="4" height="5"/>')
     return (f'<g fill="{cor}" opacity="0.92">{"".join(g)}</g>'
             f'<g fill="#ffb06d" opacity="0.55">{"".join(win)}</g>'
-            f'<rect x="0" y="{base_y}" width="1280" height="32" fill="{c("superficie", "ameixa")}"/>')
+            f'<rect x="0" y="{base_y}" width="{largura}" height="{chao}" fill="{c("superficie", "ameixa")}"/>')

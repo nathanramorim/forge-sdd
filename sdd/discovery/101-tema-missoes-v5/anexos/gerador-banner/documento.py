@@ -192,6 +192,9 @@ A edição usa a tipografia da marca. O destaque da versão é o "5.0" em Montse
 | **Lista de opções** | Linhas escuras translúcidas. A linha ativa é âmbar sólido, com o valor em caixa alta à direita. | `ambar`, `preto-fundo` |
 | **Painel de descrição** | Barra de título escura com rótulo centralizado; corpo translúcido; aviso em amarelo. | `painel`, `aviso` |
 | **Fundos** | Degradê horizontal atrás das molduras; pôr do sol com sol listrado, palmeiras e silhueta de cidade. | `prancha`, `ceu`, `sol-crepusculo`, `sol-orquidea`, `sol-ambar` |
+| **Topo em tela cheia** | Pôr do sol com a largura da janela atrás do título da LP, gerado por `hero.py`; a base se funde com o fundo ameixa. | `ceu`, `ameixa` |
+| **Placa de neon** | Última missão em caixa alta, tubo branco com brilho rosa e coral, levemente inclinada. | `branco`, `coral`, `rosa-choque` |
+| **Cartão em mosaico** | Contorno de 3 px, cantos de 6 px e sombra dura deslocada na cor do degradê assinatura. | `coral`, `rosa-choque` |
 
 ## Contraste
 
