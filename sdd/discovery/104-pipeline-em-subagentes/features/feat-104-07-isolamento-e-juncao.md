@@ -2,7 +2,7 @@
 
 **Iniciativa:** 104-pipeline-em-subagentes
 **Branch:** feat/104-pipeline-em-subagentes
-**Status:** draft (aguarda Gate 1)
+**Status:** implementado (aguarda revisão)
 **Depende de:** feat-104-06
 
 ## Problema
@@ -46,3 +46,13 @@ go vet ./... && go test ./...
 
 ## A confirmar no Gate 1
 Estratégia de junção padrão (merge por lote x rebase).
+
+## Decisões da implementação
+- Código em `internal/pipeline/leque.go` (arquivo novo ao lado de `worktree.go`, que continua sendo reusado: `CreateWorktree`, `RemoveWorktree`, `WorktreePath`).
+- Lock: `harness.AdquirirLock` com a chave `worktree-principal` (não a da iniciativa, para não colidir com o `RunChat`). Dois leques no mesmo repositório se excluem; o lock é liberado em qualquer recusa.
+- Recusa: worktree principal fora da branch base, com alteração em arquivo rastreado (`--untracked-files=no`, para não travar por lixo local) ou com lock de outro dono.
+- Junção: `git merge --no-ff` por task, na ordem do plano. Conflito: lista os arquivos, `merge --abort`, task `bloqueada`, branch e worktree preservados, menu `resolver`/`pular`/`abortar` (RN-9). Task com worktree sujo é bloqueada sem merge. Sem `reset --hard`, sem `branch -D` em task com trabalho.
+- Órfão de execução interrompida: reaproveitado só se vazio (branch sem commits e worktree limpo; remove com `branch -d`); com trabalho, a preparação para e escala.
+- Estratégia padrão (A confirmar no Gate 1): merge por lote, não rebase.
+- Tasks seguintes a um conflito continuam sendo integradas (mesmo lote é independente por construção).
+- Todas as entradas validadas na borda (regex de id, ref sem `..`/`-`, raiz do repositório); `git` por argv; texto de git sanitizado com `notify.Sanitize`.
