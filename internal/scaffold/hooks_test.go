@@ -84,3 +84,73 @@ func TestMergeClaudeInboxHook_NaoTocaEmJSONInvalidoOuFormaInesperada(t *testing.
 		assert.Contains(t, err.Error(), "manualmente", name)
 	}
 }
+
+func eventoCmds(m map[string]any, ev string) []string {
+	var cmds []string
+	hooks, _ := m["hooks"].(map[string]any)
+	groups, _ := hooks[ev].([]any)
+	for _, g := range groups {
+		for _, h := range g.(map[string]any)["hooks"].([]any) {
+			cmds = append(cmds, h.(map[string]any)["command"].(string))
+		}
+	}
+	return cmds
+}
+
+func TestHookSessionStartIdempotente(t *testing.T) {
+	dir := t.TempDir()
+	require.NoError(t, os.MkdirAll(filepath.Join(dir, ".claude"), 0o755))
+	seed := `{"model":"opus","hooks":{"SessionStart":[{"hooks":[{"type":"command","command":"echo meu"}]}]}}`
+	require.NoError(t, os.WriteFile(filepath.Join(dir, ".claude", "settings.json"), []byte(seed), 0o644))
+
+	changed, err := MergeClaudeSessionStartHook(dir)
+	require.NoError(t, err)
+	assert.True(t, changed)
+	// negativo: o segundo update não duplica
+	changed, err = MergeClaudeSessionStartHook(dir)
+	require.NoError(t, err)
+	assert.False(t, changed)
+	m := readSettings(t, dir)
+	assert.Equal(t, []string{"echo meu", doctorHookCommand}, eventoCmds(m, "SessionStart"))
+	assert.Equal(t, "opus", m["model"])
+
+	// JSON inválido nunca é tocado
+	bad := []byte(`{"hooks": `)
+	require.NoError(t, os.WriteFile(filepath.Join(dir, ".claude", "settings.json"), bad, 0o644))
+	_, err = MergeClaudeSessionStartHook(dir)
+	require.Error(t, err)
+	got, _ := os.ReadFile(filepath.Join(dir, ".claude", "settings.json"))
+	assert.Equal(t, bad, got)
+}
+
+func TestMCPServerRegistroIdempotente(t *testing.T) {
+	dir := t.TempDir()
+	p := filepath.Join(dir, ".mcp.json")
+	require.NoError(t, os.WriteFile(p, []byte(`{"mcpServers":{"outro":{"command":"x"}}}`), 0o644))
+	changed, err := MergeClaudeMCPServer(dir)
+	require.NoError(t, err)
+	assert.True(t, changed)
+	changed, err = MergeClaudeMCPServer(dir)
+	require.NoError(t, err)
+	assert.False(t, changed)
+	data, _ := os.ReadFile(p)
+	var m map[string]map[string]any
+	require.NoError(t, json.Unmarshal(data, &m))
+	assert.Contains(t, m["mcpServers"], "outro")
+	assert.Contains(t, m["mcpServers"], "forge-sdd")
+
+	require.NoError(t, os.WriteFile(p, []byte(`[1]`), 0o644))
+	_, err = MergeClaudeMCPServer(dir)
+	require.Error(t, err)
+	got, _ := os.ReadFile(p)
+	assert.Equal(t, "[1]", string(got))
+}
+
+func TestInstrucaoDoctorNoAgentsMd(t *testing.T) {
+	for _, f := range []string{"agents/openai/AGENTS.md.tmpl", "agents/claude/CLAUDE.md.tmpl", "agents/gemini/GEMINI.md.tmpl"} {
+		data, err := templatesFS.ReadFile("templates/" + f)
+		require.NoError(t, err, f)
+		assert.Contains(t, string(data), "forge_doctor", f)
+		assert.Contains(t, string(data), "forge doctor --harness", f)
+	}
+}

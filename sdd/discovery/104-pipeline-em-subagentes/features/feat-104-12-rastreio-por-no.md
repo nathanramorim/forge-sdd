@@ -34,8 +34,12 @@ Nenhuma (`SEG-07`).
 
 ## Critérios de Aceitação Executáveis
 ```bash
-go test -list 'TestTraceGravaNo|TestReportNos' ./internal/monitor | grep -q 'TestTraceGravaNo'
-go test ./internal/monitor -run 'TestTraceGravaNo|TestReportNos'
+set -o pipefail
+go test -list 'TestTraceGravaNo|TestReportNos|TestTraceRecusaNoSemMotivo' ./internal/monitor | grep -F 'TestTraceGravaNo' >/dev/null
+go test -list 'TestTraceGravaNo|TestReportNos|TestTraceRecusaNoSemMotivo' ./internal/monitor | grep -F 'TestTraceRecusaNoSemMotivo' >/dev/null
+go test ./internal/monitor -run 'TestTraceGravaNo|TestReportNos|TestTraceRecusaNoSemMotivo'
+# negativo: nó sem motivo_parada é recusado
+go test ./internal/monitor -run 'TestTraceRecusaNoSemMotivo'
 go vet ./... && go test ./...
 ```
 - Teste negativo: nó sem `motivo_parada` é recusado.

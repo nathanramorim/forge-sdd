@@ -3,11 +3,13 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
 
 	"github.com/forge-sdd/cli/internal/config"
+	"github.com/forge-sdd/cli/internal/doctor"
 	"github.com/forge-sdd/cli/internal/gate"
 	"github.com/forge-sdd/cli/internal/layout"
 	"github.com/forge-sdd/cli/internal/scaffold"
@@ -27,9 +29,13 @@ var doctorCmd = &cobra.Command{
 inconsistências de configuração dos agentes de IA e progresso das features.`,
 	Args: cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		targetDir := "."
+		targetDir, _ := cmd.Flags().GetString("dir")
 		if len(args) == 1 {
 			targetDir = args[0]
+		}
+		if harnessMode, _ := cmd.Flags().GetBool("harness"); harnessMode {
+			asJSON, _ := cmd.Flags().GetBool("json")
+			return runDoctorHarness(cmd.OutOrStdout(), targetDir, asJSON, doctor.DefaultDeps())
 		}
 
 		fmt.Printf("🩺 Iniciando diagnóstico da metodologia em '%s'...\n\n", targetDir)
@@ -304,4 +310,36 @@ inconsistências de configuração dos agentes de IA e progresso das features.`,
 func fileExists(path string) bool {
 	_, err := os.Stat(path)
 	return err == nil
+}
+
+// runDoctorHarness imprime o diagnóstico do harness (texto ou JSON) e sai com 3 se algo falhou.
+func runDoctorHarness(w io.Writer, dir string, asJSON bool, deps doctor.Deps) error {
+	rel := doctor.Diagnose(dir, deps)
+	if err := doctor.ValidateRelatorio(rel); err != nil {
+		return err
+	}
+	if asJSON {
+		data, err := json.Marshal(rel)
+		if err != nil {
+			return fmt.Errorf("serializar relatório do doctor: %w", err)
+		}
+		fmt.Fprintln(w, string(data))
+	} else {
+		for _, c := range rel.Checagens {
+			fmt.Fprintf(w, "[%s] %s: %s\n", c.Status, c.ID, c.Detalhe)
+			if c.Sugestao != "" {
+				fmt.Fprintf(w, "      sugestão: %s\n", c.Sugestao)
+			}
+		}
+	}
+	if code := rel.ExitCode(); code != 0 {
+		return exitCodeErr{code: code}
+	}
+	return nil
+}
+
+func init() {
+	doctorCmd.Flags().String("dir", ".", "Diretório alvo do projeto Forge-SDD")
+	doctorCmd.Flags().Bool("harness", false, "Diagnostica o harness do pipeline (somente leitura; sai com 3 se houver falha)")
+	doctorCmd.Flags().Bool("json", false, "Com --harness, emite o relatório em JSON")
 }

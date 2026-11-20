@@ -36,8 +36,11 @@ Nenhuma (`SEG-07`).
 
 ## Critérios de Aceitação Executáveis
 ```bash
-go test -list 'TestAgentesABSemFerramentaAgent|TestReviewerABSomenteLeitura|TestAgentesAte420Bytes' ./internal/scaffold | grep -q 'TestReviewerABSomenteLeitura'
+set -o pipefail
+go test -list 'TestAgentesABSemFerramentaAgent|TestReviewerABSomenteLeitura|TestAgentesAte420Bytes' ./internal/scaffold | grep -F 'TestReviewerABSomenteLeitura' >/dev/null
 go test ./internal/scaffold -run 'TestAgentesABSemFerramentaAgent|TestReviewerABSomenteLeitura|TestAgentesAte420Bytes'
+# negativo: reviewer com Edit, Write ou Agent reprova
+go test ./internal/scaffold -run 'TestReviewerABSomenteLeitura|TestAgentesABSemFerramentaAgent'
 go vet ./... && go test ./...
 ```
 - Teste negativo: definição de reviewer com `Edit` ou `Write` reprova; com `Agent` reprova.
