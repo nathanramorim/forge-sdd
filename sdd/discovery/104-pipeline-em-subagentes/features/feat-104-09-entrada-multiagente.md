@@ -36,8 +36,11 @@ Nenhuma (`SEG-07`).
 
 ## Critérios de Aceitação Executáveis
 ```bash
-go test -list 'TestMatrizCapacidades|TestCapacidadeSupostaGeraAviso' ./internal/config | grep -q 'TestMatrizCapacidades'
+set -o pipefail
+go test -list 'TestMatrizCapacidades|TestCapacidadeSupostaGeraAviso' ./internal/config | grep -F 'TestMatrizCapacidades' >/dev/null
 go test ./internal/config -run 'TestMatrizCapacidades|TestCapacidadeSupostaGeraAviso'
+# negativo: agente sem capacidade subagentes cai para sessions com aviso
+go test ./internal/config -run 'TestCapacidadeSupostaGeraAviso'
 go vet ./... && go test ./...
 ```
 - Teste negativo: agente sem capacidade `subagentes` cai para o modo `sessions` com aviso.

@@ -36,8 +36,11 @@ Nenhuma (`SEG-07`).
 
 ## Critérios de Aceitação Executáveis
 ```bash
-go test -list 'TestDiagnoseJSON|TestDiagnoseSemEfeitoColateral|TestDiagnoseDetectaWorktreeOrfao' ./internal/harness | grep -q 'TestDiagnoseJSON'
+set -o pipefail
+go test -list 'TestDiagnoseJSON|TestDiagnoseSemEfeitoColateral|TestDiagnoseDetectaWorktreeOrfao' ./internal/harness | grep -F 'TestDiagnoseJSON' >/dev/null
 go test ./internal/harness -run 'TestDiagnoseJSON|TestDiagnoseSemEfeitoColateral|TestDiagnoseDetectaWorktreeOrfao'
+# negativo: worktree órfão e contrato divergente produzem falha e código 3
+go test ./internal/harness -run 'TestDiagnoseDetectaWorktreeOrfao'
 go vet ./... && go test ./...
 ```
 - Teste negativo: worktree órfão e contrato divergente produzem `falha` e código 3.

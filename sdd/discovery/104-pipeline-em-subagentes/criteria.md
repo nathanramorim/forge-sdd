@@ -68,6 +68,6 @@ sequenceDiagram
 go build ./... && go vet ./... && go test ./...
 forge gate --dir . --mode bloqueio --branch feat/104-pipeline-em-subagentes --spec sdd/discovery/104-pipeline-em-subagentes/features/feat-104-01-contratos-entre-etapas.md
 ```
-- Cada feature traz ao menos um teste negativo (caso que deve falhar e falha), checado por `forge criteria verify` (feat-104-02).
+- Cada feature traz ao menos um teste negativo (caso que deve falhar e falha), checado por `forge gate --criterios` (feat-104-02).
 - Handoff com menu (RN-9): cada ponto de handoff para a pessoa, nas features 104-06, 104-08, 104-09 e 104-10, declara as opções do menu e a opção recomendada; o critério de cada uma confere que a saída oferece as opções e não só texto.
 - Avaliação (feat-104-11): mesma suíte de referência nos dois modos, relatório com aprovação, retornos, tokens, tempo e intervenções.

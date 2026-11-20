@@ -36,8 +36,11 @@ Nenhuma (`SEG-07`).
 
 ## Critérios de Aceitação Executáveis
 ```bash
-go test -list 'TestMCPForgeDoctor|TestHookSessionStartIdempotente|TestInstrucaoDoctorNoAgentsMd' ./internal/acp ./internal/scaffold | grep -q 'TestMCPForgeDoctor'
+set -o pipefail
+go test -list 'TestMCPForgeDoctor|TestHookSessionStartIdempotente|TestInstrucaoDoctorNoAgentsMd' ./internal/acp ./internal/scaffold | grep -F 'TestMCPForgeDoctor' >/dev/null
 go test ./internal/acp ./internal/scaffold -run 'TestMCPForgeDoctor|TestHookSessionStartIdempotente|TestInstrucaoDoctorNoAgentsMd'
+# negativo: ferramenta desconhecida devolve erro JSON-RPC; segundo update não duplica o hook
+go test ./internal/acp ./internal/scaffold -run 'TestMCPForgeDoctor|TestHookSessionStartIdempotente'
 go vet ./... && go test ./...
 ```
 - Teste negativo: chamada de ferramenta desconhecida devolve erro JSON-RPC; segundo `update` não duplica o hook.

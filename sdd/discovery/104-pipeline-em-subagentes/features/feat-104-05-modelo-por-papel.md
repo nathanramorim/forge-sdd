@@ -34,8 +34,11 @@ Nenhuma (`SEG-07`).
 
 ## Critérios de Aceitação Executáveis
 ```bash
-go test -list 'TestAgentModelsEscreveCabecalho|TestAgentModelsRecusaValorInvalido' ./internal/scaffold | grep -q 'TestAgentModelsEscreveCabecalho'
+set -o pipefail
+go test -list 'TestAgentModelsEscreveCabecalho|TestAgentModelsRecusaValorInvalido' ./internal/scaffold | grep -F 'TestAgentModelsEscreveCabecalho' >/dev/null
 go test ./internal/scaffold -run 'TestAgentModelsEscreveCabecalho|TestAgentModelsRecusaValorInvalido'
+# negativo: modelo fora da lista é recusado
+go test ./internal/scaffold -run 'TestAgentModelsRecusaValorInvalido'
 go vet ./... && go test ./...
 ```
 - Teste negativo: modelo fora da lista é recusado; sem chave o cabeçalho segue `inherit`.

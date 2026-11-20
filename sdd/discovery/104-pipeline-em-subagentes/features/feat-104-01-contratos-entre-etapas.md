@@ -36,8 +36,11 @@ Nenhuma (`SEG-07`).
 
 ## Critérios de Aceitação Executáveis
 ```bash
-go test -list 'TestContratoVeredito|TestContratoRecusaCampoDesconhecido' ./internal/harness | grep -q 'TestContratoVeredito'
+set -o pipefail
+go test -list 'TestContratoVeredito|TestContratoRecusaCampoDesconhecido' ./internal/harness | grep -F 'TestContratoVeredito' >/dev/null
 go test ./internal/harness -run 'TestContratoVeredito|TestContratoRecusaCampoDesconhecido'
+# negativo: parecer com campo desconhecido é recusado com o nome do campo
+go test ./internal/harness -run 'TestContratoRecusaCampoDesconhecido'
 go vet ./... && go test ./...
 ```
 - Teste negativo: parecer com campo desconhecido é recusado com o nome do campo.
