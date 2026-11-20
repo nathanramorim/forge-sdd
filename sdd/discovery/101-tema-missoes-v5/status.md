@@ -6,3 +6,4 @@
 **Falta conferir (humano):** celular em 390 px; disparo manual do workflow de encerramento.
 **Dependência externa:** PR #112 mesclado, para o deploy automático da LP.
 **Vigência:** a edição termina em 23/11/2026, 0h de Brasília.
+**Personagem do Nathan (pendente, 20/11/2026):** usar o personagem pixel de `~/git/gerador-videos/dados/personagens/nathan/pixel/` (busto, bocas aberta e fechada), redesenhado no estilo dos robôs, como o chefe que aprova a "Missão cumprida". Fazer depois da onda 1 da 104.
