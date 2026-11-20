@@ -2,7 +2,7 @@
   "feature_id": "feat-101",
   "branch": "feat/101-tema-missoes-v5",
   "spec_status": "reviewed",
-  "updated_at": "2026-11-20T01:04:10Z",
+  "updated_at": "2026-11-20T01:05:34Z",
   "items": [
     {
       "task_id": "fix-101-01-alinhar-readme-e-design-system",
@@ -168,7 +168,7 @@
       "task_id": "feat-101-05-visual-de-malandro-nos-mascotes",
       "title": "feat-101-05 — Visual de malandro de cidade tropical nos mascotes",
       "spec_path": "sdd/discovery/101-tema-missoes-v5/features/feat-101-05-visual-de-malandro-nos-mascotes.md",
-      "status": "review_pending",
+      "status": "approved",
       "depends_on": [
         "feat-101-02",
         "(acessórios",
@@ -188,7 +188,12 @@
         "FLX-02"
       ],
       "skills_used": [],
-      "attempts": 1
+      "attempts": 1,
+      "governance_verdict": {
+        "veredito": "conforme",
+        "achados": [],
+        "resumo": "Figurino genérico (panamá, charuto de brinquedo, corrente e brinco de ouro, gola florida, boné de aba reta) respeita os critérios 1 e 7. Sem nome de jogo, personagem, logo, texto ou arquivo externo; critérios da spec, go vet e forge gate passam."
+      }
     }
   ]
 }
