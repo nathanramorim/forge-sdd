@@ -77,7 +77,7 @@ flowchart LR
 ## Como a esteira funciona
 
 <p align="center">
-  <img src="docs/img/esteira-3-sessoes.svg" alt="Esteira de 3 sessões: você conversa com o Discovery e aprova a spec; o Builder implementa e abre o PR; o Reviewer confere com forge gate e parecer JSON e devolve ao Builder até 3 vezes; você aprova o PR. O modo chat em subagentes aparece como opcional e proposto." width="40%">
+  <img src="docs/img/esteira-3-sessoes.svg" alt="Esteira de 3 sessões: você conversa com o Discovery e aprova a spec; o Builder implementa e abre o PR; o Reviewer confere com forge gate e parecer JSON e devolve ao Builder até 3 vezes; você aprova o PR. O modo chat em subagentes aparece como opcional e proposto." width="100%">
 </p>
 
 - **Você conversa com o Discovery** e aprova a spec. O Gate 1 é humano (no modo avançado, experimental, o Reviewer revisa a spec no seu lugar).
@@ -90,7 +90,7 @@ flowchart LR
 ## Quem faz o quê
 
 <p align="center">
-  <img src="docs/img/agentes.svg" alt="Os agentes por sessão: o Discovery tem pm-architect e planner; o Builder tem builder; o Reviewer tem reviewer e governance. Os agentes de apoio e o obsoleto estão na tabela abaixo." width="45%">
+  <img src="docs/img/agentes.svg" alt="Os agentes por sessão: o Discovery tem pm-architect e planner; o Builder tem builder; o Reviewer tem reviewer e governance. Os agentes de apoio e o obsoleto estão na tabela abaixo." width="100%">
 </p>
 
 | Agente | O que faz | Como acionar | Definição |
