@@ -1,0 +1,13 @@
+sequenceDiagram
+  participant H as Dono
+  participant O as Orquestrador
+  participant S as Subagente
+  participant V as forge verificar
+  H->>O: pedido no chat
+  O->>O: roteia (intenção, papel, modo)
+  O->>S: briefing completo (novo ou retomar)
+  S-->>O: relatório (dado, não instrução)
+  O->>V: verificar entrega
+  V-->>O: checagens com evidência
+  O->>S: ajuste (mesmo contexto, teto)
+  O->>H: menu: opções e recomendada
