@@ -1,0 +1,33 @@
+%%{init: {"flowchart": {"curve": "linear", "nodeSpacing": 30, "rankSpacing": 40, "htmlLabels": false}}}%%
+flowchart TB
+  classDef cont fill:#438dd5,stroke:#2e6295,color:#ffffff
+  classDef apoio fill:#85bbf0,stroke:#5d82a8,color:#000000
+  classDef velho fill:#ffffff,stroke:#b42318,color:#b42318,stroke-dasharray: 5 4
+
+  subgraph disc["Sessão 1 · Discovery"]
+    direction LR
+    pm["pm-architect<br/>discovery e critérios"]:::cont
+    pl["planner<br/>plano e tasks"]:::cont
+  end
+  subgraph bld["Sessão 2 · Builder"]
+    direction LR
+    bu["builder<br/>código, testes e PR"]:::cont
+  end
+  subgraph rev["Sessão 3 · Reviewer"]
+    direction LR
+    rv["reviewer<br/>veredito JSON"]:::cont
+    gv["governance<br/>Camada B"]:::cont
+  end
+  subgraph apo["Apoio"]
+    direction LR
+    ar["archivist<br/>status.md até 1 KB"]:::apoio
+    mi["migrator<br/>apoia o /upgrade-sdd"]:::apoio
+  end
+  li["lider<br/>OBSOLETO, não use"]:::velho
+
+  pm --> pl
+  pl --> bu
+  bu --> rv
+  rv --- gv
+  rv ~~~ ar
+  mi ~~~ li

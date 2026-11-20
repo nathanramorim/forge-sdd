@@ -1,0 +1,22 @@
+%%{init: {"flowchart": {"curve": "linear", "nodeSpacing": 50, "rankSpacing": 45, "htmlLabels": false}}}%%
+flowchart TB
+  classDef pessoa fill:#08427b,stroke:#052e56,color:#ffffff
+  classDef cont fill:#438dd5,stroke:#2e6295,color:#ffffff
+  classDef gate fill:#85bbf0,stroke:#5d82a8,color:#000000
+  classDef nota fill:#ffffff,stroke:#6b6b6b,color:#222222,stroke-dasharray: 5 4
+
+  u1(["Você conversa<br/>com o Discovery"]):::pessoa
+  d["1 Discovery<br/>spec, plano e tasks"]:::cont
+  g1["Você aprova a spec"]:::gate
+  b["2 Builder<br/>implementa e abre o PR"]:::cont
+  r["3 Reviewer, somente leitura<br/>forge gate + parecer JSON"]:::cont
+  u2(["Você aprova o PR<br/>e faz o merge"]):::pessoa
+  c["Modo chat opcional (proposto)<br/>mesmo fluxo em subagentes"]:::nota
+
+  u1 --> d
+  d --> g1
+  g1 -->|"tasks na fila"| b
+  b -->|"PR aberto"| r
+  r -->|"devolve, até 3 vezes"| b
+  r -->|"conforme"| u2
+  c -.-> d

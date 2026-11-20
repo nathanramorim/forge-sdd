@@ -74,6 +74,57 @@ flowchart LR
   rev -->|"conforme ✓"| u
 ```
 
+## Como a esteira funciona
+
+<p align="center">
+  <img src="docs/img/esteira-3-sessoes.svg" alt="Esteira de 3 sessões: você conversa com o Discovery e aprova a spec; o Builder implementa e abre o PR; o Reviewer confere com forge gate e parecer JSON e devolve ao Builder até 3 vezes; você aprova o PR. O modo chat em subagentes aparece como opcional e proposto." width="40%">
+</p>
+
+- **Você conversa com o Discovery** e aprova a spec. O Gate 1 é humano (no modo avançado, experimental, o Reviewer revisa a spec no seu lugar).
+- **O Builder** pega as tasks, implementa e abre o PR.
+- **O Reviewer** confere em duas camadas: `forge gate` (regras checadas por código) e um parecer JSON de leitura apenas, que não edita nada.
+- Se o parecer aponta violação, o PR volta ao Builder, até o teto de `max_rework_attempts` (padrão 3). Passou do teto, escala para você.
+- **Você aprova o PR** e faz o merge.
+- Modo `sessions` (padrão): `forge pipeline init` e `forge up` abrem as 3 sessões. Modo `chat`: o mesmo fluxo em subagentes, no mesmo chat. É opt-in e está **proposto** na [ADR-0015](sdd/spec/adr/adr-0015-pipeline-em-subagentes-no-chat.md); ainda não existe na 5.0.0.
+
+## Quem faz o quê
+
+<p align="center">
+  <img src="docs/img/agentes.svg" alt="Cartões dos agentes por sessão: Discovery tem pm-architect e planner; Builder tem builder; Reviewer tem reviewer e governance; apoio tem archivist e migrator; o agente lider aparece marcado como obsoleto." width="45%">
+</p>
+
+| Agente | O que faz | Como acionar | Definição |
+|---|---|---|---|
+| `pm-architect` | Conversa a ideia e gera discovery e critérios | `/discovery` | `.claude/agents/pm-architect.md` |
+| `planner` | Transforma a spec em plano e tasks | `/split-features` | `.claude/agents/planner.md` |
+| `builder` | Implementa as tasks e abre o PR | `forge up`, `forge worker`, `/implementar` | `.claude/agents/builder.md` |
+| `reviewer` | Confere o PR e emite o veredito JSON | `forge bus review`, `/revisar` | `.claude/agents/reviewer.md` |
+| `governance` | Revisão semântica (Camada B), só leitura | `/revisar` | `.claude/agents/governance.md` |
+| `archivist` | Mantém o `status.md` pequeno (até 1 KB) | `/archive` | `.claude/agents/archivist.md` |
+| `migrator` | Aplica as mudanças de estrutura entre versões | `/upgrade-sdd` | `.claude/agents/migrator.md` |
+
+Os arquivos de agente apontam para as skills em `.agents/skills/`, onde está o passo a passo de cada papel.
+
+## O que é obsoleto (não use)
+
+> **Obsoleto: não use.** Esta tabela é para você não se confundir com textos antigos.
+
+| Item | Por que | Use no lugar |
+|---|---|---|
+| "5 estações" como fluxo | O produto virou 3 sessões (ADR-0004) | As 3 sessões e a sua aprovação |
+| Agente `lider` | Descreve um orquestrador de 5 estações; quem orquestra é o código Go | `forge up` (ou o modo `chat`, quando existir) |
+| `forge review` | O comando não existe | `forge bus review` |
+| Nome `forge-sdd` como comando principal | O nome oficial é `forge` (ADR-0010); `forge-sdd` segue como alias no npm | `forge` |
+| Versões `beta` e anteriores à 5.0.0 | Há uma versão estável | `npm install -g @nathanramorim/forge-sdd` |
+
+**Legado que ainda funciona** (existe no binário, mas não é o caminho principal):
+
+| Item | Situação |
+|---|---|
+| `forge queue stations` e as filas por estação | Seguem no `forge queue --help`; o caminho atual é o `queue.json` da iniciativa e o barramento de jobs |
+| Skills `sdd-*` por estação (`.agents/skills/`) | Seguem como apoio das 3 sessões; os comandos ainda apontam para elas |
+| `/implement` e `/proxima-feature` | Apelidos de `/implementar` |
+
 ## Por que usar
 
 | | |
@@ -166,7 +217,7 @@ A telemetria é opcional e fica no seu projeto. No modo `forge worker --raw`, a 
 | **4.8.0** | Versão estável do painel interativo: stream de chat nos workers, fila com abas e drill-down, popup no tmux e fila que acompanha a aprovação do Reviewer. |
 | **4.6.x** | Comando único `forge`, painel vivo executivo e tokens por janela com reset suave. |
 | **4.2.0-beta** | Pipeline multi-sessão: Discovery, Builder e Reviewer trabalhando juntos. |
-| **3.0.0-beta** | Esteira de 5 especialistas, portão de governança (A/B/C), regras por ID e auto-skills. |
+| **3.0.0-beta** | *(histórico, obsoleto como fluxo)* Esteira de 5 especialistas, portão de governança (A/B/C), regras por ID e auto-skills. O fluxo atual são 3 sessões. |
 | **2.2.0-beta** | Regras e comandos compartilhados em `.agents/`, uma fonte para vários agentes. |
 | **2.0.0-beta** | Versão enxuta: telemetria confiável, `lessons.md` e um fluxo único em `sdd/FLOW.md`. |
 
