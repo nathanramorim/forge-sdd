@@ -73,3 +73,12 @@ func TestMCPStdioPontaAPonta(t *testing.T) {
 }
 
 func mustJSON(v any) string { b, _ := json.Marshal(v); return string(b) }
+
+func TestMCPIdInvalidoRetornaErro(t *testing.T) {
+	d := NewMCPDispatcher("1.0", nil)
+	m := mcpCall(t, d, `{"jsonrpc":"2.0","id":1e999,"method":"ping"}`)
+	e, _ := m["error"].(map[string]any)
+	require.NotNil(t, e)
+	assert.EqualValues(t, CodeInvalidRequest, e["code"])
+	assert.Nil(t, m["id"])
+}

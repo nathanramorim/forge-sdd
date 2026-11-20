@@ -2,6 +2,8 @@ package scaffold
 
 import (
 	"bytes"
+	"crypto/rand"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -31,6 +33,9 @@ func MergeClaudeSessionStartHook(targetDir string) (bool, error) {
 
 func mergeClaudeHook(targetDir, event, command string, markers []string, dryRun bool) (bool, error) {
 	path := filepath.Join(targetDir, ".claude", "settings.json")
+	if err := checkSafeTarget(targetDir, path); err != nil {
+		return false, err
+	}
 	root := map[string]any{}
 
 	data, err := os.ReadFile(path)
@@ -92,11 +97,8 @@ func mergeClaudeHook(targetDir, event, command string, markers []string, dryRun 
 	if err != nil {
 		return false, err
 	}
-	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+	if err := writeFileSafe(targetDir, path, append(out, '\n')); err != nil {
 		return false, err
-	}
-	if err := os.WriteFile(path, append(out, '\n'), 0o644); err != nil {
-		return false, fmt.Errorf("gravar %s: %w", path, err)
 	}
 	return true, nil
 }
@@ -113,6 +115,9 @@ func MergeClaudeMCPServer(targetDir string) (bool, error) {
 
 func mergeClaudeMCPServer(targetDir string, dryRun bool) (bool, error) {
 	path := filepath.Join(targetDir, ".mcp.json")
+	if err := checkSafeTarget(targetDir, path); err != nil {
+		return false, err
+	}
 	root := map[string]any{}
 	data, err := os.ReadFile(path)
 	switch {
@@ -147,8 +152,8 @@ func mergeClaudeMCPServer(targetDir string, dryRun bool) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	if err := os.WriteFile(path, append(out, '\n'), 0o644); err != nil {
-		return false, fmt.Errorf("gravar %s: %w", path, err)
+	if err := writeFileSafe(targetDir, path, append(out, '\n')); err != nil {
+		return false, err
 	}
 	return true, nil
 }
@@ -168,4 +173,87 @@ func SyncClaudeIntegration(targetDir string, dryRun bool) (changed, warnings []s
 		changed = append(changed, "MCP forge-sdd")
 	}
 	return changed, warnings
+}
+
+// checkSafeTarget recusa (SEG-02) caminho que seja link simbólico ou não seja arquivo regular, e
+// diretório pai que seja link simbólico ou resolva para fora do projeto. Arquivo ou pai ausentes
+// são aceitos (serão criados).
+func checkSafeTarget(targetDir, path string) error {
+	root, err := filepath.EvalSymlinks(targetDir)
+	if err != nil {
+		return fmt.Errorf("resolver %s: %w", targetDir, err)
+	}
+	dir := filepath.Dir(path)
+	if filepath.Clean(dir) != filepath.Clean(targetDir) {
+		fi, err := os.Lstat(dir)
+		switch {
+		case errors.Is(err, os.ErrNotExist):
+		case err != nil:
+			return fmt.Errorf("verificar %s: %w", dir, err)
+		case fi.Mode()&os.ModeSymlink != 0 || !fi.IsDir():
+			return fmt.Errorf("%s é link simbólico ou não é diretório; recusado (SEG-02)", dir)
+		default:
+			real, err := filepath.EvalSymlinks(dir)
+			if err != nil || (real != root && !strings.HasPrefix(real, root+string(filepath.Separator))) {
+				return fmt.Errorf("%s resolve para fora do projeto; recusado (SEG-02)", dir)
+			}
+		}
+	}
+	fi, err := os.Lstat(path)
+	switch {
+	case errors.Is(err, os.ErrNotExist):
+		return nil
+	case err != nil:
+		return fmt.Errorf("verificar %s: %w", path, err)
+	case !fi.Mode().IsRegular():
+		return fmt.Errorf("%s é link simbólico ou não é arquivo regular; recusado (SEG-02)", path)
+	}
+	return nil
+}
+
+// writeFileSafe grava via arquivo temporário exclusivo no mesmo diretório e rename, preservando o
+// modo do arquivo existente (novo: 0644). Revalida o alvo logo antes de gravar.
+func writeFileSafe(targetDir, path string, data []byte) error {
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+		return err
+	}
+	if err := checkSafeTarget(targetDir, path); err != nil {
+		return err
+	}
+	mode := os.FileMode(0o644)
+	if fi, err := os.Lstat(path); err == nil {
+		mode = fi.Mode().Perm()
+	}
+	var buf [6]byte
+	if _, err := rand.Read(buf[:]); err != nil {
+		return err
+	}
+	tmp := filepath.Join(filepath.Dir(path), "."+filepath.Base(path)+".tmp-"+hex.EncodeToString(buf[:]))
+	f, err := os.OpenFile(tmp, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0o600)
+	if err != nil {
+		return fmt.Errorf("gravar %s: %w", path, err)
+	}
+	fail := func(err error) error {
+		_ = f.Close()
+		_ = os.Remove(tmp)
+		return fmt.Errorf("gravar %s: %w", path, err)
+	}
+	if _, err := f.Write(data); err != nil {
+		return fail(err)
+	}
+	if err := f.Chmod(mode); err != nil {
+		return fail(err)
+	}
+	if err := f.Sync(); err != nil {
+		return fail(err)
+	}
+	if err := f.Close(); err != nil {
+		_ = os.Remove(tmp)
+		return fmt.Errorf("gravar %s: %w", path, err)
+	}
+	if err := os.Rename(tmp, path); err != nil {
+		_ = os.Remove(tmp)
+		return fmt.Errorf("gravar %s: %w", path, err)
+	}
+	return nil
 }
