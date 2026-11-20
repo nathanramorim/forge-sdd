@@ -122,6 +122,12 @@ func PrepararLeque(dir string, p ParamsLeque) (*Leque, error) {
 		return nil, fmt.Errorf("worktree principal ocupado: %w", err)
 	}
 	lq := &Leque{dir: dir, iniciativa: p.Iniciativa, base: p.Base, tasks: p.Tasks, caminhos: map[string]string{}, lock: lock, agora: p.Agora}
+	pronto := false
+	defer func() {
+		if !pronto { // erro ou panic: o lock nunca fica preso até a lease vencer
+			_ = lock.Liberar()
+		}
+	}()
 	fail := func(err error) (*Leque, error) {
 		for _, t := range lq.tasks {
 			if path, ok := lq.caminhos[t]; ok {
@@ -148,10 +154,13 @@ func PrepararLeque(dir string, p ParamsLeque) (*Leque, error) {
 			return fail(err)
 		}
 	}
+	pronto = true
 	return lq, nil
 }
 
 // removerSeguro só remove worktrees recém-criados nesta chamada (limpeza de falha de preparação).
+// O chamador descarta o erro de propósito: é limpeza em melhor esforço e, se falhar, o que sobra é
+// um órfão vazio que a próxima preparação reconhece e recria; nada com trabalho é apagado aqui.
 func removerSeguro(dir, job, task, path string) error {
 	if n, err := commitsAdiante(dir, "forge/"+job+"-"+task, ""); err == nil && n > 0 {
 		return nil
@@ -176,27 +185,22 @@ func (l *Leque) prepararTask(task string) error {
 		return err
 	}
 	branch := "forge/" + l.iniciativa + "-" + task
-	_, errPath := os.Lstat(path)
+	fi, errPath := os.Lstat(path)
+	if errPath == nil && fi.Mode()&os.ModeSymlink != 0 {
+		return fmt.Errorf("caminho do worktree de %q é um link simbólico: recusado", task)
+	}
 	existeBranch := false
 	if _, err := layout.Git(l.dir, "rev-parse", "--verify", "-q", "refs/heads/"+branch); err == nil {
 		existeBranch = true
 	}
 	if errPath == nil || existeBranch {
-		// Órfão de uma execução interrompida: só descarta se não houver trabalho nele.
-		temTrabalho := false
-		if existeBranch {
-			n, err := commitsAdiante(l.dir, branch, l.base)
-			if err != nil || n > 0 {
-				temTrabalho = true
-			}
-		}
-		if errPath == nil {
-			if sujo, err := gitLimpo(path, "status", "--porcelain"); err != nil || sujo != "" {
-				temTrabalho = true
-			}
-		}
-		if temTrabalho {
-			return fmt.Errorf("worktree órfão de %q guarda trabalho (branch %s): decida entre retomar ou descartar manualmente", task, branch)
+		// Órfão de uma execução interrompida: só descarta se provar estar vazio e sem commits fora da base.
+		if l.orfaoTemTrabalho(path, branch, errPath == nil, existeBranch) {
+			return &ErroOrfao{Task: task, Branch: branch, Opcoes: []Opcao{
+				{ID: "retomar", Rotulo: "Retomar o trabalho", Descricao: "Continue na branch/worktree existente; nada foi tocado."},
+				{ID: "preservar", Rotulo: "Salvar em branch e descartar depois", Descricao: "Crie uma branch no commit do worktree, confira, e só então remova o worktree à mão."},
+				{ID: "abortar", Rotulo: "Parar o lote", Descricao: "Encerra sem alterar nada."},
+			}}
 		}
 		if errPath == nil {
 			if err := RemoveWorktree(l.dir, l.iniciativa, task); err != nil {
@@ -218,6 +222,40 @@ func (l *Leque) prepararTask(task string) error {
 	return nil
 }
 
+// ErroOrfao indica um worktree ou branch órfão que guarda trabalho; nada é removido e a pessoa
+// escolhe pelo menu (RN-9).
+type ErroOrfao struct {
+	Task, Branch string
+	Opcoes       []Opcao
+}
+
+func (e *ErroOrfao) Error() string {
+	return fmt.Sprintf("worktree órfão de %q guarda trabalho (branch %s): nada foi removido; decida entre retomar ou preservar", e.Task, e.Branch)
+}
+
+// orfaoTemTrabalho é conservador: qualquer dúvida ou erro conta como trabalho.
+func (l *Leque) orfaoTemTrabalho(path, branch string, temPath, temBranch bool) bool {
+	if temBranch {
+		if n, err := commitsAdiante(l.dir, branch, l.base); err != nil || n > 0 {
+			return true
+		}
+	}
+	if !temPath {
+		return false
+	}
+	if sujo, err := gitLimpo(path, "status", "--porcelain"); err != nil || sujo != "" { // inclui não rastreados
+		return true
+	}
+	if head, err := gitLimpo(path, "symbolic-ref", "-q", "HEAD"); err != nil || head != "refs/heads/"+branch {
+		return true // HEAD destacado ou em outra branch
+	}
+	out, err := gitLimpo(path, "rev-list", "--count", "HEAD", "^"+l.base)
+	if n, cerr := strconv.Atoi(out); err != nil || cerr != nil || n > 0 {
+		return true
+	}
+	return false
+}
+
 // Caminho devolve o worktree da task.
 func (l *Leque) Caminho(task string) (string, bool) { p, ok := l.caminhos[task]; return p, ok }
 
@@ -235,11 +273,11 @@ func (l *Leque) Juntar() (*RetornoJuncao, error) {
 			continue
 		}
 		if err := l.lock.Renovar(l.agora()); err != nil {
-			return nil, err
+			return ret, err
 		}
 		r, err := l.juntarTask(t, path)
 		if err != nil {
-			return nil, err
+			return ret, err // resultados parciais: o que já foi integrado não pode se perder do relato
 		}
 		ret.Resultados = append(ret.Resultados, r)
 	}
@@ -274,6 +312,8 @@ func (l *Leque) juntarTask(task, path string) (ResultadoJuncao, error) {
 	}
 	_, err := layout.Git(l.dir, "merge", "--no-ff", "--no-edit", "-m", "merge("+l.iniciativa+"): "+task, branch)
 	if err != nil {
+		// Erro descartado de propósito: a lista de arquivos só enriquece o relato; o abort abaixo e o
+		// bloqueio da task acontecem de qualquer forma.
 		arqs, _ := layout.Git(l.dir, "diff", "--name-only", "--diff-filter=U")
 		for _, a := range strings.Split(strings.TrimSpace(arqs), "\n") {
 			if a != "" && len(r.Arquivos) < maxArquivosConf {

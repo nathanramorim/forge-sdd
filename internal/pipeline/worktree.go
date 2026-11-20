@@ -36,6 +36,9 @@ func CreateWorktree(dir, jobID, taskID, baseRef string) (string, error) {
 	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
 		return "", err
 	}
+	if err := confirmarDentroDeWorktrees(dir, path); err != nil {
+		return "", err
+	}
 	branch := "forge/" + jobID + "-" + taskID
 	if _, err := layout.Git(dir, "worktree", "add", "-b", branch, path, baseRef); err != nil {
 		return "", fmt.Errorf("criar worktree: %w", err)
@@ -67,5 +70,33 @@ func RemoveWorktree(dir, jobID, taskID string) error {
 	}
 	_, _ = layout.Git(dir, "branch", "-D", "forge/"+jobID+"-"+taskID)
 	_ = os.Remove(filepath.Dir(path)) // remove a pasta do job quando vazia
+	return nil
+}
+
+// confirmarDentroDeWorktrees recusa um caminho cujo pai, depois de resolver links simbólicos, saia
+// de .forge/runtime/worktrees (ou cuja raiz saia do repositório), e um caminho que já seja link.
+func confirmarDentroDeWorktrees(dir, path string) error {
+	repo, err := filepath.EvalSymlinks(dir)
+	if err != nil {
+		return err
+	}
+	raiz, err := filepath.EvalSymlinks(layout.Worktrees(dir))
+	if err != nil {
+		return err
+	}
+	pai, err := filepath.EvalSymlinks(filepath.Dir(path))
+	if err != nil {
+		return err
+	}
+	dentro := func(base, alvo string) bool {
+		rel, err := filepath.Rel(base, alvo)
+		return err == nil && rel != ".." && !strings.HasPrefix(rel, ".."+string(filepath.Separator))
+	}
+	if !dentro(repo, raiz) || !dentro(raiz, pai) {
+		return fmt.Errorf("caminho de worktree %q sai de %s: recusado", path, layout.Worktrees(dir))
+	}
+	if fi, err := os.Lstat(path); err == nil && fi.Mode()&os.ModeSymlink != 0 {
+		return fmt.Errorf("caminho de worktree %q é link simbólico: recusado", path)
+	}
 	return nil
 }
