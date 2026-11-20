@@ -2,7 +2,7 @@
 
 **Iniciativa:** 104-pipeline-em-subagentes
 **Branch:** feat/104-pipeline-em-subagentes
-**Status:** implementada em 2026-11-20
+**Status:** implementada em 2026-11-20 (escrita no Claude Code concluída; Codex e Agy pendentes por falta de flag confirmada)
 **Depende de:** nenhuma
 
 ## Problema
@@ -41,6 +41,9 @@ go test ./internal/scaffold -run 'TestAgentModelsEscreveCabecalho|TestAgentModel
 # negativo: modelo inválido é recusado
 go test -list 'TestAgentModelsRecusaValorInvalido' ./internal/scaffold | grep -F 'TestAgentModelsRecusaValorInvalido' >/dev/null
 go test ./internal/scaffold -run 'TestAgentModelsRecusaValorInvalido'
+# negativo: update pelo comando recusa valor inválido sem gravar
+go test -list 'TestUpdateAgentModels_ValorInvalidoErraSemGravar' ./cmd/forge-sdd | grep -F 'TestUpdateAgentModels_ValorInvalidoErraSemGravar' >/dev/null
+go test ./cmd/forge-sdd -run 'TestUpdateAgentModels'
 go vet ./... && go test ./...
 ```
 - Teste negativo: modelo fora da lista é recusado; sem chave o cabeçalho segue `inherit`.
@@ -53,3 +56,5 @@ go vet ./... && go test ./...
 - O `model:` que passaria de 420 bytes (P-24) é recusado sem gravar nada (ex.: governance com nome de 80 caracteres).
 - Codex (`-m`) e Agy: não escritos. `codex` não instalado, flag não confirmada, e `modelEffortByCommand` só emite flag confirmada. Fica como follow-up com verificação.
 - Gravação em `scaffold.Run` e `RunAgents` fora de `--dry-run`; sem `main.go` tocado. Sem a chave, nada muda.
+- `forge update` aplica e valida `agent_models` antes de qualquer outro caminho (`reportAgentModels` em `cmd/forge-sdd/agent_models.go`, uma chamada em `runUpdateFlow`), inclusive sem atualização de versão; `--dry-run` lista sem gravar.
+- Codex e Agy: pendentes. Nota para o `doctor` futuro: checar se `agent_models` combina com os cabeçalhos gravados e, quando a flag `-m` do Codex for confirmada, o perfil dele. Não implementado aqui.

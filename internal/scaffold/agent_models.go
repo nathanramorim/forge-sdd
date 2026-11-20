@@ -13,10 +13,20 @@ import (
 // maxAgentDefBytes é o teto da definição de agente (P-24); o modelo escolhido não pode estourá-lo.
 const maxAgentDefBytes = 420
 
+// SyncAgentModels aplica agent_models aos agentes do projeto (forge update, mesmo sem atualização de
+// versão). Com dryRun devolve o que gravaria sem gravar (ARQ-05).
+func SyncAgentModels(targetDir string, dryRun bool) ([]string, error) {
+	return syncAgentModels(targetDir, dryRun)
+}
+
 // applyAgentModels grava o `model:` de agent_models no cabeçalho de .claude/agents/*.md. Sem forge.json
 // ou sem a chave, nada muda (inherit). Só edita agentes que já existem no projeto. Retorna os arquivos
 // alterados. Todo valor é validado e todo arquivo conferido antes de gravar, para não deixar estado parcial.
 func applyAgentModels(targetDir string) ([]string, error) {
+	return syncAgentModels(targetDir, false)
+}
+
+func syncAgentModels(targetDir string, dryRun bool) ([]string, error) {
 	cfg, found, err := config.LoadForgeConfig(targetDir)
 	if err != nil {
 		return nil, fmt.Errorf("agent_models: %w", err)
@@ -56,6 +66,12 @@ func applyAgentModels(targetDir string) ([]string, error) {
 		}
 	}
 	var changed []string
+	if dryRun {
+		for _, e := range edits {
+			changed = append(changed, e.path)
+		}
+		return changed, nil
+	}
 	for _, e := range edits {
 		if err := queue.WriteFileAtomic(e.path, e.data, 0o644); err != nil {
 			return changed, fmt.Errorf("agent_models: gravar %s: %w", e.path, err)
