@@ -48,12 +48,14 @@ go vet ./... && go test ./...
 
 ## Decisões da implementação
 - **Pacote:** `internal/doctor`, não `internal/harness`: `harness` é importado por `queue`, que `pipeline` importa; `Diagnose` precisa de `pipeline.ListStaleWorktrees` (`DUP-01`) e fecharia um ciclo. O contrato skill x binário ficou em `harness.VerificarContratoParecer`, reusado pelo teste da 104-01.
+- **Desvios da spec original (FLX-03):** worktree órfão é `aviso`, não `falha`; locks vencidos e MCPs ficaram fora. Aguardam aceite do dono no PR.
 - **Limiar:** `falha` só quando o harness não pode rodar certo (binário mais antigo que o projeto, `sdd/.sddrc` ilegível, `forge.json` inválido, contrato skill x binário divergente). O resto é `aviso`; o doctor sempre sugere o passo e nunca executa.
 - **Locks vencidos e MCPs:** fora desta entrega. O código não grava arquivos de lock (só mutex em memória) e `sdd/memory/mcps.md` é tabela livre sem leitor; sem fonte determinística, a checagem seria inventada. Reabrir se surgir lock em disco.
 - **Modelos:** cobertos por `forge-json`, pois `LoadForgeConfig` já valida modelos e esforços.
-- **Workers:** versão obtida executando `<exe> version` (3 s de limite) dos processos `forge worker` listados por `ps`; falha ao obter a versão é ignorada.
+- **Workers (RN-7, SEG-01):** a checagem `workers` não executa nada vindo do `ps`. A versão sai do caminho `<cache>/forge-sdd/<semver>/forge-sdd` (o cache do wrapper npm), por regex estrita sobre caminho absoluto; fora do padrão vira "versão desconhecida" com o caminho. Só processos do usuário atual entram, e o texto do `ps` é limpo de caracteres de controle e truncado. Motivo: a versão anterior rodava `<exe> version` e um argv0 forjado (`/tmp/x/forgeX worker`) executava código de terceiros num comando que deve só ler.
+- **Pré-lançamento:** `versaoMenor` no pacote `doctor` trata `5.0.0-beta` como anterior a `5.0.0`; `config.CompareVersions` ignora o sufixo e não foi alterado.
 - **Saída:** `{"versao":1,"checagens":[{id,status,detalhe,sugestao}],"falhas":N,"avisos":N}`, `detalhe` até 160 caracteres e no máximo 5 itens listados (sempre abaixo de 2 KB). `--dir` ou argumento posicional escolhe o projeto.
 - **`ARQ-06`:** inalterado; `doctor` já está na lista.
 
 ## Status
-Implementada em 2026-11-20.
+Implementada em 2026-11-20; desvios da spec original aguardam aceite do dono no PR.

@@ -3,14 +3,14 @@
 package doctor
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"os"
-	"os/exec"
+	"os/user"
 	"path/filepath"
+	"regexp"
 	"strings"
-	"time"
+	"unicode"
 
 	"github.com/forge-sdd/cli/internal/config"
 	"github.com/forge-sdd/cli/internal/harness"
@@ -53,14 +53,14 @@ type Relatorio struct {
 
 // Deps isola o que toca o sistema (processos e execução de binários), para teste.
 type Deps struct {
-	Runner          monitor.CommandRunner
-	VersaoDoBinario func(exe string) (string, error)
-	Versao          string
+	Runner  monitor.CommandRunner
+	Usuario string
+	Versao  string
 }
 
 // DefaultDeps usa o sistema real e a versão do binário em execução.
 func DefaultDeps() Deps {
-	return Deps{Runner: monitor.DefaultCommandRunner, VersaoDoBinario: versaoDoExecutavel, Versao: config.BinaryVersion()}
+	return Deps{Runner: monitor.DefaultCommandRunner, Usuario: usuarioAtual(), Versao: config.BinaryVersion()}
 }
 
 // Diagnose roda todas as checagens sobre o projeto em dir, sem alterá-lo.
@@ -168,10 +168,10 @@ func checaVersao(dir, binario string) Checagem {
 	if binario == "dev" {
 		return ok(id, "binário de desenvolvimento; projeto em "+proj)
 	}
-	switch config.CompareVersions(binario, proj) {
-	case -1:
+	switch {
+	case versaoMenor(binario, proj):
 		return falha(id, fmt.Sprintf("binário %s mais antigo que o projeto %s", binario, proj), "atualize o binário: "+comandoInst)
-	case 1:
+	case versaoMenor(proj, binario):
 		return aviso(id, fmt.Sprintf("projeto %s mais antigo que o binário %s", proj, binario), "rode forge update")
 	}
 	return ok(id, fmt.Sprintf("binário e projeto em %s", proj))
@@ -259,43 +259,79 @@ func checaWorktrees(dir string) Checagem {
 	return ok(id, "nenhum worktree órfão")
 }
 
+var caminhoWorker = regexp.MustCompile(`^/(?:[^/\s]+/)*forge-sdd/(\d+\.\d+\.\d+(?:-[0-9A-Za-z.]+)?)/forge-sdd$`)
+
+// versaoDoCaminho extrai a versão do caminho do cache do wrapper npm
+// (<cache>/forge-sdd/<versão>/forge-sdd). Nada é executado (SEG-01, RN-7).
+func versaoDoCaminho(exe string) (string, bool) {
+	m := caminhoWorker.FindStringSubmatch(exe)
+	if m == nil {
+		return "", false
+	}
+	return m[1], true
+}
+
+// limpa troca caracteres de controle e limita o tamanho do que veio do ps antes de imprimir.
+func limpa(s string) string {
+	s = strings.Map(func(r rune) rune {
+		if unicode.IsControl(r) {
+			return '?'
+		}
+		return r
+	}, s)
+	if len(s) > 60 {
+		s = s[:57] + "..."
+	}
+	return s
+}
+
 func checaWorkers(d Deps) Checagem {
 	const id = "workers"
 	if d.Runner == nil {
 		return ok(id, "listagem de processos indisponível")
 	}
-	out, err := d.Runner("ps", "-eo", "pid,command")
+	out, err := d.Runner("ps", "-eo", "user=,pid=,command=")
 	if err != nil {
 		return aviso(id, fmt.Sprintf("não foi possível listar processos: %v", err), "rode forge ps")
 	}
 	var velhos []string
 	for _, linha := range strings.Split(string(out), "\n") {
 		campos := strings.Fields(linha)
-		if len(campos) < 3 || campos[2] != "worker" || !strings.HasPrefix(filepath.Base(campos[1]), "forge") {
+		if len(campos) < 4 || campos[0] != d.Usuario || campos[3] != "worker" || !filepath.IsAbs(campos[2]) || !strings.HasPrefix(filepath.Base(campos[2]), "forge") {
 			continue
 		}
-		v, err := d.VersaoDoBinario(campos[1])
-		if err != nil || v == d.Versao {
-			continue
+		v, achou := versaoDoCaminho(campos[2])
+		switch {
+		case !achou:
+			velhos = append(velhos, fmt.Sprintf("pid %s (versão desconhecida: %s)", limpa(campos[1]), limpa(campos[2])))
+		case versaoMenor(v, d.Versao) || versaoMenor(d.Versao, v):
+			velhos = append(velhos, fmt.Sprintf("pid %s (%s)", limpa(campos[1]), limpa(v)))
 		}
-		velhos = append(velhos, fmt.Sprintf("pid %s (%s)", campos[0], v))
 	}
 	if len(velhos) > 0 {
-		return aviso(id, fmt.Sprintf("worker(s) de versão diferente de %s: %s", d.Versao, listar(velhos)), "encerre-os à mão e suba de novo com forge up; o doctor não encerra processos")
+		return aviso(id, fmt.Sprintf("worker(s) de versão diferente de %s: %s", d.Versao, listar(velhos)), "encerre-os à mão e suba de novo com forge up; o doctor não encerra processos nem executa binários")
 	}
 	return ok(id, "nenhum worker de outra versão")
 }
 
-func versaoDoExecutavel(exe string) (string, error) {
-	caminho, err := exec.LookPath(exe)
+func usuarioAtual() string {
+	u, err := user.Current()
 	if err != nil {
-		return "", fmt.Errorf("localizando %s: %w", exe, err)
+		return ""
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
-	defer cancel()
-	out, err := exec.CommandContext(ctx, caminho, "version").Output()
-	if err != nil {
-		return "", fmt.Errorf("executando %s version: %w", caminho, err)
+	return u.Username
+}
+
+// versaoMenor diz se a < b, tratando um sufixo de pré-lançamento (-beta) como anterior à versão
+// final; config.CompareVersions ignora o sufixo e não serve aqui.
+func versaoMenor(a, b string) bool {
+	if c := config.CompareVersions(a, b); c != 0 {
+		return c < 0
 	}
-	return strings.TrimSpace(string(out)), nil
+	preA := strings.Contains(a, "-")
+	preB := strings.Contains(b, "-")
+	if preA != preB {
+		return preA
+	}
+	return preA && a < b
 }

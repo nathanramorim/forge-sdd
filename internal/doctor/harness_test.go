@@ -42,9 +42,9 @@ func projeto(t *testing.T, versao string) string {
 
 func deps(versao string) Deps {
 	return Deps{
-		Versao:          versao,
-		Runner:          func(string, ...string) ([]byte, error) { return nil, nil },
-		VersaoDoBinario: func(string) (string, error) { return versao, nil },
+		Versao:  versao,
+		Usuario: "eu",
+		Runner:  func(string, ...string) ([]byte, error) { return nil, nil },
 	}
 }
 
@@ -176,6 +176,7 @@ func TestDiagnoseVersaoDoBinario(t *testing.T) {
 		nome, binario, projeto, quer string
 	}{
 		{"binário antigo", "4.9.1-beta", "5.0.0", StatusFalha},
+		{"binário beta", "5.0.0-beta", "5.0.0", StatusFalha},
 		{"igual", "5.0.0", "5.0.0", StatusOK},
 		{"projeto antigo", "5.0.0", "4.5.0", StatusAviso},
 		{"dev", "dev", "5.0.0", StatusOK},
@@ -209,20 +210,72 @@ func TestDiagnosePareceresIlegiveis(t *testing.T) {
 	}
 }
 
-func TestDiagnoseWorkersDeOutraVersao(t *testing.T) {
+func workersCom(linhas string) Deps {
 	d := deps("5.0.0")
-	d.Runner = func(string, ...string) ([]byte, error) {
-		return []byte("  PID COMMAND\n 11 /usr/bin/forge worker --role builder\n 12 /usr/bin/forge status\n 13 /x/forge worker --role reviewer\n"), nil
-	}
-	d.VersaoDoBinario = func(exe string) (string, error) {
-		if strings.HasPrefix(exe, "/usr") {
-			return "4.9.1-beta", nil
-		}
-		return "5.0.0", nil
-	}
+	d.Runner = func(string, ...string) ([]byte, error) { return []byte(linhas), nil }
+	return d
+}
+
+func TestDiagnoseWorkersDeOutraVersao(t *testing.T) {
+	d := workersCom("eu 11 /h/.cache/forge-sdd/4.9.1-beta/forge-sdd worker --role builder\n" +
+		"eu 12 /h/.cache/forge-sdd/4.9.1-beta/forge-sdd status\n" +
+		"eu 13 /h/.cache/forge-sdd/5.0.0/forge-sdd worker --role reviewer\n" +
+		"eu 14 /h/.cache/forge-sdd/5.0.0-beta/forge-sdd worker\n")
 	c := achar(t, Diagnose(projeto(t, "5.0.0"), d), "workers")
-	if c.Status != StatusAviso || !strings.Contains(c.Detalhe, "pid 11 (4.9.1-beta)") || strings.Contains(c.Detalhe, "pid 12") || strings.Contains(c.Detalhe, "pid 13") {
+	if c.Status != StatusAviso || !strings.Contains(c.Detalhe, "pid 11 (4.9.1-beta)") || !strings.Contains(c.Detalhe, "pid 14 (5.0.0-beta)") || strings.Contains(c.Detalhe, "pid 12") || strings.Contains(c.Detalhe, "pid 13") {
 		t.Fatalf("detalhe inesperado: %+v", c)
+	}
+}
+
+func TestDiagnoseWorkersNaoExecutaArgv0Forjado(t *testing.T) {
+	tmp := t.TempDir()
+	sentinela := filepath.Join(tmp, "PWNED")
+	falso := filepath.Join(tmp, "forgeX")
+	escreve(t, tmp, "forgeX", "#!/bin/sh\ntouch "+sentinela+"\n")
+	if err := os.Chmod(falso, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	d := workersCom("eu 99 " + falso + " worker --role builder\n")
+	c := achar(t, Diagnose(projeto(t, "5.0.0"), d), "workers")
+	if _, err := os.Stat(sentinela); err == nil {
+		t.Fatal("o doctor executou um caminho vindo do ps")
+	}
+	if c.Status != StatusAviso || !strings.Contains(c.Detalhe, "versão desconhecida") {
+		t.Fatalf("esperado aviso com versão desconhecida e o caminho: %+v", c)
+	}
+}
+
+func TestDiagnoseWorkersIgnoraOutroUsuarioERelativo(t *testing.T) {
+	d := workersCom("outro 21 /h/.cache/forge-sdd/4.0.0/forge-sdd worker\neu 22 forge worker\neu 23 ./forge-sdd worker\n")
+	if c := achar(t, Diagnose(projeto(t, "5.0.0"), d), "workers"); c.Status != StatusOK {
+		t.Fatalf("esperado ok: %+v", c)
+	}
+}
+
+func TestDiagnoseWorkersEscapaControle(t *testing.T) {
+	d := workersCom("eu 31 /h/forgeX\x1b[31m/y worker\n")
+	c := achar(t, Diagnose(projeto(t, "5.0.0"), d), "workers")
+	if strings.ContainsRune(c.Detalhe, 0x1b) {
+		t.Fatalf("caractere de controle impresso: %q", c.Detalhe)
+	}
+}
+
+func TestVersaoMenor(t *testing.T) {
+	casos := []struct {
+		a, b string
+		quer bool
+	}{
+		{"4.9.1-beta", "5.0.0", true},
+		{"5.0.0-beta", "5.0.0", true},
+		{"5.0.0", "5.0.0", false},
+		{"5.0.0", "5.0.0-beta", false},
+		{"5.0.0", "5.0.1", true},
+		{"5.0.1", "5.0.0", false},
+	}
+	for _, c := range casos {
+		if got := versaoMenor(c.a, c.b); got != c.quer {
+			t.Errorf("versaoMenor(%s, %s) = %v", c.a, c.b, got)
+		}
 	}
 }
 

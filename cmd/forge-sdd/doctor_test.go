@@ -78,9 +78,8 @@ func TestInit_PrimeiroPasso(t *testing.T) {
 
 func TestDoctorHarness_JSONECodigoDeSaida(t *testing.T) {
 	deps := doctor.Deps{
-		Versao:          "5.0.0",
-		Runner:          func(string, ...string) ([]byte, error) { return nil, nil },
-		VersaoDoBinario: func(string) (string, error) { return "5.0.0", nil },
+		Versao: "5.0.0",
+		Runner: func(string, ...string) ([]byte, error) { return nil, nil },
 	}
 	// Projeto sem sdd/.sddrc: a checagem de versão falha, logo o código é 3 e o JSON sai igual.
 	var buf bytes.Buffer
