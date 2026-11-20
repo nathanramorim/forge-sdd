@@ -31,7 +31,7 @@ Ordem: contrato e scripts primeiro; depois o fluxo; CI e atestado por último. N
 | 3.2 | Job de verificação do atestado (ubuntu, segundos): `scripts/atestado.py --verificar` confere veredito conforme do SHA do HEAD e a prova escolhida (Decisão vi); `validar_entrega.py` fora da Action | 1.1, Decisão vi | com 3.1 | `SEG-04`, `SEG-05`, `FLX-06` |
 | 3.3 | `scripts/ci-politica.py`: lista repositórios, marca ok/fora, alerta de gasto e checagem mensal; sem token no git | — | com 3.1 | `SEG-04`, `SEG-05` |
 | 3.4 | README: um prompt curto "cole isto na sua IA" por ferramenta; notas para Windows, Linux e macOS | 3.1, 3.2, 3.3 | — | `COD-05`, `GOV-04` |
-| 3.5 | Prova: PR de teste draft para ready (jobs `skipped`, depois uma execução) e atestado inválido bloqueando, em cada repositório da primeira leva | 3.1, 3.2 | — | `TST-01` |
+| 3.5 | Prova: PR de teste draft para ready (jobs `skipped`, depois uma execução), atestado inválido bloqueando e **Environment com revisor obrigatório em repositório pessoal privado** (se o plano não permitir, fallback commit/tag assinado), em cada repositório da primeira leva | 3.1, 3.2 | — | `TST-01` |
 | 3.6 | Aplicar nos repositórios da primeira leva via `/upgrade-sdd`, com aprovação do dono por repositório | 2.7, 3.5 | — | `FLX-01` |
 
 Caminho crítico: 1.1, 1.3, 2.1, 2.3, 2.5, 2.7, 3.6. As tasks 2.5 e 2.7 tocam templates e goldens que a 105 também altera; 2.5 também toca `split-features.md`. Sequenciar com a 105 para não regravar goldens duas vezes.
