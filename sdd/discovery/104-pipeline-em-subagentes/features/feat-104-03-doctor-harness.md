@@ -37,9 +37,12 @@ Nenhuma (`SEG-07`).
 ```bash
 set -o pipefail
 go test -list 'TestDiagnoseJSON|TestDiagnoseSemEfeitoColateral|TestDiagnoseDetectaWorktreeOrfao|TestDiagnoseContratoDivergenteFalha' ./internal/doctor | grep -F 'TestDiagnoseContratoDivergenteFalha' >/dev/null
+go test -list 'TestDiagnoseSaidaSemCaracteresDeControle' ./internal/doctor | grep -F 'TestDiagnoseSaidaSemCaracteresDeControle' >/dev/null
 go test ./internal/doctor -run 'TestDiagnoseJSON|TestDiagnoseSemEfeitoColateral|TestDiagnoseDetectaWorktreeOrfao'
 # negativo: contrato divergente produz falha e código 3
 go test ./internal/doctor -run 'TestDiagnoseContratoDivergenteFalha'
+# negativo: ESC, ANSI, CR, NUL e bidi em versão, worktrees, pareceres e workers não chegam à saída
+go test ./internal/doctor -run 'TestDiagnoseSaidaSemCaracteresDeControle'
 go vet ./... && go test ./...
 ```
 - Teste negativo: contrato divergente produz `falha` e código 3; binário mais antigo que o projeto também falha.
@@ -54,6 +57,7 @@ go vet ./... && go test ./...
 - **Modelos:** cobertos por `forge-json`, pois `LoadForgeConfig` já valida modelos e esforços.
 - **Workers (RN-7, SEG-01):** a checagem `workers` não executa nada vindo do `ps`. A versão sai do caminho `<cache>/forge-sdd/<semver>/forge-sdd` (o cache do wrapper npm), por regex estrita sobre caminho absoluto; fora do padrão vira "versão desconhecida" com o caminho. Só processos do usuário atual entram, e o texto do `ps` é limpo de caracteres de controle e truncado. Motivo: a versão anterior rodava `<exe> version` e um argv0 forjado (`/tmp/x/forgeX worker`) executava código de terceiros num comando que deve só ler.
 - **Pré-lançamento:** `versaoMenor` no pacote `doctor` trata `5.0.0-beta` como anterior a `5.0.0`; `config.CompareVersions` ignora o sufixo e não foi alterado.
+- **Sanitização (SEG-01):** `cortar` (usado por `ok`, `aviso` e `falha`, logo em todo `detalhe` e `sugestao`, no texto e no JSON) passa por `sanear`: `notify.Sanitize` mais controles, NUL, bidi e caracteres de formatação do Unicode. `ValidateRelatorio` recusa relatório com controle. Versão do `.sddrc`, nomes de worktree e de parecer eram os vetores.
 - **Saída:** `{"versao":1,"checagens":[{id,status,detalhe,sugestao}],"falhas":N,"avisos":N}`, `detalhe` até 160 caracteres e no máximo 5 itens listados (sempre abaixo de 2 KB). `--dir` ou argumento posicional escolhe o projeto.
 - **`ARQ-06`:** inalterado; `doctor` já está na lista.
 

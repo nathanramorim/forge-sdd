@@ -16,6 +16,7 @@ import (
 	"github.com/forge-sdd/cli/internal/harness"
 	"github.com/forge-sdd/cli/internal/layout"
 	"github.com/forge-sdd/cli/internal/monitor"
+	"github.com/forge-sdd/cli/internal/notify"
 	"github.com/forge-sdd/cli/internal/pipeline"
 )
 
@@ -104,6 +105,9 @@ func ValidateRelatorio(r Relatorio) error {
 		default:
 			return fmt.Errorf("relatório do doctor: checagem %q com status inválido %q", c.ID, c.Status)
 		}
+		if sanear(c.Detalhe) != c.Detalhe || sanear(c.Sugestao) != c.Sugestao {
+			return fmt.Errorf("relatório do doctor: checagem %q com caracteres de controle", c.ID)
+		}
 		if c.Status != StatusOK && strings.TrimSpace(c.Sugestao) == "" {
 			return fmt.Errorf("relatório do doctor: checagem %q (%s) sem sugestão", c.ID, c.Status)
 		}
@@ -122,10 +126,22 @@ func (r Relatorio) ExitCode() int {
 	return 0
 }
 
+// sanear remove ANSI, controles, NUL e caracteres bidi/invisíveis de tudo que o doctor imprime
+// (SEG-01), reusando notify.Sanitize e cobrindo também as categorias de formatação do Unicode.
+func sanear(s string) string {
+	s = notify.Sanitize(s, len(s), false)
+	return strings.Map(func(r rune) rune {
+		if unicode.IsControl(r) || unicode.Is(unicode.Cf, r) || r == '\u2028' || r == '\u2029' {
+			return ' '
+		}
+		return r
+	}, s)
+}
+
 func cortar(s string) string {
-	s = strings.Join(strings.Fields(s), " ")
+	s = strings.Join(strings.Fields(sanear(s)), " ")
 	if len(s) > maxDetalhe {
-		return s[:maxDetalhe-3] + "..."
+		return strings.ToValidUTF8(s[:maxDetalhe-3], "") + "..."
 	}
 	return s
 }
@@ -271,16 +287,11 @@ func versaoDoCaminho(exe string) (string, bool) {
 	return m[1], true
 }
 
-// limpa troca caracteres de controle e limita o tamanho do que veio do ps antes de imprimir.
+// limpa sanea e limita o tamanho do que veio do ps antes de imprimir.
 func limpa(s string) string {
-	s = strings.Map(func(r rune) rune {
-		if unicode.IsControl(r) {
-			return '?'
-		}
-		return r
-	}, s)
+	s = strings.Join(strings.Fields(sanear(s)), "_")
 	if len(s) > 60 {
-		s = s[:57] + "..."
+		s = strings.ToValidUTF8(s[:57], "") + "..."
 	}
 	return s
 }

@@ -318,3 +318,35 @@ func TestValidateRelatorioRecusaInvalidos(t *testing.T) {
 		}
 	}
 }
+
+func TestDiagnoseSaidaSemCaracteresDeControle(t *testing.T) {
+	sujo := "\x1b[31mX\x1b[2J\r\x00\u202e\u2066\u200b\u2028Y"
+	dir := projeto(t, "1.0.0"+sujo)
+	nome := strings.ReplaceAll(sujo, "\x00", "")
+	escreve(t, dir, ".claude/worktrees/x"+nome+"/f", "x")
+	escreve(t, dir, "sdd/discovery/97-x/verdicts/v"+nome+".json", `{"task_id":"x"}`)
+	d := workersCom("eu 7 /h/forge" + sujo + "/y worker\n")
+	r := Diagnose(dir, d)
+	if err := ValidateRelatorio(r); err != nil {
+		t.Fatal(err)
+	}
+	data, err := json.Marshal(r)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var texto strings.Builder
+	for _, c := range r.Checagens {
+		texto.WriteString(c.Detalhe + "\n" + c.Sugestao + "\n")
+	}
+	for nome, saida := range map[string]string{"texto": texto.String(), "json": string(data)} {
+		for _, r := range strings.ReplaceAll(saida, "\n", "") {
+			if r < 0x20 || r == 0x7f || r == 0x202e || r == 0x2066 || r == 0x200b || r == 0x2028 {
+				t.Errorf("%s contém caractere proibido %U: %q", nome, r, saida)
+				break
+			}
+		}
+	}
+	for _, id := range []string{"versao", "worktrees", "pareceres-gravados", "workers"} {
+		achar(t, r, id)
+	}
+}
