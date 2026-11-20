@@ -8,7 +8,7 @@
 - `TST-01`, `TST-02` (goldens), `TST-03` (casos conformes e negativos), `TST-04`, `COD-05`, `GOV-01` (ajustar `GOV-03` e, se a Decisão i mudar, a regra 2 exige ADR).
 
 ## Modelo do módulo
-**Enxuto**, com justificativa (`ARQ-11`): não há pacote de domínio novo. A política é distribuída em (a) um campo novo no contrato existente do veredito (`internal/harness`), (b) mudança de ordem em `internal/queue` e `internal/pipeline`, (c) scripts Python e workflow modelo entregues pelo scaffold e (d) texto dos comandos e skills. Cada parte tem um dono único: o veredito (`harness`), a abertura e o fechamento do PR (`queue`/`pipeline`), a barreira de `gh` (hook), a lição (`licoes.py`), o CI (workflow e `ci-politica.py`). Sem estado persistente novo além de `head_sha` no veredito e dos arquivos de lição.
+**Completo** (`ARQ-11`; antes era enxuto, mudou com o escopo VCS agnóstico): um pacote novo, `internal/vcs` (interface `Adaptador` com criar PR em draft, procurar PR aberto, marcar pronto e mesclar; implementações `github`, `azure-devops` e `nenhum`; leitura do campo `VCS / Work Item System` da Constituição), com dependência para dentro (só stdlib, `ARQ-04`) e sem importar `cmd/` (`ARQ-01`, `ARQ-02`). O restante é distribuído em (a) um campo novo no contrato do veredito (`internal/harness`), (b) `internal/queue` e `internal/pipeline` passam a delegar ao adaptador, (c) scripts Python e workflows modelo entregues pelo scaffold e (d) texto dos comandos e skills. Cada parte tem um dono único: o veredito (`harness`), a abertura e o fechamento do PR (`queue`/`pipeline`), a barreira de `gh` (hook), a lição (`licoes.py`), o CI (workflow e `ci-politica.py`). Sem estado persistente novo além de `head_sha` no veredito e dos arquivos de lição.
 
 ## Decisões do projeto aplicadas
 - **ADR-0004:** o Go decide o fluxo; o revisor não aprova nem cria PR por conta própria. Esta iniciativa estende: o PR é criado antes, na concepção.
@@ -23,6 +23,8 @@
 | Procurei | Onde | Achei | Decisão | Justificativa |
 |---|---|---|---|---|
 | Revisão do PR e fila | `forge queue review`; `cmd/forge-sdd/queue.go:185-199` | Registra o parecer e, se `conforme` e sem `--no-pr`, chama `queue.OpenPR` | **Estender**: conforme não cria PR; oferece "fechar o PR?" | `DUP-03`; a flag `--no-pr` vira o padrão |
+| Abstração de VCS | `*.go` (busca por "VCS"), `sdd/memory/constitution.md:28,30`, `.agents/skills/sdd-build/references/implementar.md:26`, `sdd-concepcao/references/constitution.md` passo 3 | Nenhuma no Go; nenhum código lê o campo da Constituição; só as skills tratam `github`, `azure-devops` e `nenhum`, em texto; `forge.go:185` lista `azure-devops` para o card (PM), outro conceito | **Criar** `internal/vcs`; o texto das skills passa a apontar para ele | `DUP-01`: um dono para PR; dois `OpenPR` duplicam hoje |
+| Chamadas `gh` no Go | `internal/pipeline/pr.go:31,138,144,231,244`; `internal/queue/pr.go:19,41,60,101,108`; `cmd/forge-sdd/review.go:90`; `internal/config/forge.go:181` (`AllowCommands`) | `gh` fixo; lista de comandos permitidos só `git`/`gh` (`SEG-03`) | **Estender**: delegar ao adaptador; permitir `az` apenas no adaptador do Azure | `DUP-03`, `SEG-03` |
 | Criação de PR (fila) | `internal/queue/pr.go:35,61,105` | `gh pr create` sem `--draft` | **Estender**: só `ready` se o PR existe; sem PR, erro orientando | Ordem invertida (RN-7) |
 | Criação de PR (pipeline) | `internal/pipeline/pr.go:71,131` | `OpenPR` do Builder: gate A, push, `findOpenPR`, cria se não existir, corrige base | **Estender**: PR existente é o caso normal; se faltar, abre em draft | `findOpenPR` já trata o PR pré-existente |
 | Reviewer da esteira | `internal/pipeline/review.go:60` (`ApplyVerdict`), `internal/pipeline/spec.go:72` (`ApplySpecVerdict`), `prompt.go:56-66` | Dois aplicadores: entrega e spec; checklist único `ReviewChecklist` | **Reusar**: já são os dois pontos | `DUP-01`; só falta o sinal e o SHA |
@@ -48,7 +50,7 @@
 | Sobreposição com a 105 | `feat/105-experiencia-cli-e-harness` (`discovery.md`, `plan.md`) | Onda 1 troca "5 estações" nos mesmos templates e goldens; onda 2 cria menus e tema (RN-7 da 105 = handoff com menu: as perguntas [Seguir]/[Continuar] devem usar o mesmo componente); onda 3 mede proficiência (`doctor --harness`, `eval`) | **Independente**: lições, CI, atestado, `pr_guard`, `validar_entrega.py`, veredito. **Colide**: templates e goldens de comandos e skills (inclui `split-features.md`), `hooks.go`, texto do `doctor`, menus, numeração de ADR. Não editei a 105 | Detalhe em `status.md` |
 
 ## Dependências novas
-**Nenhuma no binário nem no `go.mod`** (`ARQ-04`, `SEG-07`). Ferramentas já usadas ou do ambiente do dono: `gh` (já usado pelo código, `internal/queue/pr.go`), `git`, `uv` e Python 3 para os scripts distribuídos (não entram no binário; a task 1.3 consulta o `context7`/documentação do `uv` na versão exata antes de fixar o comando e o `doctor` passa a checar a presença). Nenhum token de CI ou de billing é guardado no repositório: `ci-politica.py` lê `gh auth` do ambiente.
+**Nenhuma no binário nem no `go.mod`** (`ARQ-04`, `SEG-07`). Ferramentas já usadas ou do ambiente do dono, conforme o VCS da Constituição: `gh` (já usado pelo código, `internal/queue/pr.go`) no `github`; no `azure-devops`, o `az` (CLI do Azure, com a extensão `azure-devops`: a verificar) e/ou o MCP do Azure DevOps (autenticação interativa; ainda não está em `sdd/memory/mcps.md`, que lista só `context7` e `git`); `nenhum` não usa nenhuma. Também `git`, `uv` e Python 3 para os scripts distribuídos (não entram no binário; a task 1.3 consulta o `context7`/documentação do `uv` na versão exata antes de fixar o comando e o `doctor` passa a checar a presença). Nenhum token de CI ou de billing é guardado no repositório: `ci-politica.py` lê a autenticação do VCS do ambiente (`gh auth` ou `az login`). A consulta ao `context7`/documentação do `az repos` e do MCP do Azure DevOps (`SEG-07`) é pré-requisito da task 0.1.
 
 ## Diagramas
 Diagramas do diagram-studio (versionados em `diagramas/`): fluxo `diagramas/forge-106-fluxo.png`, atestado `diagramas/forge-106-atestado.png` e BPMN simplificado `diagramas/forge-106-bpmn.png` (cada um com `.json` e `.svg`). Os três Mermaid abaixo (C4) refletem o fluxo final.
@@ -60,12 +62,12 @@ flowchart LR
   A["Agentes: Discovery,<br/>Builder e Revisor"]
   F["forge-sdd<br/>comandos, hooks, scripts"]
   R["Repositório do projeto<br/>spec, status, lições"]
-  G["GitHub<br/>PR, draft"]
-  P["Pipeline (Action)<br/>só confere o atestado e publica"]
+  G["VCS (Constituição)<br/>PR, draft"]
+  P["Pipeline do VCS<br/>só confere o atestado e publica"]
   H -->|"decide nos 2 gates"| A
   A -->|"usa"| F
   F -->|"grava artefatos"| R
-  F -->|"gh pr create, ready"| G
+  F -->|"adaptador: criar, pronto"| G
   H -->|"prova de aprovação"| G
   G -->|"dispara ao sair do draft"| P
   P -->|"publica se atestado vale"| G
@@ -76,12 +78,12 @@ flowchart LR
 flowchart TB
   CMD["Comandos e skills<br/>passos e menus"]
   HK["Hook PreToolUse<br/>pr_guard.py"]
-  CLI["forge CLI em Go<br/>review, queue, dispatch"]
+  CLI["forge CLI em Go<br/>review, queue, internal/vcs"]
   VAL["validar_entrega.py<br/>local, sem LLM"]
   VER["Veredito JSON<br/>head_sha, ponto, modo"]
   LIC["licoes.py<br/>sdd/memory/licoes"]
   ACT["Job atestado<br/>ubuntu, segundos"]
-  GH["GitHub<br/>PR e Actions"]
+  GH["VCS: github, azure-devops<br/>ou nenhum"]
   CMD -->|"abre draft"| GH
   CMD -->|"chama"| CLI
   CLI -->|"roda"| VAL
@@ -89,7 +91,7 @@ flowchart TB
   CLI -->|"grava e novo-fix"| LIC
   CMD -->|"lê lições da rule"| LIC
   HK -->|"lê"| VER
-  HK -->|"bloqueia gh fora da regra"| GH
+  HK -->|"bloqueia gh, az, MCP fora da regra"| GH
   ACT -->|"confere SHA e prova"| GH
 ```
 
@@ -100,8 +102,8 @@ sequenceDiagram
   participant C as Comando
   participant R as Revisor
   participant B as Builder
-  participant G as GitHub
-  C->>G: push e gh pr create --draft
+  participant G as VCS
+  C->>G: push e criar PR em draft
   C->>R: spec-para-revisao
   R-->>D: conforme: Seguir ou Ajustar?
   D->>B: Seguir (sem aprovar o split)
@@ -109,7 +111,7 @@ sequenceDiagram
   B->>R: pronto-para-revisao
   R-->>B: desvio vira novo-fix, prioridade
   R-->>D: conforme: Continuar ou Ajustar?
-  D->>G: Continuar: gh pr ready e prova
+  D->>G: Continuar: marcar pronto e prova
   G->>G: job confere o atestado e publica
 ```
 
@@ -122,11 +124,13 @@ go build ./... && go vet ./... && go test ./...
 go test ./internal/harness/... -run 'TestParecerGravaHeadSHA'
 go test ./internal/queue/... -run 'TestReviewConformeNaoCriaPR'
 go test ./internal/scaffold/... -run 'TestMergePreToolUseHook'
+go test ./internal/vcs/... -run 'TestGitHubCriaPRComDraft|TestAzureDevOpsCriaPRSemGitHub|TestNenhumDeixaABranchPronta|TestLeVCSDaConstituicao'
 go test ./internal/pipeline/... -run 'TestDesvioAbreNovoFixComPrioridade|TestBuilderFazSplitSemSegundaAprovacao|TestFixesParalelosNaOnda'
 uv run --no-project python -m unittest discover -s scripts/tests -p 'test_*.py'
 uv run scripts/validar_entrega.py --json --sem-llm
 uv run scripts/atestado.py --verificar --sha HEAD
 uv run scripts/pr_guard.py --check 'gh pr create --draft --fill'
+uv run scripts/pr_guard.py --check 'az repos pr create --draft true --title x'
 uv run scripts/licoes.py --rule COD-02 | grep -o 'COD-02' | wc -l
 # negativo: cada caso abaixo deve falhar, e o teste existe de fato
 go test ./internal/harness/... -list 'TestParecerSemHeadSHARecusado' | grep -F 'TestParecerSemHeadSHARecusado'
@@ -135,6 +139,14 @@ go test ./internal/queue/... -list 'TestReadySemVereditoDoSHARecusado' | grep -F
 go test ./internal/queue/... -run 'TestReadySemVereditoDoSHARecusado'
 go test ./internal/pipeline/... -list 'TestTerceiraRodadaPerguntaAoHumano' | grep -F 'TestTerceiraRodadaPerguntaAoHumano'
 go test ./internal/pipeline/... -run 'TestTerceiraRodadaPerguntaAoHumano'
+go test ./internal/vcs/... -list 'TestAzureDevOpsNaoChamaGh' | grep -F 'TestAzureDevOpsNaoChamaGh'
+go test ./internal/vcs/... -run 'TestAzureDevOpsNaoChamaGh'
+go test ./internal/vcs/... -list 'TestNenhumNaoExecutaComandoDeVCS' | grep -F 'TestNenhumNaoExecutaComandoDeVCS'
+go test ./internal/vcs/... -run 'TestNenhumNaoExecutaComandoDeVCS'
+go test ./internal/vcs/... -list 'TestVCSDesconhecidoRecusado' | grep -F 'TestVCSDesconhecidoRecusado'
+go test ./internal/vcs/... -run 'TestVCSDesconhecidoRecusado'
+if uv run scripts/pr_guard.py --check 'az repos pr create --title x'; then exit 1; fi
+if uv run scripts/pr_guard.py --check 'az repos pr update --id 7 --draft false'; then exit 1; fi
 go test ./internal/pipeline/... -list 'TestSplitForaDoPlanoRecusado' | grep -F 'TestSplitForaDoPlanoRecusado'
 go test ./internal/pipeline/... -run 'TestSplitForaDoPlanoRecusado'
 go test ./internal/pipeline/... -list 'TestModoSemHumanoExigeAvisoDeRiscos' | grep -F 'TestModoSemHumanoExigeAvisoDeRiscos'
@@ -144,7 +156,8 @@ if uv run scripts/validar_entrega.py --json --sem-llm --fixture scripts/tests/fi
 if uv run scripts/pr_guard.py --check 'gh pr create --fill'; then exit 1; fi
 if uv run scripts/pr_guard.py --check 'gh pr merge 7'; then exit 1; fi
 ```
-- Draft real: um PR de teste com `gh pr create --draft` mostra todos os jobs `skipped`; depois de `gh pr ready` os jobs rodam uma vez (task 3.5; evidência colada no PR).
+- Cada VCS suportado tem prova própria na task 3.5: `github` (abaixo), `azure-devops` (PR de teste em draft; se a build validation roda em draft e como marcar pronto: a verificar) e `nenhum` (branch pronta, sem comando de VCS).
+- Draft real no GitHub: um PR de teste com `gh pr create --draft` mostra todos os jobs `skipped`; depois de `gh pr ready` os jobs rodam uma vez (task 3.5; evidência colada no PR).
 - Atestado real: no mesmo PR de teste, `gh pr ready` com SHA sem veredito conforme faz o job de atestado falhar e bloquear a publicação; com atestado válido ele passa (task 3.5).
 - Dois pontos: com fila de 3 tasks entregues, o laço registra 0 revisões entre `spec-para-revisao` e `pronto-para-revisao` (task 1.6); os fixes abertos pelo revisor não disparam revisão até o sinal se repetir.
 - `validar_entrega.py` nunca chama LLM nem rede, e não é referenciado em nenhum workflow (conferência em `3.2`).

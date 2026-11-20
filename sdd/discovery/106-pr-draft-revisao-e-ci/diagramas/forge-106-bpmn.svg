@@ -20,7 +20,7 @@
 <text x="48.0" y="426.0" font-family="'JetBrains Mono', Consolas, 'Courier New', monospace" font-size="13.0" font-weight="700" fill="#4f8ef7" text-anchor="start">VOCÊ</text>
 <rect x="24" y="552" width="1960" height="232" rx="10" fill="#141925" stroke="#4f8ef7" stroke-width="1.5"/>
 <text x="1004.0" y="674.0" font-family="Montserrat, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="17.0" font-weight="800" fill="#f5f7fb" text-anchor="middle"></text>
-<text x="48.0" y="578.0" font-family="'JetBrains Mono', Consolas, 'Courier New', monospace" font-size="13.0" font-weight="700" fill="#4f8ef7" text-anchor="start">GITHUB</text>
+<text x="48.0" y="578.0" font-family="'JetBrains Mono', Consolas, 'Courier New', monospace" font-size="13.0" font-weight="700" fill="#4f8ef7" text-anchor="start">VCS</text>
 <rect x="120" y="148" width="160" height="72" rx="36.0" fill="#141925" stroke="#4f8ef7" stroke-width="1.5"/>
 <text x="200.0" y="189.9" font-family="Montserrat, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="17.0" font-weight="800" fill="#f5f7fb" text-anchor="middle">Início</text>
 <rect x="328" y="148" width="160" height="72" rx="10" fill="#141925" stroke="#2a3245" stroke-width="1.5"/>
@@ -56,7 +56,7 @@
 <text x="1448.0" y="638.0" font-family="Montserrat, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="14.6" font-weight="800" fill="#f5f7fb" text-anchor="middle">PR sai do draft</text>
 <text x="1448.0" y="657.0" font-family="Montserrat, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13.0" font-weight="500" fill="#c3cad8" text-anchor="middle">CI roda 1 vez</text>
 <rect x="1576" y="604" width="160" height="72" rx="10" fill="#141925" stroke="#2a3245" stroke-width="1.5"/>
-<text x="1656.0" y="638.0" font-family="Montserrat, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15.7" font-weight="800" fill="#f5f7fb" text-anchor="middle">Action confere</text>
+<text x="1656.0" y="638.0" font-family="Montserrat, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13.7" font-weight="800" fill="#f5f7fb" text-anchor="middle">Pipeline confere</text>
 <text x="1656.0" y="657.0" font-family="Montserrat, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13.0" font-weight="500" fill="#c3cad8" text-anchor="middle">só o atestado</text>
 <rect x="1784" y="604" width="160" height="72" rx="36.0" fill="#141925" stroke="#4f8ef7" stroke-width="1.5"/>
 <text x="1864.0" y="638.0" font-family="Montserrat, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="17.0" font-weight="800" fill="#f5f7fb" text-anchor="middle">Publica</text>

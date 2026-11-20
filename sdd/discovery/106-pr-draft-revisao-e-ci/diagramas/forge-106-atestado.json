@@ -1,9 +1,9 @@
 {
  "kicker": "// Forge SDD · iniciativa 106",
- "titulo": "A Action só publica: sem atestado válido, ela bloqueia",
+ "titulo": "A pipeline só publica: sem atestado válido, ela bloqueia",
  "largura": 1280,
  "altura": 470,
- "nota_rodape": "validação roda local, sem LLM; a Action só confere o atestado",
+ "nota_rodape": "validação roda local, sem LLM; a pipeline só confere o atestado",
  "elementos": [
   {
    "tipo": "caixa",
@@ -45,7 +45,7 @@
    "y": 192,
    "w": 208,
    "h": 96,
-   "texto": "Action confere",
+   "texto": "Pipeline confere",
    "sub": "1 job, segundos",
    "estilo": "normal"
   },
@@ -111,7 +111,7 @@
    "w": 560,
    "h": 56,
    "texto": "Script local, sem LLM: regras, ADR, lições, fila, SHA",
-   "sub": "não roda na Action",
+   "sub": "não roda na pipeline",
    "estilo": "tracejado"
   }
  ]

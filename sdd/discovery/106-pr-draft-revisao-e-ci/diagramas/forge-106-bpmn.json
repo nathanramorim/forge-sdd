@@ -69,7 +69,7 @@
    "tipo": "texto",
    "x": 48,
    "y": 578,
-   "texto": "GITHUB",
+   "texto": "VCS",
    "estilo": "rotulo",
    "alinha": "start"
   },
@@ -212,7 +212,7 @@
    "y": 604,
    "w": 160,
    "h": 72,
-   "texto": "Action confere",
+   "texto": "Pipeline confere",
    "sub": "só o atestado",
    "estilo": "normal"
   },
