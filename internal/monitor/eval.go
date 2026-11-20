@@ -26,8 +26,18 @@ const (
 	EvalMaxRefs = 20
 )
 
-// evalSimFile guarda, por feature de referência, o desfecho simulado de cada modo.
+// evalSimFile guarda, por feature de referência, um único desfecho simulado, aplicado igual aos
+// dois modos: o simulador testa a apuração, não compara desenhos.
 const evalSimFile = "simulacao.json"
+
+// Origens possíveis dos números de eval-<modo>.json.
+const (
+	EvalOrigemSimulado = "simulado"
+	EvalOrigemReal     = "real"
+)
+
+// EvalAvisoSimulado precede toda saída com números do simulador.
+const EvalAvisoSimulado = "SIMULADO: números de exemplo, não medidos"
 
 // EvalRefsDir devolve sdd/eval/refs.
 func EvalRefsDir(dir string) string { return filepath.Join(layout.Root(dir), "eval", "refs") }
@@ -37,7 +47,7 @@ func EvalResultPath(dir, mode string) string {
 	return filepath.Join(layout.Metrics(dir), "eval-"+mode+".json")
 }
 
-// EvalSim é o desfecho de uma feature de referência num modo, sem chamar modelo.
+// EvalSim é o desfecho simulado de uma feature de referência, idêntico nos dois modos.
 type EvalSim struct {
 	Aprovado      bool `json:"aprovado"`
 	VoltasRetorno int  `json:"voltas_retorno"`
@@ -49,12 +59,13 @@ type EvalSim struct {
 // EvalRef é uma feature de referência carregada e validada.
 type EvalRef struct {
 	ID  string
-	Sim map[string]EvalSim
+	Sim EvalSim
 }
 
 // EvalResult é o conteúdo de sdd/.metrics/eval-<modo>.json.
 type EvalResult struct {
 	Mode          string  `json:"mode"`
+	Origem        string  `json:"origem"`
 	Executor      string  `json:"executor"`
 	GeneratedAt   string  `json:"generated_at"`
 	Features      int     `json:"features"`
@@ -134,24 +145,20 @@ func loadEvalRef(refDir string) (EvalRef, []string) {
 	dec := json.NewDecoder(strings.NewReader(string(data)))
 	dec.DisallowUnknownFields()
 	if err := dec.Decode(&ref.Sim); err != nil {
-		return ref, append(problems, fmt.Sprintf("%s inválido: %v", evalSimFile, err))
-	}
-	for _, mode := range []string{EvalModeSessions, EvalModeChat} {
-		if _, ok := ref.Sim[mode]; !ok {
-			problems = append(problems, fmt.Sprintf("%s sem o modo %q", evalSimFile, mode))
-		}
+		return ref, append(problems, fmt.Sprintf("%s inválido (um único desfecho, igual nos dois modos): %v", evalSimFile, err))
 	}
 	return ref, problems
 }
 
-// SimulateEval agrega o desfecho simulado do conjunto num modo (sem modelo, determinístico).
+// SimulateEval agrega o desfecho simulado do conjunto num modo (sem modelo, determinístico). O
+// resultado é o mesmo nos dois modos, exceto o campo Mode.
 func SimulateEval(refs []EvalRef, mode string, at time.Time) (EvalResult, error) {
 	if err := ValidEvalMode(mode); err != nil {
 		return EvalResult{}, err
 	}
-	res := EvalResult{Mode: mode, Executor: "simulador", GeneratedAt: at.UTC().Format(time.RFC3339), Features: len(refs)}
+	res := EvalResult{Mode: mode, Origem: EvalOrigemSimulado, Executor: "simulador", GeneratedAt: at.UTC().Format(time.RFC3339), Features: len(refs)}
 	for _, r := range refs {
-		s := r.Sim[mode]
+		s := r.Sim
 		if s.Aprovado {
 			res.Aprovadas++
 		}
@@ -204,14 +211,28 @@ func ReadEvalResult(dir, mode string) (EvalResult, error) {
 	if err := json.Unmarshal(data, &res); err != nil {
 		return EvalResult{}, fmt.Errorf("%s inválido: %w", path, err)
 	}
+	if res.Origem != EvalOrigemSimulado && res.Origem != EvalOrigemReal {
+		return EvalResult{}, fmt.Errorf("%s sem origem válida (%q): use %q ou %q", path, res.Origem, EvalOrigemSimulado, EvalOrigemReal)
+	}
 	if res.Mode != mode {
 		return EvalResult{}, fmt.Errorf("%s declara o modo %q, esperado %q", path, res.Mode, mode)
 	}
 	return res, nil
 }
 
-// CompareEval lê os dois modos e imprime a tabela comparativa.
-func CompareEval(dir string, w io.Writer) error {
+// FormatEvalRun devolve a linha de resumo do forge eval run, avisando quando os números são simulados.
+func FormatEvalRun(res EvalResult, path string) string {
+	prefix := ""
+	if res.Origem != EvalOrigemReal {
+		prefix = EvalAvisoSimulado + ". "
+	}
+	return fmt.Sprintf("%smodo %s (origem %s): %d/%d aprovadas, %d voltas do Retorno, %d tokens, %ds, %d intervenções -> %s\n",
+		prefix, res.Mode, res.Origem, res.Aprovadas, res.Features, res.VoltasRetorno, res.Tokens, res.Segundos, res.Intervencoes, path)
+}
+
+// CompareEval lê os dois modos e imprime a tabela comparativa. Se algum lado for simulado, recusa
+// a comparação, a menos que permitirSimulado seja verdadeiro; mesmo assim imprime o aviso no topo.
+func CompareEval(dir string, w io.Writer, permitirSimulado bool) error {
 	s, err := ReadEvalResult(dir, EvalModeSessions)
 	if err != nil {
 		return err
@@ -220,7 +241,16 @@ func CompareEval(dir string, w io.Writer) error {
 	if err != nil {
 		return err
 	}
+	if s.Origem != EvalOrigemReal || c.Origem != EvalOrigemReal {
+		if !permitirSimulado {
+			return fmt.Errorf("comparação recusada: origem sessions=%s, chat=%s; números simulados não comparam desenhos (use --permitir-simulado só para testar a apuração)", s.Origem, c.Origem)
+		}
+		if _, err := fmt.Fprintf(w, "%s: esta tabela não compara os desenhos (origem sessions=%s, chat=%s)\n", EvalAvisoSimulado, s.Origem, c.Origem); err != nil {
+			return fmt.Errorf("falha ao imprimir a comparação: %w", err)
+		}
+	}
 	rows := [][3]string{
+		{"origem", s.Origem, c.Origem},
 		{"features", fmt.Sprint(s.Features), fmt.Sprint(c.Features)},
 		{"taxa de aprovação", fmt.Sprintf("%.0f%%", s.TaxaAprovacao*100), fmt.Sprintf("%.0f%%", c.TaxaAprovacao*100)},
 		{"voltas do Retorno", fmt.Sprint(s.VoltasRetorno), fmt.Sprint(c.VoltasRetorno)},

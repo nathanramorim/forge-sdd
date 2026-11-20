@@ -1,4 +1,1 @@
-{
-  "sessions": {"aprovado": true, "voltas_retorno": 0, "tokens": 31000, "segundos": 400, "intervencoes": 0},
-  "chat": {"aprovado": true, "voltas_retorno": 0, "tokens": 30000, "segundos": 380, "intervencoes": 0}
-}
+{"aprovado": true, "voltas_retorno": 0, "tokens": 31000, "segundos": 400, "intervencoes": 0}
