@@ -21,9 +21,9 @@ const (
 	StatusChangesRequested = "changes_requested"
 	StatusBlocked          = "blocked"
 
-	VerdictConforme = "conforme"
-	VerdictViolacao = "violacao"
-	VerdictDuvida   = "duvida"
+	VerdictConforme = harness.VereditoConforme
+	VerdictViolacao = harness.VereditoViolacao
+	VerdictDuvida   = harness.VereditoDuvida
 )
 
 // Queue representa a fila persistida em sdd/discovery/<id>/queue.json (ou na fila legada sdd/.queue/queue.json).

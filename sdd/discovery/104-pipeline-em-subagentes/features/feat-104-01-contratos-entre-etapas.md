@@ -47,6 +47,9 @@ go vet ./... && go test ./...
 O `regra_descricao` hoje já existe na `main`; a falha vista pelo dono veio de um binário mais antigo? Se o binário em uso for anterior, a feature só garante que não volta.
 
 ## Decisões da implementação
+
+- Depois do parecer da Governança (20/11/2026): as constantes `VerdictConforme`, `VerdictViolacao` e `VerdictDuvida` de `internal/queue` passam a apontar para as do harness, para o enum ter um só dono (DUP-04).
+- `SpecParaBuild` e `ResultadoBuild` ficam sem consumidor por enquanto, por decisão: a spec pede os dois, e a `feat-104-06` (laço no Go) e a `feat-104-07` (isolamento e junção) passam a usá-los. Se essas features não os consumirem, eles saem.
 - `Retorno` é o tipo do achado do `Parecer`; `queue.Verdict`, `queue.Finding` e `queue.CandidateSkill` viraram aliases (`type X = harness.Y`), sem mudar o JSON nem os chamadores. `queue.ValidateVerdict` só delega para `harness.ValidateParecer`.
 - O exemplo da skill usa marcadores (`"conforme | violacao | duvida"`), então o teste de contrato valida o esquema (`DecodeParecerSchema`, estrito), não o enum. Ele também exige que toda chave de `Parecer` e de `Retorno` apareça no exemplo, nos dois sentidos.
 - `regra_descricao` continua `omitempty` e não é obrigatório no binário, para não recusar pareceres que já existem (opção reversível). Ele é exigido só no exemplo da skill.
