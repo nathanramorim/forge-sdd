@@ -40,6 +40,8 @@ Contexto: o PR #113 publicou no README um banner e um design system "GTA VI", me
 8. **Agentes rebeldes nas fases.** Os mascotes dos agentes aparecem como rebeldes, com arminhas e porrete de brinquedo, nos cartões das estações, sem perder qualidade (`feat-101-02`). São personagens do próprio forge-sdd.
 9. **O site entra agora**, como a segunda etapa prevista na decisão 2.
 
+10. **A edição segue os pipelines, não as 5 estações** (Nathan, 19/11/2026: "essa visão de arquiteto já não tem mais, são as pipelines agora"). Passam a valer 3 missões (Discovery = o plano, Builder = a obra, Reviewer = o vigia) e o fecho "Missão cumprida" para a aprovação humana; a equipe de robôs tem 3 personagens. Isso substitui o mapeamento de 5 estações da proposta original e da `feat-101-01`; o conteúdo de texto da LP não muda (`feat-101-07`).
+
 ## Gate 1 das tasks (Nathan, 19/11/2026: "só vai")
 Aprovadas `fix-101-01`, `feat-101-01`, `feat-101-02` e `feat-101-03`, nessa ordem. Os três pontos em aberto ficaram como propostos:
 - O Líder (cartão 01 da LP) fica com a "Missão 5: missão cumprida".

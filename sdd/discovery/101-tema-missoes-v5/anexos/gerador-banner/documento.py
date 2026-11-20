@@ -116,7 +116,7 @@ def tabela_contraste():
 def readme():
     m = missoes()
     promessa = m["promessa"]
-    missoes_md = "\n".join(["| Missão | Estação |", "|---|---|"] + [f"| {x['titulo']} | {x['estacao']} |" for x in m["missoes"]])
+    missoes_md = "\n".join(["| Missão | Sessão |", "|---|---|"] + [f"| {x['titulo']} | {x['sessao']} |" for x in m["missoes"]] + [f"| {m['fecho']['titulo']} | {m['fecho']['sessao']} |"])
     fontes = "\n".join(["| Papel | Uso | Pilha |", "|---|---|---|"] + [f"| `{n}` | {f['uso']} | `{f['pilha']}` |" for n, f in FONTS.items()])
     return f"""# Design system da Edição Missões
 
@@ -134,7 +134,7 @@ As regras de marca desta edição estão em `sdd/discovery/101-tema-missoes-v5/`
 |---|---|
 | **Referência de cor** | [Conceito de interface de Matías Rodríguez no Behance]({URL}), publicado em 25/04/2025. {AVISO} |
 | **O que foi medido** | Cores e degradês, amostrados por script nas pranchas publicadas, em 19/11/2026. Tolerância de ±2 por canal. |
-| **O que é nosso** | Marca, tipografia, ilustrações, textos e as 5 missões. |
+| **O que é nosso** | Marca, tipografia, ilustrações, textos e as missões. |
 | **O que não entra** | Logotipos, letreiros, numerais, personagens, fontes e interface de jogos. |
 
 ## Princípios
@@ -144,7 +144,7 @@ As regras de marca desta edição estão em `sdd/discovery/101-tema-missoes-v5/`
 3. **Branco para ler, cor para estado.** O texto é branco. Âmbar, rosa e degradê aparecem só em seleção, foco e seção ativa.
 4. **Um sinal por estado.** Degradê `chip` é seção ativa, `ambar` é linha selecionada e `rosa-foco` é foco.
 
-## As 5 missões
+## As missões
 
 {missoes_md}
 
@@ -210,7 +210,7 @@ As quatro últimas linhas ficam abaixo do recomendado. No banner e no espécime,
 |---|---|
 | [`tokens.json`](tokens.json) | Tokens de cor, degradê e tipografia, com uso e origem |
 | [`tokens.css`](tokens.css) | Os mesmos tokens como variáveis CSS (`--missoes-*`) |
-| [`missoes.json`](missoes.json) | As 5 missões e a promessa, em fonte única |
+| [`missoes.json`](missoes.json) | As missões, o fecho e a promessa, em fonte única |
 | [`identidade.json`](identidade.json) e `logo.svg.frag` | Identidade no formato do readme-studio, para gerar novos banners |
 | [`especime.svg`](especime.svg) | Folha de espécime no topo desta página |
 | [`../../img/banner-v5-missoes.svg`](../../img/banner-v5-missoes.svg) | Banner do README na edição (há uma cópia em PNG para o npm) |

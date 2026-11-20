@@ -2,7 +2,7 @@
 import sys
 
 from parts import CONTORNO, FONT, MONO, grad, logo, neon, palm, skyline, striped_sun
-from tokens import c, missoes
+from tokens import c, missoes, titulos_missoes
 
 W, H = 1280, 420
 TOP, BOT = 40, 372
@@ -11,7 +11,7 @@ ART0, ART1 = 42, 370
 
 def build():
     m = missoes()
-    titulos = [x["titulo"] for x in m["missoes"]]
+    titulos = titulos_missoes()
     o = []
     rotulo = f'forge-sdd 5.0, {m["edicao"]}: seu time de IA, com método. ' + '; '.join(titulos) + '.'
     o.append(f'<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" viewBox="0 0 {W} {H}" role="img" aria-label="{rotulo}">')

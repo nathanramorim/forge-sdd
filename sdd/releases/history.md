@@ -16,7 +16,7 @@ Compatível com a 4.8.0. Consolida em versão estável tudo o que foi entregue n
 *   **Diagramas C4 com dois motores:** a skill de diagramas pergunta, a cada uso, se você quer Mermaid ou diagram-studio (Iniciativa 98).
 *   **`forge rules` volta a achar os IDs da Constituição** (`fix-88-05`).
 *   **Vindo da linha 4.9.x:** o modo pipeline avançado (experimental), o menu Settings e os tetos desligados por padrão passam a fazer parte da versão estável. O modo normal não muda.
-*   **Edição Missões:** o README ganha um banner temático e as 5 estações aparecem como missões: o plano, a rota, a obra, o vigia e missão cumprida. O design system da edição fica em `docs/design/edicao-missoes/`. É uma homenagem ao clima de pôr do sol, neon e palmeiras, com marca, tipografia e ilustrações próprias.
+*   **Edição Missões:** o README ganha um banner temático e as sessões do pipeline aparecem como missões: Discovery é o plano, Builder é a obra, Reviewer é o vigia, e a sua aprovação fecha com "Missão cumprida". O design system da edição fica em `docs/design/edicao-missoes/`. É uma homenagem ao clima de pôr do sol, neon e palmeiras, com marca, tipografia e ilustrações próprias.
 *   **Como atualizar:** `npm install -g @nathanramorim/forge-sdd` e, nos projetos existentes, `forge update`.
 
 ### Versão 4.9.1 — Correções do Modo Avançado: Fila, Teto Diário e Tetos no Settings (Beta)

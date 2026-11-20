@@ -52,7 +52,7 @@ Durante a edição de lançamento da 5.0.0, `forge-sdd.org` (landing page e wiki
 
 A virada usa o relógio do visitante, comparado em tempo absoluto: o fuso de quem visita não muda a hora da troca.
 
-### Missão de cada cartão
+### Missão de cada cartão (substituída pela feat-101-07: 3 missões e o fecho, vindas de `missoes.json`)
 
 | Cartão da LP | Estação | Missão |
 |---|---|---|

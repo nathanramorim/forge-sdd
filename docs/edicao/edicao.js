@@ -19,8 +19,17 @@
   document.documentElement.setAttribute("data-edicao", edicao.id);
   if (!document.addEventListener) return;
 
-  /* Estação de cada cartão da LP, na ordem em que a página os desenha. */
+  /* Estação de cada cartão da LP, na ordem em que a página os desenha; a missão vem do JSON. */
   var estacaoDoCartao = ["Operação", "Concepção", "Planejamento", "Construção", "Governança"];
+
+  function missaoDaEstacao(dados, estacao) {
+    var lista = dados.missoes.concat(dados.fecho ? [dados.fecho] : []);
+    for (var k = 0; k < lista.length; k++) {
+      var item = lista[k];
+      if (item && typeof item.titulo === "string" && Array.isArray(item.estacoes) && item.estacoes.indexOf(estacao) !== -1) return item.titulo;
+    }
+    return null;
+  }
 
   function criar(tag, classe, texto) {
     var el = document.createElement(tag);
@@ -29,18 +38,14 @@
     return el;
   }
 
-  function rotularCartoes(missoes) {
+  function rotularCartoes(dados) {
     var cartoes = document.querySelectorAll("#estacoes .agent-card");
     for (var i = 0; i < cartoes.length; i++) {
       var meta = cartoes[i].querySelector(".agent-meta");
       var estacao = estacaoDoCartao[Number(cartoes[i].dataset.idx)];
       if (!meta || !estacao || meta.querySelector(".edicao-missao")) continue;
-      for (var k = 0; k < missoes.length; k++) {
-        var item = missoes[k];
-        if (item && typeof item.estacao === "string" && typeof item.titulo === "string" && item.estacao === estacao) {
-          meta.insertBefore(criar("div", "edicao-missao", item.titulo), meta.querySelector("h3"));
-        }
-      }
+      var titulo = missaoDaEstacao(dados, estacao);
+      if (titulo) meta.insertBefore(criar("div", "edicao-missao", titulo), meta.querySelector("h3"));
     }
   }
 
@@ -64,19 +69,17 @@
       faixa.appendChild(criar("span", "edicao-nome", dados.edicao));
       faixa.appendChild(criar("span", "edicao-promessa", dados.promessa));
       hero.insertBefore(faixa, hero.firstChild);
-      var ultima = dados.missoes[dados.missoes.length - 1];
-      if (ultima && typeof ultima.titulo === "string") {
-        var texto = ultima.titulo.split(": ").pop();
-        faixa.parentNode.insertBefore(criar("div", "edicao-placa", texto), faixa.nextSibling);
+      if (dados.fecho && typeof dados.fecho.titulo === "string") {
+        faixa.parentNode.insertBefore(criar("div", "edicao-placa", dados.fecho.titulo), faixa.nextSibling);
       }
     }
 
     var estacoes = document.getElementById("estacoes");
     if (!estacoes) return;
-    rotularCartoes(dados.missoes);
+    rotularCartoes(dados);
     tirarMascotes3D();
     if (window.MutationObserver) {
-      new MutationObserver(function () { rotularCartoes(dados.missoes); tirarMascotes3D(); }).observe(estacoes, { childList: true, subtree: true });
+      new MutationObserver(function () { rotularCartoes(dados); tirarMascotes3D(); }).observe(estacoes, { childList: true, subtree: true });
     }
   }
 

@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="420" viewBox="0 0 1280 420" role="img" aria-label="forge-sdd 5.0, Edição Missões: seu time de IA, com método. Missão 1: o plano; Missão 2: a rota; Missão 3: a obra; Missão 4: o vigia; Missão 5: missão cumprida.">
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="420" viewBox="0 0 1280 420" role="img" aria-label="forge-sdd 5.0, Edição Missões: seu time de IA, com método. Missão 1: o plano; Missão 2: a obra; Missão 3: o vigia; Missão cumprida.">
 <title>forge-sdd 5.0 — Edição Missões</title>
 <defs>
 <linearGradient id="gSig" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#ffaa6e"/><stop offset="0.2" stop-color="#fda96a"/><stop offset="0.35" stop-color="#fd967d"/><stop offset="0.51" stop-color="#fe818d"/><stop offset="0.66" stop-color="#fd749b"/><stop offset="0.82" stop-color="#f668aa"/><stop offset="1" stop-color="#f061af"/></linearGradient>
@@ -43,16 +43,14 @@
 <text x="56" y="25" font-family="Montserrat, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" font-size="15"><tspan font-weight="800" fill="#ffffff">forge-sdd</tspan><tspan dx="10" font-weight="600" font-size="12" fill="#a48cad">Edição Missões</tspan></text>
 <text x="1250" y="25" text-anchor="end" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13.5"><tspan fill="#dfa351" font-weight="700">$</tspan><tspan dx="8" fill="#ffffff" fill-opacity="0.94">npm i -g @nathanramorim/forge-sdd</tspan></text>
 <rect x="0" y="372" width="1280" height="48" fill="#151515"/>
-<text x="128" y="401" text-anchor="middle" font-family="Montserrat, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" font-weight="700" font-size="13" fill="#ffffff">Missão 1: o plano</text>
-<text x="384" y="401" text-anchor="middle" font-family="Montserrat, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" font-weight="700" font-size="13" fill="#ffffff">Missão 2: a rota</text>
-<path d="M253,391 l6,5.5 l-6,5.5" fill="none" stroke="#a48cad" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-<text x="640" y="401" text-anchor="middle" font-family="Montserrat, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" font-weight="700" font-size="13" fill="#ffffff">Missão 3: a obra</text>
-<path d="M509,391 l6,5.5 l-6,5.5" fill="none" stroke="#a48cad" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-<text x="896" y="401" text-anchor="middle" font-family="Montserrat, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" font-weight="700" font-size="13" fill="#ffffff">Missão 4: o vigia</text>
-<path d="M765,391 l6,5.5 l-6,5.5" fill="none" stroke="#a48cad" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-<rect x="1040" y="383" width="224" height="26" rx="3" fill="url(#gChip)"/>
-<text x="1152" y="401" text-anchor="middle" font-family="Montserrat, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" font-weight="700" font-size="13" fill="#ffffff" stroke="#151515" stroke-opacity="0.5" stroke-width="2.4" stroke-linejoin="round" paint-order="stroke fill">Missão 5: missão cumprida</text>
-<path d="M1021,391 l6,5.5 l-6,5.5" fill="none" stroke="#a48cad" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="160" y="401" text-anchor="middle" font-family="Montserrat, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" font-weight="700" font-size="13" fill="#ffffff">Missão 1: o plano</text>
+<text x="480" y="401" text-anchor="middle" font-family="Montserrat, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" font-weight="700" font-size="13" fill="#ffffff">Missão 2: a obra</text>
+<path d="M317,391 l6,5.5 l-6,5.5" fill="none" stroke="#a48cad" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="800" y="401" text-anchor="middle" font-family="Montserrat, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" font-weight="700" font-size="13" fill="#ffffff">Missão 3: o vigia</text>
+<path d="M637,391 l6,5.5 l-6,5.5" fill="none" stroke="#a48cad" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="1008" y="383" width="224" height="26" rx="3" fill="url(#gChip)"/>
+<text x="1120" y="401" text-anchor="middle" font-family="Montserrat, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" font-weight="700" font-size="13" fill="#ffffff" stroke="#151515" stroke-opacity="0.5" stroke-width="2.4" stroke-linejoin="round" paint-order="stroke fill">Missão cumprida</text>
+<path d="M957,391 l6,5.5 l-6,5.5" fill="none" stroke="#a48cad" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
 <rect x="0" y="39" width="1280" height="4" fill="url(#gSig)" opacity="0.72" filter="url(#fGlow)"/><rect x="0" y="40" width="1280" height="2" fill="url(#gSig)"/>
 <rect x="0" y="369" width="1280" height="4" fill="url(#gSig)" opacity="0.72" filter="url(#fGlow)"/><rect x="0" y="370" width="1280" height="2" fill="url(#gSig)"/>
 </g>

@@ -120,11 +120,10 @@ Nenhuma.
 
 ```bash
 # 1. Nenhuma marca de terceiros fora da linha de crédito
-grep -rn -i -E "gta|grand theft|vice city|pricedown|rockstar|take-two" \
+test "$(grep -rn -i -E "gta|grand theft|vice city|pricedown|rockstar|take-two" \
   --include="*.md" --include="*.svg" --include="*.json" --include="*.css" --include="*.frag" \
   README.md npm/README.md sdd/releases/history.md docs/img docs/design \
-  | grep -v -E "sem ligação com a Rockstar/Take-Two|behance\.net/gallery/224512205"
-# não deve devolver nenhuma linha
+  | grep -v -E "sem ligação com a Rockstar/Take-Two|behance\.net/gallery/224512205" | wc -l | tr -d ' ')" = "0"
 
 # 2. Nomes antigos saem, nomes novos entram
 test ! -e docs/design/gta-vi && test ! -e docs/img/banner-v5-gta-vi.svg && test ! -e docs/img/banner-v5-gta-vi.png
@@ -140,14 +139,14 @@ for f in README.md npm/README.md sdd/releases/history.md; do
 done
 test "$(grep -c '^### Versão 5.0.0' sdd/releases/history.md)" = "1"
 
-# 4. As 5 missões saem da fonte única e aparecem iguais nos dois READMEs
+# 4. As missões (3 e o fecho, desde a feat-101-07) saem da fonte única e aparecem iguais nos dois READMEs
 node -e '
 const fs = require("fs");
 const m = JSON.parse(fs.readFileSync("docs/design/edicao-missoes/missoes.json", "utf8"));
-if (m.missoes.length !== 5) { console.error("esperava 5 missões"); process.exit(1); }
+if (m.missoes.length !== 3 || !m.fecho) { console.error("esperava 3 missões e o fecho"); process.exit(1); }
 for (const f of ["README.md", "npm/README.md"]) {
   const t = fs.readFileSync(f, "utf8");
-  for (const x of m.missoes) if (!t.includes(x.titulo)) { console.error(f, "sem:", x.titulo); process.exit(1); }
+  for (const x of m.missoes.concat(m.fecho)) if (!t.includes(x.titulo)) { console.error(f, "sem:", x.titulo); process.exit(1); }
 }
 console.log("ok");'
 

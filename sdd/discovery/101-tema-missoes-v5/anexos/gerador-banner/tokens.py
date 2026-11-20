@@ -80,3 +80,8 @@ def c(group, name):
 def missoes():
     with open(os.path.join(PASTA, "missoes.json"), encoding="utf-8") as f:
         return json.load(f)
+
+
+def titulos_missoes():
+    m = missoes()
+    return [x["titulo"] for x in m["missoes"]] + [m["fecho"]["titulo"]]

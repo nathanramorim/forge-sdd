@@ -18,7 +18,7 @@ ROBOS = {
     "governanca": {"nome": "Governança", "cor": "#ff8a5c", "escuro": "#c24a1e", "claro": "#ffcdb5", "marca": "tri", "olhos": "crescentes", "roupa": "colete", "cabeca": ["bone"], "peito": ["corrente"], "mao": "porrete"},
 }
 
-ORDEM_EQUIPE = ["planejador", "pm", "lider", "builders", "governanca"]
+ORDEM_EQUIPE = ["pm", "builders", "governanca"]
 
 
 def p(d, fill="none", stroke=CONTORNO, sw=5, extra=""):
@@ -194,8 +194,8 @@ def retrato(chave):
 
 def equipe():
     largura, altura = 1100, 330
-    escalas = {"planejador": 0.96, "pm": 1.0, "lider": 1.1, "builders": 1.0, "governanca": 0.96}
-    xs = {"planejador": 40, "pm": 250, "lider": 450, "builders": 690, "governanca": 880}
+    escalas = {"pm": 1.0, "builders": 1.1, "governanca": 1.0}
+    xs = {"pm": 230, "builders": 470, "governanca": 730}
     todos_defs, todos = [], []
     for chave in ORDEM_EQUIPE:
         defs, corpo = figura(chave, "e-" + chave)

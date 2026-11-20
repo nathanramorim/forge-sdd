@@ -15,7 +15,7 @@
 <p align="center"><strong>Versão atual: 5.0.0 (estável)</strong> · <a href="https://github.com/nathanramorim/forge-sdd/blob/main/sdd/releases/history.md">veja as novidades</a> · <a href="https://github.com/nathanramorim/forge-sdd/blob/main/docs/design/edicao-missoes/README.md">Edição Missões</a></p>
 
 <p align="center"><strong>A IA executa, o plano segura, você aprova.</strong><br>
-Missão 1: o plano · Missão 2: a rota · Missão 3: a obra · Missão 4: o vigia · Missão 5: missão cumprida</p>
+Missão 1: o plano · Missão 2: a obra · Missão 3: o vigia · Missão cumprida</p>
 <!-- edicao:fim -->
 
 <p align="center">
