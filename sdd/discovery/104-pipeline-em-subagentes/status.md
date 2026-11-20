@@ -1,5 +1,5 @@
 # Status — 104-pipeline-em-subagentes
 
-**Estado:** onda 1 concluída em 20/11/2026: feat-104-01 (contratos), feat-104-02 (verificador, `gate --criterios`, P-25) e feat-104-11 (avaliação, `forge eval`, números simulados neutros e marcados) implementadas, `conforme` na Governança e juntadas. `eval` entrou no ARQ-06 (ADR-0015).
-**Próximo passo:** onda 2: feat-104-03 (`forge doctor --harness`) e feat-104-04 (MCP, hook e instrução).
+**Estado:** ondas 1 e 2 (parcial) em 20/11/2026: 104-01, 02, 11, 03 (doctor), 05 (modelo por papel) e 06 (laço, trava, spike) conformes e mescladas; 12 specs passam no `gate --criterios`.
+**Próximo passo:** 104-04 (MCP, hook, instrução), depois 104-07 e 104-12 (dependem da 06), 104-08, 104-09, 104-10. Pendências: Codex/Agy por papel; `sonnet[1m]` recusado pelo ValidModel.
 **Pendências fora do escopo:** `TestStatusLiveFlag` instável por tempo (falha também no `main`); 5 pareceres da 97 com `task_id` não decodificam.
