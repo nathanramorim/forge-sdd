@@ -142,3 +142,21 @@ func TestAgentModelsAplicadoPeloRun(t *testing.T) {
 	assert.Equal(t, "opus", headerModel(t, dir, "pm-architect"))
 	assert.Equal(t, "opus", headerModel(t, dir, "planner"))
 }
+
+func TestAgentModelsRecusaEscalarYAML(t *testing.T) {
+	for _, v := range []string{"a:", "-", "-1", "1.5", "0x1F", "9lives", "a-", "null", "NULL", "True", "false", "yes", "No", "on", "OFF", "y", "N", "~", ".x", "_x"} {
+		cfg := config.DefaultForgeConfig()
+		cfg.AgentModels = map[string]string{"builder": v}
+		err := cfg.Validate()
+		require.Error(t, err, v)
+		assert.Contains(t, err.Error(), "agent_models.builder", v)
+	}
+}
+
+func TestAgentModelsAceitaNomesReais(t *testing.T) {
+	for _, v := range []string{"inherit", "sonnet", "opus", "haiku", "claude-sonnet-4-5", "claude-opus-4-1-20250805", "gpt-5.1", "gemini-2.5-pro", "us.anthropic.claude-sonnet-4:0"} {
+		cfg := config.DefaultForgeConfig()
+		cfg.AgentModels = map[string]string{"builder": v}
+		assert.NoError(t, cfg.Validate(), v)
+	}
+}

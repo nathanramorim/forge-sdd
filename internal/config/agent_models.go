@@ -3,6 +3,8 @@ package config
 import (
 	"fmt"
 	"sort"
+	"strings"
+	"unicode"
 )
 
 // agentModelFiles liga cada papel de agent_models aos agentes de .claude/agents que herdam o modelo
@@ -31,9 +33,29 @@ func (c ForgeConfig) validateAgentModels() error {
 		if !contains(SessionRoles(), role) {
 			return fmt.Errorf("agent_models: papel %q desconhecido (use discovery, builder ou reviewer)", role)
 		}
-		if v := c.AgentModels[role]; !ValidModel(v) {
+		v := c.AgentModels[role]
+		if !ValidModel(v) {
 			return fmt.Errorf("agent_models.%s: %q inválido (use letras, números, ponto, dois-pontos, hífen e sublinhado, de 1 a 80)", role, v)
+		}
+		if reason := yamlUnsafe(v); reason != "" {
+			return fmt.Errorf("agent_models.%s: %q %s no cabeçalho YAML do agente", role, v, reason)
 		}
 	}
 	return nil
+}
+
+var yamlReserved = map[string]bool{"null": true, "true": true, "false": true, "yes": true, "no": true, "on": true, "off": true, "y": true, "n": true, "~": true}
+
+// yamlUnsafe diz por que o valor não é lido como texto no cabeçalho YAML (vazio quando é seguro). Vale só
+// para agent_models; ValidModel segue como está para os outros usos.
+func yamlUnsafe(v string) string {
+	switch {
+	case !unicode.IsLetter([]rune(v)[0]):
+		return "não começa por letra e seria lido como outro tipo ou erro"
+	case strings.HasSuffix(v, ":") || strings.HasSuffix(v, "-"):
+		return "termina em ':' ou '-' e quebraria a leitura"
+	case yamlReserved[strings.ToLower(v)]:
+		return "é um valor reservado do YAML (nulo ou booleano)"
+	}
+	return ""
 }

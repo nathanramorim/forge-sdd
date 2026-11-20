@@ -10,7 +10,7 @@ Subagentes e papéis usam `model: inherit`; não há como pôr modelo menor nos 
 
 ## Comportamento
 1. `forge.json` ganha `agent_models` por papel (`discovery`, `builder`, `reviewer`, subagentes A/B herdam do papel).
-2. `forge update` (e `forge` na instalação) escreve o `model:` no cabeçalho de `.claude/agents/*.md`; valor validado na borda (`SEG-01`): não vazio, sem caractere de controle, `[A-Za-z0-9._:-]`, até 80. O `-m` do Codex fica fora (ver Decisões).
+2. `forge update` (e `forge` na instalação) escreve o `model:` no cabeçalho de `.claude/agents/*.md`; valor validado na borda (`SEG-01`): não vazio, sem caractere de controle, `[A-Za-z0-9._:-]`, até 80, começando por letra, sem terminar em `:` ou `-` e fora dos escalares YAML (`null`, `true`, `false`, `yes`, `no`, `on`, `off`, `y`, `n`, `~`). O `-m` do Codex fica fora (ver Decisões).
 3. Sem a chave, nada muda (`inherit`). Gemini só aceita modelo; Copilot sem flag confirmada.
 
 ## Modelo do módulo
@@ -24,8 +24,9 @@ ADR-0004 (o Go decide o fluxo), ADR-0008 (modo `sessions` convive), ADR-0015 (pr
 |---|---|---|---|---|
 | Modelo/esforço por sessão | `internal/config/forge_profiles.go`, feat-90-07 | `Models`, `Efforts`, `{model}` | **Reusar**; estender ao cabeçalho dos agentes | A 85 foi absorvida pela 90; `feat/85-...` local é antiga e não traz pasta de discovery |
 | Validação de modelo | `config.ValidModel` (forge_profiles.go) | regex SEG-01 | **Reusar** | Mesmo formato de `models` |
-| Cabeçalho dos agentes | `.claude/agents/*.md` | `model: inherit` | **Estender** (`scaffold.applyAgentModels`) | Orçamento 420 bytes |
-| Perfil Codex | `cli_profiles` | Sem `-m` confirmado | **Estender**, marcado como não verificado | `codex` não instalado aqui |
+| Cabeçalho dos agentes | `.claude/agents/*.md` | `model: inherit` | **Estender** (`scaffold.SyncAgentModels` (também chamado por `scaffold.Run`)) | Orçamento 420 bytes |
+| Perfil Codex | `cli_profiles` | Sem `-m` confirmado | **Adiado**: flag não confirmada | `codex` não instalado aqui |
+| Teto de 420 bytes | `gate.MaxRoleAdapterBytes` | Constante do gate | **Reusar** (importada em `scaffold`) | DUP-06; sem cópia local |
 
 ## Dependências novas
 Nenhuma (`SEG-07`).
@@ -45,10 +46,20 @@ go test ./internal/scaffold -run 'TestAgentModelsRecusaValorInvalido'
 # negativo: update pelo comando recusa valor inválido sem gravar
 go test -list 'TestUpdateAgentModels_ValorInvalidoErraSemGravar' ./cmd/forge-sdd | grep -F 'TestUpdateAgentModels_ValorInvalidoErraSemGravar' >/dev/null
 go test ./cmd/forge-sdd -run 'TestUpdateAgentModels_ValorInvalidoErraSemGravar'
+# negativo: escalares YAML (null, true, a:, -1) são recusados
+go test -list 'TestAgentModelsRecusaEscalarYAML' ./internal/scaffold | grep -F 'TestAgentModelsRecusaEscalarYAML' >/dev/null
+go test ./internal/scaffold -run 'TestAgentModelsRecusaEscalarYAML'
 go vet ./... && go test ./...
 ```
 - Teste negativo: modelo fora da lista é recusado; sem chave o cabeçalho segue `inherit`.
 - Definição de agente continua até 420 bytes (P-24).
+
+## Como usar
+Em `.forge/config/forge.json`:
+```json
+{ "agent_models": { "discovery": "opus", "builder": "sonnet", "reviewer": "haiku" } }
+```
+Rode `forge update` (`--dry-run` mostra sem gravar). O `model:` vai para o cabeçalho de `.claude/agents/*.md`: discovery para pm-architect e planner, builder para builder, reviewer para reviewer e governance; os demais seguem `inherit`. Diferente de `models`/`efforts`, que escolhem o `--model`/`--effort` da sessão do pipeline.
 
 ## Decisões da implementação
 - Chave nova `agent_models` (papel -> modelo), separada de `models` (modelo da sessão por `--model`): uma escolhe a CLI da sessão, a outra o cabeçalho do agente.

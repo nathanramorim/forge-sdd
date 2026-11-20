@@ -134,6 +134,7 @@ Por padrão, os workers operam em modo `headless` (executam uma nova chamada de 
 - **Status curto:** sem terminal, `forge status` imprime até 1,5 KB (só iniciativas ativas); `--full` mostra tudo.
 - **Archive:** `forge archive` move a pasta da iniciativa para `sdd/archive/discovery/` (só na branch dela e sem task pendente; rodar de novo não muda nada). Ao aprovar o último job, só a fila `origem: toca-ai` arquiva sozinha; nas demais o inbox avisa "pronta para arquivar". `forge archive --concluidas --dry-run` lista as candidatas.
 - **Modelo e esforço por sessão:** `models` e `efforts` em `forge.json` (por `discovery`, `builder`, `reviewer`) viram `--model` e `--effort` pelos marcadores `{model}` e `{effort}` do perfil (claude e agy; gemini só modelo; as demais CLIs ainda sem flag confirmada). Escolha em **Settings**; sem escolha, o comando é o de sempre. Perfil gravado sem os marcadores gera aviso no preflight.
+- **Modelo por agente:** `agent_models` em `forge.json` (por `discovery`, `builder`, `reviewer`) grava o `model:` no cabeçalho de `.claude/agents/*.md` ao rodar `forge update` (`--dry-run` mostra sem gravar). discovery vale para pm-architect e planner; reviewer para reviewer e governance. O valor deve ser texto simples (começa por letra; `null`, `true`, `yes` e similares são recusados). Codex e Agy ainda não.
 
 ## Quando algo não anda
 

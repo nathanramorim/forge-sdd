@@ -7,11 +7,9 @@ import (
 	"strings"
 
 	"github.com/forge-sdd/cli/internal/config"
+	"github.com/forge-sdd/cli/internal/gate"
 	"github.com/forge-sdd/cli/internal/queue"
 )
-
-// maxAgentDefBytes é o teto da definição de agente (P-24); o modelo escolhido não pode estourá-lo.
-const maxAgentDefBytes = 420
 
 // SyncAgentModels aplica agent_models aos agentes do projeto (forge update, mesmo sem atualização de
 // versão). Com dryRun devolve o que gravaria sem gravar (ARQ-05).
@@ -94,8 +92,8 @@ func setHeaderModel(content, model string) (string, error) {
 		if strings.HasPrefix(lines[i], "model:") {
 			lines[i] = "model: " + model
 			out := strings.Join(lines, "\n")
-			if len(out) > maxAgentDefBytes {
-				return "", fmt.Errorf("definição com %d bytes passa do teto de %d", len(out), maxAgentDefBytes)
+			if len(out) > gate.MaxRoleAdapterBytes {
+				return "", fmt.Errorf("definição com %d bytes passa do teto de %d", len(out), gate.MaxRoleAdapterBytes)
 			}
 			return out, nil
 		}
