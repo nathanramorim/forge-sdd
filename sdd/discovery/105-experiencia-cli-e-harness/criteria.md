@@ -102,3 +102,4 @@ go test ./internal/monitor -run 'TestProficienciaSemDadoEhAMedir'
 - Acessibilidade em todas as telas novas: com `NO_COLOR`, sem TTY e com largura de 40 colunas a saída é legível e sem ANSI (golden, `TST-02`).
 - `--dry-run` de qualquer comando tocado continua sem escrever no disco (`ARQ-05`).
 - Todo handoff para a pessoa é menu de opções (RN-9), com a recomendada marcada.
+- Log de achados (3.6): `sdd/memory/logs/achados.csv`, uma linha por achado, sem `Evidencia`, `Explicacao` nem `Correcao`; falha de escrita nunca quebra a revisão; consulta só por rule (`forge context --rule`). Detalhe e testes na feature 105-08.
