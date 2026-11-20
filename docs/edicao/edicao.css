@@ -4,7 +4,7 @@
 html[data-edicao="missoes"] {
   --bg: var(--missoes-superficie-preto-moldura);
   --bg2: var(--missoes-superficie-ameixa);
-  --bg3: #5a2650;
+  --bg3: var(--missoes-superficie-vinho);
   --line: rgba(255, 170, 190, .2);
   --line2: rgba(255, 170, 190, .38);
   --fg: var(--missoes-texto-branco);
@@ -25,7 +25,7 @@ html[data-edicao="missoes"] {
 html[data-edicao="missoes"] body {
   background-color: var(--missoes-superficie-ameixa);
   background-image:
-    linear-gradient(180deg, var(--missoes-superficie-preto-moldura) 0, var(--missoes-superficie-ameixa) 640px, #2b1230 100%),
+    linear-gradient(180deg, var(--missoes-superficie-preto-moldura) 0, var(--missoes-superficie-ameixa) 640px, var(--missoes-superficie-ameixa) 100%),
     linear-gradient(rgba(240, 97, 175, .05) 1px, transparent 1px),
     linear-gradient(90deg, rgba(240, 97, 175, .05) 1px, transparent 1px);
   background-size: 100% 100%, 44px 44px, 44px 44px;
