@@ -2,7 +2,7 @@
   "feature_id": "feat-101",
   "branch": "feat/101-tema-missoes-v5",
   "spec_status": "reviewed",
-  "updated_at": "2026-11-20T00:47:11Z",
+  "updated_at": "2026-11-20T00:48:47Z",
   "items": [
     {
       "task_id": "fix-101-01-alinhar-readme-e-design-system",
@@ -134,7 +134,7 @@
       "task_id": "feat-101-04-visual-mais-intenso-da-edicao",
       "title": "feat-101-04 — Visual mais intenso da Edição Missões na LP",
       "spec_path": "sdd/discovery/101-tema-missoes-v5/features/feat-101-04-visual-mais-intenso-da-edicao.md",
-      "status": "review_pending",
+      "status": "approved",
       "depends_on": [
         "feat-101-01",
         "(camada",
@@ -157,7 +157,12 @@
         "FLX-02"
       ],
       "skills_used": [],
-      "attempts": 1
+      "attempts": 1,
+      "governance_verdict": {
+        "veredito": "conforme",
+        "achados": [],
+        "resumo": "Dois achados corrigidos em 5a7ed87 (bytecode fora do índice e só tokens do design system). Critérios da spec, go vet e forge gate passam; arte sem marca de terceiros."
+      }
     }
   ]
 }
