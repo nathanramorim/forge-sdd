@@ -1,11 +1,14 @@
 package pipeline
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/forge-sdd/cli/internal/config"
@@ -33,6 +36,11 @@ const (
 	lacoSchema        = 1
 	maxAchadosRetorno = 20
 	maxTextoAchado    = 1500
+)
+
+const (
+	maxBytesEstado = 4 << 20
+	maxTasksLaco   = 200
 )
 
 // Agentes é a fronteira com o modelo: o chat (ou um teste) devolve só conteúdo, já pelo contrato
@@ -70,6 +78,7 @@ type EstadoLaco struct {
 	Iniciativa string       `json:"iniciativa"`
 	Lote       string       `json:"lote"`
 	Tasks      []EstadoTask `json:"tasks"`
+	Avisos     []string     `json:"-"` // só em memória: o que foi corrigido ao carregar um estado inválido
 }
 
 // Opcao é uma escolha do menu apresentado à pessoa (RN-9); a camada de entrada só a renderiza.
@@ -88,6 +97,7 @@ type Retorno struct {
 	Achados     []harness.Retorno `json:"achados,omitempty"`
 	Opcoes      []Opcao           `json:"opcoes"`
 	Recomendada string            `json:"recomendada"`
+	Avisos      []string          `json:"avisos,omitempty"`
 }
 
 // LimiteDeVoltas devolve o teto de devoluções ao Builder: o mesmo max_rework_attempts do modo sessions.
@@ -133,10 +143,10 @@ func RunChat(dir string, p ParamsChat) (*Retorno, error) {
 		return nil, err
 	}
 	for i := range st.Tasks {
-		if err := lock.Renovar(p.Agora()); err != nil {
-			return nil, err
-		}
-		if err := conduzirTask(caminho, st, i, p); err != nil {
+		if err := conduzirTask(caminho, st, i, p, func() error { return lock.Renovar(p.Agora()) }); err != nil {
+			if errors.Is(err, harness.ErrLockPerdido) {
+				return retornoLockPerdido(st, err), nil
+			}
 			return nil, err
 		}
 	}
@@ -145,6 +155,19 @@ func RunChat(dir string, p ParamsChat) (*Retorno, error) {
 		return nil, err
 	}
 	return montarRetorno(st), nil
+}
+
+// retornoLockPerdido para o laço sem gravar nada (o estado agora é de quem tomou o lock) e entrega
+// à pessoa o menu do que fazer (RN-9).
+func retornoLockPerdido(st *EstadoLaco, causa error) *Retorno {
+	return &Retorno{
+		Lote: LoteEscalado, Tasks: st.Tasks, Recomendada: "abortar",
+		Avisos: append(st.Avisos, "o lock da iniciativa foi perdido durante o laço: "+causa.Error()),
+		Opcoes: []Opcao{
+			{ID: "abortar", Rotulo: "Parar aqui", Descricao: "Outro coordenador pode estar operando a iniciativa; nada foi gravado por este."},
+			{ID: "retomar", Rotulo: "Retomar depois", Descricao: "Só depois de confirmar que o outro coordenador terminou."},
+		},
+	}
 }
 
 // Retomar continua do último estado gravado, sem precisar repetir a lista de tasks.
@@ -160,20 +183,75 @@ func Retomar(dir string, p ParamsChat) (*Retorno, error) {
 	return RunChat(dir, p)
 }
 
-func carregarOuIniciar(caminho string, p ParamsChat) (*EstadoLaco, error) {
+// lerEstadoLimitado lê o arquivo de estado recusando links e tamanho acima de maxBytesEstado.
+func lerEstadoLimitado(caminho string) ([]byte, error) {
+	fi, err := os.Lstat(caminho)
+	if err != nil {
+		return nil, err
+	}
+	if !fi.Mode().IsRegular() || fi.Size() > maxBytesEstado {
+		return nil, fmt.Errorf("laço: estado %s recusado (não é arquivo regular ou passa de %d bytes)", caminho, maxBytesEstado)
+	}
 	data, err := os.ReadFile(caminho)
+	if err != nil {
+		return nil, fmt.Errorf("laço: ler %s: %w", caminho, err)
+	}
+	return data, nil
+}
+
+// validarEstado decodifica o estado gravado em disco, que é entrada não confiável (SEG-01).
+// Estado ilegível ou incompatível é recusado; uma task inconsistente é marcada como falhou, com o
+// motivo em Avisos, sem derrubar o processo nem dar voltas além do teto. Os achados são sanitizados.
+func validarEstado(data []byte, caminho string, p ParamsChat) (*EstadoLaco, error) {
+	var st EstadoLaco
+	dec := json.NewDecoder(bytes.NewReader(data))
+	dec.DisallowUnknownFields()
+	if err := dec.Decode(&st); err != nil || dec.More() {
+		return nil, fmt.Errorf("laço: estado %s ilegível (JSON inválido, campo desconhecido ou conteúdo extra): %v", caminho, err)
+	}
+	if st.Schema != lacoSchema || st.Iniciativa != p.Iniciativa {
+		return nil, fmt.Errorf("laço: estado %s incompatível (schema %d, iniciativa %q)", caminho, st.Schema, st.Iniciativa)
+	}
+	if len(st.Tasks) == 0 || len(st.Tasks) > maxTasksLaco {
+		return nil, fmt.Errorf("laço: estado %s com %d tasks (esperado de 1 a %d)", caminho, len(st.Tasks), maxTasksLaco)
+	}
+	for i := range st.Tasks {
+		t := &st.Tasks[i]
+		if err := harness.ValidateSpecParaBuild(t.Spec); err != nil {
+			return nil, fmt.Errorf("laço: estado %s, task %d: %w", caminho, i, err)
+		}
+		t.Achados = sanitizarAchados(t.Achados)
+		motivo := ""
+		switch t.Estado {
+		case TaskPendente, TaskAprovada, TaskEscalada, TaskFalhou:
+		case TaskRevisando:
+			if t.Resultado == nil {
+				motivo = "estado revisando sem resultado do build"
+			} else if err := harness.ValidateResultadoBuild(*t.Resultado); err != nil {
+				motivo = "resultado do build inválido: " + err.Error()
+			}
+		default:
+			motivo = fmt.Sprintf("estado desconhecido %q", t.Estado)
+		}
+		if t.Voltas < 0 || t.Voltas > p.MaxVoltas {
+			motivo = strings.TrimPrefix(motivo+"; voltas fora de 0.."+strconv.Itoa(p.MaxVoltas), "; ")
+			t.Voltas = min(max(t.Voltas, 0), p.MaxVoltas)
+		}
+		if motivo != "" {
+			t.Estado, t.Resultado, t.Erro = TaskFalhou, nil, "estado gravado inválido: "+motivo
+			st.Avisos = append(st.Avisos, fmt.Sprintf("task %s: %s", notify.Sanitize(t.Spec.TaskID, 100, false), motivo))
+		}
+	}
+	return &st, nil
+}
+
+func carregarOuIniciar(caminho string, p ParamsChat) (*EstadoLaco, error) {
+	data, err := lerEstadoLimitado(caminho)
 	switch {
 	case err == nil:
-		var st EstadoLaco
-		if err := json.Unmarshal(data, &st); err != nil {
-			return nil, fmt.Errorf("laço: estado %s ilegível: %w", caminho, err)
-		}
-		if st.Schema != lacoSchema || st.Iniciativa != p.Iniciativa {
-			return nil, fmt.Errorf("laço: estado %s incompatível (schema %d, iniciativa %q)", caminho, st.Schema, st.Iniciativa)
-		}
-		return &st, nil
+		return validarEstado(data, caminho, p)
 	case !errors.Is(err, os.ErrNotExist):
-		return nil, fmt.Errorf("laço: ler %s: %w", caminho, err)
+		return nil, err
 	}
 	if len(p.Tasks) == 0 {
 		return nil, errors.New("laço: nenhuma task informada")
@@ -192,7 +270,7 @@ func carregarOuIniciar(caminho string, p ParamsChat) (*EstadoLaco, error) {
 }
 
 // conduzirTask roda uma task até aprovar, escalar ou falhar, gravando o estado a cada passo.
-func conduzirTask(caminho string, st *EstadoLaco, i int, p ParamsChat) error {
+func conduzirTask(caminho string, st *EstadoLaco, i int, p ParamsChat, renovar func() error) error {
 	t := &st.Tasks[i]
 	if t.Estado == TaskAprovada || t.Estado == TaskEscalada {
 		return nil
@@ -202,6 +280,9 @@ func conduzirTask(caminho string, st *EstadoLaco, i int, p ParamsChat) error {
 	}
 	for {
 		if t.Estado == TaskPendente {
+			if err := renovar(); err != nil {
+				return err
+			}
 			res, err := p.Agentes.Build(t.Spec, t.Achados)
 			if err == nil {
 				err = harness.ValidateResultadoBuild(res)
@@ -214,6 +295,12 @@ func conduzirTask(caminho string, st *EstadoLaco, i int, p ParamsChat) error {
 			if err := gravarLaco(caminho, st); err != nil {
 				return err
 			}
+		}
+		if t.Resultado == nil {
+			return fmt.Errorf("laço: task %s em revisão sem resultado do build", t.Spec.TaskID)
+		}
+		if err := renovar(); err != nil {
+			return err
 		}
 		parecer, err := p.Agentes.Review(*t.Resultado)
 		if err == nil {
@@ -283,7 +370,7 @@ func classificarLote(tasks []EstadoTask) string {
 
 // montarRetorno monta o retorno ao chat com o menu do estado e a opção recomendada (RN-9).
 func montarRetorno(st *EstadoLaco) *Retorno {
-	r := &Retorno{Lote: st.Lote, Tasks: st.Tasks}
+	r := &Retorno{Lote: st.Lote, Tasks: st.Tasks, Avisos: st.Avisos}
 	for _, t := range st.Tasks {
 		if t.Estado == TaskEscalada {
 			r.Achados = append(r.Achados, t.Achados...)

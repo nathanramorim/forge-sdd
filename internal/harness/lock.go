@@ -101,10 +101,10 @@ func (l *Lock) criar(now time.Time) (bool, error) {
 	if err != nil {
 		return false, fmt.Errorf("lock: serializar: %w", err)
 	}
-	// O conteúdo é gravado num temporário e publicado com Link, que é atômico e não sobrescreve:
+	// O conteúdo é gravado num temporário (O_EXCL, nome único) e publicado com Link, que é atômico e não sobrescreve:
 	// quem lê o lock nunca vê um arquivo pela metade e só um criador vence.
 	tmp := l.path + ".novo." + sufixoUnico()
-	if err := os.WriteFile(tmp, data, 0o644); err != nil {
+	if err := gravarNovo(tmp, data); err != nil {
 		return false, fmt.Errorf("lock: gravar %s: %w", tmp, err)
 	}
 	defer func() { _ = os.Remove(tmp) }()
@@ -124,7 +124,7 @@ func (l *Lock) criar(now time.Time) (bool, error) {
 func (l *Lock) tomar(now time.Time) (bool, error) {
 	guarda := l.path + ".tomada"
 	tmp := guarda + "." + sufixoUnico()
-	if err := os.WriteFile(tmp, []byte(l.dono), 0o644); err != nil {
+	if err := gravarNovo(tmp, []byte(l.dono)); err != nil {
 		return false, fmt.Errorf("lock: gravar guarda: %w", err)
 	}
 	defer func() { _ = os.Remove(tmp) }()
@@ -149,6 +149,13 @@ func (l *Lock) tomar(now time.Time) (bool, error) {
 
 func lerLock(path string) (InfoLock, error) {
 	var info InfoLock
+	fi, err := os.Lstat(path)
+	if err != nil {
+		return info, err
+	}
+	if !fi.Mode().IsRegular() {
+		return info, fmt.Errorf("lock: %s não é arquivo regular (%s)", path, fi.Mode().Type())
+	}
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return info, err
@@ -157,6 +164,19 @@ func lerLock(path string) (InfoLock, error) {
 		return info, fmt.Errorf("lock: %s ilegível: %w", path, err)
 	}
 	return info, nil
+}
+
+// gravarNovo cria path com O_EXCL (nunca segue nem sobrescreve um link já posto no lugar).
+func gravarNovo(path string, data []byte) error {
+	f, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0o644)
+	if err != nil {
+		return err
+	}
+	_, werr := f.Write(data)
+	if cerr := f.Close(); werr == nil {
+		werr = cerr
+	}
+	return werr
 }
 
 // Renovar estende a lease a partir de now. Falha com ErrLockPerdido se o arquivo mudou de dono.
@@ -170,8 +190,8 @@ func (l *Lock) Renovar(now time.Time) error {
 	if err != nil {
 		return fmt.Errorf("lock: serializar: %w", err)
 	}
-	tmp := l.path + ".tmp." + strconv.Itoa(os.Getpid())
-	if err := os.WriteFile(tmp, data, 0o644); err != nil {
+	tmp := l.path + ".tmp." + sufixoUnico()
+	if err := gravarNovo(tmp, data); err != nil {
 		return fmt.Errorf("lock: gravar renovação: %w", err)
 	}
 	if err := os.Rename(tmp, l.path); err != nil {

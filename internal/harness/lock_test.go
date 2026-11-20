@@ -144,3 +144,25 @@ func TestLockNomeInvalidoNaoSaiDoDiretorio(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, dir, filepath.Dir(l.Caminho()))
 }
+
+func TestLockSymlinkNoLugarDoLock(t *testing.T) {
+	base := t.TempDir()
+	dir := filepath.Join(base, "locks")
+	require.NoError(t, os.MkdirAll(dir, 0o755))
+	fora := filepath.Join(base, "fora.txt")
+	require.NoError(t, os.WriteFile(fora, []byte("intocado"), 0o644))
+
+	require.NoError(t, os.Symlink(filepath.Join(base, "nao-existe"), filepath.Join(dir, "104-pendente.lock")))
+	l, err := AdquirirLock(dir, "104-pendente", "a", time.Minute, t0)
+	require.NoError(t, err, "symlink pendente não trava a iniciativa")
+	fi, err := os.Lstat(l.Caminho())
+	require.NoError(t, err)
+	assert.True(t, fi.Mode().IsRegular())
+
+	require.NoError(t, os.Symlink(fora, filepath.Join(dir, "104-fora.lock")))
+	_, err = AdquirirLock(dir, "104-fora", "a", time.Minute, t0)
+	require.NoError(t, err)
+	data, err := os.ReadFile(fora)
+	require.NoError(t, err)
+	assert.Equal(t, "intocado", string(data), "o alvo do symlink não é escrito")
+}

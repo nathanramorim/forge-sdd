@@ -10,7 +10,7 @@ O fluxo, os limites e a ordem precisam morar em código determinístico, não em
 
 ## Comportamento
 1. `pipeline.RunChat` conduz o ciclo `spec -> build -> review -> retorno` com estados gravados em `.forge/runtime/`; o modelo só devolve conteúdo pelo contrato (feat-104-01).
-2. Lock por iniciativa (arquivo com dono e lease, `os.Rename` atômico como no `bus`); segundo coordenador na mesma iniciativa é recusado.
+2. Lock por iniciativa (arquivo com dono e lease, publicado por `os.Link` atômico e sem sobrescrever; lock vencido é tomado sob um guarda); segundo coordenador na mesma iniciativa é recusado.
 3. Retorno: `ApplyVerdict` devolve achados (`arquivo`, `linha`) ao Builder até `max_rework_attempts` (3); no teto escala ao humano pelo inbox; `retomar` continua do último estado gravado.
 4. Leque: o resultado de cada subagente é gravado; falha parcial deixa o lote em `parcial`, repete só o que falhou.
 5. Spike (documentado em `sdd/discovery/104-.../spike-aninhamento.md`): tentar criar subagente a partir de subagente e de teammate; o resultado decide o desenho A/D da ADR-0015.
@@ -42,6 +42,15 @@ set -o pipefail
 go test -list 'TestLockPorIniciativa|TestRetornoEscalaNoTeto|TestLegueParcialRepeteSoFalho|TestRetomaDoUltimoEstado' ./internal/pipeline | grep -F 'TestLockPorIniciativa' >/dev/null
 go test -list 'TestRetornoEscalaNoTeto' ./internal/pipeline | grep -F 'TestRetornoEscalaNoTeto' >/dev/null
 go test -list 'TestLockNomeInvalidoNaoSaiDoDiretorio' ./internal/harness | grep -F 'TestLockNomeInvalidoNaoSaiDoDiretorio' >/dev/null
+go test -list 'TestEstadoInvalidoNaoDerruba' ./internal/pipeline | grep -F 'TestEstadoInvalidoNaoDerruba' >/dev/null
+go test -list 'TestLockSymlinkNoLugarDoLock' ./internal/harness | grep -F 'TestLockSymlinkNoLugarDoLock' >/dev/null
+go test -list 'TestLeaseRenovaAntesDeCadaPasso' ./internal/pipeline | grep -F 'TestLeaseRenovaAntesDeCadaPasso' >/dev/null
+go test -list 'TestEstadoRecusaArquivoMalformado' ./internal/pipeline | grep -F 'TestEstadoRecusaArquivoMalformado' >/dev/null
+go test -list 'TestEstadoAchadosHostisSaoSanitizados' ./internal/pipeline | grep -F 'TestEstadoAchadosHostisSaoSanitizados' >/dev/null
+go test -list 'TestEstadoRecusaSymlink' ./internal/pipeline | grep -F 'TestEstadoRecusaSymlink' >/dev/null
+# negativo: estado gravado forjado (estado desconhecido, revisando sem resultado, voltas fora do teto, JSON enorme) não derruba nem dá voltas extras; lease perdida para o laço; symlink no lock
+go test ./internal/pipeline -run 'TestEstadoInvalidoNaoDerruba|TestEstadoRecusaArquivoMalformado|TestEstadoAchadosHostisSaoSanitizados|TestEstadoRecusaSymlink|TestLeaseRenovaAntesDeCadaPasso'
+go test ./internal/harness -run 'TestLockSymlinkNoLugarDoLock'
 # negativo: nome de iniciativa com ../ ou separador é recusado e nada é criado fora do diretório de locks
 go test ./internal/harness -run 'TestLockNomeInvalidoNaoSaiDoDiretorio'
 go test -list 'TestLockNomeIgualAoLayout' ./internal/pipeline | grep -F 'TestLockNomeIgualAoLayout' >/dev/null
@@ -62,3 +71,6 @@ go vet ./... && go test ./...
 - **Leque sequencial:** as tasks do lote rodam em ordem; paralelismo com worktree por subagente é a feat-104-07. Falha de build ou review deixa a task em `falhou` e o lote em `parcial`; `Retomar` repete só o que falhou ou parou no meio.
 - Estado gravado em `.forge/runtime/chat/<iniciativa>.json`.
 - **Validação do lock (SEG-01):** `AdquirirLock` valida por conta própria a iniciativa (mesma regra de `layout.ValidInitiative`, copiada porque `harness` não importa o projeto; `TestLockNomeIgualAoLayout` compara as duas), o `dono` (sem controle, até 64 caracteres) e confere com `filepath.Rel` que o arquivo fica dentro do diretório de locks. No laço, `arquivoLaco` valida a iniciativa com `layout.ValidInitiative` antes de montar o caminho do estado e o `dono` só é gravado no lock, que o valida; nenhuma outra gravação usa esses nomes.
+- **Estado em disco é entrada não confiável (SEG-01):** `validarEstado` lê com limite de 4 MiB, recusa link simbólico, decodifica de forma estrita (campo desconhecido e conteúdo extra recusados) e exige spec válida e de 1 a 200 tasks. Task com estado fora do enum, `revisando` sem resultado ou voltas fora de 0..teto vira `falhou` (voltas ajustadas ao intervalo, nunca mais voltas que o teto), é repetida do zero no build e o motivo vai em `Retorno.Avisos`. Os achados lidos do arquivo passam por `sanitizarAchados`.
+- **Lease renovada antes de cada Build e de cada Review:** se o lock foi perdido, o laço para sem gravar mais nada (o estado é de quem tomou o lock) e devolve `Retorno` de escalada com menu (`abortar` recomendado, `retomar`).
+- **Lock e links:** `lerLock` usa `Lstat`; o que não for arquivo regular (symlink pendente ou para fora) é tratado como órfão e removido sob o guarda `.tomada`, sem escrever no alvo. Todos os temporários nascem com `O_EXCL` e nome único.
