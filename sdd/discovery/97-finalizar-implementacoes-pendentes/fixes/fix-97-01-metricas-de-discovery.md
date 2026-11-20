@@ -67,7 +67,7 @@ O diagnóstico com evidência corrige a premissa em parte. O Discovery já grava
 6. `sdd/.metrics/schema.json` e `internal/scaffold/templates/sdd/.metrics/schema.json.tmpl` documentam `spec` como opcional, e `--sessao` entra no `Long` do comando.
 7. `RecordSessionMetrics` grava por `scaffold.WriteFileSafe` (temporário exclusivo e rename), mantendo o sufixo `-2`, `-3`. Sem ciclo: `go list -deps ./internal/scaffold` não inclui `monitor`.
 8. `session record --dry-run` (flag nova): imprime o registro em JSON na saída padrão, sem `MkdirAll` nem gravação.
-9. **Textos afetados (uma linha por reference, acréscimo de ` --sessao spec`, cerca de 14 bytes cada):** `.agents/skills/sdd-concepcao/references/{discovery,nova-feature,novo-fix}.md`; espelhos `internal/scaffold/templates/.agents/skills/sdd-concepcao/references/{discovery,nova-feature,novo-fix}.md.tmpl`; goldens `internal/scaffold/testdata/golden/.agents/skills/sdd-concepcao/references/{discovery,nova-feature,novo-fix}.md` (TST-02). `sdd-concepcao/SKILL.md` (2045 de 2048 bytes) NÃO muda. O P-24 mede `SKILL.md`, adaptadores e instruções (`gate.go:786-`), não `references/`.
+9. **Textos afetados (uma linha por reference, acréscimo de ` --sessao spec`, cerca de 14 bytes cada):** `.agents/skills/sdd-concepcao/references/{discovery,nova-feature,novo-fix}.md`; espelhos `internal/scaffold/templates/.agents/skills/sdd-concepcao/references/{discovery,nova-feature,novo-fix}.md.tmpl`; goldens `internal/scaffold/testdata/golden/.agents/skills/sdd-concepcao/references/{discovery,nova-feature,novo-fix}.md` (TST-02). `sdd-concepcao/SKILL.md` (2045 de 2048 bytes) NÃO muda. O P-24 do gate (`gate.go:786-`) não mede `references/`, mas o teste `TestContextBudget_ConjuntoDeLeituraPorComando` mede `references/discovery.md` e `implementar.md` no conjunto de leitura (medido pelo coordenador: /discovery 19905 de 22528 bytes, /implementar 6431 de 15360); o acréscimo pesa nele e o teste deve seguir verde.
 10. Fora de escopo: tokens zerados e `init_at` (105/3.1); `ClassifySessionType`; resultado do Gate Camada A, tentativas, RNs, tasks do plano e duração ("a verificar", só entram com fonte medida).
 
 ## Relações (sem editar nada delas)
@@ -105,12 +105,13 @@ ARQ-01, ARQ-05, ARQ-11, SEG-01, SEG-02, SEG-05, DUP-01, DUP-02, COD-03, TST-01, 
 
 - Origem: iniciativa 97 (`fix-97-01`).
 - Falha ao gravar o JSON mantém o comportamento atual (erro); só a coleta do `spec` é melhor esforço, com aviso em stderr.
+- Discriminador `--sessao spec` aprovado como gatilho do bloco.
+- Resultado do gate (Camada A), tentativas de ajuste e tempo de sessão ficam para a task 3.1 da 105; este fix só grava o que é derivável de arquivo.
 - Gatilho: `/discovery`, `/nova-feature` e `/novo-fix` gravam `spec`; `/split-features` não ("todas elas menos split feature").
 
 ## A confirmar com o dono
 
-1. Discriminador: recomendo a flag `--sessao spec` (acima), em vez de ausência de `--phase`. A escolha é sua.
-2. Resultado do Gate Camada A, tentativas e tempo dependem de fonte medida (105/3.1); entram depois?
+Nada com o dono. A verificar pelo Builder: o texto exato dos seis títulos obrigatórios que `secoes_obrigatorias` conta e o passo 10 de `split-features.md` (não relido nesta spec).
 
 ## Critérios de Aceitação Executáveis
 
@@ -133,5 +134,6 @@ go test -list 'TestSpecMetricsCampoInvalidoNaoEntra|TestLeitoresDeSessaoToleramS
 go test ./cmd/forge-sdd ./internal/monitor -run 'TestSpecMetricsCampoInvalidoNaoEntra|TestLeitoresDeSessaoToleramSpec' -count=1
 # as três references de concepção passam a flag
 grep -F -- '--sessao spec' .agents/skills/sdd-concepcao/references/discovery.md .agents/skills/sdd-concepcao/references/nova-feature.md .agents/skills/sdd-concepcao/references/novo-fix.md >/dev/null
+go test -count=1 -v -run TestContextBudget_ConjuntoDeLeituraPorComando ./internal/scaffold/
 go vet ./... && go test ./internal/scaffold/ ./internal/monitor/ ./cmd/forge-sdd/ ./internal/gate/ -count=1
 ```
