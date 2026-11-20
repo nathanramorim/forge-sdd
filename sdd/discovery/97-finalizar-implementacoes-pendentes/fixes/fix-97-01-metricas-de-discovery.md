@@ -7,7 +7,7 @@
 
 ## Descrição de negócio (release notes)
 
-*   **Métricas de Discovery no mesmo arquivo de sessão:** a sessão que fecha o `/discovery` passa a gravar, em `sdd/.metrics/session-*.json`, o bloco `spec` com o tamanho dos artefatos e a contagem de features e fixes da iniciativa; sessões de Build, Review e arquivos antigos seguem sem o bloco (`fix-97-01`).
+*   **Métricas de Discovery no mesmo arquivo de sessão:** as sessões de `/discovery`, `/nova-feature` e `/novo-fix` passam a gravar, em `sdd/.metrics/session-*.json`, o bloco `spec` com o tipo e o tamanho do que foi especificado; `/split-features`, Build, Review e arquivos antigos seguem sem o bloco (`fix-97-01`).
 
 ## Problema
 
@@ -46,29 +46,34 @@ O diagnóstico com evidência corrige a premissa em parte. O Discovery já grava
 
 ## Correção
 
-1. `monitor.SessionMetrics` ganha `Spec *SpecMetrics` com `json:"spec,omitempty"`. Ponteiro com `omitempty`: sessão que não é de Discovery não tem a chave e o arquivo fica idêntico ao de hoje (diferente de `complexidade`, sempre `null` por ser campo reservado).
-2. `SpecMetrics` (só números e o id; nenhum caminho):
+1. `monitor.SessionMetrics` ganha `Spec *SpecMetrics` com `json:"spec,omitempty"`. Ponteiro com `omitempty`: sessão sem o bloco gera arquivo idêntico ao de hoje (diferente de `complexidade`, sempre `null` por ser campo reservado).
+2. `SpecMetrics` (só números, enum e o id; nenhum caminho):
 
-| Campo | Tipo | Fonte (derivável de arquivo real) |
-|---|---|---|
-| `iniciativa` | string (máx. 80, `notify.Sanitize`) | nome da pasta `<id>-<nome>` extraído de `--feature` |
-| `discovery_bytes` | int | `os.Lstat` de `discovery.md` |
-| `criteria_bytes` | int | `os.Lstat` de `criteria.md` |
-| `plan_bytes` | int | `os.Lstat` de `plan.md` |
-| `status_bytes` | int | `os.Lstat` de `status.md` |
-| `features_count` | int | contagem de `features/*.md` regulares |
-| `fixes_count` | int | contagem de `fixes/*.md` regulares |
+| Campo | Tipo | Quando | Fonte (derivável de arquivo real) |
+|---|---|---|---|
+| `tipo` | `discovery`, `feature` ou `fix` | sempre | caminho de `--feature` |
+| `iniciativa` | string (máx. 80, `notify.Sanitize`) | sempre | pasta `<id>-<nome>` de `--feature` |
+| `bytes` | int | sempre | `os.Lstat` do arquivo de `--feature` |
+| `secoes_obrigatorias` | int (de 6) | `feature` e `fix` | quantos dos seis títulos `## ` obrigatórios da skill aparecem no arquivo (leitura local; só a contagem é gravada) |
+| `criteria_bytes`, `plan_bytes`, `status_bytes` | int | `discovery` | `os.Lstat` dos arquivos irmãos |
+| `features_count`, `fixes_count` | int | `discovery` | contagem de `features/*.md` e `fixes/*.md` regulares |
 
-   Arquivo ausente, não regular (link simbólico, FIFO) ou com erro de leitura: o campo de bytes fica 0 e o registro é gravado mesmo assim; a coleta nunca devolve erro. Valor inválido (bytes negativo, `iniciativa` vazia ou acima de 80) não entra no bloco.
-3. Gatilho: só quando `--feature` é exatamente `sdd/discovery/<id>-<nome>/discovery.md` (o que o passo 10 de `discovery.md` já passa) e a pasta existe dentro do projeto (sem sair por `..` nem por link simbólico). Qualquer outro `--feature`, inclusive `features/` e `fixes/` do Builder, não ganha o bloco. Não muda skill, template nem golden de skill.
-4. `sdd/.metrics/schema.json` e `internal/scaffold/templates/sdd/.metrics/schema.json.tmpl` documentam `spec` como opcional (golden, se houver, no mesmo PR; TST-02).
-5. `RecordSessionMetrics` grava por `scaffold.WriteFileSafe` (temporário exclusivo e rename), mantendo o sufixo `-2`, `-3` quando o nome existe. Não há ciclo de importação: `go list -deps ./internal/scaffold` não inclui `monitor`.
-6. `session record --dry-run`: calcula e imprime o registro (JSON) na saída padrão, sem `MkdirAll` nem gravação.
-7. Fora de escopo: tokens zerados e `init_at` (105/3.1); `ClassifySessionType`; resultado do Gate Camada A, tentativas de Gate 1 e Conferência 1, contagem de RNs e de tasks do plano (os formatos variam entre iniciativas) e duração: "a verificar", só entram com fonte medida.
+   Arquivo ausente, não regular (link simbólico, FIFO) ou com erro de leitura: o número fica 0. Valor inválido (negativo, `iniciativa` vazia ou acima de 80, `tipo` fora do enum) não entra no bloco.
+3. **Discriminador (recomendação, ver "A confirmar"):** flag explícita nova `--sessao spec`, passada só pelas references de `discovery.md` (passo 10), `nova-feature.md` (passo 8) e `novo-fix.md` (passo 7). O bloco só é gravado quando a flag está presente E `--feature` é arquivo regular dentro de `sdd/discovery/<id>-<nome>/` (`<id>-<nome>` casando `^[0-9a-z]+-[a-z0-9-]+$`): `discovery.md` (tipo `discovery`), `features/feat-*.md` (`feature`) ou `fixes/fix-*.md` (`fix`). Sem `..`, sem link simbólico e dentro do projeto (`EvalSymlinks`). Flag presente com caminho inválido: grava o arquivo sem o bloco e avisa em stderr (`notify.Sanitize`).
+   - Por que o caminho sozinho não basta: o Builder grava com `--feature` apontando para o mesmo `features/feat-*.md` ou `fixes/fix-*.md`. Evidência: `implementar.md:27` passa `--feature "<spec>" --phase "<id>" --agent-path "lider,builder,governance"` e `recordJobTelemetry` (`worker.go:86-97`) passa `--feature job.SpecPath --phase job.ID --agent-path <papel>`; `worker-job.md` não chama `session record`.
+   - Alternativa descartada, "ausência de `--phase`": hoje as references de concepção não passam `--phase` nem `--agent-path`, então funcionaria sem mudar texto; mas depende de o agente do Build nunca omitir `--phase` e de o de concepção nunca incluí-lo. Uma omissão desfaz o isolamento em silêncio e grava `spec` em sessão de Build. A flag explícita falha para o lado seguro (sem flag, sem bloco), custa uma linha por reference e é testável.
+4. **Fora do bloco:** `/split-features` (`split-features.md`, passo 10, `--feature ".../features/"`) não passa a flag e grava como hoje, sem `spec`. Mesmo que o agente passasse a flag, `--feature` é pasta e não arquivo: sem bloco.
+5. A coleta do bloco é melhor esforço: qualquer falha ao montá-lo grava o arquivo sem ele e avisa em stderr. Falha ao gravar o JSON mantém o comportamento atual (erro e saída diferente de 0, `session.go:116-119`). Decisão do dono.
+6. `sdd/.metrics/schema.json` e `internal/scaffold/templates/sdd/.metrics/schema.json.tmpl` documentam `spec` como opcional, e `--sessao` entra no `Long` do comando.
+7. `RecordSessionMetrics` grava por `scaffold.WriteFileSafe` (temporário exclusivo e rename), mantendo o sufixo `-2`, `-3`. Sem ciclo: `go list -deps ./internal/scaffold` não inclui `monitor`.
+8. `session record --dry-run` (flag nova): imprime o registro em JSON na saída padrão, sem `MkdirAll` nem gravação.
+9. **Textos afetados (uma linha por reference, acréscimo de ` --sessao spec`, cerca de 14 bytes cada):** `.agents/skills/sdd-concepcao/references/{discovery,nova-feature,novo-fix}.md`; espelhos `internal/scaffold/templates/.agents/skills/sdd-concepcao/references/{discovery,nova-feature,novo-fix}.md.tmpl`; goldens `internal/scaffold/testdata/golden/.agents/skills/sdd-concepcao/references/{discovery,nova-feature,novo-fix}.md` (TST-02). `sdd-concepcao/SKILL.md` (2045 de 2048 bytes) NÃO muda. O P-24 mede `SKILL.md`, adaptadores e instruções (`gate.go:786-`), não `references/`.
+10. Fora de escopo: tokens zerados e `init_at` (105/3.1); `ClassifySessionType`; resultado do Gate Camada A, tentativas, RNs, tasks do plano e duração ("a verificar", só entram com fonte medida).
 
 ## Relações (sem editar nada delas)
 
 - **105 task 3.1** (tokens zerados e `init_at`): mesmo arquivo `session-*.json`, mesma struct `SessionMetrics` e mesmo `sessionRecordCmd`; colisão textual provável e nenhuma semântica (campos distintos). Sequência recomendada: este fix entra primeiro (é `M` e a 3.1 está na onda 3 da 105) e a 3.1 rebaseia sobre a struct; se a 3.1 sair antes, este fix só soma o campo.
+- **105 task 2.7 e 106 task 2.6** reescrevem essas mesmas references (e templates e goldens): **Sequenciar com** elas, em série e rebaseando; aqui é uma linha por arquivo. Não editei nada delas (não conferi o conteúdo dessas tasks sobre as references).
 - **105 task 3.2** (agregador): lê com `json.Unmarshal` frouxo; o campo novo não quebra e pode ser consumido depois.
 - **105 task 3.6** (`achados.csv`) e **106** (veredito com `head_sha` e `ponto`): arquivos distintos (`sdd/memory/logs/achados.csv`, parecer); sem colisão.
 - `forge report` e `doctor` (`AggregateSessionMetrics`) ignoram o campo novo.
@@ -78,11 +83,13 @@ O diagnóstico com evidência corrige a premissa em parte. O Discovery já grava
 | Procurei | Onde | Achei | Decisão | Justificativa |
 |---|---|---|---|---|
 | Schema e gravação da sessão | `internal/monitor/session_record.go`, `sdd/.metrics/schema.json` | `SessionMetrics` plano, sem bloco por tipo | estender | Um campo opcional no mesmo registro atende o pedido (DUP-01) |
-| Tipo da sessão | `ClassifySessionType` (`session.go:223`) | Heurística por caminho só para o `report`; confunde `features/` com Discovery | reusar | Fica sem mudança: não serve de gatilho, o gatilho é o caminho exato de `discovery.md` |
+| Tipo da sessão | `ClassifySessionType` (`session.go:223`) | Heurística por caminho só para o `report`; confunde `features/` do Builder com Discovery | reusar | Fica sem mudança: não distingue especificar de construir; o gatilho é a flag `--sessao spec` mais o caminho |
+| Distinguir especificação de construção | `implementar.md:27`, `worker.go:86`, references de concepção | Build passa `--phase` e `--agent-path`; concepção não passa nenhum | criar | Flag explícita `--sessao`; a ausência de `--phase` é frágil |
 | Medição real do Build | `ReadJobUsage`, `recordJobTelemetry` | Só para jobs do barramento | reusar | Fica sem mudança: Discovery não é job |
 | Estimativa por bytes | `EstimateSessionUsage` | Serve só para tokens | reusar | Fica sem mudança: o bloco novo mede artefatos, não tokens |
 | Gravação segura | `scaffold.WriteFileSafe` (`hooks.go:236`), ADR-0018 | Exportada; `scaffold` não importa `monitor` | reusar | Sem ciclo; SEG-02 |
 | Saneamento | `notify.Sanitize` (`notify.go:122`) | Remove ANSI e controle e limita o tamanho | reusar | SEG-01 e SEG-05 |
+| Contagem de seções obrigatórias | `checkP03ReuseTable`, `gate.CriteriaHeading` | Só P-03 e P-25 olham seções da spec | criar | Contar os seis títulos é local ao bloco; reusar o gate fica a verificar |
 | `--dry-run` em `session record` | `sessionRecordCmd` | Flag inexistente | criar | ARQ-05 |
 | Leitores do arquivo de sessão | `readSessionFiles`, `ReadSessions`, `countApprovedCycles` | Todos com `json.Unmarshal` frouxo | reusar | Fica sem mudança: compatíveis nos dois sentidos |
 
@@ -94,28 +101,37 @@ Nenhuma (`go.mod` intacto).
 
 ARQ-01, ARQ-05, ARQ-11, SEG-01, SEG-02, SEG-05, DUP-01, DUP-02, COD-03, TST-01, TST-02, TST-03.
 
+## Decisões do dono (20/11/2026)
+
+- Origem: iniciativa 97 (`fix-97-01`).
+- Falha ao gravar o JSON mantém o comportamento atual (erro); só a coleta do `spec` é melhor esforço, com aviso em stderr.
+- Gatilho: `/discovery`, `/nova-feature` e `/novo-fix` gravam `spec`; `/split-features` não ("todas elas menos split feature").
+
 ## A confirmar com o dono
 
-1. Origem: escolhida a iniciativa 97 (viva, mesma superfície do `fix-90-02`) porque 55 e 01 estão arquivadas (55 é arquivo solto em `sdd/archive/discovery/`, sem `fixes/`) e a 66 trata de `activity.json`, não de `session-*.json`. Confirma a 97?
-2. `/novo-fix`, `/nova-feature` e `/split-features` também geram sessões de spec: querem `spec` ali? Esta spec cobre só o `discovery.md`.
-3. Falha de gravação do JSON hoje devolve erro e saída diferente de 0 (`session.go:116-119`). Mantém ou vira aviso com saída 0? Esta spec mantém o atual e deixa best-effort só a coleta do bloco.
-4. O bloco é fino de propósito (só o que se mede em arquivo). Resultado do Gate Camada A, tentativas e tempo dependem de fonte medida (task 3.1 da 105); entram depois?
+1. Discriminador: recomendo a flag `--sessao spec` (acima), em vez de ausência de `--phase`. A escolha é sua.
+2. Resultado do Gate Camada A, tentativas e tempo dependem de fonte medida (105/3.1); entram depois?
 
 ## Critérios de Aceitação Executáveis
 
 ```bash
 set -o pipefail
 go build ./...
-go test -list 'TestSessionRecordDiscoveryGravaSpec' ./cmd/forge-sdd | grep -F 'TestSessionRecordDiscoveryGravaSpec' >/dev/null
-go test ./cmd/forge-sdd -run 'TestSessionRecordDiscoveryGravaSpec|TestSessionRecordArquivoAntigoSemSpecAindaLe|TestSpecMetricsContaFeaturesEFixes' -count=1
-# negativo: sessão de Build, de features/ e de fixes/ não grava spec; pasta ausente, link simbólico e caminho com .. não gravam spec nem quebram o comando
-go test -list 'TestSessionRecordBuildNaoGravaSpec|TestSessionRecordFeaturesEFixesNaoGravamSpec|TestSessionRecordDiscoveryPastaAusenteGravaSemSpec|TestSessionRecordDiscoverySimbolicoNaoSegue|TestSessionRecordDiscoveryComPontosPontoNaoGravaSpec' ./cmd/forge-sdd | grep -F 'TestSessionRecordBuildNaoGravaSpec' >/dev/null
-go test ./cmd/forge-sdd -run 'TestSessionRecordBuildNaoGravaSpec|TestSessionRecordFeaturesEFixesNaoGravamSpec|TestSessionRecordDiscoveryPastaAusenteGravaSemSpec|TestSessionRecordDiscoverySimbolicoNaoSegue|TestSessionRecordDiscoveryComPontosPontoNaoGravaSpec' -count=1
-# negativo: --dry-run não cria diretório nem arquivo; iniciativa com ANSI e controle sai saneada; o JSON não carrega caminho nem conteúdo
-go test -list 'TestSessionRecordDryRunNaoGrava|TestSpecMetricsIniciativaSaneada|TestSpecMetricsJSONSemCaminhoNemConteudo' ./cmd/forge-sdd ./internal/monitor | grep -F 'TestSessionRecordDryRunNaoGrava' >/dev/null
-go test ./cmd/forge-sdd ./internal/monitor -run 'TestSessionRecordDryRunNaoGrava|TestSpecMetricsIniciativaSaneada|TestSpecMetricsJSONSemCaminhoNemConteudo' -count=1
-# negativo: campo inválido (bytes negativo, iniciativa vazia ou acima de 80) não entra no bloco; leitores frouxos seguem lendo o arquivo com spec
+go test -list 'TestSessionRecordDiscoveryGravaSpec|TestSessionRecordNovaFeatureGravaSpec|TestSessionRecordNovoFixGravaSpec' ./cmd/forge-sdd | grep -F 'TestSessionRecordNovoFixGravaSpec' >/dev/null
+go test ./cmd/forge-sdd -run 'TestSessionRecordDiscoveryGravaSpec|TestSessionRecordNovaFeatureGravaSpec|TestSessionRecordNovoFixGravaSpec|TestSessionRecordArquivoAntigoSemSpecAindaLe|TestSpecMetricsContaFeaturesEFixes' -count=1
+# negativo: /split-features, Builder com --phase e --agent-path e sessão sem a flag não gravam spec, mesmo com --feature em features/ ou fixes/
+go test -list 'TestSessionRecordSplitFeaturesNaoGravaSpec|TestSessionRecordBuilderNaoGravaSpecMesmoEmFeatures|TestSessionRecordSemFlagSessaoNaoGravaSpec|TestSessionRecordFlagComPastaNaoGravaSpec' ./cmd/forge-sdd | grep -F 'TestSessionRecordBuilderNaoGravaSpecMesmoEmFeatures' >/dev/null
+go test ./cmd/forge-sdd -run 'TestSessionRecordSplitFeaturesNaoGravaSpec|TestSessionRecordBuilderNaoGravaSpecMesmoEmFeatures|TestSessionRecordSemFlagSessaoNaoGravaSpec|TestSessionRecordFlagComPastaNaoGravaSpec' -count=1
+# negativo: caminho com .., link simbólico, fora de sdd/discovery ou pasta ausente grava o arquivo sem spec e avisa em stderr, sem quebrar o comando
+go test -list 'TestSessionRecordSpecComPontosPontoNaoGrava|TestSessionRecordSpecSimbolicoNaoSegue|TestSessionRecordSpecForaDeDiscoveryNaoGrava|TestSessionRecordSpecPastaAusenteGravaSemSpec' ./cmd/forge-sdd | grep -F 'TestSessionRecordSpecSimbolicoNaoSegue' >/dev/null
+go test ./cmd/forge-sdd -run 'TestSessionRecordSpecComPontosPontoNaoGrava|TestSessionRecordSpecSimbolicoNaoSegue|TestSessionRecordSpecForaDeDiscoveryNaoGrava|TestSessionRecordSpecPastaAusenteGravaSemSpec' -count=1
+# negativo: --dry-run não cria diretório nem arquivo; iniciativa com ANSI sai saneada; o JSON não carrega caminho nem conteúdo; falha ao gravar o JSON ainda devolve erro
+go test -list 'TestSessionRecordDryRunNaoGrava|TestSpecMetricsIniciativaSaneada|TestSpecMetricsJSONSemCaminhoNemConteudo|TestSessionRecordFalhaDeGravacaoDevolveErro' ./cmd/forge-sdd ./internal/monitor | grep -F 'TestSessionRecordDryRunNaoGrava' >/dev/null
+go test ./cmd/forge-sdd ./internal/monitor -run 'TestSessionRecordDryRunNaoGrava|TestSpecMetricsIniciativaSaneada|TestSpecMetricsJSONSemCaminhoNemConteudo|TestSessionRecordFalhaDeGravacaoDevolveErro' -count=1
+# negativo: campo inválido (negativo, iniciativa vazia ou acima de 80, tipo fora do enum) não entra no bloco; leitores frouxos seguem lendo o arquivo com spec
 go test -list 'TestSpecMetricsCampoInvalidoNaoEntra|TestLeitoresDeSessaoToleramSpec' ./internal/monitor ./cmd/forge-sdd | grep -F 'TestSpecMetricsCampoInvalidoNaoEntra' >/dev/null
 go test ./cmd/forge-sdd ./internal/monitor -run 'TestSpecMetricsCampoInvalidoNaoEntra|TestLeitoresDeSessaoToleramSpec' -count=1
-go vet ./... && go test ./internal/scaffold/ ./internal/monitor/ ./cmd/forge-sdd/ -count=1
+# as três references de concepção passam a flag
+grep -F -- '--sessao spec' .agents/skills/sdd-concepcao/references/discovery.md .agents/skills/sdd-concepcao/references/nova-feature.md .agents/skills/sdd-concepcao/references/novo-fix.md >/dev/null
+go vet ./... && go test ./internal/scaffold/ ./internal/monitor/ ./cmd/forge-sdd/ ./internal/gate/ -count=1
 ```
