@@ -1,86 +1,125 @@
 {
  "kicker": "// Forge SDD · iniciativa 106",
  "titulo": "A pipeline só publica: sem atestado válido, ela bloqueia",
- "largura": 1280,
- "altura": 540,
- "nota_rodape": "validação roda local, sem LLM; a pipeline só confere o atestado",
+ "largura": 1360,
+ "altura": 620,
+ "nota_rodape": "prova do VCS é opcional · fallback determinístico · modo no status.md",
  "elementos": [
   {
    "tipo": "caixa",
    "id": "v",
    "x": 56,
    "y": 128,
-   "w": 224,
-   "h": 88,
-   "texto": "Veredito do revisor",
-   "sub": "conforme, SHA do HEAD",
+   "w": 260,
+   "h": 92,
+   "texto": "Veredito conforme",
+   "sub": "IA · reviewer; SHA gravado pelo Go (AUTOMÁTICO)",
    "estilo": "normal"
+  },
+  {
+   "tipo": "caixa",
+   "id": "s",
+   "x": 56,
+   "y": 244,
+   "w": 260,
+   "h": 92,
+   "texto": "Valida sem LLM",
+   "sub": "AUTOMÁTICO · regras, ADR, lições, fila, SHA",
+   "estilo": "contorno"
   },
   {
    "tipo": "caixa",
    "id": "h",
    "x": 56,
-   "y": 264,
-   "w": 224,
-   "h": 88,
-   "texto": "Sua aprovação",
-   "sub": "ou modo sem humano",
-   "estilo": "normal"
-  },
-  {
-   "tipo": "caixa",
-   "id": "t",
-   "x": 392,
-   "y": 192,
-   "w": 224,
-   "h": 96,
-   "texto": "Atestado",
-   "sub": "prova que o agente não emite",
+   "y": 360,
+   "w": 260,
+   "h": 92,
+   "texto": "Aprovação do dono",
+   "sub": "HUMANO · ou modo sem humano",
    "estilo": "destaque"
   },
   {
    "tipo": "caixa",
+   "id": "t",
+   "x": 400,
+   "y": 214,
+   "w": 260,
+   "h": 112,
+   "texto": "Atestado do PR da feature",
+   "sub": "o agente não emite sozinho",
+   "estilo": "destaque"
+  },
+  {
+   "tipo": "caixa",
+   "id": "m",
+   "x": 400,
+   "y": 360,
+   "w": 260,
+   "h": 92,
+   "texto": "Modo do repositório",
+   "sub": "AUTOMÁTICO · desligado, local ou vcs",
+   "estilo": "contorno"
+  },
+  {
+   "tipo": "caixa",
    "id": "c",
-   "x": 728,
-   "y": 192,
-   "w": 208,
-   "h": 96,
+   "x": 760,
+   "y": 214,
+   "w": 240,
+   "h": 112,
    "texto": "Pipeline confere",
-   "sub": "1 job, segundos",
-   "estilo": "normal"
+   "sub": "AUTOMÁTICO · 1 job, segundos",
+   "estilo": "contorno"
   },
   {
    "tipo": "caixa",
    "id": "p",
-   "x": 1032,
+   "x": 1100,
    "y": 128,
-   "w": 192,
-   "h": 88,
+   "w": 200,
+   "h": 92,
    "texto": "Publica",
-   "sub": "",
-   "estilo": "normal"
+   "sub": "AUTOMÁTICO",
+   "estilo": "contorno"
   },
   {
    "tipo": "caixa",
    "id": "b",
-   "x": 1032,
-   "y": 264,
-   "w": 192,
-   "h": 88,
+   "x": 1100,
+   "y": 244,
+   "w": 200,
+   "h": 92,
    "texto": "Bloqueia",
    "sub": "sem atestado ou commit novo",
    "estilo": "apagado"
   },
   {
+   "tipo": "caixa",
+   "id": "f",
+   "x": 760,
+   "y": 360,
+   "w": 540,
+   "h": 92,
+   "texto": "Prova do VCS ausente ou sem resposta",
+   "sub": "cai no atestado local, avisa e PERGUNTA a você (HUMANO). Nunca aprova em silêncio",
+   "estilo": "destaque"
+  },
+  {
    "tipo": "seta",
    "de": "v.dir",
-   "para": "t.esq:0.3",
+   "para": "t.esq",
+   "forma": "horizontal"
+  },
+  {
+   "tipo": "seta",
+   "de": "s.dir",
+   "para": "t.esq",
    "forma": "horizontal"
   },
   {
    "tipo": "seta",
    "de": "h.dir",
-   "para": "t.esq:0.7",
+   "para": "t.esq",
    "forma": "horizontal"
   },
   {
@@ -104,31 +143,59 @@
    "rotulo": "inválido"
   },
   {
-   "tipo": "caixa",
-   "id": "s",
-   "x": 56,
-   "y": 384,
-   "w": 560,
-   "h": 56,
-   "texto": "Script local, sem LLM: regras, ADR, lições, fila, SHA",
-   "sub": "não roda na pipeline",
-   "estilo": "tracejado"
-  },
-  {
-   "tipo": "caixa",
-   "id": "m",
-   "x": 728,
-   "y": 384,
-   "w": 496,
-   "h": 56,
-   "texto": "Modo por repositório: desligado, local ou prova do VCS",
-   "estilo": "tracejado"
+   "tipo": "seta",
+   "de": "m.dir",
+   "para": "f.esq",
+   "forma": "horizontal",
+   "rotulo": "vcs sem prova",
+   "estilo": "fraca"
   },
   {
    "tipo": "texto",
    "x": 56,
-   "y": 480,
-   "texto": "Prova do VCS ausente ou sem resposta: cai no atestado local, avisa e pergunta a você. Nunca aprova em silêncio.",
+   "y": 508,
+   "texto": "LEGENDA",
+   "estilo": "rotulo",
+   "alinha": "start"
+  },
+  {
+   "tipo": "caixa",
+   "id": "lg1",
+   "x": 186,
+   "y": 484,
+   "w": 180,
+   "h": 56,
+   "texto": "HUMANO",
+   "sub": "decisões do Nathan",
+   "estilo": "destaque"
+  },
+  {
+   "tipo": "caixa",
+   "id": "lg2",
+   "x": 386,
+   "y": 484,
+   "w": 180,
+   "h": 56,
+   "texto": "IA",
+   "sub": "pm-architect, builder, reviewer",
+   "estilo": "normal"
+  },
+  {
+   "tipo": "caixa",
+   "id": "lg3",
+   "x": 586,
+   "y": 484,
+   "w": 180,
+   "h": 56,
+   "texto": "AUTOMÁTICO",
+   "sub": "sem LLM: script, hook, pipeline",
+   "estilo": "contorno"
+  },
+  {
+   "tipo": "texto",
+   "x": 56,
+   "y": 580,
+   "texto": "A validação roda local, sem LLM, e não roda na pipeline. A pipeline só confere o atestado.",
    "estilo": "nota",
    "alinha": "start"
   }

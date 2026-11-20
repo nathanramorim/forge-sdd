@@ -1,13 +1,16 @@
 # Status — 106-pr-draft-revisao-e-ci
 
-**Status:** Gate 1 reaprovado pelo dono em 2026-11-20 (VCS agnóstico). Nada implementado. PR #120 em draft.
-**Modo:** com-humano (padrão). **Atestado:** a definir (default em A confirmar).
-**Próximo passo:** `/split-features` da onda 0, sequenciando com a 105 (templates, goldens, `hooks.go`, `doctor`, menus) e dependente da task 0.1.
+**Status:** Gate 1 reaberto pelo dono em 2026-11-20 (spec volta à principal; branch e PR draft por feature). Nada implementado. Sem push (merge local da `main` pendente).
+**Modo:** com-humano (padrão). **Atestado:** a definir.
+**Próximo passo:** o dono responde `A confirmar`; depois `/split-features` da onda 0.
 
-## Decisões aprovadas
-Adaptador de VCS e 4 ondas; atestado Azure com Environment e aprovadores, opcional e com fallback (xi); `nenhum` só local (xii); medir MCP versus CLI na 0.1 (xiii); antes: 1 a 5, vi a ix, `FLX-01`.
+## Mantido (aprovado)
+VCS agnóstico; atestado opcional com fallback; assinatura Forge SDD; `FLX-01` com split pelo Builder; teto 3; MCP versus CLI a medir.
 
 ## A confirmar
-- Default do modo de atestado (xiv; rec. `local`) e onde mora (xv; rec. Constituição).
-- PRs de task do leque em draft?
-- Hooks só no Claude Code?
+- xvi estado da fila (rec. B: arquivo por feature); xvii Regra 15 e `FLX-02` (branch por feature).
+- xviii quem mescla a spec (rec. [Seguir] autoriza); xix [Continuar] por onda; xx dependente espera; xxi atestado da spec local; xxii leque sem `Juntar`.
+- xiv default do atestado; xv onde mora; hooks só no Claude Code.
+
+## Colisões
+107: `planner`, isolamento do `builder`, arquivar, verificador. 105: templates, goldens, `hooks.go`, `doctor`, menus.
