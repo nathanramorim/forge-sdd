@@ -85,7 +85,8 @@ html[data-edicao="missoes"] .hero::after {
 
 /* Avatar dos cartões: retrato 2D no lugar do mascote 3D */
 html[data-edicao="missoes"] .avatar-stage canvas {
-  display: none;
+  display: none !important;
+  visibility: hidden !important;
 }
 html[data-edicao="missoes"] #avatar-0 { background: url("personagens/lider.svg") center / cover no-repeat; }
 html[data-edicao="missoes"] #avatar-1 { background: url("personagens/pm.svg") center / cover no-repeat; }

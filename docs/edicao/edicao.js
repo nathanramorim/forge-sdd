@@ -44,6 +44,11 @@
     }
   }
 
+  function tirarMascotes3D() {
+    var palcos = document.querySelectorAll(".avatar-stage canvas");
+    for (var i = 0; i < palcos.length; i++) palcos[i].parentNode.removeChild(palcos[i]);
+  }
+
   function vestir(dados) {
     if (!dados || typeof dados.edicao !== "string" || typeof dados.promessa !== "string" || !Array.isArray(dados.missoes)) return;
 
@@ -69,8 +74,9 @@
     var estacoes = document.getElementById("estacoes");
     if (!estacoes) return;
     rotularCartoes(dados.missoes);
+    tirarMascotes3D();
     if (window.MutationObserver) {
-      new MutationObserver(function () { rotularCartoes(dados.missoes); }).observe(estacoes, { childList: true, subtree: true });
+      new MutationObserver(function () { rotularCartoes(dados.missoes); tirarMascotes3D(); }).observe(estacoes, { childList: true, subtree: true });
     }
   }
 
