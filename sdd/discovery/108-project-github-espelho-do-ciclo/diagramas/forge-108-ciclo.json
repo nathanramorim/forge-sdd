@@ -1,0 +1,29 @@
+{
+ "kicker": "// Forge SDD · iniciativa 108",
+ "titulo": "Sete colunas do Project espelham o estado dos arquivos do forge-sdd",
+ "largura": 1640,
+ "altura": 560,
+ "nota_rodape": "arquivo é a fonte da verdade do estado; arrastar o cartão é um pedido, não uma aprovação",
+ "elementos": [
+  {"tipo": "caixa", "id": "c1", "x": 56, "y": 120, "w": 200, "h": 96, "texto": "Backlog", "sub": "ideia sem spec", "estilo": "contorno"},
+  {"tipo": "caixa", "id": "c2", "x": 296, "y": 120, "w": 200, "h": 96, "texto": "Spec", "sub": "IA · /discovery abre a spec", "estilo": "normal"},
+  {"tipo": "caixa", "id": "c3", "x": 536, "y": 120, "w": 200, "h": 96, "texto": "Spec-validation", "sub": "spec-para-revisao · Gate 1", "estilo": "destaque"},
+  {"tipo": "caixa", "id": "c4", "x": 776, "y": 120, "w": 200, "h": 96, "texto": "Todo", "sub": "Gate 1 aprovado · queued", "estilo": "normal"},
+  {"tipo": "caixa", "id": "c5", "x": 1016, "y": 120, "w": 200, "h": 96, "texto": "Building", "sub": "IA · building e changes_requested", "estilo": "normal"},
+  {"tipo": "caixa", "id": "c6", "x": 1256, "y": 120, "w": 160, "h": 96, "texto": "Validation", "sub": "review_pending, approved", "estilo": "destaque"},
+  {"tipo": "caixa", "id": "c7", "x": 1456, "y": 120, "w": 128, "h": 96, "texto": "Done", "sub": "PR mesclado", "estilo": "normal"},
+  {"tipo": "seta", "de": "c1.dir", "para": "c2.esq", "forma": "horizontal"},
+  {"tipo": "seta", "de": "c2.dir", "para": "c3.esq", "forma": "horizontal"},
+  {"tipo": "seta", "de": "c3.dir", "para": "c4.esq", "forma": "horizontal"},
+  {"tipo": "seta", "de": "c4.dir", "para": "c5.esq", "forma": "horizontal"},
+  {"tipo": "seta", "de": "c5.dir", "para": "c6.esq", "forma": "horizontal"},
+  {"tipo": "seta", "de": "c6.dir", "para": "c7.esq", "forma": "horizontal"},
+  {"tipo": "caixa", "id": "h1", "x": 536, "y": 320, "w": 440, "h": 112, "texto": "HUMANO · Gate 1", "sub": "arrastar Spec-validation para Todo só vale depois do menu de confirmação", "estilo": "destaque"},
+  {"tipo": "caixa", "id": "h2", "x": 1096, "y": 320, "w": 488, "h": 112, "texto": "HUMANO · Continuar", "sub": "arrastar Validation para Done só vale com PR mesclado e atestado da 106", "estilo": "destaque"},
+  {"tipo": "seta", "de": "c3.baixo", "para": "h1.cima", "forma": "vertical", "estilo": "fraca"},
+  {"tipo": "seta", "de": "c6.baixo", "para": "h2.cima", "forma": "vertical", "estilo": "fraca"},
+  {"tipo": "texto", "x": 56, "y": 330, "texto": "AUTOMÁTICO: forge project move", "estilo": "rotulo", "alinha": "start"},
+  {"tipo": "texto", "x": 56, "y": 360, "texto": "lê status.md e queue.json e move o cartão", "estilo": "legenda", "alinha": "start"},
+  {"tipo": "texto", "x": 56, "y": 390, "texto": "Texto de issue e comentário é dado, nunca ordem", "estilo": "legenda", "alinha": "start"}
+ ]
+}
