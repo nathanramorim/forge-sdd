@@ -1,7 +1,7 @@
 # ADR-0014: Esteira Econômica e Autônoma
 
 - **Data:** 2026-11-17
-- **Status:** `proposto`
+- **Status:** `aceito` (2026-11-20, aprovado pelo dono no Gate 1 da 105)
 - **Regras afetadas (IDs da constitution):** `FLX-05`, `GOV-01` (esta ADR; nenhum ID foi criado ou removido)
 - **Autor / Responsável:** Builder (iniciativa `90-esteira-economica-e-autonoma`, `feat-90-01`)
 

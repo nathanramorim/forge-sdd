@@ -12,8 +12,8 @@ Só valem ADRs com status `aprovado`/`aceito` e não substituídas.
 - **ADR-0005 (aprovado):** `forge` sem argumentos abre o menu; cada ação roda o `RunE` do subcomando (D-7). O tema entra no menu sem duplicar lógica.
 - **ADR-0002 (aprovado):** estado por iniciativa; o `status` passa a esconder iniciativa concluída por esse estado.
 - **ADR-0003 (aprovado, parcialmente obsoleta):** "skills por estação". O produto virou 3 sessões; mexer nas estações exige ADR nova (task 1.1).
-- **ADRs 0009 a 0014 estão `proposto` no arquivo**, embora o código as use: não servem de base sozinhas, cito o código. Aprová-las é item do `A confirmar`.
-- **ADR-0015 (`proposto`) e ADRs 0016 a 0020 (`aceito`, só na branch `docs/constitution-alinhamento-104`, commit `bbd26d6`, fora da `main`):** a onda 3 depende delas (`doctor --harness`, `eval`, contratos). Não são base das ondas 1 e 2.
+- **ADRs 0009 a 0014:** aceitas em 2026-11-20 (Gate 1 da 105; status atualizado no mesmo PR); valem como base.
+- **ADR-0015 (`proposto`) e ADRs 0016 a 0020:** as 0016 a 0020 entram com o PR #119 (docs da Constituição, aberto): dependência de documentação, não bloqueio. Não tocadas aqui.
 - **Edição Missões (ADR-0019, só na branch acima):** temporária, termina em 23/11/2026. O tema desta iniciativa é a paleta permanente; nada de `docs/design/edicao-missoes`.
 
 ## O que já existe
@@ -88,7 +88,9 @@ go test -list 'TestSaidaSemCorSemTTYELarguraEstreita' ./internal/ui | grep -F 'T
 go test ./internal/ui -run 'TestSaidaSemCorSemTTYELarguraEstreita'
 go test -list 'TestProficienciaCalculaAPartirDeVereditos' ./internal/monitor | grep -F 'TestProficienciaCalculaAPartirDeVereditos'
 go test ./internal/monitor -run 'TestProficienciaCalculaAPartirDeVereditos'
-# negativo: NO_COLOR não emite ANSI; subcomando desconhecido sai diferente de zero; métrica sem dado vira "a medir", nunca 0
+go test -list 'TestInitSemTTYExigeAgente' ./cmd/forge-sdd | grep -F 'TestInitSemTTYExigeAgente'
+go test ./cmd/forge-sdd -run 'TestInitSemTTYExigeAgente'
+# negativo: NO_COLOR não emite ANSI; subcomando desconhecido sai diferente de zero; `init` sem TTY e sem `--agent` falha; métrica sem dado vira "a medir", nunca 0
 go test -list 'TestNoColorNaoEmiteANSI' ./internal/ui | grep -F 'TestNoColorNaoEmiteANSI'
 go test ./internal/ui -run 'TestNoColorNaoEmiteANSI'
 go test -list 'TestSubcomandoDesconhecidoSaiDiferenteDeZero' ./cmd/forge-sdd | grep -F 'TestSubcomandoDesconhecidoSaiDiferenteDeZero'

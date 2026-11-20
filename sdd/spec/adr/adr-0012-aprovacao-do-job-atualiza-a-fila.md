@@ -1,7 +1,7 @@
 # ADR-0012: A Aprovação do Job Atualiza a Fila da Iniciativa
 
 - **Data:** 2026-11-15
-- **Status:** `proposto`
+- **Status:** `aceito` (2026-11-20, aprovado pelo dono no Gate 1 da 105)
 - **Regras afetadas (IDs da constitution):** `ARQ-01`, `SEG-01`, `SEG-06`, `DUP-01`, `GOV-01` (este ADR; nenhum ID foi criado ou removido)
 - **Autor / Responsável:** Líder (`fix-84-02`)
 

@@ -22,3 +22,5 @@ Modelo atual: 3 sessões (Discovery, Builder, Reviewer) mais aprovação humana.
 **Mantém (não obsoleto):** `archivist`, `migrator`, `/toca-ai`, `/inbox`, `/status`, `/doctor`, `/tutorial`, `/archive`, `/nova-feature`, `/novo-fix`, `/c4-architecture`, `/constitution`, `/upgrade-sdd`, skill `novo-subcomando-cli-sdd`, modo `sessions` (tmux).
 
 **Não verificado:** quem usa `attach`/ACP fora deste repositório; se `forge-sdd` (alias do npm) ainda é usado; comportamento de `update` ao regravar os templates corrigidos.
+
+**Gate 1 (2026-11-20):** aprovado só corrigir texto (O1, O8, O9, O10, O11, O14) e avisar (O3, O4, O5, O7, O13); `lider` fica (só descrição), skills `sdd-*` e a lista "Mantém" ficam; nada removido. O9: `init` passa a perguntar o agente, sem padrão fixo.
