@@ -2,7 +2,7 @@
   "feature_id": "feat-101",
   "branch": "feat/101-tema-missoes-v5",
   "spec_status": "reviewed",
-  "updated_at": "2026-11-20T01:12:51Z",
+  "updated_at": "2026-11-20T01:15:11Z",
   "items": [
     {
       "task_id": "fix-101-01-alinhar-readme-e-design-system",
@@ -199,7 +199,7 @@
       "task_id": "feat-101-06-robos-em-arte-de-tela-de-carregamento",
       "title": "feat-101-06 — Robôs como personagens em arte de tela de carregamento",
       "spec_path": "sdd/discovery/101-tema-missoes-v5/features/feat-101-06-robos-em-arte-de-tela-de-carregamento.md",
-      "status": "review_pending",
+      "status": "approved",
       "depends_on": [
         "feat-101-05",
         "(figurino)",
@@ -222,7 +222,12 @@
         "FLX-02"
       ],
       "skills_used": [],
-      "attempts": 1
+      "attempts": 1,
+      "governance_verdict": {
+        "veredito": "conforme",
+        "achados": [],
+        "resumo": "Robôs 2D do forge-sdd (contorno grosso, cor chapada) respeitam os critérios 1 e 7: sem marca, personagem, pose de capa ou interface do jogo. Critério 2 da spec corrigido (xmlns do SVG); critérios, go vet e forge gate passam."
+      }
     }
   ]
 }
