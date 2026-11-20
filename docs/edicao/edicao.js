@@ -19,14 +19,13 @@
   document.documentElement.setAttribute("data-edicao", edicao.id);
   if (!document.addEventListener) return;
 
-  /* Estação de cada cartão da LP, na ordem em que a página os desenha; a missão vem do JSON. */
-  var estacaoDoCartao = ["Operação", "Concepção", "Planejamento", "Construção", "Governança"];
+  /* Sessão de cada cartão da LP, na ordem em que a página os desenha (3 sessões do pipeline); a missão vem do JSON. */
+  var sessaoDoCartao = ["Discovery", "Builder", "Reviewer"];
 
-  function missaoDaEstacao(dados, estacao) {
-    var lista = dados.missoes.concat(dados.fecho ? [dados.fecho] : []);
-    for (var k = 0; k < lista.length; k++) {
-      var item = lista[k];
-      if (item && typeof item.titulo === "string" && Array.isArray(item.estacoes) && item.estacoes.indexOf(estacao) !== -1) return item.titulo;
+  function missaoDaSessao(dados, sessao) {
+    for (var k = 0; k < dados.missoes.length; k++) {
+      var item = dados.missoes[k];
+      if (item && typeof item.titulo === "string" && item.sessao === sessao) return item.titulo;
     }
     return null;
   }
@@ -42,9 +41,9 @@
     var cartoes = document.querySelectorAll("#estacoes .agent-card");
     for (var i = 0; i < cartoes.length; i++) {
       var meta = cartoes[i].querySelector(".agent-meta");
-      var estacao = estacaoDoCartao[Number(cartoes[i].dataset.idx)];
-      if (!meta || !estacao || meta.querySelector(".edicao-missao")) continue;
-      var titulo = missaoDaEstacao(dados, estacao);
+      var sessao = sessaoDoCartao[Number(cartoes[i].dataset.idx)];
+      if (!meta || !sessao || meta.querySelector(".edicao-missao")) continue;
+      var titulo = missaoDaSessao(dados, sessao);
       if (titulo) meta.insertBefore(criar("div", "edicao-missao", titulo), meta.querySelector("h3"));
     }
   }

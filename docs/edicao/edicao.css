@@ -88,11 +88,6 @@ html[data-edicao="missoes"] .avatar-stage canvas {
   display: none !important;
   visibility: hidden !important;
 }
-html[data-edicao="missoes"] #avatar-0 { background: url("personagens/lider.svg") center / cover no-repeat; }
-html[data-edicao="missoes"] #avatar-1 { background: url("personagens/pm.svg") center / cover no-repeat; }
-html[data-edicao="missoes"] #avatar-2 { background: url("personagens/planejador.svg") center / cover no-repeat; }
-html[data-edicao="missoes"] #avatar-3 { background: url("personagens/builders.svg") center / cover no-repeat; }
-html[data-edicao="missoes"] #avatar-4 { background: url("personagens/governanca.svg") center / cover no-repeat; }
 
 /* Placa de neon com a última missão */
 html[data-edicao="missoes"] .edicao-placa {
@@ -262,3 +257,7 @@ html[data-edicao="missoes"] .edicao-missao {
     transition: none !important;
   }
 }
+/* Avatares dos 3 cartões de sessão (pipeline): Discovery, Builder, Reviewer */
+html[data-edicao="missoes"] #avatar-0 { background: url("personagens/pm.svg") center / cover no-repeat; }
+html[data-edicao="missoes"] #avatar-1 { background: url("personagens/builders.svg") center / cover no-repeat; }
+html[data-edicao="missoes"] #avatar-2 { background: url("personagens/governanca.svg") center / cover no-repeat; }
