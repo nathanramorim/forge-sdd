@@ -26,7 +26,7 @@ func TestDoctorCommand_EmptyDir(t *testing.T) {
 	os.Stdout = w
 
 	// Executa o comando via rootCmd
-	rootCmd.SetArgs([]string{"doctor", tempDir})
+	rootCmd.SetArgs([]string{"doctor", tempDir, "--verbose"})
 	err := rootCmd.Execute()
 	require.NoError(t, err)
 
@@ -91,7 +91,7 @@ func TestDoctorAndDestroyCommands(t *testing.T) {
 	r, w, _ := os.Pipe()
 	os.Stdout = w
 
-	rootCmd.SetArgs([]string{"doctor", tempDir})
+	rootCmd.SetArgs([]string{"doctor", tempDir, "--verbose"})
 	err = rootCmd.Execute()
 	require.NoError(t, err)
 
