@@ -1,16 +1,17 @@
 # Plano — Iniciativa 105
 
-3 ondas, ordem de baixo para cima (a base de cada onda primeiro). Máximo de 7 tasks por onda. Cada task vira `features/feat-105-NN-*.md` no `/split-features`, com critério executável e teste negativo (P-25). Rules citadas por ID da Constitution.
+3 ondas, ordem de baixo para cima (a base de cada onda primeiro). Máximo de 7 tasks por onda (a onda 1 tem 7). Cada task vira `features/feat-105-NN-*.md` no `/split-features`, com critério executável e teste negativo (P-25). Rules citadas por ID da Constitution.
 
 ## Onda 1 — Obsoletos e limpeza (independente de tema e da 104)
 | Task | O que | Depende de | Paralela | Rules/IDs |
 |---|---|---|---|---|
 | 1.1 | ADR de obsolescência: 5 estações (parcial sobre ADR-0003), depreciação de `queue stations`/`attach`/`queue handoff`, decisão sobre `lider`; próxima ADR livre após a 0020 | decisão do dono (`A confirmar`) | — | `FLX-05`, `GOV-01`, `ARQ-06` |
 | 1.2 | Corrigir texto: `Long` do raiz, `docs/pipeline.md` e `flows.md` (versão), "5 estações" nos templates/goldens, `docs/acp-ide-setup.md`, `sdd-acp.md` | 1.1 | com 1.3 e 1.4 | `COD-05`, `TST-02`, `DUP-06` |
-| 1.3 | Avisar (O3, O4, O5, O7, O13; cobra `Deprecated`) em `queue stations`, `attach`, `queue handoff`, `/implement`, `/proxima-feature`; nada removido | 1.1 | com 1.2 | `ARQ-06`, `COD-04`, `TST-03` |
+| 1.3 | Avisar (O3, O4, O5, O7, O13; `PreRun` com `avisoDepreciado`, sem `Deprecated` do cobra) em `queue stations`, `attach`, `queue handoff`, `/implement`, `/proxima-feature`; nada removido | 1.1 | com 1.2 | `ARQ-06`, `COD-04`, `TST-03` |
 | 1.4 | `doctor` compara `.sdd-version` com o binário; lista de features só com `--verbose` | — | com 1.2 | `ARQ-01`, `SEG-01`, `TST-03` |
 | 1.5 | `status` esconde iniciativa com fila `completed`/`approved` (ADR-0002); `--all` mostra | — | com 1.4 | `ARQ-10`, `DUP-06`, `TST-03` |
 | 1.6 | `lider`: trocar a descrição e o texto (sem renomear nem remover); testes de `launcher`, `tmux`, `preflight`, `up_sessions` verdes | 1.1 | — | `COD-04`, `TST-02`, `FLX-02` |
+| 1.7 | Registro CSV dos depreciados do forge inteiro: ponto único (catálogo + helper da 1.3) imprime o aviso e acrescenta linha em `sdd/memory/logs/depreciados.csv` (comando, contexto sem valores, agente, substituto, desde, versão) | 1.3 | — | `ARQ-01`, `ARQ-05`, `SEG-02`, `COD-03`, `TST-03` |
 
 ## Onda 2 — Navegação e tema do CLI (depende da 1.2 só para não regravar texto duas vezes)
 | Task | O que | Depende de | Paralela | Rules/IDs |
@@ -31,4 +32,4 @@
 | 3.4 | Limiares aprovados pelo dono viram checagem de `doctor --harness` (saída 3 se violar) | 3.3, aprovação | — | `ARQ-06`, `GOV-01`, `FLX-06` |
 | 3.5 | Doc `harness` e consolidação de lições da onda | 3.4 | — | `GOV-03`, `DUP-06` |
 
-Paralelismo: na onda 1, 1.2/1.3/1.4/1.5 em paralelo depois da 1.1 (1.4 e 1.5 não precisam dela); na onda 2, 2.2 e 2.3 depois da 2.1; na onda 3, 3.1 e 3.2. Ondas 1 e 2 podem rodar em paralelo exceto 1.2 antes da 2.4. Sequência com a 106 (mexe em templates, goldens, `split-features.md`, `hooks.go`, `doctor` e menus): as tasks 1.2, 1.4 e 2.6 desta e as 1.7, 2.5 e 2.6 da 106 tocam os mesmos arquivos e entram em série, ordem definida no `/split-features`. A 3.1 inclui o conserto dos tokens zerados (aprovado). Arquivar as iniciativas 79 a 88 com `/archive` só depois da 1.5. Uma branch por iniciativa (`feat/105-experiencia-cli-e-harness`), nunca por task (`FLX-02`).
+Paralelismo: na onda 1, 1.2/1.3/1.4/1.5 em paralelo depois da 1.1 (1.4 e 1.5 não precisam dela), 1.7 depois da 1.3; ordem de entrega 1.1, 1.4, 1.5, 1.2, 1.3, 1.7, 1.6; na onda 2, 2.2 e 2.3 depois da 2.1; na onda 3, 3.1 e 3.2. Ondas 1 e 2 podem rodar em paralelo exceto 1.2 antes da 2.4. Sequência com a 106 (mexe em templates, goldens, `split-features.md`, `hooks.go`, `doctor` e menus): as tasks 1.2, 1.4 e 2.6 desta e as 1.7, 2.5 e 2.6 da 106 tocam os mesmos arquivos e entram em série, ordem definida no `/split-features`. A 3.1 inclui o conserto dos tokens zerados (aprovado). Arquivar as iniciativas 79 a 88 com `/archive` só depois da 1.5. Uma branch por iniciativa (`feat/105-experiencia-cli-e-harness`), nunca por task (`FLX-02`).

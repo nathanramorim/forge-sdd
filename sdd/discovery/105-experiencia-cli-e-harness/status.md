@@ -1,8 +1,8 @@
 # Status — 105-experiencia-cli-e-harness
 
-**Status:** Split da onda 1 pronto (6 features 105-01 a 105-06), fila criada (6 tasks `queued`), aguardando Builder; ondas 2 e 3 no plan.md. PR em draft.
-**Próximo passo:** entregar ao Builder (ordem 1.1, 1.4, 1.5, 1.2, 1.3, 1.6); 1.2, 1.4 e 1.6 em série com a 106/107 (templates, goldens, `doctor`).
-**A confirmar:** nada.
+**Status:** Split da onda 1 com 7 features; 1.1 a 1.5 entregues em PRs #123 a #127 (draft); 1.6 em andamento; 1.7 especificada. PR em draft.
+**Próximo passo:** Builder da 1.7 parte da branch da 1.3 (ordem 1.1, 1.4, 1.5, 1.2, 1.3, 1.7, 1.6).
+**A confirmar:** CSV da 1.7 em `sdd/memory/logs/` versionado ou ignorado no git (ruído e conflito entre PRs; ver risco na spec).
 
 ## Decisões do Gate 1
 - Base resolvida; ADRs 0016-0020 e `obsoletos.md` da 104 entram pelo PR #119 (dependência de documentação).

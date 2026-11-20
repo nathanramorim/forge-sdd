@@ -10,7 +10,7 @@
 Itens obsoletos (O3, O4, O5, O7, O13) seguem expostos sem aviso. A decisão do Gate 1: só avisar, nada removido.
 
 ## Comportamento
-1. `queue stations`, `attach` e `queue handoff` ganham `Deprecated` do cobra (mensagem em pt-BR dizendo o que usar e que sai em versão futura por ADR). Continuam funcionando com a mesma saída e código.
+1. `queue stations`, `attach` e `queue handoff` ganham aviso próprio: `PreRun` com `avisoDepreciado` (stderr, pt-BR, diz o que usar e que sai em versão futura por ADR) e `Short` com prefixo `[depreciado]`. NÃO usar o `Deprecated` do cobra: ele esconde o comando do `--help`, e o item 4 manda manter o comando listado (desvio do Builder aceito pelo dono). Continuam funcionando com a mesma saída e código.
 2. `/implement` e `/proxima-feature` ganham uma linha de aviso: "alias de `/implementar`; será removido depois".
 3. `forge doctor` e `forge status` NÃO mudam aqui. O aviso O13 (5 pareceres antigos da 97) vira nota no `status.md` da 105 apontando `/archive` da 97; nada regravado.
 4. O aviso vai para stderr; a saída de dados não muda; `--help` mantém o comando listado.

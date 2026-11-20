@@ -3,7 +3,7 @@
   "branch": "feat/105-experiencia-cli-e-harness",
   "base_branch": "main",
   "spec_status": "reviewed",
-  "updated_at": "2026-11-20T14:29:11Z",
+  "updated_at": "2026-11-20T15:21:08Z",
   "items": [
     {
       "task_id": "feat-105-01-adr-obsolescencia",
@@ -88,6 +88,28 @@
         "COD-04",
         "TST-02",
         "FLX-02"
+      ],
+      "skills_used": [],
+      "attempts": 0
+    },
+    {
+      "task_id": "feat-105-07-registro-de-depreciados",
+      "title": "feat-105-07 — Registro CSV dos comandos depreciados (vale para o forge inteiro)",
+      "spec_path": "sdd/discovery/105-experiencia-cli-e-harness/features/feat-105-07-registro-de-depreciados.md",
+      "status": "queued",
+      "depends_on": [
+        "feat-105-03"
+      ],
+      "rules": [
+        "ARQ-01",
+        "ARQ-05",
+        "ARQ-10",
+        "COD-03",
+        "COD-05",
+        "SEG-01",
+        "SEG-02",
+        "SEG-04",
+        "TST-03"
       ],
       "skills_used": [],
       "attempts": 0
