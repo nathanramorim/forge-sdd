@@ -110,6 +110,9 @@ func Run(cfg config.Config, targetDir string) ([]string, error) {
 			return created, err
 		}
 		installClaudeInboxHook(agents, targetDir)
+		if _, err := applyAgentModels(targetDir); err != nil {
+			return created, err
+		}
 	}
 	return created, nil
 }
@@ -241,6 +244,9 @@ func RunAgents(cfg config.Config, agents []string, targetDir string) ([]string, 
 	if !cfg.DryRun {
 		cleanObsoleteFiles(targetDir)
 		installClaudeInboxHook(agents, targetDir)
+		if _, err := applyAgentModels(targetDir); err != nil {
+			return created, err
+		}
 	}
 	return created, nil
 }

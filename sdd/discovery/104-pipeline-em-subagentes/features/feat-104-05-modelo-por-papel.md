@@ -2,7 +2,7 @@
 
 **Iniciativa:** 104-pipeline-em-subagentes
 **Branch:** feat/104-pipeline-em-subagentes
-**Status:** draft (aguarda Gate 1)
+**Status:** implementada em 2026-11-20
 **Depende de:** nenhuma
 
 ## Problema
@@ -10,7 +10,7 @@ Subagentes e papéis usam `model: inherit`; não há como pôr modelo menor nos 
 
 ## Comportamento
 1. `forge.json` ganha `agent_models` por papel (`discovery`, `builder`, `reviewer`, subagentes A/B herdam do papel).
-2. `forge update` escreve o `model:` no cabeçalho de `.claude/agents/*.md` e o `-m` no perfil do Codex; valor validado contra lista conhecida (`SEG-01`).
+2. `forge update` (e `forge` na instalação) escreve o `model:` no cabeçalho de `.claude/agents/*.md`; valor validado na borda (`SEG-01`): não vazio, sem caractere de controle, `[A-Za-z0-9._:-]`, até 80. O `-m` do Codex fica fora (ver Decisões).
 3. Sem a chave, nada muda (`inherit`). Gemini só aceita modelo; Copilot sem flag confirmada.
 
 ## Modelo do módulo
@@ -23,7 +23,8 @@ ADR-0004 (o Go decide o fluxo), ADR-0008 (modo `sessions` convive), ADR-0015 (pr
 | Procurei | Onde | Achei | Decisão | Justificativa |
 |---|---|---|---|---|
 | Modelo/esforço por sessão | `internal/config/forge_profiles.go`, feat-90-07 | `Models`, `Efforts`, `{model}` | **Reusar**; estender ao cabeçalho dos agentes | A 85 foi absorvida pela 90; `feat/85-...` local é antiga e não traz pasta de discovery |
-| Cabeçalho dos agentes | `.claude/agents/*.md` | `model: inherit` | **Estender** | Orçamento 420 bytes |
+| Validação de modelo | `config.ValidModel` (forge_profiles.go) | regex SEG-01 | **Reusar** | Mesmo formato de `models` |
+| Cabeçalho dos agentes | `.claude/agents/*.md` | `model: inherit` | **Estender** (`scaffold.applyAgentModels`) | Orçamento 420 bytes |
 | Perfil Codex | `cli_profiles` | Sem `-m` confirmado | **Estender**, marcado como não verificado | `codex` não instalado aqui |
 
 ## Dependências novas
@@ -37,12 +38,18 @@ Nenhuma (`SEG-07`).
 set -o pipefail
 go test -list 'TestAgentModelsEscreveCabecalho|TestAgentModelsRecusaValorInvalido' ./internal/scaffold | grep -F 'TestAgentModelsEscreveCabecalho' >/dev/null
 go test ./internal/scaffold -run 'TestAgentModelsEscreveCabecalho|TestAgentModelsRecusaValorInvalido'
-# negativo: modelo fora da lista é recusado
+# negativo: modelo inválido é recusado
+go test -list 'TestAgentModelsRecusaValorInvalido' ./internal/scaffold | grep -F 'TestAgentModelsRecusaValorInvalido' >/dev/null
 go test ./internal/scaffold -run 'TestAgentModelsRecusaValorInvalido'
 go vet ./... && go test ./...
 ```
 - Teste negativo: modelo fora da lista é recusado; sem chave o cabeçalho segue `inherit`.
 - Definição de agente continua até 420 bytes (P-24).
 
-## A confirmar no Gate 1
-Valores aceitos por agente (Codex e Agy a verificar).
+## Decisões da implementação
+- Chave nova `agent_models` (papel -> modelo), separada de `models` (modelo da sessão por `--model`): uma escolhe a CLI da sessão, a outra o cabeçalho do agente.
+- Papel -> arquivos: `discovery` = pm-architect e planner; `builder` = builder; `reviewer` = reviewer e governance. Demais agentes (lider, migrator, archivist) seguem `inherit`.
+- Valores: o formato de `ValidModel`, não lista fixa (o Claude Code aceita alias e ID completo; lista fixa envelheceria). Recusa com erro `agent_models.<papel>`.
+- O `model:` que passaria de 420 bytes (P-24) é recusado sem gravar nada (ex.: governance com nome de 80 caracteres).
+- Codex (`-m`) e Agy: não escritos. `codex` não instalado, flag não confirmada, e `modelEffortByCommand` só emite flag confirmada. Fica como follow-up com verificação.
+- Gravação em `scaffold.Run` e `RunAgents` fora de `--dry-run`; sem `main.go` tocado. Sem a chave, nada muda.
