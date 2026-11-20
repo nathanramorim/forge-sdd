@@ -17,7 +17,7 @@ const inboxHookCommand = "forge inbox --unread --hook"
 // sobrescrever a configuração do usuário (SEG-02): cria o arquivo se faltar, acrescenta só a
 // entrada do inbox, não duplica e nunca toca em JSON inválido. Devolve true se o arquivo mudou.
 func MergeClaudeInboxHook(targetDir string) (bool, error) {
-	return mergeClaudeHook(targetDir, "UserPromptSubmit", inboxHookCommand, []string{"forge inbox", "forge-sdd inbox"})
+	return mergeClaudeHook(targetDir, "UserPromptSubmit", inboxHookCommand, []string{"forge inbox", "forge-sdd inbox"}, false)
 }
 
 // doctorHookCommand roda o diagnóstico do harness ao abrir a sessão; a saída vira contexto.
@@ -26,10 +26,10 @@ const doctorHookCommand = "forge doctor --harness"
 // MergeClaudeSessionStartHook garante o hook SessionStart do doctor em .claude/settings.json, com
 // as mesmas garantias do hook do inbox (não sobrescreve, não duplica, não toca JSON inválido).
 func MergeClaudeSessionStartHook(targetDir string) (bool, error) {
-	return mergeClaudeHook(targetDir, "SessionStart", doctorHookCommand, []string{"forge doctor", "forge-sdd doctor"})
+	return mergeClaudeHook(targetDir, "SessionStart", doctorHookCommand, []string{"forge doctor", "forge-sdd doctor"}, false)
 }
 
-func mergeClaudeHook(targetDir, event, command string, markers []string) (bool, error) {
+func mergeClaudeHook(targetDir, event, command string, markers []string, dryRun bool) (bool, error) {
 	path := filepath.Join(targetDir, ".claude", "settings.json")
 	root := map[string]any{}
 
@@ -84,6 +84,9 @@ func mergeClaudeHook(targetDir, event, command string, markers []string) (bool, 
 	})
 	hooks[event] = groups
 	root["hooks"] = hooks
+	if dryRun {
+		return true, nil
+	}
 
 	out, err := json.MarshalIndent(root, "", "  ")
 	if err != nil {
@@ -105,6 +108,10 @@ const mcpServerName = "forge-sdd"
 // que o usuário já tem: cria o arquivo se faltar, acrescenta só a entrada forge-sdd, não duplica
 // e nunca toca em JSON inválido. Devolve true se o arquivo mudou.
 func MergeClaudeMCPServer(targetDir string) (bool, error) {
+	return mergeClaudeMCPServer(targetDir, false)
+}
+
+func mergeClaudeMCPServer(targetDir string, dryRun bool) (bool, error) {
 	path := filepath.Join(targetDir, ".mcp.json")
 	root := map[string]any{}
 	data, err := os.ReadFile(path)
@@ -133,6 +140,9 @@ func MergeClaudeMCPServer(targetDir string) (bool, error) {
 	}
 	servers[mcpServerName] = map[string]any{"command": "forge", "args": []any{"mcp", "serve"}}
 	root["mcpServers"] = servers
+	if dryRun {
+		return true, nil
+	}
 	out, err := json.MarshalIndent(root, "", "  ")
 	if err != nil {
 		return false, err
@@ -141,4 +151,21 @@ func MergeClaudeMCPServer(targetDir string) (bool, error) {
 		return false, fmt.Errorf("gravar %s: %w", path, err)
 	}
 	return true, nil
+}
+
+// SyncClaudeIntegration aplica o hook SessionStart do doctor e o servidor MCP forge-sdd mesmo sem
+// atualização de versão (forge update). Com dryRun só informa o que gravaria. Erros de um item
+// (ex.: JSON inválido) viram aviso e não impedem o outro; o arquivo inválido nunca é tocado.
+func SyncClaudeIntegration(targetDir string, dryRun bool) (changed, warnings []string) {
+	if ok, err := mergeClaudeHook(targetDir, "SessionStart", doctorHookCommand, []string{"forge doctor", "forge-sdd doctor"}, dryRun); err != nil {
+		warnings = append(warnings, "hook SessionStart não instalado: "+err.Error())
+	} else if ok {
+		changed = append(changed, "hook SessionStart")
+	}
+	if ok, err := mergeClaudeMCPServer(targetDir, dryRun); err != nil {
+		warnings = append(warnings, "MCP forge-sdd não registrado: "+err.Error())
+	} else if ok {
+		changed = append(changed, "MCP forge-sdd")
+	}
+	return changed, warnings
 }

@@ -41,6 +41,9 @@ go test -list 'TestMCPForgeDoctor|TestHookSessionStartIdempotente|TestInstrucaoD
 go test ./internal/acp ./internal/scaffold -run 'TestMCPForgeDoctor|TestHookSessionStartIdempotente|TestInstrucaoDoctorNoAgentsMd'
 # negativo: ferramenta desconhecida devolve erro JSON-RPC; segundo update não duplica o hook
 go test ./internal/acp ./internal/scaffold -run 'TestMCPForgeDoctor|TestHookSessionStartIdempotente'
+# negativo: update na mesma versão instala MCP e hook; segunda rodada e .mcp.json inválido não mudam nada
+go test -list 'TestUpdateClaudeIntegracaoSemMudarVersao|TestUpdateClaudeIntegracaoMCPInvalidoIntacto' ./cmd/forge-sdd | grep -F 'TestUpdateClaudeIntegracaoMCPInvalidoIntacto' >/dev/null
+go test ./cmd/forge-sdd -run 'TestUpdateClaudeIntegracaoSemMudarVersao|TestUpdateClaudeIntegracaoMCPInvalidoIntacto'
 go vet ./... && go test ./...
 ```
 - Teste negativo: chamada de ferramenta desconhecida devolve erro JSON-RPC; segundo `update` não duplica o hook.
@@ -55,3 +58,4 @@ O app desktop usa os mesmos hooks? (suposição). Nome do subcomando `mcp serve`
 - `MergeClaudeSessionStartHook` (`forge doctor --harness`) e `MergeClaudeMCPServer` (`.mcp.json`, chave `forge-sdd`) reusam o merge seguro do inbox, instalados só por `init`/`update` (nunca escrita silenciosa); idempotentes, JSON inválido intocado.
 - Instrução (`forge_doctor` ou `forge doctor --harness`, avisar se não rodou) vai na linha de MCPs de CLAUDE/AGENTS/GEMINI; Codex lê AGENTS.md. Para caber no orçamento de 1536 bytes encurtei a linha de planejamento.
 - Suposição do desktop (mesmos hooks e MCPs) segue não verificada; vale a instrução. Manual pendente: abrir desktop e Codex.
+- Correção pós-ensaio: o `update` encerrava por "versão igual" antes de aplicar a integração. `reportClaudeIntegration` (padrão de `reportAgentModels`, em `cmd/forge-sdd/agent_models.go`) roda no `update` antes de qualquer retorno, via `scaffold.SyncClaudeIntegration`; respeita `--dry-run` ("seria instalado"), imprime "hook SessionStart instalado" / "MCP forge-sdd instalado", avisa em stderr sem falhar quando o JSON é inválido (arquivo intacto) e só atua se o agente Claude está no projeto.
