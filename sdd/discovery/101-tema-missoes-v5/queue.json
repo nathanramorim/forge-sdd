@@ -2,7 +2,7 @@
   "feature_id": "feat-101",
   "branch": "feat/101-tema-missoes-v5",
   "spec_status": "reviewed",
-  "updated_at": "2026-11-20T00:48:47Z",
+  "updated_at": "2026-11-20T01:04:10Z",
   "items": [
     {
       "task_id": "fix-101-01-alinhar-readme-e-design-system",
@@ -163,6 +163,32 @@
         "achados": [],
         "resumo": "Dois achados corrigidos em 5a7ed87 (bytecode fora do índice e só tokens do design system). Critérios da spec, go vet e forge gate passam; arte sem marca de terceiros."
       }
+    },
+    {
+      "task_id": "feat-101-05-visual-de-malandro-nos-mascotes",
+      "title": "feat-101-05 — Visual de malandro de cidade tropical nos mascotes",
+      "spec_path": "sdd/discovery/101-tema-missoes-v5/features/feat-101-05-visual-de-malandro-nos-mascotes.md",
+      "status": "review_pending",
+      "depends_on": [
+        "feat-101-02",
+        "(acessórios",
+        "dos",
+        "mascotes)"
+      ],
+      "rules": [
+        "ARQ-11",
+        "DUP-02",
+        "COD-01",
+        "COD-04",
+        "COD-05",
+        "SEG-07",
+        "TST-01",
+        "TST-05",
+        "FLX-01",
+        "FLX-02"
+      ],
+      "skills_used": [],
+      "attempts": 1
     }
   ]
 }

@@ -3,11 +3,11 @@
   var edicao = window.forgeEdicao || (window.forgeEdicao = {});
 
   edicao.acessoriosPorMarca = {
-    ring: ["bandana", "arminha"],
-    diamond: ["oculos", "arminha"],
-    bar: ["bandana", "porrete"],
-    wave: ["oculos", "arminha"],
-    tri: ["bone", "porrete"]
+    ring: ["panama", "charuto", "corrente", "arminha"],
+    diamond: ["oculos", "colarinho", "brinco", "arminha"],
+    bar: ["bonereto", "corrente", "porrete"],
+    wave: ["bandana", "oculos", "brinco", "arminha"],
+    tri: ["bone", "corrente", "porrete"]
   };
 
   var COR = {
@@ -20,7 +20,10 @@
     ambar: 0xe28642,
     aviso: 0xe6d364,
     violeta: 0x824cc8,
-    indigo: 0x4053c6
+    indigo: 0x4053c6,
+    ouro: 0xf2b84b,
+    charuto: 0x7a4a2b,
+    brasa: 0xff6a3d
   };
 
   function mat(hex, roughness, metalness) {
@@ -108,7 +111,7 @@
     return grupo;
   }
 
-  function criarBone(THREE) {
+  function criarBone(THREE, reto) {
     var grupo = new THREE.Group();
     grupo.position.set(0, 0.48, 0);
 
@@ -126,11 +129,111 @@
     faixa.position.y = 0.03;
     grupo.add(faixa);
 
-    var aba = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.32, 0.032, 24), mat(COR.rosa, 0.34, 0.12));
-    aba.scale.set(1.08, 1.0, 0.68);
-    aba.position.set(0, 0.025, 0.35);
-    aba.rotation.x = -0.14;
+    var aba = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.32, reto ? 0.06 : 0.032, 24), mat(reto ? COR.pessego : COR.rosa, 0.34, 0.12));
+    aba.scale.set(1.08, 1.0, reto ? 0.95 : 0.68);
+    aba.position.set(0, reto ? 0.0 : 0.025, reto ? 0.5 : 0.35);
+    aba.rotation.x = reto ? 0.18 : -0.14;
     grupo.add(aba);
+
+    return grupo;
+  }
+
+  function criarPanama(THREE) {
+    var grupo = new THREE.Group();
+    grupo.position.set(0, 0.5, 0);
+
+    var aba = new THREE.Mesh(new THREE.CylinderGeometry(0.64, 0.64, 0.03, 36), mat(COR.pessego, 0.55, 0.05));
+    aba.scale.set(1.0, 1.0, 0.92);
+    aba.rotation.z = 0.06;
+    grupo.add(aba);
+
+    var copa = new THREE.Mesh(new THREE.CylinderGeometry(0.30, 0.38, 0.27, 30), mat(COR.pessego, 0.55, 0.05));
+    copa.position.y = 0.14;
+    grupo.add(copa);
+
+    var topo = new THREE.Mesh(new THREE.CircleGeometry(0.30, 30), mat(COR.pessego, 0.55, 0.05));
+    topo.rotation.x = -Math.PI / 2;
+    topo.position.y = 0.276;
+    grupo.add(topo);
+
+    var faixa = new THREE.Mesh(new THREE.CylinderGeometry(0.385, 0.395, 0.07, 30, 1, true), mat(COR.rosa, 0.4, 0.1));
+    faixa.position.y = 0.045;
+    grupo.add(faixa);
+
+    return grupo;
+  }
+
+  function criarCharuto(THREE) {
+    var grupo = new THREE.Group();
+    grupo.position.set(-0.2, -0.47, 0.6);
+    grupo.rotation.set(0.05, -0.5, 0.18);
+
+    var corpo = new THREE.Mesh(new THREE.CylinderGeometry(0.042, 0.046, 0.4, 16), mat(COR.charuto, 0.7, 0.02));
+    corpo.rotation.x = Math.PI / 2;
+    corpo.position.z = 0.16;
+    grupo.add(corpo);
+
+    var anel = new THREE.Mesh(new THREE.TorusGeometry(0.047, 0.011, 12, 20), mat(COR.ouro, 0.3, 0.5));
+    anel.position.z = 0.08;
+    grupo.add(anel);
+
+    var brasa = new THREE.Mesh(
+      new THREE.SphereGeometry(0.046, 14, 12),
+      new THREE.MeshStandardMaterial({ color: COR.brasa, emissive: COR.brasa, emissiveIntensity: 0.9, roughness: 0.6 })
+    );
+    brasa.position.z = 0.37;
+    grupo.add(brasa);
+
+    return grupo;
+  }
+
+  function criarCorrente(THREE) {
+    var grupo = new THREE.Group();
+    grupo.position.set(0, -0.72, 0);
+
+    var elo = mat(COR.ouro, 0.22, 0.75);
+    var colar = new THREE.Mesh(new THREE.TorusGeometry(0.36, 0.03, 14, 40), elo);
+    colar.rotation.x = Math.PI / 2;
+    grupo.add(colar);
+
+    var haste = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.1, 10), elo);
+    haste.position.set(0, -0.05, 0.36);
+    grupo.add(haste);
+
+    var pingente = new THREE.Mesh(new THREE.OctahedronGeometry(0.075, 0), elo);
+    pingente.scale.set(0.85, 1.25, 0.5);
+    pingente.position.set(0, -0.14, 0.36);
+    grupo.add(pingente);
+
+    return grupo;
+  }
+
+  function criarBrinco(THREE) {
+    var grupo = new THREE.Group();
+    grupo.position.set(-0.8, -0.2, 0.02);
+
+    var argola = new THREE.Mesh(new THREE.TorusGeometry(0.07, 0.014, 12, 24), mat(COR.ouro, 0.22, 0.75));
+    argola.rotation.y = Math.PI / 2;
+    grupo.add(argola);
+
+    return grupo;
+  }
+
+  function criarColarinho(THREE) {
+    var grupo = new THREE.Group();
+    grupo.position.set(0, -0.72, 0);
+
+    var gola = new THREE.Mesh(new THREE.TorusGeometry(0.37, 0.07, 14, 40), mat(COR.coral, 0.5, 0.05));
+    gola.rotation.x = Math.PI / 2;
+    grupo.add(gola);
+
+    var cores = [COR.aviso, COR.rosa, COR.pessego, COR.violeta];
+    for (var i = 0; i < 10; i++) {
+      var a = (i / 10) * Math.PI * 2;
+      var flor = new THREE.Mesh(new THREE.SphereGeometry(0.036, 12, 10), mat(cores[i % cores.length], 0.4, 0.05));
+      flor.position.set(Math.cos(a) * 0.37, 0.05, Math.sin(a) * 0.37);
+      grupo.add(flor);
+    }
 
     return grupo;
   }
@@ -222,7 +325,13 @@
       var tipo = itens[i];
       if (tipo === "bandana") acessorios.add(criarBandana(THREE, markType));
       else if (tipo === "oculos") acessorios.add(criarOculos(THREE, markType));
-      else if (tipo === "bone") acessorios.add(criarBone(THREE));
+      else if (tipo === "bone") acessorios.add(criarBone(THREE, false));
+      else if (tipo === "bonereto") acessorios.add(criarBone(THREE, true));
+      else if (tipo === "panama") acessorios.add(criarPanama(THREE));
+      else if (tipo === "charuto") acessorios.add(criarCharuto(THREE));
+      else if (tipo === "corrente") acessorios.add(criarCorrente(THREE));
+      else if (tipo === "brinco") acessorios.add(criarBrinco(THREE));
+      else if (tipo === "colarinho") acessorios.add(criarColarinho(THREE));
       else if (tipo === "arminha") acessorios.add(criarArminha(THREE, markType));
       else if (tipo === "porrete") acessorios.add(criarPorrete(THREE, markType));
     }
