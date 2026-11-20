@@ -34,6 +34,7 @@
 | Prioridade de fix | `internal/bus/job.go:42-43` (`PriorityHigh`), `review.go:138` | Prioridade por job, não por tipo de task | **Estender**: fix de código já entregue entra antes de feature na fila | RN-16 |
 | Validação determinística | `forge gate` (`internal/gate`: P-01 a P-25), `forge doctor --harness` (104, só em `bbd26d6`) | Checagens por ID de rule, spec, orçamento; sem validação de ADR citada nem de lições | **Estender** com `scripts/validar_entrega.py` que reúne o checável e lista o resto para o LLM | RN-12; reusa `forge gate --json` como entrada |
 | Verificação do atestado | `.github/workflows/*.yml` | Nenhum job de atestado | **Criar** um job ubuntu que lê veredito e prova | RN-13; escolha da prova na Decisão vi |
+| Configuração do modo de atestado | `internal/config/forge.go:123,198-200` (esquema estrito do `forge.json`; a existência ativa o modo pipeline); `.gitignore` (`.forge/` ignorado); `sdd/memory/constitution.md:28` (campo versionado) | `forge.json` é local, não versionado e rejeita campo desconhecido; a Constituição é versionada e lida por todos | **Criar** o campo no lugar escolhido (Decisão xv, recomendo a Constituição) | `SEG-01`, `GOV-01` |
 | Modo da sessão | `status.md` (teto 1 KB, P-21), `forge.json` | Sem campo de modo humano | **Estender** com uma linha `Modo:` no `status.md` e `modo` no veredito | RN-14 |
 | Veredito e SHA | `internal/harness/parecer.go:16-21`; `internal/pipeline/review.go:298-318` (`persistVerdict` em `sdd/discovery/<id>/verdicts/<job>.json`) | `Parecer` sem SHA; amostra `sdd/discovery/100-auto-pr-apos-review/verdicts/feat-100-01-veredito.json` | **Estender** `Parecer` com `head_sha` e `ponto`; o Go os preenche | Contrato único (`DUP-06`) |
 | Auto-PR da 100 | `sdd/discovery/100-auto-pr-apos-review/` | Veredito conforme abre PR sem pedir | **Substituir a ordem** (não o código de PR) | Conflito declarado no discovery |
@@ -128,7 +129,10 @@ go test ./internal/vcs/... -run 'TestGitHubCriaPRComDraft|TestAzureDevOpsCriaPRS
 go test ./internal/pipeline/... -run 'TestDesvioAbreNovoFixComPrioridade|TestBuilderFazSplitSemSegundaAprovacao|TestFixesParalelosNaOnda'
 uv run --no-project python -m unittest discover -s scripts/tests -p 'test_*.py'
 uv run scripts/validar_entrega.py --json --sem-llm
-uv run scripts/atestado.py --verificar --sha HEAD
+uv run scripts/atestado.py --verificar --sha HEAD --modo local
+uv run scripts/atestado.py --verificar --sha HEAD --modo desligado
+go test ./internal/vcs/... -run 'TestAtestadoDesligadoNaoExigeProva|TestAtestadoLocalConfereVeredito|TestProvaDoVCSIndisponivelCaiNoLocal|TestModoDeAtestadoNoStatus'
+rc=0; uv run scripts/atestado.py --verificar --sha HEAD --modo vcs --simular-indisponivel || rc=$?; test "$rc" -eq 3
 uv run scripts/pr_guard.py --check 'gh pr create --draft --fill'
 uv run scripts/pr_guard.py --check 'az repos pr create --draft true --title x'
 uv run scripts/licoes.py --rule COD-02 | grep -o 'COD-02' | wc -l
@@ -151,13 +155,23 @@ go test ./internal/pipeline/... -list 'TestSplitForaDoPlanoRecusado' | grep -F '
 go test ./internal/pipeline/... -run 'TestSplitForaDoPlanoRecusado'
 go test ./internal/pipeline/... -list 'TestModoSemHumanoExigeAvisoDeRiscos' | grep -F 'TestModoSemHumanoExigeAvisoDeRiscos'
 go test ./internal/pipeline/... -run 'TestModoSemHumanoExigeAvisoDeRiscos'
-if uv run scripts/atestado.py --verificar --sha 0000000; then exit 1; fi
+go test ./internal/vcs/... -list 'TestFallbackNaoAprovaEmSilencio' | grep -F 'TestFallbackNaoAprovaEmSilencio'
+go test ./internal/vcs/... -run 'TestFallbackNaoAprovaEmSilencio'
+go test ./internal/vcs/... -list 'TestFallbackNaoBloqueiaParaSempre' | grep -F 'TestFallbackNaoBloqueiaParaSempre'
+go test ./internal/vcs/... -run 'TestFallbackNaoBloqueiaParaSempre'
+go test ./internal/vcs/... -list 'TestModoDeAtestadoInvalidoRecusado' | grep -F 'TestModoDeAtestadoInvalidoRecusado'
+go test ./internal/vcs/... -run 'TestModoDeAtestadoInvalidoRecusado'
+go test ./internal/vcs/... -list 'TestNenhumRecusaModoVCS' | grep -F 'TestNenhumRecusaModoVCS'
+go test ./internal/vcs/... -run 'TestNenhumRecusaModoVCS'
+if uv run scripts/atestado.py --verificar --sha 0000000 --modo local; then exit 1; fi
+if uv run scripts/atestado.py --verificar --sha HEAD --modo inexistente; then exit 1; fi
 if uv run scripts/validar_entrega.py --json --sem-llm --fixture scripts/tests/fixtures/rule_inexistente; then exit 1; fi
 if uv run scripts/pr_guard.py --check 'gh pr create --fill'; then exit 1; fi
 if uv run scripts/pr_guard.py --check 'gh pr merge 7'; then exit 1; fi
 ```
 - Cada VCS suportado tem prova própria na task 3.5: `github` (abaixo), `azure-devops` (PR de teste em draft; se a build validation roda em draft e como marcar pronto: a verificar) e `nenhum` (branch pronta, sem comando de VCS).
 - Draft real no GitHub: um PR de teste com `gh pr create --draft` mostra todos os jobs `skipped`; depois de `gh pr ready` os jobs rodam uma vez (task 3.5; evidência colada no PR).
+- Modos do atestado (RN-18 a RN-20): `desligado` não confere nada; `local` confere veredito e SHA; `vcs` com a prova indisponível sai com código 3 (pergunta ao humano) e nunca com sucesso; o modo efetivo e o fallback aparecem no `status.md` e no atestado (task 0.5 e 0.6).
 - Atestado real: no mesmo PR de teste, `gh pr ready` com SHA sem veredito conforme faz o job de atestado falhar e bloquear a publicação; com atestado válido ele passa (task 3.5).
 - Dois pontos: com fila de 3 tasks entregues, o laço registra 0 revisões entre `spec-para-revisao` e `pronto-para-revisao` (task 1.6); os fixes abertos pelo revisor não disparam revisão até o sinal se repetir.
 - `validar_entrega.py` nunca chama LLM nem rede, e não é referenciado em nenhum workflow (conferência em `3.2`).

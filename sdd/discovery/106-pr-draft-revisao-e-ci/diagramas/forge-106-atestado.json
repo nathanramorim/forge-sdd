@@ -2,7 +2,7 @@
  "kicker": "// Forge SDD · iniciativa 106",
  "titulo": "A pipeline só publica: sem atestado válido, ela bloqueia",
  "largura": 1280,
- "altura": 470,
+ "altura": 540,
  "nota_rodape": "validação roda local, sem LLM; a pipeline só confere o atestado",
  "elementos": [
   {
@@ -113,6 +113,24 @@
    "texto": "Script local, sem LLM: regras, ADR, lições, fila, SHA",
    "sub": "não roda na pipeline",
    "estilo": "tracejado"
+  },
+  {
+   "tipo": "caixa",
+   "id": "m",
+   "x": 728,
+   "y": 384,
+   "w": 496,
+   "h": 56,
+   "texto": "Modo por repositório: desligado, local ou prova do VCS",
+   "estilo": "tracejado"
+  },
+  {
+   "tipo": "texto",
+   "x": 56,
+   "y": 480,
+   "texto": "Prova do VCS ausente ou sem resposta: cai no atestado local, avisa e pergunta a você. Nunca aprova em silêncio.",
+   "estilo": "nota",
+   "alinha": "start"
   }
  ]
 }

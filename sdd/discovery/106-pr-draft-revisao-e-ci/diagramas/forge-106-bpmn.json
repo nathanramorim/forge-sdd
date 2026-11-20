@@ -2,7 +2,7 @@
  "kicker": "// Forge SDD · iniciativa 106 · BPMN (simplificado)",
  "titulo": "Quem faz o quê, do PR em draft até a publicação",
  "largura": 2008,
- "altura": 900,
+ "altura": 960,
  "nota_rodape": "◇ = decisão · tracejado = retrabalho",
  "elementos": [
   {
@@ -355,6 +355,14 @@
    "x": 56,
    "y": 848,
    "texto": "No modo sem humano (escolhido no início, com os riscos informados) as duas decisões suas viram automáticas.",
+   "estilo": "nota",
+   "alinha": "start"
+  },
+  {
+   "tipo": "texto",
+   "x": 56,
+   "y": 880,
+   "texto": "Atestado habilitável por repositório (desligado, local, prova do VCS); sem a prova do VCS, cai no local, avisa e pergunta a você.",
    "estilo": "nota",
    "alinha": "start"
   }
