@@ -416,6 +416,7 @@ func init() {
 	rootCmd.AddCommand(governanceCmd)
 	rootCmd.AddCommand(acpCmd)
 	rootCmd.AddCommand(attachCmd)
+	rootCmd.AddCommand(evalCmd)
 }
 
 type exitCoder interface {
