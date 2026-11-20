@@ -25,6 +25,7 @@ O `README.md` tem duas seções que explicam a esteira: `## Como funciona` (linh
 - DUP-01 e DUP-02: uma única explicação da esteira; o que só existia na seção antiga migra para a nova, sem repetir.
 - ADR-0004 (3 sessões) e ADR-0010 (comando `forge`): o texto mantido já os respeita.
 - Marcadores `<!-- edicao:inicio -->` (linha 1) e `<!-- edicao:fim -->` (linha 19) ficam intactos: `.github/scripts/encerrar-edicao/encerrar.sh` e `TestScaffold_DocsEdicao` (`internal/scaffold/pipeline_scaffold_test.go`) dependem deles.
+- Decisão do dono: manter o `sequenceDiagram` do ciclo da feature em `## Como usar`, corrigir a legenda abaixo dele (sem citar o flowchart removido) e relaxar o critério de "zero blocos mermaid" para "o flowchart antigo não volta".
 - Fora de escopo: `npm/README.md` tem só um `## Como funciona` (linha 36, sem a seção nova); não há duplicata ali, então não muda.
 - Segurança: nada de segredo nem caminho de usuário.
 
@@ -82,8 +83,11 @@ set -o pipefail
 # a seção antiga some e a nova fica uma vez só
 test "$(grep -n '^## Como funciona$' README.md | wc -l)" -eq 0
 test "$(grep -n '^## Como a esteira funciona$' README.md | wc -l)" -eq 1
-# negativo: o bloco Mermaid antigo e a tabela de sessões não voltam
-test "$(grep -n '^```mermaid' README.md | wc -l)" -eq 0
+# negativo: o flowchart antigo e a tabela de sessões não voltam
+test "$(grep -n 'flowchart LR' README.md | wc -l)" -eq 0
+test "$(grep -n 'classDef pessoa' README.md | wc -l)" -eq 0
+# o sequenceDiagram do ciclo da feature (em "Como usar") continua, uma vez só
+test "$(grep -n '^sequenceDiagram' README.md | wc -l)" -eq 1
 test "$(grep -nF 'É onde você conversa e planeja a ideia' README.md | wc -l)" -eq 0
 # o que só existia na antiga foi movido para a nova
 grep -n 'avisado na sessão de Discovery' README.md

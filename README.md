@@ -154,7 +154,7 @@ sequenceDiagram
   Você->>G: aprova e faz merge
 ```
 
-> *Convenção: pipeline em flowchart LR com cores C4; ciclo em sequenceDiagram. Versões PNG em [docs/img/](docs/img/).*
+> *Ciclo da feature em sequenceDiagram. Versões PNG em [docs/img/](docs/img/).*
 
 ## Guias
 
