@@ -42,6 +42,7 @@ Recomendação: A, com B como convivência (modo `sessions` continua) e C como s
 - RN-6 Permissão pela lista de ferramentas do papel, imposta pelo harness, não pedida no prompt.
 - RN-7 O binário só diagnostica; corrigir é do agente, com confirmação humana.
 - RN-8 Convivência: o modo de 3 sessões continua válido; o novo é opt-in (`pipeline_mode`).
+- RN-9 Todo handoff que chega à pessoa (fim da Discovery, PR pronto, retorno no teto, conclusão) é apresentado como menu de opções para escolher, nunca como texto solto: `AskUserQuestion` no Claude Code (terminal e desktop), `Select` do `huh` no CLI do forge e o mecanismo equivalente de cada agente da camada de entrada; onde não houver menu, uma lista numerada com a opção recomendada primeiro. Decisão do dono, 19/11/2026: "sempre considerar handoff com menu suspenso". Estende a regra de `sdd/memory/clarify.md`.
 
 ## Escopo
 Dentro: contratos entre etapas; verificador do verificador; `forge doctor --harness`; servidor MCP `forge_doctor`; hook e instrução; modelo por papel; laço no Go com lock e retorno estruturado; isolamento por subagente; papéis no chat; camada de entrada multiagente; rastreio por nó; conjunto de avaliação; convivência.
