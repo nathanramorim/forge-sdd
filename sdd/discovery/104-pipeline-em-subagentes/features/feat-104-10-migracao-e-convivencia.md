@@ -35,8 +35,12 @@ Nenhuma (`SEG-07`).
 
 ## Critérios de Aceitação Executáveis
 ```bash
-go test -list 'TestPipelineModeDefaultSessions|TestUpdatePreservaModo' ./internal/config | grep -q 'TestPipelineModeDefaultSessions'
-go test ./internal/config -run 'TestPipelineModeDefaultSessions|TestUpdatePreservaModo'
+set -o pipefail
+go test -list 'TestPipelineModeDefaultSessions|TestUpdatePreservaModo|TestPipelineModeRecusaInvalido' ./internal/config | grep -F 'TestPipelineModeDefaultSessions' >/dev/null
+go test -list 'TestPipelineModeDefaultSessions|TestUpdatePreservaModo|TestPipelineModeRecusaInvalido' ./internal/config | grep -F 'TestPipelineModeRecusaInvalido' >/dev/null
+go test ./internal/config -run 'TestPipelineModeDefaultSessions|TestUpdatePreservaModo|TestPipelineModeRecusaInvalido'
+# negativo: valor de modo inválido é recusado
+go test ./internal/config -run 'TestPipelineModeRecusaInvalido'
 go vet ./... && go test ./...
 ```
 - `go test ./internal/pipeline` (e2e do modo atual) segue verde.

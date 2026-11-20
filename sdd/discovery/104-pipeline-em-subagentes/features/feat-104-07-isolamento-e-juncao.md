@@ -35,8 +35,11 @@ Nenhuma (`SEG-07`).
 
 ## Critérios de Aceitação Executáveis
 ```bash
-go test -list 'TestWorktreePorSubagente|TestJuncaoConflitoEscala|TestRecusaWorktreeOcupado' ./internal/pipeline | grep -q 'TestJuncaoConflitoEscala'
+set -o pipefail
+go test -list 'TestWorktreePorSubagente|TestJuncaoConflitoEscala|TestRecusaWorktreeOcupado' ./internal/pipeline | grep -F 'TestJuncaoConflitoEscala' >/dev/null
 go test ./internal/pipeline -run 'TestWorktreePorSubagente|TestJuncaoConflitoEscala|TestRecusaWorktreeOcupado'
+# negativo: duas tasks que editam o mesmo arquivo geram conflito marcado; worktree ocupado é recusado
+go test ./internal/pipeline -run 'TestJuncaoConflitoEscala|TestRecusaWorktreeOcupado'
 go vet ./... && go test ./...
 ```
 - Teste negativo: duas tasks que editam o mesmo arquivo geram conflito marcado, sem merge silencioso.

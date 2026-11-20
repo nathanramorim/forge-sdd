@@ -12,7 +12,7 @@ import (
 var gateCmd = &cobra.Command{
 	Use:   "gate",
 	Short: "Executa a Camada A Determinística do Portão de Governança (checks P-xx)",
-	Long: `Valida determinísticamente as regras da Constituição e do fluxo SDD (P-01..P-23).
+	Long: `Valida determinísticamente as regras da Constituição e do fluxo SDD (P-01..P-25).
 Em modo 'observacao', imprime o relatório e retorna exit 0.
 Em modo 'bloqueio', retorna erro (exit != 0) caso alguma verificação falhe.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -23,6 +23,12 @@ Em modo 'bloqueio', retorna erro (exit != 0) caso alguma verificação falhe.`,
 		goModChanged, _ := cmd.Flags().GetBool("go-mod-changed")
 		mode, _ := cmd.Flags().GetString("mode")
 		asJSON, _ := cmd.Flags().GetBool("json")
+		criterios, _ := cmd.Flags().GetBool("criterios")
+		executar, _ := cmd.Flags().GetBool("executar-criterios")
+
+		if (criterios || executar) && specPath == "" {
+			return fmt.Errorf("--criterios exige --spec")
+		}
 
 		if mode == "" {
 			mode = gate.ModeObservacao
@@ -37,6 +43,8 @@ Em modo 'bloqueio', retorna erro (exit != 0) caso alguma verificação falhe.`,
 			GoModChanged: goModChanged,
 			PRBodyPath:   prBody,
 			Now:          time.Now().UTC(),
+			Criteria:     criterios || executar,
+			CriteriaExec: executar,
 		})
 		if err != nil {
 			return err
@@ -88,5 +96,7 @@ func init() {
 	gateCmd.Flags().String("pr-body", "", "Caminho para arquivo com o corpo do PR para validar P-20 (constitution-exception)")
 	gateCmd.Flags().Bool("go-mod-changed", false, "Indica se go.mod foi alterado na branch (habilita P-14)")
 	gateCmd.Flags().String("mode", gate.ModeObservacao, "Modo de operação do portão: observacao | bloqueio")
+	gateCmd.Flags().Bool("criterios", false, "Verifica os critérios executáveis da Spec (P-25): bash -n, linha '# negativo:' e padrões ruins")
+	gateCmd.Flags().Bool("executar-criterios", false, "Como --criterios e também executa o bloco de critérios com bash -e -o pipefail")
 	gateCmd.Flags().Bool("json", false, "Exibir relatório em formato JSON")
 }

@@ -35,8 +35,11 @@ Nenhuma (`SEG-07`).
 
 ## Critérios de Aceitação Executáveis
 ```bash
-go test -list 'TestEvalComparaModos|TestEvalCriteriosTemNegativo' ./internal/monitor | grep -q 'TestEvalComparaModos'
+set -o pipefail
+go test -list 'TestEvalComparaModos|TestEvalCriteriosTemNegativo' ./internal/monitor | grep -F 'TestEvalComparaModos' >/dev/null
 go test ./internal/monitor -run 'TestEvalComparaModos|TestEvalCriteriosTemNegativo'
+# negativo: feature de referência cujo critério não falha no caso ruim reprova o conjunto
+go test ./internal/monitor -run 'TestEvalCriteriosTemNegativo'
 go vet ./... && go test ./...
 ```
 - Teste negativo: feature de referência cujo critério não falha no caso ruim reprova o conjunto.

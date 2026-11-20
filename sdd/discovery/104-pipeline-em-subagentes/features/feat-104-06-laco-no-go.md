@@ -38,8 +38,11 @@ Nenhuma (`SEG-07`).
 
 ## Critérios de Aceitação Executáveis
 ```bash
-go test -list 'TestLockPorIniciativa|TestRetornoEscalaNoTeto|TestLegueParcialRepeteSoFalho|TestRetomaDoUltimoEstado' ./internal/pipeline | grep -q 'TestLockPorIniciativa'
+set -o pipefail
+go test -list 'TestLockPorIniciativa|TestRetornoEscalaNoTeto|TestLegueParcialRepeteSoFalho|TestRetomaDoUltimoEstado' ./internal/pipeline | grep -F 'TestLockPorIniciativa' >/dev/null
 go test ./internal/pipeline -run 'TestLockPorIniciativa|TestRetornoEscalaNoTeto|TestLegueParcialRepeteSoFalho|TestRetomaDoUltimoEstado'
+# negativo: segundo coordenador na mesma iniciativa falha; na 4a devolução escala
+go test ./internal/pipeline -run 'TestLockPorIniciativa|TestRetornoEscalaNoTeto'
 go vet ./... && go test ./...
 ```
 - Teste negativo: segundo coordenador na mesma iniciativa falha; na 4a devolução escala em vez de voltar.
