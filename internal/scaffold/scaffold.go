@@ -181,10 +181,6 @@ func renderDir(fsys embed.FS, root, stripPrefix string, cfg config.Config, targe
 			return nil
 		}
 
-		if err := os.MkdirAll(filepath.Dir(dest), 0755); err != nil {
-			return fmt.Errorf("mkdir %s: %w", filepath.Dir(dest), err)
-		}
-
 		data, err := fsys.ReadFile(path)
 		if err != nil {
 			return fmt.Errorf("read template %s: %w", path, err)
@@ -204,8 +200,11 @@ func renderDir(fsys embed.FS, root, stripPrefix string, cfg config.Config, targe
 		if strings.HasSuffix(dest, ".sh") {
 			perm = 0755 // scripts do pipeline (forge-up.sh) precisam ser executáveis
 		}
-		if err := os.WriteFile(dest, buf.Bytes(), perm); err != nil {
-			return fmt.Errorf("write %s: %w", dest, err)
+		// SEG-02: destino derivado de dado externo (link simbólico, pai fora do projeto, FIFO) é
+		// recusado com aviso; os demais arquivos seguem.
+		if err := writeFileSafeMode(targetDir, dest, buf.Bytes(), perm); err != nil {
+			fmt.Fprintf(os.Stderr, "aviso: %s não instalado: %v\n", dest, err)
+			return nil
 		}
 
 		created = append(created, dest)
@@ -273,8 +272,7 @@ func UpdateSddrc(cfg config.Config, targetDir string) error {
 	if err := tmpl.Execute(&buf, cfg); err != nil {
 		return fmt.Errorf("render template %s: %w", tmplPath, err)
 	}
-	dest := layout.Sddrc(targetDir)
-	return os.WriteFile(dest, buf.Bytes(), 0644)
+	return writeFileSafe(targetDir, layout.Sddrc(targetDir), buf.Bytes())
 }
 
 // shouldPreserve retorna true se o arquivo de destino já existe e deve ser preservado.
@@ -401,18 +399,22 @@ func migrateLegacyAgentDir(targetDir string) error {
 			return err
 		}
 		dest := filepath.Join(current, rel)
-		if _, err := os.Stat(dest); err == nil {
+		if _, err := os.Lstat(dest); err == nil {
 			// já existe no destino migrado — nunca sobrescreve.
 			return nil
 		}
-		if err := os.MkdirAll(filepath.Dir(dest), 0755); err != nil {
-			return fmt.Errorf("mkdir %s: %w", filepath.Dir(dest), err)
+		if !d.Type().IsRegular() {
+			fmt.Fprintf(os.Stderr, "aviso: %s não migrado: não é arquivo regular (SEG-02)\n", path)
+			return nil
 		}
 		data, err := os.ReadFile(path)
 		if err != nil {
 			return fmt.Errorf("read %s: %w", path, err)
 		}
-		return os.WriteFile(dest, data, 0644)
+		if err := writeFileSafe(targetDir, dest, data); err != nil {
+			fmt.Fprintf(os.Stderr, "aviso: %s não migrado: %v\n", dest, err)
+		}
+		return nil
 	})
 	if err != nil {
 		return fmt.Errorf("migrar conteúdo de %s para %s: %w", legacy, current, err)
