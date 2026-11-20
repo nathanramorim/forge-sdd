@@ -51,15 +51,15 @@ Fora: reescrever o barramento; remover tmux ou o modo `sessions`; agent teams em
 ## Riscos
 Subagentes não aninham (mitigado pela recomendação A); estouro de contexto do chat; Codex e Agy sem recurso equivalente (nivelar pelo menor denominador); hook ausente no desktop (fallback por instrução); custo de tokens maior no chat longo (medido pela avaliação).
 
-## A confirmar no Gate 1
-1. Desenho A (chat como coordenador, um nível de subagentes) é o aceito? O spike da feat-104-06 pode mudar para D.
-2. A caixa "CLI" do diagrama é o próprio `forge` (padrão conservador) ou um terminal genérico?
-3. O app desktop do Claude Code usa os mesmos hooks e MCPs? (suposição; só a instrução vale se não)
-4. Agent teams: vale o spike ou fica fora de vez?
-5. Codex e Agy: sem recurso de subagente confirmado, caem para o modo `sessions` com aviso?
-6. `regra_descricao`: a divergência veio de binário antigo? Na `main` o campo existe.
-7. Subcomandos novos (`criteria verify`/flag em `gate`, `mcp serve`, `eval`) mudam o texto de `ARQ-06`; aceita a ADR-0015 cobrir isso?
-8. Os critérios das features ainda não trazem o marcador `# negativo:` da feat-104-02; entram na revisão após ela.
+## Decisões do Gate 1 (Nathan, 19/11/2026: "seguir recomendações")
+1. **Desenho A aceito:** o chat é o coordenador único, com um nível de subagentes e o Go dono do laço. O spike da feat-104-06 pode propor o desenho D, que volta ao dono antes de ser adotado.
+2. **"CLI" do diagrama é o próprio `forge`.**
+3. **App desktop:** os hooks e MCPs não são assumidos. A feat-104-04 testa no app antes de depender deles; se não funcionarem, vale a instrução no projeto.
+4. **Agent teams:** entra só como spike isolado na feat-104-06; não vai para produção nesta iniciativa.
+5. **Codex e Agy** sem recurso de subagente confirmado caem para o modo `sessions`, com aviso.
+6. **`regra_descricao`:** confirmado que a recusa veio de binário antigo. O `forge` instalado na máquina do dono é o 4.9.1-beta e não há 5.0.0 no cache local; na `main` o campo existe. É um caso que o `doctor --harness` (feat-104-03) deve detectar.
+7. **ADR-0015** cobre a mudança de texto do `ARQ-06` (subcomandos novos), no mesmo PR (GOV-01).
+8. **Critérios com `# negativo:`:** a revisão dos critérios das 12 features entra como tarefa da própria feat-104-02. A verificação vira uma flag do `forge gate`, e não um subcomando novo.
 
 ## Classificação dos itens pedidos
 Feature: A1 (11), A2 (01), A3 (06), A4 (06, 07), A5 (06), A6 (05, 08), A7 (09), A8 (12), A9 (02), B (03, 04), C (05).
