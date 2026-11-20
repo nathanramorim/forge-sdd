@@ -36,6 +36,10 @@ const (
 	EvalOrigemReal     = "real"
 )
 
+// evalExecutoresReais lista os executores capazes de produzir "origem": "real". Está vazia de
+// propósito: a execução contra agentes ainda não existe, então nenhum arquivo pode se declarar real.
+var evalExecutoresReais = map[string]bool{}
+
 // EvalAvisoSimulado precede toda saída com números do simulador.
 const EvalAvisoSimulado = "SIMULADO: números de exemplo, não medidos"
 
@@ -213,6 +217,9 @@ func ReadEvalResult(dir, mode string) (EvalResult, error) {
 	}
 	if res.Origem != EvalOrigemSimulado && res.Origem != EvalOrigemReal {
 		return EvalResult{}, fmt.Errorf("%s sem origem válida (%q): use %q ou %q", path, res.Origem, EvalOrigemSimulado, EvalOrigemReal)
+	}
+	if res.Origem == EvalOrigemReal && !evalExecutoresReais[res.Executor] {
+		return EvalResult{}, fmt.Errorf("%s declara origem %q com o executor %q, que não é um executor real conhecido; arquivo recusado", path, res.Origem, res.Executor)
 	}
 	if res.Mode != mode {
 		return EvalResult{}, fmt.Errorf("%s declara o modo %q, esperado %q", path, res.Mode, mode)

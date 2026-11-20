@@ -9,6 +9,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/forge-sdd/cli/internal/gate"
+	"github.com/forge-sdd/cli/internal/layout"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -127,9 +129,33 @@ func TestEvalComparaModos(t *testing.T) {
 			body := fmt.Sprintf(`{"mode":%q,"origem":"real","executor":"agente","features":10}`, m)
 			require.NoError(t, os.WriteFile(EvalResultPath(dir, m), []byte(body), 0o644))
 		}
+		require.Error(t, CompareEval(dir, &bytes.Buffer{}, false), "executor desconhecido não pode se declarar real")
+
+		evalExecutoresReais["agente"] = true
+		t.Cleanup(func() { delete(evalExecutoresReais, "agente") })
 		var out bytes.Buffer
 		require.NoError(t, CompareEval(dir, &out, false))
 		assert.NotContains(t, out.String(), "SIMULADO")
+	})
+	t.Run("origem real editada à mão com executor simulador é recusada", func(t *testing.T) {
+		dir, _ := evalProject(t, EvalMinRefs)
+		for _, m := range []string{EvalModeSessions, EvalModeChat} {
+			_, path, err := RunEval(dir, m, evalNow)
+			require.NoError(t, err)
+			data, err := os.ReadFile(path)
+			require.NoError(t, err)
+			forged := strings.Replace(string(data), `"origem": "simulado"`, `"origem": "real"`, 1)
+			require.NotEqual(t, string(data), forged)
+			require.NoError(t, os.WriteFile(path, []byte(forged), 0o644))
+		}
+		_, err := ReadEvalResult(dir, EvalModeChat)
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "não é um executor real conhecido")
+		var out bytes.Buffer
+		err = CompareEval(dir, &out, false)
+		require.Error(t, err)
+		assert.Empty(t, out.String())
+		require.Error(t, CompareEval(dir, &bytes.Buffer{}, true))
 	})
 	t.Run("arquivo sem origem é rejeitado", func(t *testing.T) {
 		dir := t.TempDir()
@@ -194,4 +220,16 @@ func TestEvalSimulacaoNeutra(t *testing.T) {
 	require.NoError(t, err)
 	c.Mode = s.Mode
 	assert.Equal(t, s, c, "o simulador favorece um modo")
+}
+
+// TestEvalCriterioFalhaNoExemploVazio prova que o critério de uma referência não é sempre verde: contra o
+// repositório de exemplo ainda sem a implementação, ele precisa falhar.
+func TestEvalCriterioFalhaNoExemploVazio(t *testing.T) {
+	root := filepath.Join("..", "..")
+	spec, err := os.ReadFile(filepath.Join(EvalRefsDir(root), "ref-01-inverter", "spec.md"))
+	require.NoError(t, err)
+	block, ok := gate.ExtractCriteriaBlock(string(spec))
+	require.True(t, ok)
+	err = gate.RunCriteriaBlock(filepath.Join(layout.Root(root), "eval", "exemplo"), block)
+	require.Error(t, err, "o critério da ref-01 passou contra o exemplo vazio")
 }
