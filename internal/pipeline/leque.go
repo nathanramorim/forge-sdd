@@ -310,7 +310,13 @@ func (l *Leque) juntarTask(task, path string) (ResultadoJuncao, error) {
 	if sujo, err := gitLimpo(l.dir, "status", "--porcelain", "--untracked-files=no"); err != nil || sujo != "" {
 		return r, errors.New("o worktree principal ficou sujo durante a junção")
 	}
-	_, err := layout.Git(l.dir, "merge", "--no-ff", "--no-edit", "-m", "merge("+l.iniciativa+"): "+task, branch)
+	args := []string{"merge", "--no-ff", "--no-edit", "-m", "merge(" + l.iniciativa + "): " + task, branch}
+	if !l.temIdentidade() {
+		// Só sem identidade resolvível (CI, contêiner): a do usuário, quando existe, nunca é trocada
+		// e nada é gravado na config do repositório.
+		args = append([]string{"-c", "user.name=forge-sdd", "-c", "user.email=forge-sdd@localhost"}, args...)
+	}
+	_, err := layout.Git(l.dir, args...)
 	if err != nil {
 		// Erro descartado de propósito: a lista de arquivos só enriquece o relato; o abort abaixo e o
 		// bloqueio da task acontecem de qualquer forma.
@@ -320,7 +326,7 @@ func (l *Leque) juntarTask(task, path string) (ResultadoJuncao, error) {
 				r.Arquivos = append(r.Arquivos, notify.Sanitize(a, 200, false))
 			}
 		}
-		if _, merr := layout.Git(l.dir, "rev-parse", "-q", "--verify", "MERGE_HEAD"); merr == nil {
+		if _, merr := layout.Git(l.dir, "rev-parse", "-q", "--verify", "MERGE_HEAD"); merr == nil { // só com merge em andamento
 			if _, aerr := layout.Git(l.dir, "merge", "--abort"); aerr != nil {
 				return r, fmt.Errorf("merge de %s falhou e não foi possível abortar: resolva manualmente", task)
 			}
@@ -328,7 +334,11 @@ func (l *Leque) juntarTask(task, path string) (ResultadoJuncao, error) {
 		if len(r.Arquivos) > 0 {
 			return bloquear("conflito de junção; merge abortado, branch " + branch + " preservada")
 		}
-		return bloquear("merge falhou: " + notify.Sanitize(err.Error(), 300, false))
+		msg := err.Error()
+		if i := strings.IndexByte(msg, '\n'); i >= 0 {
+			msg = msg[:i]
+		}
+		return bloquear("falhou (não é conflito): " + notify.Sanitize(msg, 300, false))
 	}
 	r.Estado = JuncaoIntegrada
 	if err := RemoveWorktree(l.dir, l.iniciativa, task); err != nil {
@@ -336,6 +346,13 @@ func (l *Leque) juntarTask(task, path string) (ResultadoJuncao, error) {
 	}
 	delete(l.caminhos, task)
 	return r, nil
+}
+
+// temIdentidade diz se o git resolve autor e e-mail para este repositório.
+func (l *Leque) temIdentidade() bool {
+	n, e1 := gitLimpo(l.dir, "config", "--get", "user.name")
+	m, e2 := gitLimpo(l.dir, "config", "--get", "user.email")
+	return e1 == nil && e2 == nil && n != "" && m != ""
 }
 
 // Encerrar libera o lock do worktree principal. Worktrees e branches de tasks bloqueadas ficam.

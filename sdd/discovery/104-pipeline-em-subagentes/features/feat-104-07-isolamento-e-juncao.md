@@ -41,7 +41,9 @@ Nenhuma (`SEG-07`).
 set -o pipefail
 go test -list 'TestWorktreePorSubagente|TestJuncaoConflitoEscala|TestRecusaWorktreeOcupado' ./internal/pipeline | grep -F 'TestJuncaoConflitoEscala' >/dev/null
 go test ./internal/pipeline -run 'TestWorktreePorSubagente|TestJuncaoConflitoEscala|TestRecusaWorktreeOcupado'
-# negativo: duas tasks que editam o mesmo arquivo geram conflito marcado; worktree ocupado é recusado
+# negativo: duas tasks que editam o mesmo arquivo geram conflito marcado; worktree ocupado é recusado; falha de merge sem conflito não vira conflito
+go test -list 'TestJuncaoFalhaSemConflitoNaoViraConflito|TestJuncaoSemIdentidadeUsaFallback' ./internal/pipeline | grep -F 'TestJuncaoFalhaSemConflitoNaoViraConflito' >/dev/null
+go test ./internal/pipeline -run 'TestJuncaoFalhaSemConflitoNaoViraConflito|TestJuncaoSemIdentidadeUsaFallback|TestJuncaoNaoSobrescreve|TestJuncaoIdentidadeGlobal'
 go test ./internal/pipeline -run 'TestJuncaoConflitoEscala|TestRecusaWorktreeOcupado'
 go vet ./... && go test ./...
 ```
@@ -61,3 +63,4 @@ go vet ./... && go test ./...
 - Fora de `leque.go`: `CreateWorktree` (`worktree.go`) passou a conferir, com `EvalSymlinks`, que o pai do caminho está em `.forge/runtime/worktrees` (e este no repositório) e que o caminho não é link; o conserto natural fica lá para proteger todos os chamadores, não só o leque.
 - `Juntar` devolve os resultados parciais junto com o erro fatal. `PrepararLeque` libera o lock por `defer` em erro ou panic; `Juntar` renova a lease antes de cada merge. Os descartes de erro restantes (`removerSeguro`, lista de arquivos em conflito) estão comentados no código.
 - Hooks: ver Regras de negócio.
+- Identidade do git: o merge só recebe `-c user.name=forge-sdd -c user.email=forge-sdd@localhost` quando `git config --get user.name/user.email` não resolve (CI, contêiner); a identidade do usuário nunca é trocada e nada é gravado na config. Falha de merge sem arquivos em conflito não é rotulada de conflito: a task fica `bloqueada` com o primeiro erro do git sanitizado em `Motivo` e sem `Arquivos`; `merge --abort` só roda com merge em andamento.
