@@ -2,7 +2,7 @@
   "feature_id": "feat-101",
   "branch": "feat/101-tema-missoes-v5",
   "spec_status": "reviewed",
-  "updated_at": "2026-11-19T23:43:20Z",
+  "updated_at": "2026-11-20T00:36:05Z",
   "items": [
     {
       "task_id": "fix-101-01-alinhar-readme-e-design-system",
@@ -91,7 +91,7 @@
       "task_id": "feat-101-03-retorno-agendado-da-edicao",
       "title": "feat-101-03 — Retorno agendado: o PR que encerra a edição",
       "spec_path": "sdd/discovery/101-tema-missoes-v5/features/feat-101-03-retorno-agendado-da-edicao.md",
-      "status": "review_pending",
+      "status": "approved",
       "depends_on": [
         "fix-101-01-alinhar-readme-e-design-system",
         "feat-101-01-lp-e-wiki-na-edicao-com-validade"
@@ -111,7 +111,24 @@
         "FLX-02"
       ],
       "skills_used": [],
-      "attempts": 1
+      "attempts": 1,
+      "governance_verdict": {
+        "veredito": "conforme",
+        "achados": [
+          {
+            "verificacao": "S-05",
+            "regra": "FLX-03",
+            "classificacao": "duvida",
+            "severidade": "baixa",
+            "arquivo": ".github/scripts/encerrar-edicao/encerrar.sh",
+            "linha": 22,
+            "evidencia": "/edicao:inicio/ { skip = 1; next }",
+            "explicacao": "Com edicao:inicio sem edicao:fim, o awk descarta o resto do arquivo. O teste Go barra marcador desbalanceado, mas só enquanto docs/edicao/ existe. A spec não pede essa proteção.",
+            "correcao": "Opcional: abortar sem gravar quando o número de marcadores de abertura e de fechamento diferir."
+          }
+        ],
+        "resumo": "Camada A toda verde. Segurança do workflow, aderência à spec e o ajuste do teste Go estão corretos. Sem violação; uma dúvida de baixa severidade, não bloqueante."
+      }
     }
   ]
 }
