@@ -1,0 +1,118 @@
+{
+ "kicker": "// Forge SDD · iniciativa 106",
+ "titulo": "A Action só publica: sem atestado válido, ela bloqueia",
+ "largura": 1280,
+ "altura": 470,
+ "nota_rodape": "validação roda local, sem LLM; a Action só confere o atestado",
+ "elementos": [
+  {
+   "tipo": "caixa",
+   "id": "v",
+   "x": 56,
+   "y": 128,
+   "w": 224,
+   "h": 88,
+   "texto": "Veredito do revisor",
+   "sub": "conforme, SHA do HEAD",
+   "estilo": "normal"
+  },
+  {
+   "tipo": "caixa",
+   "id": "h",
+   "x": 56,
+   "y": 264,
+   "w": 224,
+   "h": 88,
+   "texto": "Sua aprovação",
+   "sub": "ou modo sem humano",
+   "estilo": "normal"
+  },
+  {
+   "tipo": "caixa",
+   "id": "t",
+   "x": 392,
+   "y": 192,
+   "w": 224,
+   "h": 96,
+   "texto": "Atestado",
+   "sub": "prova que o agente não emite",
+   "estilo": "destaque"
+  },
+  {
+   "tipo": "caixa",
+   "id": "c",
+   "x": 728,
+   "y": 192,
+   "w": 208,
+   "h": 96,
+   "texto": "Action confere",
+   "sub": "1 job, segundos",
+   "estilo": "normal"
+  },
+  {
+   "tipo": "caixa",
+   "id": "p",
+   "x": 1032,
+   "y": 128,
+   "w": 192,
+   "h": 88,
+   "texto": "Publica",
+   "sub": "",
+   "estilo": "normal"
+  },
+  {
+   "tipo": "caixa",
+   "id": "b",
+   "x": 1032,
+   "y": 264,
+   "w": 192,
+   "h": 88,
+   "texto": "Bloqueia",
+   "sub": "sem atestado ou commit novo",
+   "estilo": "apagado"
+  },
+  {
+   "tipo": "seta",
+   "de": "v.dir",
+   "para": "t.esq:0.3",
+   "forma": "horizontal"
+  },
+  {
+   "tipo": "seta",
+   "de": "h.dir",
+   "para": "t.esq:0.7",
+   "forma": "horizontal"
+  },
+  {
+   "tipo": "seta",
+   "de": "t.dir",
+   "para": "c.esq",
+   "forma": "horizontal"
+  },
+  {
+   "tipo": "seta",
+   "de": "c.dir",
+   "para": "p.esq",
+   "forma": "horizontal",
+   "rotulo": "válido"
+  },
+  {
+   "tipo": "seta",
+   "de": "c.dir",
+   "para": "b.esq",
+   "forma": "horizontal",
+   "rotulo": "inválido"
+  },
+  {
+   "tipo": "caixa",
+   "id": "s",
+   "x": 56,
+   "y": 384,
+   "w": 560,
+   "h": 56,
+   "texto": "Script local, sem LLM: regras, ADR, lições, fila, SHA",
+   "sub": "não roda na Action",
+   "estilo": "tracejado"
+  }
+ ]
+}

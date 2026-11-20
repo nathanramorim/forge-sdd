@@ -1,0 +1,188 @@
+{
+ "kicker": "// Forge SDD · iniciativa 106",
+ "titulo": "O PR nasce em draft e só sai depois de duas conferências",
+ "largura": 1640,
+ "altura": 460,
+ "nota_rodape": "CI pulado em draft · revisão só em 2 pontos · teto de 2 rodadas",
+ "elementos": [
+  {
+   "tipo": "caixa",
+   "id": "a",
+   "x": 56,
+   "y": 120,
+   "w": 176,
+   "h": 88,
+   "texto": "Abrir iniciativa",
+   "sub": "/discovery · feature · fix",
+   "estilo": "normal"
+  },
+  {
+   "tipo": "caixa",
+   "id": "b",
+   "x": 272,
+   "y": 120,
+   "w": 176,
+   "h": 88,
+   "texto": "PR em draft",
+   "sub": "CI pulado",
+   "estilo": "normal"
+  },
+  {
+   "tipo": "caixa",
+   "id": "c",
+   "x": 488,
+   "y": 120,
+   "w": 176,
+   "h": 88,
+   "texto": "Revisão 1",
+   "sub": "spec × regras",
+   "estilo": "normal"
+  },
+  {
+   "tipo": "caixa",
+   "id": "d",
+   "x": 704,
+   "y": 120,
+   "w": 176,
+   "h": 88,
+   "texto": "Você decide",
+   "sub": "Seguir ou ajustar",
+   "estilo": "destaque"
+  },
+  {
+   "tipo": "caixa",
+   "id": "e",
+   "x": 920,
+   "y": 120,
+   "w": 176,
+   "h": 88,
+   "texto": "Builder",
+   "sub": "split + paralelo",
+   "estilo": "normal"
+  },
+  {
+   "tipo": "caixa",
+   "id": "f",
+   "x": 1136,
+   "y": 120,
+   "w": 176,
+   "h": 88,
+   "texto": "Revisão 2",
+   "sub": "código × spec",
+   "estilo": "normal"
+  },
+  {
+   "tipo": "caixa",
+   "id": "g",
+   "x": 1352,
+   "y": 120,
+   "w": 176,
+   "h": 88,
+   "texto": "Você decide",
+   "sub": "Continuar ou ajustar",
+   "estilo": "destaque"
+  },
+  {
+   "tipo": "caixa",
+   "id": "h",
+   "x": 1352,
+   "y": 304,
+   "w": 176,
+   "h": 88,
+   "texto": "PR sai do draft",
+   "sub": "CI roda 1 vez",
+   "estilo": "normal"
+  },
+  {
+   "tipo": "caixa",
+   "id": "i",
+   "x": 1136,
+   "y": 304,
+   "w": 176,
+   "h": 88,
+   "texto": "novo-fix",
+   "sub": "prioridade, vira lição",
+   "estilo": "normal"
+  },
+  {
+   "tipo": "seta",
+   "de": "a.dir",
+   "para": "b.esq",
+   "forma": "horizontal"
+  },
+  {
+   "tipo": "seta",
+   "de": "b.dir",
+   "para": "c.esq",
+   "forma": "horizontal"
+  },
+  {
+   "tipo": "seta",
+   "de": "c.dir",
+   "para": "d.esq",
+   "forma": "horizontal"
+  },
+  {
+   "tipo": "seta",
+   "de": "d.dir",
+   "para": "e.esq",
+   "forma": "horizontal"
+  },
+  {
+   "tipo": "seta",
+   "de": "e.dir",
+   "para": "f.esq",
+   "forma": "horizontal"
+  },
+  {
+   "tipo": "seta",
+   "de": "f.dir",
+   "para": "g.esq",
+   "forma": "horizontal"
+  },
+  {
+   "tipo": "seta",
+   "de": "g.baixo",
+   "para": "h.cima",
+   "forma": "vertical"
+  },
+  {
+   "tipo": "seta",
+   "de": "f.baixo",
+   "para": "i.cima",
+   "forma": "vertical",
+   "rotulo": "desvio"
+  },
+  {
+   "tipo": "seta",
+   "de": "i.esq",
+   "para": "e.baixo",
+   "forma": "horizontal",
+   "rotulo": "volta ao Builder"
+  },
+  {
+   "tipo": "texto",
+   "x": 56,
+   "y": 352,
+   "texto": "Sem aprovação do split: depois do seu \"Seguir\", o Builder divide e implementa sozinho.",
+   "estilo": "nota",
+   "alinha": "start"
+  },
+  {
+   "tipo": "texto",
+   "x": 56,
+   "y": 384,
+   "texto": "Cada desvio achado pelo revisor vira lição para os próximos agentes.",
+   "estilo": "nota",
+   "alinha": "start"
+  },
+  {
+   "tipo": "texto",
+   "x": 56,
+   "y": 416,
+   "texto": "Modo sem humano: opcional, escolhido no início, com aviso de riscos; o padrão é com humano.",
+   "estilo": "nota",
+   "alinha": "start"
+  }
+ ]
+}

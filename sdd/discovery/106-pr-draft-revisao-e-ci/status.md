@@ -1,18 +1,16 @@
 # Status — 106-pr-draft-revisao-e-ci
 
-**Status:** Gate 1 (`FLX-01`) aprovado pelo dono em 2026-11-20 com as 5 recomendações. Nada implementado. PR em draft.
-**Próximo passo:** `/split-features` da onda 1 (sequenciar as tasks 1.7 e 2.5 com a 105).
-
-## Decisões do Gate 1
-1. Prefixo da branch: manter `feat/`.
-2. Draft em repositório pessoal privado: provar com PR de teste (task 2.6).
-3. Job "pronto?": sim, só no check obrigatório da `main`.
-4. Primeira leva: hub-busize, hub-enterprise, forge-sdd, gerador-videos.
-5. `lessons.md`: migrar para `sdd/memory/licoes/` (ajusta `GOV-03` via `GOV-01`).
+**Status:** aguardando reaprovação do escopo antes do `/split-features` (Gate 1 reaberto pelo dono em 2026-11-20; decisões 1 a 5 mantidas). Nada implementado. PR #120 em draft.
+**Modo:** com-humano (padrão).
+**Próximo passo:** o dono responde `A confirmar`; depois `/split-features` da onda 1.
 
 ## A confirmar
-- PRs de task do leque também nascem em draft?
-- Hooks só valem no Claude Code: Gemini e Copilot dependem dos passos dos comandos?
+- Prova do atestado (vi): rec. Environment com revisor (e); fallback commit assinado (d).
+- Teto com novo-fix (vii): manter 3 (2 devoluções).
+- Assinatura dos diagramas (viii): padrão ou nenhuma? Rec.: nenhuma.
+- BPMN (ix): simplificado basta? Rec.: sim.
+- `FLX-01`: aprovar a nova redação (sem 2ª aprovação do split).
+- PRs de task do leque em draft? Hooks só no Claude Code?
 
 ## Colisão com a 105
-Independente: lições, CI, `pr_guard`, veredito com SHA. Colide: templates e goldens, `hooks.go`, `doctor`, numeração de ADR (livre após 0020).
+Colide: templates, goldens, `split-features.md`, `hooks.go`, `doctor`, menus, nº da ADR. Independente: lições, CI, atestado, scripts.
