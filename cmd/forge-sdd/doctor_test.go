@@ -2,6 +2,8 @@ package main
 
 import (
 	"bytes"
+	"encoding/json"
+	"github.com/forge-sdd/cli/internal/doctor"
 	"os"
 	"path/filepath"
 	"strings"
@@ -72,4 +74,26 @@ func TestInit_PrimeiroPasso(t *testing.T) {
 	require.NoError(t, err)
 	assert.Contains(t, menuOut.String(), "Passo 1: Alinhar o projeto")
 	assert.Contains(t, menuOut.String(), "/constitution")
+}
+
+func TestDoctorHarness_JSONECodigoDeSaida(t *testing.T) {
+	deps := doctor.Deps{
+		Versao: "5.0.0",
+		Runner: func(string, ...string) ([]byte, error) { return nil, nil },
+	}
+	// Projeto sem sdd/.sddrc: a checagem de versão falha, logo o código é 3 e o JSON sai igual.
+	var buf bytes.Buffer
+	err := runDoctorHarness(&buf, t.TempDir(), true, deps)
+	var ec exitCodeErr
+	require.ErrorAs(t, err, &ec)
+	assert.Equal(t, 3, ec.ExitCode())
+	var rel doctor.Relatorio
+	require.NoError(t, json.Unmarshal(buf.Bytes(), &rel))
+	require.NoError(t, doctor.ValidateRelatorio(rel))
+	assert.Equal(t, 1, rel.Versao)
+
+	// Modo texto lista cada checagem.
+	buf.Reset()
+	_ = runDoctorHarness(&buf, t.TempDir(), false, deps)
+	assert.Contains(t, buf.String(), "[falha] versao:")
 }
