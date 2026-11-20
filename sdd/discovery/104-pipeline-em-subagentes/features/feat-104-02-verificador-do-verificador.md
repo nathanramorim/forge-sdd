@@ -51,6 +51,7 @@ go vet ./... && go test ./...
 - `grep -c` é reprovado sempre (com ou sem `-o`, pois `-c` conta linhas mesmo com `-o`); a forma aceita é `grep -o ... | wc -l`.
 - O marcador `# negativo:` vale em linha própria (seguido do comando) ou inline; o portão confere a presença e o comando, não a semântica do teste negativo.
 - Nas 12 specs: `set -o pipefail` no início, `grep -q` trocado por `grep -F ... >/dev/null` (evita SIGPIPE sob `pipefail`) e uma linha `# negativo:` com o teste do caso que deve falhar. Na feat-104-10 e na feat-104-12 o teste negativo ganhou nome próprio (`TestPipelineModeRecusaInvalido`, `TestTraceRecusaNoSemMotivo`).
+- Ajuste após a Governança: o `P-25` exige que todo nome em `go test -run` de uma linha `# negativo:` apareça num `go test -list` do mesmo bloco (senão o critério passaria com teste inexistente); 104-10 e 104-12 passaram a listar seus testes negativos. A detecção de pipefail aceita qualquer `set` com `-o pipefail` (ex.: `set -euo pipefail`, `set -o errexit -o pipefail`).
 
 ## Status
 - [x] Implementada em 2026-11-20 (branch `feat/104-02-verificador`).

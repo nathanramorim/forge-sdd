@@ -27,6 +27,11 @@ var (
 	bareNegationRe = regexp.MustCompile(`^!\s`)
 	// trailingGrepVRe acha pipeline que termina em grep -v: sai com 1 quando não imprime nada.
 	trailingGrepVRe = regexp.MustCompile(`\|\s*grep\s+(?:-[A-Za-z]*v[A-Za-z]*)(?:\s[^|]*)?$`)
+	// pipefailRe aceita qualquer forma de set com a opção pipefail (-o pipefail, -euo pipefail, -o errexit -o pipefail).
+	pipefailRe = regexp.MustCompile(`\bset\s+(?:\S+\s+)*-[A-Za-z]*o\s+pipefail\b`)
+	// goTestRunRe e goTestListRe capturam os nomes de `go test -run '<nomes>'` e `go test -list '<nomes>'`.
+	goTestRunRe  = regexp.MustCompile(`\bgo\s+test\b[^|;&]*\s-run[ =]['"]?([^'"\s]+)`)
+	goTestListRe = regexp.MustCompile(`\bgo\s+test\b[^|;&]*\s-list[ =]['"]?([^'"\s]+)`)
 )
 
 // ExtractCriteriaBlock devolve as linhas dos blocos de código da seção "## Critérios de Aceitação
@@ -65,17 +70,33 @@ func CriteriaProblems(block string) []string {
 		problems = append(problems, fmt.Sprintf("bash -n reprovou o bloco: %v", err))
 	}
 
-	hasPipefail, hasPipe, negativeIdx := false, false, -1
+	hasPipefail, hasPipe, negativeIdx, inNegative := false, false, -1, false
+	listed := map[string]bool{}
+	var negativeRuns []string
 	lines := strings.Split(block, "\n")
 	for i, raw := range lines {
 		line := strings.TrimSpace(raw)
-		if strings.HasPrefix(line, NegativeMarker) || strings.Contains(line, " "+NegativeMarker) {
+		inline := strings.Contains(line, " "+NegativeMarker)
+		if strings.HasPrefix(line, NegativeMarker) || inline {
 			negativeIdx = i
+			inNegative = true
+		} else if strings.HasPrefix(line, "#") {
+			inNegative = false
+		}
+		for _, m := range goTestListRe.FindAllStringSubmatch(line, -1) {
+			for _, n := range strings.Split(m[1], "|") {
+				listed[n] = true
+			}
+		}
+		if inNegative && line != "" && (inline || !strings.HasPrefix(line, "#")) {
+			for _, m := range goTestRunRe.FindAllStringSubmatch(line, -1) {
+				negativeRuns = append(negativeRuns, strings.Split(m[1], "|")...)
+			}
 		}
 		if line == "" || strings.HasPrefix(line, "#") {
 			continue
 		}
-		if strings.Contains(line, "set -o pipefail") || strings.Contains(line, "set -eo pipefail") {
+		if pipefailRe.MatchString(line) {
 			hasPipefail = true
 		}
 		if pipeRe.MatchString(line) {
@@ -89,6 +110,11 @@ func CriteriaProblems(block string) []string {
 		}
 		if trailingGrepVRe.MatchString(line) && !strings.Contains(line, "|| true") {
 			problems = append(problems, fmt.Sprintf("linha %d termina em grep -v: só passa quando imprime algo e quebra sob bash -e quando a saída é vazia", i+1))
+		}
+	}
+	for _, n := range negativeRuns {
+		if !listed[n] {
+			problems = append(problems, fmt.Sprintf("o teste negativo %q não aparece em nenhum 'go test -list' do bloco: 'go test -run' com nome inexistente passa sem testar nada", n))
 		}
 	}
 	if hasPipe && !hasPipefail {

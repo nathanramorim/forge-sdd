@@ -125,3 +125,22 @@ func TestRunChecksP25(t *testing.T) {
 	p25, _ = findCheck(results, "P-25")
 	assert.False(t, p25.Passed)
 }
+
+func TestCriteriaVerifyNegativoForaDoList(t *testing.T) {
+	// Caso real: `go test -run TestNadaExiste` passa sem testar nada.
+	ruim := "set -o pipefail\ngo test -list 'TestA' ./x | grep -F TestA >/dev/null\n# negativo: x\ngo test ./x -run 'TestNadaExiste'"
+	assert.True(t, hasProblem(CriteriaProblems(ruim), "TestNadaExiste"))
+	inline := "go test ./x -run TestNadaExiste # negativo: x"
+	assert.True(t, hasProblem(CriteriaProblems(inline), "TestNadaExiste"))
+	bom := "set -o pipefail\ngo test -list 'TestA|TestB' ./x | grep -F TestA >/dev/null\n# negativo: x\ngo test ./x -run 'TestA|TestB'"
+	assert.Empty(t, CriteriaProblems(bom))
+	// -run fora da linha negativa não é cobrado.
+	assert.Empty(t, CriteriaProblems("go test ./x -run 'TestC'\n# negativo: x\ntrue"))
+}
+
+func TestCriteriaVerifyAceitaFormasDePipefail(t *testing.T) {
+	for _, set := range []string{"set -euo pipefail", "set -o errexit -o pipefail", "set -o pipefail", "set -eo pipefail"} {
+		assert.False(t, hasProblem(CriteriaProblems(set+"\necho a | wc -l\n# negativo: x\ntrue"), "pipefail"), set)
+	}
+	assert.True(t, hasProblem(CriteriaProblems("set -e\necho a | wc -l\n# negativo: x\ntrue"), "pipefail"))
+}
