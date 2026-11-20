@@ -2,10 +2,8 @@ package harness
 
 import (
 	"encoding/json"
-	"os"
 	"path/filepath"
 	"reflect"
-	"regexp"
 	"strings"
 	"testing"
 )
@@ -13,25 +11,11 @@ import (
 // exemploDaSkill extrai o primeiro bloco ```json do contrato do parecer na skill de Governança.
 func exemploDaSkill(t *testing.T) []byte {
 	t.Helper()
-	path := filepath.Join("..", "..", ".agents", "skills", "sdd-governanca", "references", "veredito.md")
-	data, err := os.ReadFile(path)
+	exemplo, err := ExemploParecerDaSkill(filepath.Join("..", ".."))
 	if err != nil {
-		t.Fatalf("lendo exemplo da skill %s: %v", path, err)
+		t.Fatal(err)
 	}
-	m := regexp.MustCompile("(?s)```json\\n(.*?)```").FindSubmatch(data)
-	if m == nil {
-		t.Fatalf("bloco ```json não encontrado em %s", path)
-	}
-	return m[1]
-}
-
-// jsonTags retorna as chaves JSON declaradas pela struct do tipo informado.
-func jsonTags(tp reflect.Type) []string {
-	var tags []string
-	for i := 0; i < tp.NumField(); i++ {
-		tags = append(tags, strings.Split(tp.Field(i).Tag.Get("json"), ",")[0])
-	}
-	return tags
+	return exemplo
 }
 
 func TestContratoVeredito(t *testing.T) {
