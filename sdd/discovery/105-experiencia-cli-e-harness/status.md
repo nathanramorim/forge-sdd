@@ -1,7 +1,7 @@
 # Status — 105-experiencia-cli-e-harness
 
-**Status:** Gate 1 aprovado pelo dono em 2026-11-20. Nada implementado nem enfileirado. PR em draft.
-**Próximo passo:** `/split-features` da onda 1, em série com a 106 (ela também mexe em templates, goldens, `split-features.md`, `hooks.go`, `doctor` e menus; tasks 106 1.7, 2.5 e 2.6 dependem da ordem).
+**Status:** Split da onda 1 pronto (6 features 105-01 a 105-06), fila criada (6 tasks `queued`), aguardando Builder; ondas 2 e 3 no plan.md. PR em draft.
+**Próximo passo:** entregar ao Builder (ordem 1.1, 1.4, 1.5, 1.2, 1.3, 1.6); 1.2, 1.4 e 1.6 em série com a 106/107 (templates, goldens, `doctor`).
 **A confirmar:** nada.
 
 ## Decisões do Gate 1
