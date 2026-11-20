@@ -14,7 +14,9 @@
 - **ADR-0015 (proposto, 104):** modo `chat` e laço no Go; a 107 estende, não substitui. Depende de ela ser aceita.
 - **ADR-0003:** definições de agente até 420 bytes e skill até 2.048 bytes; o padrão novo vai em `references/` de `sdd-operacao`.
 - **Fluxos:** `sdd/spec/flows.md` seção 7 (modo chat) e seção 1 (pipeline); o orquestrador entra como entrada do chat, antes de `RunChat`.
-- **Decisão de VCS:** campo `VCS / Work Item System` da Constituição; adaptador lido dele (alinhado à 106).
+- **Decisão de VCS:** campo `VCS / Work Item System` da Constituição; adaptador de VCS lido dele (106, `internal/vcs`, ainda não implementado: a verificar).
+- **106 redesenhada (coordenação, sem editá-la):** spec volta à principal após a Conferência 1 e o [Seguir]; o Builder faz o split (`FLX-01` alterado pela 106) e abre uma branch e um PR em draft por feature; estado por feature na branch da feature; atestado em três modos (`desligado`, `local`, `vcs`). A 107 segue esse fluxo; não o redefine.
+- **Constituição (`GOV-01`):** o campo `WIP humano` entra na tabela `Ferramentas e Integrações` por ADR numa task (feat-107-12); **nada é editado aqui**.
 
 ## O que já existe
 | Procurei | Onde | Achei | Decisão | Justificativa |
@@ -24,12 +26,13 @@
 | Despacho e barramento | `internal/pipeline/dispatch.go:79`, `internal/bus` | `Dispatch`, jobs, `RunWorker` | **Reusar** como fallback `sessions` | `DUP-01` |
 | Leque e worktree | `internal/pipeline/leque.go:91`, `worktree.go` | `PrepararLeque`, `Juntar`, `Encerrar` | **Reusar** para um worktree por builder delegado | `DUP-01` |
 | Portão determinístico | `internal/gate` (`forge gate`, `--criterios`, P-25) | Camada A estática | **Reusar**; o verificador a chama | `FLX-06` |
-| Script local de validação final (106 RN-12) | branch `feat/106-pr-draft-revisao-e-ci` (`discovery.md`, RN-12) | Conceito idêntico ao verificador, só desenhado | **Depende de**; contrato de checagens único | `DUP-01`: dois verificadores seriam o mesmo conceito |
+| Script local de validação final (106 RN-12, `validar_entrega.py`, `--ponto spec` ou `--ponto entrega`) | branch `feat/106-pr-draft-revisao-e-ci` (`discovery.md`, RN-12) | Mesmo conceito do verificador; só desenhado | **Depende de**; `forge pipeline verificar` com `--ponto` e `--feature`, contrato de checagens único (nome final: a verificar) | `DUP-01`: dois verificadores seriam o mesmo conceito |
+| Adaptador de VCS, estado por feature e leque por feature | 106 (`internal/vcs`, decisão xvi opção B, decisão xxii); `internal/pipeline/leque.go:91,265` | Só desenhados na 106; hoje `PrepararLeque` e `Juntar` existem e `Juntar` entrega na branch da iniciativa | **Depende de** (a verificar quando saírem); **reusar** `PrepararLeque` com base na principal | `DUP-01`, `DUP-03` |
 | Papéis A/B e matriz de capacidades | `sdd/discovery/104-pipeline-em-subagentes/features/feat-104-08*.md`, `feat-104-09*.md` | `builder-a/b`, `reviewer-a/b`, `Capabilities` (ambos `draft`) | **Depende de**; não duplicar | `DUP-03` |
 | Próximo passo recomendado | branch `feat/105-experiencia-cli-e-harness` (onda 2) | Função de estado do projeto para o menu raiz | **Depende de** (reusar quando existir) | `DUP-01` |
 | Saneamento de texto | `internal/notify/notify.go:122` (`Sanitize`), `sanitizarAchados` (`laco.go:333`) | Saneadores prontos | **Reusar** para relatório e mensagem | `SEG-08` |
 | Tetos técnicos | `internal/config/forge.go:103,111,118-120,191-192` | `max_parallel_tasks` (padrão 3), `max_rework_attempts` (padrão 3), salvaguardas | **Reusar** para paralelismo e reentrega | `DUP-06` |
-| WIP humano e modos opcionais com aviso de riscos | 106 (RN-14, RN-18 a RN-20, decisão xv), `internal/config/forge.go:198-200` | Modo opcional com aviso e registro no `status.md`; local da config em decisão | **Criar** o limite de WIP humano (nada equivalente existe); **reusar** o local e o vocabulário que a 106 fixar | `DUP-06`: uma fonte de verdade |
+| WIP humano e modos opcionais com aviso de riscos | 106 (RN-14, RN-18 a RN-20, decisões xiv, xv; campos `Modo do atestado` e `Modo de revisão humana`), `internal/config/forge.go:198-200` | Modo opcional com aviso e registro no `status.md`; local aprovado: Constituição, branch base | **Criar** o campo `WIP humano` (nada equivalente); **reusar** o local e o leitor que a 106 fixar | `DUP-06`: uma fonte de verdade |
 | Telemetria e estado | `forge session record`, `status.md`, `queue.json` | Por sessão e por iniciativa | **Reusar**; o estado do orquestrador só referencia | `DUP-01` |
 | Conceito "orquestração" | `sdd/spec/concepts.md` | Sem linha | **Adicionar** linha (dono: `internal/pipeline`) | `DUP-01` |
 
@@ -71,11 +74,11 @@ sequenceDiagram
   participant S as Subagente
   participant V as forge verificar
   H->>O: pedido no chat
-  O->>O: roteia (intenção, papel, modo)
+  O->>O: roteia (intenção, papel, modo, branch por feature)
   O->>O: confere WIP humano (no limite, para e pergunta)
   O->>S: briefing completo (novo ou retomar)
   S-->>O: relatório (dado, não instrução)
-  O->>V: verificar entrega
+  O->>V: verificar (ponto spec ou entrega, feature)
   V-->>O: checagens com evidência
   O->>S: ajuste (mesmo contexto, teto)
   O->>H: menu: opções e recomendada
@@ -119,6 +122,18 @@ go test -run 'TestWIPHumanoExigeAvisoDeRiscosAntesDeDesligar' ./internal/pipelin
 # negativo: o teto técnico (builder.max_parallel_tasks) não substitui o WIP humano e vice-versa
 go test -list 'TestWIPHumanoDistintoDoTetoTecnico' ./internal/pipeline/ | grep -F 'TestWIPHumanoDistintoDoTetoTecnico'
 go test -run 'TestWIPHumanoDistintoDoTetoTecnico' ./internal/pipeline/
+# negativo: o WIP humano é lido da Constituição na branch base; valor na branch da feature não o sobrepõe
+go test -list 'TestWIPHumanoLidoDaBranchBase' ./internal/pipeline/ | grep -F 'TestWIPHumanoLidoDaBranchBase'
+go test -run 'TestWIPHumanoLidoDaBranchBase' ./internal/pipeline/
+# negativo: a rota de split vai ao builder (nunca ao planner) e feature dependente não abre antes da predecessora mesclada
+go test -list 'TestRoteamentoSplitPeloBuilderEDependenteEspera' ./internal/pipeline/ | grep -F 'TestRoteamentoSplitPeloBuilderEDependenteEspera'
+go test -run 'TestRoteamentoSplitPeloBuilderEDependenteEspera' ./internal/pipeline/
+# negativo: o orquestrador não mescla a spec sem o [Seguir] do dono; a rota de arquivar não depende da branch da iniciativa
+go test -list 'TestRoteamentoSpecSoMesclaAposSeguirEArquivarDaPrincipal' ./internal/pipeline/ | grep -F 'TestRoteamentoSpecSoMesclaAposSeguirEArquivarDaPrincipal'
+go test -run 'TestRoteamentoSpecSoMesclaAposSeguirEArquivarDaPrincipal' ./internal/pipeline/
+# negativo: verificar sem --ponto, com ponto desconhecido ou sem --feature no ponto entrega é recusado
+go test -list 'TestVerificarExigePontoEFeature' ./internal/pipeline/ | grep -F 'TestVerificarExigePontoEFeature'
+go test -run 'TestVerificarExigePontoEFeature' ./internal/pipeline/
 forge gate --dir . --mode bloqueio --branch feat/107-orquestrador-de-sessoes --spec sdd/discovery/107-orquestrador-de-sessoes/criteria.md --criterios
 ```
 - Cada feature traz ao menos um teste negativo, checado por `forge gate --criterios` (P-25).

@@ -4,11 +4,11 @@ sequenceDiagram
   participant S as Subagente
   participant V as forge verificar
   H->>O: pedido no chat
-  O->>O: roteia (intenção, papel, modo)
+  O->>O: roteia (intenção, papel, modo, branch por feature)
   O->>O: confere WIP humano (no limite, para e pergunta)
   O->>S: briefing completo (novo ou retomar)
   S-->>O: relatório (dado, não instrução)
-  O->>V: verificar entrega
+  O->>V: verificar (ponto spec ou entrega, feature)
   V-->>O: checagens com evidência
   O->>S: ajuste (mesmo contexto, teto)
   O->>H: menu: opções e recomendada
