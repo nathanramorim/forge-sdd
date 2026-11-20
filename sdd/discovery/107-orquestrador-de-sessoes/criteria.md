@@ -28,7 +28,8 @@
 | Papéis A/B e matriz de capacidades | `sdd/discovery/104-pipeline-em-subagentes/features/feat-104-08*.md`, `feat-104-09*.md` | `builder-a/b`, `reviewer-a/b`, `Capabilities` (ambos `draft`) | **Depende de**; não duplicar | `DUP-03` |
 | Próximo passo recomendado | branch `feat/105-experiencia-cli-e-harness` (onda 2) | Função de estado do projeto para o menu raiz | **Depende de** (reusar quando existir) | `DUP-01` |
 | Saneamento de texto | `internal/notify/notify.go:122` (`Sanitize`), `sanitizarAchados` (`laco.go:333`) | Saneadores prontos | **Reusar** para relatório e mensagem | `SEG-08` |
-| Tetos | `internal/config/forge.go:103,111,118-120` | `max_parallel_tasks`, `max_rework_attempts`, salvaguardas | **Reusar**; sem chave nova | `DUP-06` |
+| Tetos técnicos | `internal/config/forge.go:103,111,118-120,191-192` | `max_parallel_tasks` (padrão 3), `max_rework_attempts` (padrão 3), salvaguardas | **Reusar** para paralelismo e reentrega | `DUP-06` |
+| WIP humano e modos opcionais com aviso de riscos | 106 (RN-14, RN-18 a RN-20, decisão xv), `internal/config/forge.go:198-200` | Modo opcional com aviso e registro no `status.md`; local da config em decisão | **Criar** o limite de WIP humano (nada equivalente existe); **reusar** o local e o vocabulário que a 106 fixar | `DUP-06`: uma fonte de verdade |
 | Telemetria e estado | `forge session record`, `status.md`, `queue.json` | Por sessão e por iniciativa | **Reusar**; o estado do orquestrador só referencia | `DUP-01` |
 | Conceito "orquestração" | `sdd/spec/concepts.md` | Sem linha | **Adicionar** linha (dono: `internal/pipeline`) | `DUP-01` |
 
@@ -71,6 +72,7 @@ sequenceDiagram
   participant V as forge verificar
   H->>O: pedido no chat
   O->>O: roteia (intenção, papel, modo)
+  O->>O: confere WIP humano (no limite, para e pergunta)
   O->>S: briefing completo (novo ou retomar)
   S-->>O: relatório (dado, não instrução)
   O->>V: verificar entrega
@@ -105,6 +107,18 @@ go test -run 'TestVerificarSemVCSNaoChamaCLI' ./internal/pipeline/
 # negativo: entrega que o relatório diz pronta mas sem commit ou na main reprova
 go test -list 'TestVerificarReprovaEntregaSemCommitOuNaMain' ./internal/pipeline/ | grep -F 'TestVerificarReprovaEntregaSemCommitOuNaMain'
 go test -run 'TestVerificarReprovaEntregaSemCommitOuNaMain' ./internal/pipeline/
+# negativo: WIP humano configurável: limite inválido (zero, negativo, tipo errado) é recusado
+go test -list 'TestWIPHumanoConfiguravelRecusaLimiteInvalido' ./internal/pipeline/ | grep -F 'TestWIPHumanoConfiguravelRecusaLimiteInvalido'
+go test -run 'TestWIPHumanoConfiguravelRecusaLimiteInvalido' ./internal/pipeline/
+# negativo: WIP humano no limite para e pergunta em menu em vez de abrir delegação nova
+go test -list 'TestWIPHumanoNoLimiteParaEPergunta' ./internal/pipeline/ | grep -F 'TestWIPHumanoNoLimiteParaEPergunta'
+go test -run 'TestWIPHumanoNoLimiteParaEPergunta' ./internal/pipeline/
+# negativo: reduzir ou desligar o WIP humano sem exibir o aviso de riscos é recusado e o modo só é gravado no status.md depois do aviso
+go test -list 'TestWIPHumanoExigeAvisoDeRiscosAntesDeDesligar' ./internal/pipeline/ | grep -F 'TestWIPHumanoExigeAvisoDeRiscosAntesDeDesligar'
+go test -run 'TestWIPHumanoExigeAvisoDeRiscosAntesDeDesligar' ./internal/pipeline/
+# negativo: o teto técnico (builder.max_parallel_tasks) não substitui o WIP humano e vice-versa
+go test -list 'TestWIPHumanoDistintoDoTetoTecnico' ./internal/pipeline/ | grep -F 'TestWIPHumanoDistintoDoTetoTecnico'
+go test -run 'TestWIPHumanoDistintoDoTetoTecnico' ./internal/pipeline/
 forge gate --dir . --mode bloqueio --branch feat/107-orquestrador-de-sessoes --spec sdd/discovery/107-orquestrador-de-sessoes/criteria.md --criterios
 ```
 - Cada feature traz ao menos um teste negativo, checado por `forge gate --criterios` (P-25).

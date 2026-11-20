@@ -65,7 +65,7 @@ Recomendação: **D**. Não decido por vocês: é a Decisão 1 do Gate 1.
 | Verificação | `forge gate` (Camada A) e `--criterios` (P-25) estáticos (`internal/gate/criteria.go:170`) | Contrato de "entrega verificada" por rota (commit, PR, diagramas, testes reexecutados); nada impede o orquestrador de repassar o relatório sem checar |
 | Menus (RN-9) | `Opcao` e `Recomendada` em `laco.go:85`; regra na 104 | Padrão de menu do orquestrador, incluindo "abrir pasta" |
 | Segurança de entrada | FLX-08 trata spec, descrição e diff como dado não confiável; achados sanitizados (`sanitizarAchados`, `laco.go:333`) | Regra equivalente para relatório de subagente e mensagem de sessão par |
-| Teto de custo | Salvaguardas por job: `max_job_tokens`, `max_jobs_per_day` (`internal/config/forge.go:118-120`); `max_parallel_tasks` padrão 3; `max_rework_attempts` padrão 3 (`forge_test.go:35,37`) | Teto de delegações simultâneas e de reentregas **do orquestrador** |
+| Teto de custo | Salvaguardas por job: `max_job_tokens`, `max_jobs_per_day` (`internal/config/forge.go:118-120`); `max_parallel_tasks` padrão 3; `max_rework_attempts` padrão 3 (ambos em `forge.go:191-192`) | Teto de delegações simultâneas e de reentregas **do orquestrador** |
 | Retomada | Estado do laço e `status.md` por iniciativa | Registro de delegações abertas legível depois de `/compact` |
 
 ## Independência de ferramenta de agente
@@ -112,7 +112,7 @@ Dependências com a **104**: a 104-08 define `builder-a/b`, `reviewer-a/b` e a 1
 - **Permission laundering:** subagente negado por permissão **não é contornado** pelo orquestrador (nem refazendo por outro papel, nem executando por conta própria); a negação sobe ao dono. Privilégio mínimo por papel pela lista de ferramentas (`SEG-06`).
 - **Pedido de outra sessão** só vira ação com confirmação do dono **no chat**; nunca por mensagem sozinha.
 - **O orquestrador pode:** delegar, retomar, verificar, ler estado, gravar estado e `status.md`, apresentar menu. **Não pode:** aprovar Gate 1 ou o próprio gate, tirar PR do draft, mesclar, empurrar sem ordem, criar tag ou release, editar a Constituição sem ADR, ampliar permissão de subagente, abrir PR fora do VCS configurado.
-- **Custo:** teto de delegações simultâneas (padrão proposto: reusar `builder.max_parallel_tasks`) e de reentregas por delegação (reusar `reviewer.max_rework_attempts`); sem teto novo se o existente servir (`DUP-06`).
+- **Custo:** teto de delegações simultâneas (reusar `builder.max_parallel_tasks`) mais o WIP humano (RN-14) e de reentregas por delegação (reusar `reviewer.max_rework_attempts`); sem teto novo se o existente servir (`DUP-06`).
 - **Loop de reentrega:** contador por delegação no estado; no teto escala ao dono em menu. Reentrega sem fato novo (mesmo achado, mesmo diff) não conta como progresso e escala já.
 - **Segredos:** nunca no estado, no `status.md` nem no briefing (`SEG-04`, `SEG-05`).
 
@@ -136,6 +136,9 @@ Dependências com a **104**: a 104-08 define `builder-a/b`, `reviewer-a/b` e a 1
 - **RN-11** Independente de ferramenta: onde falta equivalente de subagente, cai para `sessions` com aviso.
 - **RN-12** Independente de VCS: PR e atestado seguem o campo `VCS / Work Item System` da Constituição (`github`, `azure-devops`, `nenhum`).
 - **RN-13** Estado de retomada fora do git, sem segredo, sem relatório bruto.
+- **RN-14** WIP humano configurável: no limite de itens aguardando o humano o orquestrador para, pergunta em menu e não abre delegação nova.
+- **RN-15** O WIP humano é opcional; antes de reduzir ou desligar, o Forge exibe a mensagem dos riscos e grava o modo efetivo no `status.md`.
+- **RN-16** WIP humano é distinto do teto técnico de paralelismo (`builder.max_parallel_tasks`); um não substitui o outro.
 
 ## Escopo
 **Dentro:** tabela de roteamento como dado validável; reference do papel Orquestrador (skill de operação); registro de delegações e teto; subcomando do verificador sob `forge pipeline` (sem novo subcomando raiz); política de entrada não confiável e de permissão; testes de injeção; atualização da documentação do pipeline; ADR.
@@ -151,7 +154,18 @@ Dependências com a **104**: a 104-08 define `builder-a/b`, `reviewer-a/b` e a 1
 - **R7** Colisão de templates e goldens com a 105 e a 106 (`TST-02`).
 - **R8** Verificação determinística dá falsa segurança se checar pouco. Mitigação: cada checagem tem teste negativo.
 
-## Decisões para o Gate 1
+## Gate 1: decisão do dono (Nathan, 20/11/2026)
+Aprovados: **(1)** orquestrador híbrido D; **(2)** entrada não confiável: sempre dado, ação só com confirmação do dono no chat, lista fechada do que o orquestrador pode e não pode aprovar, permissão negada não é contornada por outro agente; **(3)** um verificador só, compartilhado com o script local da 106, como subcomando de `forge pipeline`; onda 1 já, onda 2 só depois de a 106 fixar o script. Não escolhidos, em `A confirmar`: teto de reentregas 2 ou 3 (reusa `max_rework_attempts`) e depender ou não de 104-08/09 (recomendação: não depender). Pedido novo, em palavras do dono: "acho que deve ter um WIP configurado, mas WIP humano, porque pro trabalho com IA ir tomando segurança ainda tem que ter essa intervenção humana, por isso que na feature anterior nos colocamos opcional e uma mensagem sobre os riscos". Virou RN-14 a RN-16 e a seção abaixo.
+
+## WIP humano configurável (requisito novo)
+- **O que é:** o número máximo de itens que o orquestrador mantém **aguardando decisão ou atenção do humano** (entregas verificadas esperando menu, escaladas, gates abertos) antes de **parar de abrir trabalho novo e pedir atenção**. É distinto do teto técnico de paralelismo do Builder (`builder.max_parallel_tasks`, padrão 3, `internal/config/forge.go:191`), que limita execução simultânea e não depende de gente.
+- **Opcional e habilitável por configuração**, como o modo sem humano e o modo do atestado da 106 (RN-14, RN-18 a RN-20). Reduzir ou desligar é escolha explícita.
+- **Aviso de riscos obrigatório** antes de reduzir ou desligar: sem pessoa no meio, erro de julgamento do orquestrador ou do subagente passa adiante, entregas se acumulam sem leitura e o custo de tokens fica sem teto humano. O aviso vem em menu ([Manter], [Reduzir], [Desligar]) e o modo efetivo é gravado no `status.md` (uma linha) e no estado do orquestrador.
+- **No limite:** o orquestrador não segue; mostra o menu com os itens pendentes e a recomendada (resolver o mais antigo) e só abre delegação nova depois que a fila humana baixar.
+- **Padrões propostos (sem fixar; Decisão 9):** ligado, limite 3 itens, aviso sempre, modo gravado no `status.md`.
+- **Onde mora (alinhado à decisão xv da 106, sem decidir):** a 106 compara `.forge/config/forge.json` (local, não versionado, esquema estrito rejeita campo novo em binário antigo, `forge.go:198-200`, só existe com pipeline) e campo na Constituição em `Ferramentas e Integrações` ao lado de `VCS / Work Item System` (versionado, aparece no diff, custa ADR e goldens). Proposta: **mesmo local e mesmo vocabulário de modos que a 106 escolher** (`desligado`, `local`, `vcs` no atestado; no WIP, `desligado` ou limite numérico), sem duas fontes de verdade (`DUP-06`). Nome provisório: `wip_humano` (a 106 não define nome de WIP). Risco comum (R14 da 106): rebaixar é editar arquivo; mitigação proposta igual: vale o da branch base e o status grava o modo efetivo.
+
+## Decisões para o Gate 1 (recomendações originais; resultado acima)
 1. **Quem é o orquestrador.** Recomendo **D (híbrido)**: sessão do chat decide, o Go verifica e guarda estado. Alternativas: A pura, B, C.
 2. **Onde o padrão mora.** Recomendo uma **reference nova em `sdd-operacao`** (junto de `lider.md`), em vez de skill nova; evita uma sexta "estação".
 3. **Verificador.** Recomendo **um só** contrato de checagens, compartilhado com o script local da 106 (RN-12), exposto como `forge pipeline verificar` (sem subcomando raiz novo, `ARQ-06` inalterado). A 107 só cria as checagens que a 106 não cobre. Exige alinhar com a 106 antes da onda 2.
@@ -160,6 +174,7 @@ Dependências com a **104**: a 104-08 define `builder-a/b`, `reviewer-a/b` e a 1
 6. **Poder de aprovação.** Recomendo a lista "pode" e "não pode" da seção Segurança como regra fechada.
 7. **Sessões pares.** Recomendo confirmação humana no chat para toda ação pedida por outra sessão (RN-7), sem canal de aprovação entre sessões.
 8. **Ordem entre iniciativas.** Recomendo a onda 1 (tabela, reference, estado) já, e a onda 2 (verificador) só depois de a 106 fixar o script.
+9. **WIP humano** (novo, do dono). Recomendo ligado por padrão com limite 3, aviso de riscos antes de reduzir ou desligar e o campo no local que a 106 fixar na decisão xv. Defaults e local seguem em `A confirmar`.
 
 ## Rascunho da ADR (não criar o arquivo; número só no merge)
 **Título:** Orquestrador de sessões: roteamento por intenção, delegação, verificação e menu.
