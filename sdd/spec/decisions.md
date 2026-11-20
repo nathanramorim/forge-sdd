@@ -52,8 +52,8 @@
 | 0013 | Reviewer Revisa a Spec no Modo Avançado | `proposto` |
 | 0014 | Esteira Econômica e Autônoma | `proposto` |
 | 0015 | Pipeline em Subagentes no Mesmo Chat (modo `chat`) | `proposto` |
-| 0016 | Lock por Iniciativa e Estado do Laço em `.forge/runtime/chat` | `proposto` |
-| 0017 | Servidor MCP Somente Leitura com Saída Saneada | `proposto` |
-| 0018 | Gravação Segura de Arquivos do Usuário | `proposto` |
-| 0019 | Edição Temporária do Site com Porteiro por Data | `proposto` |
-| 0020 | Deploy da LP por Cloudflare Workers | `proposto` |
+| 0016 | Lock por Iniciativa e Estado do Laço em `.forge/runtime/chat` | `aceito` (20/11/2026) |
+| 0017 | Servidor MCP Somente Leitura com Saída Saneada | `aceito` (20/11/2026) |
+| 0018 | Gravação Segura de Arquivos do Usuário | `aceito` (20/11/2026) |
+| 0019 | Edição Temporária do Site com Porteiro por Data | `aceito` (20/11/2026) |
+| 0020 | Deploy da LP por Cloudflare Workers | `aceito` (20/11/2026) |

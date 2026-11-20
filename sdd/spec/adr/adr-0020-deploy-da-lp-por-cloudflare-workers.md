@@ -1,7 +1,7 @@
 # ADR-0020: Deploy da LP por Cloudflare Workers
 
 - **Data:** 2026-11-20
-- **Status:** `proposto`
+- **Status:** `aceito` (20/11/2026, aprovado pelo dono no chat)
 - **Regras afetadas (IDs da constitution):** `ARQ-04` (o `site/` segue isolado do binário), `SEG-04` (token só em segredo do CI), `GOV-01` (esta ADR). Nenhum ID é criado ou removido.
 - **Autor / Responsável:** Concepção; decisão registrada após o commit `24c1b51`
 

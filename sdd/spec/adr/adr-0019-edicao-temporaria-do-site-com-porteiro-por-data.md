@@ -1,7 +1,7 @@
 # ADR-0019: Edição Temporária do Site com Porteiro por Data
 
 - **Data:** 2026-11-20
-- **Status:** `proposto`
+- **Status:** `aceito` (20/11/2026, aprovado pelo dono no chat)
 - **Regras afetadas (IDs da constitution):** `GOV-01` (esta ADR). Nenhum ID é criado ou removido; fora do binário Go.
 - **Autor / Responsável:** Concepção; a iniciativa 101 (Edição Missões) já está no `main`
 

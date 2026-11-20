@@ -1,9 +1,9 @@
 # ADR-0017: Servidor MCP Somente Leitura com Saída Saneada
 
 - **Data:** 2026-11-20
-- **Status:** `proposto`
-- **Regras afetadas (IDs da constitution):** `ARQ-06` (subcomando `mcp`), `SEG-05`, `SEG-06`, `FLX-08`, `GOV-01` (esta ADR). Nenhum ID é criado ou removido.
-- **Autor / Responsável:** Concepção; o aceite do `mcp` em `ARQ-06` segue pendente do dono (ver `status.md` da 104)
+- **Status:** `aceito` (20/11/2026, aprovado pelo dono no chat)
+- **Regras afetadas (IDs da constitution):** `ARQ-06` (subcomando `mcp`), `SEG-05`, `SEG-06`, `SEG-08` (criado em 20/11/2026), `FLX-08`, `GOV-01` (esta ADR). O teste dos IDs passou de 45 para 46.
+- **Autor / Responsável:** Concepção; aceite do `mcp` em `ARQ-06` dado pelo dono no chat em 20/11/2026
 
 ## Relação com ADRs vigentes
 - **ADR-0015: detalha** D-5 (diagnóstico exposto por MCP). **ADR-0008 e a skill `sdd-operacao`: convivem**; `forge acp` (IDEs) é outro protocolo e não muda.
@@ -23,4 +23,4 @@ O diagnóstico `forge doctor --harness` precisa estar ao alcance do agente em v�
 
 ## Consequências
 - **Positivas:** superfície mínima e sem efeito colateral. **Negativas:** o agente não aciona o pipeline por MCP; novas ferramentas exigem nova ADR.
-- **Ações de acompanhamento:** aceite do dono para `mcp` em `ARQ-06`; não verificado: hooks no app desktop.
+- **Ações de acompanhamento:** `ARQ-06` já lista `mcp`; não verificado: hooks no app desktop.

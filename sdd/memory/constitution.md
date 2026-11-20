@@ -17,9 +17,6 @@ CLI Go de comando único (`forge-sdd init`) que scaffolda estruturas Forge-SDD e
 ## Decisões resolvidas
 | Decisão | Resolução |
 |---------|-----------|
-| Linguagem | Go: binário estático, sem runtime |
-| Superfície da CLI | `init`, `update` e subcomandos determinísticos (`ARQ-06`); os comandos de agente são skills em `.agents/skills/` |
-| Embed de templates | `embed.FS`: binário único, sem assets externos |
 | Não sobrescrever arquivos | Erro com lista de conflitos; domínio do usuário preservado |
 
 ## Ferramentas e Integrações
@@ -59,18 +56,19 @@ As regras abaixo indexam as decisões invioláveis por IDs estáveis. O **como c
 - **ARQ-03:** Templates e assets de scaffold só via `embed.FS` (Regra 3).
 - **ARQ-04:** O binário não depende de nada além da biblioteca padrão em runtime (Regra 8).
 - **ARQ-05:** `--dry-run` não tem efeito colateral no disco (Regra 9).
-- **ARQ-06:** A CLI expõe os comandos de ciclo de vida (`init`, `update`) e subcomandos determinísticos de suporte (`doctor`, `status`, `next-id`, `context`, `session`, `lessons`, `report`, `queue`, `gate`, `skills`, `governance`, `acp`, `mcp`, `attach`, `autopilot`, `destroy`, `pipeline`, `dispatch`, `bus`, `worker`, `inbox`, `up`, `eval`) com contratos explícitos (Regra 10).
+- **ARQ-06:** A CLI expõe os comandos de ciclo de vida (`init`, `update`) e subcomandos determinísticos de suporte (`doctor`, `status`, `next-id`, `context`, `session`, `lessons`, `report`, `queue`, `gate`, `skills`, `governance`, `acp`, `mcp`, `attach`, `autopilot`, `destroy`, `pipeline`, `dispatch`, `bus`, `worker`, `inbox`, `up`, `eval`, `brief`, `ps`, `rules`) com contratos explícitos (Regra 10).
 - **ARQ-10:** Domínio e validação não vazam para handlers de CLI nem para templates.
 - **ARQ-11:** Toda spec declara o modelo do módulo (`completo` ou `enxuto`) com justificativa.
 
 ### Segurança (`SEG`)
 - **SEG-01:** Toda entrada externa (flags, caminhos, JSON, manifestos, refs git) é validada na borda.
-- **SEG-02:** Escritas respeitam o diretório-alvo e preservam arquivos de domínio do usuário (`shouldPreserve`), sem perda de dados nem path traversal.
+- **SEG-02:** Escritas respeitam o diretório-alvo e preservam arquivos de domínio do usuário (`shouldPreserve`), sem perda de dados, path traversal nem link simbólico para fora do projeto; a gravação é atômica.
 - **SEG-03:** Subprocessos (`git`, `go`) usam argumentos explícitos, sem interpolação em shell.
 - **SEG-04:** Segredos e credenciais nunca entram em código, binário, templates ou repositório (Regra 4).
 - **SEG-05:** Dados sensíveis nunca aparecem em logs, saída padrão nem telemetria.
-- **SEG-06:** Agentes têm privilégio mínimo: a Governança (Camada B) é somente leitura sobre código.
+- **SEG-06:** Agentes têm privilégio mínimo: Governança (Camada B), Reviewer do modo `chat` e seus subagentes são somente leitura sobre código.
 - **SEG-07:** Nova dependência externa exige consulta ao context7 ou à documentação na versão exata (Regra 5) e a seção `## Dependências novas` na Spec.
+- **SEG-08:** Texto de modelo ou dado externo é saneado antes de ir ao terminal, ao MCP ou a notificações.
 
 ### Anti-Duplicação e Reúso (`DUP`)
 - **DUP-01:** Um conceito, uma casa: cada conceito central tem um único pacote dono em `sdd/spec/concepts.md`.

@@ -1,7 +1,7 @@
 # ADR-0016: Lock por Iniciativa e Estado do Laço em `.forge/runtime/chat`
 
 - **Data:** 2026-11-20
-- **Status:** `proposto`
+- **Status:** `aceito` (20/11/2026, aprovado pelo dono no chat)
 - **Regras afetadas (IDs da constitution):** `ARQ-01`, `SEG-01`, `FLX-04`, `GOV-01` (esta ADR). Nenhum ID é criado ou removido.
 - **Autor / Responsável:** Concepção (alinhamento da Constitution); decisão do dono pendente
 

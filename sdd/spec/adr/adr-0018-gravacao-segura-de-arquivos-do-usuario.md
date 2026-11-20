@@ -1,8 +1,8 @@
 # ADR-0018: Gravação Segura de Arquivos do Usuário (`checkSafeTarget` e `writeFileSafe`)
 
 - **Data:** 2026-11-20
-- **Status:** `proposto`
-- **Regras afetadas (IDs da constitution):** `SEG-02`, `SEG-01`, `GOV-01` (esta ADR). Nenhum ID é criado ou removido.
+- **Status:** `aceito` (20/11/2026, aprovado pelo dono no chat)
+- **Regras afetadas (IDs da constitution):** `SEG-02` (texto ampliado em 20/11/2026), `SEG-01`, `GOV-01` (esta ADR). Nenhum ID é criado ou removido.
 - **Autor / Responsável:** Concepção; decisão do dono pendente
 
 ## Relação com ADRs vigentes
