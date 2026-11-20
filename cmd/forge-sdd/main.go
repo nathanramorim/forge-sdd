@@ -186,6 +186,7 @@ func runUpdateFlow(cmd *cobra.Command, targetDir string) error {
 	if err := reportAgentModels(cmd, targetDir, dryRun); err != nil {
 		return err
 	}
+	reportClaudeIntegration(cmd, targetDir, rc.Agents, dryRun)
 	if dryRun {
 		// Plano da atualização de estrutura: não consulta o NPM, não pergunta nada e não grava.
 		planCfg := rc.ToConfig()

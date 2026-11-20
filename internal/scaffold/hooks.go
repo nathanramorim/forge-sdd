@@ -2,6 +2,8 @@ package scaffold
 
 import (
 	"bytes"
+	"crypto/rand"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -17,7 +19,23 @@ const inboxHookCommand = "forge inbox --unread --hook"
 // sobrescrever a configuração do usuário (SEG-02): cria o arquivo se faltar, acrescenta só a
 // entrada do inbox, não duplica e nunca toca em JSON inválido. Devolve true se o arquivo mudou.
 func MergeClaudeInboxHook(targetDir string) (bool, error) {
+	return mergeClaudeHook(targetDir, "UserPromptSubmit", inboxHookCommand, []string{"forge inbox", "forge-sdd inbox"}, false)
+}
+
+// doctorHookCommand roda o diagnóstico do harness ao abrir a sessão; a saída vira contexto.
+const doctorHookCommand = "forge doctor --harness"
+
+// MergeClaudeSessionStartHook garante o hook SessionStart do doctor em .claude/settings.json, com
+// as mesmas garantias do hook do inbox (não sobrescreve, não duplica, não toca JSON inválido).
+func MergeClaudeSessionStartHook(targetDir string) (bool, error) {
+	return mergeClaudeHook(targetDir, "SessionStart", doctorHookCommand, []string{"forge doctor", "forge-sdd doctor"}, false)
+}
+
+func mergeClaudeHook(targetDir, event, command string, markers []string, dryRun bool) (bool, error) {
 	path := filepath.Join(targetDir, ".claude", "settings.json")
+	if err := checkSafeTarget(targetDir, path); err != nil {
+		return false, err
+	}
 	root := map[string]any{}
 
 	data, err := os.ReadFile(path)
@@ -25,7 +43,7 @@ func MergeClaudeInboxHook(targetDir string) (bool, error) {
 	case err == nil:
 		dec := json.NewDecoder(bytes.NewReader(data))
 		if err := dec.Decode(&root); err != nil {
-			return false, fmt.Errorf("%s não é JSON válido; adicione o hook manualmente (%s): %w", path, inboxHookCommand, err)
+			return false, fmt.Errorf("%s não é JSON válido; adicione o hook manualmente (%s): %w", path, command, err)
 		}
 		if dec.More() {
 			return false, fmt.Errorf("%s tem conteúdo extra após o objeto JSON; adicione o hook manualmente", path)
@@ -46,17 +64,20 @@ func MergeClaudeInboxHook(targetDir string) (bool, error) {
 	if hooks == nil {
 		hooks = map[string]any{}
 	}
-	groups, ok := hooks["UserPromptSubmit"].([]any)
-	if hooks["UserPromptSubmit"] != nil && !ok {
-		return false, fmt.Errorf("%s: \"hooks.UserPromptSubmit\" não é uma lista; adicione o hook manualmente", path)
+	groups, ok := hooks[event].([]any)
+	if hooks[event] != nil && !ok {
+		return false, fmt.Errorf("%s: \"hooks.%s\" não é uma lista; adicione o hook manualmente", path, event)
 	}
 	for _, g := range groups {
 		if gm, ok := g.(map[string]any); ok {
 			if inner, ok := gm["hooks"].([]any); ok {
 				for _, h := range inner {
 					if hm, ok := h.(map[string]any); ok {
-						if cmd, _ := hm["command"].(string); strings.Contains(cmd, "forge inbox") || strings.Contains(cmd, "forge-sdd inbox") {
-							return false, nil // já instalado
+						cmd, _ := hm["command"].(string)
+						for _, m := range markers {
+							if strings.Contains(cmd, m) {
+								return false, nil // já instalado
+							}
 						}
 					}
 				}
@@ -64,20 +85,175 @@ func MergeClaudeInboxHook(targetDir string) (bool, error) {
 		}
 	}
 	groups = append(groups, map[string]any{
-		"hooks": []any{map[string]any{"type": "command", "command": inboxHookCommand}},
+		"hooks": []any{map[string]any{"type": "command", "command": command}},
 	})
-	hooks["UserPromptSubmit"] = groups
+	hooks[event] = groups
 	root["hooks"] = hooks
+	if dryRun {
+		return true, nil
+	}
 
 	out, err := json.MarshalIndent(root, "", "  ")
 	if err != nil {
 		return false, err
 	}
-	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+	if err := writeFileSafe(targetDir, path, append(out, '\n')); err != nil {
 		return false, err
 	}
-	if err := os.WriteFile(path, append(out, '\n'), 0o644); err != nil {
-		return false, fmt.Errorf("gravar %s: %w", path, err)
+	return true, nil
+}
+
+// mcpServerName é a chave do servidor forge-sdd em .mcp.json.
+const mcpServerName = "forge-sdd"
+
+// MergeClaudeMCPServer registra `forge mcp serve` em .mcp.json (Claude Code) sem sobrescrever o
+// que o usuário já tem: cria o arquivo se faltar, acrescenta só a entrada forge-sdd, não duplica
+// e nunca toca em JSON inválido. Devolve true se o arquivo mudou.
+func MergeClaudeMCPServer(targetDir string) (bool, error) {
+	return mergeClaudeMCPServer(targetDir, false)
+}
+
+func mergeClaudeMCPServer(targetDir string, dryRun bool) (bool, error) {
+	path := filepath.Join(targetDir, ".mcp.json")
+	if err := checkSafeTarget(targetDir, path); err != nil {
+		return false, err
+	}
+	root := map[string]any{}
+	data, err := os.ReadFile(path)
+	switch {
+	case err == nil:
+		dec := json.NewDecoder(bytes.NewReader(data))
+		if err := dec.Decode(&root); err != nil || root == nil {
+			return false, fmt.Errorf("%s não é um objeto JSON válido; registre o servidor manualmente (forge mcp serve): %v", path, err)
+		}
+		if dec.More() {
+			return false, fmt.Errorf("%s tem conteúdo extra após o objeto JSON; registre o servidor manualmente", path)
+		}
+	case errors.Is(err, os.ErrNotExist):
+	default:
+		return false, fmt.Errorf("ler %s: %w", path, err)
+	}
+	servers, ok := root["mcpServers"].(map[string]any)
+	if root["mcpServers"] != nil && !ok {
+		return false, fmt.Errorf("%s: \"mcpServers\" não é um objeto; registre o servidor manualmente", path)
+	}
+	if servers == nil {
+		servers = map[string]any{}
+	}
+	if _, existe := servers[mcpServerName]; existe {
+		return false, nil
+	}
+	servers[mcpServerName] = map[string]any{"command": "forge", "args": []any{"mcp", "serve"}}
+	root["mcpServers"] = servers
+	if dryRun {
+		return true, nil
+	}
+	out, err := json.MarshalIndent(root, "", "  ")
+	if err != nil {
+		return false, err
+	}
+	if err := writeFileSafe(targetDir, path, append(out, '\n')); err != nil {
+		return false, err
 	}
 	return true, nil
+}
+
+// SyncClaudeIntegration aplica o hook SessionStart do doctor e o servidor MCP forge-sdd mesmo sem
+// atualização de versão (forge update). Com dryRun só informa o que gravaria. Erros de um item
+// (ex.: JSON inválido) viram aviso e não impedem o outro; o arquivo inválido nunca é tocado.
+func SyncClaudeIntegration(targetDir string, dryRun bool) (changed, warnings []string) {
+	if ok, err := mergeClaudeHook(targetDir, "SessionStart", doctorHookCommand, []string{"forge doctor", "forge-sdd doctor"}, dryRun); err != nil {
+		warnings = append(warnings, "hook SessionStart não instalado: "+err.Error())
+	} else if ok {
+		changed = append(changed, "hook SessionStart")
+	}
+	if ok, err := mergeClaudeMCPServer(targetDir, dryRun); err != nil {
+		warnings = append(warnings, "MCP forge-sdd não registrado: "+err.Error())
+	} else if ok {
+		changed = append(changed, "MCP forge-sdd")
+	}
+	return changed, warnings
+}
+
+// checkSafeTarget recusa (SEG-02) caminho que seja link simbólico ou não seja arquivo regular, e
+// diretório pai que seja link simbólico ou resolva para fora do projeto. Arquivo ou pai ausentes
+// são aceitos (serão criados).
+func checkSafeTarget(targetDir, path string) error {
+	root, err := filepath.EvalSymlinks(targetDir)
+	if err != nil {
+		return fmt.Errorf("resolver %s: %w", targetDir, err)
+	}
+	dir := filepath.Dir(path)
+	if filepath.Clean(dir) != filepath.Clean(targetDir) {
+		fi, err := os.Lstat(dir)
+		switch {
+		case errors.Is(err, os.ErrNotExist):
+		case err != nil:
+			return fmt.Errorf("verificar %s: %w", dir, err)
+		case fi.Mode()&os.ModeSymlink != 0 || !fi.IsDir():
+			return fmt.Errorf("%s é link simbólico ou não é diretório; recusado (SEG-02)", dir)
+		default:
+			real, err := filepath.EvalSymlinks(dir)
+			if err != nil || (real != root && !strings.HasPrefix(real, root+string(filepath.Separator))) {
+				return fmt.Errorf("%s resolve para fora do projeto; recusado (SEG-02)", dir)
+			}
+		}
+	}
+	fi, err := os.Lstat(path)
+	switch {
+	case errors.Is(err, os.ErrNotExist):
+		return nil
+	case err != nil:
+		return fmt.Errorf("verificar %s: %w", path, err)
+	case !fi.Mode().IsRegular():
+		return fmt.Errorf("%s é link simbólico ou não é arquivo regular; recusado (SEG-02)", path)
+	}
+	return nil
+}
+
+// writeFileSafe grava via arquivo temporário exclusivo no mesmo diretório e rename, preservando o
+// modo do arquivo existente (novo: 0644). Revalida o alvo logo antes de gravar.
+func writeFileSafe(targetDir, path string, data []byte) error {
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+		return err
+	}
+	if err := checkSafeTarget(targetDir, path); err != nil {
+		return err
+	}
+	mode := os.FileMode(0o644)
+	if fi, err := os.Lstat(path); err == nil {
+		mode = fi.Mode().Perm()
+	}
+	var buf [6]byte
+	if _, err := rand.Read(buf[:]); err != nil {
+		return err
+	}
+	tmp := filepath.Join(filepath.Dir(path), "."+filepath.Base(path)+".tmp-"+hex.EncodeToString(buf[:]))
+	f, err := os.OpenFile(tmp, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0o600)
+	if err != nil {
+		return fmt.Errorf("gravar %s: %w", path, err)
+	}
+	fail := func(err error) error {
+		_ = f.Close()
+		_ = os.Remove(tmp)
+		return fmt.Errorf("gravar %s: %w", path, err)
+	}
+	if _, err := f.Write(data); err != nil {
+		return fail(err)
+	}
+	if err := f.Chmod(mode); err != nil {
+		return fail(err)
+	}
+	if err := f.Sync(); err != nil {
+		return fail(err)
+	}
+	if err := f.Close(); err != nil {
+		_ = os.Remove(tmp)
+		return fmt.Errorf("gravar %s: %w", path, err)
+	}
+	if err := os.Rename(tmp, path); err != nil {
+		_ = os.Remove(tmp)
+		return fmt.Errorf("gravar %s: %w", path, err)
+	}
+	return nil
 }

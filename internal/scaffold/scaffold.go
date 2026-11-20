@@ -127,6 +127,12 @@ func installClaudeInboxHook(agents []string, targetDir string) {
 		if _, err := MergeClaudeInboxHook(targetDir); err != nil {
 			fmt.Fprintf(os.Stderr, "aviso: hook do inbox não instalado: %v\n", err)
 		}
+		if _, err := MergeClaudeSessionStartHook(targetDir); err != nil {
+			fmt.Fprintf(os.Stderr, "aviso: hook SessionStart do doctor não instalado: %v\n", err)
+		}
+		if _, err := MergeClaudeMCPServer(targetDir); err != nil {
+			fmt.Fprintf(os.Stderr, "aviso: servidor MCP não registrado: %v\n", err)
+		}
 		return
 	}
 }
