@@ -97,7 +97,7 @@ def build():
     o.append(f'<rect x="{fx}" y="1218" width="{fw}" height="34" fill="{c("superficie", "preto-moldura")}"/>')
     o.append(neon(fx, 996, fw))
     o.append(neon(fx, 1216, fw))
-    # abas em chip: as 5 missões, com a terceira ativa
+    # abas em chip: as missões e o fecho, com a terceira ativa
     passo = fw / len(titulos)
     for i, t in enumerate(titulos):
         cx = fx + passo * (i + 0.5)

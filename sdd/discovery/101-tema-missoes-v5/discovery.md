@@ -8,7 +8,7 @@ A v5.0.0 do Forge SDD saiu em 19/11/2026, a mesma semana em que todo mundo fala 
 - **Fazer uma homenagem ao clima,** que o público reconhece sem copiar marca: o tema "Missões".
 
 ## Proposta: "Forge SDD 5.0 — Edição Missões"
-- **Conceito:** cada estação do Forge SDD é uma "missão". Concepção = "Missão 1: o plano"; Planejamento = "Missão 2: a rota"; Construção = "Missão 3: a obra"; Governança = "Missão 4: o vigia"; Operação = "Missão 5: missão cumprida". A promessa: autonomia com segurança, "a IA executa, o plano segura, você aprova".
+- **Conceito:** cada estação do Forge SDD é uma "missão". Concepção = "Missão 1: o plano"; Planejamento = "Missão 2: a rota"; Construção = "Missão 3: a obra"; Governança = "Missão 4: o vigia"; Operação = "Missão 5: missão cumprida". A promessa: autonomia com segurança, "a IA executa, o plano segura, você aprova". *(Substituído pela decisão 10: 3 missões e o fecho.)*
 - **Versão:** a v5.0.0 já existe (tag `v5.0.0`, 19/11/2026). O tema vira a "edição de lançamento" dela, sem mudar o número. Usar o "5" como destaque gráfico próprio (o "5" de 5.0), desenhado com a nossa tipografia, sem imitar o "VI".
 - **Visual (homenagem, não cópia):** pôr do sol de costa tropical (rosa, laranja, magenta, azul-petróleo), neon, palmeiras, motel art déco com letreiro com palavras nossas, mosaico de painéis no estilo "tela de carregamento" com contorno grosso. Tipografia: a da marca do Forge SDD (ou uma condensada livre, escolhida por nós e diferente da do jogo), nunca uma fonte feita para imitar o logo.
 - **Onde aplicar:** banner do README e do site `forge-sdd.org` (seção "novidades da 5.0"), página de notas da versão, card de compartilhamento (og-image), carrossel e reel "Minhas missões" (já em produção no hub-busize, PR #16), post de lançamento.
@@ -44,7 +44,7 @@ Contexto: o PR #113 publicou no README um banner e um design system "GTA VI", me
 
 ## Gate 1 das tasks (Nathan, 19/11/2026: "só vai")
 Aprovadas `fix-101-01`, `feat-101-01`, `feat-101-02` e `feat-101-03`, nessa ordem. Os três pontos em aberto ficaram como propostos:
-- O Líder (cartão 01 da LP) fica com a "Missão 5: missão cumprida".
+- O Líder (cartão 01 da LP) fica com a "Missão 5: missão cumprida". *(Agora: "Missão cumprida", o fecho; decisão 10.)*
 - "Purrete" é porrete: Planejador e Governança com porrete, os outros três com arminha.
 - O workflow de encerramento tenta abrir o PR e, se o repositório recusar, abre uma issue com o link. Não depende de mudar a configuração do Actions.
 

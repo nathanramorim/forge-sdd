@@ -73,7 +73,7 @@ def build():
     o.append(f'<text x="1250" y="25" text-anchor="end" font-family="{MONO}" font-size="13.5"><tspan fill="{c("texto", "ativo")}" font-weight="700">$</tspan>'
              f'<tspan dx="8" fill="#ffffff" fill-opacity="0.94">npm i -g @nathanramorim/forge-sdd</tspan></text>')
 
-    # barra inferior: as 5 missões, da fonte única
+    # barra inferior: as missões e o fecho, da fonte única
     o.append(f'<rect x="0" y="{BOT}" width="{W}" height="{H - BOT}" fill="{c("superficie", "preto-moldura")}"/>')
     passo = W / len(titulos)
     for i, t in enumerate(titulos):
