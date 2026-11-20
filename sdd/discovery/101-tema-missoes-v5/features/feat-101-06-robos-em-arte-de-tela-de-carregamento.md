@@ -74,8 +74,8 @@ for f in lider pm planejador builders governanca; do xmllint --noout docs/edicao
 xmllint --noout docs/edicao/equipe.svg
 ( cd sdd/discovery/101-tema-missoes-v5/anexos/gerador-banner && python3 personagens.py /tmp/personagens-ensaio >/dev/null && for f in personagens/lider.svg personagens/pm.svg personagens/planejador.svg personagens/builders.svg personagens/governanca.svg equipe.svg; do cmp "/tmp/personagens-ensaio/$f" "../../../../../docs/edicao/$f" || exit 1; done; r=$?; rm -rf __pycache__ /tmp/personagens-ensaio; exit $r )
 
-# 2. Sem texto, imagem embutida ou rede nas figuras
-test "$(grep -c -E '<text|<image|https?://|data:' docs/edicao/equipe.svg docs/edicao/personagens/*.svg | awk -F: '{s+=$2} END{print s}')" = "0"
+# 2. Sem texto, imagem embutida ou rede nas figuras (o xmlns do SVG é ignorado)
+test "$(cat docs/edicao/equipe.svg docs/edicao/personagens/*.svg | sed 's#http://www.w3.org/2000/svg##g' | grep -c -E '<text|<image|https?://|data:')" = "0"
 
 # 3. CSS: retrato no avatar, equipe no topo, tudo sob a marca da edição
 grep -q 'personagens/lider.svg' docs/edicao/edicao.css && grep -q 'equipe.svg' docs/edicao/edicao.css
@@ -97,4 +97,4 @@ Cada retrato legível a 78 px e a equipe legível no topo; nada cortado; nenhuma
 
 ## Status
 
-- [x] Implementado em feat-101-06 (19/11/2026): critérios 1 a 5 com saída 0 e `forge gate` em bloqueio sem pendências.
+- [x] Implementado em feat-101-06 (19/11/2026): critérios 1 a 5 com saída 0 (o 2 depois de ignorar o xmlns do SVG) e `forge gate` em bloqueio sem pendências.
