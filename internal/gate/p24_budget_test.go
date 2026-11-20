@@ -87,7 +87,7 @@ func TestCheckP24_RepositorioDoForgeSddPassaNoProprioPortao(t *testing.T) {
 	assert.NotContains(t, r.Evidence, "aviso", "o repositório do forge-sdd não pode ter arquivo próprio acima do orçamento")
 }
 
-// Os 45 IDs canônicos não podem se perder em reescritas da Constitution.
+// Os 46 IDs canônicos não podem se perder em reescritas da Constitution.
 func TestConstitutionDoRepositorioMantemTodosOsIDs(t *testing.T) {
 	data, err := os.ReadFile(filepath.Join("..", "..", "sdd", "memory", "constitution.md"))
 	if err != nil {
@@ -100,7 +100,7 @@ func TestConstitutionDoRepositorioMantemTodosOsIDs(t *testing.T) {
 		ids    []int
 	}{
 		{"ARQ", []int{1, 2, 3, 4, 5, 6, 10, 11}},
-		{"SEG", []int{1, 2, 3, 4, 5, 6, 7}},
+		{"SEG", []int{1, 2, 3, 4, 5, 6, 7, 8}},
 		{"DUP", []int{1, 2, 3, 4, 5, 6, 10}},
 		{"COD", []int{1, 2, 3, 4, 5, 6}},
 		{"TST", []int{1, 2, 3, 4, 5}},
@@ -111,7 +111,7 @@ func TestConstitutionDoRepositorioMantemTodosOsIDs(t *testing.T) {
 			want = append(want, fmt.Sprintf("%s-%02d", p.prefix, n))
 		}
 	}
-	assert.Len(t, want, 45)
+	assert.Len(t, want, 46)
 	for _, id := range want {
 		assert.NotEmpty(t, lines[id], "ID %s ausente ou vazio na Constitution", id)
 	}

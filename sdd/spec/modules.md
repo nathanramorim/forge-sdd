@@ -1,4 +1,4 @@
-# Módulos — forge-sdd (v4.7.7-beta)
+# Módulos — forge-sdd (v5.0.0)
 
 ## Diagrama C4 de Containers / Pacotes (`cmd/` vs `internal/`)
 
@@ -46,7 +46,8 @@ flowchart LR
 - Ciclo de vida: `main.go`, `menu.go`, `update_plan.go`, `doctor.go`, `destroy.go`.
 - Pipeline: `dispatch.go`, `worker.go`, `up.go`, `review.go`, `bus.go`, `inbox.go`, `pipeline.go`, `attach.go`.
 - Visibilidade: `status.go` (`--live`), `ps.go`, `queue.go` (`panel`, drill-down).
-- Suporte: `gate.go`, `brief.go`, `context.go`, `skills.go`, `session.go`, `report.go`, `archive.go`, `lessons.go`, `autopilot.go`, `governance.go`, `acp.go`.
+- Suporte: `gate.go`, `brief.go`, `context.go`, `skills.go`, `session.go`, `report.go`, `archive.go`, `lessons.go`, `autopilot.go`, `governance.go`, `acp.go`, `rules.go`.
+- Modo chat (ADR-0015): `mcp.go` (`forge mcp serve`), `eval.go` (`forge eval`), `agent_models.go` (modelo por papel), `pipeline_goal.go`.
 
 ### `internal/layout`
 **Responsabilidade:** casa única dos caminhos de `sdd/` e `.forge/` (`DUP-01`, `DUP-04`) e da **iniciativa ativa, deduzida da branch atual** (`ActiveInitiative`, `QueuePath`, `StatusPath`). Valida o id da iniciativa contra path traversal (`SEG-01`).
@@ -73,6 +74,7 @@ flowchart LR
 - `archive.go`: auto-archive da iniciativa quando todas as tasks estão `approved`.
 - `tmux.go`, `tmuxinstall.go`, `launcher.go`, `liveview.go`, `gitwatch.go`, `agentstate.go`, `preflight.go`: abertura das sessões, contingência de terminal e visão limpa.
 - `status_live.go`: painel executivo vivo (`forge status --live`).
+- `laco.go`: modo chat, `RunChat` e `Retomar`; o Go é dono do laço, grava o estado e adquire o lock em `.forge/runtime/chat/locks` (ADR-0015, ADR-0016). `leque.go`: um worktree por task paralela e junção (`PrepararLeque`).
 
 ### `internal/monitor`
 **Responsabilidade:** observação sem efeito colateral.
@@ -98,7 +100,13 @@ flowchart LR
 - `governance`: importação seletiva de regras externas (`ARQ-05`), bloqueando termos de cliente.
 
 ### `internal/scaffold` & `templates/`
-**Responsabilidade:** renderização da árvore SDD via `embed.FS` e sincronia com `internal/scaffold/testdata/golden/` (`GOV-01`). Inclui as 5 skills por estação em `.agents/skills/` (`sdd-concepcao`, `sdd-planejamento`, `sdd-build`, `sdd-governanca`, `sdd-operacao`), as rules em `.agents/rules/`, os comandos e os adaptadores por agente. `migrate.go` migra layouts antigos.
+**Responsabilidade:** renderização da árvore SDD via `embed.FS` e sincronia com `internal/scaffold/testdata/golden/` (`GOV-01`). Inclui as skills em `.agents/skills/` (`sdd-concepcao`, `sdd-planejamento`, `sdd-build`, `sdd-governanca`, `sdd-operacao`, hoje material de apoio das 3 sessões; ver `obsoletos.md` da iniciativa 104), as rules em `.agents/rules/`, os comandos e os adaptadores por agente. `migrate.go` migra layouts antigos. `hooks.go`: hook `SessionStart` do doctor, MCP `forge-sdd` e **gravação segura** (`checkSafeTarget`, `writeFileSafe`: recusa link simbólico e destino fora do projeto, grava por temporário e rename; ADR-0018).
 
 ### `internal/acp`
-**Responsabilidade:** servidor Agent Client Protocol (JSON-RPC 2.0 por stdio e HTTP/SSE) para IDEs externas (`forge acp`).
+**Responsabilidade:** servidor Agent Client Protocol (JSON-RPC 2.0 por stdio e HTTP/SSE) para IDEs externas (`forge acp`). `mcp.go` expõe, por `forge mcp serve`, só a ferramenta `forge_doctor`, somente leitura, com saída saneada (`mcpSaneia`; ADR-0017).
+
+### `internal/harness`
+**Responsabilidade:** contratos entre etapas do modo chat com decodificação estrita (`build.go`, `parecer.go`, `harness.go`, `skill.go`) e o **lock por iniciativa** (`lock.go`: `AdquirirLock`, `Renovar`, `Liberar`, lease com recuperação de lock órfão; ADR-0016).
+
+### `internal/doctor`
+**Responsabilidade:** `Diagnose` do harness (`harness.go`), somente leitura, usado por `forge doctor --harness` e pela ferramenta MCP `forge_doctor`.
