@@ -43,6 +43,7 @@ go test -list 'TestAgentModelsRecusaValorInvalido' ./internal/scaffold | grep -F
 go test ./internal/scaffold -run 'TestAgentModelsRecusaValorInvalido'
 # negativo: update pelo comando recusa valor inválido sem gravar
 go test -list 'TestUpdateAgentModels_ValorInvalidoErraSemGravar' ./cmd/forge-sdd | grep -F 'TestUpdateAgentModels_ValorInvalidoErraSemGravar' >/dev/null
+go test ./cmd/forge-sdd -run 'TestUpdateAgentModels_ValorInvalidoErraSemGravar'
 go test ./cmd/forge-sdd -run 'TestUpdateAgentModels'
 go vet ./... && go test ./...
 ```
