@@ -17,6 +17,19 @@ const inboxHookCommand = "forge inbox --unread --hook"
 // sobrescrever a configuração do usuário (SEG-02): cria o arquivo se faltar, acrescenta só a
 // entrada do inbox, não duplica e nunca toca em JSON inválido. Devolve true se o arquivo mudou.
 func MergeClaudeInboxHook(targetDir string) (bool, error) {
+	return mergeClaudeHook(targetDir, "UserPromptSubmit", inboxHookCommand, []string{"forge inbox", "forge-sdd inbox"})
+}
+
+// doctorHookCommand roda o diagnóstico do harness ao abrir a sessão; a saída vira contexto.
+const doctorHookCommand = "forge doctor --harness"
+
+// MergeClaudeSessionStartHook garante o hook SessionStart do doctor em .claude/settings.json, com
+// as mesmas garantias do hook do inbox (não sobrescreve, não duplica, não toca JSON inválido).
+func MergeClaudeSessionStartHook(targetDir string) (bool, error) {
+	return mergeClaudeHook(targetDir, "SessionStart", doctorHookCommand, []string{"forge doctor", "forge-sdd doctor"})
+}
+
+func mergeClaudeHook(targetDir, event, command string, markers []string) (bool, error) {
 	path := filepath.Join(targetDir, ".claude", "settings.json")
 	root := map[string]any{}
 
@@ -25,7 +38,7 @@ func MergeClaudeInboxHook(targetDir string) (bool, error) {
 	case err == nil:
 		dec := json.NewDecoder(bytes.NewReader(data))
 		if err := dec.Decode(&root); err != nil {
-			return false, fmt.Errorf("%s não é JSON válido; adicione o hook manualmente (%s): %w", path, inboxHookCommand, err)
+			return false, fmt.Errorf("%s não é JSON válido; adicione o hook manualmente (%s): %w", path, command, err)
 		}
 		if dec.More() {
 			return false, fmt.Errorf("%s tem conteúdo extra após o objeto JSON; adicione o hook manualmente", path)
@@ -46,17 +59,20 @@ func MergeClaudeInboxHook(targetDir string) (bool, error) {
 	if hooks == nil {
 		hooks = map[string]any{}
 	}
-	groups, ok := hooks["UserPromptSubmit"].([]any)
-	if hooks["UserPromptSubmit"] != nil && !ok {
-		return false, fmt.Errorf("%s: \"hooks.UserPromptSubmit\" não é uma lista; adicione o hook manualmente", path)
+	groups, ok := hooks[event].([]any)
+	if hooks[event] != nil && !ok {
+		return false, fmt.Errorf("%s: \"hooks.%s\" não é uma lista; adicione o hook manualmente", path, event)
 	}
 	for _, g := range groups {
 		if gm, ok := g.(map[string]any); ok {
 			if inner, ok := gm["hooks"].([]any); ok {
 				for _, h := range inner {
 					if hm, ok := h.(map[string]any); ok {
-						if cmd, _ := hm["command"].(string); strings.Contains(cmd, "forge inbox") || strings.Contains(cmd, "forge-sdd inbox") {
-							return false, nil // já instalado
+						cmd, _ := hm["command"].(string)
+						for _, m := range markers {
+							if strings.Contains(cmd, m) {
+								return false, nil // já instalado
+							}
 						}
 					}
 				}
@@ -64,9 +80,9 @@ func MergeClaudeInboxHook(targetDir string) (bool, error) {
 		}
 	}
 	groups = append(groups, map[string]any{
-		"hooks": []any{map[string]any{"type": "command", "command": inboxHookCommand}},
+		"hooks": []any{map[string]any{"type": "command", "command": command}},
 	})
-	hooks["UserPromptSubmit"] = groups
+	hooks[event] = groups
 	root["hooks"] = hooks
 
 	out, err := json.MarshalIndent(root, "", "  ")
@@ -74,6 +90,51 @@ func MergeClaudeInboxHook(targetDir string) (bool, error) {
 		return false, err
 	}
 	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+		return false, err
+	}
+	if err := os.WriteFile(path, append(out, '\n'), 0o644); err != nil {
+		return false, fmt.Errorf("gravar %s: %w", path, err)
+	}
+	return true, nil
+}
+
+// mcpServerName é a chave do servidor forge-sdd em .mcp.json.
+const mcpServerName = "forge-sdd"
+
+// MergeClaudeMCPServer registra `forge mcp serve` em .mcp.json (Claude Code) sem sobrescrever o
+// que o usuário já tem: cria o arquivo se faltar, acrescenta só a entrada forge-sdd, não duplica
+// e nunca toca em JSON inválido. Devolve true se o arquivo mudou.
+func MergeClaudeMCPServer(targetDir string) (bool, error) {
+	path := filepath.Join(targetDir, ".mcp.json")
+	root := map[string]any{}
+	data, err := os.ReadFile(path)
+	switch {
+	case err == nil:
+		dec := json.NewDecoder(bytes.NewReader(data))
+		if err := dec.Decode(&root); err != nil || root == nil {
+			return false, fmt.Errorf("%s não é um objeto JSON válido; registre o servidor manualmente (forge mcp serve): %v", path, err)
+		}
+		if dec.More() {
+			return false, fmt.Errorf("%s tem conteúdo extra após o objeto JSON; registre o servidor manualmente", path)
+		}
+	case errors.Is(err, os.ErrNotExist):
+	default:
+		return false, fmt.Errorf("ler %s: %w", path, err)
+	}
+	servers, ok := root["mcpServers"].(map[string]any)
+	if root["mcpServers"] != nil && !ok {
+		return false, fmt.Errorf("%s: \"mcpServers\" não é um objeto; registre o servidor manualmente", path)
+	}
+	if servers == nil {
+		servers = map[string]any{}
+	}
+	if _, existe := servers[mcpServerName]; existe {
+		return false, nil
+	}
+	servers[mcpServerName] = map[string]any{"command": "forge", "args": []any{"mcp", "serve"}}
+	root["mcpServers"] = servers
+	out, err := json.MarshalIndent(root, "", "  ")
+	if err != nil {
 		return false, err
 	}
 	if err := os.WriteFile(path, append(out, '\n'), 0o644); err != nil {

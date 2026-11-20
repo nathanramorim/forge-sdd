@@ -2,7 +2,7 @@
 
 **Iniciativa:** 104-pipeline-em-subagentes
 **Branch:** feat/104-pipeline-em-subagentes
-**Status:** draft (aguarda Gate 1)
+**Status:** implementada (aguarda revisão)
 **Depende de:** feat-104-03
 
 ## Problema
@@ -48,3 +48,10 @@ go vet ./... && go test ./...
 
 ## A confirmar no Gate 1
 O app desktop usa os mesmos hooks? (suposição). Nome do subcomando `mcp serve` (muda a lista de `ARQ-06`).
+
+## Decisões da implementação
+- Subcomando `forge mcp serve [--dir]` (stdio); `mcp` entra na lista de `ARQ-06` da Constitution. `internal/acp/mcp.go` cria um despachador próprio (initialize, ping, tools/list, tools/call), sem os métodos ACP; a spec citava `harness.Diagnose`, o pacote real é `doctor.Diagnose`.
+- Somente leitura: o diretório vem da flag, nunca do cliente; `arguments` não vazio é recusado (`-32602`); nome de ferramenta desconhecido volta como `-32602`, sanitizado (controles, ESC, bidi) e truncado; relatório passa por `ValidateRelatorio`, `json.Valid` e limite de 64 KB; nada vindo do cliente é executado.
+- `MergeClaudeSessionStartHook` (`forge doctor --harness`) e `MergeClaudeMCPServer` (`.mcp.json`, chave `forge-sdd`) reusam o merge seguro do inbox, instalados só por `init`/`update` (nunca escrita silenciosa); idempotentes, JSON inválido intocado.
+- Instrução (`forge_doctor` ou `forge doctor --harness`, avisar se não rodou) vai na linha de MCPs de CLAUDE/AGENTS/GEMINI; Codex lê AGENTS.md. Para caber no orçamento de 1536 bytes encurtei a linha de planejamento.
+- Suposição do desktop (mesmos hooks e MCPs) segue não verificada; vale a instrução. Manual pendente: abrir desktop e Codex.
