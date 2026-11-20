@@ -6,7 +6,9 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strconv"
+	"strings"
 	"sync/atomic"
 	"time"
 )
@@ -46,13 +48,22 @@ func (l *Lock) Caminho() string { return l.path }
 // AdquirirLock tenta obter o lock de iniciativa em dirLocks. Devolve ErrLockOcupado se outro dono
 // tem uma lease ainda válida em now. Um lock com lease vencida é tomado.
 func AdquirirLock(dirLocks, iniciativa, dono string, lease time.Duration, now time.Time) (*Lock, error) {
-	if iniciativa == "" || dono == "" || lease <= 0 {
-		return nil, fmt.Errorf("lock: iniciativa, dono e lease positiva são obrigatórios")
+	if lease <= 0 {
+		return nil, fmt.Errorf("lock: lease positiva é obrigatória")
+	}
+	if err := validarIniciativaLock(iniciativa); err != nil {
+		return nil, err
+	}
+	if err := validarDonoLock(dono); err != nil {
+		return nil, err
 	}
 	if err := os.MkdirAll(dirLocks, 0o755); err != nil {
 		return nil, fmt.Errorf("lock: criar %s: %w", dirLocks, err)
 	}
 	l := &Lock{path: filepath.Join(dirLocks, iniciativa+".lock"), dono: dono, lease: lease}
+	if rel, err := filepath.Rel(dirLocks, l.path); err != nil || strings.HasPrefix(rel, "..") || strings.ContainsRune(rel, filepath.Separator) {
+		return nil, fmt.Errorf("lock: caminho %q sai de %s", l.path, dirLocks)
+	}
 	for tentativa := 0; tentativa < 8; tentativa++ {
 		ok, err := l.criar(now)
 		if err != nil {
@@ -190,4 +201,32 @@ var seqTmp atomic.Uint64
 // sufixoUnico distingue arquivos temporários de goroutines e processos (o relógio sozinho repete).
 func sufixoUnico() string {
 	return strconv.Itoa(os.Getpid()) + "." + strconv.FormatUint(seqTmp.Add(1), 36) + "." + strconv.FormatInt(time.Now().UnixNano(), 36)
+}
+
+// slugIniciativaLock repete a regra de layout.ValidInitiative (harness não importa o projeto,
+// para evitar ciclos); um teste no pacote pipeline mantém as duas iguais.
+var slugIniciativaLock = regexp.MustCompile(`^[a-z0-9]+(-[a-z0-9]+)+$`)
+
+const (
+	maxIniciativaLock = 100
+	maxDonoLock       = 64
+)
+
+func validarIniciativaLock(id string) error {
+	if len(id) > maxIniciativaLock || !slugIniciativaLock.MatchString(id) {
+		return fmt.Errorf("lock: iniciativa %q inválida (use <id>-<nome>, minúsculas, dígitos e hífen, até %d caracteres)", id, maxIniciativaLock)
+	}
+	return nil
+}
+
+func validarDonoLock(dono string) error {
+	if strings.TrimSpace(dono) == "" || len(dono) > maxDonoLock {
+		return fmt.Errorf("lock: dono vazio ou com mais de %d caracteres", maxDonoLock)
+	}
+	for _, r := range dono {
+		if r < 0x20 || r == 0x7f {
+			return fmt.Errorf("lock: dono com caractere de controle")
+		}
+	}
+	return nil
 }

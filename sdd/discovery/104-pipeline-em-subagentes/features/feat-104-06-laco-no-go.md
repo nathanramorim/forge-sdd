@@ -41,6 +41,11 @@ Nenhuma (`SEG-07`).
 set -o pipefail
 go test -list 'TestLockPorIniciativa|TestRetornoEscalaNoTeto|TestLegueParcialRepeteSoFalho|TestRetomaDoUltimoEstado' ./internal/pipeline | grep -F 'TestLockPorIniciativa' >/dev/null
 go test -list 'TestRetornoEscalaNoTeto' ./internal/pipeline | grep -F 'TestRetornoEscalaNoTeto' >/dev/null
+go test -list 'TestLockNomeInvalidoNaoSaiDoDiretorio' ./internal/harness | grep -F 'TestLockNomeInvalidoNaoSaiDoDiretorio' >/dev/null
+# negativo: nome de iniciativa com ../ ou separador é recusado e nada é criado fora do diretório de locks
+go test ./internal/harness -run 'TestLockNomeInvalidoNaoSaiDoDiretorio'
+go test -list 'TestLockNomeIgualAoLayout' ./internal/pipeline | grep -F 'TestLockNomeIgualAoLayout' >/dev/null
+go test ./internal/pipeline -run 'TestLockNomeIgualAoLayout'
 go test ./internal/pipeline -run 'TestLockPorIniciativa|TestRetornoEscalaNoTeto|TestLegueParcialRepeteSoFalho|TestRetomaDoUltimoEstado'
 # negativo: segundo coordenador na mesma iniciativa falha; na 4a devolução escala
 go test ./internal/pipeline -run 'TestLockPorIniciativa|TestRetornoEscalaNoTeto'
@@ -56,3 +61,4 @@ go vet ./... && go test ./...
 - **Escalada pelo retorno, não pelo inbox:** o laço devolve `Retorno` com achados (arquivo e linha, sanitizados, FLX-08) e o menu (`Opcoes`, `Recomendada`, RN-9); notificar a pessoa fica para a camada de entrada (feat-104-09), para não duplicar `ApplyVerdict` do modo `sessions`.
 - **Leque sequencial:** as tasks do lote rodam em ordem; paralelismo com worktree por subagente é a feat-104-07. Falha de build ou review deixa a task em `falhou` e o lote em `parcial`; `Retomar` repete só o que falhou ou parou no meio.
 - Estado gravado em `.forge/runtime/chat/<iniciativa>.json`.
+- **Validação do lock (SEG-01):** `AdquirirLock` valida por conta própria a iniciativa (mesma regra de `layout.ValidInitiative`, copiada porque `harness` não importa o projeto; `TestLockNomeIgualAoLayout` compara as duas), o `dono` (sem controle, até 64 caracteres) e confere com `filepath.Rel` que o arquivo fica dentro do diretório de locks. No laço, `arquivoLaco` valida a iniciativa com `layout.ValidInitiative` antes de montar o caminho do estado e o `dono` só é gravado no lock, que o valida; nenhuma outra gravação usa esses nomes.

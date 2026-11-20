@@ -305,3 +305,12 @@ func TestLimiteDeVoltas(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, 2, n)
 }
+
+// A regra de nome do lock (harness) repete a de layout.ValidInitiative; os dois têm de concordar.
+func TestLockNomeIgualAoLayout(t *testing.T) {
+	casos := []string{"104-x", "104-pipeline-em-subagentes", "a-b", "x", "104", "-x", "x-", "a--b", "A-b", "a_b", "../fuga", "..", "a/b", "", "a b", "104-x\n", "é-a"}
+	for _, nome := range casos {
+		_, err := harness.AdquirirLock(t.TempDir(), nome, "chat", time.Minute, tLaco)
+		assert.Equal(t, layout.ValidInitiative(nome), err == nil, "nome %q", nome)
+	}
+}

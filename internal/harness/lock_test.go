@@ -4,6 +4,7 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"testing"
@@ -75,7 +76,7 @@ func TestLock_ParametrosInvalidos(t *testing.T) {
 		ini, dono string
 		lease     time.Duration
 	}{
-		{"", "a", time.Minute}, {"x", "", time.Minute}, {"x", "a", 0},
+		{"", "a", time.Minute}, {"104-x", "", time.Minute}, {"104-x", "a", 0}, {"x", "a", time.Minute},
 	} {
 		_, err := AdquirirLock(dir, c.ini, c.dono, c.lease, t0)
 		assert.Error(t, err)
@@ -117,4 +118,29 @@ func TestLock_ConcorrenciaUmSoVence(t *testing.T) {
 		assert.EqualValues(t, 1, vencedores.Load(), "órfão=%v: exatamente um vence", orfao)
 		assert.EqualValues(t, 31, ocupados.Load())
 	}
+}
+
+func TestLockNomeInvalidoNaoSaiDoDiretorio(t *testing.T) {
+	base := t.TempDir()
+	dir := filepath.Join(base, "locks")
+	ruins := []string{"../fuga", "../../fuga", "..", "a/b", "/etc/x", "", "104-x\nfuga", "104 x", "104-X", "104-x\x00", strings.Repeat("a-", 80)}
+	for _, nome := range ruins {
+		_, err := AdquirirLock(dir, nome, "ensaio", time.Minute, t0)
+		assert.Error(t, err, "nome %q deve ser recusado", nome)
+	}
+	for _, dono := range []string{"", "  ", "a\nb", "a\x1b[0m", strings.Repeat("d", 65)} {
+		_, err := AdquirirLock(dir, "104-x", dono, time.Minute, t0)
+		assert.Error(t, err, "dono %q deve ser recusado", dono)
+	}
+	var achados []string
+	require.NoError(t, filepath.WalkDir(base, func(p string, d os.DirEntry, err error) error {
+		if err == nil && !d.IsDir() {
+			achados = append(achados, p)
+		}
+		return err
+	}))
+	assert.Empty(t, achados, "nenhum arquivo pode ser criado, dentro ou fora de dirLocks")
+	l, err := AdquirirLock(dir, "104-valido", "chat", time.Minute, t0)
+	require.NoError(t, err)
+	assert.Equal(t, dir, filepath.Dir(l.Caminho()))
 }
