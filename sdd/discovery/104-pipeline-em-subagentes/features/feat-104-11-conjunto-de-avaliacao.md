@@ -2,7 +2,7 @@
 
 **Iniciativa:** 104-pipeline-em-subagentes
 **Branch:** feat/104-pipeline-em-subagentes
-**Status:** draft (aguarda Gate 1)
+**Status:** implementada (2026-11-20)
 **Depende de:** feat-104-02
 
 ## Problema
@@ -37,6 +37,7 @@ Nenhuma (`SEG-07`).
 ```bash
 set -o pipefail
 go test -list 'TestEvalComparaModos|TestEvalCriteriosTemNegativo' ./internal/monitor | grep -F 'TestEvalComparaModos' >/dev/null
+go test -list 'TestEvalComparaModos|TestEvalCriteriosTemNegativo' ./internal/monitor | grep -F 'TestEvalCriteriosTemNegativo' >/dev/null
 go test ./internal/monitor -run 'TestEvalComparaModos|TestEvalCriteriosTemNegativo'
 # negativo: feature de referência cujo critério não falha no caso ruim reprova o conjunto
 go test ./internal/monitor -run 'TestEvalCriteriosTemNegativo'
@@ -44,5 +45,12 @@ go vet ./... && go test ./...
 ```
 - Teste negativo: feature de referência cujo critério não falha no caso ruim reprova o conjunto.
 
-## A confirmar no Gate 1
-Quantas features (10 ou 20) e qual repositório de exemplo.
+## Decisões da implementação
+- **Quantas features:** 10 (piso da faixa; o carregador aceita de 10 a 20, então crescer não muda código).
+- **Repositório de exemplo:** módulo Go isolado em `sdd/eval/exemplo/` (go.mod próprio, fora do `go test ./...` da raiz), sem repositório externo.
+- **Validação:** `LoadEvalRefs` reusa `gate.ExtractCriteriaBlock` e `gate.CriteriaProblems` (P-25); uma referência com problema, uma simulação incompleta ou um total fora de 10 a 20 reprovam o conjunto inteiro.
+- **Simulador:** `forge eval run` usa só o `simulacao.json` de cada referência (valores fixados, não medições). A execução com modelo real não entra nesta feature: tem custo e ficará atrás de um comando manual numa feature posterior.
+- **Métricas:** `sdd/.metrics/eval-<modo>.json` tem estrutura própria; `schema.json` (por sessão) não foi alterado, e os leitores de telemetria já filtram `session-*.json`.
+
+## Status
+- [x] Implementada em 2026-11-20 (branch `feat/104-11-avaliacao`).
