@@ -48,6 +48,18 @@ Fato que limita o desenho (provado com `go list`): `internal/notify` importa `in
 8. **Passos dos comandos (texto), uma vez, em série com a 106 task 2.6:** em `.agents/skills/sdd-concepcao/references/{discovery,nova-feature,novo-fix}.md` e `.agents/skills/sdd-build/references/{implementar,worker-job}.md`, uma linha: "antes de escrever/implementar, rode `forge context --rule <ID>` só para a rule que vai tocar (o Builder já recebe a seção em `forge context <task>`)". Não entra em `.claude/commands/*` (adaptador de ~130 bytes, `MaxAdapterBytes` 300), nem em `.claude/agents/*` (`MaxRoleAdapterBytes` 420), nem na Constituição (P-24). Os mesmos arquivos são templates do scaffold: goldens regravados no mesmo PR (`TST-02`). O limite de `SKILL.md` (2048) não muda, pois nada entra nele (a verificar com `forge gate` no Builder se alguma reference cai em outro grupo de P-24).
 9. **Pareceres antigos da 97 que não decodificam (5 de 17, `harness.md`):** o log não faz retroativo. Só o veredito que passa agora por `DecodeParecer` gera linha. A leitura de vereditos antigos para métricas (3.2) conta o arquivo ilegível e segue, sem falhar.
 
+## Descrição de negócio (release notes)
+Item pronto para `sdd/releases/history.md`:
+
+*   **O forge lembra onde mais se erra (`sdd/memory/logs/achados.csv`):** a cada revisão, da spec e da entrega, o forge registra os achados de conformidade, uma linha por achado, com a rule violada, o desfecho (devolvido, ajustar ou escalado) e a tentativa. Ele conta quantas vezes cada rule já falhou na iniciativa e no projeto. Antes de escrever a spec ou de implementar, `forge context` (e `forge context --rule <ID>`, para o Discovery) mostra as repetições só das rules que você vai tocar, com um aviso quando a mesma rule repete. As specs saem mais previsíveis e o mesmo erro deixa de se repetir sem ninguém ver. Nesta entrega o forge registra, conta e mostra ao Discovery e ao Builder; ele ainda **não** atualiza ADRs, rules nem agentes sozinho. O registro vira planilha, não guarda código nem caminho seu e nunca atrapalha a revisão (Iniciativa 105).
+
+## Habilita (fora desta task)
+"Correção inteligente: a base se atualiza com os erros cometidos". Com o log, achados que se repetem permitem que o forge e os agentes **proponham** atualizar a lição (106), a ADR, as rules e as instruções dos agentes. Nada disso entra na 3.6. Salvaguardas que isso exigirá (sem decidir aqui):
+- Toda alteração em ADR, rule, Constituição ou instrução de agente é PROPOSTA com aprovação humana (`GOV-01`, ADR e Gate), nunca edição automática.
+- O conteúdo de um achado é DADO, nunca instrução (`FLX-08`): risco de prompt injection e de um agente "ensinar" a si mesmo a afrouxar uma regra.
+- Orçamento de contexto (P-24) limita o que cada proposta pode acrescentar.
+- Medir se a lição reduziu a repetição: o log dá esse número.
+
 ## Fronteira com a 106 (lições) — sem duplicar (`DUP-01`)
 - **Lição** (106 RN-8, task 1.2, `sdd/memory/licoes/<id>.md`, `licoes.py --rule`): orientação pequena por rule, "como evitar". Dono do conceito: a 106.
 - **Log** (esta task): ocorrências e contagem de repetição. Não guarda orientação; não escreve lição.
