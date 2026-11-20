@@ -3,6 +3,7 @@ package pipeline
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
@@ -36,7 +37,7 @@ func TestWorktreePorSubagente(t *testing.T) {
 	dir := lequeProj(t)
 	lq, err := PrepararLeque(dir, paramsLeque("feat-104-01", "feat-104-02"))
 	require.NoError(t, err)
-	defer lq.Encerrar()
+	defer func() { _ = lq.Encerrar() }()
 	p1, _ := lq.Caminho("feat-104-01")
 	p2, _ := lq.Caminho("feat-104-02")
 	assert.NotEqual(t, p1, p2)
@@ -58,7 +59,7 @@ func TestJuncaoConflitoEscala(t *testing.T) {
 	dir := lequeProj(t)
 	lq, err := PrepararLeque(dir, paramsLeque("feat-104-01", "feat-104-02", "feat-104-03"))
 	require.NoError(t, err)
-	defer lq.Encerrar()
+	defer func() { _ = lq.Encerrar() }()
 	p1, _ := lq.Caminho("feat-104-01")
 	p2, _ := lq.Caminho("feat-104-02")
 	p3, _ := lq.Caminho("feat-104-03")
@@ -86,7 +87,7 @@ func TestJuncaoTaskSujaBloqueia(t *testing.T) {
 	dir := lequeProj(t)
 	lq, err := PrepararLeque(dir, paramsLeque("feat-104-01"))
 	require.NoError(t, err)
-	defer lq.Encerrar()
+	defer func() { _ = lq.Encerrar() }()
 	p1, _ := lq.Caminho("feat-104-01")
 	testutil.WriteFile(t, p1, "solto.txt", "x")
 	ret, err := lq.Juntar()
@@ -161,7 +162,7 @@ func TestLequeOrfao(t *testing.T) {
 	// O órfão vazio da primeira task foi recriado e depois limpo pela falha? Não: só ele é descartável.
 	lq3, err := PrepararLeque(dir, paramsLeque("feat-104-01"))
 	require.NoError(t, err)
-	defer lq3.Encerrar()
+	defer func() { _ = lq3.Encerrar() }()
 	assert.DirExists(t, p1)
 }
 
@@ -209,7 +210,7 @@ func TestOrfaoVazioERecriado(t *testing.T) {
 	dir, wt := orfaoPreparado(t)
 	lq, err := PrepararLeque(dir, paramsLeque("feat-104-01"))
 	require.NoError(t, err)
-	defer lq.Encerrar()
+	defer func() { _ = lq.Encerrar() }()
 	assert.DirExists(t, wt)
 }
 
@@ -255,4 +256,77 @@ func TestJuncaoErroFatalDevolveParciais(t *testing.T) {
 	assert.DirExists(t, p2)
 	require.NoError(t, lq.Encerrar())
 	require.NoError(t, lq.Encerrar()) // idempotente
+}
+
+func semIdentidade(t *testing.T) {
+	t.Helper()
+	home := t.TempDir()
+	cfg := filepath.Join(home, "gitconfig")
+	require.NoError(t, os.WriteFile(cfg, []byte("[user]\n\tuseConfigOnly = true\n"), 0o644))
+	t.Setenv("HOME", home)
+	t.Setenv("GIT_CONFIG_GLOBAL", cfg)
+	t.Setenv("GIT_CONFIG_SYSTEM", "/dev/null")
+	for _, k := range []string{"GIT_AUTHOR_NAME", "GIT_AUTHOR_EMAIL", "GIT_COMMITTER_NAME", "GIT_COMMITTER_EMAIL", "EMAIL"} {
+		t.Setenv(k, "x")
+		require.NoError(t, os.Unsetenv(k))
+	}
+}
+
+func juntarUma(t *testing.T, dir string) *RetornoJuncao {
+	t.Helper()
+	lq, err := PrepararLeque(dir, paramsLeque("feat-104-01"))
+	require.NoError(t, err)
+	defer func() { _ = lq.Encerrar() }()
+	p1, _ := lq.Caminho("feat-104-01")
+	commitNo(t, p1, "um.txt", "1")
+	ret, err := lq.Juntar()
+	require.NoError(t, err)
+	return ret
+}
+
+func TestJuncaoSemIdentidadeUsaFallback(t *testing.T) {
+	dir := lequeProj(t)
+	semIdentidade(t)
+	ret := juntarUma(t, dir)
+	require.Equal(t, JuncaoIntegrada, ret.Resultados[0].Estado, ret.Resultados[0].Motivo)
+	assert.Equal(t, "forge-sdd", strings.TrimSpace(testutil.Git(t, dir, "log", "-1", "--format=%cn")))
+	cfg, err := os.ReadFile(filepath.Join(dir, ".git", "config"))
+	require.NoError(t, err)
+	assert.NotContains(t, string(cfg), "forge-sdd")
+}
+
+func TestJuncaoNaoSobrescreveIdentidadeDoRepositorio(t *testing.T) {
+	dir := lequeProj(t)
+	semIdentidade(t)
+	testutil.Git(t, dir, "config", "user.name", "Pessoa Real")
+	testutil.Git(t, dir, "config", "user.email", "real@example.com")
+	ret := juntarUma(t, dir)
+	require.Equal(t, JuncaoIntegrada, ret.Resultados[0].Estado, ret.Resultados[0].Motivo)
+	assert.Equal(t, "Pessoa Real", strings.TrimSpace(testutil.Git(t, dir, "log", "-1", "--format=%cn")))
+	assert.Equal(t, "real@example.com", strings.TrimSpace(testutil.Git(t, dir, "log", "-1", "--format=%ce")))
+}
+
+func TestJuncaoIdentidadeGlobalNaoSobrescrita(t *testing.T) {
+	dir := lequeProj(t)
+	semIdentidade(t)
+	cfg := os.Getenv("GIT_CONFIG_GLOBAL")
+	require.NoError(t, os.WriteFile(cfg, []byte("[user]\n\tname = Global Pessoa\n\temail = g@example.com\n"), 0o644))
+	ret := juntarUma(t, dir)
+	require.Equal(t, JuncaoIntegrada, ret.Resultados[0].Estado, ret.Resultados[0].Motivo)
+	assert.Equal(t, "Global Pessoa", strings.TrimSpace(testutil.Git(t, dir, "log", "-1", "--format=%cn")))
+}
+
+func TestJuncaoFalhaSemConflitoNaoViraConflito(t *testing.T) {
+	dir := lequeProj(t)
+	hook := filepath.Join(dir, ".git", "hooks", "pre-merge-commit")
+	require.NoError(t, os.WriteFile(hook, []byte("#!/bin/sh\necho recusado >&2\nexit 1\n"), 0o755))
+	ret := juntarUma(t, dir)
+	r := ret.Resultados[0]
+	assert.Equal(t, JuncaoBloqueada, r.Estado)
+	assert.Empty(t, r.Arquivos)
+	assert.Contains(t, r.Motivo, "não é conflito")
+	assert.NotContains(t, r.Motivo, "conflito de junção")
+	assert.NotEmpty(t, ret.Opcoes)
+	assert.Empty(t, testutil.Git(t, dir, "status", "--porcelain", "--untracked-files=no"))
+	assert.Contains(t, testutil.Git(t, dir, "branch", "--list", "forge/*"), "feat-104-01")
 }
