@@ -7,9 +7,31 @@ import (
 	"testing"
 	"time"
 
+	"github.com/forge-sdd/cli/internal/layout"
+	"github.com/forge-sdd/cli/internal/testutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
+
+// Em branch por feature (Regra 15 com exceção), o P-21 mede o status.md da iniciativa e não o
+// progress.md legado.
+func TestGateEmBranchPorFeature(t *testing.T) {
+	dir := setupGateDir(t)
+	testutil.InitRepo(t, dir, "feat/106-11-parecer")
+	t.Setenv("FORGE_INICIATIVA", "")
+	layout.SetOverride("")
+	t.Cleanup(func() { layout.SetOverride("") })
+	big := strings.Repeat("a", MaxProgressBytes+10)
+	require.NoError(t, os.MkdirAll(filepath.Join(dir, "sdd", "discovery", "106-pr-draft"), 0o755))
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "sdd", "discovery", "106-pr-draft", "status.md"), []byte(big), 0o644))
+
+	results, err := RunChecks(dir, Options{})
+	require.NoError(t, err)
+	p21, ok := findCheck(results, "P-21")
+	require.True(t, ok)
+	assert.False(t, p21.Passed, "o progress.md legado é pequeno; só o status.md da iniciativa estoura")
+	assert.Contains(t, p21.Evidence, "status.md da iniciativa")
+}
 
 func setupGateDir(t *testing.T) string {
 	t.Helper()

@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/forge-sdd/cli/internal/config"
+	"github.com/forge-sdd/cli/internal/layout"
 	"github.com/forge-sdd/cli/internal/scaffold"
 	"github.com/forge-sdd/cli/internal/survey"
 	"github.com/spf13/cobra"
@@ -24,6 +25,33 @@ var rootCmd = &cobra.Command{
 (sdd/, .agents/, arquivos de instrução por agente) e conduz o fluxo em 3 sessões
 (Discovery, Builder, Reviewer) com aprovação humana. Funciona com Claude Code,
 Gemini CLI, Codex e GitHub Copilot.`,
+	// Ponto único: grava a flag --iniciativa e, nos comandos que leem a fila ou o status da
+	// iniciativa, falha cedo se ela for ambígua ou inexistente (nada lê a fila legada).
+	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+		id, _ := cmd.Flags().GetString("iniciativa")
+		layout.SetOverride(id)
+		if !requerIniciativa[cmd.CommandPath()] {
+			return nil
+		}
+		dir := "."
+		if f := cmd.Flags().Lookup("dir"); f != nil {
+			dir = f.Value.String()
+		}
+		return layout.RequireInitiative(dir)
+	},
+}
+
+// requerIniciativa lista os comandos que chamam layout.RequireInitiative antes de ler a fila.
+var requerIniciativa = map[string]bool{
+	"forge queue enqueue":  true,
+	"forge queue next":     true,
+	"forge queue complete": true,
+	"forge queue review":   true,
+	"forge queue list":     true,
+	"forge status":         true,
+	"forge archive":        true,
+	"forge doctor":         true,
+	"forge gate":           true,
 }
 
 var versionCmd = &cobra.Command{
@@ -400,6 +428,7 @@ func init() {
 	initCmd.Flags().Bool("no-telemetry", false, "Desabilitar telemetria local")
 	initCmd.Flags().String("agent", "", "Agente(s) de IA: copilot, claude, gemini (csv, default: copilot)")
 	initCmd.Flags().String("naming-convention", "", "Convenção de nomenclatura: sequencial, hash, workitem")
+	rootCmd.PersistentFlags().String("iniciativa", "", "Iniciativa a usar (id <N>-<nome>); vence FORGE_INICIATIVA e a branch")
 	rootCmd.AddCommand(initCmd)
 
 	updateCmd.Flags().Bool("yes", false, "Pular prompts e usar flags")
