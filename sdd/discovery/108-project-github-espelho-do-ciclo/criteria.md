@@ -50,7 +50,7 @@ Nenhuma (`SEG-07`). O `gh` (CLI do GitHub) já é usado e está em `allow_comman
 | Spec | Pasta `sdd/discovery/<id>-<nome>/` existe; `status.md` sem `spec-para-revisao`; `queue.json` ausente | `/discovery`, `/nova-feature` ou `/novo-fix` abrem a spec | pm-architect (IA) |
 | Spec-validation | Spec aprovada pelo Gate 1 (ou `status.md` com `spec-para-revisao`, 106 RN-4) e **ainda não mesclada** na principal; PR da spec aberto | Spec entregue e script local verde; menu do Gate 1 | pm-architect (IA); humano no Gate 1 |
 | Todo | Spec já na principal e pronta para o Builder (marcador `Gate 1: aprovado`, 106 task 2.2, e PR da spec mesclado); `queue.json` com itens `queued` ou split ainda por fazer (a cargo do Builder, 106) | PR da spec mesclado na principal e Gate 1 aprovado | forge, depois do merge (HUMANO decide) |
-| Building | Item `building` ou `changes_requested`; PR da feature em draft | Builder pega a task (`queue next`); reviewer devolve (`pr_rework`) | forge, a partir da fila (IA) |
+| Building | Item `building` ou `changes_requested`; PR da feature em draft | Builder **começa sozinho** depois do merge da spec, só com spec na principal e dentro do WIP humano da 107 e do teto de 3 tentativas (`queue next`); reviewer devolve (`pr_rework`). Via rápida: item sem `código` pula esta coluna | forge, a partir da fila (IA) |
 | Validation | Trabalho pronto num PR aberto aguardando o dono conferir e mesclar (código, ADR, rule ou documentação); item `review_pending` ou `approved`; `pronto-para-revisao` (106) | `queue complete`, ou veredito conforme | forge, a partir da fila (AUTOMÁTICO) |
 | Done | PR da feature mesclado | Merge feito pelo dono ou pelo adaptador após [Continuar] | forge (HUMANO decide) |
 | (campo `Bloqueado`) | Item `blocked` | `blocked_reason` preenchido | forge; cartão fica na etapa de origem |
@@ -179,6 +179,24 @@ go test -run 'TestPrefixoDoTituloRecusaEtiquetaDesconhecida' ./internal/pipeline
 # negativo: achar a issue pelo título base ou prefixado renomeia e nunca cria duplicata
 go test -list 'TestPrefixoDoTituloRenomeiaSemDuplicar' ./internal/pipeline/ | grep -F 'TestPrefixoDoTituloRenomeiaSemDuplicar'
 go test -run 'TestPrefixoDoTituloRenomeiaSemDuplicar' ./internal/pipeline/
+# via rápida: PR só de adr, rule e documentação (pela etiqueta, sem código) vai de Todo direto para Validation
+go test -list 'TestViaRapidaSemCodigoPulaBuilding' ./internal/pipeline/ | grep -F 'TestViaRapidaSemCodigoPulaBuilding'
+go test -run 'TestViaRapidaSemCodigoPulaBuilding' ./internal/pipeline/
+# negativo: PR de via rápida que passa a conter código volta a Building e avisa o dono
+go test -list 'TestViaRapidaComCodigoVoltaParaBuilding' ./internal/pipeline/ | grep -F 'TestViaRapidaComCodigoVoltaParaBuilding'
+go test -run 'TestViaRapidaComCodigoVoltaParaBuilding' ./internal/pipeline/
+# negativo: a via rápida decide pelos arquivos do PR e nunca pelo texto do cartão
+go test -list 'TestViaRapidaDecidePorArquivosNaoPorTexto' ./internal/pipeline/ | grep -F 'TestViaRapidaDecidePorArquivosNaoPorTexto'
+go test -run 'TestViaRapidaDecidePorArquivosNaoPorTexto' ./internal/pipeline/
+# negativo: Todo para Building só com spec na principal e dentro do WIP humano; no limite não inicia o Builder
+go test -list 'TestTodoParaBuildingExigeSpecNaPrincipalEWIP' ./internal/pipeline/ | grep -F 'TestTodoParaBuildingExigeSpecNaPrincipalEWIP'
+go test -run 'TestTodoParaBuildingExigeSpecNaPrincipalEWIP' ./internal/pipeline/
+# negativo: o início automático nunca é disparado por texto de issue ou de comentário e respeita o teto de 3 tentativas
+go test -list 'TestInicioAutomaticoGatilhoEhEstadoEMergeVerificado' ./internal/pipeline/ | grep -F 'TestInicioAutomaticoGatilhoEhEstadoEMergeVerificado'
+go test -run 'TestInicioAutomaticoGatilhoEhEstadoEMergeVerificado' ./internal/pipeline/
+# negativo: issue aberta com PR mesclado (cartão da issue fora de Done) é listada pelo doctor como divergência
+go test -list 'TestDoctorListaIssueAbertaComPRMesclado' ./internal/doctor/ | grep -F 'TestDoctorListaIssueAbertaComPRMesclado'
+go test -run 'TestDoctorListaIssueAbertaComPRMesclado' ./internal/doctor/
 # negativo: arrastar Spec-validation para Todo sem Gate 1 aprovado e sem o PR da spec mesclado é recusado e só abre o menu
 go test -list 'TestArrastarNaoAprovaGate1SemMenu' ./internal/pipeline/ | grep -F 'TestArrastarNaoAprovaGate1SemMenu'
 go test -run 'TestArrastarNaoAprovaGate1SemMenu' ./internal/pipeline/

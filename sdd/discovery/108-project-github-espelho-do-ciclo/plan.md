@@ -8,6 +8,7 @@ Ordem de baixo para cima: primeiro o mapa e a leitura (sem escrita), depois move
 - **106/2.6 e 0.2:** passos dos comandos e `internal/vcs` (`Adaptador`). A 108/1.2 declara `Quadro` e implementa o adaptador `github` **depois** da 106/0.2 (ou junto, sem duplicar; a verificar quem entra primeiro).
 - **106/1.6:** sinais `spec-para-revisao` e `pronto-para-revisao`; a 108/1.1 só lê.
 - **106/1.6 e 2.6:** a mesma convenção de PR/issue; a 108/2.6 só acrescenta etiquetas ao que a 106 abrir (aplicar depois da 106/2.4, que abre o PR por feature).
+- **107 (WIP humano) e 106 (modo, atestado e [Seguir]):** a 108/2.7 só consome o limite de WIP e o modo; não os redefine.
 - **107:** orquestrador e WIP humano; as references de `sdd-operacao` são compartilhadas. A 108/3.5 só acrescenta `project.md`.
 Colisões de arquivo: `.agents/skills/sdd-operacao/references/`, `internal/vcs`, `forge status`. Regra: um PR por vez em cada arquivo; resolver na ordem de merge.
 
@@ -29,6 +30,7 @@ Colisões de arquivo: `.agents/skills/sdd-operacao/references/`, `internal/vcs`,
 | 2.2 | `forge project move <iniciativa|feature> --para <etapa> [--dry-run]`; `--dry-run` sem efeito; etapa validada na lista fechada | 1.1 | com 2.1 | `ARQ-01`, `ARQ-05`, `TST-03` |
 | 2.3 | Gatilhos: depois de `queue next`, `queue complete`, `queue review` e do Gate 1 o forge chama o movimento (falha do quadro não bloqueia a fila; vira aviso) | 2.1, 2.2 | — | `FLX-06`, `COD-03`, `TST-03` |
 | 2.4 | Sem VCS (`nenhum`) e sem Project configurado: nada é chamado; teste sem `gh` no PATH | 2.1 | com 2.5 | `ARQ-05`, `TST-03` |
+| 2.7 | Via rápida: função pura `ViaRapida(arquivos)` sobre `ClassificaEtiquetas` (sem `código` e com ao menos uma de adr, rule, documentação); Todo vai direto a Validation; volta a Building se aparecer `código` e o dono é avisado | 1.7, 2.3 | com 2.6 | `ARQ-10`, `DUP-01`, `TST-03` |
 | 2.6 | Aplicar etiquetas e o prefixo do título da issue (renomeia a existente em vez de duplicar): ao abrir PR ou issue, calcular pela 1.7 e aplicar no PR e na issue vinculada (`gh pr edit` e `gh issue edit --add-label`); ao mesclar, remover `spec` se há código; nunca remover a etiqueta posta à mão | 1.7, 2.1 | com 2.5 | `SEG-03`, `SEG-08`, `TST-03` |
 | 2.5 | `criar-project.sh` revisado e testado (rascunho desta iniciativa) com o Project real do dono; relatório sem token | 2.1 | com 2.4 | `SEG-04`, `TST-02` |
 
@@ -37,7 +39,8 @@ Colisões de arquivo: `.agents/skills/sdd-operacao/references/`, `internal/vcs`,
 |---|---|---|---|---|
 | 3.1 | Polling: o forge lê a etapa de cada cartão a cada comando e compara com o arquivo; divergência vira pedido, nunca gravação direta; ator conferido (a verificar se o `gh` o expõe) | 1.3, 2.3 | — | `SEG-01`, `TST-03` |
 | 3.2 | Arrastar como pedido: Spec-validation para Todo abre o menu de confirmação e exige Gate 1 aprovado e PR da spec mesclado; Validation para Done exige PR mesclado e atestado conforme o modo da 106 | 3.1; 106/3.2 | — | `FLX-01`, `GOV-01`, `TST-03` |
-| 3.3 | `forge doctor` verifica Project configurado, escopo `project` do `gh`, campo `Status` com as 7 opções e divergências arquivo versus quadro | 3.1 | com 3.4 | `ARQ-01`, `TST-03` |
+| 3.7 | Início automático (D1): regra de Todo para Building (spec na principal, WIP humano da 107, teto de 3 tentativas, modo/atestado da 106); **mecanismo de disparo é decisão aberta do Gate 1** (processo local, rotina na nuvem ou Action, a verificar); o gatilho é estado em arquivo e merge verificado | 2.3, 2.7; 107; 106/2.4 | — | `FLX-01`, `SEG-08`, `TST-03` |
+| 3.3 | `forge doctor` lista issue aberta com PR mesclado e as automações do Project não conferidas (D3, a verificar no Project real); verifica Project configurado, escopo `project` do `gh`, campo `Status` com as 7 opções e divergências arquivo versus quadro | 3.1 | com 3.4 | `ARQ-01`, `TST-03` |
 | 3.4 | Orquestrador (107): expõe a contagem de cartões em Validation para o WIP humano; lê só o campo validado | 3.1; 107 | com 3.3 | `DUP-01`, `SEG-08` |
 | 3.5 | Reference única `.agents/skills/sdd-operacao/references/project.md` (rotina por agente e por coluna) e os comandos `/discovery`, `/nova-feature`, `/novo-fix`, `/implementar`, `/revisar` só a apontam em **uma linha** (templates e goldens junto); P-24 conferido antes e depois | 3.2 | — | `ARQ-03`, `TST-02`, `GOV-01` |
 | 3.6 | Prova ponta a ponta com um Project privado de teste: arquivo para quadro, quadro para menu, ator desconhecido recusado; relatório com o que ficou "a verificar" | 3.1 a 3.5 | — | `FLX-06`, `TST-05` |
