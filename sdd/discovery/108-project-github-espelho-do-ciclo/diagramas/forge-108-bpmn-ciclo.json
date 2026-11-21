@@ -1,7 +1,7 @@
 {
  "kicker": "// Forge SDD · iniciativa 108 · BPMN 1 de 3",
  "titulo": "O caminho de um trabalho pelas 7 colunas do quadro",
- "largura": 2500,
+ "largura": 2800,
  "altura": 860,
  "nota_rodape": "Desenho do que foi decidido; ainda não construído",
  "elementos": [
@@ -39,7 +39,7 @@
   },
   {
    "tipo": "texto",
-   "x": 1260,
+   "x": 1560,
    "y": 126,
    "texto": "BUILDING",
    "estilo": "rotulo",
@@ -47,7 +47,7 @@
   },
   {
    "tipo": "texto",
-   "x": 1560,
+   "x": 1860,
    "y": 126,
    "texto": "VALIDATION",
    "estilo": "rotulo",
@@ -55,7 +55,7 @@
   },
   {
    "tipo": "texto",
-   "x": 2160,
+   "x": 2460,
    "y": 126,
    "texto": "DONE",
    "estilo": "rotulo",
@@ -66,7 +66,7 @@
    "id": "L7",
    "x": 24,
    "y": 150,
-   "w": 2452,
+   "w": 2752,
    "h": 200,
    "texto": "",
    "sub": "",
@@ -75,7 +75,7 @@
   },
   {
    "tipo": "texto",
-   "x": 2452,
+   "x": 2752,
    "y": 180,
    "texto": "HUMANO · o dono",
    "estilo": "rotulo",
@@ -86,7 +86,7 @@
    "id": "L9",
    "x": 24,
    "y": 370,
-   "w": 2452,
+   "w": 2752,
    "h": 200,
    "texto": "",
    "sub": "",
@@ -95,7 +95,7 @@
   },
   {
    "tipo": "texto",
-   "x": 2452,
+   "x": 2752,
    "y": 400,
    "texto": "IA · pm-architect, Builder, Reviewer",
    "estilo": "rotulo",
@@ -106,7 +106,7 @@
    "id": "L11",
    "x": 24,
    "y": 590,
-   "w": 2452,
+   "w": 2752,
    "h": 200,
    "texto": "",
    "sub": "",
@@ -115,7 +115,7 @@
   },
   {
    "tipo": "texto",
-   "x": 2452,
+   "x": 2752,
    "y": 620,
    "texto": "AUTOMÁTICO · sem LLM",
    "estilo": "rotulo",
@@ -131,6 +131,30 @@
    "texto": "Ideia entra",
    "sub": "em Backlog",
    "estilo": "pill",
+   "tamanho": 22
+  },
+  {
+   "tipo": "caixa",
+   "id": "g1",
+   "x": 60,
+   "y": 420,
+   "w": 260,
+   "h": 120,
+   "texto": "◇ Espelho ligado?",
+   "sub": "na Constituição",
+   "estilo": "destaque",
+   "tamanho": 22
+  },
+  {
+   "tipo": "caixa",
+   "id": "n1",
+   "x": 60,
+   "y": 640,
+   "w": 260,
+   "h": 120,
+   "texto": "Só arquivo",
+   "sub": "não consulta o quadro",
+   "estilo": "tracejado",
    "tamanho": 22
   },
   {
@@ -183,8 +207,32 @@
   },
   {
    "tipo": "caixa",
-   "id": "a2",
+   "id": "g2",
    "x": 1260,
+   "y": 640,
+   "w": 260,
+   "h": 120,
+   "texto": "◇ Início automático?",
+   "sub": "ligado na Constituição",
+   "estilo": "destaque",
+   "tamanho": 22
+  },
+  {
+   "tipo": "caixa",
+   "id": "m1",
+   "x": 1260,
+   "y": 200,
+   "w": 260,
+   "h": 120,
+   "texto": "Você inicia o Builder",
+   "sub": "forge up, se desligado",
+   "estilo": "tracejado",
+   "tamanho": 22
+  },
+  {
+   "tipo": "caixa",
+   "id": "a2",
+   "x": 1560,
    "y": 640,
    "w": 260,
    "h": 120,
@@ -196,7 +244,7 @@
   {
    "tipo": "caixa",
    "id": "i3",
-   "x": 1260,
+   "x": 1560,
    "y": 420,
    "w": 260,
    "h": 120,
@@ -208,7 +256,7 @@
   {
    "tipo": "caixa",
    "id": "a3",
-   "x": 1560,
+   "x": 1860,
    "y": 640,
    "w": 260,
    "h": 120,
@@ -220,7 +268,7 @@
   {
    "tipo": "caixa",
    "id": "i4",
-   "x": 1860,
+   "x": 2160,
    "y": 420,
    "w": 260,
    "h": 120,
@@ -232,7 +280,7 @@
   {
    "tipo": "caixa",
    "id": "h3",
-   "x": 2160,
+   "x": 2460,
    "y": 200,
    "w": 260,
    "h": 120,
@@ -243,8 +291,22 @@
   },
   {
    "tipo": "seta",
-   "de": "h1.dir",
-   "para": "i1.cima"
+   "de": "h1.baixo",
+   "para": "g1.cima",
+   "forma": "vertical"
+  },
+  {
+   "tipo": "seta",
+   "de": "g1.dir",
+   "para": "i1.esq",
+   "forma": "horizontal"
+  },
+  {
+   "tipo": "seta",
+   "de": "g1.baixo",
+   "para": "n1.cima",
+   "forma": "vertical",
+   "estilo": "fraca"
   },
   {
    "tipo": "seta",
@@ -266,8 +328,27 @@
   {
    "tipo": "seta",
    "de": "a1.dir",
+   "para": "g2.esq",
+   "forma": "horizontal"
+  },
+  {
+   "tipo": "seta",
+   "de": "g2.dir",
    "para": "a2.esq",
    "forma": "horizontal"
+  },
+  {
+   "tipo": "seta",
+   "de": "g2.cima",
+   "para": "m1.baixo",
+   "forma": "vertical",
+   "estilo": "fraca"
+  },
+  {
+   "tipo": "seta",
+   "de": "m1.dir",
+   "para": "i3.cima",
+   "estilo": "fraca"
   },
   {
    "tipo": "seta",

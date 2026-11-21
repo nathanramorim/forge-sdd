@@ -1,7 +1,7 @@
 {
  "kicker": "// Forge SDD · iniciativa 108 · BPMN 3 de 3",
  "titulo": "Do PR mesclado ao Done e à issue fechada",
- "largura": 1900,
+ "largura": 2220,
  "altura": 940,
  "nota_rodape": "Desenho do que foi decidido; ainda não construído",
  "elementos": [
@@ -10,7 +10,7 @@
    "id": "L0",
    "x": 24,
    "y": 100,
-   "w": 1852,
+   "w": 2172,
    "h": 160,
    "texto": "",
    "sub": "",
@@ -19,7 +19,7 @@
   },
   {
    "tipo": "texto",
-   "x": 1852,
+   "x": 2172,
    "y": 130,
    "texto": "HUMANO · o dono",
    "estilo": "rotulo",
@@ -30,7 +30,7 @@
    "id": "L2",
    "x": 24,
    "y": 280,
-   "w": 1852,
+   "w": 2172,
    "h": 370,
    "texto": "",
    "sub": "",
@@ -39,7 +39,7 @@
   },
   {
    "tipo": "texto",
-   "x": 1852,
+   "x": 2172,
    "y": 310,
    "texto": "AUTOMÁTICO · GitHub e forge, sem LLM",
    "estilo": "rotulo",
@@ -50,7 +50,7 @@
    "id": "L4",
    "x": 24,
    "y": 670,
-   "w": 1852,
+   "w": 2172,
    "h": 190,
    "texto": "",
    "sub": "",
@@ -59,7 +59,7 @@
   },
   {
    "tipo": "texto",
-   "x": 1852,
+   "x": 2172,
    "y": 700,
    "texto": "CARTÕES · dois por trabalho",
    "estilo": "rotulo",
@@ -79,8 +79,32 @@
   },
   {
    "tipo": "caixa",
-   "id": "a1",
+   "id": "g0",
    "x": 60,
+   "y": 340,
+   "w": 260,
+   "h": 120,
+   "texto": "◇ Espelho ligado?",
+   "sub": "na Constituição",
+   "estilo": "destaque",
+   "tamanho": 22
+  },
+  {
+   "tipo": "caixa",
+   "id": "n0",
+   "x": 60,
+   "y": 510,
+   "w": 260,
+   "h": 120,
+   "texto": "Só arquivo",
+   "sub": "o forge não consulta o quadro",
+   "estilo": "tracejado",
+   "tamanho": 22
+  },
+  {
+   "tipo": "caixa",
+   "id": "a1",
+   "x": 380,
    "y": 340,
    "w": 260,
    "h": 120,
@@ -92,7 +116,7 @@
   {
    "tipo": "caixa",
    "id": "a2",
-   "x": 380,
+   "x": 700,
    "y": 340,
    "w": 260,
    "h": 120,
@@ -104,7 +128,7 @@
   {
    "tipo": "caixa",
    "id": "a3",
-   "x": 700,
+   "x": 1020,
    "y": 340,
    "w": 260,
    "h": 120,
@@ -116,7 +140,7 @@
   {
    "tipo": "caixa",
    "id": "a4",
-   "x": 380,
+   "x": 700,
    "y": 510,
    "w": 260,
    "h": 120,
@@ -128,7 +152,7 @@
   {
    "tipo": "caixa",
    "id": "a5",
-   "x": 1250,
+   "x": 1560,
    "y": 510,
    "w": 260,
    "h": 120,
@@ -140,7 +164,7 @@
   {
    "tipo": "caixa",
    "id": "ci",
-   "x": 700,
+   "x": 1020,
    "y": 710,
    "w": 260,
    "h": 120,
@@ -152,7 +176,7 @@
   {
    "tipo": "caixa",
    "id": "cp",
-   "x": 1340,
+   "x": 1660,
    "y": 710,
    "w": 260,
    "h": 120,
@@ -164,8 +188,21 @@
   {
    "tipo": "seta",
    "de": "h1.baixo",
-   "para": "a1.cima",
+   "para": "g0.cima",
    "forma": "vertical"
+  },
+  {
+   "tipo": "seta",
+   "de": "g0.baixo",
+   "para": "n0.cima",
+   "forma": "vertical",
+   "estilo": "fraca"
+  },
+  {
+   "tipo": "seta",
+   "de": "g0.dir",
+   "para": "a1.esq",
+   "forma": "horizontal"
   },
   {
    "tipo": "seta",

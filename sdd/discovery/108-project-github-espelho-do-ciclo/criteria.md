@@ -43,6 +43,9 @@ Nenhuma (`SEG-07`). O `gh` (CLI do GitHub) já é usado e está em `allow_comman
 ## Rules e IDs da Constituição Aplicáveis
 `.agents/rules/sdd-arquitetura.md` (ARQ-01, 02, 04, 05, 06, 11), `sdd-codigo-e-testes.md` (COD-01, 03, TST-01 a 03), `sdd-fluxo-e-portao.md` (FLX-01, 06, GOV-01), `sdd-seguranca.md` (SEG-01, 03, 04, 07, 08), `sdd-reuso-e-duplicacao.md` (DUP-01, 03, 06). `forge context <task>` resolve o recorte de cada task.
 
+## Configuração opcional (RN-16)
+Campos propostos na Constituição (tabela Ferramentas e Integrações, lidos da branch base, ao lado de `VCS / Work Item System` e dos campos da 106): `Quadro de acompanhamento` = `desligado` (padrão) | `github-projects` | (`azure-boards`, a verificar) e `Início automático do Builder` = `desligado` (padrão) | `local`. **Não editados aqui**: custo de cerca de 284 bytes contra 27 livres (9189 de 9216), entra por ADR e `GOV-01` na task 0.2 junto com a 106. Alternativa: `forge.json` (local, esquema estrito). `github-projects` só com VCS `github`; `nenhum` só admite `desligado`. Com o espelho desligado: nenhuma chamada ao `gh`, nenhum polling, nenhum cartão lido ou escrito, nenhuma etiqueta nem prefixo aplicados, `doctor` só informa "espelho do quadro: desligado"; com o início automático desligado o `observar` recusa com código diferente de zero. Ligar informa o custo e grava o modo no `status.md`.
+
 ## Tabela de mapeamento (estado do arquivo, coluna, evento)
 | Coluna | Estado no arquivo | Evento que move o cartão | Quem move |
 |---|---|---|---|
@@ -182,6 +185,27 @@ go test -run 'TestPrefixoDoTituloRecusaEtiquetaDesconhecida' ./internal/pipeline
 # negativo: achar a issue pelo título base ou prefixado renomeia e nunca cria duplicata
 go test -list 'TestPrefixoDoTituloRenomeiaSemDuplicar' ./internal/pipeline/ | grep -F 'TestPrefixoDoTituloRenomeiaSemDuplicar'
 go test -run 'TestPrefixoDoTituloRenomeiaSemDuplicar' ./internal/pipeline/
+# configuração: com o espelho desligado o runner falso conta zero chamadas ao gh
+go test -list 'TestEspelhoDesligadoNaoChamaGh' ./internal/pipeline/ | grep -F 'TestEspelhoDesligadoNaoChamaGh'
+go test -run 'TestEspelhoDesligadoNaoChamaGh' ./internal/pipeline/
+# negativo: com o espelho desligado não há polling, nem leitura, nem escrita de cartão, nem etiqueta
+go test -list 'TestEspelhoDesligadoSemPolling' ./internal/pipeline/ | grep -F 'TestEspelhoDesligadoSemPolling'
+go test -run 'TestEspelhoDesligadoSemPolling' ./internal/pipeline/
+# negativo: o doctor só informa espelho desligado e não verifica divergência
+go test -list 'TestDoctorInformaEspelhoDesligado' ./internal/doctor/ | grep -F 'TestDoctorInformaEspelhoDesligado'
+go test -run 'TestDoctorInformaEspelhoDesligado' ./internal/doctor/
+# negativo: o observador recusa iniciar com o início automático desligado, com mensagem e código diferente de zero
+go test -list 'TestObservadorRecusaComEspelhoDesligado' ./cmd/forge-sdd/ | grep -F 'TestObservadorRecusaComEspelhoDesligado'
+go test -run 'TestObservadorRecusaComEspelhoDesligado' ./cmd/forge-sdd/
+# negativo: valor de configuração fora da lista fechada, ou incoerente com o VCS, é recusado
+go test -list 'TestValorDeConfigInvalidoRecusado' ./internal/config/ | grep -F 'TestValorDeConfigInvalidoRecusado'
+go test -run 'TestValorDeConfigInvalidoRecusado' ./internal/config/
+# negativo: a configuração é lida da branch base e o valor na branch da feature não a sobrepõe
+go test -list 'TestConfigLidaDaBranchBase' ./internal/config/ | grep -F 'TestConfigLidaDaBranchBase'
+go test -run 'TestConfigLidaDaBranchBase' ./internal/config/
+# negativo: espelho ligado sem o gh falha com mensagem clara e nunca em silêncio
+go test -list 'TestEspelhoLigadoSemGhFalhaComMensagem' ./internal/pipeline/ | grep -F 'TestEspelhoLigadoSemGhFalhaComMensagem'
+go test -run 'TestEspelhoLigadoSemGhFalhaComMensagem' ./internal/pipeline/
 # BPMN: os três existem em json, svg e png
 test -f sdd/discovery/108-project-github-espelho-do-ciclo/diagramas/forge-108-bpmn-ciclo.json
 test -f sdd/discovery/108-project-github-espelho-do-ciclo/diagramas/forge-108-bpmn-ciclo.png

@@ -1,7 +1,7 @@
 {
  "kicker": "// Forge SDD · iniciativa 108 · BPMN 2 de 3",
  "titulo": "Arquivo e quadro andam juntos, nas duas vias",
- "largura": 2000,
+ "largura": 2300,
  "altura": 840,
  "nota_rodape": "Desenho do que foi decidido; ainda não construído",
  "elementos": [
@@ -10,7 +10,7 @@
    "id": "L0",
    "x": 24,
    "y": 100,
-   "w": 1952,
+   "w": 2252,
    "h": 200,
    "texto": "",
    "sub": "",
@@ -19,7 +19,7 @@
   },
   {
    "tipo": "texto",
-   "x": 1952,
+   "x": 2252,
    "y": 130,
    "texto": "HUMANO · você, no celular ou no computador",
    "estilo": "rotulo",
@@ -30,7 +30,7 @@
    "id": "L2",
    "x": 24,
    "y": 320,
-   "w": 1952,
+   "w": 2252,
    "h": 200,
    "texto": "",
    "sub": "",
@@ -39,7 +39,7 @@
   },
   {
    "tipo": "texto",
-   "x": 1952,
+   "x": 2252,
    "y": 350,
    "texto": "AUTOMÁTICO · forge, sem LLM",
    "estilo": "rotulo",
@@ -50,7 +50,7 @@
    "id": "L4",
    "x": 24,
    "y": 540,
-   "w": 1952,
+   "w": 2252,
    "h": 200,
    "texto": "",
    "sub": "",
@@ -59,7 +59,7 @@
   },
   {
    "tipo": "texto",
-   "x": 1952,
+   "x": 2252,
    "y": 570,
    "texto": "DADOS · o arquivo manda",
    "estilo": "rotulo",
@@ -67,8 +67,32 @@
   },
   {
    "tipo": "caixa",
+   "id": "g0",
+   "x": 60,
+   "y": 370,
+   "w": 260,
+   "h": 120,
+   "texto": "◇ Espelho ligado?",
+   "sub": "na Constituição",
+   "estilo": "destaque",
+   "tamanho": 22
+  },
+  {
+   "tipo": "caixa",
+   "id": "n0",
+   "x": 60,
+   "y": 590,
+   "w": 260,
+   "h": 120,
+   "texto": "Só arquivo",
+   "sub": "não consulta o quadro",
+   "estilo": "tracejado",
+   "tamanho": 22
+  },
+  {
+   "tipo": "caixa",
    "id": "arq",
-   "x": 1020,
+   "x": 1340,
    "y": 590,
    "w": 260,
    "h": 120,
@@ -80,7 +104,7 @@
   {
    "tipo": "caixa",
    "id": "a1",
-   "x": 700,
+   "x": 1020,
    "y": 370,
    "w": 260,
    "h": 120,
@@ -92,7 +116,7 @@
   {
    "tipo": "caixa",
    "id": "qua",
-   "x": 380,
+   "x": 700,
    "y": 590,
    "w": 260,
    "h": 120,
@@ -104,7 +128,7 @@
   {
    "tipo": "caixa",
    "id": "h1",
-   "x": 60,
+   "x": 380,
    "y": 150,
    "w": 260,
    "h": 120,
@@ -116,7 +140,7 @@
   {
    "tipo": "caixa",
    "id": "a3",
-   "x": 60,
+   "x": 380,
    "y": 370,
    "w": 260,
    "h": 120,
@@ -128,7 +152,7 @@
   {
    "tipo": "caixa",
    "id": "h2",
-   "x": 380,
+   "x": 700,
    "y": 150,
    "w": 260,
    "h": 120,
@@ -140,7 +164,7 @@
   {
    "tipo": "caixa",
    "id": "a5",
-   "x": 1340,
+   "x": 1660,
    "y": 370,
    "w": 260,
    "h": 120,
@@ -152,7 +176,7 @@
   {
    "tipo": "caixa",
    "id": "a7",
-   "x": 1660,
+   "x": 1980,
    "y": 370,
    "w": 260,
    "h": 120,
@@ -160,6 +184,19 @@
    "sub": "só lista divergência",
    "estilo": "tracejado",
    "tamanho": 22
+  },
+  {
+   "tipo": "seta",
+   "de": "g0.baixo",
+   "para": "n0.cima",
+   "forma": "vertical",
+   "estilo": "fraca"
+  },
+  {
+   "tipo": "seta",
+   "de": "g0.dir",
+   "para": "a3.esq",
+   "forma": "horizontal"
   },
   {
    "tipo": "seta",

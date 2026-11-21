@@ -13,6 +13,14 @@ Ordem de baixo para cima: primeiro o mapa e a leitura (sem escrita), depois move
 - **107:** orquestrador e WIP humano; as references de `sdd-operacao` são compartilhadas. A 108/3.5 só acrescenta `project.md`.
 Colisões de arquivo: `.agents/skills/sdd-operacao/references/`, `internal/vcs`, `forge status`. Regra: um PR por vez em cada arquivo; resolver na ordem de merge.
 
+## Onda 0 — Configuração opcional e custo zero (RN-16)
+| # | Task | Depende | Paralelo | Rules/IDs |
+|---|---|---|---|---|
+| 0.1 | **Leitura da configuração e curto-circuito de custo zero, antes de qualquer chamada ao `gh`**: lê `Quadro de acompanhamento` e `Início automático do Builder` (padrão `desligado`; valor fora da lista fechada ou incoerente com o VCS é recusado); com o espelho desligado nada chama `gh` ou rede, não há polling, `doctor` só informa "desligado"; aviso de custo ao ligar e modo efetivo gravado no `status.md`. Compartilha o leitor da tabela da Constituição (branch base) com a 106/0.5 | 106/0.5 (mesmo leitor) | — | `ARQ-01`, `ARQ-05`, `SEG-01`, `TST-03` |
+| 0.2 | ADR curta (fonte da verdade, o que o arrastar autoriza, campos novos na Constituição, orçamento de bytes) e linha em `sdd/spec/concepts.md`; decide com a 106 o que sai da Constituição para caber (27 bytes livres) ou se o (b) vai para `forge.json` | Gate 1 | com 0.1 | `GOV-01`, `DUP-01` |
+
+Sequenciar com a 106: o leitor da tabela de Ferramentas e Integrações é um só (decisão xv da 106); a 108/0.1 não cria um segundo.
+
 ## Onda 1 — Mapa e leitura (somente leitura)
 | # | Task | Depende | Paralelo | Rules/IDs |
 |---|---|---|---|---|
@@ -22,7 +30,6 @@ Colisões de arquivo: `.agents/skills/sdd-operacao/references/`, `internal/vcs`,
 | 1.4 | `internal/config`: nome do campo (`Status`), número do Project e `provider` `github-projects`; mapa entre `status_on_implement`/`status_on_pr_approved` e as 7 etapas (sem quebrar o padrão atual) | — | com 1.1 | `DUP-06`, `GOV-01`, `TST-02` |
 | 1.5 | Teste de injeção: título, corpo e comentário com ordem embutida são dado; só o campo de etapa válido é lido | 1.2 | com 1.3 | `SEG-08`, `TST-03` |
 | 1.7 | Funções puras `ClassificaEtiquetas(caminhos)` e `PrefixoDoTitulo(etiquetas)` (prefixo `[código+adr+rule]`, `doc`, `spec · `; recusa etiqueta desconhecida) em `internal/pipeline` (código, adr, rule, documentação, spec; ignora `sdd/.metrics/`; recusa `..`, controle e lista vazia; desconhecido fica sem etiqueta com aviso). Entra na onda 1 porque é pura, sem rede e sem escrita, como o mapa 1.1 | — | com 1.1 | `ARQ-10`, `DUP-01`, `TST-03` |
-| 1.6 | Linha em `sdd/spec/concepts.md` e ADR curta (fonte da verdade, o que o arrastar autoriza) conforme o Gate 1 | Gate 1 | — | `GOV-01`, `DUP-01` |
 
 ## Onda 2 — Mover o cartão pelo CLI
 | # | Task | Depende | Paralelo | Rules/IDs |
@@ -40,7 +47,7 @@ Colisões de arquivo: `.agents/skills/sdd-operacao/references/`, `internal/vcs`,
 |---|---|---|---|---|
 | 3.1 | Polling: o forge lê a etapa de cada cartão a cada comando e compara com o arquivo; divergência vira pedido, nunca gravação direta; ator conferido (a verificar se o `gh` o expõe) | 1.3, 2.3 | — | `SEG-01`, `TST-03` |
 | 3.2 | Arrastar como pedido: Spec-validation para Todo abre o menu de confirmação e exige Gate 1 aprovado e PR da spec mesclado; Validation para Done exige PR mesclado e atestado conforme o modo da 106 | 3.1; 106/3.2 | — | `FLX-01`, `GOV-01`, `TST-03` |
-| 3.7 | Início automático (D1) por **`forge project observar`** (mecanismo decidido pelo dono: processo local enquanto a sessão estiver aberta): polling com intervalo mínimo de 30 s (a verificar contra o limite de taxa), só lê estado e merge verificado, aplica a regra de Todo para Building (spec na principal, WIP humano da 107, teto de 3 tentativas, modo/atestado da 106), não grava aprovação sem menu, encerra limpo e tem `--dry-run`; nuvem e Action ficam como alternativas futuras | 2.3, 2.7; 107; 106/2.4 | — | `FLX-01`, `SEG-08`, `TST-03` |
+| 3.7 | Início automático (D1; só se `Início automático do Builder` = `local`, senão recusa com código diferente de zero) por **`forge project observar`** (mecanismo decidido pelo dono: processo local enquanto a sessão estiver aberta): polling com intervalo mínimo de 30 s (a verificar contra o limite de taxa), só lê estado e merge verificado, aplica a regra de Todo para Building (spec na principal, WIP humano da 107, teto de 3 tentativas, modo/atestado da 106), não grava aprovação sem menu, encerra limpo e tem `--dry-run`; nuvem e Action ficam como alternativas futuras | 2.3, 2.7; 107; 106/2.4 | — | `FLX-01`, `SEG-08`, `TST-03` |
 | 3.3 | `forge doctor` lista issue aberta com PR mesclado e as automações do Project não conferidas (D3, a verificar no Project real); verifica Project configurado, escopo `project` do `gh`, campo `Status` com as 7 opções e divergências arquivo versus quadro | 3.1 | com 3.4 | `ARQ-01`, `TST-03` |
 | 3.4 | Orquestrador (107): expõe a contagem de cartões em Validation para o WIP humano; lê só o campo validado | 3.1; 107 | com 3.3 | `DUP-01`, `SEG-08` |
 | 3.5 | Reference única `.agents/skills/sdd-operacao/references/project.md` (rotina por agente e por coluna) e os comandos `/discovery`, `/nova-feature`, `/novo-fix`, `/implementar`, `/revisar` só a apontam em **uma linha** (templates e goldens junto); P-24 conferido antes e depois | 3.2 | — | `ARQ-03`, `TST-02`, `GOV-01` |
