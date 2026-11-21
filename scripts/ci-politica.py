@@ -294,21 +294,41 @@ def relatorio(uso, runs, teto_gasto=ALERTA_GASTO_PADRAO, acoes_por_uso=0):
     return "\n".join(texto) + "\n"
 
 
+# Prefixos que uma planilha interpreta como fórmula (CSV injection). Um valor que
+# começa com eles recebe apóstrofo, para a célula ser texto e não comando.
+PREFIXOS_FORMULA = ("=", "+", "@", "-")
+
+
+def neutralizar_celula(valor):
+    """Devolve a célula como texto seguro para planilha (segunda camada do SEG-04).
+
+    O CSV é dado que abre em Excel/Sheets; uma célula começando com `=` ou `@`
+    viraria fórmula. O apóstrofo força texto e é o que o OWASP recomenda.
+    """
+    texto = "" if valor is None else str(valor)
+    if texto[:1] in PREFIXOS_FORMULA:
+        return "'" + texto
+    return texto
+
+
 def relatorio_csv(uso, runs):
-    """Mesma informação em CSV, para planilha."""
+    """Mesma informação em CSV, para planilha, com as células neutralizadas."""
     jobs = normalizar_runs(runs)
     por_jobs = calcular_por_jobs(jobs)
+    # Nenhum campo do ambiente entra no relatório (SEG-05): o CSV não lê CI_POLITICA_TOKEN.
     buf = io.StringIO()
     w = csv.writer(buf)
     w.writerow(["repositorio", "origem", "minutos", "observacao"])
     if uso is not None:
         cobranca = normalizar_uso(uso)
         for repo, minutos in sorted(cobranca["repositorios"].items()):
-            w.writerow([repo, "cobranca", "%.2f" % minutos, cobranca["rotulo"]])
+            w.writerow([neutralizar_celula(repo), "cobranca", neutralizar_celula("%.2f" % minutos),
+                        neutralizar_celula(cobranca["rotulo"])])
     for repo, minutos in sorted(por_jobs["por_repositorio"].items()):
-        w.writerow([repo, "jobs", "%.2f" % minutos, ""])
+        w.writerow([neutralizar_celula(repo), "jobs", neutralizar_celula("%.2f" % minutos), ""])
     for so, d in por_jobs["por_so"].items():
-        w.writerow(["(total %s)" % so, "jobs", "%.2f" % d["minutos_linux"], "equivalente Linux"])
+        w.writerow([neutralizar_celula("(total %s)" % so), "jobs",
+                    neutralizar_celula("%.2f" % d["minutos_linux"]), "equivalente Linux"])
     return buf.getvalue()
 
 
@@ -426,6 +446,8 @@ def main(argv=None):
     ap.add_argument("--offline", action="store_true", help="não consulta a rede; usa arquivos")
     ap.add_argument("--relatorio", nargs="+", metavar="ARQUIVO", help="uso.json [runs.json]")
     ap.add_argument("--csv", action="store_true", help="saída em CSV")
+    ap.add_argument("arquivos", nargs="*", metavar="ARQUIVO",
+                    help="uso.json [runs.json] posicionais, alternativa a --relatorio")
     ap.add_argument("--so", choices=["cobranca", "jobs"], help="usar uma fonte só (recusado)")
     ap.add_argument("--usar-api", action="store_true", help="consulta a API do GitHub")
     ap.add_argument("--org", default="", help="organização para --usar-api")
@@ -433,6 +455,8 @@ def main(argv=None):
                     help="teto de gasto mensal em USD; acima dele o relatório alerta")
     ap.add_argument("--congelar-linha-de-base", action="store_true",
                     help="grava a linha de base versionada (o único modo que escreve)")
+    ap.add_argument("--sem-data", action="store_true",
+                    help="recusado: a linha de base sem data não é aceita")
     ap.add_argument("--dir", default=".", help="raiz do projeto para a linha de base")
     ap.add_argument("--selftest", action="store_true", help="roda o autoteste sem rede")
     args = ap.parse_args(argv)
@@ -458,8 +482,8 @@ def main(argv=None):
             if not args.org:
                 raise ErroPolitica("--usar-api exige --org <organização>")
             uso, runs = consultar_api(args.org, token)
-        elif args.relatorio:
-            arquivos = args.relatorio
+        elif args.relatorio or args.arquivos:
+            arquivos = args.relatorio or args.arquivos
             if not arquivos:
                 raise ErroPolitica("--relatorio exige ao menos um arquivo de jobs")
             if len(arquivos) >= 2:
@@ -473,6 +497,13 @@ def main(argv=None):
             )
 
         if args.congelar_linha_de_base:
+            if args.sem_data:
+                raise ErroPolitica(
+                    "--sem-data recusado: a linha de base precisa da data, porque o número "
+                    "não quer dizer nada sem saber de quando ele é"
+                )
+            if not runs:
+                raise ErroPolitica("--congelar-linha-de-base exige --relatorio ou --usar-api com dados")
             jobs = normalizar_runs(runs)
             por_jobs = calcular_jobs = calcular_por_jobs(jobs)
             dados = linha_de_base(por_jobs)

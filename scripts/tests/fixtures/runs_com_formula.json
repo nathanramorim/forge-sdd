@@ -1,0 +1,10 @@
+{
+  "jobs": [
+    { "name": "test", "repository": "=HYPERLINK(\"http://evil\",\"clique\")", "conclusion": "success",
+      "started_at": "2026-11-21T10:00:00Z", "completed_at": "2026-11-21T10:05:00Z" },
+    { "name": "lint", "repository": "@SUM(A1:A9)", "conclusion": "success",
+      "started_at": "2026-11-21T10:00:00Z", "completed_at": "2026-11-21T10:02:00Z" },
+    { "name": "deploy", "repository": "-2+3", "conclusion": "success",
+      "started_at": "2026-11-21T10:00:00Z", "completed_at": "2026-11-21T10:01:00Z" }
+  ]
+}
