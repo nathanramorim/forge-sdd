@@ -4,6 +4,24 @@ Este arquivo registra o histórico de entregas de produto deste projeto.
 
 ## Entregas
 
+### Versão 5.2.0 — O CI Sai do Caminho, a Revisão Vem Antes e Cada Feature Tem o Seu PR (Beta)
+
+Compatível com a 5.0.0. Consolida a iniciativa 106 inteira: o CI deixa de rodar em trabalho não conferido, a revisão acontece em dois pontos (a spec e a feature) e cada feature do split tem branch e PR próprios.
+
+*   **O CI roda no ponto certo (#181):** PR em draft tem os jobs pulados e não consome runner. Ao sair do draft, teste e lint rodam uma vez, em três sistemas (Linux, macOS e Windows), e `concurrency` cancela a execução anterior quando você sobe um commit novo. Um job novo, `pronto?`, é obrigatório na principal e recusa PR em draft.
+*   **A spec volta cedo, em PR próprio (#193, #199):** `/discovery`, `/nova-feature` e `/novo-fix` abrem só a spec, em PR draft. Depois da Conferência 1 e do seu `[Seguir]`, a spec é mesclada na principal e a construção começa — em vez de ficar presa numa branch de iniciativa até o fim. O Gate 1 passa a ser uma linha explícita no `status.md`, não a existência de um arquivo.
+*   **Uma branch e um PR em draft por feature (#198, #201, #203, #206):** o Builder abre uma branch por feature do split, com base na principal, e cada uma tem o seu PR. Nenhum PR tem base em outro. Uma feature só começa com as dependências **mescladas**, não apenas abertas, e o `[Continuar]` é agrupado por onda.
+*   **Ninguém marca "pronto" sem parecer válido (#185):** `gh pr ready` e `gh pr merge` exigem parecer `conforme` com `head_sha` igual ao HEAD atual. Parecer de outro commit — o código mudou depois da revisão — é recusado com os dois SHA lado a lado.
+*   **A barreira fica instalada (#182):** o hook `PreToolUse` que barra o `gh` entra sozinho no `.claude/settings.json`, e o `forge doctor` mostra em quais agentes ele vale. Nos outros agentes, o job `pronto?` do CI segura.
+*   **Atestado conferido no CI (#196):** `scripts/atestado.py` verifica o parecer no PR de feature, no modo `local`, em segundos. O modo `desligado` diz em voz alta que nada foi conferido; `vcs` é recusado como adiado.
+*   **Quanto o CI custa, com número defensável (#188, #197):** `scripts/ci-politica.py` cruza a cobrança do GitHub com o cálculo por job e mostra a diferença. Jobs pulados e cancelados ficam à parte, e o CSV é seguro para abrir em planilha (células que começam com `=`, `+`, `@` ou `-` são neutralizadas).
+*   **Modos do projeto na Constituição (#177):** a tabela `Ferramentas e Integrações` ganha o modo do atestado, o modo de revisão humana, o WIP humano, os módulos permitidos e o início automático do Builder. `GOV-03` passa a guardar lições em `sdd/memory/licoes/`, um arquivo por regra.
+*   **Modo sem humano, com os riscos à vista (#190):** só liga depois de o aviso de três riscos ser apresentado e aceito. Sem isso, o modo fica `com-humano` — recusar sempre mantém o padrão seguro.
+*   **`/upgrade-sdd` leva a política (#202):** quem já tem projeto recebe o hook, o job `pronto?`, os scripts e os campos de modo sem perder o `ci.yml` nem o `.claude/settings.json` — o forge mescla, nunca sobrescreve, e JSON inválido não é tocado.
+*   **README com um prompt por ferramenta (#191):** quatro blocos "cole isto na sua IA", um para cada agente, apontando para o arquivo de instruções que ele lê.
+*   **Como atualizar:** `npm install -g @nathanramorim/forge-sdd@beta` para a prévia; nos projetos existentes, `forge update --upgrade` e depois `/upgrade-sdd`, que leva a política de PR. Rode `forge doctor` no fim: a seção "Barreira de PR" diz o que ficou instalado.
+*   **Avisos da beta:** esta versão não está na `main` (`FLX-07`); quem usa `npm install -g @nathanramorim/forge-sdd` sem `@beta` continua na linha estável.
+
 ### Versão 5.1.0 — CLI Mais Claro, Métricas de Discovery e Parecer com Proveniência e Fila por Branch de Feature (Beta)
 
 Compatível com a 5.0.0 (Iniciativas 97, 104, 105 e 106). Beta: a versão não está na `main`; a estável continua sendo a 5.0.0.
