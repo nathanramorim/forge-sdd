@@ -41,15 +41,19 @@ Com a exceção da Regra 15 (dono, até 2026-12-31) o Builder trabalha numa bran
 
 **(a) Prefixo numérico.** Nova função em `layout`, `ResolveInitiative(dir, branch)`, usada por `ActiveInitiative` (e portanto por `QueuePath`, `StatusPath`, archive, Enqueue). Ordem: 1) pasta `sdd/discovery/<slug>` exata (comportamento de hoje, sem mudança); 2) se não existir, extrair `N` com regex ancorada `^(?:feat|fix)/([0-9]{1,6})-[a-z0-9-]+$` e casar com as pastas `sdd/discovery/N-*` (comparar o primeiro segmento, não prefixo de texto: `10` não casa `106`); 3) exatamente uma pasta -> é a iniciativa; zero -> `ok=false` (legado, como hoje); duas ou mais -> erro claro listando as pastas ("branch X é ambígua: A, B; use --iniciativa"). `FromBranch` permanece puro e inalterado (não regride `archive.go:193` nem `scan.go:323`).
 
-**(b) Escape.** `--iniciativa <id>` (flag persistente) e `FORGE_INICIATIVA`, validados por `ValidInitiative` e exigindo pasta existente; a flag vence a variável, que vence a branch. DECISÃO: não há campo `Iniciativa` em `.forge`; bastam flag e variável.
+**(a2) Como a ambiguidade chega ao usuário.** `ActiveInitiative(dir) (id, path, ok)`, `QueuePath` e `StatusPath` não devolvem erro; sozinhos transformariam a ambiguidade em `ok=false` e a fila legada, o que a DECISÃO 3 proíbe. Por isso `ResolveInitiative(dir) (id, path string, err error)` (assinatura final: sem o parâmetro `branch`; lê a branch atual) distingue três saídas: iniciativa achada; "sem iniciativa" (`id==""`, `err==nil`, vai à fila legada, comportamento atual); `ErrAmbiguousInitiative` com a lista das pastas que casaram. As assinaturas antigas ficam como adaptadores finos sobre ela (ambiguidade => `ok=false`), para não quebrar chamadores. Os comandos que usam a fila (`queue enqueue/next/complete/review`, e `queue move` quando existir, `status`, `archive`, `doctor`, `gate`) chamam UMA verificação única (`layout.RequireInitiative(dir) error`) antes de ler a fila, via o mesmo ponto de entrada em `cmd/forge-sdd`, e saem com código de erro diferente de zero e a lista das pastas. Em ambiguidade nada lê nem grava `sdd/.queue/queue.json`.
+
+**(b) Escape.** UM mecanismo, em `layout`, sem segundo parser: a flag persistente `--iniciativa` no comando raiz grava o valor validado em `layout.SetOverride(id)`, chamada em um só `PersistentPreRunE`. `ResolveInitiative` lê, nessa ordem, o override da flag, `os.Getenv("FORGE_INICIATIVA")` e a branch; flag e variável são validadas por `ValidInitiative` e exigem pasta existente (senão erro, sem cair na branch). DECISÃO: não há campo `Iniciativa` em `.forge`; bastam flag e variável.
 
 **(c) Compatibilidade.** Branch por iniciativa (`feat/106-pr-draft-revisao-e-ci`) casa no passo 1, idêntica a hoje. Branches sem prefixo numérico (`main`, `fix/ordem-da-fila-e-prioridade`, `chore/x`) não casam no passo 2 e seguem para a fila legada. 107 e 106/0.7 não mudam: continuam lendo `QueuePath`.
 
 **(d) `queue enqueue/next/complete/review`.** Nenhum muda de código: todos chegam à fila por `QueuePath`/`ActiveInitiative`. Só `Enqueue` (`queue.go:218-223`) compara a iniciativa da branch informada com a ativa; passa a usar `ResolveInitiative` nos dois lados para não rejeitar `feat/106-11-...` como "outra iniciativa". Fora isso, o comportamento onde a branch já casa é idêntico (teste de não regressão).
 
-**(e) Segurança.** Branch vem do git (não confiável): regex ancorada com dígitos no prefixo, `len <= 200`, sem `/` além do prefixo, sem `..`, sem caractere de controle; o id devolvido sai SEMPRE da listagem real de pastas (nunca da branch) e passa por `Initiative()` (SEG-01). Flag/env: mesma validação.
+**(e) Segurança.** Branch vem do git (não confiável): regex ancorada com dígitos no prefixo e `len <= 200` (o código atual NÃO limita o tamanho; o limite é acrescentado aqui e coberto por `TestResolveRecusaBranchHostil`, que inclui branch com 201 caracteres), sem `/` além do prefixo, sem `..`, sem caractere de controle; o id devolvido sai SEMPRE da listagem real de pastas (nunca da branch) e passa por `Initiative()` (SEG-01). Flag/env: mesma validação.
 
-**(f) Colisões.** `feat-106-07a` e `fix-104-17` (PR #158, `queue move`): editam `queue.go`/`taskstatus.go`/`waves.go`; este fix toca `internal/layout/layout.go` e uma linha de `queue.go:218-223`. Conflito textual pequeno em `queue.go` apenas; sem dependência de ordem, DECISÃO: este fix entra ANTES da `feat-106-07a`, para ela ser testável em branch por feature. `queue move` herda a correção sem mudança.
+**(g) Chamadores indiretos e marcador "atual".** `internal/gate/gate.go:545` e `cmd/forge-sdd/doctor.go:165` usam `layout.StatusPath` e herdam a correção; teste do gate numa branch por feature. O marcador `Current` de `ListInitiatives` (`internal/layout/scan.go:36`, via `Current`) seguiria falso em `feat/106-11-...`; passa a usar o resolvedor (mudança pequena; em ambiguidade o marcador fica falso, sem erro, pois é só listagem).
+
+**(f) Colisões.** `feat-106-07a` e `fix-104-17` (PR #158, `queue move`): editam `queue.go`/`taskstatus.go`/`waves.go`; este fix toca `internal/layout/layout.go` e uma linha de `queue.go:218-223`. Conflito textual pequeno em `queue.go` apenas; sem dependência de ordem, DECISÃO: este fix entra ANTES da `feat-106-07a`, para ela ser testável em branch por feature. O `fix-104-17` (#158, só spec) já está na `main`, mas `queue move` ainda NÃO existe como código: a colisão é só de arquivo (`queue.go`). Quando `queue move` existir, usa a mesma verificação única.
 
 ## Rules e IDs da Constituição Aplicáveis
 
@@ -75,6 +79,18 @@ go test ./internal/layout -run 'TestResolveRecusaBranchHostil' -count=1
 # não regressão: branch por iniciativa (nome exato) resolve como antes
 go test ./internal/layout -list 'TestBranchPorIniciativaNaoRegride' | grep -F 'TestBranchPorIniciativaNaoRegride'
 go test ./internal/layout -run 'TestBranchPorIniciativaNaoRegride' -count=1
+# negativo: em ambiguidade o comando falha e NÃO lê nem grava a fila legada (sdd/.queue/queue.json inalterado)
+go test ./cmd/forge-sdd -list 'TestQueueAmbiguidadeFalhaSemTocarFilaLegada' | grep -F 'TestQueueAmbiguidadeFalhaSemTocarFilaLegada'
+go test ./cmd/forge-sdd -run 'TestQueueAmbiguidadeFalhaSemTocarFilaLegada' -count=1
+# precedência flag > variável > branch
+go test ./internal/layout -list 'TestPrecedenciaFlagVariavelBranch' | grep -F 'TestPrecedenciaFlagVariavelBranch'
+go test ./internal/layout -run 'TestPrecedenciaFlagVariavelBranch' -count=1
+# gate em branch por feature herda a correção
+go test ./internal/gate -list 'TestGateEmBranchPorFeature' | grep -F 'TestGateEmBranchPorFeature'
+go test ./internal/gate -run 'TestGateEmBranchPorFeature' -count=1
+# marcador atual de ListInitiatives em branch por feature
+go test ./internal/layout -list 'TestListInitiativesMarcaAtualEmBranchPorFeature' | grep -F 'TestListInitiativesMarcaAtualEmBranchPorFeature'
+go test ./internal/layout -run 'TestListInitiativesMarcaAtualEmBranchPorFeature' -count=1
 # flag e variável de escape; a flag vence a variável
 go test ./cmd/forge-sdd -list 'TestQueueIniciativaFlagEEnv' | grep -F 'TestQueueIniciativaFlagEEnv'
 go test ./cmd/forge-sdd -run 'TestQueueIniciativaFlagEEnv' -count=1
