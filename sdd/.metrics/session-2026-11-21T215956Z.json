@@ -1,0 +1,26 @@
+{
+  "$schema": "forge-sdd/metrics/1.0",
+  "feature": "sdd/discovery/106-pr-draft-revisao-e-ci/features/feat-106-24b-leque-por-worktree.md,sdd/discovery/106-pr-draft-revisao-e-ci/features/feat-106-36-upgrade-sdd-leva-a-politica.md",
+  "agent_path": null,
+  "tokens_input": 4000,
+  "tokens_output": 4530,
+  "turns": 0,
+  "duration_seconds": 0,
+  "criterio_atendido": true,
+  "model": "",
+  "rework_lines": 0,
+  "context7_calls": 0,
+  "git_calls": 0,
+  "files_touched": [
+    "internal/pipeline/leque_entrega.go",
+    "internal/pipeline/leque_entrega_test.go",
+    ".agents/skills/sdd-operacao/references/upgrade-sdd.md",
+    "internal/scaffold/templates/.agents/skills/sdd-operacao/references/upgrade-sdd.md.tmpl",
+    "internal/scaffold/testdata/golden/.agents/skills/sdd-operacao/references/upgrade-sdd.md",
+    "internal/scaffold/scaffold_test.go"
+  ],
+  "outcome": "approved",
+  "sdd_version": "5.0.0",
+  "medicao": "estimado",
+  "complexidade": null
+}
