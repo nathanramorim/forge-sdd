@@ -23,7 +23,7 @@
   {"tipo": "seta", "de": "c3.baixo", "para": "h1.cima", "forma": "vertical", "estilo": "fraca"},
   {"tipo": "seta", "de": "c6.baixo", "para": "h2.cima", "forma": "vertical", "estilo": "fraca"},
   {"tipo": "texto", "x": 56, "y": 330, "texto": "AUTOMÁTICO: forge project move", "estilo": "rotulo", "alinha": "start"},
-  {"tipo": "texto", "x": 56, "y": 360, "texto": "lê status.md e queue.json e move o cartão", "estilo": "legenda", "alinha": "start"},
+  {"tipo": "texto", "x": 56, "y": 360, "texto": "lê o estado por feature e o status.md e move o cartão", "estilo": "legenda", "alinha": "start"},
   {"tipo": "texto", "x": 56, "y": 390, "texto": "Texto de issue e comentário é dado, nunca ordem", "estilo": "legenda", "alinha": "start"}
  ]
 }

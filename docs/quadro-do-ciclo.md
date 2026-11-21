@@ -38,12 +38,10 @@ São dois interruptores. Os dois vêm **desligados**.
 | Quadro de acompanhamento | `desligado` (padrão) ou `github-projects` | O espelho: o forge lê e move os cartões. |
 | Início automático do Builder | `desligado` (padrão) ou `local` | O Builder começa sozinho quando a spec é mesclada. |
 
-Onde ficam: a ideia é que sejam campos da Constituição do projeto, lidos da branch base (não vale o que estiver só na sua branch de trabalho).
+Onde ficam: serão campos da Constituição do projeto, lidos da branch base (não vale o que estiver só na sua branch de trabalho). O texto final dos campos, as notas e o espaço no orçamento da Constituição estão definidos num PR único da Constituição, ainda não feito; hoje os campos não existem.
 
 Ainda em decisão:
-- a redação final dos campos;
-- o espaço no orçamento da Constituição, que hoje está quase cheio;
-- se o início automático depende do quadro ou é independente.
+- se o início automático depende do quadro ou é independente (a recomendação é que seja independente).
 
 Ao ligar, o forge vai avisar o que passa a fazer e o que custa.
 
@@ -165,7 +163,7 @@ Só se você ligou o início automático. Ele fica dentro dos freios: 3 esperand
 O arquivo vale. O `forge doctor` mostra a diferença.
 
 **Onde ficam os interruptores?**
-Ideia atual: na Constituição. Ainda em decisão.
+Na Constituição do projeto, pelo PR único da Constituição (ainda não feito; nada disso existe hoje).
 
 **Já funciona?**
 Não. Está especificado, não construído.

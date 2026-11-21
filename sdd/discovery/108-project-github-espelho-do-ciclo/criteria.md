@@ -1,7 +1,7 @@
 # Critérios — Iniciativa 108 (GitHub Project como espelho do ciclo)
 
 ## Restrições (Constitution)
-`ARQ-01` (`cmd/` só adapta flags do `forge project`; o mapa e a regra ficam em `internal/pipeline`, a chamada ao `gh` em `internal/vcs`), `ARQ-02` (sem ciclo: `vcs` não importa `pipeline`; `pipeline` define a interface que consome), `ARQ-04` (só stdlib em runtime; `gh` é binário externo opcional já listado em `allow_commands`), `ARQ-05` (`--dry-run` e a leitura do quadro não têm efeito em disco nem chamam escrita no GitHub), `ARQ-06` (o comando entra sob `forge project`, subcomando novo documentado em `--help`; ADR se o dono preferir raiz), `ARQ-11` (modelo do módulo declarado), `COD-01`, `COD-03`, `DUP-01` (um dono do mapa de estados), `DUP-03` (nenhum pacote paralelo ao `vcs` da 106), `FLX-01` (a Discovery só escreve spec; criar o Project é ato do dono), `FLX-06`, `GOV-01` (nenhuma regra nova sem ADR), `SEG-01` (validar entrada), `SEG-03` (só `gh` em `allow_commands`), `SEG-04` (token nunca em arquivo nem saída), `SEG-07` (sem dependência nova), `SEG-08` (saneamento de texto externo) e `TST-03` (teste negativo por regra de recusa).
+`ARQ-01` (`cmd/` só adapta flags do `forge project`; o mapa e a regra ficam em `internal/pipeline`, a chamada ao `gh` em `internal/vcs`), `ARQ-02` (sem ciclo: `vcs` não importa `pipeline`; `pipeline` define a interface que consome), `ARQ-04` (só stdlib em runtime; `gh` é binário externo opcional já listado em `allow_commands`), `ARQ-05` (`--dry-run` e a leitura do quadro não têm efeito em disco nem chamam escrita no GitHub), `ARQ-06` (o comando raiz novo `forge project` **não está** na enumeração do `ARQ-06` em `sdd/memory/constitution.md:59`; a inclusão de `project` entra no PR único da Constituição, cerca de +11 bytes, e não é feita pela 108; subcomandos documentados em `--help`), `ARQ-11` (modelo do módulo declarado), `COD-01`, `COD-03`, `DUP-01` (um dono do mapa de estados), `DUP-03` (nenhum pacote paralelo ao `vcs` da 106), `FLX-01` (a Discovery só escreve spec; criar o Project é ato do dono), `FLX-06`, `GOV-01` (nenhuma regra nova sem ADR), `SEG-01` (validar entrada), `SEG-03` (só `gh` em `allow_commands`), `SEG-04` (token nunca em arquivo nem saída), `SEG-07` (sem dependência nova), `SEG-08` (saneamento de texto externo) e `TST-03` (teste negativo por regra de recusa).
 
 ## Modelo do módulo
 **Enxuto** (`ARQ-11`): sem pacote novo além do que a 106 já prevê. (a) O **mapa estado do arquivo para etapa** e a **lista fechada de 7 etapas** vivem em `internal/pipeline` (já dona de `queue`, `status` e do despacho; `DUP-01`). (b) O **adaptador do quadro** (ler etapa, mover cartão, vincular PR) é uma interface mínima `Quadro` declarada no consumidor (`internal/pipeline`) e implementada em `internal/vcs` pelo adaptador `github` (`gh project`), junto da interface `Adaptador` da 106 task 0.2; `azure-devops` ganha o equivalente Azure Boards **a verificar**; `nenhum` devolve "sem quadro". (c) `forge project` (`cmd/forge-sdd/project.go`) só adapta flags. (d) O **prefixo do título** (`PrefixoDoTitulo`, função pura) mora junto de `ClassificaEtiquetas`. (e) A **classificação de etiquetas** (função pura caminho para etiquetas, lista fechada de 5) mora em `internal/pipeline`, ao lado do mapa de estados: é regra de domínio sem I/O, e o `internal/vcs` só aplica o resultado (`gh pr edit` e `gh issue edit --add-label`), sem decidir nada (`ARQ-10`). Fronteira: enquanto `internal/vcs` não existir em `main` (a 106 ainda não foi implementada), a task 1.x cria **só o necessário** do pacote (interface `Quadro` e o adaptador `github`) sem duplicar o que a 106 vai definir, e **sequencia com a 106 task 0.2** (a verificar quem entra primeiro). Justificativa: um pacote `internal/project` novo duplicaria o conceito de adaptador de VCS (`DUP-03`).
@@ -25,7 +25,7 @@
 |---|---|---|---|---|
 | Ligação com gerenciador de projeto | `internal/config/forge.go:91-98,183-190,337-346` (`PMConfig`, `pm_mcp`) | Provedores `clickup`, `github-projects`, `azure-devops`, `jira`; `RequireExistingCard`; `StatusOnImplement` "In Progress", `StatusOnPRApproved` "Ready for Review" | **Reusar** `provider` para escolher o quadro; **estender** com o nome do campo e as 7 etapas; **não** criar outra config | `DUP-06`: um dono de `forge.json`. Os dois status atuais não casam com as 7 etapas (a mapear na task 1.4) |
 | Uso de card no despacho e no veredito | `internal/pipeline/dispatch.go:200-262,431-482`, `review.go:107` | Só evidência (`card-evidence.json`) e uma frase `CardInstruction`; nenhuma chamada de API, nenhuma leitura de coluna | **Reusar** a evidência (provider, id, url) como vínculo cartão-iniciativa; **criar** a leitura e o movimento reais | O código hoje delega ao agente via MCP, que não está registrado em `mcps.md` |
-| Estados da fila | `internal/queue/queue.go:16-23`, `Complete` `:464`, `Review` `:488` | `queued`, `building`, `review_pending`, `approved`, `changes_requested`, `blocked`; sem `in_progress` nem `completed` | **Reusar**; o mapa lê esses estados, não cria estado novo | `DUP-01` |
+| Estados da fila | `internal/queue/queue.go:16-23`, `Complete` `:464`, `Review` `:488` | `queued`, `building`, `review_pending`, `approved`, `changes_requested`, `blocked`; sem `in_progress` nem `completed` | **Reusar**; o mapa lê esses nomes (a 106/0.7 não os renomeia; o esquema do arquivo de estado por feature não é definido na 106 em 38f12e5), mas lê o **estado por feature** (`sdd/discovery/<id>/state/<sid>.json`, 106/0.7), não o `queue.json` como fonte única | `DUP-01` |
 | Jobs do barramento | `internal/bus/job.go:33-37` | `feature_build`, `pr_rework`, `pr_review`, `spec_review` | **Reusar** como evento: `pr_rework` volta o cartão a Building | `DUP-01` |
 | Adaptador de VCS | 106 (`plan.md` task 0.2, `internal/vcs`) | Só desenhado; **não existe em `main`** | **Depende de**; declarar `Quadro` no consumidor e implementar junto do adaptador `github` | `DUP-03`: evitar pacote paralelo |
 | Atestado, veredito com SHA, sinais no `status.md` | 106 (`discovery.md` RN-4, RN-6, RN-13, RN-18; `plan.md` 1.1, 1.6, 3.2) | Só desenhados | **Depende de**: o arrastar do humano só vale com o atestado conforme o modo | Evita um segundo canal de aprovação |
@@ -40,34 +40,49 @@
 ## Dependências novas
 Nenhuma (`SEG-07`). O `gh` (CLI do GitHub) já é usado e está em `allow_commands` (`internal/config/forge.go:181`); JSON do `gh` lido com a stdlib (`encoding/json`, `DisallowUnknownFields`). Para `azure-devops`, `az boards` seria binário externo opcional, **a verificar**.
 
+## Dependências de outras iniciativas (DURA = exige o código; MOLE = só sequenciar)
+| Task 108 | Exige (DURA) | Origem |
+|---|---|---|
+| 0.1 | leitor da tabela da Constituição (`DUP-01`) e os campos | 106/0.5; PR único da Constituição |
+| 0.2 | PR único da Constituição | task nova da 106 |
+| 1.1 | estado por feature, sinais `spec-para-revisao` e `pronto-para-revisao`, marcador `Gate 1: aprovado` | 106/0.7, 106/1.6, 106/2.2 |
+| 1.2 | `internal/vcs`, interface `Adaptador` (a 108 não cria pacote paralelo) | 106/0.2 |
+| 2.3 | estado por feature e marcador | 106/0.7, 106/2.2 |
+| 2.6 | `gh pr edit` e `gh issue edit` pelo adaptador | 106/0.2 |
+| 3.2 | atestado, só `local`; puxa 106/0.5, 0.6 e 0.3 (a 0.3 é Azure e fica fora: só `github` e `nenhum`) | 106/3.2 |
+| 3.4 | WIP humano e interface `FonteDePendencias` | 107-12 |
+| 3.7 | WIP humano, um PR por feature, leitor da tabela, sinais | 107-12, 106/2.4, 106/0.5, 106/1.6 |
+| 4.1 | `OpenPR` delegando ao adaptador | 106/2.1 |
+MOLE (sequenciar com, só colisão de ARQUIVO: `doctor.go`, `status.go`, `session.go`, references e goldens): 105/1.4, 105/1.5, 105/1.7, o verificador 107-05 e o fix-97-01. A 108 NÃO depende deles. Tarefas do dono (Project real e `gh` autenticado; `TST-04` proíbe rede nos testes): 2.5 e 3.6.
+
 ## Rules e IDs da Constituição Aplicáveis
 `.agents/rules/sdd-arquitetura.md` (ARQ-01, 02, 04, 05, 06, 11), `sdd-codigo-e-testes.md` (COD-01, 03, TST-01 a 03), `sdd-fluxo-e-portao.md` (FLX-01, 06, GOV-01), `sdd-seguranca.md` (SEG-01, 03, 04, 07, 08), `sdd-reuso-e-duplicacao.md` (DUP-01, 03, 06). `forge context <task>` resolve o recorte de cada task.
 
 ## Configuração opcional (RN-16)
-Campos propostos na Constituição (tabela Ferramentas e Integrações, lidos da branch base, ao lado de `VCS / Work Item System` e dos campos da 106): `Quadro de acompanhamento` = `desligado` (padrão) | `github-projects` | (`azure-boards`, a verificar) e `Início automático do Builder` = `desligado` (padrão) | `local`. **Não editados aqui**: custo de cerca de 284 bytes contra 27 livres (9189 de 9216), entra por ADR e `GOV-01` na task 0.2 junto com a 106. Alternativa: `forge.json` (local, esquema estrito). `github-projects` só com VCS `github`; `nenhum` só admite `desligado`. Com o espelho desligado: nenhuma chamada ao `gh`, nenhum polling, nenhum cartão lido ou escrito, nenhuma etiqueta nem prefixo aplicados, `doctor` só informa "espelho do quadro: desligado"; com o início automático desligado o `observar` recusa com código diferente de zero. Ligar informa o custo e grava o modo no `status.md`.
+Campos propostos na Constituição (tabela Ferramentas e Integrações, lidos da branch base, ao lado de `VCS / Work Item System` e dos campos da 106): `Quadro de acompanhamento` = `desligado` (padrão) | `github-projects` | (`azure-boards`, a verificar) e `Início automático do Builder` = `desligado` (padrão) | `local`. **Não editados pela 108**: as linhas, as NOTAS e o ponteiro vivem no PR único da Constituição (task nova da 106; ADR 0022; rule `.agents/rules/sdd-modos-de-projeto.md`); o texto final dos campos e o espaço no orçamento (9189 de 9216 hoje) são definidos lá, cortando itens duplicados. A 108/0.2 fica só com a ADR da 108 e a linha em `concepts.md` e depende do PR único. `github-projects` só com VCS `github`; `nenhum` só admite `desligado`. Com o espelho desligado: nenhuma chamada ao `gh`, nenhum polling, nenhum cartão lido ou escrito, nenhuma etiqueta nem prefixo aplicados, `doctor` só informa "espelho do quadro: desligado"; com o início automático desligado o `observar` recusa com código diferente de zero. Ligar informa o custo e grava o modo no `status.md`.
 
 ## Tabela de mapeamento (estado do arquivo, coluna, evento)
 | Coluna | Estado no arquivo | Evento que move o cartão | Quem move |
 |---|---|---|---|
 | Backlog | Ideia registrada sem pasta de spec (item de backlog da iniciativa ou issue) | Alguém registra a ideia | humano ou pm-architect |
-| Spec | Pasta `sdd/discovery/<id>-<nome>/` existe; `status.md` sem `spec-para-revisao`; `queue.json` ausente | `/discovery`, `/nova-feature` ou `/novo-fix` abrem a spec | pm-architect (IA) |
+| Spec | Pasta `sdd/discovery/<id>-<nome>/` existe; `status.md` sem `spec-para-revisao`; nenhum estado por feature (`state/<sid>.json`) | `/discovery`, `/nova-feature` ou `/novo-fix` abrem a spec | pm-architect (IA) |
 | Spec-validation | Spec aprovada pelo Gate 1 (ou `status.md` com `spec-para-revisao`, 106 RN-4) e **ainda não mesclada** na principal; PR da spec aberto | Spec entregue e script local verde; menu do Gate 1 | pm-architect (IA); humano no Gate 1 |
-| Todo | Spec já na principal e pronta para o Builder (marcador `Gate 1: aprovado`, 106 task 2.2, e PR da spec mesclado); `queue.json` com itens `queued` ou split ainda por fazer (a cargo do Builder, 106) | PR da spec mesclado na principal e Gate 1 aprovado | forge, depois do merge (HUMANO decide) |
+| Todo | Spec já na principal e pronta para o Builder (marcador `Gate 1: aprovado`, 106 task 2.2, e PR da spec mesclado); estados por feature `queued` ou split ainda por fazer (a cargo do Builder, 106) | PR da spec mesclado na principal e Gate 1 aprovado | forge, depois do merge (HUMANO decide) |
 | Building | Item `building` ou `changes_requested`; PR da feature em draft | Builder **começa sozinho** depois do merge da spec, só com spec na principal e dentro do WIP humano da 107 e do teto de 3 tentativas (`queue next`); reviewer devolve (`pr_rework`). Via rápida: item sem `código` pula esta coluna | forge, a partir da fila (IA) |
 | Validation | Trabalho pronto num PR aberto aguardando o dono conferir e mesclar (código, ADR, rule ou documentação); item `review_pending` ou `approved`; `pronto-para-revisao` (106) | `queue complete`, ou veredito conforme | forge, a partir da fila (AUTOMÁTICO) |
 | Done | PR da feature mesclado | Merge feito pelo dono ou pelo adaptador após [Continuar] | forge (HUMANO decide) |
 | (campo `Bloqueado`) | Item `blocked` | `blocked_reason` preenchido | forge; cartão fica na etapa de origem |
-Recusa: qualquer valor fora dos 7 nomes exatos é descartado e vira divergência. Sem `status.md` ou `queue.json` legíveis o cartão não se move (falha fechada).
+Recusa: qualquer valor fora dos 7 nomes exatos é descartado e vira divergência. Sem `status.md` ou estado por feature legíveis o cartão não se move (falha fechada). Fonte do estado: arquivos `sdd/discovery/<id>/state/<sid>.json` (106/0.7) e o marcador `Gate 1: aprovado` do `status.md` (106/2.2); o `queue.json` é só o plano.
 
 ## Sinais da 106, 107 e 105 (como se relacionam)
 - **106:** `spec-para-revisao` leva a Spec-validation; `Gate 1: aprovado` com o PR da spec mesclado leva a Todo (sem o merge, o cartão fica em Spec-validation; correção de 20/11/2026: a definição anterior de Todo contradizia a 106); `pronto-para-revisao` leva a Validation; veredito com `head_sha` diferente do HEAD volta o cartão a Building (commit novo invalida). O atestado (`desligado`, `local`, `vcs`) define se arrastar Validation para Done exige prova externa.
-- **107:** o orquestrador lê a etapa, nunca o texto do cartão; o WIP humano conta cartões em Validation e em Spec-validation (a decisão é do dono).
+- **107** (203d98b; não menciona Project nem cartão): o orquestrador lê a etapa, nunca o texto do cartão. A contagem do WIP humano usa a interface `FonteDePendencias` da 107-12 (`Pendentes(ctx) (int, error)`; **proposta do coordenador, a confirmar pelo dono**), com implementação padrão por arquivo; a 108/3.4 acrescenta uma SEGUNDA fonte (cartões em Validation) só quando o espelho estiver ligado, sem a 107 depender da 108.
 - **105:** `forge status` ganha a etapa depois da 2.6; a 2.7 (descrição de negócio) é a fonte do texto comercial das issues.
 
 ## Espelho em duas vias (fonte da verdade e conflito)
 | Dado | Fonte da verdade | Como o outro lado acompanha |
 |---|---|---|
-| Estado da spec, da fila e do PR | Arquivo (`status.md`, `queue.json`) e o PR | O forge move o cartão depois de cada transição (idempotente) |
+| Estado da spec, da fila e do PR | Arquivo (`status.md`, estado por feature) e o PR | O forge move o cartão depois de cada transição (idempotente) |
 | Etapa vista no quadro | O campo `Status` do Project (lido em `.status` no `item-list`) | O forge lê por polling (`gh project item-list --format json`) a cada comando e em `doctor`; o orquestrador lê o campo |
 | Aprovação do Gate 1 e [Continuar] | O menu do forge e o atestado (106) | Arrastar o cartão **só gera o menu**; nunca grava aprovação |
 | Conflito (quadro diz X, arquivo diz Y) | Arquivo vence para estado; o humano vence só pelo menu | `forge doctor` lista a divergência com o ator e a hora; nada é corrigido sem confirmação |
@@ -82,7 +97,7 @@ flowchart LR
   dono(["Dono do projeto<br/>decide e arrasta cartão"])
   ag(["Agentes<br/>pm-architect, builder, reviewer"])
   forge["forge CLI<br/>mapeia estado em etapa"]
-  arq[("Arquivos no repositório<br/>spec, queue.json, status.md")]
+  arq[("Arquivos no repositório<br/>spec, estado por feature, status.md")]
   proj[/"GitHub Project<br/>7 etapas, gestão à vista"/]
   gh["GitHub<br/>issues e PRs"]
   dono -->|"arrasta o cartão"| proj
@@ -100,7 +115,7 @@ flowchart TB
   cli["cmd/forge-sdd<br/>forge project (só adapta flags)"]
   mapa["internal/pipeline<br/>estado de arquivo para etapa"]
   vcs["internal/vcs<br/>Adaptador: github, azure-devops, nenhum"]
-  fila["internal/queue<br/>queue.json e status.md"]
+  fila["internal/queue<br/>estado por feature e status.md"]
   doc["internal/doctor<br/>divergência arquivo x quadro"]
   ghcli["gh project<br/>item-list, item-edit, field-list"]
   quadro[/"GitHub Project<br/>campo Status, 7 opções"/]
@@ -119,7 +134,7 @@ sequenceDiagram
   participant H as Dono
   participant P as Project (Status)
   participant F as forge project
-  participant A as Arquivos (status.md, queue.json)
+  participant A as Arquivos (status.md, estado por feature)
   Note over F,A: arquivo vira quadro
   F->>A: lê estado e calcula a etapa
   F->>P: move o cartão se a etapa difere
@@ -304,4 +319,19 @@ bash -n sdd/discovery/108-project-github-espelho-do-ciclo/criar-project.sh
 bash sdd/discovery/108-project-github-espelho-do-ciclo/criar-project.sh --dry-run | grep -F 'DRY-RUN'
 # negativo: flag desconhecida é recusada e nada é criado
 if bash sdd/discovery/108-project-github-espelho-do-ciclo/criar-project.sh --inventada; then exit 1; fi
+# fecho (prioridade 0): plano com ondas, ordem de merge e caminho crítico
+grep -F '## Fecho (prioridade 0): ondas, ordem de merge e base dos Builders' sdd/discovery/108-project-github-espelho-do-ciclo/plan.md
+grep -F 'Caminho crítico' sdd/discovery/108-project-github-espelho-do-ciclo/plan.md
+grep -F 'PR único da Constituição' sdd/discovery/108-project-github-espelho-do-ciclo/plan.md
+# negativo: a spec não cita a task 2.8 inexistente nem diz que a Constituição não muda
+if grep -F '108/2.8' sdd/discovery/108-project-github-espelho-do-ciclo/plan.md; then exit 1; fi
+if grep -F 'a Constituição não muda' sdd/discovery/108-project-github-espelho-do-ciclo/plan.md sdd/discovery/108-project-github-espelho-do-ciclo/discovery.md; then exit 1; fi
+# negativo: o estado vem do estado por feature, não do queue.json como fonte única
+grep -F 'estado por feature' sdd/discovery/108-project-github-espelho-do-ciclo/criteria.md
+if grep -F 'só lê** o estado em arquivo (`status.md`, `queue.json`)' sdd/discovery/108-project-github-espelho-do-ciclo/discovery.md; then exit 1; fi
+# dependências duras declaradas e FonteDePendencias como proposta
+grep -F 'FonteDePendencias' sdd/discovery/108-project-github-espelho-do-ciclo/plan.md
+grep -F 'proposta do coordenador' sdd/discovery/108-project-github-espelho-do-ciclo/plan.md
+# negativo: guia e wiki não afirmam que os campos já existem na Constituição
+if grep -F 'já existem na Constituição' docs/quadro-do-ciclo.md docs/wiki.html; then exit 1; fi
 ```

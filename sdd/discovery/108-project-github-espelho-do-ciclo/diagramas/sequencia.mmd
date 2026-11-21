@@ -2,7 +2,7 @@ sequenceDiagram
   participant H as Dono
   participant P as Project (Status)
   participant F as forge project
-  participant A as Arquivos (status.md, queue.json)
+  participant A as Arquivos (status.md, estado por feature)
   Note over F,A: arquivo vira quadro
   F->>A: lê estado e calcula a etapa
   F->>P: move o cartão se a etapa difere
