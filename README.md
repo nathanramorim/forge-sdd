@@ -111,6 +111,44 @@ O pipeline de três sessões já vem na versão estável. Para já instalar a pr
 
 ## Como usar
 
+### Comece por aqui: cole isto na sua IA
+
+Escolha a ferramenta e copie o bloco inteiro:
+
+**Claude Code**
+
+```text
+Leia o CLAUDE.md deste projeto e o sdd/memory/constitution.md. Depois rode
+`forge brief` e me diga em que estado o projeto está e qual é o próximo passo.
+Não implemente nada ainda; só me diga o que fazer a seguir.
+```
+
+**Gemini CLI**
+
+```text
+Leia o GEMINI.md deste projeto e o sdd/memory/constitution.md. Depois rode
+`forge brief` e me diga em que estado o projeto está e qual é o próximo passo.
+Não implemente nada ainda; só me diga o que fazer a seguir.
+```
+
+**GitHub Copilot**
+
+```text
+Leia .github/copilot-instructions.md deste projeto e o sdd/memory/constitution.md.
+Depois rode `forge brief` e me diga em que estado o projeto está e qual é o
+próximo passo. Não implemente nada ainda.
+```
+
+**Codex / outros agentes**
+
+```text
+Leia o AGENTS.md deste projeto e o sdd/memory/constitution.md. Depois rode
+`forge brief` e me diga em que estado o projeto está e qual é o próximo passo.
+Não implemente nada ainda.
+```
+
+Depois de alinhar o contexto, siga com os passos abaixo.
+
 **1. Comece o pipeline.** Rode `forge` e escolha *Pipeline multi-sessão → Iniciar as 3 sessões*. O menu pergunta qual agente roda em cada sessão e lembra da sua escolha.
 
 **2. Alinhe o projeto.** Em projetos novos, comece com `/constitution`. Ele registra a missão, a stack e as decisões antes da primeira feature. Para saber se o projeto está pronto, rode `forge brief --check`; sem `--check`, `forge brief` imprime o resumo das decisões.

@@ -1,0 +1,28 @@
+{
+  "$schema": "forge-sdd/metrics/1.0",
+  "feature": "sdd/discovery/106-pr-draft-revisao-e-ci/features/feat-106-33a-ci-politica-relatorio.md,sdd/discovery/106-pr-draft-revisao-e-ci/features/feat-106-32-atestado-local-no-ci.md,sdd/discovery/106-pr-draft-revisao-e-ci/features/feat-106-17-modo-sem-humano.md",
+  "agent_path": null,
+  "tokens_input": 4000,
+  "tokens_output": 500,
+  "turns": 0,
+  "duration_seconds": 0,
+  "criterio_atendido": true,
+  "model": "",
+  "rework_lines": 0,
+  "context7_calls": 0,
+  "git_calls": 0,
+  "files_touched": [
+    "scripts/ci-politica.py",
+    "scripts/tests/fixtures/uso.json",
+    "scripts/tests/fixtures/runs.json",
+    "scripts/atestado.py",
+    "internal/vcs/atestado_test.go",
+    "internal/pipeline/modo_humano.go",
+    "internal/pipeline/modo_humano_test.go",
+    "internal/pipeline/sinais.go"
+  ],
+  "outcome": "approved",
+  "sdd_version": "5.0.0",
+  "medicao": "estimado",
+  "complexidade": null
+}
