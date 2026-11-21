@@ -1,4 +1,4 @@
-# fix-104-14 — Reviewer comenta o diagnóstico simples e libera o PR conforme
+# fix-104-16 — Reviewer comenta o diagnóstico simples e libera o PR conforme
 
 **Iniciativa:** 104-pipeline-em-subagentes
 **Status:** ready (aguarda Gate 1 do dono)
