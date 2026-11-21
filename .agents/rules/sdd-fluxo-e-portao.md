@@ -1,7 +1,7 @@
 ---
 description: Como operar os gates de Spec, branches, Portão em 3 Camadas (A/B/C), ADRs, exceções com prazo e fechamento de onda.
 globs: ["sdd/**", ".github/**"]
-regras: [FLX-01, FLX-02, FLX-03, FLX-05, FLX-06, FLX-07, FLX-08, GOV-01, GOV-02, GOV-03]
+regras: [FLX-01, FLX-02, FLX-03, FLX-05, FLX-06, FLX-07, FLX-08, GOV-01, GOV-02, GOV-03, GOV-04]
 ---
 
 # Guia Prático — Fluxo SDD, Portão de Governança e Releases
@@ -35,5 +35,9 @@ Procedimentos operacionais para cumprir `FLX-01..03`, `FLX-05..08` e `GOV-01..03
 - **Exceções com prazo (`GOV-02`):**
   - Quando autorizado pelo humano, declare o bloco `constitution-exception` na Spec ou descrição do PR preenchendo `regra`, `motivo`, `prazo: AAAA-MM-DD` (data futura) e `responsavel`.
 - **Fim de Onda e Release Beta (`GOV-03`, `FLX-07`):**
-  - No fechamento (`/archive` ou conclusão da onda), registre erros evitáveis em `sdd/memory/lessons.md` e proponha Auto-Skills para padrões repetidos (`forge skills propose`).
-  - Em versões `-beta`, documente os destaques reais e prévias de comandos em `sdd/releases/history.md`, publique a tag na própria branch da feature e mantenha o PR aberto até a promoção estável.
+  - No fechamento (`/archive` ou conclusão da onda), registre erros evitáveis em `sdd/memory/licoes/<ID>.md`, um arquivo por regra (`forge lessons add --rule <ID>`, entregue pela 106-12), e proponha Auto-Skills para padrões repetidos (`forge skills propose`). O agregado `sdd/memory/lessons.md` continua recebendo a entrada quando não há rule (ou por espelho), aparado por orçamento.
+  - Versões `-beta` e `-rc`: documente os destaques reais e prévias de comandos em `sdd/releases/history.md`, publique a tag na própria branch da feature e mantenha o PR aberto até a promoção estável. A regra vale também para `-rc`.
+  - A beta pode acumular fixes e features antes da promoção.
+  - Sem destaques reais em `sdd/releases/history.md`, o workflow de release falha com o texto genérico.
+  - Retenção no GitHub: as 3 releases estáveis mais recentes e as betas posteriores à mais antiga delas; o NPM não é afetado.
+  - Novos comandos atualizam a documentação, com prévia e agente explícito.

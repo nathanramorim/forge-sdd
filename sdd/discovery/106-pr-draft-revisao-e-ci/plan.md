@@ -17,7 +17,7 @@ Ordem: base (adaptador, modo, estado) primeiro; depois o mecanismo; depois o flu
 Fica fora da tabela da Onda 0 porque ela já tem 7 tasks (teto por onda). Número 0.8 por ordem inicial; é a primeira a entrar.
 | # | Task | Depende de | Paralelo | Rules |
 |---|---|---|---|---|
-| 0.8 | **PR único da Constituição e da rule de modos** (ADR-0022 e `GOV-01`): todas as edições de `sdd/memory/constitution.md` num só PR, mais a rule `.agents/rules/sdd-modos-de-projeto.md` e o ajuste de `sdd-fluxo-e-portao.md`; conta de bytes em `discovery.md`, seção "PR único da Constituição" (alvo 9.173 de 9.216 bytes, medidos com `wc -c` em 2026-11-20; campo `Módulos permitidos` no lugar de `Quadro de acompanhamento` e `modulo` no lugar de `project` no `ARQ-06`, conforme a 109, commit `b7c5745`) | — | com 0.2 e 1.1 | `GOV-01`, `GOV-04`, `FLX-05`, `TST-03` |
+| 0.8 | **PR único da Constituição e da rule de modos** (ADR-0022 e `GOV-01`): todas as edições de `sdd/memory/constitution.md` num só PR, mais a rule `.agents/rules/sdd-modos-de-projeto.md` e o ajuste de `sdd-fluxo-e-portao.md`; conta de bytes em `discovery.md`, seção "PR único da Constituição" (teto 9.216 bytes, medido com `wc -c`; campo `Módulos permitidos` no lugar de `Quadro de acompanhamento` e `modulo` anotado no `ARQ-06` como entrega da 109, conforme o commit `b7c5745`, sem entrar na lista de comandos até a CLI expor) | — | com 0.2 e 1.1 | `GOV-01`, `GOV-04`, `FLX-05`, `TST-03` |
 
 ## Onda 1 — Mecanismo (contrato, scripts locais, hooks)
 | # | Task | Depende de | Paralelo | Rules |
