@@ -1,0 +1,9 @@
+flowchart TB
+  CH["Chat do agente<br/>papel Orquestrador (skill)"] --> RT["Roteador<br/>internal/pipeline/roteamento.go"]
+  CH --> EST["Estado de delegações<br/>.forge/runtime/orquestrador"]
+  CH --> VER["Verificador de entrega<br/>forge pipeline verificar"]
+  RT --> AG[".claude/agents/*<br/>papéis e ferramentas"]
+  VER --> GT["forge gate<br/>Camada A"]
+  VER --> LQ["Leque e fila<br/>worktree por task"]
+  CH --> ST["status.md da iniciativa<br/>retomada após /compact"]
+  EST --> LK["Lock por iniciativa<br/>internal/harness"]

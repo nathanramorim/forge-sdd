@@ -1,0 +1,8 @@
+flowchart LR
+  H["Dono (humano)<br/>decide em menu"] --> O["Orquestrador<br/>sessão do chat"]
+  O -->|"delega com briefing"| S["Subagentes<br/>pm-architect, builder, reviewer"]
+  S -->|"relatório (dado)"| O
+  O -->|"verifica antes de devolver"| F["forge Go<br/>gate, bus, leque, estado"]
+  P["Outra sessão<br/>ex.: hub-busize"] -.->|"mensagem (dado)"| O
+  O -->|"menu"| H
+  F --> V["VCS da Constituição<br/>github, azure-devops, nenhum"]
