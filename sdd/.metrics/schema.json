@@ -19,5 +19,17 @@
   "tokens_cache_creation": "integer (opcional)",
   "cost_usd_tabela": "number (opcional; preço de tabela, não é fatura)",
   "medicao": "real | estimado | resumo (opcional; resumo é o registro do archive e não entra nas somas)",
-  "complexidade": "string | null (reservado; preenchimento via ADR futura)"
+  "complexidade": "string | null (reservado; preenchimento via ADR futura)",
+  "spec": {
+    "_": "objeto opcional; só as sessões de /discovery, /nova-feature e /novo-fix (forge session record --sessao spec) o gravam",
+    "tipo": "discovery | feature | fix",
+    "iniciativa": "string (id <id>-<nome> da iniciativa, máx. 80)",
+    "bytes": "integer",
+    "secoes_obrigatorias": "integer de 6 (só feature e fix)",
+    "criteria_bytes": "integer (só discovery)",
+    "plan_bytes": "integer (só discovery)",
+    "status_bytes": "integer (só discovery)",
+    "features_count": "integer (só discovery)",
+    "fixes_count": "integer (só discovery)"
+  }
 }
