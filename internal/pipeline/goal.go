@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -274,15 +275,44 @@ func goalSteps(dir, initiative string) ([]Task, error) {
 	return steps, nil
 }
 
+// gate1Re casa o marcador do Gate 1 como linha própria do status.md, com ou sem negrito.
+var gate1Re = regexp.MustCompile(`(?im)^\s*(?:\*\*)?Gate 1:(?:\*\*)?\s*aprovado\b`)
+
+// maxStatusBytes limita a leitura do status.md (dado não confiável, SEG-02).
+const maxStatusBytes = 64 << 10
+
+// gate1Marked diz se o status.md da iniciativa traz a linha `Gate 1: aprovado`. Link simbólico,
+// arquivo ausente ou id inválido valem como "não aprovado".
+func gate1Marked(dir, initiative string) bool {
+	path, err := layout.InitiativeStatus(dir, initiative)
+	if err != nil {
+		return false
+	}
+	if fi, err := os.Lstat(path); err != nil || !fi.Mode().IsRegular() {
+		return false
+	}
+	f, err := os.Open(path)
+	if err != nil {
+		return false
+	}
+	defer f.Close()
+	data, err := io.ReadAll(io.LimitReader(f, maxStatusBytes))
+	return err == nil && gate1Re.Match(data)
+}
+
 // goalSpecApproved diz se a spec da iniciativa já passou no portão. No modo avançado, vale o parecer
-// aprovado do Reviewer; no normal, a aprovação humana (Gate 1) que cria queue.json.
+// aprovado do Reviewer; no normal, a aprovação humana (Gate 1): o marcador `Gate 1: aprovado` no
+// status.md (que vem da principal) ou, em iniciativa antiga, a queue.json que o Gate 1 criava.
 func goalSpecApproved(dir, initiative string, cfg config.ForgeConfig) bool {
 	if !cfg.IsAdvanced() {
 		base, err := layout.Initiative(dir, initiative)
 		if err != nil {
 			return false
 		}
-		_, err = os.Stat(filepath.Join(base, layout.QueueFileName)) // criada pelo Gate 1 humano
+		if gate1Marked(dir, initiative) {
+			return true
+		}
+		_, err = os.Stat(filepath.Join(base, layout.QueueFileName)) // iniciativa antiga: criada pelo Gate 1 humano
 		return err == nil
 	}
 	entries, err := bus.List(dir, layout.RoleReviewer, layout.StateDone)

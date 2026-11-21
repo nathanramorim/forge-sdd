@@ -302,15 +302,16 @@ func FromBranch(branch string) (id string, ok bool) {
 	return slug, true
 }
 
-// Current devolve a iniciativa da branch atual de dir. Sem iniciativa ativa devolve
-// ok=false e erro nulo; só falha se o git não puder ser consultado.
+// Current devolve a iniciativa da branch atual de dir, também em branch por feature
+// (feat/<N>-<slug> casa com a pasta de mesmo número, como ResolveInitiative). Sem iniciativa
+// ativa devolve ok=false e erro nulo; falha se o git não puder ser consultado ou se o número
+// casar com mais de uma pasta (ErrAmbiguousInitiative).
 func Current(dir string) (id string, ok bool, err error) {
 	branch, err := CurrentBranch(dir)
 	if err != nil {
 		return "", false, err
 	}
-	id, ok = FromBranch(branch)
-	return id, ok, nil
+	return InitiativeOfBranch(dir, branch)
 }
 
 // CurrentBranch devolve o nome da branch atual (vazio em HEAD destacado).
