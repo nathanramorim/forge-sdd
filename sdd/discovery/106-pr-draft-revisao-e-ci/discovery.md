@@ -103,13 +103,13 @@ Objetivo: dizer quanto o draft, o cancelamento e a matriz economizam, sem invent
 
 | Operação | `github` | `azure-devops` | `nenhum` | Prova do "a verificar" |
 |---|---|---|---|---|
-| Criar PR em draft | `gh pr create --draft` (fato: hoje sem `--draft`, `internal/pipeline/pr.go:144`) | MCP (suporte a draft: a verificar); `az repos pr create --draft true` (a verificar) | sem PR: branch pronta | PR de teste por VCS (task 3.5); documentação no context7 |
-| Procurar PR aberto da branch | `gh pr list --head <branch> --json` (fato: `pr.go:231`) | `az repos pr list --source-branch` ou MCP (a verificar) | n/a | idem |
-| Marcar pronto | `gh pr ready` | MCP ou `az repos pr update --id <n> --draft false` (a verificar) | n/a | idem |
-| Mesclar | `gh pr merge` | `az repos pr update --status completed` ou MCP (a verificar) | merge local | idem |
-| Aprovação (prova) | Environment com revisor (aprovada); fallback assinado | Environment do Azure Pipelines com aprovadores (aprovada); se o autor aprova o próprio PR: a verificar | só local | PR de teste |
-| Pular CI em draft | Actions: `if` de draft e `ready_for_review` | build validation da política de branch; se roda em draft: a verificar | sem CI | PR de teste draft |
-| Bloquear o agente | hook em `gh pr ...` | hook em `az repos pr ...` e MCP (a verificar) | nada | teste do hook |
+| Criar PR em draft | `gh pr create --draft` (fato: hoje sem `--draft`, `internal/pipeline/pr.go:144`) | MCP (`repo_create_pull_request` com `isDraft: true`, verificado na 0.1); `az repos pr create --draft true` (verificado na 0.1) | sem PR: branch pronta | Documentação verificada na 0.1; PR de teste por VCS (task 3.5) |
+| Procurar PR aberto da branch | `gh pr list --head <branch> --json` (fato: `pr.go:231`) | `az repos pr list --source-branch <branch> --status active` ou MCP `repo_list_pull_requests_by_repo` (verificado na 0.1) | n/a | idem |
+| Marcar pronto | `gh pr ready` | MCP (`repo_update_pull_request` com `isDraft: false`) ou `az repos pr update --id <n> --draft false` (verificado na 0.1) | n/a | idem |
+| Mesclar | `gh pr merge` | `az repos pr update --id <n> --status completed` ou MCP `repo_update_pull_request` (verificado na 0.1) | merge local | idem |
+| Aprovação (prova) | Environment com revisor (aprovada); fallback assinado | Environment do Azure Pipelines com aprovadores (aprovada); autoaprovação bloqueada quando *"Allow approvers to approve their own runs"* está desmarcado (verificado na 0.1) | só local | Documentação verificada na 0.1; PR de teste (3.5) |
+| Pular CI em draft | Actions: `if` de draft e `ready_for_review` | build validation da política de branch não dispara automaticamente em draft, só ao publicar (verificado na 0.1) | sem CI | Documentação verificada na 0.1; PR de teste draft (3.5) |
+| Bloquear o agente | hook em `gh pr ...` | hook `PreToolUse` em `az repos pr ...` e `mcp__.*repo_.*pull_request.*` (verificado na 0.1) | nada | Documentação verificada na 0.1; teste do hook (1.4) |
 
 ### Modos do atestado (RN-18 a RN-20)
 | Modo | O que confere | Fallback | O que se perde |
@@ -233,4 +233,34 @@ A pergunta "PRs de task do leque em draft?" está respondida: cada feature abre 
 - **(xxi) Atestado do PR da spec: sempre `local`** (veredito conforme da Conferência 1 com SHA mais o [Seguir] do Nathan, ou o modo sem humano). O campo `Modo do atestado` da Constituição vale **só para PRs de feature**.
 - **Hooks só no Claude Code: aceito**, com a pipeline como rede de segurança. Hooks no Claude Code; nos outros agentes (Gemini, Copilot) valem os passos dos comandos; o job leve "pronto?" na principal (decisão iii, aprovada) barra o merge de PR em draft ou sem atestado; o `doctor` informa qual agente tem hook (task 0.4); o `pr_guard.py` e o instalador (tasks 1.4 e 1.5) cobrem só o Claude Code, e o aviso de instalação diz isso.
 
-Sem itens em aberto de decisão. O que falta é **medir**: a task 0.1 (Azure DevOps e custo de tokens MCP versus CLI).
+Sem itens em aberto de decisão. A medição da task 0.1 (Azure DevOps e custo de tokens MCP versus CLI) está registrada abaixo.
+
+## Verificação da 0.1
+Documentação oficial da Microsoft (`az repos pr`, Azure Repos Branch Policies, Azure Pipelines Environments) e do servidor MCP `@azure-devops/mcp` verificada para todas as operações que estavam como "a verificar" (a implementação do adaptador `azure-devops` continua adiada conforme o escopo reduzido de 2026-11-20, tasks 0.3 e 3.5):
+
+1. **CLI `az repos pr` (extensão `azure-devops` do Azure CLI):**
+   - **Criar PR em draft:** `az repos pr create --draft true --source-branch <branch> --target-branch <base> --title <título> --description <corpo>`.
+   - **Procurar PR aberto da branch:** `az repos pr list --source-branch <branch> --status active --output json`.
+   - **Marcar pronto (sair do draft / publish):** `az repos pr update --id <id> --draft false`.
+   - **Mesclar (completar):** `az repos pr update --id <id> --status completed` (suporta `--delete-source-branch true`, `--squash true` e `--merge-commit-message`).
+   - **Votar / aprovar:** `az repos pr set-vote --id <id> --vote approve` (valores aceitos: `approve`, `approve-with-suggestions`, `reject`, `waiting-for-author`, `reset`).
+
+2. **Servidor MCP do Azure DevOps (`@azure-devops/mcp`):**
+   - **Autenticação interativa:** é o padrão do servidor local (`npx -y @azure-devops/mcp <org>`), explícita com `--authentication interactive` (ou `-a interactive`, login OAuth Entra ID no navegador); também aceita `-a azcli` (reusa sessão de `az login`), `-a env` (`DefaultAzureCredential`) e `-a envvar` (`ADO_MCP_AUTH_TOKEN`).
+   - **Ferramentas de PR:** `repo_create_pull_request` (suporta rascunho via parâmetro booleano `isDraft: true`), `repo_list_pull_requests_by_repo` / `repo_list_pull_requests_by_project` (filtro por `sourceRefName` e `status`), `repo_update_pull_request` (altera estado de draft via `isDraft: false`, status, título, descrição e `targetRefName`), `repo_update_pull_request_reviewers` e `repo_vote_pull_request`.
+
+3. **Build validation em PRs em draft no Azure DevOps:**
+   - Políticas de branch de **Build validation** **não disparam automaticamente** enquanto o PR está em modo draft (mesmo quando configuradas com gatilho `Automatic`), nem adicionam revisores obrigatórios ou permitem votos; builds em draft só rodam se enfileirados manualmente (*Queue build*).
+   - Ao publicar o PR (`--draft false` / *Publish*), o Azure DevOps avalia as políticas da branch alvo e dispara automaticamente a build validation. Portanto, diferentemente do GitHub Actions (que exige `if: github.event.pull_request.draft == false`), o Azure Repos já poupa CI em draft por padrão na política de branch.
+
+4. **Environment com aprovadores e restrição de autoaprovação ("Requestor cannot approve"):**
+   - **Política de branch (PR):** a opção *"Allow requestors to approve their own changes"* em *Minimum number of reviewers* vem **desmarcada por padrão** — o autor do PR não consegue satisfazer o número mínimo de aprovadores votando no próprio PR.
+   - **Azure Pipelines Environment (*Approvals and checks* → *Approvals*):** na seção *Advanced*, a opção *"Allow approvers to approve their own runs"* controla se quem disparou a execução pode aprová-la; quando **desmarcada** (*Requestor cannot approve*), impede que o autor/agente que acionou a pipeline aprove a própria execução no Environment, garantindo segregação de funções (4 olhos) para o modo `vcs` do atestado.
+
+5. **Hook `PreToolUse` do Claude Code para CLI e MCP:**
+   - Em `.claude/settings.json`, um grupo `PreToolUse` sem `matcher` (ou com `"matcher": "*"`) intercepta **todas** as ferramentas, incluindo `Bash` e ferramentas MCP (nomeadas no formato `mcp__<servidor>__<ferramenta>`, ex.: `mcp__ado__repo_create_pull_request` e `mcp__ado__repo_update_pull_request`). Para escopo explícito, o matcher aceita regex como `Bash|mcp__.*repo_.*pull_request.*`, inspecionando `tool_name` e `tool_input` (`isDraft`, `status`) no `stdin` do hook.
+
+6. **Comparação de custo de tokens — MCP versus CLI (`az` / `gh`):**
+   - **Carregamento de esquemas no contexto (custo fixo por turno):** o servidor `@azure-devops/mcp` expõe dezenas de ferramentas (repos, PRs, threads, work items, pipelines, wiki), adicionando ~4.000 a 8.000 tokens de definições JSON Schema ao prompt a cada turno (exceto quando o cliente aplica *lazy loading* / `ToolSearch`), enquanto chamadas CLI via `Bash` (`gh pr` ou `az repos pr`) têm **0 tokens** de esquema extra.
+   - **Payload por operação (entrada + saída):** `repo_create_pull_request` / `repo_update_pull_request` no MCP retornam o objeto completo do PR e metadados (~600 a 1.500 tokens por chamada); `az repos pr` com `--query "{id:pullRequestId,status:status,isDraft:isDraft}" -o tsv` (ou `gh pr create`/`gh pr list --json number,url,isDraft`) consome ~80 a 200 tokens por chamada (cerca de 5x a 10x menos tokens).
+   - **Conclusão para RN-17:** o CLI (`gh` no GitHub e `az repos pr` com `--query`/`-o tsv` no código Go do adaptador `internal/vcs`) é o caminho determinístico e de menor custo em tokens para automação do Forge; o MCP (`@azure-devops/mcp -a interactive`) fica como alternativa interativa para sessões de agente onde o usuário prefira login OAuth no navegador sem configurar `az login`.
