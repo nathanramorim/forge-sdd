@@ -16,7 +16,7 @@
 - **Fluxos:** `sdd/spec/flows.md` seção 7 (modo chat) e seção 1 (pipeline); o orquestrador entra como entrada do chat, antes de `RunChat`.
 - **Decisão de VCS:** campo `VCS / Work Item System` da Constituição; adaptador de VCS lido dele (106, `internal/vcs`, ainda não implementado: a verificar).
 - **106 redesenhada (coordenação, sem editá-la):** spec volta à principal após a Conferência 1 e o [Seguir]; o Builder faz o split (`FLX-01` alterado pela 106) e abre uma branch e um PR em draft por feature; estado por feature na branch da feature; atestado em três modos (`desligado`, `local`, `vcs`). A 107 segue esse fluxo; não o redefine.
-- **Constituição (`GOV-01`):** o campo `WIP humano` entra na tabela `Ferramentas e Integrações` por ADR numa task (feat-107-12); **nada é editado aqui**.
+- **Constituição (`GOV-01`):** a 107 **não edita** a Constituição. A linha `| WIP humano | 3 |` e a nota entram no PR único de Constituição (task nova da 106, com as notas dos campos em `.agents/rules/sdd-modos-de-projeto.md`); a feat-107-12 só lê o campo.
 
 ## O que já existe
 | Procurei | Onde | Achei | Decisão | Justificativa |
@@ -32,7 +32,7 @@
 | Próximo passo recomendado | branch `feat/105-experiencia-cli-e-harness` (onda 2) | Função de estado do projeto para o menu raiz | **Depende de** (reusar quando existir) | `DUP-01` |
 | Saneamento de texto | `internal/notify/notify.go:122` (`Sanitize`), `sanitizarAchados` (`laco.go:333`) | Saneadores prontos | **Reusar** para relatório e mensagem | `SEG-08` |
 | Tetos técnicos | `internal/config/forge.go:103,111,118-120,191-192` | `max_parallel_tasks` (padrão 3), `max_rework_attempts` (padrão 3), salvaguardas | **Reusar** para paralelismo e reentrega | `DUP-06` |
-| WIP humano e modos opcionais com aviso de riscos | 106 (RN-14, RN-18 a RN-20, decisões xiv, xv; campos `Modo do atestado` e `Modo de revisão humana`), `internal/config/forge.go:198-200` | Modo opcional com aviso e registro no `status.md`; local aprovado: Constituição, branch base | **Criar** o campo `WIP humano` (nada equivalente); **reusar** o local e o leitor que a 106 fixar | `DUP-06`: uma fonte de verdade |
+| WIP humano e modos opcionais com aviso de riscos | 106 (RN-14, RN-18 a RN-20, decisões xiv, xv; campos `Modo do atestado` e `Modo de revisão humana`), `internal/config/forge.go:198-200` | Modo opcional com aviso e registro no `status.md`; local aprovado: Constituição, branch base | **Reusar** o campo `WIP humano` (criado no PR único de Constituição da 106) e o leitor da tabela da 106/0.5 (106 primeiro); a 107-12 só lê e valida | `DUP-06`: uma fonte de verdade |
 | Telemetria e estado | `forge session record`, `status.md`, `queue.json` | Por sessão e por iniciativa | **Reusar**; o estado do orquestrador só referencia | `DUP-01` |
 | Conceito "orquestração" | `sdd/spec/concepts.md` | Sem linha | **Adicionar** linha (dono: `internal/pipeline`) | `DUP-01` |
 
@@ -122,9 +122,15 @@ go test -run 'TestWIPHumanoExigeAvisoDeRiscosAntesDeDesligar' ./internal/pipelin
 # negativo: o teto técnico (builder.max_parallel_tasks) não substitui o WIP humano e vice-versa
 go test -list 'TestWIPHumanoDistintoDoTetoTecnico' ./internal/pipeline/ | grep -F 'TestWIPHumanoDistintoDoTetoTecnico'
 go test -run 'TestWIPHumanoDistintoDoTetoTecnico' ./internal/pipeline/
-# negativo: o WIP humano é lido da Constituição na branch base; valor na branch da feature não o sobrepõe
+# negativo: o WIP humano é lido pelo leitor da tabela da 106 na branch base; valor na branch da feature não o sobrepõe e a 107 não edita a Constituição
 go test -list 'TestWIPHumanoLidoDaBranchBase' ./internal/pipeline/ | grep -F 'TestWIPHumanoLidoDaBranchBase'
 go test -run 'TestWIPHumanoLidoDaBranchBase' ./internal/pipeline/
+# negativo: PROPOSTA do coordenador (a confirmar pelo dono): o WIP humano recebe a contagem por FonteDePendencias; com dublê soma as fontes e fonte com erro recusa seguir
+go test -list 'TestWIPHumanoContaPorFonteDePendencias' ./internal/pipeline/ | grep -F 'TestWIPHumanoContaPorFonteDePendencias'
+go test -run 'TestWIPHumanoContaPorFonteDePendencias' ./internal/pipeline/
+# negativo: PROPOSTA (a confirmar): a fonte padrão por arquivo conta itens review_pending e specs aguardando [Seguir] e ignora os demais estados
+go test -list 'TestFonteDePendenciasPadraoPorArquivo' ./internal/pipeline/ | grep -F 'TestFonteDePendenciasPadraoPorArquivo'
+go test -run 'TestFonteDePendenciasPadraoPorArquivo' ./internal/pipeline/
 # negativo: a rota de split vai ao builder (nunca ao planner) e feature dependente não abre antes da predecessora mesclada
 go test -list 'TestRoteamentoSplitPeloBuilderEDependenteEspera' ./internal/pipeline/ | grep -F 'TestRoteamentoSplitPeloBuilderEDependenteEspera'
 go test -run 'TestRoteamentoSplitPeloBuilderEDependenteEspera' ./internal/pipeline/
