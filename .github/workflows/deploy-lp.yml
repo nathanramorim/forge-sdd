@@ -15,6 +15,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # A seção de novidades da LP lê docs/data/releases.json. Regerar aqui
+      # garante que o site nunca suba com o arquivo atrasado em relação ao
+      # sdd/releases/history.md (feat-112-03).
+      - name: Regerar as novidades da LP
+        run: python3 scripts/novidades_lp.py
+
+      - name: Falhar se o JSON divergir do histórico
+        run: python3 scripts/novidades_lp.py --check
+
       - name: Deploy Worker (LP)
         uses: cloudflare/wrangler-action@v3
         with:
