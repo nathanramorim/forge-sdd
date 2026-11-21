@@ -1,0 +1,26 @@
+{
+  "$schema": "forge-sdd/metrics/1.0",
+  "feature": "sdd/discovery/106-pr-draft-revisao-e-ci/features/feat-106-26a-comandos-de-concepcao.md,sdd/discovery/106-pr-draft-revisao-e-ci/features/feat-106-26b-builder-por-feature.md",
+  "agent_path": null,
+  "tokens_input": 4000,
+  "tokens_output": 7542,
+  "turns": 0,
+  "duration_seconds": 0,
+  "criterio_atendido": true,
+  "model": "",
+  "rework_lines": 0,
+  "context7_calls": 0,
+  "git_calls": 0,
+  "files_touched": [
+    ".agents/skills/sdd-concepcao/references/discovery.md",
+    ".agents/skills/sdd-concepcao/references/nova-feature.md",
+    ".agents/skills/sdd-concepcao/references/novo-fix.md",
+    ".agents/skills/sdd-build/references/implementar.md",
+    ".agents/skills/sdd-planejamento/references/split-features.md",
+    "internal/scaffold/scaffold_test.go"
+  ],
+  "outcome": "approved",
+  "sdd_version": "5.0.0",
+  "medicao": "estimado",
+  "complexidade": null
+}
