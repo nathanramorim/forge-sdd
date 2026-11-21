@@ -167,6 +167,15 @@ grep -F '| Início automático do Builder | desligado |' sdd/memory/constitution
 grep -F '.agents/rules/sdd-modos-de-projeto.md' sdd/memory/constitution.md
 grep -F 'regras:' .agents/rules/sdd-modos-de-projeto.md
 grep -F 'betas posteriores' .agents/rules/sdd-fluxo-e-portao.md
+# P-25: itens das Regras 11 e 12 que migram para a rule (feat-106-08)
+grep -F 'acumular fixes e features' .agents/rules/sdd-fluxo-e-portao.md
+grep -F 'vale também para `-rc`' .agents/rules/sdd-fluxo-e-portao.md
+grep -F 'texto genérico' .agents/rules/sdd-fluxo-e-portao.md
+grep -F 'betas posteriores à mais antiga' .agents/rules/sdd-fluxo-e-portao.md
+grep -F 'NPM não é afetado' .agents/rules/sdd-fluxo-e-portao.md
+grep -F 'com prévia e agente explícito' .agents/rules/sdd-fluxo-e-portao.md
+# negativo: a Constituição não pode mais citar as Regras 11 e 12 removidas
+if grep -E 'Regras? 1[12]' sdd/memory/constitution.md; then exit 1; fi
 ls sdd/spec/adr | grep -F 'adr-0022'
 # atestado: só local; vcs recusado com mensagem clara
 go test ./internal/vcs/... -run 'TestModoVCSRecusadoComModoAdiado'
