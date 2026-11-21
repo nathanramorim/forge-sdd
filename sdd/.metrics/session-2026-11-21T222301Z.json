@@ -1,0 +1,24 @@
+{
+  "$schema": "forge-sdd/metrics/1.0",
+  "feature": "sdd/releases/history.md",
+  "agent_path": null,
+  "tokens_input": 75227,
+  "tokens_output": 24238,
+  "turns": 0,
+  "duration_seconds": 0,
+  "criterio_atendido": true,
+  "model": "",
+  "rework_lines": 0,
+  "context7_calls": 0,
+  "git_calls": 0,
+  "files_touched": [
+    "sdd/discovery/106-pr-draft-revisao-e-ci/queue.json",
+    "sdd/discovery/106-pr-draft-revisao-e-ci/status.md",
+    "sdd/releases/history.md",
+    "docs/data/releases.json"
+  ],
+  "outcome": "approved",
+  "sdd_version": "5.0.0",
+  "medicao": "estimado",
+  "complexidade": null
+}
