@@ -184,7 +184,7 @@ Serve a mais de um módulo porque o contrato tem só: manifesto, evento, `doctor
 | Dois repositórios com ciclos diferentes | contrato versionado e `contrato.min` no módulo |
 
 ## Decisões do dono (Nathan, chat, 20/11/2026) e perguntas abertas
-**O Gate 1 desta discovery NÃO está aprovado**: o dono decidiu os pontos abaixo em conversa, mas ainda não aprovou formalmente. Resumo: **1 a 6 decididas** (3 só na visibilidade; a licença segue aberta); **7 e a licença abertas**. Plano de versão: 5.1.0-beta ao fim da onda 3 do core (a tag nasce na branch, o PR fica aberto, FLX-07) e 5.1.0 estável depois da onda 5; o release segue o checklist (README, `npm/README.md`, `sdd/releases/history.md`). Ordem das ondas: `plan.md`.
+**Gate 1 aprovado pelo dono em 2026-11-20 (completo, incluindo as decisões 1 a 6).** Próximo passo: `/split-features`; o dono mescla o PR #154. Resumo: **1 a 6 decididas** (3 só na visibilidade; a licença segue aberta); **7 e a licença abertas**. Plano de versão: 5.1.0-beta ao fim da onda 3 do core (a tag nasce na branch, o PR fica aberto, FLX-07) e 5.1.0 estável depois da onda 8 (módulo usável e provado); o release segue o checklist (README, `npm/README.md`, `sdd/releases/history.md`). Ordem das ondas: `plan.md`.
 
 ## Decisões para o Gate 1 (texto original de cada uma; estado em cada título)
 1. **DECIDIDO pelo dono (pasta do usuário + `Módulos permitidos` + hash autorizado; PATH fora). Onde o módulo vive e como o core o acha:** pasta do usuário + lista na Constituição + hash autorizado (recomendado) **versus** PATH (o brief original). PATH aceita qualquer `forge-project` plantado; recomendo a pasta.
@@ -198,3 +198,5 @@ Serve a mais de um módulo porque o contrato tem só: manifesto, evento, `doctor
 5. **DECIDIDO pelo dono: task `107-13` criada na spec 107 (PR #122), no core, antes na 108/3.7.** Início automático (3.7) e regra de WIP ficam no laço da 107; fica sujeita à aprovação formal da 107.
 6. **DECIDIDO pelo dono: a ordem das ondas é reaberta, sem cortar escopo.** A prioridade 0 da 108 deixa de ser o fecho obrigatório; o quadro vira módulo, o último a construir (ver `plan.md`, `## Ordem das ondas do core`).
 7. **EM ABERTO (recomendado: sem canal de volta). Sem canal de volta (pedidos) em v1** (recomendado) **versus** já aceitar `pedidos` validados pelo core.
+
+**Decisão adicional do dono (20/11/2026): ADR antecipada.** A execução de módulo (109-05) amplia a lista fixa de comandos externos (`git`/`gh`), o que exige ADR (FLX-05, SEG-03). Nasce a task `109-12` (só o PR da ADR, texto curto; número reservado no merge; 0021 é da 105 e 0022 da 106/0.8) na onda 4, antes da 109-05. A 109-11 cobre só o texto mínimo no core e a documentação.

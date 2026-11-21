@@ -20,7 +20,7 @@ Ordem de baixo para cima: primeiro prender o comportamento atual (byte a byte), 
 ### Onda 3 — Execução
 | # | Task | Depende de | Paralelo | Rules |
 |---|---|---|---|---|
-| 109-05 | Carregador e execução: `LookPath` injetável, pasta do usuário, ambiente por lista, tempo limite, saída limitada e saneada (`SEG-08`), códigos 0 a 5 mapeados a aviso; **quebra deliberada da lista fixa de comandos** documentada | 109-03, 109-04 | com 109-07 | `SEG-03`, `SEG-05`, `SEG-08`, `ARQ-02`, `TST-03` |
+| 109-05 | Carregador e execução: `LookPath` injetável, pasta do usuário, ambiente por lista, tempo limite, saída limitada e saneada (`SEG-08`), códigos 0 a 5 mapeados a aviso; **quebra deliberada da lista fixa de comandos** documentada | 109-03, 109-04, 109-12 | com 109-07 | `SEG-03`, `SEG-05`, `SEG-08`, `ARQ-02`, `TST-03` |
 | 109-07 | Instantâneo `forge modulo contexto --json` (somente leitura): iniciativas, estados, PRs, `wip_humano`, `modo`, `max_parallel_tasks`; sem ler arquivo que o módulo possa mudar | 109-06 | com 109-05 | `ARQ-01`, `SEG-05`, `TST-03` |
 
 ### Onda 4 — Comandos, ajuda e doctor
@@ -33,7 +33,12 @@ Ordem de baixo para cima: primeiro prender o comportamento atual (byte a byte), 
 | # | Task | Depende de | Paralelo | Rules |
 |---|---|---|---|---|
 | 109-10 | Suíte de byte-identidade completa (módulo ausente, quebrado, lento, incompatível, hash mudado) com um módulo falso de teste (`TestMain` que reexecuta o binário de teste); mede o custo zero por contagem de chamadas | 109-01, 109-08, 109-09, 109-06, 109-07 | com 109-11 | `TST-03`, `TST-04`, `COD-03` |
-| 109-11 | ADR do 109 (contrato, confiança, quebra da lista fixa; número no merge), linha em `sdd/spec/concepts.md` (dono: `internal/modulo`), texto mínimo "Módulos externos (opcionais)" na doc, **sem** linha nos comandos nem nos templates | 109-08, 109-09 | com 109-10 | `FLX-05`, `GOV-01`, `DUP-01` |
+| 109-11 | **Sem ADR** (é da 109-12): linha em `sdd/spec/concepts.md` (dono: `internal/modulo`), texto mínimo "Módulos externos (opcionais)" na doc, **sem** linha nos comandos nem nos templates | 109-08, 109-09 | com 109-10 | `GOV-01`, `DUP-01` |
+
+### Onda 4 do core — ADR antecipada
+| # | Task | Depende de | Paralelo | Rules |
+|---|---|---|---|---|
+| 109-12 | ADR da execução de módulos externos: só o PR da ADR, texto curto (contrato, confiança, quebra da lista fixa `git`/`gh`); número reservado no merge (0021 é da 105, 0022 da 106/0.8) | nenhuma | com 109-04 e 109-07 | `FLX-05`, `SEG-03`, `GOV-01` |
 
 **Alteração em task de outra iniciativa (sem PR novo de Constituição):** a **106/0.8** troca a linha `Quadro de acompanhamento` por `| Módulos permitidos | nenhum |`, troca `project` por `modulo` na `ARQ-06` e reescreve a seção 5 da rule `sdd-modos-de-projeto.md` (texto em `discovery.md`); 9.173 de 9.216 bytes (medido; **não editei a Constituição**).
 
@@ -95,11 +100,11 @@ Decisão do dono (chat, 20/11/2026, decisão 6): a ordem é reaberta **sem corta
 | 1 | 105-01, 105-04, 105-05, 105-02, 105-03, 105-07, 105-06 | PRs #123 a #129 **já construídos**: só merge, na ordem do plano da 105 |
 | 2 | 106/0.8, 106/0.2, 106/1.1, 106/0.1*, 107-01, 109-01, 109-02 | todas sem dependência; os Builders podem rodar em paralelo à onda 1 (arquivos disjuntos); merge depois dela |
 | 3 | 106/0.5, 106/0.7, 106/1.3, 107-02, 109-03, 109-06 | **5.1.0-beta ao fim desta onda** (tag na branch, PR aberto, FLX-07) |
-| 4 | 106/1.6, 106/0.6, 106/1.2, 107-12, 109-04, 109-07 | 109-04 precisa de 106/0.5 e 0.8 |
-| 5 | 106/2.1, 106/3.2 (local), 106/1.4, 107-04, 109-05 | **5.1.0 estável depois desta onda** (ver alerta de conteúdo) |
+| 4 | 106/1.6, 106/0.6, 106/1.2, 107-12, 109-04, 109-07, 109-12 | 109-04 precisa de 106/0.5 e 0.8; 109-12 (só a ADR) antes da 109-05; onda com 7 tasks, nada movido |
+| 5 | 106/2.1, 106/3.2 (local), 106/1.4, 107-04, 109-05 | 109-05 depende de 109-12 (onda 4) |
 | 6 | 106/2.2, 106/1.5, 106/1.7*, 107-05, 107-07, 107-09, 109-08 | |
 | 7 | 106/2.3, 106/2.4, 107-03, 107-06, 107-08, 109-09 | |
-| 8 | 106/2.6, 107-13, 107-10, 106/3.1, 109-10, 109-11 | 107-13 só depois de 106/2.4 |
+| 8 | 106/2.6, 107-13, 107-10, 106/3.1, 109-10, 109-11 | 107-13 só depois de 106/2.4; **5.1.0 estável depois desta onda** |
 | 9 | 106/2.7, 106/3.3*, 105-09, 105 onda 2: 2.1, 105 onda 3: 3.1 e 3.2 | 105-09 só depois de 106/2.6 |
 | 10 | 106/3.4, 106/3.6, 107-11, 105 onda 2: 2.2, 2.3, 2.5, 105-08 | |
 | 11 | 105 onda 2: 2.4, 2.6; 105 onda 3: 3.3 | |
@@ -107,11 +112,13 @@ Decisão do dono (chat, 20/11/2026, decisão 6): a ordem é reaberta **sem corta
 
 **Depois (fora do core; repositório do módulo, privado, futuro):** P-00 a P-10 (parte B), na esteira SDD do repositório do módulo. O quadro (a antiga 108) só entra aí.
 
-**Caminho crítico:** 106/0.2 (onda 2) → 106/0.7 (3) → 106/1.6 (4) → 106/2.1 (5) → 106/2.2 (6) → 106/2.4 (7) → 107-13 (8); e 106/2.6 (8) → 106/2.7 (9) → 106/3.6 (10). Do 109: 109-02 (2) → 109-03 (3) → 109-04 (4) → 109-05 (5) → 109-08 e 109-09 (6 e 7) → 109-10 (8).
+**Opcionais do core (decisão do dono, 20/11/2026):** as tasks 106/0.4, 2.5 e 3.7 ficam no plano da 106 como opcionais do core, fora das ondas; decidir depois.
 
-**Alerta de conteúdo da 5.1.0 (decisão do dono):** pela tabela, **depois da onda 5 o módulo ainda não é usável**: o comando `forge modulo` (109-08) e a checagem do `doctor` (109-09) vêm nas ondas 6 e 7, e a suíte de byte a byte (109-10, RN-1 do requisito inegociável) e a ADR (109-11) na onda 8. A 5.1.0 literal "depois da onda 5" levaria só a infraestrutura e o início de execução (109-05), sem a prova de RN-1. Recomendação: 5.1.0 estável **depois da onda 8** (primeira com 107-13 e a suíte 109-10); a beta ao fim da onda 3 contém só 105 onda 1, base da 106 (0.8, 0.2, 1.1, 0.5, 0.7, 1.3), 107-01/02 e 109-01/02/03/06, **sem** efeito visível do módulo. Mantive no quadro os marcos que o dono pediu.
+**Caminho crítico:** 106/0.2 (onda 2) → 106/0.7 (3) → 106/1.6 (4) → 106/2.1 (5) → 106/2.2 (6) → 106/2.4 (7) → 107-13 (8); e 106/2.6 (8) → 106/2.7 (9) → 106/3.6 (10). Do 109: 109-02 (2) → 109-03 (3) → 109-04 (4) e 109-12 (4) → 109-05 (5) → 109-08 e 109-09 (6 e 7) → 109-10 (8).
 
-**Alerta de governança (FLX-05, SEG-03):** a 109-05 (onda 5) quebra de propósito a lista fixa de comandos (`git`/`gh`) e isso exige ADR; a ADR está na 109-11 (onda 8). Ou o texto da ADR sobe para antes ou junto da 109-05 (recomendado: um PR de ADR na onda 4), ou a execução de módulo fica fora da 5.1.0.
+**Alerta de conteúdo da 5.1.0 (decisão do dono):** pela tabela, **depois da onda 5 o módulo ainda não é usável**: o comando `forge modulo` (109-08) e a checagem do `doctor` (109-09) vêm nas ondas 6 e 7, e a suíte de byte a byte (109-10, RN-1 do requisito inegociável) e a ADR (109-11) na onda 8. A 5.1.0 literal "depois da onda 5" levaria só a infraestrutura e o início de execução (109-05), sem a prova de RN-1. **Decidido pelo dono (20/11/2026):** 5.1.0 estável **depois da onda 8** (primeira com 107-13 e a suíte 109-10); a beta ao fim da onda 3 contém só 105 onda 1, base da 106 (0.8, 0.2, 1.1, 0.5, 0.7, 1.3), 107-01/02 e 109-01/02/03/06, **sem** efeito visível do módulo. A beta fica ao fim da onda 3.
+
+**Alerta de governança (FLX-05, SEG-03):** a 109-05 (onda 5) quebra de propósito a lista fixa de comandos (`git`/`gh`) e isso exige ADR; **decidido pelo dono (20/11/2026):** a ADR sobe para a task 109-12 (onda 4, só o PR da ADR), antes da 109-05; a 109-11 cobre só o texto mínimo e a documentação.
 
 **Colisões de arquivo e quem vai antes**
 | Arquivo | Quem toca (onda) | Ordem |
