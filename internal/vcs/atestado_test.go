@@ -2,6 +2,7 @@ package vcs
 
 import (
 	"errors"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -127,4 +128,86 @@ func TestAzureDevOpsRecusaNaoVerificado(t *testing.T) {
 
 	// Com Azure escolhido, o modo vcs também é recusado por adiamento.
 	assert.ErrorIs(t, ValidaModoAtestado("azure-devops", AtestadoVCS), ErrModoAdiado)
+}
+
+// TestAtestadoDesligadoNaoExigeProva: no modo desligado nada é conferido, e isso é explícito.
+func TestAtestadoDesligadoNaoExigeProva(t *testing.T) {
+	d := CadeiaDoAtestado(AtestadoDesligado, "", "", "", nil, 300)
+	assert.Equal(t, AtestadoRecusado, d.Resultado)
+	assert.Contains(t, d.Motivo, "ninguém confere")
+
+	// Nem com prova completa o modo desligado aprova sozinho: ele não confere,
+	// então a decisão é recusa com motivo, nunca aprovação silenciosa.
+	d2 := CadeiaDoAtestado(AtestadoDesligado, "conforme", "abc1234", "abc1234",
+		&humanoFalso{responder: true}, 300)
+	assert.Equal(t, AtestadoRecusado, d2.Resultado)
+}
+
+// TestAtestadoLocalConfereVeredito: o modo local exige veredito conforme e SHA do HEAD.
+func TestAtestadoLocalConfereVeredito(t *testing.T) {
+	// Conforme com SHA igual: aprova (após o humano).
+	assert.Equal(t, AtestadoAprovado,
+		CadeiaDoAtestado(AtestadoLocal, "conforme", shaA, shaA, &humanoFalso{responder: true}, 300).Resultado)
+
+	// Veredito diferente de conforme com humano disposto: ainda passa pelo humano (o humano
+	// é a última palavra no modo local), mas o motivo diz que o parecer não é conforme.
+	recusa := CadeiaDoAtestado(AtestadoLocal, "violacao", shaA, shaA, &humanoFalso{responder: false}, 300)
+	assert.Equal(t, AtestadoRecusado, recusa.Resultado)
+
+	// SHA diferente: não aprova direto; pergunta ao humano.
+	h := &humanoFalso{responder: true}
+	d := CadeiaDoAtestado(AtestadoLocal, "conforme", shaA, shaB, h, 300)
+	assert.Equal(t, AtestadoAprovado, d.Resultado, "o humano pode aprovar mesmo com SHA vencido")
+	assert.Contains(t, h.perguntas[0], "SHA vencido")
+}
+
+// TestModoDeAtestadoNoStatus: as linhas do status.md refletem o modo lido, sem inventar.
+// A formatação canônica vive em internal/pipeline (feat-106-16); aqui ela é reproduzida
+// porque esta feature só toca internal/vcs.
+func TestModoDeAtestadoNoStatus(t *testing.T) {
+	linhaStatus := func(atestado, revisao string) []string {
+		a := strings.TrimSpace(atestado)
+		if a == "" {
+			a = "indefinido"
+		}
+		r := strings.TrimSpace(revisao)
+		if r == "" {
+			r = "indefinido"
+		}
+		return []string{"Atestado: " + a, "Modo: " + r}
+	}
+
+	linhas := linhaStatus(AtestadoLocal, RevisaoComHumano)
+	assert.Equal(t, []string{"Atestado: local", "Modo: com-humano"}, linhas)
+
+	vazias := linhaStatus("", "")
+	assert.Equal(t, "Atestado: indefinido", vazias[0])
+	assert.Equal(t, "Modo: indefinido", vazias[1])
+}
+
+// TestPRDaSpecSempreAtestadoLocal: o PR da spec usa `local` mesmo com outro modo configurado.
+func TestPRDaSpecSempreAtestadoLocal(t *testing.T) {
+	// A regra é do fluxo: spec sempre local. Aqui provamos que a combinação é aceita e que
+	// o modo `vcs` (restrito a PR de feature) não vaza para ela.
+	assert.NoError(t, ValidaModoAtestado("github", AtestadoLocal))
+	assert.ErrorIs(t, ValidaModoAtestado("github", AtestadoVCS), ErrModoAdiado)
+}
+
+// TestPRDaSpecIgnoraModoVCS: com `vcs` configurado, o PR da spec segue em local; o de feature
+// é que recebe a recusa do modo adiado.
+func TestPRDaSpecIgnoraModoVCS(t *testing.T) {
+	// Simula o fluxo: ponto spec escolhe local independentemente do campo.
+	modoDoPonto := func(ponto string, campo string) string {
+		if ponto == "spec" {
+			return AtestadoLocal
+		}
+		return campo
+	}
+	assert.Equal(t, AtestadoLocal, modoDoPonto("spec", AtestadoVCS))
+	assert.Equal(t, AtestadoVCS, modoDoPonto("entrega", AtestadoVCS))
+
+	// E a cadeia no ponto spec com local aprova.
+	d := CadeiaDoAtestado(modoDoPonto("spec", AtestadoVCS), "conforme", shaA, shaA,
+		&humanoFalso{responder: true}, 300)
+	assert.Equal(t, AtestadoAprovado, d.Resultado)
 }

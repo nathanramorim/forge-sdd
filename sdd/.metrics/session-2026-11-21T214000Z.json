@@ -1,0 +1,24 @@
+{
+  "$schema": "forge-sdd/metrics/1.0",
+  "feature": "sdd/discovery/106-pr-draft-revisao-e-ci/features/feat-106-33b-ci-politica-linha-de-base.md,sdd/discovery/106-pr-draft-revisao-e-ci/features/feat-106-27-adr-final-e-concepts.md",
+  "agent_path": null,
+  "tokens_input": 4000,
+  "tokens_output": 2651,
+  "turns": 0,
+  "duration_seconds": 0,
+  "criterio_atendido": true,
+  "model": "",
+  "rework_lines": 0,
+  "context7_calls": 0,
+  "git_calls": 0,
+  "files_touched": [
+    "scripts/ci-politica.py",
+    "scripts/tests/fixtures/runs_com_formula.json",
+    "sdd/spec/adr/adr-0023-fluxo-de-pr-em-dois-pontos-e-estado-isolado.md",
+    "sdd/spec/concepts.md"
+  ],
+  "outcome": "approved",
+  "sdd_version": "5.0.0",
+  "medicao": "estimado",
+  "complexidade": null
+}
