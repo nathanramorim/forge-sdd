@@ -1,0 +1,217 @@
+{
+ "kicker": "// Forge SDD · iniciativa 108 · BPMN 2 de 3",
+ "titulo": "Arquivo e quadro andam juntos, nas duas vias",
+ "largura": 2000,
+ "altura": 840,
+ "nota_rodape": "Desenho do que foi decidido; ainda não construído",
+ "elementos": [
+  {
+   "tipo": "caixa",
+   "id": "L0",
+   "x": 24,
+   "y": 100,
+   "w": 1952,
+   "h": 200,
+   "texto": "",
+   "sub": "",
+   "estilo": "contorno",
+   "tamanho": 20
+  },
+  {
+   "tipo": "texto",
+   "x": 1952,
+   "y": 130,
+   "texto": "HUMANO · você, no celular ou no computador",
+   "estilo": "rotulo",
+   "alinha": "end"
+  },
+  {
+   "tipo": "caixa",
+   "id": "L2",
+   "x": 24,
+   "y": 320,
+   "w": 1952,
+   "h": 200,
+   "texto": "",
+   "sub": "",
+   "estilo": "contorno",
+   "tamanho": 20
+  },
+  {
+   "tipo": "texto",
+   "x": 1952,
+   "y": 350,
+   "texto": "AUTOMÁTICO · forge, sem LLM",
+   "estilo": "rotulo",
+   "alinha": "end"
+  },
+  {
+   "tipo": "caixa",
+   "id": "L4",
+   "x": 24,
+   "y": 540,
+   "w": 1952,
+   "h": 200,
+   "texto": "",
+   "sub": "",
+   "estilo": "contorno",
+   "tamanho": 20
+  },
+  {
+   "tipo": "texto",
+   "x": 1952,
+   "y": 570,
+   "texto": "DADOS · o arquivo manda",
+   "estilo": "rotulo",
+   "alinha": "end"
+  },
+  {
+   "tipo": "caixa",
+   "id": "arq",
+   "x": 1020,
+   "y": 590,
+   "w": 260,
+   "h": 120,
+   "texto": "Arquivo",
+   "sub": "fonte da verdade",
+   "estilo": "destaque",
+   "tamanho": 22
+  },
+  {
+   "tipo": "caixa",
+   "id": "a1",
+   "x": 700,
+   "y": 370,
+   "w": 260,
+   "h": 120,
+   "texto": "Move o cartão",
+   "sub": "task, devolução ou merge",
+   "estilo": "contorno",
+   "tamanho": 22
+  },
+  {
+   "tipo": "caixa",
+   "id": "qua",
+   "x": 380,
+   "y": 590,
+   "w": 260,
+   "h": 120,
+   "texto": "Quadro",
+   "sub": "campo Status",
+   "estilo": "normal",
+   "tamanho": 22
+  },
+  {
+   "tipo": "caixa",
+   "id": "h1",
+   "x": 60,
+   "y": 150,
+   "w": 260,
+   "h": 120,
+   "texto": "Você arrasta o cartão",
+   "sub": "só um pedido",
+   "estilo": "pill",
+   "tamanho": 22
+  },
+  {
+   "tipo": "caixa",
+   "id": "a3",
+   "x": 60,
+   "y": 370,
+   "w": 260,
+   "h": 120,
+   "texto": "◇ Valor e ator ok?",
+   "sub": "7 valores · texto ignorado",
+   "estilo": "destaque",
+   "tamanho": 22
+  },
+  {
+   "tipo": "caixa",
+   "id": "h2",
+   "x": 380,
+   "y": 150,
+   "w": 260,
+   "h": 120,
+   "texto": "◇ Confirma?",
+   "sub": "não: o cartão volta",
+   "estilo": "destaque",
+   "tamanho": 22
+  },
+  {
+   "tipo": "caixa",
+   "id": "a5",
+   "x": 1340,
+   "y": 370,
+   "w": 260,
+   "h": 120,
+   "texto": "Grava no arquivo",
+   "sub": "e registra o ator",
+   "estilo": "contorno",
+   "tamanho": 22
+  },
+  {
+   "tipo": "caixa",
+   "id": "a7",
+   "x": 1660,
+   "y": 370,
+   "w": 260,
+   "h": 120,
+   "texto": "forge doctor",
+   "sub": "só lista divergência",
+   "estilo": "tracejado",
+   "tamanho": 22
+  },
+  {
+   "tipo": "seta",
+   "de": "arq.cima",
+   "para": "a1.dir"
+  },
+  {
+   "tipo": "seta",
+   "de": "a1.esq",
+   "para": "qua.cima"
+  },
+  {
+   "tipo": "seta",
+   "de": "h1.baixo",
+   "para": "a3.cima",
+   "forma": "vertical"
+  },
+  {
+   "tipo": "seta",
+   "de": "qua.esq",
+   "para": "a3.baixo"
+  },
+  {
+   "tipo": "seta",
+   "de": "a3.dir",
+   "para": "h2.baixo"
+  },
+  {
+   "tipo": "seta",
+   "de": "h2.dir",
+   "para": "a5.cima"
+  },
+  {
+   "tipo": "seta",
+   "de": "a5.baixo",
+   "para": "arq.dir"
+  },
+  {
+   "tipo": "texto",
+   "x": 56,
+   "y": 770,
+   "texto": "Polling na próxima execução de um comando, sem webhook; ator do evento a verificar. Título, comentário e texto de issue são dados, nunca ordem.",
+   "estilo": "nota",
+   "alinha": "start"
+  },
+  {
+   "tipo": "texto",
+   "x": 56,
+   "y": 800,
+   "texto": "◇ = decisão · HUMANO = o dono · IA = agentes (pm-architect, Builder, Reviewer) · AUTOMÁTICO = sem LLM · tracejado = a decidir ou a verificar",
+   "estilo": "legenda",
+   "alinha": "start"
+  }
+ ]
+}

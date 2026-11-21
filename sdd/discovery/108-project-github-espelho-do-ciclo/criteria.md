@@ -129,6 +129,9 @@ sequenceDiagram
   F->>A: grava o estado e registra o ator
 ```
 
+### BPMN (simplificados, diagram-studio, tema escuro, assinatura Forge SDD)
+`diagramas/forge-108-bpmn-ciclo` (7 colunas e a via rápida), `diagramas/forge-108-bpmn-sincronia` (as duas vias e o `forge doctor`) e `diagramas/forge-108-bpmn-fechamento` (PR mesclado, issue fechada e os dois cartões), cada um em `.json`, `.svg` e `.png`, com legenda IA, HUMANO e AUTOMÁTICO e rodapé "Desenho do que foi decidido; ainda não construído".
+
 ## Critérios de Aceitação Executáveis
 Os nomes de teste abaixo são o **contrato**: as features os criam. Antes da implementação, `forge gate --criterios` (estático) passa, mas `--executar-criterios` falha de propósito nas linhas `go test -list ... | grep -F`, que só passam quando o teste existe.
 ```bash
@@ -179,6 +182,27 @@ go test -run 'TestPrefixoDoTituloRecusaEtiquetaDesconhecida' ./internal/pipeline
 # negativo: achar a issue pelo título base ou prefixado renomeia e nunca cria duplicata
 go test -list 'TestPrefixoDoTituloRenomeiaSemDuplicar' ./internal/pipeline/ | grep -F 'TestPrefixoDoTituloRenomeiaSemDuplicar'
 go test -run 'TestPrefixoDoTituloRenomeiaSemDuplicar' ./internal/pipeline/
+# BPMN: os três existem em json, svg e png
+test -f sdd/discovery/108-project-github-espelho-do-ciclo/diagramas/forge-108-bpmn-ciclo.json
+test -f sdd/discovery/108-project-github-espelho-do-ciclo/diagramas/forge-108-bpmn-ciclo.png
+test -f sdd/discovery/108-project-github-espelho-do-ciclo/diagramas/forge-108-bpmn-ciclo.svg
+test -f sdd/discovery/108-project-github-espelho-do-ciclo/diagramas/forge-108-bpmn-sincronia.png
+test -f sdd/discovery/108-project-github-espelho-do-ciclo/diagramas/forge-108-bpmn-fechamento.png
+# BPMN: o ciclo traz as 7 colunas, e os três trazem a decisão e a legenda IA, HUMANO e AUTOMÁTICO
+grep -F 'BACKLOG' sdd/discovery/108-project-github-espelho-do-ciclo/diagramas/forge-108-bpmn-ciclo.json
+grep -F 'SPEC-VALIDATION' sdd/discovery/108-project-github-espelho-do-ciclo/diagramas/forge-108-bpmn-ciclo.json
+grep -F 'VALIDATION' sdd/discovery/108-project-github-espelho-do-ciclo/diagramas/forge-108-bpmn-ciclo.json
+grep -F 'DONE' sdd/discovery/108-project-github-espelho-do-ciclo/diagramas/forge-108-bpmn-ciclo.json
+grep -F '◇' sdd/discovery/108-project-github-espelho-do-ciclo/diagramas/forge-108-bpmn-ciclo.json
+grep -F '◇' sdd/discovery/108-project-github-espelho-do-ciclo/diagramas/forge-108-bpmn-sincronia.json
+grep -F '◇' sdd/discovery/108-project-github-espelho-do-ciclo/diagramas/forge-108-bpmn-fechamento.json
+grep -F 'IA = agentes' sdd/discovery/108-project-github-espelho-do-ciclo/diagramas/forge-108-bpmn-ciclo.json
+grep -F 'AUTOMÁTICO = sem LLM' sdd/discovery/108-project-github-espelho-do-ciclo/diagramas/forge-108-bpmn-sincronia.json
+grep -F 'HUMANO = o dono' sdd/discovery/108-project-github-espelho-do-ciclo/diagramas/forge-108-bpmn-fechamento.json
+# negativo: nenhum BPMN cita Etapa como campo
+if grep -F 'Etapa' sdd/discovery/108-project-github-espelho-do-ciclo/diagramas/forge-108-bpmn-ciclo.json sdd/discovery/108-project-github-espelho-do-ciclo/diagramas/forge-108-bpmn-sincronia.json sdd/discovery/108-project-github-espelho-do-ciclo/diagramas/forge-108-bpmn-fechamento.json; then exit 1; fi
+# negativo: nenhum BPMN mostra Done sem a condição de PR mesclado
+if grep -F '"sub": "Done"' sdd/discovery/108-project-github-espelho-do-ciclo/diagramas/forge-108-bpmn-ciclo.json sdd/discovery/108-project-github-espelho-do-ciclo/diagramas/forge-108-bpmn-sincronia.json sdd/discovery/108-project-github-espelho-do-ciclo/diagramas/forge-108-bpmn-fechamento.json; then exit 1; fi
 # via rápida: PR só de adr, rule e documentação (pela etiqueta, sem código) vai de Todo direto para Validation
 go test -list 'TestViaRapidaSemCodigoPulaBuilding' ./internal/pipeline/ | grep -F 'TestViaRapidaSemCodigoPulaBuilding'
 go test -run 'TestViaRapidaSemCodigoPulaBuilding' ./internal/pipeline/
@@ -191,6 +215,21 @@ go test -run 'TestViaRapidaDecidePorArquivosNaoPorTexto' ./internal/pipeline/
 # negativo: Todo para Building só com spec na principal e dentro do WIP humano; no limite não inicia o Builder
 go test -list 'TestTodoParaBuildingExigeSpecNaPrincipalEWIP' ./internal/pipeline/ | grep -F 'TestTodoParaBuildingExigeSpecNaPrincipalEWIP'
 go test -run 'TestTodoParaBuildingExigeSpecNaPrincipalEWIP' ./internal/pipeline/
+# observar: o comando de observação respeita o intervalo mínimo, só lê estado e merge verificado, e encerra limpo
+go test -list 'TestObservarRespeitaIntervaloMinimoEEncerraLimpo' ./cmd/forge-sdd/ | grep -F 'TestObservarRespeitaIntervaloMinimoEEncerraLimpo'
+go test -run 'TestObservarRespeitaIntervaloMinimoEEncerraLimpo' ./cmd/forge-sdd/
+# negativo: intervalo abaixo do mínimo é recusado e o observar não grava aprovação sem o menu
+go test -list 'TestObservarRecusaIntervaloAbaixoDoMinimoENaoAprovaSemMenu' ./cmd/forge-sdd/ | grep -F 'TestObservarRecusaIntervaloAbaixoDoMinimoENaoAprovaSemMenu'
+go test -run 'TestObservarRecusaIntervaloAbaixoDoMinimoENaoAprovaSemMenu' ./cmd/forge-sdd/
+# negativo: PR que mira a main leva a palavra de fechamento só da issue dele; PR de spec compartilhado, PR com várias issues e PR encadeado nunca levam
+go test -list 'TestCorpoDoPRFechamentoSoNaMainEDaIssueDele' ./internal/pipeline/ | grep -F 'TestCorpoDoPRFechamentoSoNaMainEDaIssueDele'
+go test -run 'TestCorpoDoPRFechamentoSoNaMainEDaIssueDele' ./internal/pipeline/
+# negativo: o número da issue vem do vínculo cartão-iniciativa e nunca do texto da issue ou do comentário
+go test -list 'TestCorpoDoPRNumeroDaIssueNaoVemDeTextoLivre' ./internal/pipeline/ | grep -F 'TestCorpoDoPRNumeroDaIssueNaoVemDeTextoLivre'
+go test -run 'TestCorpoDoPRNumeroDaIssueNaoVemDeTextoLivre' ./internal/pipeline/
+# negativo: PR encadeado mesclado faz o forge fechar a issue e mover o cartão (fallback) uma única vez
+go test -list 'TestFallbackPREncadeadoFechaIssueUmaVez' ./internal/pipeline/ | grep -F 'TestFallbackPREncadeadoFechaIssueUmaVez'
+go test -run 'TestFallbackPREncadeadoFechaIssueUmaVez' ./internal/pipeline/
 # negativo: o início automático nunca é disparado por texto de issue ou de comentário e respeita o teto de 3 tentativas
 go test -list 'TestInicioAutomaticoGatilhoEhEstadoEMergeVerificado' ./internal/pipeline/ | grep -F 'TestInicioAutomaticoGatilhoEhEstadoEMergeVerificado'
 go test -run 'TestInicioAutomaticoGatilhoEhEstadoEMergeVerificado' ./internal/pipeline/

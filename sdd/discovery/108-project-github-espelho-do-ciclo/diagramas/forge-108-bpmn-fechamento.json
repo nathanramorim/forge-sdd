@@ -1,0 +1,228 @@
+{
+ "kicker": "// Forge SDD · iniciativa 108 · BPMN 3 de 3",
+ "titulo": "Do PR mesclado ao Done e à issue fechada",
+ "largura": 1900,
+ "altura": 940,
+ "nota_rodape": "Desenho do que foi decidido; ainda não construído",
+ "elementos": [
+  {
+   "tipo": "caixa",
+   "id": "L0",
+   "x": 24,
+   "y": 100,
+   "w": 1852,
+   "h": 160,
+   "texto": "",
+   "sub": "",
+   "estilo": "contorno",
+   "tamanho": 20
+  },
+  {
+   "tipo": "texto",
+   "x": 1852,
+   "y": 130,
+   "texto": "HUMANO · o dono",
+   "estilo": "rotulo",
+   "alinha": "end"
+  },
+  {
+   "tipo": "caixa",
+   "id": "L2",
+   "x": 24,
+   "y": 280,
+   "w": 1852,
+   "h": 370,
+   "texto": "",
+   "sub": "",
+   "estilo": "contorno",
+   "tamanho": 20
+  },
+  {
+   "tipo": "texto",
+   "x": 1852,
+   "y": 310,
+   "texto": "AUTOMÁTICO · GitHub e forge, sem LLM",
+   "estilo": "rotulo",
+   "alinha": "end"
+  },
+  {
+   "tipo": "caixa",
+   "id": "L4",
+   "x": 24,
+   "y": 670,
+   "w": 1852,
+   "h": 190,
+   "texto": "",
+   "sub": "",
+   "estilo": "contorno",
+   "tamanho": 20
+  },
+  {
+   "tipo": "texto",
+   "x": 1852,
+   "y": 700,
+   "texto": "CARTÕES · dois por trabalho",
+   "estilo": "rotulo",
+   "alinha": "end"
+  },
+  {
+   "tipo": "caixa",
+   "id": "h1",
+   "x": 60,
+   "y": 130,
+   "w": 260,
+   "h": 120,
+   "texto": "Você mescla o PR",
+   "sub": "decisão do dono",
+   "estilo": "pill",
+   "tamanho": 22
+  },
+  {
+   "tipo": "caixa",
+   "id": "a1",
+   "x": 60,
+   "y": 340,
+   "w": 260,
+   "h": 120,
+   "texto": "◇ PR mira a main?",
+   "sub": "",
+   "estilo": "destaque",
+   "tamanho": 22
+  },
+  {
+   "tipo": "caixa",
+   "id": "a2",
+   "x": 380,
+   "y": 340,
+   "w": 260,
+   "h": 120,
+   "texto": "Closes #N no corpo",
+   "sub": "só a issue dele",
+   "estilo": "normal",
+   "tamanho": 22
+  },
+  {
+   "tipo": "caixa",
+   "id": "a3",
+   "x": 700,
+   "y": 340,
+   "w": 260,
+   "h": 120,
+   "texto": "Automações do Project",
+   "sub": "a verificar, ligar à mão",
+   "estilo": "tracejado",
+   "tamanho": 22
+  },
+  {
+   "tipo": "caixa",
+   "id": "a4",
+   "x": 380,
+   "y": 510,
+   "w": 260,
+   "h": 120,
+   "texto": "PR encadeado",
+   "sub": "forge fecha a issue",
+   "estilo": "contorno",
+   "tamanho": 22
+  },
+  {
+   "tipo": "caixa",
+   "id": "a5",
+   "x": 1250,
+   "y": 510,
+   "w": 260,
+   "h": 120,
+   "texto": "forge doctor",
+   "sub": "issue aberta, PR mesclado",
+   "estilo": "contorno",
+   "tamanho": 22
+  },
+  {
+   "tipo": "caixa",
+   "id": "ci",
+   "x": 700,
+   "y": 710,
+   "w": 260,
+   "h": 120,
+   "texto": "Cartão da issue",
+   "sub": "Done só ao fechar",
+   "estilo": "normal",
+   "tamanho": 22
+  },
+  {
+   "tipo": "caixa",
+   "id": "cp",
+   "x": 1340,
+   "y": 710,
+   "w": 260,
+   "h": 120,
+   "texto": "Cartão do PR",
+   "sub": "Done ao mesclar",
+   "estilo": "normal",
+   "tamanho": 22
+  },
+  {
+   "tipo": "seta",
+   "de": "h1.baixo",
+   "para": "a1.cima",
+   "forma": "vertical"
+  },
+  {
+   "tipo": "seta",
+   "de": "a1.dir",
+   "para": "a2.esq",
+   "forma": "horizontal"
+  },
+  {
+   "tipo": "seta",
+   "de": "a2.dir",
+   "para": "a3.esq",
+   "forma": "horizontal"
+  },
+  {
+   "tipo": "seta",
+   "de": "a1.baixo",
+   "para": "a4.esq",
+   "estilo": "fraca"
+  },
+  {
+   "tipo": "seta",
+   "de": "a3.baixo",
+   "para": "ci.cima",
+   "forma": "vertical"
+  },
+  {
+   "tipo": "seta",
+   "de": "a3.dir",
+   "para": "cp.cima",
+   "forma": "horizontal"
+  },
+  {
+   "tipo": "seta",
+   "de": "a4.baixo",
+   "para": "ci.esq"
+  },
+  {
+   "tipo": "seta",
+   "de": "a5.baixo",
+   "para": "ci.dir",
+   "estilo": "fraca"
+  },
+  {
+   "tipo": "texto",
+   "x": 56,
+   "y": 880,
+   "texto": "Sim: Closes #N. Não (base em outra branch): o forge fecha. Closes nunca em PR de spec compartilhado.",
+   "estilo": "nota",
+   "alinha": "start"
+  },
+  {
+   "tipo": "texto",
+   "x": 56,
+   "y": 900,
+   "texto": "◇ = decisão · HUMANO = o dono · IA = agentes (pm-architect, Builder, Reviewer) · AUTOMÁTICO = sem LLM · tracejado = a decidir ou a verificar",
+   "estilo": "legenda",
+   "alinha": "start"
+  }
+ ]
+}

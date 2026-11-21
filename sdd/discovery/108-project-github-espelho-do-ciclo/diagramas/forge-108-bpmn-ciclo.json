@@ -1,0 +1,309 @@
+{
+ "kicker": "// Forge SDD · iniciativa 108 · BPMN 1 de 3",
+ "titulo": "O caminho de um trabalho pelas 7 colunas do quadro",
+ "largura": 2500,
+ "altura": 860,
+ "nota_rodape": "Desenho do que foi decidido; ainda não construído",
+ "elementos": [
+  {
+   "tipo": "texto",
+   "x": 60,
+   "y": 126,
+   "texto": "BACKLOG",
+   "estilo": "rotulo",
+   "alinha": "start"
+  },
+  {
+   "tipo": "texto",
+   "x": 360,
+   "y": 126,
+   "texto": "SPEC",
+   "estilo": "rotulo",
+   "alinha": "start"
+  },
+  {
+   "tipo": "texto",
+   "x": 660,
+   "y": 126,
+   "texto": "SPEC-VALIDATION",
+   "estilo": "rotulo",
+   "alinha": "start"
+  },
+  {
+   "tipo": "texto",
+   "x": 960,
+   "y": 126,
+   "texto": "TODO",
+   "estilo": "rotulo",
+   "alinha": "start"
+  },
+  {
+   "tipo": "texto",
+   "x": 1260,
+   "y": 126,
+   "texto": "BUILDING",
+   "estilo": "rotulo",
+   "alinha": "start"
+  },
+  {
+   "tipo": "texto",
+   "x": 1560,
+   "y": 126,
+   "texto": "VALIDATION",
+   "estilo": "rotulo",
+   "alinha": "start"
+  },
+  {
+   "tipo": "texto",
+   "x": 2160,
+   "y": 126,
+   "texto": "DONE",
+   "estilo": "rotulo",
+   "alinha": "start"
+  },
+  {
+   "tipo": "caixa",
+   "id": "L7",
+   "x": 24,
+   "y": 150,
+   "w": 2452,
+   "h": 200,
+   "texto": "",
+   "sub": "",
+   "estilo": "contorno",
+   "tamanho": 20
+  },
+  {
+   "tipo": "texto",
+   "x": 2452,
+   "y": 180,
+   "texto": "HUMANO · o dono",
+   "estilo": "rotulo",
+   "alinha": "end"
+  },
+  {
+   "tipo": "caixa",
+   "id": "L9",
+   "x": 24,
+   "y": 370,
+   "w": 2452,
+   "h": 200,
+   "texto": "",
+   "sub": "",
+   "estilo": "contorno",
+   "tamanho": 20
+  },
+  {
+   "tipo": "texto",
+   "x": 2452,
+   "y": 400,
+   "texto": "IA · pm-architect, Builder, Reviewer",
+   "estilo": "rotulo",
+   "alinha": "end"
+  },
+  {
+   "tipo": "caixa",
+   "id": "L11",
+   "x": 24,
+   "y": 590,
+   "w": 2452,
+   "h": 200,
+   "texto": "",
+   "sub": "",
+   "estilo": "contorno",
+   "tamanho": 20
+  },
+  {
+   "tipo": "texto",
+   "x": 2452,
+   "y": 620,
+   "texto": "AUTOMÁTICO · sem LLM",
+   "estilo": "rotulo",
+   "alinha": "end"
+  },
+  {
+   "tipo": "caixa",
+   "id": "h1",
+   "x": 60,
+   "y": 200,
+   "w": 260,
+   "h": 120,
+   "texto": "Ideia entra",
+   "sub": "em Backlog",
+   "estilo": "pill",
+   "tamanho": 22
+  },
+  {
+   "tipo": "caixa",
+   "id": "i1",
+   "x": 360,
+   "y": 420,
+   "w": 260,
+   "h": 120,
+   "texto": "Escreve a spec",
+   "sub": "abre a pasta",
+   "estilo": "normal",
+   "tamanho": 22
+  },
+  {
+   "tipo": "caixa",
+   "id": "i2",
+   "x": 660,
+   "y": 420,
+   "w": 260,
+   "h": 120,
+   "texto": "Conferência 1",
+   "sub": "Reviewer lê a spec",
+   "estilo": "normal",
+   "tamanho": 22
+  },
+  {
+   "tipo": "caixa",
+   "id": "h2",
+   "x": 660,
+   "y": 200,
+   "w": 260,
+   "h": 120,
+   "texto": "◇ Seguir ou ajustar?",
+   "sub": "Gate 1, no menu",
+   "estilo": "destaque",
+   "tamanho": 22
+  },
+  {
+   "tipo": "caixa",
+   "id": "a1",
+   "x": 960,
+   "y": 640,
+   "w": 260,
+   "h": 120,
+   "texto": "Spec na principal",
+   "sub": "forge vê o merge",
+   "estilo": "contorno",
+   "tamanho": 22
+  },
+  {
+   "tipo": "caixa",
+   "id": "a2",
+   "x": 1260,
+   "y": 640,
+   "w": 260,
+   "h": 120,
+   "texto": "◇ Só adr, rule, doc?",
+   "sub": "sim: pula Building",
+   "estilo": "destaque",
+   "tamanho": 22
+  },
+  {
+   "tipo": "caixa",
+   "id": "i3",
+   "x": 1260,
+   "y": 420,
+   "w": 260,
+   "h": 120,
+   "texto": "Builder constrói",
+   "sub": "WIP 3 · teto 3",
+   "estilo": "normal",
+   "tamanho": 22
+  },
+  {
+   "tipo": "caixa",
+   "id": "a3",
+   "x": 1560,
+   "y": 640,
+   "w": 260,
+   "h": 120,
+   "texto": "Script local valida",
+   "sub": "sem LLM",
+   "estilo": "contorno",
+   "tamanho": 22
+  },
+  {
+   "tipo": "caixa",
+   "id": "i4",
+   "x": 1860,
+   "y": 420,
+   "w": 260,
+   "h": 120,
+   "texto": "Conferência 2",
+   "sub": "Reviewer, por feature",
+   "estilo": "normal",
+   "tamanho": 22
+  },
+  {
+   "tipo": "caixa",
+   "id": "h3",
+   "x": 2160,
+   "y": 200,
+   "w": 260,
+   "h": 120,
+   "texto": "Você mescla o PR",
+   "sub": "Done: PR mesclado",
+   "estilo": "pill",
+   "tamanho": 22
+  },
+  {
+   "tipo": "seta",
+   "de": "h1.dir",
+   "para": "i1.cima"
+  },
+  {
+   "tipo": "seta",
+   "de": "i1.dir",
+   "para": "i2.esq",
+   "forma": "horizontal"
+  },
+  {
+   "tipo": "seta",
+   "de": "i2.cima",
+   "para": "h2.baixo",
+   "forma": "vertical"
+  },
+  {
+   "tipo": "seta",
+   "de": "h2.dir",
+   "para": "a1.cima"
+  },
+  {
+   "tipo": "seta",
+   "de": "a1.dir",
+   "para": "a2.esq",
+   "forma": "horizontal"
+  },
+  {
+   "tipo": "seta",
+   "de": "a2.cima",
+   "para": "i3.baixo",
+   "forma": "vertical"
+  },
+  {
+   "tipo": "seta",
+   "de": "i3.dir",
+   "para": "a3.cima"
+  },
+  {
+   "tipo": "seta",
+   "de": "a2.dir",
+   "para": "a3.esq",
+   "forma": "horizontal",
+   "estilo": "fraca"
+  },
+  {
+   "tipo": "seta",
+   "de": "a3.dir",
+   "para": "i4.baixo"
+  },
+  {
+   "tipo": "seta",
+   "de": "i4.cima",
+   "para": "h3.esq"
+  },
+  {
+   "tipo": "texto",
+   "x": 56,
+   "y": 820,
+   "texto": "◇ = decisão · HUMANO = o dono · IA = agentes (pm-architect, Builder, Reviewer) · AUTOMÁTICO = sem LLM · tracejado = a decidir ou a verificar",
+   "estilo": "legenda",
+   "alinha": "start"
+  }
+ ]
+}
