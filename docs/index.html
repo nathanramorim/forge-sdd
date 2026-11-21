@@ -1096,11 +1096,6 @@ footer {
   box-shadow: 0 0 10px var(--accent);
 }
 </style>
-<!-- edicao:inicio -->
-<link rel="stylesheet" href="edicao/edicao.css">
-<script src="edicao/edicao.js"></script>
-<script src="edicao/edicao-mascotes.js"></script>
-<!-- edicao:fim -->
 </head>
 <body>
 
@@ -1130,7 +1125,8 @@ footer {
     <a href="#" class="brand">
       <span class="brand-dot"></span>
       <span>Forge-SDD</span>
-      <span class="chip"><i style="--o:var(--accent)"></i>v5.0.0</span>
+      <span class="chip"><i style="--o:var(--accent)"></i>Estável <span data-versao="latest">5.0.0</span></span>
+      <span class="chip"><i style="--o:var(--warn)"></i>Beta <span data-versao="beta">5.1.0-beta</span></span>
       <span class="chip chip-mit" title="Licença MIT Open Source"><i style="--o:var(--ok)"></i>MIT License</span>
     </a>
     <nav aria-label="Navegação Principal">
@@ -1250,7 +1246,7 @@ footer {
 
       <div class="emu-shell">
         <div class="emu-topbar">
-          <div class="emu-dots"><i></i><i></i><i></i><span class="mono" style="margin-left:6px">meu-projeto — forge-sdd v5.0.0</span></div>
+          <div class="emu-dots"><i></i><i></i><i></i><span class="mono" style="margin-left:6px">meu-projeto — forge-sdd v<span data-versao="latest">5.0.0</span></span></div>
           <div class="emu-cmd-tabs" id="emuTabs">
             <button type="button" class="emu-cmd-btn active" data-emu="0">1. $ forge init</button>
             <button type="button" class="emu-cmd-btn" data-emu="1">2. $ forge up</button>
@@ -1313,11 +1309,14 @@ footer {
           </div>
           <h3 style="font:700 15px var(--f-body);margin-bottom:6px">Instale uma vez e use o comando curto <span class="mono" style="color:#fff">forge</span></h3>
           <div class="term" style="margin-top:10px">
-            <div># 1. Instale globalmente via NPM</div>
+            <div># 1. Instale globalmente via NPM (estável, recomendado)</div>
             <div style="color:#fff;font-weight:600">npm install -g @nathanramorim/forge-sdd</div>
+            <div style="margin-top:8px"># Ou canal Beta (v<span data-versao="beta">5.1.0-beta</span>)</div>
+            <div style="color:#fff;font-weight:600">npm install -g @nathanramorim/forge-sdd@beta</div>
             <div style="margin-top:8px"># 2. Inicialize dentro do seu projeto</div>
             <div style="color:#fff;font-weight:600">forge init</div>
           </div>
+          <p style="font:500 12px/1.45 var(--f-body);color:var(--muted);margin-top:8px">Para testar novidades. A beta não é a versão recomendada para produção.</p>
         </div>
 
         <div class="panel">
@@ -1573,7 +1572,8 @@ footer {
 
   <footer>
     <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-      <span><strong>Forge-SDD v5.0.0</strong> · Código aberto sob <strong>Licença MIT</strong></span>
+      <span><strong>Forge-SDD v<span data-versao="latest">5.0.0</span></strong> · Código aberto sob <strong>Licença MIT</strong></span>
+      <span style="font-size:12px;color:var(--muted)">As versões vêm do registro público do npm; se ele não responder, mostramos as últimas conhecidas.</span>
     </div>
     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
       <a href="https://github.com/nathanramorim/forge-sdd" target="_blank" rel="noopener noreferrer" class="ds-link" aria-label="GitHub Forge-SDD">
@@ -1771,9 +1771,6 @@ function createForgeMascot3D(mountEl, agentHex, initialState, markType) {
   }
 
   setState(currentState);
-  /* edicao:inicio */
-  if (window.forgeEdicao && window.forgeEdicao.vestirMascote) window.forgeEdicao.vestirMascote(botGroup, markType);
-  /* edicao:fim */
 
   return {
     setState,
@@ -2082,7 +2079,7 @@ const EMU_STEPS = [
       <div class="dim">→ Distribuindo regras em .agents/rules/sdd-{arquitetura,seguranca,reuso-e-duplicacao,codigo-e-testes,fluxo-e-portao}.md</div>
       <div class="dim">→ Instalando skills em .agents/skills/sdd-{concepcao,planejamento,build,governanca,operacao}</div>
       <div class="dim">→ Criando sdd/memory/constitution.md (IDs estáveis: ARQ-*, SEG-*, DUP-*, COD-*, TST-*, FLX-*, GOV-*)</div>
-      <div class="ok">✓ Estrutura Forge-SDD v5.0.0 criada com sucesso!</div>
+      <div class="ok">✓ Estrutura Forge-SDD v<span data-versao="latest">5.0.0</span> criada com sucesso!</div>
     `,
     files: [
       ['.agents/rules/sdd-*.md', 'criado', 'var(--ok)'],
@@ -2444,6 +2441,93 @@ const navObserver = new IntersectionObserver((entries) => {
 }, { rootMargin: '-25% 0px -60% 0px', threshold: 0 });
 
 document.querySelectorAll('main section[id]').forEach((sec) => navObserver.observe(sec));
+
+/* versoes:inicio */
+const RE_VERSAO_ESTAVEL = /^\d+\.\d+\.\d+$/;
+const RE_VERSAO_BETA = /^\d+\.\d+\.\d+-beta(\.\d+)?$/;
+const OPCOES_FETCH_VERSOES = {
+  credentials: 'omit',
+  referrerPolicy: 'no-referrer',
+  cache: 'default'
+};
+
+function versaoValida(valor, canal) {
+  if (typeof valor !== 'string') return false;
+  if (canal === 'latest') return RE_VERSAO_ESTAVEL.test(valor);
+  if (canal === 'beta') return RE_VERSAO_BETA.test(valor);
+  return false;
+}
+
+function extrairVersao(payload) {
+  if (!payload || typeof payload !== 'object') return '';
+  return typeof payload.version === 'string' ? payload.version : '';
+}
+
+function escolherVersoes(respLatest, respBeta, fallback) {
+  const fb = fallback && typeof fallback === 'object' ? fallback : {};
+  const fbLatest = typeof fb.latest === 'string' ? fb.latest : '5.0.0';
+  const fbBeta = typeof fb.beta === 'string' ? fb.beta : '5.1.0-beta';
+  const candLatest = typeof respLatest === 'string' ? respLatest : extrairVersao(respLatest);
+  const candBeta = typeof respBeta === 'string' ? respBeta : extrairVersao(respBeta);
+  return {
+    latest: versaoValida(candLatest, 'latest') ? candLatest : fbLatest,
+    beta: versaoValida(candBeta, 'beta') ? candBeta : fbBeta
+  };
+}
+
+async function buscarCanalNpm(canal, fetchImpl) {
+  const fn = fetchImpl || (typeof fetch === 'function' ? fetch : null);
+  if (!fn) return null;
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 3000);
+  try {
+    const resp = await fn('https://registry.npmjs.org/@nathanramorim/forge-sdd/' + canal, {
+      ...OPCOES_FETCH_VERSOES,
+      signal: ctrl.signal
+    });
+    if (!resp || !resp.ok) return null;
+    return await resp.json();
+  } catch (_) {
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+/* versoes:fim */
+
+function aplicarVersoesNoDOM(versoes) {
+  if (!versoes || typeof document === 'undefined') return;
+  if (versaoValida(versoes.latest, 'latest')) {
+    document.querySelectorAll('[data-versao="latest"]').forEach((el) => {
+      el.textContent = versoes.latest;
+    });
+  }
+  if (versaoValida(versoes.beta, 'beta')) {
+    document.querySelectorAll('[data-versao="beta"]').forEach((el) => {
+      el.textContent = versoes.beta;
+    });
+  }
+}
+
+async function carregarVersoesAoVivo() {
+  const elLatest = document.querySelector('[data-versao="latest"]');
+  const elBeta = document.querySelector('[data-versao="beta"]');
+  const fallback = {
+    latest: elLatest ? elLatest.textContent.trim() : '5.0.0',
+    beta: elBeta ? elBeta.textContent.trim() : '5.1.0-beta'
+  };
+  const [dLatest, dBeta] = await Promise.all([
+    buscarCanalNpm('latest'),
+    buscarCanalNpm('beta')
+  ]);
+  aplicarVersoesNoDOM(escolherVersoes(dLatest, dBeta, fallback));
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', carregarVersoesAoVivo, { once: true });
+} else {
+  carregarVersoesAoVivo();
+}
 </script>
 </body>
 </html>
