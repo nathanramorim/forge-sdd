@@ -1,5 +1,5 @@
 ---
-description: "Líder (Orquestrador) do forge-sdd: coordena as 5 estações, gerencia gates humanos, fila e Painel Executivo."
+description: "Líder (Orquestrador) do forge-sdd: coordena as 3 sessões (Discovery, Builder, Reviewer), gerencia gates humanos, fila e Painel Executivo."
 tools: [read_file, list_dir, run_in_terminal]
 ---
 

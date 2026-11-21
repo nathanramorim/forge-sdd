@@ -21,7 +21,9 @@ var rootCmd = &cobra.Command{
 	Use:   "forge",
 	Short: "Scaffolda estruturas Forge-SDD em qualquer projeto",
 	Long: `forge é um CLI que gera a estrutura completa Forge-SDD
-(sdd/, .github/, .vscode/) pronta para uso com GitHub Copilot.`,
+(sdd/, .agents/, arquivos de instrução por agente) e conduz o fluxo em 3 sessões
+(Discovery, Builder, Reviewer) com aprovação humana. Funciona com Claude Code,
+Gemini CLI, Codex e GitHub Copilot.`,
 }
 
 var versionCmd = &cobra.Command{
