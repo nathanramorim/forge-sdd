@@ -351,4 +351,12 @@ go test -list 'TestEspelhoPreservaPosicaoRelativaDaFila' ./internal/pipeline/ | 
 go test -list 'TestReordenarNaMesmaColunaEPedidoComMenu' ./internal/pipeline/ | grep -F 'TestReordenarNaMesmaColunaEPedidoComMenu'
 # negativo: o guia não diz que o quadro é a fonte da prioridade
 if grep -F 'o quadro é a fonte da prioridade' docs/quadro-do-ciclo.md; then exit 1; fi
+# P-25 (RN-19, PROPOSTA): o guia descreve o selo "Só IA" e o rótulo gravado pelo core
+grep -F '## Selos do cartão' docs/quadro-do-ciclo.md
+grep -F 'revisado-só-por-ia' docs/quadro-do-ciclo.md
+go test -list 'TestCartaoSoIAMostraSelo' ./internal/pipeline/ | grep -F 'TestCartaoSoIAMostraSelo'
+# negativo: cartão conferido por humano não mostra o selo
+go test -list 'TestCartaoConferidoPorHumanoNaoMostraSelo' ./internal/pipeline/ | grep -F 'TestCartaoConferidoPorHumanoNaoMostraSelo'
+# negativo: o guia não diz que o módulo grava o rótulo
+if grep -F 'o módulo grava o rótulo' docs/quadro-do-ciclo.md; then exit 1; fi
 ```

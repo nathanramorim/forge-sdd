@@ -108,6 +108,10 @@ O diagnóstico do Reviewer é um **comentário simples no PR**: até 8 linhas, e
 | Validation | IA (Reviewer); HUMANO decide | O Reviewer faz a Conferência 2 e comenta o diagnóstico no PR. Se `conforme`, o PR sai de rascunho (pronto para mesclar). Se `violação`, o cartão volta a Building e o PR segue em rascunho. Se `dúvida`, escala ao dono. O HUMANO só mescla o PR de entrega. |
 | Done | AUTOMÁTICO (forge) | A issue é fechada e o cartão vai a Done depois do merge. |
 
+## Selos do cartão
+
+**PROPOSTA, a confirmar pelo dono.** Quando só o Reviewer (IA) revisou e fechou, isso aparece na issue. O core grava o sinal como o rótulo `revisado-só-por-ia` no PR e na issue (PROPOSTA, fix-104-16, PR #157). O módulo apenas **mostra**: o cartão ganha o selo "Só IA", diferente de "Conferido por humano", e o quadro tem o filtro correspondente. Quem grava o rótulo é o core, não este módulo. Cartão conferido por humano não mostra o selo "Só IA".
+
 ## Ordem = prioridade
 
 Dentro de cada coluna, a ordem dos cartões **é a prioridade**: de cima para baixo, o do topo é o mais prioritário (o que se puxa primeiro) e o do fim o menos.
