@@ -1,7 +1,7 @@
 ---
 description: Como ler e respeitar os campos de modo da tabela Ferramentas e Integrações da Constituição (VCS, atestado, revisão humana, WIP humano, módulos permitidos e início automático).
 globs: ["sdd/memory/constitution.md", "internal/vcs/**", "internal/config/**", "scripts/atestado.py"]
-regras: [ARQ-06, SEG-05, FLX-01, FLX-02, FLX-06, GOV-01, GOV-04]
+regras: [ARQ-06, SEG-01, SEG-03, SEG-05, FLX-01, FLX-02, FLX-06, GOV-01, GOV-04]
 ---
 
 # Guia Prático — Modos de projeto (campos da Constituição)
