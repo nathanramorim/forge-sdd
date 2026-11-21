@@ -74,6 +74,8 @@ Ordem da jornada: Backlog > Spec > Spec-validation > Todo > Building > Validatio
 
 O campo do quadro se chama `Status`.
 
+Dentro de cada coluna, a ordem dos cartões é a prioridade (ver "Ordem = prioridade").
+
 ## A jornada de um trabalho, passo a passo
 
 1. **HUMANO:** você registra a ideia em Backlog. *(OPCIONAL, com o quadro: você cria a issue e o cartão.)*
@@ -105,6 +107,14 @@ O diagnóstico do Reviewer é um **comentário simples no PR**: até 8 linhas, e
 | Building | IA (Builder) | O PR de entrega (em rascunho) e o cartão movido para Validation. |
 | Validation | IA (Reviewer); HUMANO decide | O Reviewer faz a Conferência 2 e comenta o diagnóstico no PR. Se `conforme`, o PR sai de rascunho (pronto para mesclar). Se `violação`, o cartão volta a Building e o PR segue em rascunho. Se `dúvida`, escala ao dono. O HUMANO só mescla o PR de entrega. |
 | Done | AUTOMÁTICO (forge) | A issue é fechada e o cartão vai a Done depois do merge. |
+
+## Ordem = prioridade
+
+Dentro de cada coluna, a ordem dos cartões **é a prioridade**: de cima para baixo, o do topo é o mais prioritário (o que se puxa primeiro) e o do fim o menos.
+- **Fonte da verdade:** o arquivo do core (a fila). O quadro só espelha a posição.
+- **Desempate (PROPOSTA, a confirmar pelo dono):** dentro de uma iniciativa vale a ordem do `queue.json`; entre iniciativas vale a prioridade que o dono definir.
+- **Arrastar para cima ou para baixo na mesma coluna** é um **pedido** de reordenar a fila. O forge confirma num menu, como no arrastar entre colunas; nada muda sozinho.
+- O GitHub Projects v2 guarda a posição do item e a mutação `updateProjectV2ItemPosition` reordena: **a verificar** na documentação e no uso real (não confirmado).
 
 ## O que acontece quando você arrasta um cartão
 

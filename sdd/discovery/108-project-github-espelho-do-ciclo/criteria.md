@@ -342,4 +342,13 @@ grep -F 'não este módulo' docs/quadro-do-ciclo.md
 if grep -F 'o módulo escreve o comentário' docs/quadro-do-ciclo.md; then exit 1; fi
 # negativo: a spec não põe a rotina de comentar no escopo do módulo
 if grep -F 'o módulo comenta no PR' sdd/discovery/108-project-github-espelho-do-ciclo/discovery.md; then exit 1; fi
+# P-26 (RN-18): o guia afirma que a ordem é a prioridade
+grep -F '## Ordem = prioridade' docs/quadro-do-ciclo.md
+grep -F 'o do topo é o mais prioritário' docs/quadro-do-ciclo.md
+# código do módulo (contrato): o espelho preserva a posição relativa vinda da fila
+go test -list 'TestEspelhoPreservaPosicaoRelativaDaFila' ./internal/pipeline/ | grep -F 'TestEspelhoPreservaPosicaoRelativaDaFila'
+# código do módulo (contrato): arrastar na mesma coluna é pedido de reordenar, confirmado em menu
+go test -list 'TestReordenarNaMesmaColunaEPedidoComMenu' ./internal/pipeline/ | grep -F 'TestReordenarNaMesmaColunaEPedidoComMenu'
+# negativo: o guia não diz que o quadro é a fonte da prioridade
+if grep -F 'o quadro é a fonte da prioridade' docs/quadro-do-ciclo.md; then exit 1; fi
 ```
