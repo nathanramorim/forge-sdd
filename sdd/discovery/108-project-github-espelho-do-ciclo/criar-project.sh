@@ -44,6 +44,27 @@ etiquetas_validas() {
     case "$NOMES_ETIQUETA" in *",$x,"*) ;; *) return 1 ;; esac
   done
 }
+# Prefixo do título (função pura, mesma regra de PrefixoDoTitulo): conteúdo = código, adr, rule presentes
+# (nessa ordem) unidos por +; sem nenhum, "doc" se houver documentação; com spec, começa por "spec · ".
+# Etiqueta fora da lista fechada é recusada (return 1). Sem etiqueta, sem prefixo.
+prefixo_do_titulo() {
+  local et="$1" x tem_spec=0 tem_doc=0 tem_cod=0 tem_adr=0 tem_rule=0 conteudo="" p=""
+  [ -z "$et" ] && return 0
+  for x in ${et//+/ }; do
+    case "$x" in
+      código) tem_cod=1 ;; adr) tem_adr=1 ;; rule) tem_rule=1 ;;
+      documentação) tem_doc=1 ;; spec) tem_spec=1 ;;
+      *) echo "etiqueta fora da lista fechada: $x" >&2; return 1 ;;
+    esac
+  done
+  [ "$tem_cod" = 1 ] && conteudo="código"
+  [ "$tem_adr" = 1 ] && conteudo="${conteudo:+$conteudo+}adr"
+  [ "$tem_rule" = 1 ] && conteudo="${conteudo:+$conteudo+}rule"
+  [ -z "$conteudo" ] && [ "$tem_doc" = 1 ] && conteudo="doc"
+  if [ "$tem_spec" = 1 ]; then p="spec"; [ -n "$conteudo" ] && p="spec · $conteudo"; else p="$conteudo"; fi
+  [ -n "$p" ] && printf '[%s] ' "$p"
+  return 0
+}
 AQUI="$(cd "$(dirname "$0")" && pwd)"
 INDICE="$AQUI/issues/indice.csv"
 
@@ -87,7 +108,8 @@ if [ "$MODO" = "dry-run" ]; then
     etapa_valida "$coluna" || { echo "etapa inválida em $chave: $coluna" >&2; exit 1; }
     [ -f "$AQUI/issues/$chave.md" ] || { echo "falta issues/$chave.md" >&2; exit 1; }
     etiquetas_validas "$etiq" || { echo "etiqueta inválida em $chave: $etiq" >&2; exit 1; }
-    echo "DRY-RUN: issue '$titulo' (se não existir) -> $CAMPO $coluna${pr:+; PR $pr}$([ "$coluna" = Validation ] && [ -n "$pr" ] && echo " vira cartão próprio em Validation")${etiq:+; etiquetas: ${etiq//+/, }}"
+    pref="$(prefixo_do_titulo "$etiq")" || exit 1
+    echo "DRY-RUN: issue '${pref}${titulo}' (procura por título base ou prefixado; renomeia se achar; cria se não) -> $CAMPO $coluna${pr:+; PR $pr}$([ "$coluna" = Validation ] && [ -n "$pr" ] && echo " vira cartão próprio em Validation")${etiq:+; etiquetas: ${etiq//+/, }}"
   done
   echo "DRY-RUN: fim. Para criar de verdade: $0 --executar"
   exit 0
@@ -174,13 +196,22 @@ tail -n +2 "$INDICE" | while IFS=, read -r chave titulo coluna tipo pasta pr pai
   corpo="$AQUI/issues/$chave.md"
   [ -f "$corpo" ] || { echo "falta $corpo" >&2; exit 1; }
 
-  numero_issue="$(gh issue list --repo "$REPO" --state all --limit 500 --json number,title -q ".[] | select(.title==\"$titulo\") | .number" | head -n1 || true)"
-  if [ -z "$numero_issue" ]; then
-    url="$(gh issue create --repo "$REPO" --title "$titulo" --body-file "$corpo")"
-    echo "issue criada: $titulo -> $url"
+  pref="$(prefixo_do_titulo "$etiq")" || exit 1
+  titulo_final="${pref}${titulo}"
+  # Acha pelo título base OU por qualquer título que termine em "] <base>" (prefixo antigo ou novo).
+  achada="$(gh issue list --repo "$REPO" --state all --limit 500 --json number,title -q ".[] | select(.title==\"$titulo\" or (.title | endswith(\"] $titulo\"))) | \"\(.number)|\(.title)\"" | head -n1 || true)"
+  if [ -z "$achada" ]; then
+    url="$(gh issue create --repo "$REPO" --title "$titulo_final" --body-file "$corpo")"
+    echo "issue criada: $titulo_final -> $url"
   else
+    numero_issue="${achada%%|*}"; titulo_atual="${achada#*|}"
     url="https://github.com/$REPO/issues/$numero_issue"
-    echo "issue já existe: $titulo -> $url"
+    if [ "$titulo_atual" != "$titulo_final" ]; then
+      gh issue edit "$numero_issue" --repo "$REPO" --title "$titulo_final" >/dev/null
+      echo "issue renomeada: '$titulo_atual' -> '$titulo_final'"
+    else
+      echo "issue já existe: $titulo_final -> $url"
+    fi
   fi
 
   alvos="$url"

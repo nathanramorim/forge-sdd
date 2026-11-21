@@ -32,7 +32,7 @@ O dono do projeto (decide gates e merge; quer gestão à vista) e os agentes (`p
 ## Jornada alvo
 1. [IA pm-architect] `/discovery` abre a spec: a issue-mãe entra no Project na coluna **Spec**.
 2. [AUTOMÁTICO] Spec pronta para revisão (`spec-para-revisao`): o forge move o cartão para **Spec-validation**.
-3. [HUMANO] Gate 1 aprovado em menu: o cartão vai para **Todo** (fila `queued`).
+3. [HUMANO] Gate 1 aprovado em menu: o cartão **continua em Spec-validation** até o PR da spec ser mesclado na principal; só então vai para **Todo** (fila `queued`).
 4. [IA builder] Pega a task: o cartão vai para **Building**; cada feature tem o seu cartão e o seu PR.
 5. [AUTOMÁTICO] `pronto-para-revisao` ou `review_pending`: o cartão vai para **Validation** (WIP humano da 107 conta os cartões aqui).
 6. [HUMANO] [Continuar] e merge do PR: o cartão vai para **Done**.
@@ -49,6 +49,7 @@ O dono do projeto (decide gates e merge; quer gestão à vista) e os agentes (`p
 - **RN-8** Issue publicada traz descrição comercial; o detalhe técnico fica na spec e a issue só leva o link. Repositório público: nada de cliente, cobrança, caminho local ou nome pessoal.
 - **RN-9** Nada é criado no GitHub sem `--executar` explícito; o padrão do script é `--dry-run`.
 - **RN-10** O quadro nasce **privado**; abrir ao público é decisão posterior do dono.
+- **RN-12** (nova, 20/11/2026) O título da issue leva um prefixo derivado das etiquetas (função pura); o título base é a fonte; achar a issue por título nunca cria duplicata (renomeia).
 - **RN-11** (nova, pedido do dono em 20/11/2026) Todo PR e toda issue carregam **etiquetas** que dizem se o item contém código, ADR, rule, documentação ou é só especificação. Etiquetas, não um campo do Project (decisão do dono no chat). O cálculo é por caminho dos arquivos (heurística, sem ler conteúdo).
 
 ## Escopo
@@ -60,10 +61,10 @@ O dono do projeto (decide gates e merge; quer gestão à vista) e os agentes (`p
 |---|---|---|
 | Backlog | ideia sem pasta de spec | alguém registra a ideia |
 | Spec | pasta da discovery sem `spec-para-revisao` | `/discovery`, `/nova-feature`, `/novo-fix` abrem a spec |
-| Spec-validation | `status.md` com `spec-para-revisao` (106); PR da spec em draft | pm-architect entrega a spec |
-| Todo | Gate 1 aprovado; itens `queued` | menu do Gate 1 |
+| Spec-validation | spec aprovada pelo Gate 1 (ou `spec-para-revisao`, 106) e **ainda não mesclada** na principal; PR da spec aberto | pm-architect entrega a spec; menu do Gate 1 |
+| Todo | spec já na principal e pronta para o Builder; itens `queued` | PR da spec mesclado na principal e Gate 1 aprovado |
 | Building | item `building` ou `changes_requested` | Builder pega a task; reviewer devolve |
-| Validation | item `review_pending` ou `approved`; `pronto-para-revisao` (106); PR pronto | Builder termina; veredito conforme |
+| Validation | trabalho pronto num PR aberto aguardando o dono conferir e mesclar (código, ADR, rule ou documentação); item `review_pending` ou `approved`; `pronto-para-revisao` (106) | Builder termina; veredito conforme |
 | Done | PR mesclado | merge |
 `blocked` não vira coluna nova: o cartão fica na etapa de origem com o campo `Bloqueado` (decisão do dono, item 6).
 
@@ -97,14 +98,18 @@ Várias por item: "só ADR" = `adr`; "código e ADR" = `código` + `adr`. `códi
 
 **Limite:** a classificação é por caminho (heurística), sem ler o conteúdo: um `.md` que na prática é regra, ou um arquivo de outro tipo dentro de `docs/`, pode ser classificado errado. **Caminho fora das regras:** recomendo **ficar sem etiqueta e aparecer como aviso** (`forge project status` e `doctor` listam), em vez de cair em `documentação`: cair em `documentação` esconderia código de um tipo novo (por exemplo `.ts`) justamente na etiqueta que o dono usa para separar código. Exceção já na regra: `.md` desconhecido é documentação. Caminho com `..`, caractere de controle ou lista vazia é recusado e não gera etiqueta.
 
+## Tipo no título da issue (prefixo derivado das etiquetas)
+Para o tipo aparecer no celular sem abrir a etiqueta, o título de cada **issue** ganha um prefixo entre colchetes **calculado das etiquetas** (aplicado à mão em 20/11/2026): conteúdo = as de `código`, `adr` e `rule` presentes, nessa ordem, unidas por `+`; se não houver nenhuma, `doc` quando houver `documentação`; se `spec` estiver presente, o prefixo começa com `spec · ` (só `spec` quando não há mais nada). Sem etiqueta, sem prefixo. PRs não mudam de título. Exemplos: `[adr] Registrar a decisão ...`; `[código+rule] Trocar as menções ...`; `[doc] O guia inicial ...`; `[spec · código+adr+rule] Gastar menos ...`.
+O `indice.csv` e os `issues/*.md` guardam o título **base** (sem prefixo); o prefixo é sempre derivado, por função pura `PrefixoDoTitulo(etiquetas)` em `internal/pipeline`, junto de `ClassificaEtiquetas`. Etiqueta fora da lista fechada é recusada. Para ser idempotente com títulos já prefixados, o `criar-project.sh` procura a issue pelo título base **ou** por qualquer título que termine em `] <base>`, **renomeia** em vez de criar outra e recalcula o prefixo quando as etiquetas mudam.
+
 ## Decisões para o Gate 1 (recomendação de cada uma; a decisão é do dono)
 1. **Fonte da verdade.** Recomendo o **arquivo** para o estado (spec, fila, PR) e o quadro como espelho; o humano só muda estado pelo menu do forge. Alternativa: o quadro como fonte para a etapa (mais simples de ver, mas qualquer pessoa com escrita no repositório público passa a decidir o fluxo).
-2. **O que arrastar o cartão autoriza.** Recomendo que arrastar seja **um pedido**: Spec-validation para Todo abre o menu do Gate 1; Validation para Done só vale com PR mesclado e atestado conforme o modo da 106. Se o `gh` não expuser o ator do evento (a verificar), arrastar nunca aprova sozinho.
+2. **O que arrastar o cartão autoriza.** Recomendo que arrastar seja **um pedido**: Spec-validation para Todo abre o menu de confirmação do merge da spec (exige Gate 1 aprovado); Validation para Done só vale com PR mesclado e atestado conforme o modo da 106. Se o `gh` não expuser o ator do evento (a verificar), arrastar nunca aprova sozinho.
 3. **Polling versus webhook.** Recomendo **polling** pelo CLI (`gh project item-list`) a cada comando e no `doctor`: não depende de Action (o CI está bloqueado por cobrança) nem de servidor. Webhook e Action: a verificar para Projects v2 de usuário.
 4. **Nome do campo.** O campo da etapa é o **`Status`** do Project, com exatamente as 7 opções. Registro histórico: a versão anterior desta discovery recomendava um campo novo `Etapa`, porque supunha que as opções do `Status` não podiam ser editadas; **foi uma premissa errada do pm-architect e do coordenador, corrigida em 20/11/2026**. Verificado na API real em 20/11/2026: a mutation GraphQL `updateProjectV2Field` (com `singleSelectOptions`) substitui as opções do `Status` (cores GRAY, BLUE, GREEN, YELLOW, ORANGE, RED, PINK, PURPLE; `description` obrigatória); `createProjectV2View` com `BOARD_LAYOUT` cria o quadro, que agrupa pelo `Status` por padrão (o agrupamento não é configurável pela API). Cores: Backlog GRAY, Spec BLUE, Spec-validation PURPLE, Todo YELLOW, Building ORANGE, Validation PINK, Done GREEN.
 5. **Privado ou público.** Recomendo **privado** no início (`gh project edit <n> --owner @me --visibility PRIVATE`); abrir ao público depois com `--visibility PUBLIC` se o dono quiser mostrar o ciclo. O repositório é público: issue e título ficam visíveis de qualquer jeito.
 6. **`blocked`.** Recomendo **não criar a oitava coluna**: o cartão fica na etapa de origem com o campo `Bloqueado`. Alternativa: coluna extra.
-7. **Todo exige split feito?** O pedido diz "Gate 1 aprovado e split feito". Pela 106 o split é do Builder, sem nova aprovação. Recomendo que Todo signifique "Gate 1 aprovado, pronto para o Builder" (então 105, 106 e 107 entram em Todo). Se preferir split antes, 106 e 107 ficam em Spec-validation até o split.
+7. **Definição de Spec-validation e Todo (corrigida).** Spec-validation = especificação aprovada pelo Gate 1 mas **ainda não mesclada** na principal (aguardando o merge do PR da spec). Todo = a spec já está na principal e pronta para o Builder (o split é do Builder, 106). Validation = trabalho pronto num PR aberto aguardando o dono conferir e mesclar (qualquer tipo). Done = PR mesclado. **Correção (20/11/2026, indicada pelo dono):** a definição anterior ("Todo = Gate 1 aprovado e pronto para o Builder") era uma inconsistência da própria 108 com a 106, que só devolve a spec à principal depois de aprovada e só então deixa o Builder começar. Aplicada à mão no GitHub: #141, #142, #143, #144 e #147 foram para Spec-validation; Todo ficou vazio até um merge de spec.
 8. **Escopo do repositório e dos Projects.** Recomendo um Project de usuário "Forge SDD — ciclo" ligado (`gh project link --owner nathanramorim`; com `@me` o link falhou, verificado em 20/11/2026) ao repositório; sem mexer nos projetos 1 a 3 existentes. Alternativa: Project de organização (permite mais controles de ator, a verificar).
 9. **Etiquetas em vez de campo (aprovado pelo dono no chat).** Etiquetas permitem várias por item e aparecem no PR e na issue. Recomendação para caminho desconhecido: sem etiqueta e com aviso (ver seção Etiquetas).
 10. **Quando publicar as issues.** Recomendo executar `criar-project.sh --executar` só depois do Gate 1 e de revisar o texto das issues (repositório público); o script é idempotente e começa em `--dry-run`.

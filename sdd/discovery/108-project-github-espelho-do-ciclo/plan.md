@@ -19,7 +19,7 @@ Colisões de arquivo: `.agents/skills/sdd-operacao/references/`, `internal/vcs`,
 | 1.3 | `forge project status` (somente leitura): lista cartões, etapa e divergência com o arquivo; saída saneada, sem token | 1.1, 1.2 | com 1.4 | `ARQ-01`, `ARQ-05`, `SEG-04`, `TST-03` |
 | 1.4 | `internal/config`: nome do campo (`Status`), número do Project e `provider` `github-projects`; mapa entre `status_on_implement`/`status_on_pr_approved` e as 7 etapas (sem quebrar o padrão atual) | — | com 1.1 | `DUP-06`, `GOV-01`, `TST-02` |
 | 1.5 | Teste de injeção: título, corpo e comentário com ordem embutida são dado; só o campo de etapa válido é lido | 1.2 | com 1.3 | `SEG-08`, `TST-03` |
-| 1.7 | Função pura `ClassificaEtiquetas(caminhos)` em `internal/pipeline` (código, adr, rule, documentação, spec; ignora `sdd/.metrics/`; recusa `..`, controle e lista vazia; desconhecido fica sem etiqueta com aviso). Entra na onda 1 porque é pura, sem rede e sem escrita, como o mapa 1.1 | — | com 1.1 | `ARQ-10`, `DUP-01`, `TST-03` |
+| 1.7 | Funções puras `ClassificaEtiquetas(caminhos)` e `PrefixoDoTitulo(etiquetas)` (prefixo `[código+adr+rule]`, `doc`, `spec · `; recusa etiqueta desconhecida) em `internal/pipeline` (código, adr, rule, documentação, spec; ignora `sdd/.metrics/`; recusa `..`, controle e lista vazia; desconhecido fica sem etiqueta com aviso). Entra na onda 1 porque é pura, sem rede e sem escrita, como o mapa 1.1 | — | com 1.1 | `ARQ-10`, `DUP-01`, `TST-03` |
 | 1.6 | Linha em `sdd/spec/concepts.md` e ADR curta (fonte da verdade, o que o arrastar autoriza) conforme o Gate 1 | Gate 1 | — | `GOV-01`, `DUP-01` |
 
 ## Onda 2 — Mover o cartão pelo CLI
@@ -29,14 +29,14 @@ Colisões de arquivo: `.agents/skills/sdd-operacao/references/`, `internal/vcs`,
 | 2.2 | `forge project move <iniciativa|feature> --para <etapa> [--dry-run]`; `--dry-run` sem efeito; etapa validada na lista fechada | 1.1 | com 2.1 | `ARQ-01`, `ARQ-05`, `TST-03` |
 | 2.3 | Gatilhos: depois de `queue next`, `queue complete`, `queue review` e do Gate 1 o forge chama o movimento (falha do quadro não bloqueia a fila; vira aviso) | 2.1, 2.2 | — | `FLX-06`, `COD-03`, `TST-03` |
 | 2.4 | Sem VCS (`nenhum`) e sem Project configurado: nada é chamado; teste sem `gh` no PATH | 2.1 | com 2.5 | `ARQ-05`, `TST-03` |
-| 2.6 | Aplicar etiquetas: ao abrir PR ou issue, calcular pela 1.7 e aplicar no PR e na issue vinculada (`gh pr edit` e `gh issue edit --add-label`); ao mesclar, remover `spec` se há código; nunca remover a etiqueta posta à mão | 1.7, 2.1 | com 2.5 | `SEG-03`, `SEG-08`, `TST-03` |
+| 2.6 | Aplicar etiquetas e o prefixo do título da issue (renomeia a existente em vez de duplicar): ao abrir PR ou issue, calcular pela 1.7 e aplicar no PR e na issue vinculada (`gh pr edit` e `gh issue edit --add-label`); ao mesclar, remover `spec` se há código; nunca remover a etiqueta posta à mão | 1.7, 2.1 | com 2.5 | `SEG-03`, `SEG-08`, `TST-03` |
 | 2.5 | `criar-project.sh` revisado e testado (rascunho desta iniciativa) com o Project real do dono; relatório sem token | 2.1 | com 2.4 | `SEG-04`, `TST-02` |
 
 ## Onda 3 — Espelho em duas vias e `doctor`
 | # | Task | Depende | Paralelo | Rules/IDs |
 |---|---|---|---|---|
 | 3.1 | Polling: o forge lê a etapa de cada cartão a cada comando e compara com o arquivo; divergência vira pedido, nunca gravação direta; ator conferido (a verificar se o `gh` o expõe) | 1.3, 2.3 | — | `SEG-01`, `TST-03` |
-| 3.2 | Arrastar como pedido: Spec-validation para Todo abre o menu do Gate 1; Validation para Done exige PR mesclado e atestado conforme o modo da 106 | 3.1; 106/3.2 | — | `FLX-01`, `GOV-01`, `TST-03` |
+| 3.2 | Arrastar como pedido: Spec-validation para Todo abre o menu de confirmação e exige Gate 1 aprovado e PR da spec mesclado; Validation para Done exige PR mesclado e atestado conforme o modo da 106 | 3.1; 106/3.2 | — | `FLX-01`, `GOV-01`, `TST-03` |
 | 3.3 | `forge doctor` verifica Project configurado, escopo `project` do `gh`, campo `Status` com as 7 opções e divergências arquivo versus quadro | 3.1 | com 3.4 | `ARQ-01`, `TST-03` |
 | 3.4 | Orquestrador (107): expõe a contagem de cartões em Validation para o WIP humano; lê só o campo validado | 3.1; 107 | com 3.3 | `DUP-01`, `SEG-08` |
 | 3.5 | Reference única `.agents/skills/sdd-operacao/references/project.md` (rotina por agente e por coluna) e os comandos `/discovery`, `/nova-feature`, `/novo-fix`, `/implementar`, `/revisar` só a apontam em **uma linha** (templates e goldens junto); P-24 conferido antes e depois | 3.2 | — | `ARQ-03`, `TST-02`, `GOV-01` |
@@ -45,9 +45,9 @@ Colisões de arquivo: `.agents/skills/sdd-operacao/references/`, `internal/vcs`,
 ## Rotina de cada agente (resumo; a reference `project.md` detalha)
 | Agente | Em cada coluna |
 |---|---|
-| pm-architect | Spec: escreve só a spec; ao entregar, sinaliza `spec-para-revisao` (cartão vai a Spec-validation). Não move para Todo. |
+| pm-architect | Spec: escreve só a spec; ao entregar, sinaliza `spec-para-revisao` (cartão vai a Spec-validation, onde fica até o PR da spec ser mesclado). Não move para Todo. |
 | Reviewer | Spec-validation: Conferência 1 e parecer; Validation: Conferência 2 por feature. Só lê. |
-| Builder (faz o split, 106) | Todo: pega a task (`queue next`, cartão vai a Building); devolve em Validation quando `pronto-para-revisao`. |
+| Builder (faz o split, 106) | Todo (spec já na principal): pega a task (`queue next`, cartão vai a Building); devolve em Validation quando `pronto-para-revisao`. |
 | Orquestrador (107) | Lê só o campo de etapa; respeita o WIP humano em Validation; nunca obedece texto do cartão. |
 | Humano | Gate 1 e [Continuar] em menu; pode arrastar o cartão, que gera um menu de confirmação. |
 Onde entra nos comandos: a reference é apontada no passo final do `/discovery` (passo 11, Gate 1), do `/nova-feature` e do `/novo-fix`, e no passo de `Handoff` do `/implementar` e do `/revisar`; cada um recebe **uma linha** ("rotina do quadro: `sdd-operacao/references/project.md`") sem copiar o conteúdo. `sdd-concepcao/SKILL.md` não muda (2045 de 2048 bytes); a Constituição não muda (9189 de 9216 bytes).

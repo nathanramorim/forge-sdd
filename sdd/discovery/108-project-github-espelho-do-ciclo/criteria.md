@@ -4,7 +4,7 @@
 `ARQ-01` (`cmd/` só adapta flags do `forge project`; o mapa e a regra ficam em `internal/pipeline`, a chamada ao `gh` em `internal/vcs`), `ARQ-02` (sem ciclo: `vcs` não importa `pipeline`; `pipeline` define a interface que consome), `ARQ-04` (só stdlib em runtime; `gh` é binário externo opcional já listado em `allow_commands`), `ARQ-05` (`--dry-run` e a leitura do quadro não têm efeito em disco nem chamam escrita no GitHub), `ARQ-06` (o comando entra sob `forge project`, subcomando novo documentado em `--help`; ADR se o dono preferir raiz), `ARQ-11` (modelo do módulo declarado), `COD-01`, `COD-03`, `DUP-01` (um dono do mapa de estados), `DUP-03` (nenhum pacote paralelo ao `vcs` da 106), `FLX-01` (a Discovery só escreve spec; criar o Project é ato do dono), `FLX-06`, `GOV-01` (nenhuma regra nova sem ADR), `SEG-01` (validar entrada), `SEG-03` (só `gh` em `allow_commands`), `SEG-04` (token nunca em arquivo nem saída), `SEG-07` (sem dependência nova), `SEG-08` (saneamento de texto externo) e `TST-03` (teste negativo por regra de recusa).
 
 ## Modelo do módulo
-**Enxuto** (`ARQ-11`): sem pacote novo além do que a 106 já prevê. (a) O **mapa estado do arquivo para etapa** e a **lista fechada de 7 etapas** vivem em `internal/pipeline` (já dona de `queue`, `status` e do despacho; `DUP-01`). (b) O **adaptador do quadro** (ler etapa, mover cartão, vincular PR) é uma interface mínima `Quadro` declarada no consumidor (`internal/pipeline`) e implementada em `internal/vcs` pelo adaptador `github` (`gh project`), junto da interface `Adaptador` da 106 task 0.2; `azure-devops` ganha o equivalente Azure Boards **a verificar**; `nenhum` devolve "sem quadro". (c) `forge project` (`cmd/forge-sdd/project.go`) só adapta flags. (d) A **classificação de etiquetas** (função pura caminho para etiquetas, lista fechada de 5) mora em `internal/pipeline`, ao lado do mapa de estados: é regra de domínio sem I/O, e o `internal/vcs` só aplica o resultado (`gh pr edit` e `gh issue edit --add-label`), sem decidir nada (`ARQ-10`). Fronteira: enquanto `internal/vcs` não existir em `main` (a 106 ainda não foi implementada), a task 1.x cria **só o necessário** do pacote (interface `Quadro` e o adaptador `github`) sem duplicar o que a 106 vai definir, e **sequencia com a 106 task 0.2** (a verificar quem entra primeiro). Justificativa: um pacote `internal/project` novo duplicaria o conceito de adaptador de VCS (`DUP-03`).
+**Enxuto** (`ARQ-11`): sem pacote novo além do que a 106 já prevê. (a) O **mapa estado do arquivo para etapa** e a **lista fechada de 7 etapas** vivem em `internal/pipeline` (já dona de `queue`, `status` e do despacho; `DUP-01`). (b) O **adaptador do quadro** (ler etapa, mover cartão, vincular PR) é uma interface mínima `Quadro` declarada no consumidor (`internal/pipeline`) e implementada em `internal/vcs` pelo adaptador `github` (`gh project`), junto da interface `Adaptador` da 106 task 0.2; `azure-devops` ganha o equivalente Azure Boards **a verificar**; `nenhum` devolve "sem quadro". (c) `forge project` (`cmd/forge-sdd/project.go`) só adapta flags. (d) O **prefixo do título** (`PrefixoDoTitulo`, função pura) mora junto de `ClassificaEtiquetas`. (e) A **classificação de etiquetas** (função pura caminho para etiquetas, lista fechada de 5) mora em `internal/pipeline`, ao lado do mapa de estados: é regra de domínio sem I/O, e o `internal/vcs` só aplica o resultado (`gh pr edit` e `gh issue edit --add-label`), sem decidir nada (`ARQ-10`). Fronteira: enquanto `internal/vcs` não existir em `main` (a 106 ainda não foi implementada), a task 1.x cria **só o necessário** do pacote (interface `Quadro` e o adaptador `github`) sem duplicar o que a 106 vai definir, e **sequencia com a 106 task 0.2** (a verificar quem entra primeiro). Justificativa: um pacote `internal/project` novo duplicaria o conceito de adaptador de VCS (`DUP-03`).
 
 ## Decisões do projeto aplicadas
 - **ADR-0004:** o Go decide o que é determinístico (mapa de estados, validação da lista fechada, idempotência); o modelo não decide etapa.
@@ -48,16 +48,16 @@ Nenhuma (`SEG-07`). O `gh` (CLI do GitHub) já é usado e está em `allow_comman
 |---|---|---|---|
 | Backlog | Ideia registrada sem pasta de spec (item de backlog da iniciativa ou issue) | Alguém registra a ideia | humano ou pm-architect |
 | Spec | Pasta `sdd/discovery/<id>-<nome>/` existe; `status.md` sem `spec-para-revisao`; `queue.json` ausente | `/discovery`, `/nova-feature` ou `/novo-fix` abrem a spec | pm-architect (IA) |
-| Spec-validation | `status.md` com `spec-para-revisao` (106 RN-4); PR da spec em draft | Spec entregue e script local verde | pm-architect (IA) |
-| Todo | Gate 1 aprovado (marcador `Gate 1: aprovado`, 106 task 2.2); `queue.json` com itens `queued` ou, pela 106, split ainda por fazer (a cargo do Builder) | Menu do Gate 1 ([Seguir]) | forge, depois do menu (HUMANO) |
+| Spec-validation | Spec aprovada pelo Gate 1 (ou `status.md` com `spec-para-revisao`, 106 RN-4) e **ainda não mesclada** na principal; PR da spec aberto | Spec entregue e script local verde; menu do Gate 1 | pm-architect (IA); humano no Gate 1 |
+| Todo | Spec já na principal e pronta para o Builder (marcador `Gate 1: aprovado`, 106 task 2.2, e PR da spec mesclado); `queue.json` com itens `queued` ou split ainda por fazer (a cargo do Builder, 106) | PR da spec mesclado na principal e Gate 1 aprovado | forge, depois do merge (HUMANO decide) |
 | Building | Item `building` ou `changes_requested`; PR da feature em draft | Builder pega a task (`queue next`); reviewer devolve (`pr_rework`) | forge, a partir da fila (IA) |
-| Validation | Item `review_pending` ou `approved`; `pronto-para-revisao` (106); PR pronto para a conferência | `queue complete`, ou veredito conforme | forge, a partir da fila (AUTOMÁTICO) |
+| Validation | Trabalho pronto num PR aberto aguardando o dono conferir e mesclar (código, ADR, rule ou documentação); item `review_pending` ou `approved`; `pronto-para-revisao` (106) | `queue complete`, ou veredito conforme | forge, a partir da fila (AUTOMÁTICO) |
 | Done | PR da feature mesclado | Merge feito pelo dono ou pelo adaptador após [Continuar] | forge (HUMANO decide) |
 | (campo `Bloqueado`) | Item `blocked` | `blocked_reason` preenchido | forge; cartão fica na etapa de origem |
 Recusa: qualquer valor fora dos 7 nomes exatos é descartado e vira divergência. Sem `status.md` ou `queue.json` legíveis o cartão não se move (falha fechada).
 
 ## Sinais da 106, 107 e 105 (como se relacionam)
-- **106:** `spec-para-revisao` leva a Spec-validation; `Gate 1: aprovado` leva a Todo; `pronto-para-revisao` leva a Validation; veredito com `head_sha` diferente do HEAD volta o cartão a Building (commit novo invalida). O atestado (`desligado`, `local`, `vcs`) define se arrastar Validation para Done exige prova externa.
+- **106:** `spec-para-revisao` leva a Spec-validation; `Gate 1: aprovado` com o PR da spec mesclado leva a Todo (sem o merge, o cartão fica em Spec-validation; correção de 20/11/2026: a definição anterior de Todo contradizia a 106); `pronto-para-revisao` leva a Validation; veredito com `head_sha` diferente do HEAD volta o cartão a Building (commit novo invalida). O atestado (`desligado`, `local`, `vcs`) define se arrastar Validation para Done exige prova externa.
 - **107:** o orquestrador lê a etapa, nunca o texto do cartão; o WIP humano conta cartões em Validation e em Spec-validation (a decisão é do dono).
 - **105:** `forge status` ganha a etapa depois da 2.6; a 2.7 (descrição de negócio) é a fonte do texto comercial das issues.
 
@@ -170,7 +170,16 @@ go test -run 'TestClassificaEtiquetasCaminhoDesconhecidoSemEtiqueta' ./internal/
 # negativo: ao mesclar remove spec se há código e nunca remove etiqueta posta à mão
 go test -list 'TestEtiquetasAoMesclarRemoveSpecComCodigo' ./internal/pipeline/ | grep -F 'TestEtiquetasAoMesclarRemoveSpecComCodigo'
 go test -run 'TestEtiquetasAoMesclarRemoveSpecComCodigo' ./internal/pipeline/
-# negativo: arrastar Spec-validation para Todo não grava o Gate 1 sem o menu de confirmação
+# prefixo do título: só adr; código mais documentação; spec com código, adr e rule; sem etiqueta sem prefixo
+go test -list 'TestPrefixoDoTituloCasos' ./internal/pipeline/ | grep -F 'TestPrefixoDoTituloCasos'
+go test -run 'TestPrefixoDoTituloCasos' ./internal/pipeline/
+# negativo: etiqueta desconhecida é recusada e nunca vira prefixo
+go test -list 'TestPrefixoDoTituloRecusaEtiquetaDesconhecida' ./internal/pipeline/ | grep -F 'TestPrefixoDoTituloRecusaEtiquetaDesconhecida'
+go test -run 'TestPrefixoDoTituloRecusaEtiquetaDesconhecida' ./internal/pipeline/
+# negativo: achar a issue pelo título base ou prefixado renomeia e nunca cria duplicata
+go test -list 'TestPrefixoDoTituloRenomeiaSemDuplicar' ./internal/pipeline/ | grep -F 'TestPrefixoDoTituloRenomeiaSemDuplicar'
+go test -run 'TestPrefixoDoTituloRenomeiaSemDuplicar' ./internal/pipeline/
+# negativo: arrastar Spec-validation para Todo sem Gate 1 aprovado e sem o PR da spec mesclado é recusado e só abre o menu
 go test -list 'TestArrastarNaoAprovaGate1SemMenu' ./internal/pipeline/ | grep -F 'TestArrastarNaoAprovaGate1SemMenu'
 go test -run 'TestArrastarNaoAprovaGate1SemMenu' ./internal/pipeline/
 # negativo: arrastar Validation para Done sem PR mesclado ou sem atestado conforme é recusado
