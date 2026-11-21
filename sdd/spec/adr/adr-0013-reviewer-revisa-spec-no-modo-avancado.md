@@ -1,7 +1,7 @@
 # ADR-0013: Reviewer Revisa a Spec no Modo Avançado
 
 - **Data:** 2026-11-16
-- **Status:** `proposto`
+- **Status:** `aceito` (2026-11-20, aprovado pelo dono no Gate 1 da 105)
 - **Regras afetadas (IDs da constitution):** `FLX-01`, `FLX-05`, `FLX-06`, `GOV-01`, `SEG-06` (este ADR; nenhum ID foi criado ou removido)
 - **Autor / Responsável:** Líder (iniciativa `88-modo-pipeline-avancado`, `feat-88-03`)
 

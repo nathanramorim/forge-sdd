@@ -1,7 +1,7 @@
 # ADR-0011: Painel Interativo, Stream de Chat nos Workers e Fila com Drill-Down
 
 - **Data:** 2026-11-15
-- **Status:** `proposto`
+- **Status:** `aceito` (2026-11-20, aprovado pelo dono no Gate 1 da 105)
 - **Regras afetadas (IDs da constitution):** `ARQ-01`, `COD-01`, `DUP-01`, `SEG-05`, `GOV-01` (este ADR; nenhum ID foi criado ou removido)
 - **Autor / Responsável:** Líder (discovery 84)
 
