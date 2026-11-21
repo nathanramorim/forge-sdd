@@ -168,10 +168,6 @@ func formatLessonEntry(pattern, fix, ref string) string {
 	return fmt.Sprintf("- %s → %s", pattern, fix)
 }
 
-func parseLessonEntries(content string) []string {
-	return parseLessonEntriesWithHeader(content, lessonsHeader)
-}
-
 func parseLessonEntriesWithHeader(content, header string) []string {
 	idx := strings.Index(content, header)
 	body := content
@@ -186,10 +182,6 @@ func parseLessonEntriesWithHeader(content, header string) []string {
 		}
 	}
 	return entries
-}
-
-func renderLessons(entries []string) string {
-	return renderLessonsWithHeader(lessonsHeader, entries)
 }
 
 func renderLessonsWithHeader(header string, entries []string) string {
