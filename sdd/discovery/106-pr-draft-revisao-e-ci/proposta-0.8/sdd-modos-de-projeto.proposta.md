@@ -1,5 +1,5 @@
 ---
-description: Como ler e respeitar os campos de modo da tabela Ferramentas e Integrações da Constituição (VCS, atestado, revisão humana, WIP humano, quadro e início automático).
+description: Como ler e respeitar os campos de modo da tabela Ferramentas e Integrações da Constituição (VCS, atestado, revisão humana, WIP humano, módulos permitidos e início automático).
 globs: ["sdd/memory/constitution.md", "internal/vcs/**", "internal/config/**", "scripts/atestado.py"]
 regras: [ARQ-06, SEG-05, FLX-01, FLX-02, FLX-06, GOV-01, GOV-04]
 ---
@@ -27,9 +27,11 @@ Os campos ficam na tabela `Ferramentas e Integrações` de `sdd/memory/constitut
 ## 4. WIP humano (`FLX-01`)
 - Inteiro positivo (padrão 3) ou `desligado`: limite de itens aguardando o humano. No limite o orquestrador para e pergunta em menu. Reduzir ou desligar exige o aviso dos riscos e o registro no `status.md`. Distinto de `builder.max_parallel_tasks`.
 
-## 5. Quadro de acompanhamento e Início automático do Builder (`ARQ-06`)
-- `Quadro de acompanhamento`: `desligado` (padrão) ou `github-projects` (só com VCS `github`; `nenhum` só admite `desligado`). Desligado: nenhuma chamada ao `gh`, nenhum polling, nenhum cartão lido ou escrito. O comando `project` opera o quadro.
-- `Início automático do Builder`: `desligado` (padrão) ou `local`.
+## 5. Módulos permitidos e Início automático do Builder (`ARQ-06`, `SEG-03`)
+- `Módulos permitidos`: `nenhum` (padrão; campo ausente vale o mesmo) ou lista de nomes. Só roda módulo listado aqui, instalado na pasta do usuário, com hash conferido e autorizado pelo dono para aquela versão. `nenhum` não lê disco do usuário nem chama processo.
+- A configuração de cada módulo fica em `sdd/modulos/<nome>.json`, opaca ao core. O quadro do GitHub Project é um módulo externo, opcional, e não um campo da Constituição.
+- `Início automático do Builder`: `desligado` (padrão) ou `local`; é do laço da 107.
+- Nota copiada do `discovery.md` da 109 (commit `b7c5745`, seção "Constituição").
 
 ## 6. Como cumprir
 - Leia os campos por um leitor único (`internal/vcs`), com valor inválido recusado na borda (`SEG-01`); não copie os valores para `forge.json`.

@@ -26,7 +26,7 @@ CLI Go de comando único (`forge-sdd init`) que scaffolda estruturas Forge-SDD e
 | Modo do atestado | local |
 | Modo de revisão humana | com-humano |
 | WIP humano | 3 |
-| Quadro de acompanhamento | desligado |
+| Módulos permitidos | nenhum |
 | Início automático do Builder | desligado |
 
 Notas dos campos: `.agents/rules/sdd-modos-de-projeto.md`.
@@ -59,7 +59,7 @@ As regras abaixo indexam as decisões invioláveis por IDs estáveis. O **como c
 - **ARQ-03:** Templates e assets de scaffold só via `embed.FS` (Regra 3).
 - **ARQ-04:** O binário não depende de nada além da biblioteca padrão em runtime (Regra 8).
 - **ARQ-05:** `--dry-run` não tem efeito colateral no disco (Regra 9).
-- **ARQ-06:** A CLI expõe os comandos de ciclo de vida (`init`, `update`) e subcomandos determinísticos de suporte (`doctor`, `status`, `next-id`, `context`, `session`, `lessons`, `report`, `queue`, `gate`, `skills`, `governance`, `acp`, `mcp`, `attach`, `autopilot`, `destroy`, `pipeline`, `dispatch`, `bus`, `worker`, `inbox`, `up`, `eval`, `brief`, `ps`, `rules`, `project`) com contratos explícitos (Regra 10).
+- **ARQ-06:** A CLI expõe os comandos de ciclo de vida (`init`, `update`) e subcomandos determinísticos de suporte (`doctor`, `status`, `next-id`, `context`, `session`, `lessons`, `report`, `queue`, `gate`, `skills`, `governance`, `acp`, `mcp`, `attach`, `autopilot`, `destroy`, `pipeline`, `dispatch`, `bus`, `worker`, `inbox`, `up`, `eval`, `brief`, `ps`, `rules`, `modulo`) com contratos explícitos (Regra 10).
 - **ARQ-10:** Domínio e validação não vazam para handlers de CLI nem para templates.
 - **ARQ-11:** Toda spec declara o modelo do módulo (`completo` ou `enxuto`) com justificativa.
 
