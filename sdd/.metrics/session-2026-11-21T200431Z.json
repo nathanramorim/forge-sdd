@@ -1,0 +1,27 @@
+{
+  "$schema": "forge-sdd/metrics/1.0",
+  "feature": "sdd/discovery/112-lp-estavel-beta-e-estilo-forge/features/feat-112-03-seletor-de-novidades-na-lp.md",
+  "agent_path": null,
+  "tokens_input": 10758,
+  "tokens_output": 52552,
+  "turns": 0,
+  "duration_seconds": 0,
+  "criterio_atendido": true,
+  "model": "",
+  "rework_lines": 0,
+  "context7_calls": 0,
+  "git_calls": 0,
+  "files_touched": [
+    "scripts/novidades_lp.py",
+    "docs/data/releases.json",
+    "docs/index.html",
+    "internal/scaffold/lp_novidades_test.go",
+    ".github/workflows/deploy-lp.yml",
+    ".github/workflows/release.yml",
+    "sdd/releases/history.md"
+  ],
+  "outcome": "approved",
+  "sdd_version": "5.0.0",
+  "medicao": "estimado",
+  "complexidade": null
+}

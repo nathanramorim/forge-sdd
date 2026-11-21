@@ -1,17 +1,62 @@
 name: CI
 
+# Política de CI do Forge-SDD (feat-106-31, ADR-0022):
+#
+# - O trabalho é conferido **antes** de virar PR: `forge gate` (Camada A),
+#   `go vet`/`go test` e `scripts/validar_entrega.py` rodam locais, no Builder.
+# - O CI caro (teste em 3 sistemas e lint completo) só roda quando o PR **sai
+#   do draft** (`ready_for_review`) e na `main`. Um PR em draft não consome
+#   runner: os jobs aparecem como "skipped".
+# - `concurrency` cancela a execução anterior do mesmo PR ao subir um commit
+#   novo, em vez de manter duas filas.
+# - O evento de PR é sempre `pull_request` (o código do PR nunca roda com os
+#   segredos do repositório).
+
 on:
   push:
     branches: [main]
   pull_request:
     branches: [main]
+    types: [opened, synchronize, reopened, ready_for_review]
 
 env:
   ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: 'true'
 
+concurrency:
+  # Só agrupa por PR; push na main roda sempre (um por branch).
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
-  test:
+  # Job obrigatório na main: recusa PR em draft. A verificação do parecer do
+  # Reviewer entra na feat-106-32. Na main (push) o job não tem o que conferir
+  # e sai verde sem custo.
+  pronto:
+    name: pronto?
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
+    steps:
+      - name: PR não pode estar em draft
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          set -euo pipefail
+          draft=$(gh pr view "$PR" --json isDraft -q .isDraft)
+          if [ "$draft" = "true" ]; then
+            echo "::error::O PR #$PR está em draft. Marque como pronto só depois da conferência do Reviewer."
+            exit 1
+          fi
+          echo "PR #$PR pronto para revisão."
+
+  test:
+    # Um PR em draft não roda teste: economiza runner e segura o CI para o fim.
+    if: github.event_name == 'push' || github.event.pull_request.draft == false
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
 
@@ -22,9 +67,10 @@ jobs:
           cache: true
 
       - name: go test
-        run: go test ./... -v
+        run: go test ./...
 
   lint:
+    if: github.event_name == 'push' || github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

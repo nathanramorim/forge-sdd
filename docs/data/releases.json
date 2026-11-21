@@ -1,0 +1,107 @@
+{
+  "schema": 1,
+  "chave_conteudo": "b93e91a5c7fe448f",
+  "versao_historico": "45a6cef",
+  "versoes": [
+    {
+      "versao": "5.0.0",
+      "rotulo": "5.0.0",
+      "canal": "stable",
+      "titulo": "Wiki Get Started, PR Automático e Edição Missões (Estável)",
+      "itens": [
+        {
+          "titulo": "Wiki Get Started (`forge-sdd.org/wiki`)",
+          "texto": "uma jornada guiada de instalação, primeira feature e ciclo completo. Cada passo traz um bloco \"Prompt para IA\", pronto para copiar e colar no seu agente. Inclui o modo Hub, para usar o forge-sdd em vários repositórios, e uma seção sobre `/constitution`. O botão \"Get Started\" da landing page leva direto para lá (Iniciativa 99)."
+        },
+        {
+          "titulo": "PR automático depois da revisão (`forge queue review`)",
+          "texto": "quando o veredito é `conforme`, o comando envia a branch e abre o PR com `gh pr create`, sem perguntar. Use `--no-pr` para pular (Iniciativa 100)."
+        },
+        {
+          "titulo": "Revise a spec sem sair da conversa",
+          "texto": "ao encerrar `/discovery`, `/nova-feature`, `/novo-fix` ou `/split-features`, o agente pergunta se você quer revisar os artefatos gerados antes de seguir para o Gate 1, sem navegar pelas pastas (`feat-97-03`)."
+        },
+        {
+          "titulo": "Worktrees ociosos não se acumulam",
+          "texto": "ao iniciar `forge up`, `forge worker` ou `forge inbox`, o forge detecta worktrees em `.forge/runtime/worktrees/` que podem ser removidos com segurança e oferece a limpeza (`feat-97-02`)."
+        },
+        {
+          "titulo": "Métricas de sessão com tokens de verdade",
+          "texto": "corrigidos os `tokens_input: 0` e `tokens_output: 0` em `sdd/.metrics/session-*.json`. O campo `complexidade` fica reservado no schema, ainda sem preenchimento (`feat-97-01`)."
+        },
+        {
+          "titulo": "Diagramas C4 com dois motores",
+          "texto": "a skill de diagramas pergunta, a cada uso, se você quer Mermaid ou diagram-studio (Iniciativa 98)."
+        },
+        {
+          "titulo": "`forge rules` volta a achar os IDs da Constituição",
+          "texto": "(`fix-88-05`)."
+        },
+        {
+          "titulo": "Vindo da linha 4.9.x",
+          "texto": "o modo pipeline avançado (experimental), o menu Settings e os tetos desligados por padrão passam a fazer parte da versão estável. O modo normal não muda."
+        },
+        {
+          "titulo": "Edição Missões",
+          "texto": "o README ganha um banner temático e as sessões do pipeline aparecem como missões: Discovery é o plano, Builder é a obra, Reviewer é o vigia, e a sua aprovação fecha com \"Missão cumprida\". O design system da edição fica em `docs/design/edicao-missoes/`. É uma homenagem ao clima de pôr do sol, neon e palmeiras, com marca, tipografia e ilustrações próprias."
+        },
+        {
+          "titulo": "Como atualizar",
+          "texto": "`npm install -g @nathanramorim/forge-sdd` e, nos projetos existentes, `forge update`."
+        }
+      ]
+    },
+    {
+      "versao": "5.1.0",
+      "rotulo": "5.1.0-beta",
+      "canal": "beta",
+      "titulo": "CLI Mais Claro, Métricas de Discovery e Parecer com Proveniência e Fila por Branch de Feature (Beta)",
+      "itens": [
+        {
+          "titulo": "`forge doctor` compara versões e fala menos (#125)",
+          "texto": "o diagnóstico compara a versão do projeto com a do programa e avisa quando o projeto está atrás. Os caminhos de features e tasks só aparecem com `--verbose`."
+        },
+        {
+          "titulo": "`forge status` esconde o que já terminou (#124)",
+          "texto": "iniciativa com a fila concluída sai da lista; `forge status --all` mostra todas, marcando as concluídas."
+        },
+        {
+          "titulo": "Aviso de comando depreciado (#126, #129)",
+          "texto": "`queue stations`, `queue handoff` e `attach` mostram o substituto ao serem usados, e o aviso aparece também na documentação dos atalhos `/implement` e `/proxima-feature`. Os usos dos comandos do programa (`queue stations`, `queue handoff` e `attach`) são registrados em `sdd/memory/logs/depreciados.csv`, para você ver o que ainda está em uso antes da remoção; os atalhos de barra não geram linha no CSV. A decisão está na ADR-0021 (#123)."
+        },
+        {
+          "titulo": "\"3 sessões\" no lugar de \"5 estações\" (#127, #128)",
+          "texto": "a ajuda do programa e os textos entregues passam a falar de Discovery, Builder e Reviewer; a descrição do agente `lider` segue o mesmo caminho. Nenhum comando foi renomeado."
+        },
+        {
+          "titulo": "Métricas de Discovery (#131)",
+          "texto": "as métricas das sessões de concepção ganham o bloco `spec`."
+        },
+        {
+          "titulo": "Parecer do Reviewer com proveniência (feature 106-11, #159)",
+          "texto": "o parecer guarda `head_sha`, `ponto` (`spec` ou `entrega`), `modo` e `feature`, gravados pelo Go a partir do HEAD da branch. Veredito sem commit válido é recusado."
+        },
+        {
+          "titulo": "A fila acha a iniciativa em branch por feature (fix-106-01, #163)",
+          "texto": "em branches como `feat/106-11-...` ou `fix/106-01-...`, os comandos que leem a fila (`forge queue list`, `forge queue next` e os demais subcomandos de `queue`) passam a achar a iniciativa casando o número do começo da branch com a pasta em `sdd/discovery/`. Se duas pastas tiverem o mesmo número, o comando falha com erro claro e lista as pastas. `forge status`, `forge doctor`, `forge gate`, `forge archive` e `forge context` conferem isso antes de ler a fila. Nova flag global `--iniciativa <id>` e variável `FORGE_INICIATIVA`"
+        },
+        {
+          "titulo": "README mais claro (#130, #132)",
+          "texto": "a esteira é contada uma vez só, e os diagramas usam as cores e as marcas dos robôs da página."
+        },
+        {
+          "titulo": "O que vem a seguir (em desenho, sem data)",
+          "texto": "contrato de módulos, régua de estimativa de tokens, painel de métricas, orquestrador e política de PR em rascunho com CI. Nada disso está nesta beta."
+        },
+        {
+          "titulo": "Como atualizar",
+          "texto": "`npm install -g @nathanramorim/forge-sdd@beta` para instalar a prévia; nos projetos existentes, rode `forge update --upgrade` e depois `forge doctor` para conferir se o projeto está em sincronia com o programa. Para voltar à estável, `npm install -g @nathanramorim/forge-sdd` sem `@beta`."
+        },
+        {
+          "titulo": "Avisos da beta",
+          "texto": "esta versão não está na `main` (`FLX-07`); quem usa `npm install -g @nathanramorim/forge-sdd` sem `@beta` continua na 5.0.0 estável."
+        }
+      ]
+    }
+  ]
+}

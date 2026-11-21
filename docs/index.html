@@ -1018,6 +1018,58 @@ footer {
   margin-top: 32px;
 }
 
+/* Seção de novidades por versão (feat-112-03) */
+.novidades { margin-top: 40px; padding-top: 28px; border-top: 1px solid var(--line); }
+.nv-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 14px; flex-wrap: wrap; margin-bottom: 18px; }
+.nv-title { font: 700 18px var(--f-head, var(--f-body)); color: var(--fg); margin: 0 0 4px; }
+.nv-sub { color: var(--muted); font: 500 12.5px var(--f-body); margin: 0; max-width: 56ch; }
+.nv-link { display: inline-flex; align-items: center; gap: 6px; font: 600 12px var(--f-body); color: var(--accent); text-decoration: none; white-space: nowrap; }
+.nv-link:hover { text-decoration: underline; }
+.nv-link svg { width: 14px; height: 14px; }
+
+.nv-layout { display: grid; grid-template-columns: 240px 1fr; gap: 18px; align-items: start; }
+@media (max-width: 760px) { .nv-layout { grid-template-columns: 1fr; } }
+
+.nv-tabs { display: flex; flex-direction: column; gap: 8px; }
+.nv-tab {
+  text-align: left;
+  width: 100%;
+  background: var(--bg2);
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  padding: 10px 12px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  transition: border-color .25s, background .25s;
+}
+.nv-tab:hover { border-color: var(--line2); }
+.nv-tab.active {
+  border-color: color-mix(in srgb, var(--accent) 60%, transparent);
+  background: radial-gradient(120% 150% at 0 0, color-mix(in srgb, var(--accent) 11%, var(--bg2)), var(--bg2));
+}
+.nv-tab-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.nv-tab-top .mono { font: 600 12px var(--f-mono, monospace); color: var(--fg); }
+.nv-tab-hint { font: 500 11px var(--f-body); color: var(--muted); }
+
+.nv-version { font: 600 12px var(--f-body); color: var(--muted); margin-bottom: 8px; min-height: 16px; }
+.nv-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 1px; }
+.nv-item {
+  display: grid;
+  grid-template-columns: minmax(150px, 34%) 1fr;
+  gap: 12px;
+  padding: 9px 2px;
+  border-bottom: 1px solid color-mix(in srgb, var(--line) 60%, transparent);
+  align-items: baseline;
+}
+.nv-item:last-child { border-bottom: 0; }
+@media (max-width: 640px) { .nv-item { grid-template-columns: 1fr; gap: 2px; } }
+.nv-item-titulo { font: 600 12.5px var(--f-body); color: var(--fg); }
+.nv-item-texto { font: 500 12.5px var(--f-body); color: var(--muted); line-height: 1.5; }
+.nv-empty { color: var(--muted); font: 500 12.5px var(--f-body); padding: 10px 2px; }
+.nv-carregando { opacity: .55; }
+
 /* Links com ícones vetoriais integrados ao Design System */
 .ds-link {
   display: inline-flex;
@@ -1112,10 +1164,12 @@ footer {
       <path d="M12 7.5v9"/>
       <path d="M16.5 16.5h-3"/>
     </symbol>
-    <symbol id="ico-instagram" viewBox="0 0 24 24">
-      <rect x="3" y="3" width="18" height="18" rx="5"/>
-      <circle cx="12" cy="12" r="4"/>
-      <circle cx="17.5" cy="6.5" r="0.8" fill="currentColor"/>
+    <symbol id="ico-linkedin" viewBox="0 0 24 24">
+      <rect x="3" y="3" width="18" height="18" rx="4"/>
+      <path d="M7.5 10.5v6"/>
+      <circle cx="7.5" cy="7.5" r="1"/>
+      <path d="M11 16.5v-6"/>
+      <path d="M11 12.5c0-1.2 1-2 2.2-2s2.3.8 2.3 2.2v3.8"/>
     </symbol>
   </defs>
 </svg>
@@ -1146,9 +1200,9 @@ footer {
           <svg aria-hidden="true"><use href="#ico-github"/></svg>
           <span>GitHub</span>
         </a>
-        <a href="https://www.instagram.com/nathan.ramorim" target="_blank" rel="noopener noreferrer" class="ds-link" title="Instagram @nathan.ramorim">
-          <svg aria-hidden="true"><use href="#ico-instagram"/></svg>
-          <span>Instagram</span>
+        <a href="https://www.linkedin.com/in/nathanramorim/" target="_blank" rel="noopener noreferrer" class="ds-link" title="LinkedIn de Nathan Amorim">
+          <svg aria-hidden="true"><use href="#ico-linkedin"/></svg>
+          <span>LinkedIn</span>
         </a>
       </span>
     </nav>
@@ -1570,6 +1624,47 @@ footer {
     </section>
   </main>
 
+  <!-- novidades:inicio -->
+  <section id="novidades" class="novidades" aria-labelledby="novidadesTitulo">
+    <div class="nv-head">
+      <div>
+        <h2 id="novidadesTitulo" class="nv-title">O que mudou em cada versão</h2>
+        <p class="nv-sub">O resumo sai direto do histórico de releases do projeto — a mesma fonte das notas completas.</p>
+      </div>
+      <a class="nv-link" id="nvLinkNotas" href="https://github.com/nathanramorim/forge-sdd/blob/main/sdd/releases/history.md" target="_blank" rel="noopener noreferrer">
+        Ver release notes completas
+        <svg aria-hidden="true"><use href="#ico-github"/></svg>
+      </a>
+    </div>
+
+    <div class="nv-layout">
+      <div class="nv-tabs" id="nvTabs" role="tablist" aria-label="Versões">
+        <button class="nv-tab active" data-nv="stable" type="button" role="tab" aria-selected="true">
+          <span class="nv-tab-top">
+            <span class="chip"><i style="--o:var(--accent)"></i>Estável</span>
+            <span class="mono" data-versao="latest">5.0.0</span>
+          </span>
+          <span class="nv-tab-hint">Recomendada para produção</span>
+        </button>
+        <button class="nv-tab" data-nv="beta" type="button" role="tab" aria-selected="false">
+          <span class="nv-tab-top">
+            <span class="chip"><i style="--o:var(--warn)"></i>Beta</span>
+            <span class="mono" data-versao="beta">5.1.0-beta</span>
+          </span>
+          <span class="nv-tab-hint">Novidades em teste, com <code>@beta</code></span>
+        </button>
+      </div>
+
+      <div class="nv-list-wrap">
+        <div class="nv-version" id="nvVersao" aria-live="polite"></div>
+        <ul class="nv-list" id="nvLista">
+          <li class="nv-empty">Carregando as novidades…</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+  <!-- novidades:fim -->
+
   <footer>
     <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
       <span><strong>Forge-SDD v<span data-versao="latest">5.0.0</span></strong> · Código aberto sob <strong>Licença MIT</strong></span>
@@ -1584,9 +1679,9 @@ footer {
         <svg aria-hidden="true"><use href="#ico-npm"/></svg>
         <span>NPM</span>
       </a>
-      <a href="https://www.instagram.com/nathan.ramorim" target="_blank" rel="noopener noreferrer" class="ds-link" aria-label="Instagram @nathan.ramorim">
-        <svg aria-hidden="true"><use href="#ico-instagram"/></svg>
-        <span>Instagram</span>
+      <a href="https://www.linkedin.com/in/nathanramorim/" target="_blank" rel="noopener noreferrer" class="ds-link" aria-label="LinkedIn de Nathan Amorim">
+        <svg aria-hidden="true"><use href="#ico-linkedin"/></svg>
+        <span>LinkedIn</span>
       </a>
     </div>
   </footer>
@@ -2495,6 +2590,197 @@ async function buscarCanalNpm(canal, fetchImpl) {
 }
 /* versoes:fim */
 
+/* novidades:inicio */
+const NV_JSON_URL = 'data/releases.json';
+const NV_HISTORY_RAW = 'https://raw.githubusercontent.com/nathanramorim/forge-sdd/main/sdd/releases/history.md';
+const OPCOES_FETCH_NOVIDADES = {
+  credentials: 'omit',
+  referrerPolicy: 'no-referrer',
+  cache: 'no-cache'
+};
+const NV_MAX_TEXTO = 600;
+
+// Marca texto que tenta injetar marcação ou esquema executável. A renderização
+// já é por textContent; esta barreira descarta o item inteiro em vez de exibi-lo
+// (SEG-01: entrada externa é dado não confiável).
+const NV_SUSPEITO = /<\s*[a-z!/]|javascript\s*:|data\s*:\s*text\/html|on[a-z]+\s*=/i;
+
+function nvLimpar(valor) {
+  if (typeof valor !== 'string') return '';
+  // Tira caracteres de controle e normaliza espaços; nunca devolve HTML.
+  const semControle = valor.replace(/[\u0000-\u0008\u000b-\u001f\u007f-\u009f]/g, '');
+  return semControle.replace(/\s+/g, ' ').trim().slice(0, NV_MAX_TEXTO);
+}
+
+function nvCanalValido(canal) {
+  return canal === 'stable' || canal === 'beta';
+}
+
+// Normaliza as versões recebidas: descarta o que não for objeto válido e
+// devolve só o que a tela sabe desenhar. Entrada externa é não confiável (SEG-01).
+function nvNormalizar(versoes) {
+  if (!Array.isArray(versoes)) return [];
+  const saida = [];
+  for (const v of versoes) {
+    if (!v || typeof v !== 'object') continue;
+    if (!nvCanalValido(v.canal)) continue;
+    const itens = Array.isArray(v.itens) ? v.itens : [];
+    const limpos = [];
+    for (const i of itens) {
+      if (!i || typeof i !== 'object') continue;
+      const titulo = nvLimpar(i.titulo);
+      const texto = nvLimpar(i.texto);
+      if (!titulo && !texto) continue;
+      if (NV_SUSPEITO.test(titulo) || NV_SUSPEITO.test(texto)) continue;
+      limpos.push({ titulo: titulo, texto: texto });
+    }
+    if (!limpos.length) continue;
+    const rotuloBruto = nvLimpar(v.rotulo) || nvLimpar(v.versao);
+    if (NV_SUSPEITO.test(rotuloBruto)) continue;
+    saida.push({
+      canal: v.canal,
+      versao: nvLimpar(v.versao),
+      rotulo: rotuloBruto,
+      titulo: NV_SUSPEITO.test(nvLimpar(v.titulo)) ? '' : nvLimpar(v.titulo),
+      itens: limpos
+    });
+  }
+  return saida;
+}
+
+// Extrai as seções de `### Versão` do histórico em Markdown. Usado só no fallback
+// (quando o JSON não está disponível), com o mesmo critério do scripts/novidades_lp.py.
+function nvParseHistorico(texto) {
+  if (typeof texto !== 'string') return [];
+  const linhas = texto.split(/\r?\n/);
+  const reSecao = /^###\s+Versão\s+(\d+\.\d+\.\d+(?:-[0-9A-Za-z.]+)?)\s*[—–-]\s*(.+?)\s*$/;
+  const versoes = [];
+  let atual = null;
+  for (const linha of linhas) {
+    const m = reSecao.exec(linha);
+    if (m) {
+      if (atual) versoes.push(atual);
+      const titulo = nvLimpar(m[2]);
+      const betaPorTitulo = /\((beta|rc)[^)]*\)\s*$/i.test(titulo);
+      let canal = '';
+      if (/-beta(\.\d+)?$/.test(m[1]) || betaPorTitulo) canal = 'beta';
+      else if (/^\d+\.\d+\.\d+$/.test(m[1])) canal = 'stable';
+      atual = { versao: m[1], canal: canal, titulo: titulo, rotulo: m[1], itens: [] };
+      if (canal === 'beta' && !/-beta/.test(m[1])) atual.rotulo = m[1] + '-beta';
+      continue;
+    }
+    if (/^#{2,3}\s/.test(linha)) { if (atual) versoes.push(atual); atual = null; continue; }
+    if (!atual) continue;
+    const mb = /^\*\s+(.+)$/.exec(linha.trim());
+    if (!mb) continue;
+    const bruto = nvLimpar(mb[1]);
+    const bold = /\*\*(.+?)\*\*/.exec(bruto);
+    if (bold) {
+      atual.itens.push({
+        titulo: nvLimpar(bold[1]).replace(/:$/, ''),
+        texto: nvLimpar(bruto.slice(0, bold.index) + ' ' + bruto.slice(bold.index + bold[0].length)).replace(/^[:—–-]\s*/, '')
+      });
+    } else {
+      atual.itens.push({ titulo: '', texto: bruto });
+    }
+  }
+  if (atual) versoes.push(atual);
+  return versoes.filter((v) => v.canal && v.itens.length);
+}
+
+async function nvBuscar(url, tipo, timeoutMs) {
+  if (typeof fetch !== 'function') return null;
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), timeoutMs || 3000);
+  try {
+    const resp = await fetch(url, { ...OPCOES_FETCH_NOVIDADES, signal: ctrl.signal });
+    if (!resp || !resp.ok) return null;
+    if (tipo === 'json') return await resp.json();
+    return await resp.text();
+  } catch (_) {
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+async function nvCarregar() {
+  const json = await nvBuscar(NV_JSON_URL, 'json', 3000);
+  if (json && typeof json === 'object') {
+    const norm = nvNormalizar(json.versoes);
+    if (norm.length) return norm;
+  }
+  const texto = await nvBuscar(NV_HISTORY_RAW, 'text', 4000);
+  const doHistorico = nvParseHistorico(texto);
+  return nvNormalizar(doHistorico);
+}
+
+function nvRenderLista(versoes, canal) {
+  const lista = document.getElementById('nvLista');
+  const rotuloEl = document.getElementById('nvVersao');
+  if (!lista) return;
+  lista.textContent = '';
+  const alvo = versoes.find((v) => v.canal === canal) || versoes[0];
+  if (rotuloEl) rotuloEl.textContent = alvo ? 'Versão ' + alvo.rotulo + (alvo.titulo ? ' — ' + alvo.titulo : '') : '';
+  if (!alvo) {
+    const vazio = document.createElement('li');
+    vazio.className = 'nv-empty';
+    vazio.textContent = 'As novidades desta versão ainda não foram publicadas.';
+    lista.appendChild(vazio);
+    return;
+  }
+  for (const item of alvo.itens) {
+    const li = document.createElement('li');
+    li.className = 'nv-item';
+    const t = document.createElement('span');
+    t.className = 'nv-item-titulo';
+    t.textContent = item.titulo || '';
+    const d = document.createElement('span');
+    d.className = 'nv-item-texto';
+    d.textContent = item.texto || '';
+    li.appendChild(t);
+    li.appendChild(d);
+    lista.appendChild(li);
+  }
+}
+
+function nvAtivarAbas(versoes) {
+  const abas = Array.from(document.querySelectorAll('.nv-tab'));
+  if (!abas.length) return;
+  abas.forEach((aba) => {
+    aba.addEventListener('click', () => {
+      abas.forEach((b) => {
+        b.classList.toggle('active', b === aba);
+        b.setAttribute('aria-selected', b === aba ? 'true' : 'false');
+      });
+      nvRenderLista(versoes, aba.getAttribute('data-nv'));
+    });
+  });
+}
+
+function nvIniciar() {
+  const secao = document.getElementById('novidades');
+  if (!secao) return;
+  const lista = document.getElementById('nvLista');
+  if (lista) lista.classList.add('nv-carregando');
+  nvCarregar().then((versoes) => {
+    if (lista) lista.classList.remove('nv-carregando');
+    const ativa = document.querySelector('.nv-tab.active');
+    nvAtivarAbas(versoes);
+    nvRenderLista(versoes, ativa ? ativa.getAttribute('data-nv') : 'stable');
+  }).catch(() => {
+    if (lista) {
+      lista.classList.remove('nv-carregando');
+      lista.textContent = '';
+      const vazio = document.createElement('li');
+      vazio.className = 'nv-empty';
+      vazio.textContent = 'Não foi possível carregar as novidades agora. Tente as release notes completas no link acima.';
+      lista.appendChild(vazio);
+    }
+  });
+}
+/* novidades:fim */
+
 function aplicarVersoesNoDOM(versoes) {
   if (!versoes || typeof document === 'undefined') return;
   if (versaoValida(versoes.latest, 'latest')) {
@@ -2525,8 +2811,10 @@ async function carregarVersoesAoVivo() {
 
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', carregarVersoesAoVivo, { once: true });
+  document.addEventListener('DOMContentLoaded', nvIniciar, { once: true });
 } else {
   carregarVersoesAoVivo();
+  nvIniciar();
 }
 </script>
 </body>
