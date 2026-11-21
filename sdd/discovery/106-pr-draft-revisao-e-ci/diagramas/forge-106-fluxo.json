@@ -273,7 +273,7 @@
    "tipo": "texto",
    "x": 56,
    "y": 792,
-   "texto": "Fallback do atestado: prova do VCS ausente cai no local, avisa e pergunta a você. Teto de 3 passadas por feature; depois pergunta a você.",
+   "texto": "Atestado local por PR de feature; modo vcs adiado (recusado). Sem resposta, pergunta a você. Teto de 3 passadas por feature; depois pergunta a você.",
    "estilo": "nota",
    "alinha": "start"
   }

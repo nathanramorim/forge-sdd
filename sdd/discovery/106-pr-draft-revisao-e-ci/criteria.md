@@ -10,7 +10,7 @@ Legenda dos diagramas (todos): **HUMANO** (decisões e aprovações do Nathan), 
 - `TST-01`, `TST-02` (goldens), `TST-03` (casos conformes e negativos), `TST-04`, `COD-05`, `GOV-01` (ajustar `GOV-03` e, se a Decisão i mudar, a regra 2 exige ADR).
 
 ## Modelo do módulo
-**Completo** (`ARQ-11`; antes era enxuto, mudou com o escopo VCS agnóstico): um pacote novo, `internal/vcs` (interface `Adaptador` com criar PR em draft, procurar PR aberto, marcar pronto e mesclar; implementações `github`, `azure-devops` e `nenhum`; leitura do campo `VCS / Work Item System` da Constituição), com dependência para dentro (só stdlib, `ARQ-04`) e sem importar `cmd/` (`ARQ-01`, `ARQ-02`). O restante é distribuído em (a) um campo novo no contrato do veredito (`internal/harness`), (b) `internal/queue` e `internal/pipeline` passam a delegar ao adaptador, (c) scripts Python e workflows modelo entregues pelo scaffold e (d) texto dos comandos e skills. Cada parte tem um dono único: o veredito (`harness`), a abertura e o fechamento do PR (`queue`/`pipeline`), a barreira de `gh` (hook), a lição (`licoes.py`), o CI (workflow e `ci-politica.py`). Estado persistente novo: `head_sha`, `ponto` e `modo` no veredito, os arquivos de lição e, conforme a Decisão xvi (recomendo B), um arquivo de estado por feature na branch da feature (nenhum arquivo de estado compartilhado por todas as features, RN-23).
+**Completo** (`ARQ-11`; antes era enxuto, mudou com o escopo VCS agnóstico): um pacote novo, `internal/vcs` (interface `Adaptador` com criar PR em draft, procurar PR aberto, marcar pronto e mesclar; implementações `github` e `nenhum` (o `azure-devops` é reconhecido e recusa com "não verificado" nesta entrega, escopo do fecho da 108); leitura do campo `VCS / Work Item System` da Constituição), com dependência para dentro (só stdlib, `ARQ-04`) e sem importar `cmd/` (`ARQ-01`, `ARQ-02`). O restante é distribuído em (a) um campo novo no contrato do veredito (`internal/harness`), (b) `internal/queue` e `internal/pipeline` passam a delegar ao adaptador, (c) scripts Python e workflows modelo entregues pelo scaffold e (d) texto dos comandos e skills. Cada parte tem um dono único: o veredito (`harness`), a abertura e o fechamento do PR (`queue`/`pipeline`), a barreira de `gh` (hook), a lição (`licoes.py`), o CI (workflow e `ci-politica.py`). Estado persistente novo: `head_sha`, `ponto` e `modo` no veredito, os arquivos de lição e, conforme a Decisão xvi (recomendo B), um arquivo de estado por feature na branch da feature (nenhum arquivo de estado compartilhado por todas as features, RN-23).
 
 ## Decisões do projeto aplicadas
 - **ADR-0004:** o Go decide o fluxo; o revisor não aprova nem cria PR por conta própria. Esta iniciativa estende: o PR é criado antes, na concepção.
@@ -19,7 +19,7 @@ Legenda dos diagramas (todos): **HUMANO** (decisões e aprovações do Nathan), 
 - **ADR-0015 (104):** modo `chat` e subagentes: os dois pontos de revisão valem nos dois modos; a 106 não altera o laço.
 - **ADR-0003/P-24:** definições de agente até 420 bytes e skills até 2.048: o texto novo entra por referência, não por inchaço.
 - **ADR-0002:** estado por iniciativa e execução fora do git (`sdd/.runtime/`); **estendida** com estado por feature. A frase "a branch aponta para essa pasta" deixa de valer para branches de feature.
-- **Regra 15 e `FLX-02` da Constituição:** hoje "uma branch por iniciativa, nunca por task"; mudança **aprovada** por ADR e `GOV-01` na task 2.7 (redação exata no rascunho da ADR do `discovery.md`). **Conflito** com o pedido (uma branch por feature); a redação nova vai na ADR (Decisão xvii), sem editar a Constituição agora.
+- **Regra 15 e `FLX-02` da Constituição:** hoje "uma branch por iniciativa, nunca por task"; mudança **aprovada** por ADR e `GOV-01` na task 0.8, PR único da Constituição (ADR-0022; redação exata no rascunho da ADR do `discovery.md`; a conta de bytes está na seção "PR único da Constituição" dele). **Conflito** com o pedido (uma branch por feature); a redação nova vai na ADR (Decisão xvii), sem editar a Constituição agora.
 - **Memória do dono:** handoff é menu; PR automático após veredito conforme é **revertida** por esta política (ver `O que já existe`).
 
 ## O que já existe
@@ -138,7 +138,7 @@ go build ./... && go vet ./... && go test ./...
 go test ./internal/harness/... -run 'TestParecerGravaHeadSHA'
 go test ./internal/queue/... -run 'TestReviewConformeNaoCriaPR'
 go test ./internal/scaffold/... -run 'TestMergePreToolUseHook'
-go test ./internal/vcs/... -run 'TestGitHubCriaPRComDraft|TestAzureDevOpsCriaPRSemGitHub|TestNenhumDeixaABranchPronta|TestLeVCSDaConstituicao'
+go test ./internal/vcs/... -run 'TestGitHubCriaPRComDraft|TestNenhumDeixaABranchPronta|TestLeVCSDaConstituicao'
 go test ./internal/pipeline/... -run 'TestDesvioAbreNovoFixComPrioridade|TestBuilderFazSplitSemSegundaAprovacao|TestFixesParalelosNaOnda'
 go test ./internal/vcs/... -run 'TestLeModosDaConstituicaoDaBranchBase|TestAtestadoPadraoELocal|TestPRDaSpecSempreAtestadoLocal'
 go test ./cmd/... ./internal/scaffold/... -run 'TestDoctorInformaQualAgenteTemHook'
@@ -152,8 +152,21 @@ uv run scripts/ci-politica.py --offline --relatorio scripts/tests/fixtures/uso.j
 uv run scripts/validar_entrega.py --json --sem-llm
 uv run scripts/atestado.py --verificar --sha HEAD --modo local
 uv run scripts/atestado.py --verificar --sha HEAD --modo desligado
-go test ./internal/vcs/... -run 'TestAtestadoDesligadoNaoExigeProva|TestAtestadoLocalConfereVeredito|TestProvaDoVCSIndisponivelCaiNoLocal|TestModoDeAtestadoNoStatus'
-rc=0; uv run scripts/atestado.py --verificar --sha HEAD --modo vcs --simular-indisponivel || rc=$?; test "$rc" -eq 3
+go test ./internal/vcs/... -run 'TestAtestadoDesligadoNaoExigeProva|TestAtestadoLocalConfereVeredito|TestModoDeAtestadoNoStatus'
+# Constituição (task 0.8, PR único): campos, ponteiro, orçamento e rule
+go test ./internal/gate/... -run 'TestConstitutionDoRepositorioMantemTodosOsIDs|TestCheckP24_RepositorioDoForgeSddPassaNoProprioPortao|TestCheckP23RulesGovernance'
+test "$(wc -c < sdd/memory/constitution.md)" -le 9216
+grep -F '| Modo do atestado | local |' sdd/memory/constitution.md
+grep -F '| Modo de revisão humana | com-humano |' sdd/memory/constitution.md
+grep -F '| WIP humano | 3 |' sdd/memory/constitution.md
+grep -F '| Quadro de acompanhamento | desligado |' sdd/memory/constitution.md
+grep -F '| Início automático do Builder | desligado |' sdd/memory/constitution.md
+grep -F '.agents/rules/sdd-modos-de-projeto.md' sdd/memory/constitution.md
+grep -F 'regras:' .agents/rules/sdd-modos-de-projeto.md
+grep -F 'betas posteriores' .agents/rules/sdd-fluxo-e-portao.md
+ls sdd/spec/adr | grep -F 'adr-0022'
+# atestado: só local; vcs recusado com mensagem clara
+go test ./internal/vcs/... -run 'TestModoVCSRecusadoComModoAdiado'
 uv run scripts/pr_guard.py --check 'gh pr create --draft --fill'
 uv run scripts/pr_guard.py --check 'az repos pr create --draft true --title x'
 uv run scripts/licoes.py --rule COD-02 | grep -o 'COD-02' | wc -l
@@ -164,8 +177,8 @@ go test ./internal/queue/... -list 'TestReadySemVereditoDoSHARecusado' | grep -F
 go test ./internal/queue/... -run 'TestReadySemVereditoDoSHARecusado'
 go test ./internal/pipeline/... -list 'TestTerceiraRodadaPerguntaAoHumano' | grep -F 'TestTerceiraRodadaPerguntaAoHumano'
 go test ./internal/pipeline/... -run 'TestTerceiraRodadaPerguntaAoHumano'
-go test ./internal/vcs/... -list 'TestAzureDevOpsNaoChamaGh' | grep -F 'TestAzureDevOpsNaoChamaGh'
-go test ./internal/vcs/... -run 'TestAzureDevOpsNaoChamaGh'
+go test ./internal/vcs/... -list 'TestAzureDevOpsRecusaNaoVerificado' | grep -F 'TestAzureDevOpsRecusaNaoVerificado'
+go test ./internal/vcs/... -run 'TestAzureDevOpsRecusaNaoVerificado'
 go test ./internal/vcs/... -list 'TestNenhumNaoExecutaComandoDeVCS' | grep -F 'TestNenhumNaoExecutaComandoDeVCS'
 go test ./internal/vcs/... -run 'TestNenhumNaoExecutaComandoDeVCS'
 go test ./internal/vcs/... -list 'TestVCSDesconhecidoRecusado' | grep -F 'TestVCSDesconhecidoRecusado'
@@ -213,6 +226,12 @@ go test ./internal/vcs/... -list 'TestModoDeAtestadoInvalidoRecusado' | grep -F 
 go test ./internal/vcs/... -run 'TestModoDeAtestadoInvalidoRecusado'
 go test ./internal/vcs/... -list 'TestNenhumRecusaModoVCS' | grep -F 'TestNenhumRecusaModoVCS'
 go test ./internal/vcs/... -run 'TestNenhumRecusaModoVCS'
+go test ./internal/vcs/... -list 'TestModoVCSRecusadoComModoAdiado' | grep -F 'TestModoVCSRecusadoComModoAdiado'
+out=$(uv run scripts/atestado.py --verificar --sha HEAD --modo vcs 2>&1) && exit 1; printf '%s' "$out" | grep -F 'modo adiado'
+# negativo: Constituição acima do orçamento reprova no P-24; ID inexistente ou cópia literal na rule reprova no P-23
+go test ./internal/gate/... -list 'TestCheckP24_ReprovaArquivosGeradosAcimaDoLimite' | grep -F 'TestCheckP24_ReprovaArquivosGeradosAcimaDoLimite'
+go test ./internal/gate/... -run 'TestCheckP24_ReprovaArquivosGeradosAcimaDoLimite'
+go test ./internal/gate/... -list 'TestCheckP23RulesGovernance' | grep -F 'TestCheckP23RulesGovernance'
 if uv run scripts/atestado.py --verificar --sha 0000000 --modo local; then exit 1; fi
 if uv run scripts/atestado.py --verificar --sha HEAD --modo inexistente; then exit 1; fi
 if uv run scripts/validar_entrega.py --json --sem-llm --fixture scripts/tests/fixtures/rule_inexistente; then exit 1; fi
@@ -226,10 +245,10 @@ if uv run scripts/pr_guard.py --check 'gh pr merge 7'; then exit 1; fi
 - Uma branch e um PR em draft por feature (RN-22): com 3 features independentes, o VCS mostra 3 branches `feat/<id>-<nome>-<sid>` com base na principal e 3 PRs em draft; nenhum PR tem base em branch de iniciativa (task 2.4).
 - Estado sem conflito (RN-23): duas branches de feature mescladas na principal sem conflito de estado; o teste reproduz o caso de `queue.json` com `updated_at` como falha de referência e prova que o arquivo por feature não conflita (task 0.7).
 - Conferências (RN-3): `status.md` mostra `spec-para-revisao` antes de a spec voltar e `pronto-para-revisao` por feature; o teto vale por feature (task 1.6).
-- Cada VCS suportado tem prova própria na task 3.5: `github` (abaixo), `azure-devops` (PR de teste em draft; se a build validation roda em draft e como marcar pronto: a verificar) e `nenhum` (branch pronta, sem comando de VCS).
-- Draft real no GitHub: um PR de teste com `gh pr create --draft` mostra todos os jobs `skipped`; depois de `gh pr ready` os jobs rodam uma vez (task 3.5; evidência colada no PR).
-- Modos do atestado (RN-18 a RN-20): `desligado` não confere nada; `local` confere veredito e SHA; `vcs` com a prova indisponível sai com código 3 (pergunta ao humano) e nunca com sucesso; o modo efetivo e o fallback aparecem no `status.md` e no atestado (task 0.5 e 0.6).
-- Atestado real: no mesmo PR de teste, `gh pr ready` com SHA sem veredito conforme faz o job de atestado falhar e bloquear a publicação; com atestado válido ele passa (task 3.5).
+- **ADIADO (fora do fecho da 108):** cada VCS tem prova própria na task 3.5 (`github`, `azure-devops` e `nenhum`). Nesta entrega, `azure-devops` só recusa com "não verificado" (`TestAzureDevOpsRecusaNaoVerificado`) e `nenhum` tem os testes do bloco acima; a prova no PR de teste fica para a 3.5.
+- **ADIADO (3.5):** Draft real no GitHub: um PR de teste com `gh pr create --draft` mostra todos os jobs `skipped`; depois de `gh pr ready` os jobs rodam uma vez (task 3.5; evidência colada no PR).
+- Modos do atestado (RN-18 a RN-20): `desligado` não confere nada; `local` confere veredito e SHA; `vcs` é aceito como valor e **recusado com a mensagem "modo adiado"** (código diferente de zero; nunca sucesso); a cadeia entregue (`github` e `nenhum`) termina no `local`, pergunta ao humano sem resposta e nunca aprova em silêncio; o modo efetivo aparece no `status.md` e no atestado (tasks 0.5, 0.6 e 3.2). **ADIADOS com a 3.2 e a 3.5:** a prova do Environment com aprovadores e o fallback `vcs` para `local` (`TestProvaDoVCSIndisponivelCaiNoLocal`, `--simular-indisponivel` com código 3).
+- **ADIADO (3.5):** Atestado real: no mesmo PR de teste, `gh pr ready` com SHA sem veredito conforme faz o job de atestado falhar e bloquear a publicação; com atestado válido ele passa (task 3.5).
 - Duas conferências: com 3 commits na feature, o laço registra 0 revisões entre a abertura do PR de feature e `pronto-para-revisao` (task 1.6); os fixes abertos pelo revisor não disparam revisão até o sinal se repetir.
 - `validar_entrega.py` nunca chama LLM nem rede, e não é referenciado em nenhum workflow (conferência na task 3.2).
 - Goldens: `go test ./internal/scaffold/...` verde após regenerar (`TST-02`).

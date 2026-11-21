@@ -3,7 +3,7 @@
  "titulo": "A pipeline só publica: sem atestado válido, ela bloqueia",
  "largura": 1360,
  "altura": 620,
- "nota_rodape": "prova do VCS é opcional · fallback determinístico · modo no status.md",
+ "nota_rodape": "prova do VCS adiada · cadeia de fallback só github e nenhum · modo no status.md",
  "elementos": [
   {
    "tipo": "caixa",
@@ -57,7 +57,7 @@
    "w": 260,
    "h": 92,
    "texto": "Modo do repositório",
-   "sub": "AUTOMÁTICO · desligado, local ou vcs",
+   "sub": "AUTOMÁTICO · desligado ou local",
    "estilo": "contorno"
   },
   {
@@ -100,8 +100,8 @@
    "y": 360,
    "w": 540,
    "h": 92,
-   "texto": "Prova do VCS ausente ou sem resposta",
-   "sub": "cai no atestado local, avisa e PERGUNTA a você (HUMANO). Nunca aprova em silêncio",
+   "texto": "Modo vcs adiado: recusado",
+   "sub": "mensagem 'modo adiado'; sem resposta no local, PERGUNTA a você",
    "estilo": "destaque"
   },
   {
@@ -147,7 +147,7 @@
    "de": "m.dir",
    "para": "f.esq",
    "forma": "horizontal",
-   "rotulo": "vcs sem prova",
+   "rotulo": "vcs",
    "estilo": "fraca"
   },
   {
