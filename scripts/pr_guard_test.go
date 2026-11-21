@@ -152,3 +152,94 @@ func TestPRGuardModoHookPreToolUseViaStdin(t *testing.T) {
 		t.Fatalf("hook com JSON inválido deveria falhar")
 	}
 }
+
+// TestPRGuardBloqueiaMergeComBaseForaDaPrincipal: um PR com base em outra branch entra por
+// squash e deixa os commits de cima órfãos — o arquivo some da principal (feat-106-24d).
+// O teste usa um `gh` falso no PATH para simular a base do PR.
+func TestPRGuardBloqueiaMergeComBaseForaDaPrincipal(t *testing.T) {
+	py, err := exec.LookPath("python3")
+	if err != nil {
+		t.Skip("python3 ausente")
+	}
+	dir, _ := os.Getwd()
+	raizProjeto, _ := filepath.Abs(filepath.Join(dir, ".."))
+
+	// Veredito conforme para o HEAD, para o guard chegar até a checagem da base.
+	head := strings.TrimSpace(strings.Split(string(mustRun(t, raizProjeto, "git", "rev-parse", "HEAD")), "\n")[0])
+
+	casos := map[string]struct {
+		base     string
+		quebrar  bool
+		bloqueia bool
+	}{
+		"base na main passa":                 {base: "main"},
+		"base em branch de feature bloqueia": {base: "feat/106-24b-leque-por-worktree", bloqueia: true},
+	}
+
+	for nome, c := range casos {
+		t.Run(nome, func(t *testing.T) {
+			bin := t.TempDir()
+			script := "#!/bin/sh\n"
+			if c.quebrar {
+				script += "exit 1\n"
+			} else {
+				script += "case \"$1 $2\" in\n"
+				script += "  'pr view') echo '{\"baseRefName\":\"" + c.base + "\"}' ;;\n"
+				script += "  'repo view') echo '{\"defaultBranchRef\":{\"name\":\"main\"}}' ;;\n"
+				script += "  *) echo '{}' ;;\n"
+				script += "esac\n"
+			}
+			ghPath := filepath.Join(bin, "gh")
+			if err := os.WriteFile(ghPath, []byte(script), 0o755); err != nil {
+				t.Fatalf("escrever gh falso: %v", err)
+			}
+
+			veredito := filepath.Join(t.TempDir(), "veredito.json")
+			conteudo := `{"veredito":"conforme","head_sha":"` + head + `","ponto":"entrega","feature":"feat-106-24d"}`
+			if err := os.WriteFile(veredito, []byte(conteudo), 0o644); err != nil {
+				t.Fatalf("escrever veredito: %v", err)
+			}
+
+			cmd := exec.Command(py, "-I", filepath.Join(dir, "pr_guard.py"),
+				"--check", "gh pr merge 7 --squash", "--veredito", veredito, "--head", head)
+			cmd.Dir = raizProjeto
+			cmd.Env = append(os.Environ(), "PATH="+bin+":"+os.Getenv("PATH"))
+			var out bytes.Buffer
+			cmd.Stdout, cmd.Stderr = &out, &out
+			err := cmd.Run()
+
+			saida := out.String()
+			if c.quebrar {
+				// Sem conseguir ler a base, o guard não inventa: deixa passar com o veredito.
+				if err != nil {
+					t.Fatalf("sem base legível não deveria bloquear: %s", saida)
+				}
+				return
+			}
+			if c.bloqueia {
+				if err == nil {
+					t.Fatalf("deveria bloquear merge com base fora da principal: %s", saida)
+				}
+				if !strings.Contains(saida, "RN-22") || !strings.Contains(saida, "base") {
+					t.Fatalf("a mensagem precisa citar a RN-22 e a base: %s", saida)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("merge com base na principal deveria passar: %s", saida)
+			}
+		})
+	}
+}
+
+// mustRun roda um comando e devolve a saída; falha o teste se o comando errar.
+func mustRun(t *testing.T, dir, name string, args ...string) []byte {
+	t.Helper()
+	cmd := exec.Command(name, args...)
+	cmd.Dir = dir
+	out, err := cmd.Output()
+	if err != nil {
+		t.Fatalf("%s %v: %v", name, args, err)
+	}
+	return out
+}

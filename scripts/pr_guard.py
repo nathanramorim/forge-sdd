@@ -12,6 +12,8 @@ Uso:
 Regras (RN-7, SEG-01, SEG-03, FLX-08):
 - `gh pr create`: permitido somente com `--draft` ou `-d`.
 - `gh pr ready` e `gh pr merge`: bloqueados sem veredito `conforme` válido para o HEAD atual.
+- `gh pr merge`: bloqueado quando a base do PR não é a principal. Um PR com base em outra branch
+  entra por squash e deixa os commits de cima órfãos — o arquivo some da principal (feat-106-24d).
 - `az repos pr create`: permitido somente com `--draft true` ou `--draft=true`.
 - `az repos pr update`: com `--draft false`/`--draft=false` ou `--status completed`/`--status=completed`,
   bloqueado sem veredito `conforme` válido para o HEAD atual.
@@ -210,6 +212,64 @@ def gh_tem_draft(args):
     return False
 
 
+def gh_base_do_merge(args):
+    """Lê o número do PR de `gh pr merge`; None quando o comando não identifica um PR.
+
+    Sem número, o `gh` usa o PR da branch atual, e a base não pode ser conferida aqui: o
+    chamador decide (o guard só bloqueia quando consegue ler o número).
+    """
+    ignorar_valor = {"-b", "--body", "-t", "--subject", "-m", "--body-file", "-F", "--author-email",
+                     "-R", "--repo", "--match-head-commit", "--delete-branch"}
+    i = 0
+    while i < len(args):
+        a = args[i]
+        if a in ignorar_valor:
+            i += 2
+            continue
+        if a.isdigit():
+            return int(a)
+        i += 1
+    return None
+
+
+def base_do_pr(raiz, numero):
+    """Devolve a base do PR pelo `gh` (somente leitura). None quando não consegue ler."""
+    try:
+        r = subprocess.run(
+            ["gh", "pr", "view", str(numero), "--json", "baseRefName"],
+            cwd=raiz or ".", capture_output=True, text=True, timeout=15,
+        )
+    except (OSError, subprocess.SubprocessError):
+        return None
+    if r.returncode != 0:
+        return None
+    try:
+        dados = json.loads(r.stdout or "{}")
+    except ValueError:
+        return None
+    base = dados.get("baseRefName")
+    return base if isinstance(base, str) and base else None
+
+
+def principal_do_repo(raiz):
+    """Principal do repositório: `main` quando não consegue descobrir."""
+    try:
+        r = subprocess.run(
+            ["gh", "repo", "view", "--json", "defaultBranchRef"],
+            cwd=raiz or ".", capture_output=True, text=True, timeout=15,
+        )
+    except (OSError, subprocess.SubprocessError):
+        return "main"
+    if r.returncode != 0:
+        return "main"
+    try:
+        dados = json.loads(r.stdout or "{}")
+    except ValueError:
+        return "main"
+    ref = (dados.get("defaultBranchRef") or {}).get("name")
+    return ref if isinstance(ref, str) and ref else "main"
+
+
 def az_valor_op(args, opcoes):
     """Extrai os valores passados para qualquer flag em `opcoes` (ex.: ('--draft',))."""
     valores = []
@@ -277,7 +337,7 @@ def extrair_subcomando_az_pr(tokens):
     return None
 
 
-def avaliar_segmento(seg, veredito_ok):
+def avaliar_segmento(seg, veredito_ok, raiz="."):
     """Retorna None se permitido, ou mensagem de erro caso bloqueado."""
     tokens = desempacotar_wrappers(seg)
     if not tokens:
@@ -299,6 +359,20 @@ def avaliar_segmento(seg, veredito_ok):
                     f"bloqueado (RN-7): 'gh pr {acao}' exige veredito 'conforme' válido para o SHA do HEAD atual. "
                     f"{AVISO_COBERTURA}"
                 )
+            if acao == "merge":
+                # A base do PR precisa ser a principal: um PR com base em outra branch entra
+                # por squash e deixa os commits de cima órfãos — o arquivo some da principal.
+                numero = gh_base_do_merge(args)
+                if numero is not None:
+                    base = base_do_pr(raiz, numero)
+                    principal = principal_do_repo(raiz)
+                    if base is not None and base != principal:
+                        return (
+                            f"bloqueado (RN-22): o PR #{numero} tem base '{base}', não '{principal}'. "
+                            "Um PR com base em outra branch entra por squash e deixa os commits de cima "
+                            f"órfãos. Retargete para '{principal}' antes do merge (gh pr edit --base {principal}). "
+                            f"{AVISO_COBERTURA}"
+                        )
             return None
         return None
 
@@ -345,7 +419,7 @@ def avaliar_comando(cmd, raiz=".", veredito_arg=None, head_arg=None):
         return cache_veredito
 
     for seg in segmentar_comando(cmd):
-        motivo = avaliar_segmento(seg, veredito_ok)
+        motivo = avaliar_segmento(seg, veredito_ok, raiz)
         if motivo:
             return False, motivo
     return True, ""
