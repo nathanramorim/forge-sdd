@@ -1,6 +1,7 @@
 package scaffold
 
 import (
+	"encoding/json"
 	"os"
 	"path/filepath"
 	"strings"
@@ -427,3 +428,59 @@ func TestUpgradeMigratesForgeJSONGeminiToAgy(t *testing.T) {
 	assert.NotContains(t, disk, `"command": "gemini"`)
 }
 
+// TestUpgradeNaoSobrescreveSettingsDoUsuario: o upgrade leva o hook da política sem perder
+// o que o dono configurou em .claude/settings.json (feat-106-36).
+func TestUpgradeNaoSobrescreveSettingsDoUsuario(t *testing.T) {
+	dir := t.TempDir()
+
+	cfg := config.Config{
+		Project:    "demo",
+		Stack:      "go",
+		DB:         "none",
+		Lang:       "pt-BR",
+		SddVersion: "1.5.2",
+		Agents:     []string{config.AgentClaude},
+	}
+	_, err := Run(cfg, dir)
+	require.NoError(t, err)
+
+	// O dono personalizou o settings: modelo, permissão e um hook próprio.
+	settingsPath := filepath.Join(dir, ".claude", "settings.json")
+	require.NoError(t, os.MkdirAll(filepath.Dir(settingsPath), 0o755))
+	personalizado := `{
+  "model": "opus",
+  "permissions": {"allow": ["Bash(go test:*)"]},
+  "hooks": {"UserPromptSubmit": [{"hooks": [{"type": "command", "command": "echo meu"}]}]}
+}`
+	require.NoError(t, os.WriteFile(settingsPath, []byte(personalizado), 0o644))
+
+	// Upgrade para a versão nova.
+	cfgUpgrade := cfg
+	cfgUpgrade.SddVersion = "5.2.0"
+	_, err = Run(cfgUpgrade, dir)
+	require.NoError(t, err)
+
+	data, err := os.ReadFile(settingsPath)
+	require.NoError(t, err)
+	var m map[string]any
+	require.NoError(t, json.Unmarshal(data, &m), "settings.json precisa continuar JSON válido")
+
+	// O que o dono configurou continua lá.
+	assert.Equal(t, "opus", m["model"])
+	assert.NotNil(t, m["permissions"])
+	hooks, ok := m["hooks"].(map[string]any)
+	require.True(t, ok)
+	assert.NotNil(t, hooks["UserPromptSubmit"], "hook do usuário preservado")
+
+	// E a política foi levada: o hook da barreira de PR está presente.
+	assert.Contains(t, string(data), "pr_guard.py", "o upgrade leva a barreira de PR")
+
+	// JSON inválido nunca é tocado: o upgrade avisa e mantém o arquivo do usuário.
+	quebrado := `{"model":`
+	require.NoError(t, os.WriteFile(settingsPath, []byte(quebrado), 0o644))
+	_, err = Run(cfgUpgrade, dir)
+	require.NoError(t, err, "JSON inválido não derruba o upgrade; ele avisa")
+	inalterado, err := os.ReadFile(settingsPath)
+	require.NoError(t, err)
+	assert.Equal(t, quebrado, string(inalterado), "o arquivo do usuário fica intacto")
+}
