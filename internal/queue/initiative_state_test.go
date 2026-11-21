@@ -70,6 +70,21 @@ func TestEnqueue_IniciativaNovaNaoHerdaItensDeOutra(t *testing.T) {
 	assert.NotContains(t, string(alfa), "71-01")
 }
 
+func TestEnqueue_AceitaBranchPorFeatureDaMesmaIniciativa(t *testing.T) {
+	dir := t.TempDir()
+	testutil.InitRepo(t, dir, "feat/70-11-parte")
+	spec := filepath.Join("sdd", "discovery", "70-alfa", "features", "feat-70-11.md")
+	writeSpec(t, dir, spec)
+	testutil.WriteFile(t, dir, "sdd/discovery/71-beta/status.md", "x")
+
+	require.NoError(t, Enqueue(dir, "feat-70", "feat/70-11-parte", "70-11", "t", spec, nil))
+	assert.FileExists(t, filepath.Join(dir, "sdd", "discovery", "70-alfa", "queue.json"))
+
+	err := Enqueue(dir, "feat-71", "feat/71-02-outra", "71-02", "t", spec, nil)
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "71-beta")
+}
+
 func TestEnqueue_RecusaBranchDeOutraIniciativa(t *testing.T) {
 	dir := t.TempDir()
 	testutil.InitRepo(t, dir, "feat/70-alfa")
