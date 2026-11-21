@@ -1,8 +1,6 @@
 # Status — 110-estimativa-de-tokens
 
-**Status:** Discovery pronta para o Gate 1 (não aprovado). Nada implementado; repositório não criado.
-**Dado hoje:** 97 sessões (88 sem tokens), 25 logs reais (12 builder, 13 reviewer), 0 de Discovery. Só faixa por papel, com aviso.
-**Próximo passo:** o dono decide as 5 decisões do `discovery.md`; depois `/split-features` pela onda 1.
-
-## A confirmar
-Forma (módulo e skill); leitura direta de `sdd/.metrics`; campo `tool` no core; metas de acurácia; visibilidade e licença.
+**Status:** Gate 1 aprovado em 2026-11-20 (completo, com as recomendações das 5 decisões). Nada implementado; repositório privado ainda não criado.
+**Dado hoje:** 97 sessões (88 sem tokens), 25 logs reais; só faixa por papel, com aviso.
+**Decididas pelo dono (chat, 20/11/2026):** ler `sdd/.metrics` e logs na v0 (só leitura, adaptador versionado); eventos aditivos `sessao.registrada` e `spec.criada` propostos à 109 depois; campo `tool` no core depois da 109 (sem flag nova); metas (a confirmar com dados): n<5 "sem estimativa", n<15 "amostra pequena", erro mediano <= 40% com >= 15 iniciativas; repositório privado; forma = módulo da 109 como motor e skill fina depois.
+**Próximo passo:** `/split-features`; o dono mescla o PR da spec. A 109 recebe depois as propostas de eventos.

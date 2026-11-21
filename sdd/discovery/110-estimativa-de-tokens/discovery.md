@@ -7,7 +7,9 @@ Um plugin/módulo que, **já na Discovery**, estime quantos tokens custa executa
 Conferido em 20/11/2026: `ls sdd/discovery | grep -E '^11'` vazio; `git branch -r | grep -E '/(feat|fix)/1[01][0-9]'` mostra 105 a 109 e nenhuma 110; `git worktree list` sem outra 110. O `#110` do GitHub é um PR (bump da LP), não iniciativa. Depois de criada a branch, `forge next-id` devolveu 111, porque conta o nome da própria branch; é esperado.
 
 ## Clarify
-Sem pergunta antes de escrever: o pedido traz forma, fronteira e restrições. As lacunas viraram `## Decisões para o Gate 1`.
+Sem pergunta antes de escrever: o pedido traz forma, fronteira e restrições. As lacunas viraram `**Gate 1 aprovado em 2026-11-20 (completo): o dono aceitou a recomendação de cada decisão abaixo.** Decisões: leitura direta na v0, eventos e `tool` depois da 109, metas de acurácia, repositório privado, módulo mais skill fina.
+
+## Decisões para o Gate 1`.
 
 ## Descrição de negócio (obrigatória em toda spec nova)
 Hoje o dono só descobre quanto uma iniciativa consumiu depois de gasto. A régua mostra, antes do Gate 1 e antes de cada feature começar, uma **faixa** de tokens (e, se o dono mantiver uma tabela de preços, de dinheiro), com o agente, o modelo e a ferramenta que a história sugere. Ganho: o dono decide escopo e modelo com previsibilidade, e a esteira passa a medir o próprio erro e a melhorar. Regra de honestidade: a régua nunca finge precisão; mostra o tamanho da amostra e diz "sem estimativa" quando não há dado.
