@@ -1,0 +1,174 @@
+{
+ "kicker": "// Forge SDD · iniciativa 109",
+ "titulo": "Instalar, confiar, receber o evento e o módulo agir",
+ "largura": 1360,
+ "altura": 620,
+ "nota_rodape": "uma autorização por versão; binário mudou, recusa",
+ "elementos": [
+  {
+   "tipo": "caixa",
+   "id": "s1",
+   "x": 40,
+   "y": 128,
+   "w": 230,
+   "h": 100,
+   "texto": "1 · Dono instala",
+   "sub": "HUMANO · forge modulo instalar --sha256",
+   "estilo": "destaque"
+  },
+  {
+   "tipo": "caixa",
+   "id": "s2",
+   "x": 300,
+   "y": 128,
+   "w": 230,
+   "h": 100,
+   "texto": "2 · Forge verifica",
+   "sub": "AUTOMÁTICO · lista, hash, contrato",
+   "estilo": "contorno"
+  },
+  {
+   "tipo": "caixa",
+   "id": "s3",
+   "x": 560,
+   "y": 128,
+   "w": 230,
+   "h": 100,
+   "texto": "3 · Dono autoriza",
+   "sub": "HUMANO · menu, uma vez por versão",
+   "estilo": "destaque"
+  },
+  {
+   "tipo": "caixa",
+   "id": "s4",
+   "x": 820,
+   "y": 128,
+   "w": 230,
+   "h": 100,
+   "texto": "4 · Esteira anda",
+   "sub": "IA · Builder e reviewer; core muda o estado",
+   "estilo": "normal"
+  },
+  {
+   "tipo": "caixa",
+   "id": "s5",
+   "x": 1080,
+   "y": 128,
+   "w": 240,
+   "h": 100,
+   "texto": "5 · Core emite o evento",
+   "sub": "AUTOMÁTICO · melhor esforço, 10 s",
+   "estilo": "contorno"
+  },
+  {
+   "tipo": "caixa",
+   "id": "s6",
+   "x": 1080,
+   "y": 300,
+   "w": 240,
+   "h": 100,
+   "texto": "6 · Módulo age",
+   "sub": "módulo · move o cartão via gh, idempotente",
+   "estilo": "normal"
+  },
+  {
+   "tipo": "caixa",
+   "id": "s7",
+   "x": 820,
+   "y": 300,
+   "w": 230,
+   "h": 100,
+   "texto": "7 · Resposta",
+   "sub": "ok e avisos; falha vira aviso no doctor",
+   "estilo": "contorno"
+  },
+  {
+   "tipo": "caixa",
+   "id": "s8",
+   "x": 560,
+   "y": 300,
+   "w": 230,
+   "h": 100,
+   "texto": "Binário mudou?",
+   "sub": "AUTOMÁTICO · hash novo: recusa",
+   "estilo": "apagado"
+  },
+  {
+   "tipo": "seta",
+   "de": "s1.dir",
+   "para": "s2.esq",
+   "forma": "horizontal"
+  },
+  {
+   "tipo": "seta",
+   "de": "s2.dir",
+   "para": "s3.esq",
+   "forma": "horizontal"
+  },
+  {
+   "tipo": "seta",
+   "de": "s3.dir",
+   "para": "s4.esq",
+   "forma": "horizontal"
+  },
+  {
+   "tipo": "seta",
+   "de": "s4.dir",
+   "para": "s5.esq",
+   "forma": "horizontal"
+  },
+  {
+   "tipo": "seta",
+   "de": "s5.baixo",
+   "para": "s6.cima",
+   "forma": "vertical"
+  },
+  {
+   "tipo": "seta",
+   "de": "s6.esq",
+   "para": "s7.dir",
+   "forma": "horizontal"
+  },
+  {
+   "tipo": "caixa",
+   "id": "lg1",
+   "x": 56,
+   "y": 470,
+   "w": 200,
+   "h": 56,
+   "texto": "HUMANO",
+   "sub": "instala e autoriza",
+   "estilo": "destaque"
+  },
+  {
+   "tipo": "caixa",
+   "id": "lg2",
+   "x": 276,
+   "y": 470,
+   "w": 200,
+   "h": 56,
+   "texto": "IA",
+   "sub": "agentes da esteira",
+   "estilo": "normal"
+  },
+  {
+   "tipo": "caixa",
+   "id": "lg3",
+   "x": 496,
+   "y": 470,
+   "w": 300,
+   "h": 56,
+   "texto": "AUTOMÁTICO",
+   "sub": "código do forge, sem LLM",
+   "estilo": "contorno"
+  },
+  {
+   "tipo": "texto",
+   "x": 56,
+   "y": 570,
+   "texto": "Sem módulo instalado, os passos 2 a 7 não existem e nada muda no forge.",
+   "estilo": "nota",
+   "alinha": "start"
+  }
+ ]
+}

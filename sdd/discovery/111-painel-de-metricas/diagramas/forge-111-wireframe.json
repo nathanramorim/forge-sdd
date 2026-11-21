@@ -1,0 +1,108 @@
+{
+ "kicker": "// Forge SDD · iniciativa 111",
+ "titulo": "Wireframe do painel: 5 abas e uma lista com busca, filtros e paginação",
+ "largura": 1360,
+ "altura": 640,
+ "nota_rodape": "abre por file://; HTML semântico, CSS e JS em assets/",
+ "elementos": [
+  {
+   "tipo": "caixa",
+   "id": "cab",
+   "x": 56,
+   "y": 112,
+   "w": 1248,
+   "h": 48,
+   "texto": "Painel de métricas do forge-sdd",
+   "sub": "cabeçalho · landmarks: header, nav, main, footer",
+   "estilo": "grupo"
+  },
+  {
+   "tipo": "caixa",
+   "id": "t1",
+   "x": 56,
+   "y": 184,
+   "w": 232,
+   "h": 48,
+   "texto": "Visão geral",
+   "sub": "",
+   "estilo": "destaque"
+  },
+  {
+   "tipo": "caixa",
+   "id": "t2",
+   "x": 312,
+   "y": 184,
+   "w": 232,
+   "h": 48,
+   "texto": "Erros e retornos",
+   "sub": "",
+   "estilo": "normal"
+  },
+  {
+   "tipo": "caixa",
+   "id": "t3",
+   "x": 568,
+   "y": 184,
+   "w": 232,
+   "h": 48,
+   "texto": "Depreciados",
+   "sub": "",
+   "estilo": "normal"
+  },
+  {
+   "tipo": "caixa",
+   "id": "t4",
+   "x": 824,
+   "y": 184,
+   "w": 232,
+   "h": 48,
+   "texto": "Tokens",
+   "sub": "",
+   "estilo": "normal"
+  },
+  {
+   "tipo": "caixa",
+   "id": "t5",
+   "x": 1080,
+   "y": 184,
+   "w": 224,
+   "h": 48,
+   "texto": "Lições",
+   "sub": "",
+   "estilo": "normal"
+  },
+  {
+   "tipo": "caixa",
+   "id": "flt",
+   "x": 56,
+   "y": 256,
+   "w": 1248,
+   "h": 64,
+   "texto": "Filtros: iniciativa · papel · agente · período · busca",
+   "sub": "",
+   "estilo": "contorno"
+  },
+  {
+   "tipo": "caixa",
+   "id": "lst",
+   "x": 56,
+   "y": 344,
+   "w": 1248,
+   "h": 200,
+   "texto": "Lista com caption, colunas ordenáveis e rótulo de medição (real, estimado)",
+   "sub": "tabela semântica; linha ruim aparece contada, não escondida",
+   "estilo": "grupo"
+  },
+  {
+   "tipo": "caixa",
+   "id": "pg",
+   "x": 56,
+   "y": 568,
+   "w": 1248,
+   "h": 48,
+   "texto": "Paginação: anterior · página 1 de N · próxima · itens por página",
+   "sub": "",
+   "estilo": "pill"
+  }
+ ]
+}
