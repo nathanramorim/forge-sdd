@@ -12,6 +12,7 @@ import (
 	"github.com/forge-sdd/cli/internal/doctor"
 	"github.com/forge-sdd/cli/internal/gate"
 	"github.com/forge-sdd/cli/internal/layout"
+	"github.com/forge-sdd/cli/internal/notify"
 	"github.com/forge-sdd/cli/internal/scaffold"
 	"github.com/spf13/cobra"
 )
@@ -38,6 +39,7 @@ inconsistências de configuração dos agentes de IA e progresso das features.`,
 			return runDoctorHarness(cmd.OutOrStdout(), targetDir, asJSON, doctor.DefaultDeps())
 		}
 
+		verbose, _ := cmd.Flags().GetBool("verbose")
 		fmt.Printf("🩺 Iniciando diagnóstico da metodologia em '%s'...\n\n", targetDir)
 
 		sddrcPath := layout.Sddrc(targetDir)
@@ -97,10 +99,9 @@ inconsistências de configuração dos agentes de IA e progresso das features.`,
 			} else {
 				vStr := strings.TrimSpace(string(verData))
 				if vStr != rc.Version {
-					fmt.Printf("⚠️  Descompasso de versão: sdd/.sddrc indica v%s mas sdd/.sdd-version indica v%s\n", rc.Version, vStr)
-				} else {
-					fmt.Printf("✓ Versão registrada em sincronia: v%s\n", vStr)
+					fmt.Printf("⚠️  Descompasso de versão: sdd/.sddrc indica v%s mas sdd/.sdd-version indica v%s\n", notify.Sanitize(rc.Version, 40, false), notify.Sanitize(vStr, 40, false))
 				}
+				reportDoctorVersao(vStr)
 			}
 		} else {
 			fmt.Println("⚠️  Arquivo sdd/.sdd-version não encontrado.")
@@ -197,7 +198,7 @@ inconsistências de configuração dos agentes de IA e progresso das features.`,
 
 		if scannedAny {
 			fmt.Printf("\n📋 Features Registradas: %d cadastrada(s)\n", len(activeFeatures))
-			if len(activeFeatures) > 0 {
+			if verbose && len(activeFeatures) > 0 {
 				fmt.Println("  Caminhos:")
 				for _, feat := range activeFeatures {
 					fmt.Printf("   - sdd/%s\n", feat)
@@ -307,6 +308,19 @@ inconsistências de configuração dos agentes de IA e progresso das features.`,
 	},
 }
 
+// reportDoctorVersao compara a versão do projeto com a do binário e imprime o veredito.
+func reportDoctorVersao(projeto string) {
+	st, msg := doctor.CompararVersao(projeto, config.BinaryVersion())
+	switch st {
+	case doctor.VersaoOK:
+		fmt.Println("✓ " + msg)
+	case doctor.VersaoBinarioAntigo:
+		fmt.Println("✗ " + msg)
+	default:
+		fmt.Println("⚠️  " + msg)
+	}
+}
+
 func fileExists(path string) bool {
 	_, err := os.Stat(path)
 	return err == nil
@@ -341,5 +355,6 @@ func runDoctorHarness(w io.Writer, dir string, asJSON bool, deps doctor.Deps) er
 func init() {
 	doctorCmd.Flags().String("dir", ".", "Diretório alvo do projeto Forge-SDD")
 	doctorCmd.Flags().Bool("harness", false, "Diagnostica o harness do pipeline (somente leitura; sai com 3 se houver falha)")
+	doctorCmd.Flags().Bool("verbose", false, "Lista os caminhos de features/tasks (o padrão imprime só o resumo)")
 	doctorCmd.Flags().Bool("json", false, "Com --harness, emite o relatório em JSON")
 }
