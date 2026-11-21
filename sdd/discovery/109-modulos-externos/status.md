@@ -5,3 +5,4 @@
 **Em aberto:** decisão 7 original (canal de volta) e licença.
 **Versão:** 5.1.0-beta ao fim da onda 3 (FLX-07); 5.1.0 estável depois da onda 8.
 **Próximo passo:** `/split-features`; o dono mescla o PR #154. P-00 (repositório privado) é futura.
+**K-01/K-02:** onda 5 da 109, decisão do dono em 2026-11-21.

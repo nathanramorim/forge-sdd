@@ -101,7 +101,7 @@ Decisão do dono (chat, 20/11/2026, decisão 6): a ordem é reaberta **sem corta
 | 2 | 106/0.8, 106/0.2, 106/1.1, 106/0.1*, 107-01, 109-01, 109-02 | todas sem dependência; os Builders podem rodar em paralelo à onda 1 (arquivos disjuntos); merge depois dela |
 | 3 | 106/0.5, 106/0.7, 106/1.3, 107-02, 109-03, 109-06 | **5.1.0-beta ao fim desta onda** (tag na branch, PR aberto, FLX-07) |
 | 4 | 106/1.6, 106/0.6, 106/1.2, 107-12, 109-04, 109-07, 109-12 | 109-04 precisa de 106/0.5 e 0.8; 109-12 (só a ADR) antes da 109-05; onda com 7 tasks, nada movido |
-| 5 | 106/2.1, 106/3.2 (local), 106/1.4, 107-04, 109-05 | 109-05 depende de 109-12 (onda 4) |
+| 5 | 106/2.1, 106/3.2 (local), 106/1.4, 107-04, 109-05, K-01, K-02 | 109-05 depende de 109-12 (onda 4); K-01 depende de 109-06 (onda 3); K-02 depende da decisão 3 da 107 e de 109-07 (onda 4); 7 tasks, nada movido. K-01 e K-02 são tasks da 110 (decisão do dono, 2026-11-21) que moram na ordem do core; a 110 (E-11) e a 111 (111-C1) dependem delas |
 | 6 | 106/2.2, 106/1.5, 106/1.7*, 107-05, 107-07, 107-09, 109-08 | |
 | 7 | 106/2.3, 106/2.4, 107-03, 107-06, 107-08, 109-09 | |
 | 8 | 106/2.6, 107-13, 107-10, 106/3.1, 109-10, 109-11 | 107-13 só depois de 106/2.4; **5.1.0 estável depois desta onda** |

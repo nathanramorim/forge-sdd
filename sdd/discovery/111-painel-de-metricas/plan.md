@@ -39,7 +39,7 @@ Ordem de baixo para cima. Até 7 tasks por onda. As tasks 111-xx rodam no reposi
 ## Onda 4 — Core (mínimo, aditivo, só com módulo ativo)
 | # | Task | Depende de | Rules |
 |---|---|---|---|
-| 111-C1 | Consumir `sessao.registrada` e `tool` (donas: K-01/K-02 da 110; sem código novo no core, proposta a confirmar pelo dono) | **109**, **110 K-01/K-02** | `ARQ-02`, `TST-02` |
+| 111-C1 | Consumir `sessao.registrada` e `tool` (donas: K-01/K-02 da 110; sem código novo no core; decisão do dono em 2026-11-21: K-01/K-02 na onda 5 da 109) | **109**, **110 K-01/K-02 (onda 5 da 109)** | `ARQ-02`, `TST-02` |
 | 111-C2 | Evento `volta.registrada` (Discovery, nova-feature, novo-fix) | 109 | `FLX-06`, `TST-02` |
 | 111-C3 | Suíte de byte-identidade estendida: sem módulo, saída igual | 109-01 | `TST-02` |
 
