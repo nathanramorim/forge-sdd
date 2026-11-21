@@ -522,3 +522,33 @@ func TestComandosDeConcepcaoSemBranchDaIniciativa(t *testing.T) {
 		}
 	}
 }
+
+// TestImplementarSemGhPrCreateFill: o Builder nunca abre PR sem `--draft` (feat-106-26b, RN-7).
+func TestImplementarSemGhPrCreateFill(t *testing.T) {
+	data, err := os.ReadFile(filepath.Join("..", "..", ".agents/skills/sdd-build/references/implementar.md"))
+	require.NoError(t, err)
+	texto := string(data)
+
+	// Toda menção a `gh pr create` precisa trazer `--draft`.
+	for _, linha := range strings.Split(texto, "\n") {
+		if !strings.Contains(linha, "gh pr create") {
+			continue
+		}
+		// A linha que proíbe o uso sem draft também cita o comando; ela é permitida.
+		if strings.Contains(linha, "Nunca") || strings.Contains(linha, "sem `--draft`") {
+			continue
+		}
+		assert.Contains(t, linha, "--draft", "PR da feature precisa nascer em draft: %s", linha)
+	}
+
+	// A política do PR por feature está declarada.
+	assert.Contains(t, texto, "Uma branch e um PR por feature")
+	assert.Contains(t, texto, "base na principal")
+	assert.Contains(t, texto, "gh pr ready", "marcar pronto é etapa separada, com parecer do HEAD")
+
+	// O split não cria mais a branch da construção.
+	split, err := os.ReadFile(filepath.Join("..", "..", ".agents/skills/sdd-planejamento/references/split-features.md"))
+	require.NoError(t, err)
+	assert.Contains(t, string(split), "Sem branch nova aqui",
+		"o split não pode criar a branch da iniciativa")
+}
