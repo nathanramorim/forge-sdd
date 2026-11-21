@@ -1,6 +1,6 @@
 ---
 description: Como ler e respeitar os campos de modo da tabela Ferramentas e Integrações da Constituição (VCS, atestado, revisão humana, WIP humano, módulos permitidos e início automático).
-globs: ["sdd/memory/constitution.md", "internal/vcs/**", "internal/config/**", "scripts/atestado.py"]
+globs: ["sdd/memory/constitution.md", "internal/vcs/**", "internal/config/**"]
 regras: [ARQ-06, SEG-01, SEG-03, SEG-05, FLX-01, FLX-02, FLX-06, GOV-01, GOV-04]
 ---
 
@@ -10,7 +10,7 @@ Os campos ficam na tabela `Ferramentas e Integrações` de `sdd/memory/constitut
 
 ## 1. VCS / Work Item System (`FLX-02`)
 - `github`: `gh pr create --draft`, `gh pr ready`, `gh pr merge` pelo adaptador `internal/vcs`.
-- `azure-devops`: **não verificado** nesta entrega. O adaptador recusa a operação com a mensagem "não verificado" e o `forge doctor` informa. Antes, `az repos pr create` substituía `gh pr create`.
+- `azure-devops`: **não verificado** nesta entrega. O adaptador recusa a operação com a mensagem "não verificado"; o aviso do `forge doctor` depende da task 0.4 (`feat-106-04`, ainda `queued`). Antes, `az repos pr create` substituía `gh pr create`.
 - `nenhum`: deixe a branch pronta e informe o usuário, sem comando de VCS; o merge é local.
 - O status real dos MCPs fica em `sdd/memory/mcps.md` (`ativo` ou `indisponível`).
 
@@ -19,7 +19,7 @@ Os campos ficam na tabela `Ferramentas e Integrações` de `sdd/memory/constitut
 - `local`: veredito conforme com `head_sha` igual ao HEAD mais a aprovação do humano no chat. Sem prova externa: quem tem acesso ao repositório pode forjar.
 - `desligado`: ninguém confere veredito nem aprovação; o PR pode sair sem conformidade.
 - `vcs` (prova do VCS com aprovadores): **adiado**. É aceito como valor, mas recusado com a mensagem "modo adiado". `nenhum` só admite `desligado` ou `local`.
-- Cadeia de fallback entregue: `local`, com tempo limite; sem resposta, pergunta ao humano (no modo sem humano, avisa e grava). Nunca aprova em silêncio.
+- Cadeia de fallback **planejada** (task 0.6, `feat-106-06`, ainda `queued`): `local`, com tempo limite; sem resposta, pergunta ao humano (no modo sem humano, avisa e grava). Nunca aprova em silêncio.
 
 ## 3. Modo de revisão humana (`FLX-01`)
 - `com-humano` (padrão) ou `sem-humano`. O segundo só vale se escolhido no início da sessão, depois do aviso dos riscos: nenhuma pessoa vê o código antes de o PR sair do draft; erro do revisor passa; o custo fica sem teto humano.

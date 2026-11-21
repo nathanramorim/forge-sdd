@@ -9,7 +9,7 @@
 
 O GitHub bloqueou as Actions da conta por cobrança e revelou o consumo evitável de rodar CI em trabalho ainda não conferido. Além disso, a spec ficava amarrada numa branch única de iniciativa até toda a implementação acabar (contradizendo a necessidade de escalar o backlog em branches independentes sem conflito de estado em `queue.json`), o auto-PR da iniciativa 100 nascia sem `--draft`, e o uso de `gh` estava fixo no código embora a Constituição já previsse `azure-devops` e `nenhum`.
 
-Ao mesmo tempo, as iniciativas 106, 107 e 109 precisavam adicionar campos de configuração versionados na tabela `Ferramentas e Integrações` da Constituição (`Modo do atestado`, `Modo de revisão humana`, `WIP humano`, `Módulos permitidos` e `Início automático do Builder`) e o subcomando `modulo` em `ARQ-06`, mantendo `sdd/memory/constitution.md` dentro do orçamento de 9.216 bytes (`P-24`).
+Ao mesmo tempo, as iniciativas 106, 107 e 109 precisavam adicionar campos de configuração versionados na tabela `Ferramentas e Integrações` da Constituição (`Modo do atestado`, `Modo de revisão humana`, `WIP humano`, `Módulos permitidos` e `Início automático do Builder`) e reservar o subcomando `modulo` para a 109 (a Constituição o anota sem listá-lo em `ARQ-06` até a entrega), mantendo `sdd/memory/constitution.md` dentro do orçamento de 9.216 bytes (`P-24`).
 
 ## Opções Consideradas
 
@@ -27,7 +27,7 @@ Escolhida a **Opção 2** (RN-0 a RN-25 da iniciativa 106 e alinhamento com 107 
    - **Regra 15 e `FLX-02`:** a spec vive numa branch por iniciativa (`<prefixo>/<id>-<nome>`), com PR próprio em draft, e volta para a principal após a Conferência 1 e o `[Seguir]`; a construção usa uma branch por feature do split (`<prefixo>/<id>-<nome>-<sid>`), aberta pelo Builder a partir da principal, cada uma com o seu PR em draft.
    - **`FLX-01`:** nada é implementado nem enfileirado sem Spec revisada e aprovada pelo humano no Gate 1 (`[Seguir]`/`[Ajustar]`); com o Gate 1 aprovado o Builder faz o split e enfileira sem nova aprovação, só dentro do escopo do `plan.md` aprovado.
 3. **Subcomando `modulo` (`ARQ-06`) e lições por arquivo (`GOV-03`):**
-   - `ARQ-06` inclui `modulo` na lista de subcomandos determinísticos de suporte (iniciativa 109).
+   - `modulo` fica reservado para a iniciativa 109: a Constituição o anota em `ARQ-06` e passa a listá-lo entre os subcomandos determinísticos quando a 109 o entregar (o contrato segue o código, `ARQ-06`).
    - `GOV-03` passa a consolidar lições em `sdd/memory/licoes/` (um arquivo por lição).
 4. **Orçamento da Constituição (`P-24`) e migração das Regras 11 e 12 (`FLX-07`, `GOV-04`):**
    - As Regras 11 e 12 são removidas da lista numerada (mantendo a numeração 10, 13, 14, 15 para preservar referências) e `FLX-07` fica conciso na Constituição (`9.173` de `9.216` bytes).
