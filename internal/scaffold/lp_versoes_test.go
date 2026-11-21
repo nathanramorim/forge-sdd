@@ -33,7 +33,7 @@ func TestLP_VersoesFallbackEstatico(t *testing.T) {
 	html := lerIndexLP(t)
 
 	assert.Regexp(t, `data-versao="latest"[^>]*>5\.0\.0<`, html)
-	assert.Regexp(t, `data-versao="beta"[^>]*>5\.1\.0-beta<`, html)
+	assert.Regexp(t, `data-versao="beta"[^>]*>5\.2\.0-beta<`, html)
 	assert.Contains(t, html, "npm install -g @nathanramorim/forge-sdd")
 	assert.Contains(t, html, "npm install -g @nathanramorim/forge-sdd@beta")
 	assert.Contains(t, html, "Para testar novidades. A beta não é a versão recomendada para produção.")
