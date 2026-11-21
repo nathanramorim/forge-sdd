@@ -76,6 +76,26 @@ go test ./internal/scaffold/... ./internal/doctor/...
 ```
 Lembrete: `forge doctor` e o gate sem violação nova. Sem `grep -c`.
 
+## Sinal "revisado só por IA" (PROPOSTA a confirmar pelo dono)
+
+Requisito do dono (21/11/2026): quando só o Reviewer revisou e fechou, isso aparece na issue e no PR.
+
+1. **Rótulo `revisado-só-por-ia`** (cor distinta, ex.: laranja; criar se não existir) no PR e na issue vinculada, mais a linha fixa no comentário do Reviewer: `Atenção: fechado só com revisão de IA, sem conferência humana.`
+2. **Retirada:** quando uma pessoa conferir ou mesclar, o rótulo sai e entra `conferido-por-humano` (quem muda: o dono, ou o forge no merge feito por humano).
+3. **Origem do sinal:** deriva do modo em vigor e do atestado da 106 (`com-humano` / `sem-humano`, atestado local), nunca de texto livre. Em `com-humano` o PR conforme fica pronto e só o merge humano o fecha: sem rótulo. Em `sem-humano` ou fechamento automático: rótulo.
+4. **Onde aparece:** issue, PR, `forge status` e selo no cartão do módulo do quadro. Contrato: o core grava o sinal (campo `revisao: ia|humano` no estado da feature); o módulo só lê e mostra (outro agente).
+5. **Escopo:** agora só instruções (o Reviewer aplica o rótulo por `gh` quando o modo informado no job for `sem-humano`); a gravação do campo, `forge status` e a leitura do modo ficam na 106/2.x.
+
+```bash
+set -o pipefail
+R=.agents/skills/sdd-governanca/references/pr-review.md
+grep -F 'revisado-só-por-ia' "$R"
+grep -F 'conferido-por-humano' "$R"
+grep -F 'Atenção: fechado só com revisão de IA, sem conferência humana.' "$R"
+# negativo: o rótulo não é aplicado sem o modo sem-humano
+! grep -F 'sempre aplique o rótulo revisado-só-por-ia' "$R" || exit 1
+```
+
 ## Fora de escopo
 
 `PRComment` no `conforme` em Go, `OpenPR --draft`, adaptador de VCS, `pr_guard.py` e hooks (106); qualquer merge ou tag.
