@@ -7,9 +7,9 @@ Um plugin/módulo que, **já na Discovery**, estime quantos tokens custa executa
 Conferido em 20/11/2026: `ls sdd/discovery | grep -E '^11'` vazio; `git branch -r | grep -E '/(feat|fix)/1[01][0-9]'` mostra 105 a 109 e nenhuma 110; `git worktree list` sem outra 110. O `#110` do GitHub é um PR (bump da LP), não iniciativa. Depois de criada a branch, `forge next-id` devolveu 111, porque conta o nome da própria branch; é esperado.
 
 ## Clarify
-Sem pergunta antes de escrever: o pedido traz forma, fronteira e restrições. As lacunas viraram `**Gate 1 aprovado em 2026-11-20 (completo): o dono aceitou a recomendação de cada decisão abaixo.** Decisões: leitura direta na v0, eventos e `tool` depois da 109, metas de acurácia, repositório privado, módulo mais skill fina.
+Sem pergunta antes de escrever: o pedido traz forma, fronteira e restrições. As lacunas viraram as decisões da seção abaixo.
 
-## Decisões para o Gate 1`.
+**Gate 1 aprovado em 2026-11-20 (completo): o dono aceitou a recomendação de cada decisão abaixo.** Decisões: leitura direta na v0, eventos e `tool` depois da 109, metas de acurácia, repositório privado, módulo mais skill fina.
 
 ## Descrição de negócio (obrigatória em toda spec nova)
 Hoje o dono só descobre quanto uma iniciativa consumiu depois de gasto. A régua mostra, antes do Gate 1 e antes de cada feature começar, uma **faixa** de tokens (e, se o dono mantiver uma tabela de preços, de dinheiro), com o agente, o modelo e a ferramenta que a história sugere. Ganho: o dono decide escopo e modelo com previsibilidade, e a esteira passa a medir o próprio erro e a melhorar. Regra de honestidade: a régua nunca finge precisão; mostra o tamanho da amostra e diz "sem estimativa" quando não há dado.
@@ -42,7 +42,7 @@ Os 9 valores diferentes de zero (por exemplo 6.800/2.400 e 48.000/9.500) parecem
 
 **3. Transcrições do Claude Code** (`~/.claude/projects/<slug>/*.jsonl`, fora do forge): 38 arquivos neste projeto; em 1 arquivo lido (só as chaves) cada mensagem traz `usage` (`input_tokens`, `output_tokens`, `cache_read_input_tokens`, `cache_creation_input_tokens`) e `model`. Cobrem sessões **interativas**, como a Discovery. **Formato interno do Claude Code, sem contrato: não verificado se é estável.**
 
-**4. Variáveis explicativas (já existem, do lado da entrada):** 26 pastas de iniciativa na main, 21 com `queue.json` (90 itens: 70 `approved`, 14 `completed`, 3 `queued`, 3 `review_pending`), 109 specs de feature/fix; `discovery.md` de 0,5 a 7,9 KB nas iniciativas lidas; nº de critérios e de tasks no `plan.md`.
+**4. Variáveis explicativas (já existem, do lado da entrada):** 26 pastas de iniciativa na main, 21 com `queue.json` (90 itens: 70 `approved`, 14 `completed`, 3 `queued`, 3 `review_pending`), 125 specs de feature e 15 de fix (`git ls-tree -r --name-only origin/main | grep -E '^sdd/discovery/[^/]+/(features|fixes)/(feat|fix)-.*\.md$'`, separando por `feat-`/`fix-`; conferido em 21/11/2026; a 111 usa a mesma contagem); `discovery.md` de 0,5 a 7,9 KB nas iniciativas lidas; nº de critérios e de tasks no `plan.md`.
 
 **5. Fora da main:** o bloco `spec` do fix-97-01 (`internal/monitor/spec_metrics.go`: tipo, bytes, seções, features_count) **existe só na branch de PR #131, aberto**; é dependência, não código existente.
 

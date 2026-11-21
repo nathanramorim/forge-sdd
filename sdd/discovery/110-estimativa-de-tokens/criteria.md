@@ -55,7 +55,9 @@ go test ./internal/regua/... -list 'TestSemAmostraNaoInventaNumero' | grep -F 'T
 go test ./internal/amostra/... -list 'TestNaoEnviaDadoParaRede' | grep -F 'TestNaoEnviaDadoParaRede'
 go test ./internal/amostra/... -list 'TestNaoGravaEstadoDoCore' | grep -F 'TestNaoGravaEstadoDoCore'
 go test ./cmd/... -list 'TestPrecoNuncaEmbutidoNoBinario' | grep -F 'TestPrecoNuncaEmbutidoNoBinario'
-go test ./internal/regua/... -run 'TestSemAmostraNaoInventaNumero|TestNaoEnviaDadoParaRede|TestNaoGravaEstadoDoCore|TestPrecoNuncaEmbutidoNoBinario'
+go test ./internal/regua/... -run 'TestSemAmostraNaoInventaNumero'
+go test ./internal/amostra/... -run 'TestNaoEnviaDadoParaRede|TestNaoGravaEstadoDoCore'
+go test ./cmd/... -run 'TestPrecoNuncaEmbutidoNoBinario'
 # negativo: a assinatura dos diagramas não leva nome pessoal nem LinkedIn
 ! grep -iE 'nathan|linkedin' sdd/discovery/110-estimativa-de-tokens/diagramas/forge-110-dados-e-regua.svg sdd/discovery/110-estimativa-de-tokens/diagramas/forge-110-fluxo-discovery.svg || exit 1
 ```

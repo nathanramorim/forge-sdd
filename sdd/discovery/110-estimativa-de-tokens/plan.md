@@ -22,6 +22,7 @@ Tasks do **módulo** têm prefixo `E-`; mudanças no **core** têm prefixo `K-` 
 | E-10 | Adaptador da transcrição do Claude (`usage` por mensagem), isolado | onda 1 |
 
 ## Onda 3 — contrato e calibração (depende da 109 e do dono)
+K-01 e K-02 são as donas, no core, do evento `sessao.registrada` e do campo `tool`; a 111 (task 111-C1) apenas consome (proposta a confirmar pelo dono).
 | Task | O quê | Depende |
 |---|---|---|
 | K-01 | Evento aditivo `spec.criada` e `sessao.registrada` no contrato v1 | 109 aprovada |
