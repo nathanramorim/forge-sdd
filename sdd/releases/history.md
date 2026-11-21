@@ -4,6 +4,23 @@ Este arquivo registra o histórico de entregas de produto deste projeto.
 
 ## Entregas
 
+<!-- TODO(coordenação): incluir o fix-106-01 (a fila acha a iniciativa em branch por feature; flag --iniciativa e FORGE_INICIATIVA) se o #163 for mesclado antes da tag -->
+
+### Versão 5.1.0 — CLI Mais Claro, Métricas de Discovery e Parecer com Proveniência (Beta)
+
+Compatível com a 5.0.0 (Iniciativas 97, 104, 105 e 106). Beta: a versão não está na `main`; a estável continua sendo a 5.0.0.
+
+*   **`forge doctor` compara versões e fala menos (#125):** o diagnóstico compara a versão do projeto com a do programa e avisa quando o projeto está atrás. Os caminhos de features e tasks só aparecem com `--verbose`.
+*   **`forge status` esconde o que já terminou (#124):** iniciativa com a fila concluída sai da lista; `forge status --all` mostra todas, marcando as concluídas.
+*   **Aviso de comando depreciado (#126, #129):** `queue stations`, `queue handoff`, `attach` e os atalhos antigos (`/implement`, `/proxima-feature`) mostram o substituto. Cada uso de comando depreciado é registrado em `sdd/memory/logs/depreciados.csv`, para você ver o que ainda está em uso antes da remoção. A decisão está na ADR-0021 (#123).
+*   **"3 sessões" no lugar de "5 estações" (#127, #128):** a ajuda do programa e os textos entregues passam a falar de Discovery, Builder e Reviewer; a descrição do agente `lider` segue o mesmo caminho. Nenhum comando foi renomeado.
+*   **Métricas de Discovery (#131):** as métricas das sessões de concepção ganham o bloco `spec`.
+*   **Parecer do Reviewer com proveniência (feature 106-11, #159):** o parecer guarda `head_sha`, `ponto` (`spec` ou `entrega`), `modo` e `feature`, gravados pelo Go a partir do HEAD da branch. Veredito sem commit válido é recusado.
+*   **README mais claro (#130, #132):** a esteira é contada uma vez só, e os diagramas usam as cores e as marcas dos robôs da página.
+*   **O que vem a seguir (em desenho, sem data):** contrato de módulos, régua de estimativa de tokens, painel de métricas, orquestrador e política de PR em rascunho com CI. Nada disso está nesta beta.
+*   **Como atualizar:** `npm install -g @nathanramorim/forge-sdd@beta` e, nos projetos existentes, `forge update`; depois rode `forge doctor` para conferir se o projeto está em sincronia com o programa.
+*   **Avisos da beta:** esta versão não está na `main` (`FLX-07`); quem usa `npm install -g @nathanramorim/forge-sdd` sem `@beta` continua na 5.0.0 estável.
+
 ### Versão 5.0.0 — Wiki Get Started, PR Automático e Edição Missões (Estável)
 
 Compatível com a 4.8.0. Consolida em versão estável tudo o que foi entregue na linha 4.9.x e nas Iniciativas 97 a 100.
