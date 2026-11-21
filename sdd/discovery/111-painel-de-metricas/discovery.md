@@ -10,7 +10,9 @@ Conferido em 20/11/2026: `ls sdd/discovery | grep -E '^1[01]'` na main traz 100,
 Hoje o dono só sabe onde a esteira erra lendo arquivos um a um. O painel junta, num lugar só e sem sair da máquina, o que foi devolvido, por qual regra, quantas vezes a mesma regra falhou, quais comandos depreciados ainda são usados e quanto se gastou. O ganho é duplo: **menos retrabalho e menos token** (o erro que se repete vira lição aprovada pelo dono, e o comando depreciado com substituto mais barato é achado e trocado) e **previsibilidade** (o dono vê a tendência, com o tamanho da amostra sempre à mostra). Regra de honestidade: o painel nunca finge precisão; mostra `n`, a origem do dado e o rótulo `real` ou `estimado`.
 
 ## Clarify
-Sem pergunta antes de escrever: o pedido traz forma, fronteira e restrições. As lacunas viraram `## Decisões para o Gate 1`.
+Sem pergunta antes de escrever: o pedido traz forma, fronteira e restrições. As lacunas viraram `**Gate 1 aprovado em 2026-11-20 (completo): o dono aceitou a recomendação de cada decisão abaixo.** nome `forge metricas`, leitura de arquivos na v0, lições gravadas pelo core, eventos e `tool` aditivos, onda 1 (Visão geral, Erros e retornos), repositório privado.
+
+## Decisões para o Gate 1`.
 
 ## 1. Que dados existem hoje (medido em `origin/main` 8bd3a0a, neste worktree; nada executado além de leitura)
 

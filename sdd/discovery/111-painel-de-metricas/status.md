@@ -1,8 +1,6 @@
 # Status — 111-painel-de-metricas
 
-**Status:** Discovery pronta para o Gate 1 (não aprovado). Nada implementado; repositório não criado.
-**Dado hoje:** 97 sessões (9 com token), 17 vereditos, 19 achados, 90 itens de fila; depreciados e achados.csv: 0 (só especificados).
-**Próximo passo:** o dono decide as 5 decisões do `discovery.md`; depois `/split-features` pela onda 1.
-
-## A confirmar
-Forma e nome (`forge metricas`); leitura direta ou eventos (junto com a 110); gravação de lições; campos novos no core; visibilidade e licença.
+**Status:** Gate 1 aprovado em 2026-11-20 (completo, com as recomendações das 5 decisões). Nada implementado; repositório privado ainda não criado.
+**Dado hoje:** 97 sessões (9 com token), 17 vereditos, 19 achados, 90 itens de fila.
+**Decididas pelo dono (chat, 20/11/2026):** nome `forge metricas`; leitura de arquivos do core na v0 com adaptador versionado (igual à 110); lições propostas pelo módulo e gravadas pelo core (RN-7 da 109); eventos aditivos `sessao.registrada` e `volta.registrada` e campo `tool`; onda 1 só com Visão geral e Erros e retornos; repositório privado.
+**Próximo passo:** `/split-features`; o dono mescla o PR da spec. A 109 recebe depois as propostas de eventos.
