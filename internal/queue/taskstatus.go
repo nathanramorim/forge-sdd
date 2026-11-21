@@ -85,19 +85,36 @@ func mutateTasks(dir, initiative string, taskIDs []string, fn func(*QueueItem) b
 	if err := json.Unmarshal(data, &q); err != nil {
 		return 0, fmt.Errorf("falha ao decodificar %s: %w", path, err)
 	}
-	changed := 0
+	// Estado por feature: com state/ na iniciativa, o status vive em state/<sid>.json (um arquivo
+	// por feature) e queue.json não é regravado. Sem state/ nada muda (fila antiga).
+	porFeature := stateModeActive(dir, initiative)
+	if porFeature {
+		if _, err := overlayStates(dir, initiative, &q); err != nil {
+			return 0, err
+		}
+	}
+	changedIdx := []int{}
 	for i := range q.Items {
 		for _, id := range taskIDs {
 			if matchesTask(q.Items[i].TaskID, id) {
 				if fn(&q.Items[i]) {
-					changed++
+					changedIdx = append(changedIdx, i)
 				}
 				break
 			}
 		}
 	}
+	changed := len(changedIdx)
 	if changed == 0 {
 		return 0, nil
+	}
+	if porFeature {
+		for _, i := range changedIdx {
+			if err := WriteFeatureState(dir, initiative, stateFromItem(q.Items[i])); err != nil {
+				return 0, err
+			}
+		}
+		return changed, nil
 	}
 	q.UpdatedAt = time.Now().UTC().Format(time.RFC3339)
 	if err := WriteJSONAtomic(path, &q, 0o644); err != nil {

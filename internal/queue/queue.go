@@ -90,6 +90,9 @@ func Load(dir string) (*Queue, error) {
 	if q.Items == nil {
 		q.Items = []QueueItem{}
 	}
+	if _, err := overlayStates(dir, initiativeOfQueuePath(dir, path), &q); err != nil {
+		return nil, err
+	}
 	return &q, nil
 }
 
@@ -102,6 +105,16 @@ func Save(dir string, q *Queue) error {
 	}
 	q.UpdatedAt = time.Now().UTC().Format(time.RFC3339)
 
+	// Itens com arquivo em state/ mantêm no plano o que já estava gravado (estado fica por feature).
+	if id := initiativeOfQueuePath(dir, path); id != "" {
+		probe := Queue{Items: append([]QueueItem(nil), q.Items...)}
+		if ov, err := overlayStates(dir, id, &probe); err == nil && len(ov) > 0 {
+			planned := *q
+			planned.Items = append([]QueueItem(nil), q.Items...)
+			restorePlan(path, &planned, ov)
+			q = &planned
+		}
+	}
 	if err := WriteJSONAtomic(path, q, 0o644); err != nil {
 		return fmt.Errorf("falha ao gravar fila %s: %w", path, err)
 	}
@@ -458,7 +471,7 @@ func Next(dir string) (*QueueItem, error) {
 		if st == StatusQueued || st == StatusChangesRequested {
 			q.Items[i].Status = StatusBuilding
 			q.Items[i].Attempts++
-			if err := Save(dir, q); err != nil {
+			if err := saveItem(dir, q, i); err != nil {
 				return nil, err
 			}
 			itemCopy := q.Items[i]
@@ -481,7 +494,7 @@ func Complete(dir, taskID string) error {
 				return fmt.Errorf("task %q não está em %q (status atual: %q)", taskID, StatusBuilding, q.Items[i].Status)
 			}
 			q.Items[i].Status = StatusReviewPending
-			return Save(dir, q)
+			return saveItem(dir, q, i)
 		}
 	}
 	return fmt.Errorf("task %q não encontrada na fila", taskID)
@@ -515,7 +528,7 @@ func Review(dir, taskID string, verdictJSON []byte) (*QueueItem, error) {
 			case VerdictDuvida:
 				q.Items[i].Status = StatusReviewPending
 			}
-			if err := Save(dir, q); err != nil {
+			if err := saveItem(dir, q, i); err != nil {
 				return nil, err
 			}
 			itemCopy := q.Items[i]
@@ -637,6 +650,9 @@ func LoadForInitiative(dir, initiative string) (*Queue, error) {
 	}
 	if q.Items == nil {
 		q.Items = []QueueItem{}
+	}
+	if _, err := overlayStates(dir, initiative, q); err != nil {
+		return nil, err
 	}
 	return q, nil
 }
