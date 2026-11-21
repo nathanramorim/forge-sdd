@@ -1,0 +1,27 @@
+{
+  "$schema": "forge-sdd/metrics/1.0",
+  "feature": "sdd/discovery/106-pr-draft-revisao-e-ci/features/feat-106-31-workflow-modelo-por-vcs.md",
+  "agent_path": null,
+  "tokens_input": 1951,
+  "tokens_output": 11274,
+  "turns": 0,
+  "duration_seconds": 0,
+  "criterio_atendido": true,
+  "model": "",
+  "rework_lines": 0,
+  "context7_calls": 0,
+  "git_calls": 0,
+  "files_touched": [
+    ".github/workflows/ci.yml",
+    "internal/scaffold/hooks.go",
+    "internal/scaffold/scaffold.go",
+    "cmd/forge-sdd/doctor.go",
+    "internal/scaffold/hooks_test.go",
+    "internal/pipeline/sinais.go",
+    "internal/pipeline/sinais_test.go"
+  ],
+  "outcome": "approved",
+  "sdd_version": "5.0.0",
+  "medicao": "estimado",
+  "complexidade": null
+}
