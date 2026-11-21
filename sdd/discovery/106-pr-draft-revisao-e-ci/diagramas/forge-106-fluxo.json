@@ -1,0 +1,281 @@
+{
+ "kicker": "// Forge SDD · iniciativa 106",
+ "titulo": "A spec volta à principal; cada feature tem a sua branch e o seu PR em draft",
+ "largura": 1640,
+ "altura": 840,
+ "nota_rodape": "CI pulado em draft · duas conferências do reviewer · modo sem humano opcional",
+ "elementos": [
+  {
+   "tipo": "texto",
+   "x": 56,
+   "y": 118,
+   "texto": "ESPECIFICAÇÃO",
+   "estilo": "rotulo",
+   "alinha": "start"
+  },
+  {
+   "tipo": "texto",
+   "x": 56,
+   "y": 348,
+   "texto": "CONSTRUÇÃO (UMA BRANCH E UM PR EM DRAFT POR FEATURE)",
+   "estilo": "rotulo",
+   "alinha": "start"
+  },
+  {
+   "tipo": "caixa",
+   "id": "a1",
+   "x": 56,
+   "y": 150,
+   "w": 220,
+   "h": 100,
+   "texto": "Escolhe o modo",
+   "sub": "HUMANO · com ou sem humano",
+   "estilo": "destaque"
+  },
+  {
+   "tipo": "caixa",
+   "id": "a2",
+   "x": 312,
+   "y": 150,
+   "w": 220,
+   "h": 100,
+   "texto": "Spec e PR da spec em draft",
+   "sub": "IA · pm-architect",
+   "estilo": "normal"
+  },
+  {
+   "tipo": "caixa",
+   "id": "a3",
+   "x": 568,
+   "y": 150,
+   "w": 220,
+   "h": 100,
+   "texto": "Valida a spec",
+   "sub": "AUTOMÁTICO · script, sem LLM",
+   "estilo": "contorno"
+  },
+  {
+   "tipo": "caixa",
+   "id": "a4",
+   "x": 824,
+   "y": 150,
+   "w": 220,
+   "h": 100,
+   "texto": "Conferência 1",
+   "sub": "IA · reviewer: só o julgamento",
+   "estilo": "normal"
+  },
+  {
+   "tipo": "caixa",
+   "id": "a5",
+   "x": 1080,
+   "y": 150,
+   "w": 220,
+   "h": 100,
+   "texto": "Seguir ou ajustar?",
+   "sub": "HUMANO · Gate 1",
+   "estilo": "destaque"
+  },
+  {
+   "tipo": "caixa",
+   "id": "a6",
+   "x": 1336,
+   "y": 150,
+   "w": 220,
+   "h": 100,
+   "texto": "Spec mesclada na principal",
+   "sub": "AUTOMÁTICO · adaptador de VCS",
+   "estilo": "contorno"
+  },
+  {
+   "tipo": "caixa",
+   "id": "b1",
+   "x": 56,
+   "y": 380,
+   "w": 220,
+   "h": 100,
+   "texto": "Split e 1 PR em draft por feature",
+   "sub": "IA · builder, da principal",
+   "estilo": "normal"
+  },
+  {
+   "tipo": "caixa",
+   "id": "b2",
+   "x": 312,
+   "y": 380,
+   "w": 220,
+   "h": 100,
+   "texto": "Valida a feature",
+   "sub": "AUTOMÁTICO · script, sem LLM",
+   "estilo": "contorno"
+  },
+  {
+   "tipo": "caixa",
+   "id": "b3",
+   "x": 568,
+   "y": 380,
+   "w": 220,
+   "h": 100,
+   "texto": "Conferência 2, por feature",
+   "sub": "IA · reviewer: só o julgamento",
+   "estilo": "normal"
+  },
+  {
+   "tipo": "caixa",
+   "id": "b4",
+   "x": 568,
+   "y": 530,
+   "w": 220,
+   "h": 100,
+   "texto": "novo-fix, com prioridade",
+   "sub": "IA · reviewer abre, builder corrige",
+   "estilo": "normal"
+  },
+  {
+   "tipo": "caixa",
+   "id": "b5",
+   "x": 824,
+   "y": 380,
+   "w": 220,
+   "h": 100,
+   "texto": "Continuar ou ajustar?",
+   "sub": "HUMANO · por onda",
+   "estilo": "destaque"
+  },
+  {
+   "tipo": "caixa",
+   "id": "b6",
+   "x": 1080,
+   "y": 380,
+   "w": 220,
+   "h": 100,
+   "texto": "Sai do draft e CI roda 1 vez",
+   "sub": "AUTOMÁTICO · pipeline confere o atestado",
+   "estilo": "contorno"
+  },
+  {
+   "tipo": "seta",
+   "de": "a1.dir",
+   "para": "a2.esq",
+   "forma": "horizontal"
+  },
+  {
+   "tipo": "seta",
+   "de": "a2.dir",
+   "para": "a3.esq",
+   "forma": "horizontal"
+  },
+  {
+   "tipo": "seta",
+   "de": "a3.dir",
+   "para": "a4.esq",
+   "forma": "horizontal"
+  },
+  {
+   "tipo": "seta",
+   "de": "a4.dir",
+   "para": "a5.esq",
+   "forma": "horizontal"
+  },
+  {
+   "tipo": "seta",
+   "de": "a5.dir",
+   "para": "a6.esq",
+   "forma": "horizontal"
+  },
+  {
+   "tipo": "seta",
+   "de": "a6.baixo",
+   "para": "b1.cima",
+   "forma": "vertical",
+   "rotulo": "volta à principal"
+  },
+  {
+   "tipo": "seta",
+   "de": "b1.dir",
+   "para": "b2.esq",
+   "forma": "horizontal"
+  },
+  {
+   "tipo": "seta",
+   "de": "b2.dir",
+   "para": "b3.esq",
+   "forma": "horizontal"
+  },
+  {
+   "tipo": "seta",
+   "de": "b3.baixo",
+   "para": "b4.cima",
+   "forma": "vertical",
+   "rotulo": "desvio"
+  },
+  {
+   "tipo": "seta",
+   "de": "b4.esq",
+   "para": "b1.baixo",
+   "forma": "horizontal",
+   "rotulo": "volta ao builder"
+  },
+  {
+   "tipo": "seta",
+   "de": "b3.dir",
+   "para": "b5.esq",
+   "forma": "horizontal"
+  },
+  {
+   "tipo": "seta",
+   "de": "b5.dir",
+   "para": "b6.esq",
+   "forma": "horizontal"
+  },
+  {
+   "tipo": "texto",
+   "x": 56,
+   "y": 718,
+   "texto": "LEGENDA",
+   "estilo": "rotulo",
+   "alinha": "start"
+  },
+  {
+   "tipo": "caixa",
+   "id": "lg1",
+   "x": 186,
+   "y": 694,
+   "w": 180,
+   "h": 56,
+   "texto": "HUMANO",
+   "sub": "decisões do Nathan",
+   "estilo": "destaque"
+  },
+  {
+   "tipo": "caixa",
+   "id": "lg2",
+   "x": 386,
+   "y": 694,
+   "w": 180,
+   "h": 56,
+   "texto": "IA",
+   "sub": "pm-architect, builder, reviewer",
+   "estilo": "normal"
+  },
+  {
+   "tipo": "caixa",
+   "id": "lg3",
+   "x": 586,
+   "y": 694,
+   "w": 180,
+   "h": 56,
+   "texto": "AUTOMÁTICO",
+   "sub": "sem LLM: script, hook, pipeline",
+   "estilo": "contorno"
+  },
+  {
+   "tipo": "texto",
+   "x": 56,
+   "y": 792,
+   "texto": "Atestado local por PR de feature; modo vcs adiado (recusado). Sem resposta, pergunta a você. Teto de 3 passadas por feature; depois pergunta a você.",
+   "estilo": "nota",
+   "alinha": "start"
+  }
+ ]
+}
