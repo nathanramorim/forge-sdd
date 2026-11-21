@@ -93,4 +93,4 @@ motivo: uma branch e um PR em draft por feature (iniciativa 106) até a task 0.8
 prazo: 2026-12-31
 responsavel: Nathan Ramos Amorim
 ```
-O prazo é proposto; o dono ajusta ao aprovar.
+**APROVADO pelo dono (Nathan Ramos Amorim) em 2026-11-20**, prazo 2026-12-31.
