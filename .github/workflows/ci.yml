@@ -4,9 +4,12 @@ name: CI
 #
 # - O trabalho é conferido **antes** de virar PR: `forge gate` (Camada A),
 #   `go vet`/`go test` e `scripts/validar_entrega.py` rodam locais, no Builder.
-# - O CI caro (teste em 3 sistemas e lint completo) só roda quando o PR **sai
-#   do draft** (`ready_for_review`) e na `main`. Um PR em draft não consome
-#   runner: os jobs aparecem como "skipped".
+# - O CI só roda quando o PR **sai do draft** (`ready_for_review`) e na `main`.
+#   Um PR em draft não consome runner: os jobs aparecem como "skipped".
+# - **Só Linux.** A conferência por sistema operacional é do `forge doctor`, na
+#   máquina de quem instala (feat-106-35): quem usa Windows ou macOS roda o
+#   diagnóstico ali. Rodar a matriz inteira no CI custa caro para cobrir o que
+#   já é verificado no ponto de uso.
 # - `concurrency` cancela a execução anterior do mesmo PR ao subir um commit
 #   novo, em vez de manter duas filas.
 # - O evento de PR é sempre `pull_request` (o código do PR nunca roda com os
