@@ -4,7 +4,7 @@
 **Branch:** `fix/fila-acha-iniciativa-em-branch-por-feature`
 **Origem:** relato do Builder da `feat-106-11`, verificado pela coordenação (21/11/2026)
 **Tamanho:** `S`
-**Status:** `spec` (PROPOSTA; Gate 1 pendente do dono)
+**Status:** `spec` (Gate 1 aprovado em 2026-11-21)
 
 ## Problema
 
@@ -35,13 +35,13 @@ Com a exceção da Regra 15 (dono, até 2026-12-31) o Builder trabalha numa bran
 | Dedução da iniciativa pela branch | `layout.FromBranch`/`Current`/`ActiveInitiative` | Casa só nome exato | Estender `ActiveInitiative` |
 | Lista de pastas | `layout.ListInitiatives`, `Discovery(dir)` | Existe | Reusar para achar `<N>-*` |
 | Escape por flag/env | `cmd/forge-sdd` | Só `--dir` | Criar `--iniciativa` e `FORGE_INICIATIVA` |
-| Resolver na 106/07a | `feat-106-07a` | Estado por feature e claim pela branch; NÃO trata a dedução da iniciativa (assume que ela já funciona) | Este fix vem antes |
+| Resolver na 106/07a | `feat-106-07a` | Estado por feature e claim pela branch; NÃO trata a dedução da iniciativa (assume que ela já funciona) | Este fix vem antes; a 07a entra DEPOIS dele |
 
-## Desenho mínimo (PROPOSTA a confirmar pelo dono)
+## Desenho mínimo (Gate 1 aprovado em 2026-11-21)
 
 **(a) Prefixo numérico.** Nova função em `layout`, `ResolveInitiative(dir, branch)`, usada por `ActiveInitiative` (e portanto por `QueuePath`, `StatusPath`, archive, Enqueue). Ordem: 1) pasta `sdd/discovery/<slug>` exata (comportamento de hoje, sem mudança); 2) se não existir, extrair `N` com regex ancorada `^(?:feat|fix)/([0-9]{1,6})-[a-z0-9-]+$` e casar com as pastas `sdd/discovery/N-*` (comparar o primeiro segmento, não prefixo de texto: `10` não casa `106`); 3) exatamente uma pasta -> é a iniciativa; zero -> `ok=false` (legado, como hoje); duas ou mais -> erro claro listando as pastas ("branch X é ambígua: A, B; use --iniciativa"). `FromBranch` permanece puro e inalterado (não regride `archive.go:193` nem `scan.go:323`).
 
-**(b) Escape.** `--iniciativa <id>` (flag persistente) e `FORGE_INICIATIVA`, validados por `ValidInitiative` e exigindo pasta existente; a flag vence a variável, que vence a branch. Campo `Iniciativa` em `.forge`/Constituição: NÃO proposto (não existe hoje; criaria fonte nova). Decisão do dono se quer.
+**(b) Escape.** `--iniciativa <id>` (flag persistente) e `FORGE_INICIATIVA`, validados por `ValidInitiative` e exigindo pasta existente; a flag vence a variável, que vence a branch. DECISÃO: não há campo `Iniciativa` em `.forge`; bastam flag e variável.
 
 **(c) Compatibilidade.** Branch por iniciativa (`feat/106-pr-draft-revisao-e-ci`) casa no passo 1, idêntica a hoje. Branches sem prefixo numérico (`main`, `fix/ordem-da-fila-e-prioridade`, `chore/x`) não casam no passo 2 e seguem para a fila legada. 107 e 106/0.7 não mudam: continuam lendo `QueuePath`.
 
@@ -49,7 +49,7 @@ Com a exceção da Regra 15 (dono, até 2026-12-31) o Builder trabalha numa bran
 
 **(e) Segurança.** Branch vem do git (não confiável): regex ancorada com dígitos no prefixo, `len <= 200`, sem `/` além do prefixo, sem `..`, sem caractere de controle; o id devolvido sai SEMPRE da listagem real de pastas (nunca da branch) e passa por `Initiative()` (SEG-01). Flag/env: mesma validação.
 
-**(f) Colisões.** `feat-106-07a` e `fix-104-17` (PR #158, `queue move`): editam `queue.go`/`taskstatus.go`/`waves.go`; este fix toca `internal/layout/layout.go` e uma linha de `queue.go:218-223`. Conflito textual pequeno em `queue.go` apenas; sem dependência de ordem, mas este fix deve entrar ANTES da 07a para ela ser testável em branch por feature. `queue move` herda a correção sem mudança.
+**(f) Colisões.** `feat-106-07a` e `fix-104-17` (PR #158, `queue move`): editam `queue.go`/`taskstatus.go`/`waves.go`; este fix toca `internal/layout/layout.go` e uma linha de `queue.go:218-223`. Conflito textual pequeno em `queue.go` apenas; sem dependência de ordem, DECISÃO: este fix entra ANTES da `feat-106-07a`, para ela ser testável em branch por feature. `queue move` herda a correção sem mudança.
 
 ## Rules e IDs da Constituição Aplicáveis
 
@@ -89,6 +89,6 @@ go vet ./... && go test ./...
 
 Campo `Iniciativa` em `.forge`; estado por feature (`feat-106-07a`); edição das specs 106/107; `queue move` (`fix-104-17`).
 
-## Decisões pendentes do dono
+## Decisões do dono (Gate 1, 2026-11-21)
 
-1. Aceita casar por prefixo numérico `<N>-*` único (a)? 2. Quer o campo `Iniciativa` em `.forge` ou basta flag/env (b)? 3. Ambiguidade falha (proposto) ou cai na legada?
+DECISÃO 1: casar a iniciativa pelo prefixo numérico `<N>-*` único. DECISÃO 2: bastam `--iniciativa` e `FORGE_INICIATIVA`, sem campo em `.forge`. DECISÃO 3: ambiguidade (duas pastas com o mesmo número) FALHA com erro claro listando as pastas que casaram, sem cair na fila legada. Ordem: a `feat-106-07a` entra DEPOIS deste fix.
