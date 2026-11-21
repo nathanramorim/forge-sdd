@@ -125,10 +125,10 @@ go test -run 'TestWIPHumanoDistintoDoTetoTecnico' ./internal/pipeline/
 # negativo: o WIP humano é lido pelo leitor da tabela da 106 na branch base; valor na branch da feature não o sobrepõe e a 107 não edita a Constituição
 go test -list 'TestWIPHumanoLidoDaBranchBase' ./internal/pipeline/ | grep -F 'TestWIPHumanoLidoDaBranchBase'
 go test -run 'TestWIPHumanoLidoDaBranchBase' ./internal/pipeline/
-# negativo: PROPOSTA do coordenador (a confirmar pelo dono): o WIP humano recebe a contagem por FonteDePendencias; com dublê soma as fontes e fonte com erro recusa seguir
+# negativo: decisão do dono em 2026-11-21 (FonteDePendencias): o WIP humano recebe a contagem por FonteDePendencias; com dublê soma as fontes e fonte com erro recusa seguir
 go test -list 'TestWIPHumanoContaPorFonteDePendencias' ./internal/pipeline/ | grep -F 'TestWIPHumanoContaPorFonteDePendencias'
 go test -run 'TestWIPHumanoContaPorFonteDePendencias' ./internal/pipeline/
-# negativo: PROPOSTA (a confirmar): a fonte padrão por arquivo conta itens review_pending e specs aguardando [Seguir] e ignora os demais estados
+# negativo: decisão do dono em 2026-11-21 (FonteDePendencias): a fonte padrão por arquivo conta itens review_pending e specs aguardando [Seguir] e ignora os demais estados
 go test -list 'TestFonteDePendenciasPadraoPorArquivo' ./internal/pipeline/ | grep -F 'TestFonteDePendenciasPadraoPorArquivo'
 go test -run 'TestFonteDePendenciasPadraoPorArquivo' ./internal/pipeline/
 # negativo: a rota de split vai ao builder (nunca ao planner) e feature dependente não abre antes da predecessora mesclada
@@ -140,7 +140,7 @@ go test -run 'TestRoteamentoSpecSoMesclaAposSeguirEArquivarDaPrincipal' ./intern
 # negativo: verificar sem --ponto, com ponto desconhecido ou sem --feature no ponto entrega é recusado
 go test -list 'TestVerificarExigePontoEFeature' ./internal/pipeline/ | grep -F 'TestVerificarExigePontoEFeature'
 go test -run 'TestVerificarExigePontoEFeature' ./internal/pipeline/
-# negativo: início automático (107-13, decisão do dono em chat, aguarda aprovação formal): com `Início automático do Builder` = `desligado` o observador recusa iniciar, com mensagem e código diferente de zero
+# negativo: início automático (107-13, decisão do dono em 2026-11-21): com `Início automático do Builder` = `desligado` o observador recusa iniciar, com mensagem e código diferente de zero
 go test -list 'TestObservarRecusaComInicioAutomaticoDesligado' ./cmd/forge-sdd/ | grep -F 'TestObservarRecusaComInicioAutomaticoDesligado'
 go test -run 'TestObservarRecusaComInicioAutomaticoDesligado' ./cmd/forge-sdd/
 # negativo: Todo para Building só com spec na principal, dentro do WIP humano e do teto de 3 tentativas; no limite não inicia o Builder
