@@ -52,3 +52,26 @@ func TestAppendLesson_RespectsBudget(t *testing.T) {
 	require.NoError(t, err)
 	assert.LessOrEqual(t, len(data), lessonsBudgetBytes, "arquivo deve respeitar o orçamento configurado")
 }
+
+func TestAppendRuleLesson_CreatesRuleFileAndValidatesConstitution(t *testing.T) {
+	dir := t.TempDir()
+	memDir := filepath.Join(dir, "sdd", "memory")
+	require.NoError(t, os.MkdirAll(memDir, 0o755))
+	require.NoError(t, os.WriteFile(filepath.Join(memDir, "constitution.md"), []byte("# Constituição\n- **COD-02:** go vet\n- **DUP-10:** fonte única\n"), 0o644))
+
+	path, err := AppendRuleLesson(dir, "COD-02", "faltou go vet", "rodar go vet ./...", "feat-106-12")
+	require.NoError(t, err)
+	assert.Equal(t, filepath.Join(dir, "sdd", "memory", "licoes", "COD-02.md"), path)
+
+	data, err := os.ReadFile(path)
+	require.NoError(t, err)
+	assert.Contains(t, string(data), "COD-02")
+	assert.Contains(t, string(data), "faltou go vet → rodar go vet ./... (feat-106-12)")
+
+	_, err = AppendRuleLesson(dir, "ZZZ-99", "padrão", "fix", "")
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "ZZZ-99")
+
+	_, err = AppendRuleLesson(dir, "../COD-02", "padrão", "fix", "")
+	require.Error(t, err)
+}
