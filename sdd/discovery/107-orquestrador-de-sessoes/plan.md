@@ -22,6 +22,11 @@ Paralelo: 01 sozinha; 02 e 04 após 01; 03 após 02; 12 após 02, 106/0.5 e o PR
 - **feat-107-10** Casos de avaliação do orquestrador (injeção, loop, permissão negada, WIP no limite) no `forge eval` da 104-11. **Depende de:** feat-107-03, feat-107-09, feat-107-12 e feat-104-11 (já mesclada: a verificar). Rules: TST-01, TST-04.
 - **feat-107-11** `sdd/spec/concepts.md`, `docs/pipeline.md`, `flows.md` e o texto final da ADR (número no merge). **Depende de:** ondas anteriores. Rules: FLX-05, GOV-01, DUP-01.
 
+## Onda 4 — Início automático do Builder (decisão do dono em chat, 20/11/2026; aguarda aprovação formal)
+- **feat-107-13** Início automático do Builder local, **no core** (veio da 108/3.7, sem depender do quadro nem do módulo da 109). Comando sob `forge pipeline observar` (`ARQ-06`; **não** `forge project`, que é do módulo). Processo local do forge **só enquanto a sessão estiver aberta**: polling com intervalo mínimo de 30 s (padrão 60 s; a confirmar contra o limite de taxa do VCS, a verificar); só lê o estado por feature (106/0.7), o marcador `Gate 1: aprovado` do `status.md` (106/2.2) e o merge da spec **pelo adaptador de VCS da 106** (nunca `gh` direto, nunca texto de cartão, título ou comentário). Regra Todo para Building: spec na principal, **WIP humano 3** (feat-107-12), **teto de 3 tentativas** (reusa o contador `Attempt` da 106/1.6; não cria outro, `DUP-06`), modo e atestado da 106; não grava nada que seja aprovação sem menu; encerra limpo em Ctrl-C ou fim da sessão; `--dry-run` não escreve nem inicia nada. Só roda com o campo `Início automático do Builder` = `local` (valores `desligado`, padrão, ou `local`; a linha `| Início automático do Builder | desligado |` já está na proposta da 106/0.8, **a 107 não edita a Constituição**); `desligado` recusa com mensagem e código diferente de zero. Funciona com `Módulos permitidos = nenhum` e com VCS `nenhum` (sem chamar `gh`). **Depende de:** feat-107-12, 106/0.5, 106/0.8, 106/0.7, 106/2.4; transitivas pela 2.4: 106/0.2, 2.1, 2.2, 1.6 (a 108/3.7 as listava como duras). Rules: FLX-01, SEG-03, SEG-08, DUP-06, TST-03.
+
+Paralelo: nenhum (fecha a cadeia da 106/2.4). A 108/3.7 não será mais construída no core: a regra mora aqui e o módulo do quadro só soma a fonte de pendências (109, capacidade `pendentes`).
+
 Colisões a sequenciar: templates e goldens com a 105 e a 106 (`TST-02`); número de ADR no merge; a 107 não edita a Constituição (o campo `WIP humano` vai no PR único da 106, notas em `.agents/rules/sdd-modos-de-projeto.md`).
 
 ## Fecho da 108 (prioridade 0)
@@ -31,3 +36,6 @@ Decisão do dono (20/11/2026): a 108 (quadro opcional do GitHub Project) é prio
 - **Onda 3 do fecho: 107-12** (WIP humano, só código). Depois de 106/0.5 (leitor da tabela) e do PR único de Constituição da 106.
 - 107-01 e 107-02 **não dependem de nada da 106** (confirmado pelas linhas `Depende de` do plano).
 - **Adiadas: 107-03 a 107-11.** A 108 não as exige; entram na ordem normal da 107, sem bloquear o fecho. Cada onda do fecho tem 1 task (limite de 7).
+
+## Ordem das ondas do core (2026-11-20)
+A ordem de merge do core (105, 106, 107, 109 e fixes) foi refeita na iniciativa 109, seção `## Ordem das ondas do core (substitui o fecho da prioridade 0)` de `sdd/discovery/109-modulos-externos/plan.md`. O fecho da 108 acima deixa de ser o fecho obrigatório; o escopo da 107 não foi cortado e a 107-13 entra pela regra do início automático.

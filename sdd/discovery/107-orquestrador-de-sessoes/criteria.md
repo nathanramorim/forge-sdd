@@ -140,6 +140,24 @@ go test -run 'TestRoteamentoSpecSoMesclaAposSeguirEArquivarDaPrincipal' ./intern
 # negativo: verificar sem --ponto, com ponto desconhecido ou sem --feature no ponto entrega é recusado
 go test -list 'TestVerificarExigePontoEFeature' ./internal/pipeline/ | grep -F 'TestVerificarExigePontoEFeature'
 go test -run 'TestVerificarExigePontoEFeature' ./internal/pipeline/
+# negativo: início automático (107-13, decisão do dono em chat, aguarda aprovação formal): com `Início automático do Builder` = `desligado` o observador recusa iniciar, com mensagem e código diferente de zero
+go test -list 'TestObservarRecusaComInicioAutomaticoDesligado' ./cmd/forge-sdd/ | grep -F 'TestObservarRecusaComInicioAutomaticoDesligado'
+go test -run 'TestObservarRecusaComInicioAutomaticoDesligado' ./cmd/forge-sdd/
+# negativo: Todo para Building só com spec na principal, dentro do WIP humano e do teto de 3 tentativas; no limite não inicia o Builder
+go test -list 'TestInicioAutomaticoExigeSpecNaPrincipalWIPETeto' ./internal/pipeline/ | grep -F 'TestInicioAutomaticoExigeSpecNaPrincipalWIPETeto'
+go test -run 'TestInicioAutomaticoExigeSpecNaPrincipalWIPETeto' ./internal/pipeline/
+# negativo: intervalo abaixo de 30 s é recusado, o observador só lê estado e merge verificado pelo adaptador e nunca grava aprovação sem menu
+go test -list 'TestObservarRecusaIntervaloAbaixoDoMinimoENaoAprovaSemMenu' ./cmd/forge-sdd/ | grep -F 'TestObservarRecusaIntervaloAbaixoDoMinimoENaoAprovaSemMenu'
+go test -run 'TestObservarRecusaIntervaloAbaixoDoMinimoENaoAprovaSemMenu' ./cmd/forge-sdd/
+# negativo: encerra limpo (Ctrl-C ou fim da sessão), sem processo órfão e sem lock preso; --dry-run não escreve nem inicia nada
+go test -list 'TestObservarEncerraLimpoEDryRunNaoEscreve' ./cmd/forge-sdd/ | grep -F 'TestObservarEncerraLimpoEDryRunNaoEscreve'
+go test -run 'TestObservarEncerraLimpoEDryRunNaoEscreve' ./cmd/forge-sdd/
+# negativo: com VCS `nenhum` o observador nunca chama gh nem az, e roda igual com `Módulos permitidos` = `nenhum` (sem módulo, sem quadro)
+go test -list 'TestObservarSemVCSNemModuloNaoChamaCLI' ./internal/pipeline/ | grep -F 'TestObservarSemVCSNemModuloNaoChamaCLI'
+go test -run 'TestObservarSemVCSNemModuloNaoChamaCLI' ./internal/pipeline/
+# negativo: o teto de 3 tentativas reusa o contador da 106/1.6 (Attempt) e o gatilho nunca vem de texto de cartão, título ou comentário
+go test -list 'TestInicioAutomaticoTetoReusaAttemptEGatilhoNaoVemDeTexto' ./internal/pipeline/ | grep -F 'TestInicioAutomaticoTetoReusaAttemptEGatilhoNaoVemDeTexto'
+go test -run 'TestInicioAutomaticoTetoReusaAttemptEGatilhoNaoVemDeTexto' ./internal/pipeline/
 forge gate --dir . --mode bloqueio --branch feat/107-orquestrador-de-sessoes --spec sdd/discovery/107-orquestrador-de-sessoes/criteria.md --criterios
 ```
 - Cada feature traz ao menos um teste negativo, checado por `forge gate --criterios` (P-25).
