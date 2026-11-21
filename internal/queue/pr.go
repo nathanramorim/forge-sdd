@@ -1,33 +1,20 @@
 package queue
 
 import (
-	"bytes"
-	"encoding/json"
 	"fmt"
 	"io"
 	"os"
 	"os/exec"
-	"strings"
+
+	"github.com/forge-sdd/cli/internal/vcs"
 )
 
 // prLookPath é injetável nos testes (TST-04).
 var prLookPath = exec.LookPath
 
 // prRunCmd executa name com args em dir e devolve stdout; injetável nos testes (TST-04).
-// Apenas "git" e "gh" são permitidos (SEG-03).
-var prRunCmd = func(dir, name string, args ...string) (string, error) {
-	if name != "git" && name != "gh" {
-		return "", fmt.Errorf("comando %q não permitido", name)
-	}
-	cmd := exec.Command(name, args...)
-	cmd.Dir = dir
-	var stdout, stderr bytes.Buffer
-	cmd.Stdout, cmd.Stderr = &stdout, &stderr
-	if err := cmd.Run(); err != nil {
-		return strings.TrimSpace(stdout.String()), fmt.Errorf("%w: %s", err, strings.TrimSpace(stderr.String()))
-	}
-	return strings.TrimSpace(stdout.String()), nil
-}
+// O executor real e a lista git/gh (SEG-03) moram em internal/vcs.
+var prRunCmd = vcs.RunGitOrGh
 
 // OpenPR faz git push origin <branch> + gh pr create após veredito conforme.
 // Falha graciosamente: se gh não está instalado, branch está vazia ou origin não existe,
@@ -35,6 +22,15 @@ var prRunCmd = func(dir, name string, args ...string) (string, error) {
 func OpenPR(dir string, q *Queue, item *QueueItem, out io.Writer) error {
 	if out == nil {
 		out = os.Stdout
+	}
+
+	adapt, err := vcs.DaConstituicao(dir, func(d, n string, a ...string) (string, error) { return prRunCmd(d, n, a...) })
+	if err != nil {
+		return err
+	}
+	if adapt.Nome() == "nenhum" {
+		fmt.Fprintf(out, "aviso: VCS nenhum; sem PR, a branch %q fica pronta e o merge é local\n", q.Branch)
+		return nil
 	}
 
 	// 1. Verifica gh
@@ -57,24 +53,14 @@ func OpenPR(dir string, q *Queue, item *QueueItem, out io.Writer) error {
 	}
 
 	// 4. Verifica se PR já existe
-	listOut, err := prRunCmd(dir, "gh", "pr", "list",
-		"--head", branch,
-		"--state", "open",
-		"--json", "url",
-		"--limit", "1",
-	)
+	existing, err := adapt.ProcurarPRAberto(dir, branch)
 	if err != nil {
 		fmt.Fprintf(out, "aviso: falha ao verificar PR existente: %v; PR não criado automaticamente\n", err)
 		return nil
 	}
-	var prList []struct {
-		URL string `json:"url"`
-	}
-	if strings.TrimSpace(listOut) != "" {
-		if jsonErr := json.Unmarshal([]byte(listOut), &prList); jsonErr == nil && len(prList) > 0 {
-			fmt.Fprintf(out, "PR já existe: %s\n", prList[0].URL)
-			return nil
-		}
+	if existing != nil {
+		fmt.Fprintf(out, "PR já existe: %s\n", existing.URL)
+		return nil
 	}
 
 	// 5. Extrai título do PR da spec (DUP-01: usa extractSpecTitle do pacote)
@@ -97,29 +83,11 @@ func OpenPR(dir string, q *Queue, item *QueueItem, out io.Writer) error {
 		return fmt.Errorf("git push falhou: %w", err)
 	}
 
-	// 9. gh pr create
-	prOut, err := prRunCmd(dir, "gh", "pr", "create",
-		"--title", title,
-		"--body", resumo,
-		"--base", baseBranch,
-		"--head", branch,
-	)
+	// 9. PR em draft pelo adaptador (RN-7)
+	pr, err := adapt.CriarPRDraft(dir, vcs.NovoPR{Base: baseBranch, Branch: branch, Titulo: title, Corpo: resumo})
 	if err != nil {
 		return fmt.Errorf("gh pr create falhou: %w", err)
 	}
-
-	// 10. Captura URL do PR (última linha não vazia da saída)
-	url := lastNonEmptyLine(prOut)
-	fmt.Fprintf(out, "→ PR aberto: %s\n", url)
+	fmt.Fprintf(out, "→ PR aberto: %s\n", pr.URL)
 	return nil
-}
-
-func lastNonEmptyLine(s string) string {
-	lines := strings.Split(s, "\n")
-	for i := len(lines) - 1; i >= 0; i-- {
-		if l := strings.TrimSpace(lines[i]); l != "" {
-			return l
-		}
-	}
-	return strings.TrimSpace(s)
 }

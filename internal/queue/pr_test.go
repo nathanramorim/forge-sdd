@@ -3,6 +3,8 @@ package queue
 import (
 	"bytes"
 	"errors"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -219,4 +221,28 @@ func TestOpenPR_CaminhoFelizComBaseBranch(t *testing.T) {
 		}
 	}
 	assert.Contains(t, createCall, "--base develop", "base deve ser BaseBranch quando definido")
+	assert.Contains(t, createCall, "--draft", "PR nasce em draft (RN-7)")
+}
+
+func TestOpenPR_VCSNenhumNaoExecutaComando(t *testing.T) {
+	dir := t.TempDir()
+	require.NoError(t, os.MkdirAll(filepath.Join(dir, "sdd", "memory"), 0o755))
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "sdd", "memory", "constitution.md"),
+		[]byte("| VCS / Work Item System | nenhum |\n"), 0o644))
+	origRun := prRunCmd
+	t.Cleanup(func() { prRunCmd = origRun })
+	chamadas := 0
+	prRunCmd = func(_, _ string, _ ...string) (string, error) { chamadas++; return "", nil }
+
+	var buf bytes.Buffer
+	err := OpenPR(dir, &Queue{Branch: "feat/x"}, &QueueItem{TaskID: "1"}, &buf)
+	require.NoError(t, err)
+	assert.Zero(t, chamadas)
+	assert.Contains(t, buf.String(), "VCS nenhum")
+
+	// VCS desconhecido é recusado
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "sdd", "memory", "constitution.md"),
+		[]byte("| VCS / Work Item System | gitlab |\n"), 0o644))
+	assert.Error(t, OpenPR(dir, &Queue{Branch: "feat/x"}, &QueueItem{TaskID: "1"}, &buf))
+	assert.Zero(t, chamadas)
 }
