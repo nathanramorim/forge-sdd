@@ -1,9 +1,9 @@
 {
  "kicker": "// Forge SDD · iniciativa 108",
- "titulo": "Sete colunas do Project espelham o estado dos arquivos do forge-sdd",
+ "titulo": "As 7 opções do campo Status são as colunas do quadro e espelham os arquivos",
  "largura": 1640,
  "altura": 560,
- "nota_rodape": "arquivo é a fonte da verdade do estado; arrastar o cartão é um pedido, não uma aprovação",
+ "nota_rodape": "campo Status do Project · arquivo é a fonte da verdade · arrastar o cartão é um pedido, não uma aprovação",
  "elementos": [
   {"tipo": "caixa", "id": "c1", "x": 56, "y": 120, "w": 200, "h": 96, "texto": "Backlog", "sub": "ideia sem spec", "estilo": "contorno"},
   {"tipo": "caixa", "id": "c2", "x": 296, "y": 120, "w": 200, "h": 96, "texto": "Spec", "sub": "IA · /discovery abre a spec", "estilo": "normal"},

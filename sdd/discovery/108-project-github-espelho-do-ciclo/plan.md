@@ -16,7 +16,7 @@ Colisões de arquivo: `.agents/skills/sdd-operacao/references/`, `internal/vcs`,
 | 1.1 | `internal/pipeline`: tipo `Etapa` com a lista fechada das 7; função pura `EtapaDoEstado` (`queue.json`, `status.md`, sinais da 106) e recusa de valor fora da lista; `Bloqueado` como marca | — | com 1.4 | `ARQ-01`, `DUP-01`, `TST-03` |
 | 1.2 | Interface `Quadro` (ler etapa, mover, vincular PR) no consumidor e adaptador `github` só de leitura (`gh project item-list --format json`, `field-list`) em `internal/vcs`; `nenhum` devolve "sem quadro"; `azure-devops` = a verificar | 1.1; sequenciar com 106/0.2 | — | `ARQ-02`, `DUP-03`, `SEG-03`, `SEG-08`, `TST-03` |
 | 1.3 | `forge project status` (somente leitura): lista cartões, etapa e divergência com o arquivo; saída saneada, sem token | 1.1, 1.2 | com 1.4 | `ARQ-01`, `ARQ-05`, `SEG-04`, `TST-03` |
-| 1.4 | `internal/config`: nome do campo (`Etapa`), número do Project e `provider` `github-projects`; mapa entre `status_on_implement`/`status_on_pr_approved` e as 7 etapas (sem quebrar o padrão atual) | — | com 1.1 | `DUP-06`, `GOV-01`, `TST-02` |
+| 1.4 | `internal/config`: nome do campo (`Status`), número do Project e `provider` `github-projects`; mapa entre `status_on_implement`/`status_on_pr_approved` e as 7 etapas (sem quebrar o padrão atual) | — | com 1.1 | `DUP-06`, `GOV-01`, `TST-02` |
 | 1.5 | Teste de injeção: título, corpo e comentário com ordem embutida são dado; só o campo de etapa válido é lido | 1.2 | com 1.3 | `SEG-08`, `TST-03` |
 | 1.6 | Linha em `sdd/spec/concepts.md` e ADR curta (fonte da verdade, o que o arrastar autoriza) conforme o Gate 1 | Gate 1 | — | `GOV-01`, `DUP-01` |
 
@@ -34,7 +34,7 @@ Colisões de arquivo: `.agents/skills/sdd-operacao/references/`, `internal/vcs`,
 |---|---|---|---|---|
 | 3.1 | Polling: o forge lê a etapa de cada cartão a cada comando e compara com o arquivo; divergência vira pedido, nunca gravação direta; ator conferido (a verificar se o `gh` o expõe) | 1.3, 2.3 | — | `SEG-01`, `TST-03` |
 | 3.2 | Arrastar como pedido: Spec-validation para Todo abre o menu do Gate 1; Validation para Done exige PR mesclado e atestado conforme o modo da 106 | 3.1; 106/3.2 | — | `FLX-01`, `GOV-01`, `TST-03` |
-| 3.3 | `forge doctor` verifica Project configurado, escopo `project` do `gh`, campo `Etapa` com as 7 opções e divergências arquivo versus quadro | 3.1 | com 3.4 | `ARQ-01`, `TST-03` |
+| 3.3 | `forge doctor` verifica Project configurado, escopo `project` do `gh`, campo `Status` com as 7 opções e divergências arquivo versus quadro | 3.1 | com 3.4 | `ARQ-01`, `TST-03` |
 | 3.4 | Orquestrador (107): expõe a contagem de cartões em Validation para o WIP humano; lê só o campo validado | 3.1; 107 | com 3.3 | `DUP-01`, `SEG-08` |
 | 3.5 | Reference única `.agents/skills/sdd-operacao/references/project.md` (rotina por agente e por coluna) e os comandos `/discovery`, `/nova-feature`, `/novo-fix`, `/implementar`, `/revisar` só a apontam em **uma linha** (templates e goldens junto); P-24 conferido antes e depois | 3.2 | — | `ARQ-03`, `TST-02`, `GOV-01` |
 | 3.6 | Prova ponta a ponta com um Project privado de teste: arquivo para quadro, quadro para menu, ator desconhecido recusado; relatório com o que ficou "a verificar" | 3.1 a 3.5 | — | `FLX-06`, `TST-05` |

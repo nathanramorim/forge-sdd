@@ -1,6 +1,6 @@
 sequenceDiagram
   participant H as Dono
-  participant P as Project (Etapa)
+  participant P as Project (Status)
   participant F as forge project
   participant A as Arquivos (status.md, queue.json)
   Note over F,A: arquivo vira quadro
@@ -8,7 +8,7 @@ sequenceDiagram
   F->>P: move o cartão se a etapa difere
   Note over H,A: quadro vira arquivo
   H->>P: arrasta o cartão para outra etapa
-  F->>P: polling lê Etapa e ator do evento
+  F->>P: polling lê Status e ator do evento
   F->>F: valida a etapa na lista fechada de 7
   F->>H: menu: confirmar a etapa nova?
   H->>F: confirma (atestado da 106)

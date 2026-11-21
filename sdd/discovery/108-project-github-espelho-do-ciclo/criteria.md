@@ -31,7 +31,7 @@
 | Atestado, veredito com SHA, sinais no `status.md` | 106 (`discovery.md` RN-4, RN-6, RN-13, RN-18; `plan.md` 1.1, 1.6, 3.2) | Só desenhados | **Depende de**: o arrastar do humano só vale com o atestado conforme o modo | Evita um segundo canal de aprovação |
 | Orquestrador e WIP humano | 107 (`discovery.md`, decisões do Gate 1) | Só desenhados | **Depende de** para contar Validation; a 108 só expõe o número | `DUP-01` |
 | Menus e `forge status` | 105 (2.2, 2.6) | Só desenhados/PRs | **Sequenciar com**: a coluna em `status` só depois | Evita conflito no mesmo arquivo |
-| Comando `gh project` | `gh project --help` (somente leitura) | `create`, `edit`, `field-create`, `field-list`, `item-add`, `item-edit`, `item-list`, `link` existem; **não** há `field-edit` | **Reusar** o `gh` (já em `allow_commands`); campo novo "Etapa" | `SEG-07`: nenhuma dependência nova |
+| Comando `gh project` | `gh project --help` (somente leitura) | `create`, `edit`, `field-create`, `field-list`, `item-add`, `item-edit`, `item-list`, `link` existem; **não** há `field-edit` (as opções do `Status` mudam por GraphQL `updateProjectV2Field`) | **Reusar** o `gh` (já em `allow_commands`); o campo da etapa é o `Status` (opções trocadas pela API GraphQL, verificado em 20/11/2026); não existe campo `Etapa` | `SEG-07`: nenhuma dependência nova |
 | Saneamento de texto externo | `internal/notify/notify.go:122` (`Sanitize`), `internal/gate` (`MaskSecrets`) | Saneadores prontos | **Reusar** para título e corpo de issue lidos do quadro | `SEG-08` |
 | Reference de rotina por agente | `.agents/skills/sdd-operacao/references/` (`archive`, `doctor`, `pipeline`, `status`...) | Sem `project.md` | **Criar** `project.md` (ponto único); `SKILL.md` de `sdd-concepcao` não muda (2045 de 2048 bytes) | `DUP-01`, P-24 |
 | Conceito "quadro do ciclo" | `sdd/spec/concepts.md` | Sem linha | **Adicionar** linha (dono: `internal/pipeline`, adaptador em `internal/vcs`) | `DUP-01` |
@@ -64,7 +64,7 @@ Recusa: qualquer valor fora dos 7 nomes exatos é descartado e vira divergência
 | Dado | Fonte da verdade | Como o outro lado acompanha |
 |---|---|---|
 | Estado da spec, da fila e do PR | Arquivo (`status.md`, `queue.json`) e o PR | O forge move o cartão depois de cada transição (idempotente) |
-| Etapa vista no quadro | O campo `Etapa` do Project | O forge lê por polling (`gh project item-list --format json`) a cada comando e em `doctor`; o orquestrador lê o campo |
+| Etapa vista no quadro | O campo `Status` do Project (lido em `.status` no `item-list`) | O forge lê por polling (`gh project item-list --format json`) a cada comando e em `doctor`; o orquestrador lê o campo |
 | Aprovação do Gate 1 e [Continuar] | O menu do forge e o atestado (106) | Arrastar o cartão **só gera o menu**; nunca grava aprovação |
 | Conflito (quadro diz X, arquivo diz Y) | Arquivo vence para estado; o humano vence só pelo menu | `forge doctor` lista a divergência com o ator e a hora; nada é corrigido sem confirmação |
 Percepção do arrastar: **polling** pelo CLI (sem webhook nem Action; o CI está bloqueado por cobrança e webhooks de Projects v2 de usuário são **a verificar**). Se `item-list` não expuser o ator do movimento (**a verificar**), o arrastar é só um pedido e o forge confirma por menu.
@@ -99,7 +99,7 @@ flowchart TB
   fila["internal/queue<br/>queue.json e status.md"]
   doc["internal/doctor<br/>divergência arquivo x quadro"]
   ghcli["gh project<br/>item-list, item-edit, field-list"]
-  quadro[/"GitHub Project<br/>campo Etapa, 7 opções"/]
+  quadro[/"GitHub Project<br/>campo Status, 7 opções"/]
   cli --> mapa
   mapa --> fila
   cli --> vcs
@@ -113,7 +113,7 @@ flowchart TB
 ```mermaid
 sequenceDiagram
   participant H as Dono
-  participant P as Project (Etapa)
+  participant P as Project (Status)
   participant F as forge project
   participant A as Arquivos (status.md, queue.json)
   Note over F,A: arquivo vira quadro
@@ -121,7 +121,7 @@ sequenceDiagram
   F->>P: move o cartão se a etapa difere
   Note over H,A: quadro vira arquivo
   H->>P: arrasta o cartão para outra etapa
-  F->>P: polling lê Etapa e ator do evento
+  F->>P: polling lê Status e ator do evento
   F->>F: valida a etapa na lista fechada de 7
   F->>H: menu: confirmar a etapa nova?
   H->>F: confirma (atestado da 106)
@@ -145,7 +145,7 @@ go test -run 'TestEtapaBloqueadoMantemEtapaDeOrigem' ./internal/pipeline/
 # negativo: título, corpo e comentário de issue nunca viram ordem nem saem sem saneamento
 go test -list 'TestQuadroTextoDeIssueEhDadoENaoOrdem' ./internal/vcs/ | grep -F 'TestQuadroTextoDeIssueEhDadoENaoOrdem'
 go test -run 'TestQuadroTextoDeIssueEhDadoENaoOrdem' ./internal/vcs/
-# leitura somente leitura: lê só o campo Etapa e nunca chama escrita no GitHub
+# leitura somente leitura: lê só o campo Status e nunca chama escrita no GitHub
 go test -list 'TestQuadroLeituraNaoChamaEscrita' ./internal/vcs/ | grep -F 'TestQuadroLeituraNaoChamaEscrita'
 go test -run 'TestQuadroLeituraNaoChamaEscrita' ./internal/vcs/
 # negativo: mover o mesmo cartão duas vezes não repete a chamada (idempotente)
