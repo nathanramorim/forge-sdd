@@ -60,6 +60,17 @@ grep -F '| Módulos permitidos | nenhum |' sdd/memory/constitution.md
 grep -F '| Início automático do Builder |' sdd/memory/constitution.md
 go test ./internal/gate/... -run 'TestCheckP24_RepositorioDoForgeSddPassaNoProprioPortao'
 # byte a byte sem módulo (RN-1, requisito inegociável)
+# os testes existem de fato (P-25): -run sozinho passa sem rodar nada
+set -o pipefail
+go test ./cmd/... -list 'TestSemModuloHelpIdentico' | grep -F 'TestSemModuloHelpIdentico'
+go test ./cmd/... -list 'TestSemModuloDoctorIdentico' | grep -F 'TestSemModuloDoctorIdentico'
+go test ./cmd/... -list 'TestSemModuloStatusIdentico' | grep -F 'TestSemModuloStatusIdentico'
+go test ./cmd/... -list 'TestSemModuloComandoDesconhecidoIdentico' | grep -F 'TestSemModuloComandoDesconhecidoIdentico'
+go test ./cmd/... -list 'TestSemModuloCodigosDeSaidaIdenticos' | grep -F 'TestSemModuloCodigosDeSaidaIdenticos'
+go test ./internal/pipeline/... -list 'TestEsteiraCompletaIdenticaSemModulo' | grep -F 'TestEsteiraCompletaIdenticaSemModulo'
+go test ./internal/modulo/... -list 'TestCampoNenhumNaoTocaDiscoNemProcesso' | grep -F 'TestCampoNenhumNaoTocaDiscoNemProcesso'
+go test ./internal/modulo/... -list 'TestCampoAusenteVaiNenhumSemAviso' | grep -F 'TestCampoAusenteVaiNenhumSemAviso'
+go test ./internal/scaffold/... -list 'TestInitNaoGeraCampoDeModulos' | grep -F 'TestInitNaoGeraCampoDeModulos'
 go test ./cmd/... -run 'TestSemModuloHelpIdentico|TestSemModuloDoctorIdentico|TestSemModuloStatusIdentico'
 go test ./cmd/... -run 'TestSemModuloComandoDesconhecidoIdentico|TestSemModuloCodigosDeSaidaIdenticos'
 go test ./internal/pipeline/... -run 'TestEsteiraCompletaIdenticaSemModulo'
@@ -69,10 +80,10 @@ go test ./internal/scaffold/... -run 'TestInitNaoGeraCampoDeModulos'
 go test ./internal/modulo/... -run 'TestModuloAusenteIgnoradoSemSaida|TestModuloQuebradoIgnoradoEMensagemSoNoDoctor'
 go test ./internal/modulo/... -run 'TestModuloIncompativelIgnoradoEMensagemSoNoDoctor|TestModuloLentoNaoBloqueiaAFila'
 go test ./internal/doctor/... -run 'TestDoctorModuloProblemaViraAvisoNuncaFalha|TestDoctorListaModuloAutorizado'
-# P-25 (109-12): ADR da execução existe e cita FLX-05 e SEG-03
-test -f sdd/spec/adr/adr-0023-execucao-de-modulos-externos.md
-grep -F 'FLX-05' sdd/spec/adr/adr-0023-execucao-de-modulos-externos.md
-grep -F 'SEG-03' sdd/spec/adr/adr-0023-execucao-de-modulos-externos.md
+# P-25 (109-12): ADR da execução existe e cita FLX-05 e SEG-03 (número definido no merge)
+test -n "$(ls sdd/spec/adr/adr-*-execucao-de-modulos-externos.md 2>/dev/null)"
+grep -F 'FLX-05' sdd/spec/adr/adr-*-execucao-de-modulos-externos.md
+grep -F 'SEG-03' sdd/spec/adr/adr-*-execucao-de-modulos-externos.md
 # negativo: cada caso abaixo deve falhar, e o teste existe de fato
 go test ./internal/modulo/... -list 'TestBinarioAlteradoERecusado' | grep -F 'TestBinarioAlteradoERecusado'
 go test ./internal/modulo/... -list 'TestCaminhoForaDoUsuarioRecusado' | grep -F 'TestCaminhoForaDoUsuarioRecusado'
