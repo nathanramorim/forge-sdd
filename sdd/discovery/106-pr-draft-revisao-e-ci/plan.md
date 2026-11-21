@@ -79,3 +79,18 @@ Id estável de cada task: `feat-106-<onda><n>` (0.2 = `feat-106-02`, 0.8 = `feat
 - **2.6:** `26a` comandos `/discovery`, `/nova-feature`, `/novo-fix`; `26b` skill do Builder, perguntas, templates e goldens.
 - **3.3:** `33a` sub-etapa de medição e relatório com as duas fontes; `33b` alerta, linha de base e métricas normalizadas.
 As demais cabem a um Builder.
+
+## Decisão do dono (chat, 2026-11-20): opcionais do core
+As tasks **0.4**, **2.5** e **3.7** ficam como "opcionais do core, fora das ondas, decidir depois". Não foram apagadas das tabelas; as ondas não as incluem, não têm feature nem entram na fila (ver `fora-da-fila.md`). A ordem do core das ondas mora na 109 (`plan.md` dela); não é copiada aqui.
+
+## Split aplicado (2026-11-20)
+30 features em `features/` e em `queue.json` (todas `queued`), ids `feat-106-<onda><n>`; cortes: 07a/07b, 22a/22b, 24a/24b/24c, 26a/26b, 33a/33b. A 0.1 virou `feat-106-01`; a 0.8, `feat-106-08` (onda P). Ordem de colisão virou `Depende de` onde era barata: 02 e 07a depois da 11; 15 depois da 13; 21 antes da 22a, 24a e 32; 26b depois da 15.
+
+**Pré-requisito das branches por feature (`GOV-02`, Regra 15):**
+```constitution-exception
+regra: 15
+motivo: uma branch e um PR em draft por feature (iniciativa 106) até a task 0.8 reescrever a Regra 15 no PR único da Constituição
+prazo: 2026-12-31
+responsavel: Nathan Ramos Amorim
+```
+O prazo é proposto; o dono ajusta ao aprovar.
