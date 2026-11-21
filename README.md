@@ -12,7 +12,7 @@
 
 <h3 align="center">Seu time de IA, com método.<br>Do plano ao PR, sem repetir instruções.</h3>
 
-<p align="center"><strong>Versão atual: 5.0.0 (estável)</strong> · <a href="sdd/releases/history.md">veja as novidades</a> · <a href="docs/design/edicao-missoes/README.md">Edição Missões</a></p>
+<p align="center"><strong>Versão atual: 5.0.0 (estável) · prévia: 5.1.0-beta (<code>@beta</code>)</strong> · <a href="sdd/releases/history.md">veja as novidades</a> · <a href="docs/design/edicao-missoes/README.md">Edição Missões</a></p>
 
 <p align="center"><strong>A IA executa, o plano segura, você aprova.</strong><br>
 Missão 1: o plano · Missão 2: a obra · Missão 3: o vigia · Missão cumprida</p>
@@ -172,6 +172,7 @@ A telemetria é opcional e fica no seu projeto. No modo `forge worker --raw`, a 
 
 | Versão | Novidades |
 |---|---|
+| **5.1.0-beta** | Prévia (`@beta`, fora da `main`): `forge doctor` compara versões, `forge status --all`, aviso de comandos depreciados com registro em CSV, métricas de Discovery e parecer do Reviewer com proveniência. |
 | **5.0.0** | Edição Missões: wiki Get Started com prompts prontos para IA e modo Hub, PR aberto sozinho quando a revisão dá conforme, limpeza de worktrees ociosos e revisão dos artefatos da spec sem sair da conversa. |
 | **4.8.0** | Versão estável do painel interativo: stream de chat nos workers, fila com abas e drill-down, popup no tmux e fila que acompanha a aprovação do Reviewer. |
 | **4.6.x** | Comando único `forge`, painel vivo executivo e tokens por janela com reset suave. |
