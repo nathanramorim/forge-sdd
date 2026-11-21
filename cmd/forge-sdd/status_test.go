@@ -38,6 +38,9 @@ func runRoot(t *testing.T, args ...string) (string, error) {
 	_ = briefCmd.Flags().Set("dir", ".")
 	_ = briefCmd.Flags().Set("max-bytes", "0")
 	_ = briefCmd.Flags().Set("check", "false")
+	if f := rootCmd.PersistentFlags().Lookup("iniciativa"); f != nil {
+		_ = rootCmd.PersistentFlags().Set("iniciativa", "")
+	}
 	resetWorkerFlags()
 	resetReviewFlags()
 	var out bytes.Buffer

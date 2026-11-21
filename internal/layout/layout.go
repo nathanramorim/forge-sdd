@@ -220,15 +220,8 @@ func ActivityFile(dir string) string { return filepath.Join(Runtime(dir), Activi
 // ActiveInitiative devolve o id e a pasta da iniciativa da branch atual, desde que a pasta
 // exista em sdd/discovery. Sem git, branch fora do padrão ou pasta ausente devolve ok=false.
 func ActiveInitiative(dir string) (id, path string, ok bool) {
-	id, found, err := Current(dir)
-	if err != nil || !found {
-		return "", "", false
-	}
-	path, err = Initiative(dir, id)
-	if err != nil {
-		return "", "", false
-	}
-	if info, err := os.Stat(path); err != nil || !info.IsDir() {
+	id, path, err := ResolveInitiative(dir)
+	if err != nil || id == "" {
 		return "", "", false
 	}
 	return id, path, true
