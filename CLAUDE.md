@@ -12,7 +12,7 @@ forge-sdd: stack . Fluxo por feature em `sdd/FLOW.md`.
 ## Onde está cada coisa
 - `sdd/memory/constitution.md`: regras por ID; leia só os IDs da tarefa (`forge context`).
 - `sdd/discovery/<id>-<nome>/`: discovery, criteria, plan, status, queue, features e fixes.
-- `.agents/rules/`: como cumprir a Constitution. `.agents/skills/sdd-*`: as 5 estações.
+- `.agents/rules/`: como cumprir a Constitution. `.agents/skills/sdd-*`: as 3 sessões.
 
 ## Comandos
 `/discovery`, `/split-features`, `/implementar [feature]`, `/revisar`, `/status`, `/nova-feature`, `/novo-fix`, `/archive`, `/doctor`, `/upgrade-sdd`, `/constitution`, `/c4-architecture`, `/tutorial` (`.claude/commands/`, `.claude/agents/`).

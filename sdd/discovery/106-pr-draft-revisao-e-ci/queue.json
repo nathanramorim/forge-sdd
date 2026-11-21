@@ -1,0 +1,510 @@
+{
+  "feature_id": "feat-106",
+  "branch": "feat/106-pr-draft-revisao-e-ci",
+  "base_branch": "main",
+  "spec_status": "reviewed",
+  "updated_at": "2026-11-21T02:23:18Z",
+  "items": [
+    {
+      "task_id": "feat-106-01",
+      "title": "feat-106-01 — Verificar o que está \"a verificar\" (Azure, build validation, MCP)",
+      "spec_path": "sdd/discovery/106-pr-draft-revisao-e-ci/features/feat-106-01-verificar-a-verificar.md",
+      "status": "queued",
+      "rules": [
+        "SEG-07",
+        "DUP-02"
+      ],
+      "skills_used": [],
+      "attempts": 0
+    },
+    {
+      "task_id": "feat-106-11",
+      "title": "feat-106-11 — harness.Parecer com head_sha, ponto, modo e feature",
+      "spec_path": "sdd/discovery/106-pr-draft-revisao-e-ci/features/feat-106-11-parecer-com-head-sha.md",
+      "status": "queued",
+      "rules": [
+        "DUP-06",
+        "FLX-06",
+        "SEG-01",
+        "TST-03"
+      ],
+      "skills_used": [],
+      "attempts": 0
+    },
+    {
+      "task_id": "feat-106-02",
+      "title": "feat-106-02 — internal/vcs com adaptadores github e nenhum",
+      "spec_path": "sdd/discovery/106-pr-draft-revisao-e-ci/features/feat-106-02-adaptador-vcs.md",
+      "status": "queued",
+      "depends_on": [
+        "feat-106-11"
+      ],
+      "rules": [
+        "ARQ-01",
+        "ARQ-02",
+        "DUP-01",
+        "SEG-03",
+        "TST-03"
+      ],
+      "skills_used": [],
+      "attempts": 0
+    },
+    {
+      "task_id": "feat-106-08",
+      "title": "feat-106-08 — PR único da Constituição e da rule de modos",
+      "spec_path": "sdd/discovery/106-pr-draft-revisao-e-ci/features/feat-106-08-constituicao-pr-unico.md",
+      "status": "queued",
+      "rules": [
+        "GOV-01",
+        "GOV-04",
+        "FLX-05",
+        "TST-03"
+      ],
+      "skills_used": [],
+      "attempts": 0
+    },
+    {
+      "task_id": "feat-106-05",
+      "title": "feat-106-05 — Leitor único dos campos de modo da Constituição",
+      "spec_path": "sdd/discovery/106-pr-draft-revisao-e-ci/features/feat-106-05-leitor-de-modos.md",
+      "status": "queued",
+      "depends_on": [
+        "feat-106-02",
+        "feat-106-08"
+      ],
+      "rules": [
+        "ARQ-10",
+        "SEG-01",
+        "GOV-01",
+        "TST-03"
+      ],
+      "skills_used": [],
+      "attempts": 0
+    },
+    {
+      "task_id": "feat-106-06",
+      "title": "feat-106-06 — Cadeia de fallback do atestado (github e nenhum)",
+      "spec_path": "sdd/discovery/106-pr-draft-revisao-e-ci/features/feat-106-06-fallback-do-atestado.md",
+      "status": "queued",
+      "depends_on": [
+        "feat-106-02",
+        "feat-106-05"
+      ],
+      "rules": [
+        "FLX-01",
+        "SEG-05",
+        "TST-03"
+      ],
+      "skills_used": [],
+      "attempts": 0
+    },
+    {
+      "task_id": "feat-106-07a",
+      "title": "feat-106-07a — Estado por feature, claim pela branch e mutadores da fila",
+      "spec_path": "sdd/discovery/106-pr-draft-revisao-e-ci/features/feat-106-07a-estado-por-feature.md",
+      "status": "queued",
+      "depends_on": [
+        "feat-106-11"
+      ],
+      "rules": [
+        "DUP-04",
+        "DUP-01",
+        "ARQ-02",
+        "TST-03"
+      ],
+      "skills_used": [],
+      "attempts": 0
+    },
+    {
+      "task_id": "feat-106-07b",
+      "title": "feat-106-07b — layout.Current, goalSpecApproved e archive a partir da principal",
+      "spec_path": "sdd/discovery/106-pr-draft-revisao-e-ci/features/feat-106-07b-layout-e-archive-da-principal.md",
+      "status": "queued",
+      "depends_on": [
+        "feat-106-07a"
+      ],
+      "rules": [
+        "DUP-04",
+        "DUP-01",
+        "ARQ-02",
+        "TST-03"
+      ],
+      "skills_used": [],
+      "attempts": 0
+    },
+    {
+      "task_id": "feat-106-12",
+      "title": "feat-106-12 — scripts/licoes.py e lições por arquivo",
+      "spec_path": "sdd/discovery/106-pr-draft-revisao-e-ci/features/feat-106-12-licoes-por-arquivo.md",
+      "status": "queued",
+      "rules": [
+        "DUP-01",
+        "ARQ-03",
+        "GOV-03",
+        "TST-03"
+      ],
+      "skills_used": [],
+      "attempts": 0
+    },
+    {
+      "task_id": "feat-106-13",
+      "title": "feat-106-13 — scripts/validar_entrega.py (ponto spec ou entrega)",
+      "spec_path": "sdd/discovery/106-pr-draft-revisao-e-ci/features/feat-106-13-validar-entrega.md",
+      "status": "queued",
+      "depends_on": [
+        "feat-106-11"
+      ],
+      "rules": [
+        "FLX-06",
+        "DUP-03",
+        "SEG-03",
+        "TST-03"
+      ],
+      "skills_used": [],
+      "attempts": 0
+    },
+    {
+      "task_id": "feat-106-14",
+      "title": "feat-106-14 — scripts/pr_guard.py (barreira de gh/az no Claude Code)",
+      "spec_path": "sdd/discovery/106-pr-draft-revisao-e-ci/features/feat-106-14-pr-guard.md",
+      "status": "queued",
+      "depends_on": [
+        "feat-106-02",
+        "feat-106-11"
+      ],
+      "rules": [
+        "SEG-01",
+        "SEG-03",
+        "SEG-07",
+        "FLX-08"
+      ],
+      "skills_used": [],
+      "attempts": 0
+    },
+    {
+      "task_id": "feat-106-15",
+      "title": "feat-106-15 — Instalador do hook PreToolUse e aviso de cobertura no doctor",
+      "spec_path": "sdd/discovery/106-pr-draft-revisao-e-ci/features/feat-106-15-hook-pretooluse.md",
+      "status": "queued",
+      "depends_on": [
+        "feat-106-13",
+        "feat-106-14"
+      ],
+      "rules": [
+        "SEG-02",
+        "ARQ-05",
+        "TST-02"
+      ],
+      "skills_used": [],
+      "attempts": 0
+    },
+    {
+      "task_id": "feat-106-16",
+      "title": "feat-106-16 — Sinais spec-para-revisao e pronto-para-revisao, linhas do status.md, teto",
+      "spec_path": "sdd/discovery/106-pr-draft-revisao-e-ci/features/feat-106-16-sinais-e-teto.md",
+      "status": "queued",
+      "depends_on": [
+        "feat-106-11",
+        "feat-106-07a"
+      ],
+      "rules": [
+        "FLX-06",
+        "ARQ-01",
+        "TST-03"
+      ],
+      "skills_used": [],
+      "attempts": 0
+    },
+    {
+      "task_id": "feat-106-17",
+      "title": "feat-106-17 — Modo sem humano (pergunta no início, aviso de riscos)",
+      "spec_path": "sdd/discovery/106-pr-draft-revisao-e-ci/features/feat-106-17-modo-sem-humano.md",
+      "status": "queued",
+      "depends_on": [
+        "feat-106-11",
+        "feat-106-16"
+      ],
+      "rules": [
+        "FLX-01",
+        "SEG-05",
+        "TST-03"
+      ],
+      "skills_used": [],
+      "attempts": 0
+    },
+    {
+      "task_id": "feat-106-21",
+      "title": "feat-106-21 — queue review e OpenPR delegam ao adaptador",
+      "spec_path": "sdd/discovery/106-pr-draft-revisao-e-ci/features/feat-106-21-queue-review-pelo-adaptador.md",
+      "status": "queued",
+      "depends_on": [
+        "feat-106-02",
+        "feat-106-11",
+        "feat-106-16"
+      ],
+      "rules": [
+        "ARQ-02",
+        "DUP-03",
+        "FLX-03"
+      ],
+      "skills_used": [],
+      "attempts": 0
+    },
+    {
+      "task_id": "feat-106-22a",
+      "title": "feat-106-22a — PR da spec em draft e merge da spec pelo adaptador",
+      "spec_path": "sdd/discovery/106-pr-draft-revisao-e-ci/features/feat-106-22a-pr-da-spec-e-merge.md",
+      "status": "queued",
+      "depends_on": [
+        "feat-106-07a",
+        "feat-106-13",
+        "feat-106-21"
+      ],
+      "rules": [
+        "FLX-01",
+        "FLX-02",
+        "TST-03"
+      ],
+      "skills_used": [],
+      "attempts": 0
+    },
+    {
+      "task_id": "feat-106-22b",
+      "title": "feat-106-22b — Marcador Gate 1 no status.md da principal e modo sem humano",
+      "spec_path": "sdd/discovery/106-pr-draft-revisao-e-ci/features/feat-106-22b-marcador-gate-1-e-sem-humano.md",
+      "status": "queued",
+      "depends_on": [
+        "feat-106-22a",
+        "feat-106-07b",
+        "feat-106-17"
+      ],
+      "rules": [
+        "FLX-01",
+        "FLX-02",
+        "TST-03"
+      ],
+      "skills_used": [],
+      "attempts": 0
+    },
+    {
+      "task_id": "feat-106-23",
+      "title": "feat-106-23 — Split pelo Builder sem nova aprovação",
+      "spec_path": "sdd/discovery/106-pr-draft-revisao-e-ci/features/feat-106-23-split-pelo-builder.md",
+      "status": "queued",
+      "depends_on": [
+        "feat-106-13",
+        "feat-106-22b"
+      ],
+      "rules": [
+        "FLX-01",
+        "FLX-02",
+        "TST-03"
+      ],
+      "skills_used": [],
+      "attempts": 0
+    },
+    {
+      "task_id": "feat-106-24a",
+      "title": "feat-106-24a — Base sempre base_branch e OpenPR pelo adaptador (uma branch e um PR draft por feature)",
+      "spec_path": "sdd/discovery/106-pr-draft-revisao-e-ci/features/feat-106-24a-base-e-openpr-por-feature.md",
+      "status": "queued",
+      "depends_on": [
+        "feat-106-07a",
+        "feat-106-21",
+        "feat-106-22a"
+      ],
+      "rules": [
+        "DUP-03",
+        "ARQ-02",
+        "TST-04"
+      ],
+      "skills_used": [],
+      "attempts": 0
+    },
+    {
+      "task_id": "feat-106-24b",
+      "title": "feat-106-24b — Leque com worktree por task: Juntar só no nenhum, Publicar nos demais",
+      "spec_path": "sdd/discovery/106-pr-draft-revisao-e-ci/features/feat-106-24b-leque-por-worktree.md",
+      "status": "queued",
+      "depends_on": [
+        "feat-106-24a"
+      ],
+      "rules": [
+        "DUP-03",
+        "ARQ-02",
+        "TST-04"
+      ],
+      "skills_used": [],
+      "attempts": 0
+    },
+    {
+      "task_id": "feat-106-24c",
+      "title": "feat-106-24c — Dependente espera a predecessora mesclada; Continuar agrupado por onda",
+      "spec_path": "sdd/discovery/106-pr-draft-revisao-e-ci/features/feat-106-24c-espera-e-continuar-por-onda.md",
+      "status": "queued",
+      "depends_on": [
+        "feat-106-24b"
+      ],
+      "rules": [
+        "DUP-03",
+        "ARQ-02",
+        "TST-04"
+      ],
+      "skills_used": [],
+      "attempts": 0
+    },
+    {
+      "task_id": "feat-106-26a",
+      "title": "feat-106-26a — Comandos /discovery, /nova-feature, /novo-fix só da spec",
+      "spec_path": "sdd/discovery/106-pr-draft-revisao-e-ci/features/feat-106-26a-comandos-de-concepcao.md",
+      "status": "queued",
+      "depends_on": [
+        "feat-106-17",
+        "feat-106-22b",
+        "feat-106-23"
+      ],
+      "rules": [
+        "DUP-10",
+        "TST-02",
+        "COD-05",
+        "FLX-01"
+      ],
+      "skills_used": [],
+      "attempts": 0
+    },
+    {
+      "task_id": "feat-106-26b",
+      "title": "feat-106-26b — Skill do Builder por feature, perguntas, templates e goldens",
+      "spec_path": "sdd/discovery/106-pr-draft-revisao-e-ci/features/feat-106-26b-builder-por-feature.md",
+      "status": "queued",
+      "depends_on": [
+        "feat-106-15",
+        "feat-106-24c",
+        "feat-106-26a"
+      ],
+      "rules": [
+        "DUP-10",
+        "TST-02",
+        "COD-05",
+        "FLX-01"
+      ],
+      "skills_used": [],
+      "attempts": 0
+    },
+    {
+      "task_id": "feat-106-27",
+      "title": "feat-106-27 — ADR final dos fluxos e concepts.md",
+      "spec_path": "sdd/discovery/106-pr-draft-revisao-e-ci/features/feat-106-27-adr-final-e-concepts.md",
+      "status": "queued",
+      "depends_on": [
+        "feat-106-26b",
+        "feat-106-08"
+      ],
+      "rules": [
+        "GOV-01",
+        "FLX-05"
+      ],
+      "skills_used": [],
+      "attempts": 0
+    },
+    {
+      "task_id": "feat-106-31",
+      "title": "feat-106-31 — Workflow modelo por VCS e ci.yml do forge-sdd",
+      "spec_path": "sdd/discovery/106-pr-draft-revisao-e-ci/features/feat-106-31-workflow-modelo-por-vcs.md",
+      "status": "queued",
+      "depends_on": [
+        "feat-106-01"
+      ],
+      "rules": [
+        "ARQ-03",
+        "SEG-04"
+      ],
+      "skills_used": [],
+      "attempts": 0
+    },
+    {
+      "task_id": "feat-106-32",
+      "title": "feat-106-32 — Verificação do atestado por PR de feature (modo local)",
+      "spec_path": "sdd/discovery/106-pr-draft-revisao-e-ci/features/feat-106-32-atestado-local-no-ci.md",
+      "status": "queued",
+      "depends_on": [
+        "feat-106-05",
+        "feat-106-06",
+        "feat-106-11",
+        "feat-106-21"
+      ],
+      "rules": [
+        "SEG-04",
+        "SEG-05",
+        "FLX-06"
+      ],
+      "skills_used": [],
+      "attempts": 0
+    },
+    {
+      "task_id": "feat-106-33a",
+      "title": "feat-106-33a — ci-politica.py: medição e relatório com as duas fontes",
+      "spec_path": "sdd/discovery/106-pr-draft-revisao-e-ci/features/feat-106-33a-ci-politica-relatorio.md",
+      "status": "queued",
+      "depends_on": [
+        "feat-106-01",
+        "feat-106-31"
+      ],
+      "rules": [
+        "SEG-04",
+        "SEG-05",
+        "TST-03"
+      ],
+      "skills_used": [],
+      "attempts": 0
+    },
+    {
+      "task_id": "feat-106-33b",
+      "title": "feat-106-33b — ci-politica.py: alerta, CSV, linha de base e métricas normalizadas",
+      "spec_path": "sdd/discovery/106-pr-draft-revisao-e-ci/features/feat-106-33b-ci-politica-linha-de-base.md",
+      "status": "queued",
+      "depends_on": [
+        "feat-106-33a"
+      ],
+      "rules": [
+        "SEG-04",
+        "SEG-05",
+        "TST-03"
+      ],
+      "skills_used": [],
+      "attempts": 0
+    },
+    {
+      "task_id": "feat-106-34",
+      "title": "feat-106-34 — README: prompt curto por ferramenta e notas por SO",
+      "spec_path": "sdd/discovery/106-pr-draft-revisao-e-ci/features/feat-106-34-readme-prompt-por-ferramenta.md",
+      "status": "queued",
+      "depends_on": [
+        "feat-106-31",
+        "feat-106-32",
+        "feat-106-33b"
+      ],
+      "rules": [
+        "COD-05",
+        "GOV-04"
+      ],
+      "skills_used": [],
+      "attempts": 0
+    },
+    {
+      "task_id": "feat-106-36",
+      "title": "feat-106-36 — /upgrade-sdd leva a política; forge update e goldens; nota de versão",
+      "spec_path": "sdd/discovery/106-pr-draft-revisao-e-ci/features/feat-106-36-upgrade-sdd-leva-a-politica.md",
+      "status": "queued",
+      "depends_on": [
+        "feat-106-27"
+      ],
+      "rules": [
+        "TST-02",
+        "FLX-07"
+      ],
+      "skills_used": [],
+      "attempts": 0
+    }
+  ]
+}

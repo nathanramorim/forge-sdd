@@ -30,6 +30,9 @@ func TestGoldenInit(t *testing.T) {
 		if err := os.RemoveAll(goldenDir); err != nil {
 			t.Fatalf("removeAll golden: %v", err)
 		}
+		if err := os.MkdirAll(goldenDir, 0o755); err != nil {
+			t.Fatalf("mkdir golden: %v", err)
+		}
 		files, err := Run(cfg, goldenDir)
 		if err != nil {
 			t.Fatalf("Run (update): %v", err)

@@ -24,6 +24,7 @@ func runRoot(t *testing.T, args ...string) (string, error) {
 	_ = statusCmd.Flags().Set("once", "false")
 	_ = statusCmd.Flags().Set("compact", "false")
 	_ = statusCmd.Flags().Set("full", "false")
+	_ = statusCmd.Flags().Set("all", "false")
 	_ = statusCmd.Flags().Set("interactive", "false")
 	_ = queueCmd.Flags().Set("interactive", "false")
 	_ = queuePanelCmd.Flags().Set("interactive", "false")
@@ -37,6 +38,9 @@ func runRoot(t *testing.T, args ...string) (string, error) {
 	_ = briefCmd.Flags().Set("dir", ".")
 	_ = briefCmd.Flags().Set("max-bytes", "0")
 	_ = briefCmd.Flags().Set("check", "false")
+	if f := rootCmd.PersistentFlags().Lookup("iniciativa"); f != nil {
+		_ = rootCmd.PersistentFlags().Set("iniciativa", "")
+	}
 	resetWorkerFlags()
 	resetReviewFlags()
 	var out bytes.Buffer
@@ -253,4 +257,48 @@ func TestStatusCurtoSemTerminal(t *testing.T) {
 	require.NoError(t, err)
 	assert.Greater(t, len(full), 1500)
 	assert.NotContains(t, full, `{"type"`)
+}
+
+func escreveIniciativaFila(t *testing.T, dir, id, queueJSON string) {
+	t.Helper()
+	d := filepath.Join(dir, "sdd", "discovery", id)
+	require.NoError(t, os.MkdirAll(d, 0o755))
+	if queueJSON != "" {
+		require.NoError(t, os.WriteFile(filepath.Join(d, "queue.json"), []byte(queueJSON), 0o644))
+	}
+}
+
+const filaConcluida = `{"items":[{"id":"a","status":"completed"},{"id":"b","status":"approved"}]}`
+
+func TestStatusEscondeIniciativaConcluida(t *testing.T) {
+	dir := t.TempDir()
+	escreveIniciativaFila(t, dir, "79-velha", filaConcluida)
+	escreveIniciativaFila(t, dir, "90-viva", `{"items":[{"id":"a","status":"queued"}]}`)
+	out, err := runRoot(t, "status", "--dir", dir)
+	require.NoError(t, err)
+	assert.NotContains(t, out, "79-velha")
+	assert.Contains(t, out, "90-viva")
+}
+
+func TestStatusAllMostraConcluida(t *testing.T) {
+	dir := t.TempDir()
+	escreveIniciativaFila(t, dir, "79-velha", filaConcluida)
+	escreveIniciativaFila(t, dir, "90-viva", `{"items":[{"id":"a","status":"queued"}]}`)
+	out, err := runRoot(t, "status", "--dir", dir, "--all")
+	require.NoError(t, err)
+	assert.Contains(t, out, "79-velha [concluída]")
+	assert.Contains(t, out, "90-viva")
+}
+
+func TestStatusNaoEscondeFilaPendenteOuVazia(t *testing.T) {
+	dir := t.TempDir()
+	escreveIniciativaFila(t, dir, "80-pendente", `{"items":[{"id":"a","status":"completed"},{"id":"b","status":"review_pending"}]}`)
+	escreveIniciativaFila(t, dir, "81-vazia", `{"items":[]}`)
+	escreveIniciativaFila(t, dir, "82-sem-fila", "")
+	out, err := runRoot(t, "status", "--dir", dir)
+	require.NoError(t, err)
+	for _, id := range []string{"80-pendente", "81-vazia", "82-sem-fila"} {
+		assert.Contains(t, out, id)
+	}
+	assert.NotContains(t, out, "[concluída]")
 }

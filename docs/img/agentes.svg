@@ -38,30 +38,30 @@
 <ellipse cx="60" cy="127" rx="32" ry="4.5" fill="rgba(0,0,0,0.38)"/>
 <ellipse cx="13" cy="90" rx="7" ry="11" fill="#8aa4ff"/><ellipse cx="107" cy="90" rx="7" ry="11" fill="#8aa4ff"/>
 <line x1="60" y1="30" x2="60" y2="17" stroke="#8aa4ff" stroke-width="3.2" stroke-linecap="round"/>
-<circle cx="60" cy="11" r="14" fill="#4fd1b5" opacity="0.3"/><circle cx="60" cy="11" r="7.8" fill="#4fd1b5"/>
+<circle cx="60" cy="11" r="14" fill="#f5b04a" opacity="0.3"/><circle cx="60" cy="11" r="7.8" fill="#f5b04a"/>
 <path d="M60 28 C86 28 102 52 105 80 C108 106 92 118 60 118 C28 118 12 106 15 80 C18 52 34 28 60 28 Z" fill="#8aa4ff"/>
 <path d="M15 80 C12 106 28 118 60 118 C92 118 108 106 105 80 C97 98 80 106 60 106 C40 106 23 98 15 80 Z" fill="rgba(0,0,0,0.22)"/>
-<rect x="52" y="49.7" width="16" height="4.6" rx="2.3" fill="rgba(18,24,48,0.6)"/>
+<polygon points="60,45.5 66.5,52 60,58.5 53.5,52" fill="rgba(18,24,48,0.6)"/>
 <rect x="25" y="70" width="70" height="32" rx="16" fill="#10131a" stroke="rgba(255,255,255,0.1)"/>
-<g fill="#4fd1b5"><rect x="41.5" y="78" width="7" height="16" rx="3.5"/><rect x="71.5" y="78" width="7" height="16" rx="3.5"/></g>
+<g fill="#f5b04a"><circle cx="45" cy="86" r="6.5"/><circle cx="75" cy="86" r="6.5"/></g>
 </g><g transform="translate(610.0,168.0) scale(0.5)">
+<ellipse cx="60" cy="127" rx="32" ry="4.5" fill="rgba(0,0,0,0.38)"/>
+<ellipse cx="13" cy="90" rx="7" ry="11" fill="#4fd1b5"/><ellipse cx="107" cy="90" rx="7" ry="11" fill="#4fd1b5"/>
+<line x1="60" y1="30" x2="60" y2="17" stroke="#4fd1b5" stroke-width="3.2" stroke-linecap="round"/>
+<circle cx="60" cy="11" r="14" fill="#4f8ef7" opacity="0.3"/><circle cx="60" cy="11" r="7.8" fill="#4f8ef7"/>
+<path d="M60 28 C86 28 102 52 105 80 C108 106 92 118 60 118 C28 118 12 106 15 80 C18 52 34 28 60 28 Z" fill="#4fd1b5"/>
+<path d="M15 80 C12 106 28 118 60 118 C92 118 108 106 105 80 C97 98 80 106 60 106 C40 106 23 98 15 80 Z" fill="rgba(0,0,0,0.22)"/>
+<path d="M51 53 Q55.5 47 60 53 Q64.5 59 69 53" fill="none" stroke="rgba(18,24,48,0.6)" stroke-width="2.6" stroke-linecap="round"/>
+<rect x="25" y="70" width="70" height="32" rx="16" fill="#10131a" stroke="rgba(255,255,255,0.1)"/>
+<g fill="#4f8ef7"><rect x="41.5" y="78" width="7" height="16" rx="3.5"/><rect x="71.5" y="78" width="7" height="16" rx="3.5"/></g>
+</g><g transform="translate(1010.0,168.0) scale(0.5)">
 <ellipse cx="60" cy="127" rx="32" ry="4.5" fill="rgba(0,0,0,0.38)"/>
 <ellipse cx="13" cy="90" rx="7" ry="11" fill="#ff8a5c"/><ellipse cx="107" cy="90" rx="7" ry="11" fill="#ff8a5c"/>
 <line x1="60" y1="30" x2="60" y2="17" stroke="#ff8a5c" stroke-width="3.2" stroke-linecap="round"/>
-<circle cx="60" cy="11" r="14" fill="#4fd1b5" opacity="0.3"/><circle cx="60" cy="11" r="7.8" fill="#4fd1b5"/>
+<circle cx="60" cy="11" r="14" fill="#38c6e8" opacity="0.3"/><circle cx="60" cy="11" r="7.8" fill="#38c6e8"/>
 <path d="M60 28 C86 28 102 52 105 80 C108 106 92 118 60 118 C28 118 12 106 15 80 C18 52 34 28 60 28 Z" fill="#ff8a5c"/>
 <path d="M15 80 C12 106 28 118 60 118 C92 118 108 106 105 80 C97 98 80 106 60 106 C40 106 23 98 15 80 Z" fill="rgba(0,0,0,0.22)"/>
 <polygon points="60,46.5 66,57 54,57" fill="rgba(18,24,48,0.6)"/>
 <rect x="25" y="70" width="70" height="32" rx="16" fill="#10131a" stroke="rgba(255,255,255,0.1)"/>
-<g fill="#4fd1b5"><rect x="41.5" y="78" width="7" height="16" rx="3.5"/><rect x="71.5" y="78" width="7" height="16" rx="3.5"/></g>
-</g><g transform="translate(1010.0,168.0) scale(0.5)">
-<ellipse cx="60" cy="127" rx="32" ry="4.5" fill="rgba(0,0,0,0.38)"/>
-<ellipse cx="13" cy="90" rx="7" ry="11" fill="#f2a65a"/><ellipse cx="107" cy="90" rx="7" ry="11" fill="#f2a65a"/>
-<line x1="60" y1="30" x2="60" y2="17" stroke="#f2a65a" stroke-width="3.2" stroke-linecap="round"/>
-<circle cx="60" cy="11" r="14" fill="#4fd1b5" opacity="0.3"/><circle cx="60" cy="11" r="7.8" fill="#4fd1b5"/>
-<path d="M60 28 C86 28 102 52 105 80 C108 106 92 118 60 118 C28 118 12 106 15 80 C18 52 34 28 60 28 Z" fill="#f2a65a"/>
-<path d="M15 80 C12 106 28 118 60 118 C92 118 108 106 105 80 C97 98 80 106 60 106 C40 106 23 98 15 80 Z" fill="rgba(0,0,0,0.22)"/>
-<circle cx="60" cy="52" r="4.6" fill="none" stroke="rgba(18,24,48,0.6)" stroke-width="2.6"/>
-<rect x="25" y="70" width="70" height="32" rx="16" fill="#10131a" stroke="rgba(255,255,255,0.1)"/>
-<g fill="#4fd1b5"><rect x="41.5" y="78" width="7" height="16" rx="3.5"/><rect x="71.5" y="78" width="7" height="16" rx="3.5"/></g>
+<g fill="#38c6e8"><circle cx="45" cy="86" r="6.5"/><circle cx="75" cy="86" r="6.5"/></g>
 </g></g></svg>

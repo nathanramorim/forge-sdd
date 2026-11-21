@@ -1,0 +1,156 @@
+{
+ "kicker": "// Forge SDD · iniciativa 111",
+ "titulo": "Das fontes de dados ao painel e às lições, tudo local e só leitura",
+ "largura": 1360,
+ "altura": 600,
+ "nota_rodape": "nada sai da máquina; só o dono aprova uma lição",
+ "elementos": [
+  {
+   "tipo": "caixa",
+   "id": "f1",
+   "x": 56,
+   "y": 120,
+   "w": 320,
+   "h": 76,
+   "texto": "Sessões e fila",
+   "sub": "sdd/.metrics · queue.json · state",
+   "estilo": "normal"
+  },
+  {
+   "tipo": "caixa",
+   "id": "f2",
+   "x": 56,
+   "y": 216,
+   "w": 320,
+   "h": 76,
+   "texto": "Vereditos e achados",
+   "sub": "verdicts/*.json · achados.csv",
+   "estilo": "normal"
+  },
+  {
+   "tipo": "caixa",
+   "id": "f3",
+   "x": 56,
+   "y": 312,
+   "w": 320,
+   "h": 76,
+   "texto": "Depreciados",
+   "sub": "depreciados.csv · catálogo",
+   "estilo": "normal"
+  },
+  {
+   "tipo": "caixa",
+   "id": "f4",
+   "x": 56,
+   "y": 408,
+   "w": 320,
+   "h": 76,
+   "texto": "Lições e status",
+   "sub": "licoes/ · lessons.md · status.md",
+   "estilo": "normal"
+  },
+  {
+   "tipo": "caixa",
+   "id": "k",
+   "x": 464,
+   "y": 120,
+   "w": 288,
+   "h": 364,
+   "texto": "Leitor versionado",
+   "sub": "contrato v1 · só aditivo",
+   "estilo": "destaque"
+  },
+  {
+   "tipo": "caixa",
+   "id": "g",
+   "x": 840,
+   "y": 120,
+   "w": 232,
+   "h": 176,
+   "texto": "forge metricas gerar",
+   "sub": "médias e reincidência",
+   "estilo": "normal"
+  },
+  {
+   "tipo": "caixa",
+   "id": "l",
+   "x": 840,
+   "y": 328,
+   "w": 232,
+   "h": 156,
+   "texto": "Proposta de lição",
+   "sub": "texto curto com a regra e o motivo",
+   "estilo": "normal"
+  },
+  {
+   "tipo": "caixa",
+   "id": "p",
+   "x": 1144,
+   "y": 120,
+   "w": 160,
+   "h": 176,
+   "texto": "Painel",
+   "sub": "5 abas em HTML estático",
+   "estilo": "normal"
+  },
+  {
+   "tipo": "caixa",
+   "id": "d",
+   "x": 1144,
+   "y": 328,
+   "w": 160,
+   "h": 156,
+   "texto": "Dono",
+   "sub": "aprova por menu",
+   "estilo": "destaque"
+  },
+  {
+   "tipo": "seta",
+   "de": "f1.dir",
+   "para": "k.esq",
+   "forma": "horizontal"
+  },
+  {
+   "tipo": "seta",
+   "de": "f2.dir",
+   "para": "k.esq",
+   "forma": "horizontal"
+  },
+  {
+   "tipo": "seta",
+   "de": "f3.dir",
+   "para": "k.esq",
+   "forma": "horizontal"
+  },
+  {
+   "tipo": "seta",
+   "de": "f4.dir",
+   "para": "k.esq",
+   "forma": "horizontal"
+  },
+  {
+   "tipo": "seta",
+   "de": "k.dir",
+   "para": "g.esq",
+   "forma": "horizontal"
+  },
+  {
+   "tipo": "seta",
+   "de": "g.baixo",
+   "para": "l.cima",
+   "forma": "vertical"
+  },
+  {
+   "tipo": "seta",
+   "de": "g.dir",
+   "para": "p.esq",
+   "forma": "horizontal"
+  },
+  {
+   "tipo": "seta",
+   "de": "l.dir",
+   "para": "d.esq",
+   "forma": "horizontal"
+  }
+ ]
+}

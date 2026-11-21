@@ -332,17 +332,3 @@ func usuarioAtual() string {
 	}
 	return u.Username
 }
-
-// versaoMenor diz se a < b, tratando um sufixo de pré-lançamento (-beta) como anterior à versão
-// final; config.CompareVersions ignora o sufixo e não serve aqui.
-func versaoMenor(a, b string) bool {
-	if c := config.CompareVersions(a, b); c != 0 {
-		return c < 0
-	}
-	preA := strings.Contains(a, "-")
-	preB := strings.Contains(b, "-")
-	if preA != preB {
-		return preA
-	}
-	return preA && a < b
-}

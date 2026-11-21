@@ -1,0 +1,145 @@
+{
+ "kicker": "// Forge SDD · iniciativa 111",
+ "titulo": "O laço de aprendizado: o erro vira lição só depois do dono aprovar",
+ "largura": 1360,
+ "altura": 520,
+ "nota_rodape": "efeito medido: o erro caiu depois da lição? se não, a lição volta ao dono",
+ "elementos": [
+  {
+   "tipo": "caixa",
+   "id": "a",
+   "x": 56,
+   "y": 160,
+   "w": 232,
+   "h": 120,
+   "texto": "1. Erro",
+   "sub": "retorno do Reviewer ou volta à Discovery",
+   "estilo": "normal"
+  },
+  {
+   "tipo": "caixa",
+   "id": "b",
+   "x": 360,
+   "y": 160,
+   "w": 232,
+   "h": 120,
+   "texto": "2. Achado",
+   "sub": "uma linha por regra: P-xx, DUP-02, TST-03",
+   "estilo": "normal"
+  },
+  {
+   "tipo": "caixa",
+   "id": "c",
+   "x": 664,
+   "y": 160,
+   "w": 232,
+   "h": 120,
+   "texto": "3. Padrão",
+   "sub": "mesma regra N vezes vira reincidência",
+   "estilo": "normal"
+  },
+  {
+   "tipo": "caixa",
+   "id": "d",
+   "x": 968,
+   "y": 160,
+   "w": 232,
+   "h": 120,
+   "texto": "4. Proposta",
+   "sub": "texto curto, sem código nem caminho",
+   "estilo": "normal"
+  },
+  {
+   "tipo": "caixa",
+   "id": "e",
+   "x": 968,
+   "y": 336,
+   "w": 232,
+   "h": 120,
+   "texto": "5. Dono decide",
+   "sub": "menu: aprovar, ajustar ou recusar",
+   "estilo": "destaque"
+  },
+  {
+   "tipo": "caixa",
+   "id": "f",
+   "x": 664,
+   "y": 336,
+   "w": 232,
+   "h": 120,
+   "texto": "6. Lição gravada",
+   "sub": "pelo core, com versão e como reverter",
+   "estilo": "normal"
+  },
+  {
+   "tipo": "caixa",
+   "id": "g",
+   "x": 360,
+   "y": 336,
+   "w": 232,
+   "h": 120,
+   "texto": "7. Agentes leem",
+   "sub": "forge context traz a lição da regra",
+   "estilo": "normal"
+  },
+  {
+   "tipo": "caixa",
+   "id": "h",
+   "x": 56,
+   "y": 336,
+   "w": 232,
+   "h": 120,
+   "texto": "8. Efeito medido",
+   "sub": "o erro caiu? antes e depois, com n",
+   "estilo": "normal"
+  },
+  {
+   "tipo": "seta",
+   "de": "a.dir",
+   "para": "b.esq",
+   "forma": "horizontal"
+  },
+  {
+   "tipo": "seta",
+   "de": "b.dir",
+   "para": "c.esq",
+   "forma": "horizontal"
+  },
+  {
+   "tipo": "seta",
+   "de": "c.dir",
+   "para": "d.esq",
+   "forma": "horizontal"
+  },
+  {
+   "tipo": "seta",
+   "de": "d.baixo",
+   "para": "e.cima",
+   "forma": "vertical"
+  },
+  {
+   "tipo": "seta",
+   "de": "e.esq",
+   "para": "f.dir",
+   "forma": "horizontal"
+  },
+  {
+   "tipo": "seta",
+   "de": "f.esq",
+   "para": "g.dir",
+   "forma": "horizontal"
+  },
+  {
+   "tipo": "seta",
+   "de": "g.esq",
+   "para": "h.dir",
+   "forma": "horizontal"
+  },
+  {
+   "tipo": "seta",
+   "de": "h.cima",
+   "para": "a.baixo",
+   "forma": "vertical"
+  }
+ ]
+}

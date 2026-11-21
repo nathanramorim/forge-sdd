@@ -272,3 +272,10 @@ func TestSessions_LiveModeBuilderReviewerGeminiAbreAgySemFlagI(t *testing.T) {
 	assert.NotContains(t, revCmd, "-i")
 	assert.NotContains(t, revCmd, "gemini")
 }
+
+// Negativo (feat-105-06): forge up ainda resolve o agente lider na sessão Discovery.
+func TestLauncherDiscoveryUsaLider(t *testing.T) {
+	ss, err := Sessions(lenv("linux", nil, nil), "claude")
+	require.NoError(t, err)
+	assert.Contains(t, ss[0].Inner, "--agent lider")
+}

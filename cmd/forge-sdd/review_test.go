@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"testing"
 	"time"
@@ -19,6 +20,11 @@ import (
 func reviewFixture(t *testing.T, attempt int) string {
 	t.Helper()
 	dir := t.TempDir()
+	// O veredito exige o head_sha do HEAD: o fixture é um repositório local com um commit.
+	for _, a := range [][]string{{"init", "-q"}, {"-c", "user.name=t", "-c", "user.email=t@t", "commit", "-q", "--allow-empty", "-m", "base"}} {
+		out, err := exec.Command("git", append([]string{"-C", dir}, a...)...).CombinedOutput()
+		require.NoError(t, err, string(out))
+	}
 	cfg, _ := json.Marshal(config.DefaultForgeConfig())
 	testutil.WriteFile(t, dir, ".forge/config/forge.json", string(cfg))
 	url, n := "https://github.com/acme/app/pull/12", 12

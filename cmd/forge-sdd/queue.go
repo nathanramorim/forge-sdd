@@ -303,7 +303,8 @@ func RunInteractiveQueue(dir string, out io.Writer) error {
 
 var queueHandoffCmd = &cobra.Command{
 	Use:   "handoff",
-	Short: "Transfere um artefato de forma idempotente entre duas estações",
+	Short:  "[depreciado] Transfere um artefato de forma idempotente entre duas estações",
+	PreRun: avisoDepreciado(),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		dir, _ := cmd.Flags().GetString("dir")
 		from, _ := cmd.Flags().GetString("from")
@@ -335,7 +336,8 @@ var queueHandoffCmd = &cobra.Command{
 
 var queueStationsCmd = &cobra.Command{
 	Use:   "stations",
-	Short: "Lista o estado e versão das 5 filas de estações",
+	Short:  "[depreciado] Lista o estado e versão das 5 filas de estações",
+	PreRun: avisoDepreciado(),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		dir, _ := cmd.Flags().GetString("dir")
 		stations := queue.CanonicalStations()

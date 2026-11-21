@@ -57,3 +57,4 @@
 | 0018 | Gravação Segura de Arquivos do Usuário | `aceito` (20/11/2026) |
 | 0019 | Edição Temporária do Site com Porteiro por Data | `aceito` (20/11/2026) |
 | 0020 | Deploy da LP por Cloudflare Workers | `aceito` (20/11/2026) |
+| 0021 | Obsolescência das 5 Estações como Visão do Fluxo | `aceito` (20/11/2026) |

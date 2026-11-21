@@ -215,8 +215,16 @@ func Enqueue(dir, featureID, branch, taskID, title, specPath string, rules []str
 		q.FeatureID = featureID
 	}
 	if branch != "" {
-		if id, ok := layout.FromBranch(branch); ok {
-			if activeID, _, active := layout.ActiveInitiative(dir); active && activeID != id {
+		id, ok, err := layout.InitiativeOfBranch(dir, branch)
+		if err != nil {
+			return err
+		}
+		if ok {
+			activeID, _, err := layout.ResolveInitiative(dir)
+			if err != nil {
+				return err
+			}
+			if activeID != "" && activeID != id {
 				return fmt.Errorf("a branch %q pertence à iniciativa %q, mas a branch atual é da iniciativa %q; troque de branch antes de enfileirar", branch, id, activeID)
 			}
 		}

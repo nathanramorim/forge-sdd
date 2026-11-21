@@ -2,6 +2,7 @@ package harness
 
 import (
 	"fmt"
+	"regexp"
 	"strings"
 )
 
@@ -18,6 +19,43 @@ type Parecer struct {
 	Achados        []Retorno       `json:"achados"`
 	CandidateSkill *CandidateSkill `json:"candidate_skill,omitempty"`
 	Resumo         string          `json:"resumo"`
+	// Proveniência (106, task 1.1): quem grava é o Go, a partir do HEAD da branch, nunca o agente.
+	HeadSHA string `json:"head_sha,omitempty"`
+	Ponto   string `json:"ponto,omitempty"`
+	Modo    string `json:"modo,omitempty"`
+	Feature string `json:"feature,omitempty"`
+}
+
+// Pontos de revisão aceitos em Parecer.Ponto.
+const (
+	PontoSpec    = "spec"
+	PontoEntrega = "entrega"
+)
+
+var reSHA = regexp.MustCompile(`^[0-9a-f]{7,64}$`)
+
+// ComProveniencia devolve o parecer carimbado com o commit revisado, o ponto, o modo e a feature.
+// Sem SHA válido ou com ponto fora do enum, recusa: veredito sem SHA não vale.
+func (v Parecer) ComProveniencia(sha, ponto, modo, feature string) (Parecer, error) {
+	v.HeadSHA, v.Ponto, v.Feature = strings.ToLower(strings.TrimSpace(sha)), ponto, feature
+	if strings.TrimSpace(v.Modo) == "" {
+		v.Modo = modo
+	}
+	if err := ValidarProveniencia(v); err != nil {
+		return Parecer{}, err
+	}
+	return v, nil
+}
+
+// ValidarProveniencia exige head_sha hexadecimal e ponto spec ou entrega.
+func ValidarProveniencia(v Parecer) error {
+	if !reSHA.MatchString(v.HeadSHA) {
+		return fmt.Errorf("contrato %s: veredito sem head_sha válido (recebido %q): recusado", ContratoParecer, v.HeadSHA)
+	}
+	if v.Ponto != PontoSpec && v.Ponto != PontoEntrega {
+		return fmt.Errorf("contrato %s: ponto inválido %q: deve ser %q ou %q", ContratoParecer, v.Ponto, PontoSpec, PontoEntrega)
+	}
+	return nil
 }
 
 // Retorno é um achado individual do Parecer, devolvido ao Builder.

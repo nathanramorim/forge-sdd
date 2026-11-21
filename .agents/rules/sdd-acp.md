@@ -1,5 +1,5 @@
 ---
-description: Como operar, estender e integrar o Protocolo ACP (Agent Client Protocol) para comunicação entre IDEs e as 5 estações SDD.
+description: Como operar, estender e integrar o Protocolo ACP (Agent Client Protocol) para comunicação entre IDEs e as 3 sessões (Discovery, Builder, Reviewer) SDD.
 globs: ["internal/acp/**", "cmd/forge-sdd/acp.go", "docs/acp-*.md"]
 regras: [ARQ-01, ARQ-06, SEG-01, SEG-02, SEG-04, COD-01, COD-03, FLX-01, FLX-02, FLX-03, GOV-04, TST-01, TST-05]
 ---

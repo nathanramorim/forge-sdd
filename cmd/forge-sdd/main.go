@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/forge-sdd/cli/internal/config"
+	"github.com/forge-sdd/cli/internal/layout"
 	"github.com/forge-sdd/cli/internal/scaffold"
 	"github.com/forge-sdd/cli/internal/survey"
 	"github.com/spf13/cobra"
@@ -21,7 +22,47 @@ var rootCmd = &cobra.Command{
 	Use:   "forge",
 	Short: "Scaffolda estruturas Forge-SDD em qualquer projeto",
 	Long: `forge é um CLI que gera a estrutura completa Forge-SDD
-(sdd/, .github/, .vscode/) pronta para uso com GitHub Copilot.`,
+(sdd/, .agents/, arquivos de instrução por agente) e conduz o fluxo em 3 sessões
+(Discovery, Builder, Reviewer) com aprovação humana. Funciona com Claude Code,
+Gemini CLI, Codex e GitHub Copilot.`,
+	// Ponto único: grava a flag --iniciativa e, nos comandos que leem a fila ou o status da
+	// iniciativa, falha cedo se ela for ambígua ou inexistente (nada lê a fila legada).
+	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+		id, _ := cmd.Flags().GetString("iniciativa")
+		layout.SetOverride(id)
+		cmd.SilenceUsage, cmd.SilenceErrors = false, false
+		path := cmd.CommandPath()
+		interativo, _ := cmd.Flags().GetBool("interactive")
+		if !requerIniciativa[path] && !(path == "forge queue" && interativo) {
+			return nil
+		}
+		dir := "."
+		if f := cmd.Flags().Lookup("dir"); f != nil {
+			dir = f.Value.String()
+		}
+		if err := layout.RequireInitiative(dir); err != nil {
+			// Uma só mensagem clara (main a imprime), sem uso nem eco duplicado do cobra.
+			cmd.SilenceUsage = true
+			cmd.SilenceErrors = true
+			return err
+		}
+		return nil
+	},
+}
+
+// requerIniciativa lista os comandos que chamam layout.RequireInitiative antes de ler a fila.
+var requerIniciativa = map[string]bool{
+	"forge queue enqueue":  true,
+	"forge queue next":     true,
+	"forge queue complete": true,
+	"forge queue review":   true,
+	"forge queue list":     true,
+	"forge queue panel":    true,
+	"forge context":        true,
+	"forge status":         true,
+	"forge archive":        true,
+	"forge doctor":         true,
+	"forge gate":           true,
 }
 
 var versionCmd = &cobra.Command{
@@ -398,6 +439,7 @@ func init() {
 	initCmd.Flags().Bool("no-telemetry", false, "Desabilitar telemetria local")
 	initCmd.Flags().String("agent", "", "Agente(s) de IA: copilot, claude, gemini (csv, default: copilot)")
 	initCmd.Flags().String("naming-convention", "", "Convenção de nomenclatura: sequencial, hash, workitem")
+	rootCmd.PersistentFlags().String("iniciativa", "", "Iniciativa a usar (id <N>-<nome>); vence FORGE_INICIATIVA e a branch")
 	rootCmd.AddCommand(initCmd)
 
 	updateCmd.Flags().Bool("yes", false, "Pular prompts e usar flags")

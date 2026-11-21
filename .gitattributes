@@ -1,0 +1,2 @@
+# Evita conflito de merge entre PRs paralelos no registro de depreciados (append-only).
+sdd/memory/logs/*.csv merge=union

@@ -12,6 +12,7 @@ import (
 	"github.com/forge-sdd/cli/internal/config"
 	"github.com/forge-sdd/cli/internal/layout"
 	"github.com/forge-sdd/cli/internal/monitor"
+	"github.com/forge-sdd/cli/internal/notify"
 	"github.com/spf13/cobra"
 )
 
@@ -33,7 +34,10 @@ var sessionRecordCmd = &cobra.Command{
 Pensado para ser chamado por QUALQUER comando que encerra uma sessão
 (/proxima-feature, /revisar, /novo-fix) — não apenas o último passo de um
 prompt longo. Se sdd/.sddrc tiver telemetry.enabled=false, não grava nada
-e retorna sucesso (silencioso, por design).`,
+e retorna sucesso (silencioso, por design).
+
+--sessao spec (só /discovery, /nova-feature e /novo-fix) acrescenta o bloco "spec"
+com números da spec indicada em --feature; --dry-run imprime o JSON sem gravar.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		targetDir, _ := cmd.Flags().GetString("dir")
 		if targetDir == "" {
@@ -111,6 +115,29 @@ e retorna sucesso (silencioso, por design).`,
 			TokensCacheCreation: cacheCreation,
 			CostUSDTabela:       costTabela,
 			Medicao:             medicao,
+		}
+
+		sessao, _ := cmd.Flags().GetString("sessao")
+		switch sessao {
+		case "":
+		case "spec":
+			// Melhor esforço: falha na coleta grava o arquivo sem o bloco e avisa.
+			if sm, serr := monitor.CollectSpecMetrics(targetDir, feature); serr != nil {
+				fmt.Fprintf(cmd.ErrOrStderr(), "aviso: bloco spec não gravado: %s\n", notify.Sanitize(serr.Error(), 200, false))
+			} else {
+				metrics.Spec = sm
+			}
+		default:
+			fmt.Fprintf(cmd.ErrOrStderr(), "aviso: --sessao %q desconhecido; use spec\n", notify.Sanitize(sessao, 40, false))
+		}
+
+		if dry, _ := cmd.Flags().GetBool("dry-run"); dry {
+			data, derr := monitor.MarshalSessionMetrics(metrics)
+			if derr != nil {
+				return derr
+			}
+			fmt.Fprint(cmd.OutOrStdout(), string(data))
+			return nil
 		}
 
 		path, err := WriteSessionMetrics(targetDir, metrics, time.Now().UTC())
@@ -268,6 +295,8 @@ func init() {
 	sessionRecordCmd.Flags().Int("tokens-cache-creation", 0, "Tokens gravados no cache (medição real)")
 	sessionRecordCmd.Flags().Float64("cost-usd-tabela", 0, "Custo em dólares a preço de tabela (não é a fatura)")
 	sessionRecordCmd.Flags().String("medicao", "", "Origem dos tokens: real ou estimado")
+	sessionRecordCmd.Flags().String("sessao", "", "Tipo de sessão: spec grava o bloco spec (só /discovery, /nova-feature e /novo-fix)")
+	sessionRecordCmd.Flags().Bool("dry-run", false, "Imprime o registro em JSON sem gravar nada")
 	sessionRecordCmd.Flags().String("outcome", "", "Resultado da sessão: approved, rejected ou blocked (obrigatório)")
 
 	sessionCmd.AddCommand(sessionRecordCmd)

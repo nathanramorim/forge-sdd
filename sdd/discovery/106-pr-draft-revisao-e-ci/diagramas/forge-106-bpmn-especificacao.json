@@ -1,0 +1,315 @@
+{
+ "kicker": "// Forge SDD · iniciativa 106 · BPMN 1 de 2",
+ "titulo": "Especificação: da ideia à spec na principal",
+ "largura": 2200,
+ "altura": 894,
+ "nota_rodape": "◇ = decisão · tracejado = retrabalho",
+ "elementos": [
+  {
+   "tipo": "caixa",
+   "id": "LH",
+   "x": 24,
+   "y": 100,
+   "w": 2152,
+   "h": 150,
+   "texto": "",
+   "sub": "",
+   "estilo": "contorno",
+   "tamanho": 20
+  },
+  {
+   "tipo": "texto",
+   "x": 48,
+   "y": 128,
+   "texto": "HUMANO · Nathan",
+   "estilo": "rotulo",
+   "alinha": "start"
+  },
+  {
+   "tipo": "caixa",
+   "id": "LP",
+   "x": 24,
+   "y": 250,
+   "w": 2152,
+   "h": 150,
+   "texto": "",
+   "sub": "",
+   "estilo": "contorno",
+   "tamanho": 20
+  },
+  {
+   "tipo": "texto",
+   "x": 48,
+   "y": 278,
+   "texto": "IA · pm-architect",
+   "estilo": "rotulo",
+   "alinha": "start"
+  },
+  {
+   "tipo": "caixa",
+   "id": "LA",
+   "x": 24,
+   "y": 400,
+   "w": 2152,
+   "h": 150,
+   "texto": "",
+   "sub": "",
+   "estilo": "contorno",
+   "tamanho": 20
+  },
+  {
+   "tipo": "texto",
+   "x": 48,
+   "y": 428,
+   "texto": "AUTOMÁTICO · script e adaptador de VCS",
+   "estilo": "rotulo",
+   "alinha": "start"
+  },
+  {
+   "tipo": "caixa",
+   "id": "LR",
+   "x": 24,
+   "y": 550,
+   "w": 2152,
+   "h": 150,
+   "texto": "",
+   "sub": "",
+   "estilo": "contorno",
+   "tamanho": 20
+  },
+  {
+   "tipo": "texto",
+   "x": 48,
+   "y": 578,
+   "texto": "IA · reviewer",
+   "estilo": "rotulo",
+   "alinha": "start"
+  },
+  {
+   "tipo": "caixa",
+   "id": "ini",
+   "x": 270,
+   "y": 124,
+   "w": 200,
+   "h": 100,
+   "texto": "Escolhe o modo",
+   "sub": "com ou sem humano",
+   "estilo": "pill",
+   "tamanho": 20
+  },
+  {
+   "tipo": "caixa",
+   "id": "p1",
+   "x": 500,
+   "y": 274,
+   "w": 200,
+   "h": 100,
+   "texto": "Spec e PR em draft",
+   "sub": "escreve só a spec",
+   "estilo": "normal",
+   "tamanho": 20
+  },
+  {
+   "tipo": "caixa",
+   "id": "a1",
+   "x": 730,
+   "y": 424,
+   "w": 200,
+   "h": 100,
+   "texto": "Valida a spec",
+   "sub": "sem LLM",
+   "estilo": "contorno",
+   "tamanho": 20
+  },
+  {
+   "tipo": "caixa",
+   "id": "r1",
+   "x": 960,
+   "y": 574,
+   "w": 200,
+   "h": 100,
+   "texto": "Conferência 1",
+   "sub": "só o julgamento",
+   "estilo": "normal",
+   "tamanho": 20
+  },
+  {
+   "tipo": "caixa",
+   "id": "g1",
+   "x": 1190,
+   "y": 574,
+   "w": 200,
+   "h": 100,
+   "texto": "Conforme?",
+   "sub": "◇ spec",
+   "estilo": "normal",
+   "tamanho": 20
+  },
+  {
+   "tipo": "caixa",
+   "id": "p2",
+   "x": 1190,
+   "y": 274,
+   "w": 200,
+   "h": 100,
+   "texto": "Ajusta a spec",
+   "sub": "retrabalho",
+   "estilo": "tracejado",
+   "tamanho": 20
+  },
+  {
+   "tipo": "caixa",
+   "id": "h1",
+   "x": 1420,
+   "y": 124,
+   "w": 200,
+   "h": 100,
+   "texto": "Seguir ou ajustar?",
+   "sub": "◇ Gate 1",
+   "estilo": "destaque",
+   "tamanho": 20
+  },
+  {
+   "tipo": "caixa",
+   "id": "a2",
+   "x": 1650,
+   "y": 424,
+   "w": 200,
+   "h": 100,
+   "texto": "Spec mesclada",
+   "sub": "adaptador de VCS",
+   "estilo": "contorno",
+   "tamanho": 20
+  },
+  {
+   "tipo": "caixa",
+   "id": "fim",
+   "x": 1880,
+   "y": 424,
+   "w": 200,
+   "h": 100,
+   "texto": "Spec na principal",
+   "sub": "o Builder pode começar",
+   "estilo": "pill",
+   "tamanho": 20
+  },
+  {
+   "tipo": "seta",
+   "de": "ini.baixo",
+   "para": "p1.cima",
+   "forma": "vertical"
+  },
+  {
+   "tipo": "seta",
+   "de": "p1.baixo",
+   "para": "a1.cima",
+   "forma": "vertical"
+  },
+  {
+   "tipo": "seta",
+   "de": "a1.baixo",
+   "para": "r1.cima",
+   "forma": "vertical"
+  },
+  {
+   "tipo": "seta",
+   "de": "r1.dir",
+   "para": "g1.esq",
+   "forma": "horizontal"
+  },
+  {
+   "tipo": "seta",
+   "de": "g1.cima",
+   "para": "p2.baixo",
+   "forma": "vertical",
+   "rotulo": "não"
+  },
+  {
+   "tipo": "seta",
+   "de": "p2.esq",
+   "para": "p1.dir",
+   "forma": "horizontal",
+   "rotulo": "volta"
+  },
+  {
+   "tipo": "seta",
+   "de": "g1.dir",
+   "para": "h1.baixo",
+   "forma": "horizontal",
+   "rotulo": "sim"
+  },
+  {
+   "tipo": "seta",
+   "de": "h1.dir",
+   "para": "a2.cima",
+   "forma": "vertical",
+   "rotulo": "seguir"
+  },
+  {
+   "tipo": "seta",
+   "de": "a2.dir",
+   "para": "fim.esq",
+   "forma": "horizontal"
+  },
+  {
+   "tipo": "texto",
+   "x": 56,
+   "y": 758,
+   "texto": "LEGENDA",
+   "estilo": "rotulo",
+   "alinha": "start"
+  },
+  {
+   "tipo": "caixa",
+   "id": "lg1",
+   "x": 186,
+   "y": 734,
+   "w": 200,
+   "h": 60,
+   "texto": "HUMANO",
+   "sub": "decisões do Nathan",
+   "estilo": "destaque",
+   "tamanho": 18
+  },
+  {
+   "tipo": "caixa",
+   "id": "lg2",
+   "x": 406,
+   "y": 734,
+   "w": 200,
+   "h": 60,
+   "texto": "IA",
+   "sub": "pm-architect, builder, reviewer",
+   "estilo": "normal",
+   "tamanho": 18
+  },
+  {
+   "tipo": "caixa",
+   "id": "lg3",
+   "x": 626,
+   "y": 734,
+   "w": 200,
+   "h": 60,
+   "texto": "AUTOMÁTICO",
+   "sub": "sem LLM: script, hook, pipeline",
+   "estilo": "contorno",
+   "tamanho": 18
+  },
+  {
+   "tipo": "texto",
+   "x": 56,
+   "y": 820,
+   "texto": "Ajustar volta ao passo anterior. Teto de 3 passadas; depois o Forge pergunta a você.",
+   "estilo": "nota",
+   "alinha": "start"
+  },
+  {
+   "tipo": "texto",
+   "x": 56,
+   "y": 852,
+   "texto": "Modo sem humano: o Seguir vira automático e fica gravado. Sem VCS: o merge da spec é local.",
+   "estilo": "nota",
+   "alinha": "start"
+  }
+ ]
+}

@@ -1,0 +1,23 @@
+{
+  "$schema": "forge-sdd/metrics/1.0",
+  "feature": "sdd/discovery/97-finalizar-implementacoes-pendentes/fixes/fix-97-01-metricas-de-discovery.md",
+  "agent_path": [
+    "concepcao"
+  ],
+  "tokens_input": 12420,
+  "tokens_output": 3105,
+  "turns": 0,
+  "duration_seconds": 0,
+  "criterio_atendido": false,
+  "model": "",
+  "rework_lines": 0,
+  "context7_calls": 0,
+  "git_calls": 0,
+  "files_touched": [
+    "sdd/discovery/97-finalizar-implementacoes-pendentes/fixes/fix-97-01-metricas-de-discovery.md"
+  ],
+  "outcome": "blocked",
+  "sdd_version": "5.0.0",
+  "medicao": "estimado",
+  "complexidade": null
+}
