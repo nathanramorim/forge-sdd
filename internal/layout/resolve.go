@@ -104,7 +104,7 @@ func explicitInitiative(dir, v, origem string) (id, path string, err error) {
 		return "", "", fmt.Errorf("%s: %w", origem, err)
 	}
 	if _, ok := existingInitiative(dir, v); !ok {
-		return "", "", fmt.Errorf("%s: a iniciativa %q não existe em %s", origem, v, Discovery(dir))
+		return "", "", fmt.Errorf("%s: a iniciativa %q não existe em %s; corrija ou remova %s", origem, v, Discovery(dir), origem)
 	}
 	return v, path, nil
 }

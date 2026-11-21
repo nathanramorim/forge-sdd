@@ -30,14 +30,23 @@ Gemini CLI, Codex e GitHub Copilot.`,
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 		id, _ := cmd.Flags().GetString("iniciativa")
 		layout.SetOverride(id)
-		if !requerIniciativa[cmd.CommandPath()] {
+		cmd.SilenceUsage, cmd.SilenceErrors = false, false
+		path := cmd.CommandPath()
+		interativo, _ := cmd.Flags().GetBool("interactive")
+		if !requerIniciativa[path] && !(path == "forge queue" && interativo) {
 			return nil
 		}
 		dir := "."
 		if f := cmd.Flags().Lookup("dir"); f != nil {
 			dir = f.Value.String()
 		}
-		return layout.RequireInitiative(dir)
+		if err := layout.RequireInitiative(dir); err != nil {
+			// Uma só mensagem clara (main a imprime), sem uso nem eco duplicado do cobra.
+			cmd.SilenceUsage = true
+			cmd.SilenceErrors = true
+			return err
+		}
+		return nil
 	},
 }
 
@@ -48,6 +57,7 @@ var requerIniciativa = map[string]bool{
 	"forge queue complete": true,
 	"forge queue review":   true,
 	"forge queue list":     true,
+	"forge queue panel":    true,
 	"forge status":         true,
 	"forge archive":        true,
 	"forge doctor":         true,
