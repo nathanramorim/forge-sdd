@@ -1,0 +1,1087 @@
+{
+ "kicker": "// Forge SDD · iniciativa 108 · Kanban (celular)",
+ "titulo": "O quadro do ciclo, de cima para baixo",
+ "largura": 1080,
+ "altura": 5190,
+ "nota_rodape": "Desenho do que foi decidido; ainda não construído",
+ "elementos": [
+  {
+   "tipo": "caixa",
+   "id": "lgH",
+   "x": 40,
+   "y": 124,
+   "w": 170,
+   "h": 44,
+   "texto": "HUMANO",
+   "sub": "",
+   "estilo": "destaque",
+   "tamanho": 28,
+   "raio": 10
+  },
+  {
+   "tipo": "texto",
+   "x": 226,
+   "y": 156,
+   "texto": "= você, o dono",
+   "estilo": "legenda",
+   "tamanho": 28,
+   "alinha": "start"
+  },
+  {
+   "tipo": "caixa",
+   "id": "lgIA",
+   "x": 40,
+   "y": 182,
+   "w": 80,
+   "h": 44,
+   "texto": "IA",
+   "sub": "",
+   "estilo": "destaque",
+   "tamanho": 28,
+   "raio": 11
+  },
+  {
+   "tipo": "texto",
+   "x": 136,
+   "y": 214,
+   "texto": "= agente: pm-architect, Builder, Reviewer",
+   "estilo": "legenda",
+   "tamanho": 28,
+   "alinha": "start"
+  },
+  {
+   "tipo": "caixa",
+   "id": "lgAU",
+   "x": 40,
+   "y": 240,
+   "w": 250,
+   "h": 44,
+   "texto": "AUTOMÁTICO",
+   "sub": "",
+   "estilo": "destaque",
+   "tamanho": 28,
+   "raio": 13
+  },
+  {
+   "tipo": "texto",
+   "x": 306,
+   "y": 272,
+   "texto": "= sem IA: script, forge, GitHub",
+   "estilo": "legenda",
+   "tamanho": 28,
+   "alinha": "start"
+  },
+  {
+   "tipo": "caixa",
+   "id": "lgop",
+   "x": 40,
+   "y": 298,
+   "w": 1000,
+   "h": 52,
+   "texto": "OPCIONAL (tracejado) = só com a configuração ligada",
+   "sub": "",
+   "estilo": "novo",
+   "tamanho": 28
+  },
+  {
+   "tipo": "caixa",
+   "id": "c1",
+   "x": 40,
+   "y": 384,
+   "w": 940,
+   "h": 456,
+   "texto": "",
+   "sub": "",
+   "estilo": "normal"
+  },
+  {
+   "tipo": "texto",
+   "x": 64,
+   "y": 436,
+   "texto": "1. BACKLOG",
+   "estilo": "titulo",
+   "tamanho": 38,
+   "alinha": "start"
+  },
+  {
+   "tipo": "texto",
+   "x": 64,
+   "y": 476,
+   "texto": "Ideia na fila, sem spec",
+   "estilo": "legenda",
+   "tamanho": 28,
+   "alinha": "start"
+  },
+  {
+   "tipo": "caixa",
+   "id": "k11",
+   "x": 60,
+   "y": 498,
+   "w": 900,
+   "h": 132,
+   "texto": "",
+   "sub": "",
+   "estilo": "normal"
+  },
+  {
+   "tipo": "caixa",
+   "id": "b11",
+   "x": 80,
+   "y": 514,
+   "w": 159,
+   "h": 44,
+   "texto": "HUMANO",
+   "sub": "",
+   "estilo": "destaque",
+   "tamanho": 28,
+   "raio": 10
+  },
+  {
+   "tipo": "texto",
+   "x": 80,
+   "y": 604,
+   "texto": "Você registra a ideia",
+   "estilo": "titulo",
+   "tamanho": 30,
+   "alinha": "start"
+  },
+  {
+   "tipo": "caixa",
+   "id": "k12",
+   "x": 60,
+   "y": 644,
+   "w": 900,
+   "h": 176,
+   "texto": "",
+   "sub": "",
+   "estilo": "novo"
+  },
+  {
+   "tipo": "caixa",
+   "id": "b12",
+   "x": 80,
+   "y": 660,
+   "w": 159,
+   "h": 44,
+   "texto": "HUMANO",
+   "sub": "",
+   "estilo": "destaque",
+   "tamanho": 28,
+   "raio": 10
+  },
+  {
+   "tipo": "texto",
+   "x": 80,
+   "y": 750,
+   "texto": "Você cria a issue e o cartão no quadro",
+   "estilo": "titulo",
+   "tamanho": 30,
+   "alinha": "start"
+  },
+  {
+   "tipo": "texto",
+   "x": 80,
+   "y": 798,
+   "texto": "OPCIONAL · Quadro = github-projects",
+   "estilo": "rotulo",
+   "tamanho": 28,
+   "alinha": "start"
+  },
+  {
+   "tipo": "caixa",
+   "id": "c2",
+   "x": 40,
+   "y": 924,
+   "w": 940,
+   "h": 456,
+   "texto": "",
+   "sub": "",
+   "estilo": "normal"
+  },
+  {
+   "tipo": "texto",
+   "x": 64,
+   "y": 976,
+   "texto": "2. SPEC",
+   "estilo": "titulo",
+   "tamanho": 38,
+   "alinha": "start"
+  },
+  {
+   "tipo": "texto",
+   "x": 64,
+   "y": 1016,
+   "texto": "Spec sendo escrita",
+   "estilo": "legenda",
+   "tamanho": 28,
+   "alinha": "start"
+  },
+  {
+   "tipo": "caixa",
+   "id": "k21",
+   "x": 60,
+   "y": 1038,
+   "w": 900,
+   "h": 132,
+   "texto": "",
+   "sub": "",
+   "estilo": "normal"
+  },
+  {
+   "tipo": "caixa",
+   "id": "b21",
+   "x": 80,
+   "y": 1054,
+   "w": 368,
+   "h": 44,
+   "texto": "IA · pm-architect",
+   "sub": "",
+   "estilo": "destaque",
+   "tamanho": 28,
+   "raio": 11
+  },
+  {
+   "tipo": "texto",
+   "x": 80,
+   "y": 1144,
+   "texto": "Escreve a spec (/discovery)",
+   "estilo": "titulo",
+   "tamanho": 30,
+   "alinha": "start"
+  },
+  {
+   "tipo": "caixa",
+   "id": "k22",
+   "x": 60,
+   "y": 1184,
+   "w": 900,
+   "h": 176,
+   "texto": "",
+   "sub": "",
+   "estilo": "novo"
+  },
+  {
+   "tipo": "caixa",
+   "id": "b22",
+   "x": 80,
+   "y": 1200,
+   "w": 235,
+   "h": 44,
+   "texto": "AUTOMÁTICO",
+   "sub": "",
+   "estilo": "destaque",
+   "tamanho": 28,
+   "raio": 13
+  },
+  {
+   "tipo": "texto",
+   "x": 80,
+   "y": 1290,
+   "texto": "forge põe o cartão em Spec",
+   "estilo": "titulo",
+   "tamanho": 30,
+   "alinha": "start"
+  },
+  {
+   "tipo": "texto",
+   "x": 80,
+   "y": 1338,
+   "texto": "OPCIONAL · Quadro = github-projects",
+   "estilo": "rotulo",
+   "tamanho": 28,
+   "alinha": "start"
+  },
+  {
+   "tipo": "caixa",
+   "id": "c3",
+   "x": 40,
+   "y": 1464,
+   "w": 940,
+   "h": 558,
+   "texto": "",
+   "sub": "",
+   "estilo": "normal"
+  },
+  {
+   "tipo": "texto",
+   "x": 64,
+   "y": 1516,
+   "texto": "3. SPEC-VALIDATION",
+   "estilo": "titulo",
+   "tamanho": 38,
+   "alinha": "start"
+  },
+  {
+   "tipo": "texto",
+   "x": 64,
+   "y": 1556,
+   "texto": "Spec pronta, ainda não mesclada",
+   "estilo": "legenda",
+   "tamanho": 28,
+   "alinha": "start"
+  },
+  {
+   "tipo": "caixa",
+   "id": "k31",
+   "x": 60,
+   "y": 1578,
+   "w": 900,
+   "h": 132,
+   "texto": "",
+   "sub": "",
+   "estilo": "normal"
+  },
+  {
+   "tipo": "caixa",
+   "id": "b31",
+   "x": 80,
+   "y": 1594,
+   "w": 292,
+   "h": 44,
+   "texto": "IA · Reviewer",
+   "sub": "",
+   "estilo": "destaque",
+   "tamanho": 28,
+   "raio": 11
+  },
+  {
+   "tipo": "texto",
+   "x": 80,
+   "y": 1684,
+   "texto": "Conferência 1: lê a spec",
+   "estilo": "titulo",
+   "tamanho": 30,
+   "alinha": "start"
+  },
+  {
+   "tipo": "caixa",
+   "id": "k32",
+   "x": 60,
+   "y": 1724,
+   "w": 900,
+   "h": 132,
+   "texto": "",
+   "sub": "",
+   "estilo": "normal"
+  },
+  {
+   "tipo": "caixa",
+   "id": "b32",
+   "x": 80,
+   "y": 1740,
+   "w": 159,
+   "h": 44,
+   "texto": "HUMANO",
+   "sub": "",
+   "estilo": "destaque",
+   "tamanho": 28,
+   "raio": 10
+  },
+  {
+   "tipo": "texto",
+   "x": 80,
+   "y": 1830,
+   "texto": "Gate 1: você aprova no menu do forge",
+   "estilo": "titulo",
+   "tamanho": 30,
+   "alinha": "start"
+  },
+  {
+   "tipo": "caixa",
+   "id": "k33",
+   "x": 60,
+   "y": 1870,
+   "w": 900,
+   "h": 132,
+   "texto": "",
+   "sub": "",
+   "estilo": "normal"
+  },
+  {
+   "tipo": "caixa",
+   "id": "b33",
+   "x": 80,
+   "y": 1886,
+   "w": 159,
+   "h": 44,
+   "texto": "HUMANO",
+   "sub": "",
+   "estilo": "destaque",
+   "tamanho": 28,
+   "raio": 10
+  },
+  {
+   "tipo": "texto",
+   "x": 80,
+   "y": 1976,
+   "texto": "Você mescla o PR da spec",
+   "estilo": "titulo",
+   "tamanho": 30,
+   "alinha": "start"
+  },
+  {
+   "tipo": "caixa",
+   "id": "c4",
+   "x": 40,
+   "y": 2106,
+   "w": 940,
+   "h": 818,
+   "texto": "",
+   "sub": "",
+   "estilo": "normal"
+  },
+  {
+   "tipo": "texto",
+   "x": 64,
+   "y": 2158,
+   "texto": "4. TODO",
+   "estilo": "titulo",
+   "tamanho": 38,
+   "alinha": "start"
+  },
+  {
+   "tipo": "texto",
+   "x": 64,
+   "y": 2198,
+   "texto": "Spec na principal, pronta p/ o Builder",
+   "estilo": "legenda",
+   "tamanho": 28,
+   "alinha": "start"
+  },
+  {
+   "tipo": "caixa",
+   "id": "k41",
+   "x": 60,
+   "y": 2220,
+   "w": 900,
+   "h": 132,
+   "texto": "",
+   "sub": "",
+   "estilo": "normal"
+  },
+  {
+   "tipo": "caixa",
+   "id": "b41",
+   "x": 80,
+   "y": 2236,
+   "w": 235,
+   "h": 44,
+   "texto": "AUTOMÁTICO",
+   "sub": "",
+   "estilo": "destaque",
+   "tamanho": 28,
+   "raio": 13
+  },
+  {
+   "tipo": "texto",
+   "x": 80,
+   "y": 2326,
+   "texto": "forge vê o merge da spec",
+   "estilo": "titulo",
+   "tamanho": 30,
+   "alinha": "start"
+  },
+  {
+   "tipo": "caixa",
+   "id": "k42",
+   "x": 60,
+   "y": 2366,
+   "w": 900,
+   "h": 176,
+   "texto": "",
+   "sub": "",
+   "estilo": "novo"
+  },
+  {
+   "tipo": "caixa",
+   "id": "b42",
+   "x": 80,
+   "y": 2382,
+   "w": 235,
+   "h": 44,
+   "texto": "AUTOMÁTICO",
+   "sub": "",
+   "estilo": "destaque",
+   "tamanho": 28,
+   "raio": 13
+  },
+  {
+   "tipo": "texto",
+   "x": 80,
+   "y": 2472,
+   "texto": "Builder começa sozinho (sem você presente)",
+   "estilo": "titulo",
+   "tamanho": 30,
+   "alinha": "start"
+  },
+  {
+   "tipo": "texto",
+   "x": 80,
+   "y": 2520,
+   "texto": "OPCIONAL · Início automático = local",
+   "estilo": "rotulo",
+   "tamanho": 28,
+   "alinha": "start"
+  },
+  {
+   "tipo": "caixa",
+   "id": "k43",
+   "x": 60,
+   "y": 2556,
+   "w": 900,
+   "h": 176,
+   "texto": "",
+   "sub": "",
+   "estilo": "normal"
+  },
+  {
+   "tipo": "caixa",
+   "id": "b43",
+   "x": 80,
+   "y": 2572,
+   "w": 159,
+   "h": 44,
+   "texto": "HUMANO",
+   "sub": "",
+   "estilo": "destaque",
+   "tamanho": 28,
+   "raio": 10
+  },
+  {
+   "tipo": "texto",
+   "x": 80,
+   "y": 2662,
+   "texto": "Você inicia o Builder",
+   "estilo": "titulo",
+   "tamanho": 30,
+   "alinha": "start"
+  },
+  {
+   "tipo": "texto",
+   "x": 80,
+   "y": 2710,
+   "texto": "sem Início automático",
+   "estilo": "rotulo",
+   "tamanho": 28,
+   "alinha": "start"
+  },
+  {
+   "tipo": "caixa",
+   "id": "vr",
+   "x": 60,
+   "y": 2746,
+   "w": 900,
+   "h": 158,
+   "texto": "",
+   "sub": "",
+   "estilo": "contorno"
+  },
+  {
+   "tipo": "texto",
+   "x": 80,
+   "y": 2792,
+   "texto": "ATALHO · VIA RÁPIDA",
+   "estilo": "titulo",
+   "tamanho": 30,
+   "alinha": "start"
+  },
+  {
+   "tipo": "texto",
+   "x": 80,
+   "y": 2834,
+   "texto": "Só adr, rule ou documentação",
+   "estilo": "legenda",
+   "tamanho": 28,
+   "alinha": "start"
+  },
+  {
+   "tipo": "texto",
+   "x": 80,
+   "y": 2872,
+   "texto": "(sem código): pula o Building",
+   "estilo": "legenda",
+   "tamanho": 28,
+   "alinha": "start"
+  },
+  {
+   "tipo": "caixa",
+   "id": "c5",
+   "x": 40,
+   "y": 3008,
+   "w": 940,
+   "h": 456,
+   "texto": "",
+   "sub": "",
+   "estilo": "normal"
+  },
+  {
+   "tipo": "texto",
+   "x": 64,
+   "y": 3060,
+   "texto": "5. BUILDING",
+   "estilo": "titulo",
+   "tamanho": 38,
+   "alinha": "start"
+  },
+  {
+   "tipo": "texto",
+   "x": 64,
+   "y": 3100,
+   "texto": "Builder constrói",
+   "estilo": "legenda",
+   "tamanho": 28,
+   "alinha": "start"
+  },
+  {
+   "tipo": "caixa",
+   "id": "k51",
+   "x": 60,
+   "y": 3122,
+   "w": 900,
+   "h": 132,
+   "texto": "",
+   "sub": "",
+   "estilo": "normal"
+  },
+  {
+   "tipo": "caixa",
+   "id": "b51",
+   "x": 80,
+   "y": 3138,
+   "w": 273,
+   "h": 44,
+   "texto": "IA · Builder",
+   "sub": "",
+   "estilo": "destaque",
+   "tamanho": 28,
+   "raio": 11
+  },
+  {
+   "tipo": "texto",
+   "x": 80,
+   "y": 3228,
+   "texto": "Constrói a feature num PR",
+   "estilo": "titulo",
+   "tamanho": 30,
+   "alinha": "start"
+  },
+  {
+   "tipo": "caixa",
+   "id": "k52",
+   "x": 60,
+   "y": 3268,
+   "w": 900,
+   "h": 176,
+   "texto": "",
+   "sub": "",
+   "estilo": "novo"
+  },
+  {
+   "tipo": "caixa",
+   "id": "b52",
+   "x": 80,
+   "y": 3284,
+   "w": 235,
+   "h": 44,
+   "texto": "AUTOMÁTICO",
+   "sub": "",
+   "estilo": "destaque",
+   "tamanho": 28,
+   "raio": 13
+  },
+  {
+   "tipo": "texto",
+   "x": 80,
+   "y": 3374,
+   "texto": "Freios: 3 esperando você e 3 tentativas",
+   "estilo": "titulo",
+   "tamanho": 30,
+   "alinha": "start"
+  },
+  {
+   "tipo": "texto",
+   "x": 80,
+   "y": 3422,
+   "texto": "OPCIONAL · Início automático = local",
+   "estilo": "rotulo",
+   "tamanho": 28,
+   "alinha": "start"
+  },
+  {
+   "tipo": "caixa",
+   "id": "c6",
+   "x": 40,
+   "y": 3548,
+   "w": 940,
+   "h": 558,
+   "texto": "",
+   "sub": "",
+   "estilo": "normal"
+  },
+  {
+   "tipo": "texto",
+   "x": 64,
+   "y": 3600,
+   "texto": "6. VALIDATION",
+   "estilo": "titulo",
+   "tamanho": 38,
+   "alinha": "start"
+  },
+  {
+   "tipo": "texto",
+   "x": 64,
+   "y": 3640,
+   "texto": "PR pronto, esperando você",
+   "estilo": "legenda",
+   "tamanho": 28,
+   "alinha": "start"
+  },
+  {
+   "tipo": "caixa",
+   "id": "k61",
+   "x": 60,
+   "y": 3662,
+   "w": 900,
+   "h": 132,
+   "texto": "",
+   "sub": "",
+   "estilo": "normal"
+  },
+  {
+   "tipo": "caixa",
+   "id": "b61",
+   "x": 80,
+   "y": 3678,
+   "w": 235,
+   "h": 44,
+   "texto": "AUTOMÁTICO",
+   "sub": "",
+   "estilo": "destaque",
+   "tamanho": 28,
+   "raio": 13
+  },
+  {
+   "tipo": "texto",
+   "x": 80,
+   "y": 3768,
+   "texto": "Script local valida (sem IA)",
+   "estilo": "titulo",
+   "tamanho": 30,
+   "alinha": "start"
+  },
+  {
+   "tipo": "caixa",
+   "id": "k62",
+   "x": 60,
+   "y": 3808,
+   "w": 900,
+   "h": 132,
+   "texto": "",
+   "sub": "",
+   "estilo": "normal"
+  },
+  {
+   "tipo": "caixa",
+   "id": "b62",
+   "x": 80,
+   "y": 3824,
+   "w": 292,
+   "h": 44,
+   "texto": "IA · Reviewer",
+   "sub": "",
+   "estilo": "destaque",
+   "tamanho": 28,
+   "raio": 11
+  },
+  {
+   "tipo": "texto",
+   "x": 80,
+   "y": 3914,
+   "texto": "Conferência 2: lê o PR da feature",
+   "estilo": "titulo",
+   "tamanho": 30,
+   "alinha": "start"
+  },
+  {
+   "tipo": "caixa",
+   "id": "k63",
+   "x": 60,
+   "y": 3954,
+   "w": 900,
+   "h": 132,
+   "texto": "",
+   "sub": "",
+   "estilo": "normal"
+  },
+  {
+   "tipo": "caixa",
+   "id": "b63",
+   "x": 80,
+   "y": 3970,
+   "w": 159,
+   "h": 44,
+   "texto": "HUMANO",
+   "sub": "",
+   "estilo": "destaque",
+   "tamanho": 28,
+   "raio": 10
+  },
+  {
+   "tipo": "texto",
+   "x": 80,
+   "y": 4060,
+   "texto": "Você confere o PR",
+   "estilo": "titulo",
+   "tamanho": 30,
+   "alinha": "start"
+  },
+  {
+   "tipo": "caixa",
+   "id": "c7",
+   "x": 40,
+   "y": 4190,
+   "w": 940,
+   "h": 686,
+   "texto": "",
+   "sub": "",
+   "estilo": "normal"
+  },
+  {
+   "tipo": "texto",
+   "x": 64,
+   "y": 4242,
+   "texto": "7. DONE",
+   "estilo": "titulo",
+   "tamanho": 38,
+   "alinha": "start"
+  },
+  {
+   "tipo": "texto",
+   "x": 64,
+   "y": 4282,
+   "texto": "PR mesclado",
+   "estilo": "legenda",
+   "tamanho": 28,
+   "alinha": "start"
+  },
+  {
+   "tipo": "caixa",
+   "id": "k71",
+   "x": 60,
+   "y": 4304,
+   "w": 900,
+   "h": 132,
+   "texto": "",
+   "sub": "",
+   "estilo": "normal"
+  },
+  {
+   "tipo": "caixa",
+   "id": "b71",
+   "x": 80,
+   "y": 4320,
+   "w": 159,
+   "h": 44,
+   "texto": "HUMANO",
+   "sub": "",
+   "estilo": "destaque",
+   "tamanho": 28,
+   "raio": 10
+  },
+  {
+   "tipo": "texto",
+   "x": 80,
+   "y": 4410,
+   "texto": "Você mescla o PR",
+   "estilo": "titulo",
+   "tamanho": 30,
+   "alinha": "start"
+  },
+  {
+   "tipo": "caixa",
+   "id": "k72",
+   "x": 60,
+   "y": 4450,
+   "w": 900,
+   "h": 216,
+   "texto": "",
+   "sub": "",
+   "estilo": "novo"
+  },
+  {
+   "tipo": "caixa",
+   "id": "b72",
+   "x": 80,
+   "y": 4466,
+   "w": 235,
+   "h": 44,
+   "texto": "AUTOMÁTICO",
+   "sub": "",
+   "estilo": "destaque",
+   "tamanho": 28,
+   "raio": 13
+  },
+  {
+   "tipo": "texto",
+   "x": 80,
+   "y": 4556,
+   "texto": "Closes #N fecha a issue",
+   "estilo": "titulo",
+   "tamanho": 30,
+   "alinha": "start"
+  },
+  {
+   "tipo": "texto",
+   "x": 80,
+   "y": 4596,
+   "texto": "(automação: a verificar)",
+   "estilo": "titulo",
+   "tamanho": 30,
+   "alinha": "start"
+  },
+  {
+   "tipo": "texto",
+   "x": 80,
+   "y": 4644,
+   "texto": "OPCIONAL · Quadro = github-projects",
+   "estilo": "rotulo",
+   "tamanho": 28,
+   "alinha": "start"
+  },
+  {
+   "tipo": "caixa",
+   "id": "k73",
+   "x": 60,
+   "y": 4680,
+   "w": 900,
+   "h": 176,
+   "texto": "",
+   "sub": "",
+   "estilo": "novo"
+  },
+  {
+   "tipo": "caixa",
+   "id": "b73",
+   "x": 80,
+   "y": 4696,
+   "w": 235,
+   "h": 44,
+   "texto": "AUTOMÁTICO",
+   "sub": "",
+   "estilo": "destaque",
+   "tamanho": 28,
+   "raio": 13
+  },
+  {
+   "tipo": "texto",
+   "x": 80,
+   "y": 4786,
+   "texto": "PR encadeado: o forge fecha a issue",
+   "estilo": "titulo",
+   "tamanho": 30,
+   "alinha": "start"
+  },
+  {
+   "tipo": "texto",
+   "x": 80,
+   "y": 4834,
+   "texto": "OPCIONAL · Quadro = github-projects",
+   "estilo": "rotulo",
+   "tamanho": 28,
+   "alinha": "start"
+  },
+  {
+   "tipo": "seta",
+   "de": "c1.baixo:0.45",
+   "para": "c2.cima:0.45"
+  },
+  {
+   "tipo": "seta",
+   "de": "c2.baixo:0.45",
+   "para": "c3.cima:0.45"
+  },
+  {
+   "tipo": "seta",
+   "de": "c3.baixo:0.45",
+   "para": "c4.cima:0.45"
+  },
+  {
+   "tipo": "seta",
+   "de": "c4.baixo:0.45",
+   "para": "c5.cima:0.45"
+  },
+  {
+   "tipo": "seta",
+   "de": "c5.baixo:0.45",
+   "para": "c6.cima:0.45"
+  },
+  {
+   "tipo": "seta",
+   "de": "c6.baixo:0.45",
+   "para": "c7.cima:0.45"
+  },
+  {
+   "tipo": "seta",
+   "de": "vr.dir",
+   "para": "c6.dir:0.12",
+   "forma": "horizontal",
+   "meio": 1024
+  },
+  {
+   "tipo": "caixa",
+   "id": "band",
+   "x": 40,
+   "y": 4906,
+   "w": 1000,
+   "h": 260,
+   "texto": "",
+   "sub": "",
+   "estilo": "normal"
+  },
+  {
+   "tipo": "texto",
+   "x": 64,
+   "y": 4958,
+   "texto": "Sem o quadro (padrão): os mesmos",
+   "estilo": "titulo",
+   "tamanho": 30,
+   "alinha": "start"
+  },
+  {
+   "tipo": "texto",
+   "x": 64,
+   "y": 5000,
+   "texto": "passos acontecem só nos arquivos;",
+   "estilo": "titulo",
+   "tamanho": 30,
+   "alinha": "start"
+  },
+  {
+   "tipo": "texto",
+   "x": 64,
+   "y": 5042,
+   "texto": "nada é consultado no GitHub.",
+   "estilo": "titulo",
+   "tamanho": 30,
+   "alinha": "start"
+  },
+  {
+   "tipo": "texto",
+   "x": 64,
+   "y": 5096,
+   "texto": "Quadro = Quadro de acompanhamento · Início",
+   "estilo": "legenda",
+   "tamanho": 28,
+   "alinha": "start"
+  },
+  {
+   "tipo": "texto",
+   "x": 64,
+   "y": 5134,
+   "texto": "automático = do Builder · os dois vêm desligados",
+   "estilo": "legenda",
+   "tamanho": 28,
+   "alinha": "start"
+  }
+ ]
+}

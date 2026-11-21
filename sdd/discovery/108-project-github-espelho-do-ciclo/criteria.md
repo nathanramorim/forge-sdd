@@ -132,7 +132,10 @@ sequenceDiagram
   F->>A: grava o estado e registra o ator
 ```
 
-### BPMN (simplificados, diagram-studio, tema escuro, assinatura Forge SDD)
+### Kanban (visão principal) e documentação
+`diagramas/forge-108-kanban` e `diagramas/forge-108-kanban-celular` (json, svg, png), guia `docs/quadro-do-ciclo.md` e seção na `docs/wiki.html`.
+
+### BPMN (consulta; simplificados, diagram-studio, tema escuro, assinatura Forge SDD)
 `diagramas/forge-108-bpmn-ciclo` (7 colunas e a via rápida), `diagramas/forge-108-bpmn-sincronia` (as duas vias e o `forge doctor`) e `diagramas/forge-108-bpmn-fechamento` (PR mesclado, issue fechada e os dois cartões), cada um em `.json`, `.svg` e `.png`, com legenda IA, HUMANO e AUTOMÁTICO e rodapé "Desenho do que foi decidido; ainda não construído".
 
 ## Critérios de Aceitação Executáveis
@@ -275,6 +278,27 @@ go test -run 'TestDoctorDetectaDivergenciaQuadroArquivo' ./internal/doctor/
 # negativo: a saída do forge project nunca imprime token nem valor de variável de ambiente
 go test -list 'TestProjectSaidaNaoVazaToken' ./cmd/forge-sdd/ | grep -F 'TestProjectSaidaNaoVazaToken'
 go test -run 'TestProjectSaidaNaoVazaToken' ./cmd/forge-sdd/
+# documentação: Kanban, guia e imagens existem
+test -f sdd/discovery/108-project-github-espelho-do-ciclo/diagramas/forge-108-kanban.json
+test -f sdd/discovery/108-project-github-espelho-do-ciclo/diagramas/forge-108-kanban.png
+test -f sdd/discovery/108-project-github-espelho-do-ciclo/diagramas/forge-108-kanban-celular.png
+test -f docs/quadro-do-ciclo.md
+test -f docs/img/quadro-kanban.png
+test -f docs/img/quadro-kanban-celular.png
+# documentação: aviso, 7 colunas na ordem e opcional desligado por padrão
+grep -F 'Em construção' docs/quadro-do-ciclo.md
+grep -F 'Backlog > Spec > Spec-validation > Todo > Building > Validation > Done' docs/quadro-do-ciclo.md
+grep -F 'OPCIONAL' docs/quadro-do-ciclo.md
+grep -F 'desligado por padrão' docs/quadro-do-ciclo.md
+grep -F 'Prompt para colar na sua IA' docs/quadro-do-ciclo.md
+grep -F 'quadro-acompanhamento' docs/wiki.html
+grep -F 'Quadro de acompanhamento (opcional)' docs/wiki.html
+grep -F 'forge-108-kanban' sdd/discovery/108-project-github-espelho-do-ciclo/discovery.md
+# negativo: guia e wiki nunca afirmam que o forge já move cartão
+if grep -F 'forge já move' docs/quadro-do-ciclo.md docs/wiki.html; then exit 1; fi
+if grep -F 'já move o cartão' docs/quadro-do-ciclo.md docs/wiki.html; then exit 1; fi
+# negativo: o guia não cita Etapa como campo
+if grep -F 'Etapa' docs/quadro-do-ciclo.md; then exit 1; fi
 # script de criação (rascunho): sintaxe válida e dry-run sem escrita
 bash -n sdd/discovery/108-project-github-espelho-do-ciclo/criar-project.sh
 bash sdd/discovery/108-project-github-espelho-do-ciclo/criar-project.sh --dry-run | grep -F 'DRY-RUN'

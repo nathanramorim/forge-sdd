@@ -57,6 +57,7 @@ Sequenciar com a 106: o leitor da tabela de Ferramentas e Integrações é um s�
 | # | Task | Depende | Paralelo | Rules/IDs |
 |---|---|---|---|---|
 | 4.1 | **Corpo do PR gerado pelo forge**: palavra de fechamento só em PR que mira a main e só para a issue daquele PR (número do vínculo cartão-iniciativa, nunca de texto livre); nunca em PR de spec compartilhado nem em PR com várias issues; fallback do forge (fecha a issue e move o cartão) para PR encadeado | 2.1, 2.3, 3.1 | — | `SEG-08`, `GOV-01`, `TST-03` |
+| 4.2 | **Documentação do quadro (guia e wiki):** `docs/quadro-do-ciclo.md` (aviso "Em construção" removido só quando a funcionalidade existir), imagens `docs/img/quadro-*` e a seção "Quadro de acompanhamento (opcional)" em `docs/wiki.html`; atualizar o texto de "em construção" para o que foi construído e provar os passos "a verificar" | 3.5, 3.6, 4.1 (o rascunho de hoje já existe e diz que não está construído) | com 4.1 | `GOV-01`, `TST-03` |
 
 ## Rotina de cada agente (resumo; a reference `project.md` detalha)
 | Agente | Em cada coluna |

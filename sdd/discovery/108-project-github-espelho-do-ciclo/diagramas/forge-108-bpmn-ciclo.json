@@ -234,12 +234,12 @@
    "id": "a2",
    "x": 1560,
    "y": 640,
-   "w": 260,
+   "w": 216,
    "h": 120,
    "texto": "◇ Só adr, rule, doc?",
    "sub": "sim: pula Building",
    "estilo": "destaque",
-   "tamanho": 22
+   "tamanho": 17
   },
   {
    "tipo": "caixa",
@@ -365,8 +365,7 @@
    "tipo": "seta",
    "de": "a2.dir",
    "para": "a3.esq",
-   "forma": "horizontal",
-   "estilo": "fraca"
+   "forma": "horizontal"
   },
   {
    "tipo": "seta",
@@ -385,6 +384,30 @@
    "texto": "◇ = decisão · HUMANO = o dono · IA = agentes (pm-architect, Builder, Reviewer) · AUTOMÁTICO = sem LLM · tracejado = a decidir ou a verificar",
    "estilo": "legenda",
    "alinha": "start"
+  },
+  {
+   "tipo": "caixa",
+   "id": "psim",
+   "x": 1784,
+   "y": 660,
+   "w": 64,
+   "h": 28,
+   "texto": "sim",
+   "sub": "",
+   "estilo": "pill",
+   "tamanho": 16
+  },
+  {
+   "tipo": "caixa",
+   "id": "pnao",
+   "x": 1678,
+   "y": 598,
+   "w": 64,
+   "h": 28,
+   "texto": "não",
+   "sub": "",
+   "estilo": "pill",
+   "tamanho": 16
   }
  ]
 }

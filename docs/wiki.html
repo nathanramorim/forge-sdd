@@ -27,6 +27,7 @@
       <a href="#jornada" class="sidebar-link" data-pt="Jornada" data-en="Journey">Jornada</a>
       <a href="#exemplos" class="sidebar-link" data-pt="Exemplos" data-en="Examples">Exemplos</a>
       <a href="#hub-mode" class="sidebar-link" data-pt="Hub mode" data-en="Hub mode">Hub mode</a>
+      <a href="#quadro-acompanhamento" class="sidebar-link">Quadro (opcional)</a>
     </nav>
   </aside>
 
@@ -234,6 +235,49 @@ Me diga quando terminar e mostre os repos vinculados.</pre>
         <pre class="ai-prompt__code">Liste todos os repos vinculados ao hub e o status de cada um:
 forge pipeline
 Mostre quais têm features abertas e quais estão sem atividade.</pre>
+      </div>
+    </section>
+
+    <section id="quadro-acompanhamento">
+      <h2 class="section-title">Quadro de acompanhamento (opcional)</h2>
+      <p><span class="wiki-badge">em construção, ainda não disponível</span></p>
+      <p class="section-lead">Um painel em colunas, no GitHub Project, que espelha em que etapa está cada trabalho. Está especificado e aprovado, mas ainda não foi construído. Hoje o quadro é mantido à mão.</p>
+
+      <ul>
+        <li><strong>É opcional e vem desligado.</strong> Sem ele, os mesmos passos acontecem só nos arquivos e nada é consultado no GitHub.</li>
+        <li>O arquivo é a fonte da verdade; o quadro é só um espelho.</li>
+        <li>São 7 colunas: Backlog, Spec, Spec-validation, Todo, Building, Validation e Done.</li>
+        <li>Em cada passo fica claro o que é HUMANO, o que é IA e o que é AUTOMÁTICO.</li>
+        <li>Arrastar um cartão é um pedido: abre um menu e nada muda sem a sua confirmação.</li>
+        <li>Dois interruptores: "Quadro de acompanhamento" e "Início automático do Builder". Os dois vêm desligados.</li>
+        <li>Ligar custa chamadas ao GitHub e, no início automático, um processo local. Desligado, o custo é zero.</li>
+        <li>Item só de adr, rule ou documentação segue pela via rápida, de Todo direto a Validation.</li>
+      </ul>
+
+      <img src="img/quadro-kanban-celular.png" alt="Quadro Kanban em 7 etapas empilhadas, de Backlog a Done, com selos HUMANO, IA e AUTOMÁTICO em cada cartão, os passos opcionais tracejados e o atalho da via rápida de Todo a Validation" style="max-width:100%;height:auto;border-radius:12px">
+
+      <p>Guia completo: <a href="https://github.com/nathanramorim/forge-sdd/blob/main/docs/quadro-do-ciclo.md">docs/quadro-do-ciclo.md</a>. O link só funciona depois do merge da iniciativa 108.</p>
+
+      <div class="ai-prompt">
+        <div class="ai-prompt__header">
+          <span class="ai-prompt__label">Prompt para IA (ainda não funciona)</span>
+          <button class="ai-prompt__copy" onclick="copyPrompt(this)">Copiar</button>
+        </div>
+        <pre class="ai-prompt__code">Quero ligar o quadro de acompanhamento do forge-sdd neste projeto.
+Explique o que passa a custar, peça minha confirmação e depois
+ligue "Quadro de acompanhamento" como github-projects.
+Deixe o início automático do Builder desligado.</pre>
+      </div>
+
+      <div class="ai-prompt">
+        <div class="ai-prompt__header">
+          <span class="ai-prompt__label">Prompt para IA (ainda não funciona)</span>
+          <button class="ai-prompt__copy" onclick="copyPrompt(this)">Copiar</button>
+        </div>
+        <pre class="ai-prompt__code">Rode forge doctor e me diga, em linguagem simples,
+se o quadro está ligado, se o campo Status tem as 7 colunas
+e se há divergência entre os arquivos e o quadro.
+Não corrija nada sem me perguntar.</pre>
       </div>
     </section>
 

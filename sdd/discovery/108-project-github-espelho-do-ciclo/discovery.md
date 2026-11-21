@@ -86,7 +86,9 @@ O dono do projeto (decide gates e merge; quer gestão à vista) e os agentes (`p
 - **Opcional e custo zero (RN-16).** Risco: uma chamada ao `gh` esquecida num caminho com o espelho desligado gasta rede e trava quem não usa. Mitigação: a leitura da configuração é a primeira task (0.1) e curto-circuita antes de qualquer chamada, com teste de runner falso contando chamadas (deve ser zero). Risco de configuração incoerente (por exemplo `github-projects` com VCS diferente): recusa e `doctor` acusa.
 - **Visibilidade:** repositório público; issues e títulos ficam visíveis. Revisar o texto antes de publicar.
 
-## Diagramas (BPMN)
+## Diagramas (Kanban e BPMN)
+**Visão principal: Kanban.** `diagramas/forge-108-kanban` (computador, 7 colunas lado a lado, setas da jornada, selos HUMANO, IA e AUTOMÁTICO, passos OPCIONAIS tracejados e o atalho da via rápida) e `diagramas/forge-108-kanban-celular` (as mesmas 7 etapas de cima para baixo, texto grande). Guia para quem usa: `docs/quadro-do-ciclo.md`; resumo na wiki. Os BPMN abaixo ficam como **consulta** do detalhe.
+
 Três desenhos simplificados (raias, ◇ nas decisões, pílulas nos eventos, legenda IA, HUMANO e AUTOMÁTICO), em `diagramas/`, só do que está decidido; o que é "a verificar" aparece tracejado.
 - `forge-108-bpmn-ciclo.png`: por que caminho passa um trabalho, da ideia ao Done, nas 7 colunas (Gate 1, merge da spec, início do Builder, via rápida, conferências, merge do PR)?
 - `forge-108-bpmn-sincronia.png`: como o arquivo e o quadro andam juntos nas duas vias, e por que arrastar o cartão é só um pedido (valida, abre menu, grava ou devolve; `forge doctor` lista divergência)?

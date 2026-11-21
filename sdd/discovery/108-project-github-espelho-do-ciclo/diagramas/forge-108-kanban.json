@@ -1,0 +1,1199 @@
+{
+ "kicker": "// Forge SDD · iniciativa 108 · Kanban",
+ "titulo": "O quadro do ciclo: da ideia ao Done, da esquerda para a direita",
+ "largura": 2800,
+ "altura": 1056,
+ "nota_rodape": "Desenho do que foi decidido; ainda não construído",
+ "elementos": [
+  {
+   "tipo": "caixa",
+   "id": "lgH",
+   "x": 56,
+   "y": 112,
+   "w": 79,
+   "h": 28,
+   "texto": "HUMANO",
+   "sub": "",
+   "estilo": "destaque",
+   "tamanho": 14,
+   "raio": 10
+  },
+  {
+   "tipo": "texto",
+   "x": 147,
+   "y": 132,
+   "texto": "= você, o dono",
+   "estilo": "legenda",
+   "tamanho": 17,
+   "alinha": "start"
+  },
+  {
+   "tipo": "caixa",
+   "id": "lgIA",
+   "x": 321,
+   "y": 112,
+   "w": 56,
+   "h": 28,
+   "texto": "IA",
+   "sub": "",
+   "estilo": "destaque",
+   "tamanho": 14,
+   "raio": 11
+  },
+  {
+   "tipo": "texto",
+   "x": 389,
+   "y": 132,
+   "texto": "= agente de IA",
+   "estilo": "legenda",
+   "tamanho": 17,
+   "alinha": "start"
+  },
+  {
+   "tipo": "caixa",
+   "id": "lgAU",
+   "x": 563,
+   "y": 112,
+   "w": 117,
+   "h": 28,
+   "texto": "AUTOMÁTICO",
+   "sub": "",
+   "estilo": "destaque",
+   "tamanho": 14,
+   "raio": 13
+  },
+  {
+   "tipo": "texto",
+   "x": 692,
+   "y": 132,
+   "texto": "= sem IA: script, forge, GitHub",
+   "estilo": "legenda",
+   "tamanho": 17,
+   "alinha": "start"
+  },
+  {
+   "tipo": "caixa",
+   "id": "lgop",
+   "x": 1033,
+   "y": 112,
+   "w": 120,
+   "h": 28,
+   "texto": "OPCIONAL",
+   "sub": "",
+   "estilo": "novo",
+   "tamanho": 14
+  },
+  {
+   "tipo": "texto",
+   "x": 1165,
+   "y": 132,
+   "texto": "= tracejado: só com a configuração ligada",
+   "estilo": "legenda",
+   "tamanho": 17,
+   "alinha": "start"
+  },
+  {
+   "tipo": "caixa",
+   "id": "c1",
+   "x": 56,
+   "y": 176,
+   "w": 336,
+   "h": 604,
+   "texto": "",
+   "sub": "",
+   "estilo": "normal"
+  },
+  {
+   "tipo": "texto",
+   "x": 76,
+   "y": 220,
+   "texto": "BACKLOG",
+   "estilo": "titulo",
+   "tamanho": 30,
+   "alinha": "start"
+  },
+  {
+   "tipo": "texto",
+   "x": 76,
+   "y": 252,
+   "texto": "Ideia na fila, sem spec",
+   "estilo": "legenda",
+   "tamanho": 18,
+   "alinha": "start"
+  },
+  {
+   "tipo": "caixa",
+   "id": "k11",
+   "x": 72,
+   "y": 314,
+   "w": 304,
+   "h": 140,
+   "texto": "",
+   "sub": "",
+   "estilo": "normal"
+  },
+  {
+   "tipo": "caixa",
+   "id": "b11",
+   "x": 86,
+   "y": 326,
+   "w": 79,
+   "h": 28,
+   "texto": "HUMANO",
+   "sub": "",
+   "estilo": "destaque",
+   "tamanho": 14,
+   "raio": 10
+  },
+  {
+   "tipo": "texto",
+   "x": 88,
+   "y": 382,
+   "texto": "Você registra a ideia",
+   "estilo": "titulo",
+   "tamanho": 19,
+   "alinha": "start"
+  },
+  {
+   "tipo": "caixa",
+   "id": "k12",
+   "x": 72,
+   "y": 468,
+   "w": 304,
+   "h": 140,
+   "texto": "",
+   "sub": "",
+   "estilo": "novo"
+  },
+  {
+   "tipo": "caixa",
+   "id": "b12",
+   "x": 86,
+   "y": 480,
+   "w": 79,
+   "h": 28,
+   "texto": "HUMANO",
+   "sub": "",
+   "estilo": "destaque",
+   "tamanho": 14,
+   "raio": 10
+  },
+  {
+   "tipo": "texto",
+   "x": 88,
+   "y": 536,
+   "texto": "Você cria a issue e",
+   "estilo": "titulo",
+   "tamanho": 19,
+   "alinha": "start"
+  },
+  {
+   "tipo": "texto",
+   "x": 88,
+   "y": 562,
+   "texto": "o cartão no quadro",
+   "estilo": "titulo",
+   "tamanho": 19,
+   "alinha": "start"
+  },
+  {
+   "tipo": "texto",
+   "x": 88,
+   "y": 596,
+   "texto": "OPCIONAL · Quadro",
+   "estilo": "rotulo",
+   "tamanho": 14,
+   "alinha": "start"
+  },
+  {
+   "tipo": "caixa",
+   "id": "c2",
+   "x": 448,
+   "y": 176,
+   "w": 336,
+   "h": 604,
+   "texto": "",
+   "sub": "",
+   "estilo": "normal"
+  },
+  {
+   "tipo": "texto",
+   "x": 468,
+   "y": 220,
+   "texto": "SPEC",
+   "estilo": "titulo",
+   "tamanho": 30,
+   "alinha": "start"
+  },
+  {
+   "tipo": "texto",
+   "x": 468,
+   "y": 252,
+   "texto": "Spec sendo escrita",
+   "estilo": "legenda",
+   "tamanho": 18,
+   "alinha": "start"
+  },
+  {
+   "tipo": "caixa",
+   "id": "k21",
+   "x": 464,
+   "y": 314,
+   "w": 304,
+   "h": 140,
+   "texto": "",
+   "sub": "",
+   "estilo": "normal"
+  },
+  {
+   "tipo": "caixa",
+   "id": "b21",
+   "x": 478,
+   "y": 326,
+   "w": 184,
+   "h": 28,
+   "texto": "IA · pm-architect",
+   "sub": "",
+   "estilo": "destaque",
+   "tamanho": 14,
+   "raio": 11
+  },
+  {
+   "tipo": "texto",
+   "x": 480,
+   "y": 382,
+   "texto": "Escreve a spec",
+   "estilo": "titulo",
+   "tamanho": 19,
+   "alinha": "start"
+  },
+  {
+   "tipo": "texto",
+   "x": 480,
+   "y": 408,
+   "texto": "(/discovery)",
+   "estilo": "titulo",
+   "tamanho": 19,
+   "alinha": "start"
+  },
+  {
+   "tipo": "caixa",
+   "id": "k22",
+   "x": 464,
+   "y": 468,
+   "w": 304,
+   "h": 140,
+   "texto": "",
+   "sub": "",
+   "estilo": "novo"
+  },
+  {
+   "tipo": "caixa",
+   "id": "b22",
+   "x": 478,
+   "y": 480,
+   "w": 117,
+   "h": 28,
+   "texto": "AUTOMÁTICO",
+   "sub": "",
+   "estilo": "destaque",
+   "tamanho": 14,
+   "raio": 13
+  },
+  {
+   "tipo": "texto",
+   "x": 480,
+   "y": 536,
+   "texto": "forge põe o cartão",
+   "estilo": "titulo",
+   "tamanho": 19,
+   "alinha": "start"
+  },
+  {
+   "tipo": "texto",
+   "x": 480,
+   "y": 562,
+   "texto": "em Spec",
+   "estilo": "titulo",
+   "tamanho": 19,
+   "alinha": "start"
+  },
+  {
+   "tipo": "texto",
+   "x": 480,
+   "y": 596,
+   "texto": "OPCIONAL · Quadro",
+   "estilo": "rotulo",
+   "tamanho": 14,
+   "alinha": "start"
+  },
+  {
+   "tipo": "caixa",
+   "id": "c3",
+   "x": 840,
+   "y": 176,
+   "w": 336,
+   "h": 604,
+   "texto": "",
+   "sub": "",
+   "estilo": "normal"
+  },
+  {
+   "tipo": "texto",
+   "x": 860,
+   "y": 220,
+   "texto": "SPEC-VALIDATION",
+   "estilo": "titulo",
+   "tamanho": 27,
+   "alinha": "start"
+  },
+  {
+   "tipo": "texto",
+   "x": 860,
+   "y": 252,
+   "texto": "Spec pronta, ainda não",
+   "estilo": "legenda",
+   "tamanho": 18,
+   "alinha": "start"
+  },
+  {
+   "tipo": "texto",
+   "x": 860,
+   "y": 276,
+   "texto": "mesclada",
+   "estilo": "legenda",
+   "tamanho": 18,
+   "alinha": "start"
+  },
+  {
+   "tipo": "caixa",
+   "id": "k31",
+   "x": 856,
+   "y": 314,
+   "w": 304,
+   "h": 140,
+   "texto": "",
+   "sub": "",
+   "estilo": "normal"
+  },
+  {
+   "tipo": "caixa",
+   "id": "b31",
+   "x": 870,
+   "y": 326,
+   "w": 146,
+   "h": 28,
+   "texto": "IA · Reviewer",
+   "sub": "",
+   "estilo": "destaque",
+   "tamanho": 14,
+   "raio": 11
+  },
+  {
+   "tipo": "texto",
+   "x": 872,
+   "y": 382,
+   "texto": "Conferência 1:",
+   "estilo": "titulo",
+   "tamanho": 19,
+   "alinha": "start"
+  },
+  {
+   "tipo": "texto",
+   "x": 872,
+   "y": 408,
+   "texto": "lê a spec",
+   "estilo": "titulo",
+   "tamanho": 19,
+   "alinha": "start"
+  },
+  {
+   "tipo": "caixa",
+   "id": "k32",
+   "x": 856,
+   "y": 468,
+   "w": 304,
+   "h": 140,
+   "texto": "",
+   "sub": "",
+   "estilo": "normal"
+  },
+  {
+   "tipo": "caixa",
+   "id": "b32",
+   "x": 870,
+   "y": 480,
+   "w": 79,
+   "h": 28,
+   "texto": "HUMANO",
+   "sub": "",
+   "estilo": "destaque",
+   "tamanho": 14,
+   "raio": 10
+  },
+  {
+   "tipo": "texto",
+   "x": 872,
+   "y": 536,
+   "texto": "Gate 1: você aprova",
+   "estilo": "titulo",
+   "tamanho": 19,
+   "alinha": "start"
+  },
+  {
+   "tipo": "texto",
+   "x": 872,
+   "y": 562,
+   "texto": "no menu do forge",
+   "estilo": "titulo",
+   "tamanho": 19,
+   "alinha": "start"
+  },
+  {
+   "tipo": "caixa",
+   "id": "k33",
+   "x": 856,
+   "y": 622,
+   "w": 304,
+   "h": 140,
+   "texto": "",
+   "sub": "",
+   "estilo": "normal"
+  },
+  {
+   "tipo": "caixa",
+   "id": "b33",
+   "x": 870,
+   "y": 634,
+   "w": 79,
+   "h": 28,
+   "texto": "HUMANO",
+   "sub": "",
+   "estilo": "destaque",
+   "tamanho": 14,
+   "raio": 10
+  },
+  {
+   "tipo": "texto",
+   "x": 872,
+   "y": 690,
+   "texto": "Você mescla o PR",
+   "estilo": "titulo",
+   "tamanho": 19,
+   "alinha": "start"
+  },
+  {
+   "tipo": "texto",
+   "x": 872,
+   "y": 716,
+   "texto": "da spec",
+   "estilo": "titulo",
+   "tamanho": 19,
+   "alinha": "start"
+  },
+  {
+   "tipo": "caixa",
+   "id": "c4",
+   "x": 1232,
+   "y": 176,
+   "w": 336,
+   "h": 604,
+   "texto": "",
+   "sub": "",
+   "estilo": "normal"
+  },
+  {
+   "tipo": "texto",
+   "x": 1252,
+   "y": 220,
+   "texto": "TODO",
+   "estilo": "titulo",
+   "tamanho": 30,
+   "alinha": "start"
+  },
+  {
+   "tipo": "texto",
+   "x": 1252,
+   "y": 252,
+   "texto": "Spec na principal, pronta",
+   "estilo": "legenda",
+   "tamanho": 18,
+   "alinha": "start"
+  },
+  {
+   "tipo": "texto",
+   "x": 1252,
+   "y": 276,
+   "texto": "p/ o Builder",
+   "estilo": "legenda",
+   "tamanho": 18,
+   "alinha": "start"
+  },
+  {
+   "tipo": "caixa",
+   "id": "k41",
+   "x": 1248,
+   "y": 314,
+   "w": 304,
+   "h": 140,
+   "texto": "",
+   "sub": "",
+   "estilo": "normal"
+  },
+  {
+   "tipo": "caixa",
+   "id": "b41",
+   "x": 1262,
+   "y": 326,
+   "w": 117,
+   "h": 28,
+   "texto": "AUTOMÁTICO",
+   "sub": "",
+   "estilo": "destaque",
+   "tamanho": 14,
+   "raio": 13
+  },
+  {
+   "tipo": "texto",
+   "x": 1264,
+   "y": 382,
+   "texto": "forge vê o merge",
+   "estilo": "titulo",
+   "tamanho": 19,
+   "alinha": "start"
+  },
+  {
+   "tipo": "texto",
+   "x": 1264,
+   "y": 408,
+   "texto": "da spec",
+   "estilo": "titulo",
+   "tamanho": 19,
+   "alinha": "start"
+  },
+  {
+   "tipo": "caixa",
+   "id": "k42",
+   "x": 1248,
+   "y": 468,
+   "w": 304,
+   "h": 140,
+   "texto": "",
+   "sub": "",
+   "estilo": "novo"
+  },
+  {
+   "tipo": "caixa",
+   "id": "b42",
+   "x": 1262,
+   "y": 480,
+   "w": 117,
+   "h": 28,
+   "texto": "AUTOMÁTICO",
+   "sub": "",
+   "estilo": "destaque",
+   "tamanho": 14,
+   "raio": 13
+  },
+  {
+   "tipo": "texto",
+   "x": 1264,
+   "y": 536,
+   "texto": "Builder começa sozinho",
+   "estilo": "titulo",
+   "tamanho": 19,
+   "alinha": "start"
+  },
+  {
+   "tipo": "texto",
+   "x": 1264,
+   "y": 562,
+   "texto": "(sem você presente)",
+   "estilo": "titulo",
+   "tamanho": 19,
+   "alinha": "start"
+  },
+  {
+   "tipo": "texto",
+   "x": 1264,
+   "y": 596,
+   "texto": "OPCIONAL · Início automático",
+   "estilo": "rotulo",
+   "tamanho": 14,
+   "alinha": "start"
+  },
+  {
+   "tipo": "caixa",
+   "id": "k43",
+   "x": 1248,
+   "y": 622,
+   "w": 304,
+   "h": 140,
+   "texto": "",
+   "sub": "",
+   "estilo": "normal"
+  },
+  {
+   "tipo": "caixa",
+   "id": "b43",
+   "x": 1262,
+   "y": 634,
+   "w": 79,
+   "h": 28,
+   "texto": "HUMANO",
+   "sub": "",
+   "estilo": "destaque",
+   "tamanho": 14,
+   "raio": 10
+  },
+  {
+   "tipo": "texto",
+   "x": 1264,
+   "y": 690,
+   "texto": "Você inicia o Builder",
+   "estilo": "titulo",
+   "tamanho": 19,
+   "alinha": "start"
+  },
+  {
+   "tipo": "texto",
+   "x": 1264,
+   "y": 750,
+   "texto": "sem Início automático",
+   "estilo": "rotulo",
+   "tamanho": 14,
+   "alinha": "start"
+  },
+  {
+   "tipo": "caixa",
+   "id": "c5",
+   "x": 1624,
+   "y": 176,
+   "w": 336,
+   "h": 604,
+   "texto": "",
+   "sub": "",
+   "estilo": "normal"
+  },
+  {
+   "tipo": "texto",
+   "x": 1644,
+   "y": 220,
+   "texto": "BUILDING",
+   "estilo": "titulo",
+   "tamanho": 30,
+   "alinha": "start"
+  },
+  {
+   "tipo": "texto",
+   "x": 1644,
+   "y": 252,
+   "texto": "Builder constrói",
+   "estilo": "legenda",
+   "tamanho": 18,
+   "alinha": "start"
+  },
+  {
+   "tipo": "caixa",
+   "id": "k51",
+   "x": 1640,
+   "y": 314,
+   "w": 304,
+   "h": 140,
+   "texto": "",
+   "sub": "",
+   "estilo": "normal"
+  },
+  {
+   "tipo": "caixa",
+   "id": "b51",
+   "x": 1654,
+   "y": 326,
+   "w": 136,
+   "h": 28,
+   "texto": "IA · Builder",
+   "sub": "",
+   "estilo": "destaque",
+   "tamanho": 14,
+   "raio": 11
+  },
+  {
+   "tipo": "texto",
+   "x": 1656,
+   "y": 382,
+   "texto": "Constrói a feature",
+   "estilo": "titulo",
+   "tamanho": 19,
+   "alinha": "start"
+  },
+  {
+   "tipo": "texto",
+   "x": 1656,
+   "y": 408,
+   "texto": "num PR",
+   "estilo": "titulo",
+   "tamanho": 19,
+   "alinha": "start"
+  },
+  {
+   "tipo": "caixa",
+   "id": "k52",
+   "x": 1640,
+   "y": 468,
+   "w": 304,
+   "h": 140,
+   "texto": "",
+   "sub": "",
+   "estilo": "novo"
+  },
+  {
+   "tipo": "caixa",
+   "id": "b52",
+   "x": 1654,
+   "y": 480,
+   "w": 117,
+   "h": 28,
+   "texto": "AUTOMÁTICO",
+   "sub": "",
+   "estilo": "destaque",
+   "tamanho": 14,
+   "raio": 13
+  },
+  {
+   "tipo": "texto",
+   "x": 1656,
+   "y": 536,
+   "texto": "Freios: 3 esperando você",
+   "estilo": "titulo",
+   "tamanho": 19,
+   "alinha": "start"
+  },
+  {
+   "tipo": "texto",
+   "x": 1656,
+   "y": 562,
+   "texto": "e 3 tentativas",
+   "estilo": "titulo",
+   "tamanho": 19,
+   "alinha": "start"
+  },
+  {
+   "tipo": "texto",
+   "x": 1656,
+   "y": 596,
+   "texto": "OPCIONAL · Início automático",
+   "estilo": "rotulo",
+   "tamanho": 14,
+   "alinha": "start"
+  },
+  {
+   "tipo": "caixa",
+   "id": "c6",
+   "x": 2016,
+   "y": 176,
+   "w": 336,
+   "h": 604,
+   "texto": "",
+   "sub": "",
+   "estilo": "normal"
+  },
+  {
+   "tipo": "texto",
+   "x": 2036,
+   "y": 220,
+   "texto": "VALIDATION",
+   "estilo": "titulo",
+   "tamanho": 30,
+   "alinha": "start"
+  },
+  {
+   "tipo": "texto",
+   "x": 2036,
+   "y": 252,
+   "texto": "PR pronto, esperando você",
+   "estilo": "legenda",
+   "tamanho": 18,
+   "alinha": "start"
+  },
+  {
+   "tipo": "caixa",
+   "id": "k61",
+   "x": 2032,
+   "y": 314,
+   "w": 304,
+   "h": 140,
+   "texto": "",
+   "sub": "",
+   "estilo": "normal"
+  },
+  {
+   "tipo": "caixa",
+   "id": "b61",
+   "x": 2046,
+   "y": 326,
+   "w": 117,
+   "h": 28,
+   "texto": "AUTOMÁTICO",
+   "sub": "",
+   "estilo": "destaque",
+   "tamanho": 14,
+   "raio": 13
+  },
+  {
+   "tipo": "texto",
+   "x": 2048,
+   "y": 382,
+   "texto": "Script local valida",
+   "estilo": "titulo",
+   "tamanho": 19,
+   "alinha": "start"
+  },
+  {
+   "tipo": "texto",
+   "x": 2048,
+   "y": 408,
+   "texto": "(sem IA)",
+   "estilo": "titulo",
+   "tamanho": 19,
+   "alinha": "start"
+  },
+  {
+   "tipo": "caixa",
+   "id": "k62",
+   "x": 2032,
+   "y": 468,
+   "w": 304,
+   "h": 140,
+   "texto": "",
+   "sub": "",
+   "estilo": "normal"
+  },
+  {
+   "tipo": "caixa",
+   "id": "b62",
+   "x": 2046,
+   "y": 480,
+   "w": 146,
+   "h": 28,
+   "texto": "IA · Reviewer",
+   "sub": "",
+   "estilo": "destaque",
+   "tamanho": 14,
+   "raio": 11
+  },
+  {
+   "tipo": "texto",
+   "x": 2048,
+   "y": 536,
+   "texto": "Conferência 2:",
+   "estilo": "titulo",
+   "tamanho": 19,
+   "alinha": "start"
+  },
+  {
+   "tipo": "texto",
+   "x": 2048,
+   "y": 562,
+   "texto": "lê o PR da feature",
+   "estilo": "titulo",
+   "tamanho": 19,
+   "alinha": "start"
+  },
+  {
+   "tipo": "caixa",
+   "id": "k63",
+   "x": 2032,
+   "y": 622,
+   "w": 304,
+   "h": 140,
+   "texto": "",
+   "sub": "",
+   "estilo": "normal"
+  },
+  {
+   "tipo": "caixa",
+   "id": "b63",
+   "x": 2046,
+   "y": 634,
+   "w": 79,
+   "h": 28,
+   "texto": "HUMANO",
+   "sub": "",
+   "estilo": "destaque",
+   "tamanho": 14,
+   "raio": 10
+  },
+  {
+   "tipo": "texto",
+   "x": 2048,
+   "y": 690,
+   "texto": "Você confere o PR",
+   "estilo": "titulo",
+   "tamanho": 19,
+   "alinha": "start"
+  },
+  {
+   "tipo": "caixa",
+   "id": "c7",
+   "x": 2408,
+   "y": 176,
+   "w": 336,
+   "h": 604,
+   "texto": "",
+   "sub": "",
+   "estilo": "normal"
+  },
+  {
+   "tipo": "texto",
+   "x": 2428,
+   "y": 220,
+   "texto": "DONE",
+   "estilo": "titulo",
+   "tamanho": 30,
+   "alinha": "start"
+  },
+  {
+   "tipo": "texto",
+   "x": 2428,
+   "y": 252,
+   "texto": "PR mesclado",
+   "estilo": "legenda",
+   "tamanho": 18,
+   "alinha": "start"
+  },
+  {
+   "tipo": "caixa",
+   "id": "k71",
+   "x": 2424,
+   "y": 314,
+   "w": 304,
+   "h": 140,
+   "texto": "",
+   "sub": "",
+   "estilo": "normal"
+  },
+  {
+   "tipo": "caixa",
+   "id": "b71",
+   "x": 2438,
+   "y": 326,
+   "w": 79,
+   "h": 28,
+   "texto": "HUMANO",
+   "sub": "",
+   "estilo": "destaque",
+   "tamanho": 14,
+   "raio": 10
+  },
+  {
+   "tipo": "texto",
+   "x": 2440,
+   "y": 382,
+   "texto": "Você mescla o PR",
+   "estilo": "titulo",
+   "tamanho": 19,
+   "alinha": "start"
+  },
+  {
+   "tipo": "caixa",
+   "id": "k72",
+   "x": 2424,
+   "y": 468,
+   "w": 304,
+   "h": 140,
+   "texto": "",
+   "sub": "",
+   "estilo": "novo"
+  },
+  {
+   "tipo": "caixa",
+   "id": "b72",
+   "x": 2438,
+   "y": 480,
+   "w": 117,
+   "h": 28,
+   "texto": "AUTOMÁTICO",
+   "sub": "",
+   "estilo": "destaque",
+   "tamanho": 14,
+   "raio": 13
+  },
+  {
+   "tipo": "texto",
+   "x": 2440,
+   "y": 536,
+   "texto": "Closes #N fecha a issue",
+   "estilo": "titulo",
+   "tamanho": 19,
+   "alinha": "start"
+  },
+  {
+   "tipo": "texto",
+   "x": 2440,
+   "y": 562,
+   "texto": "(automação: a verificar)",
+   "estilo": "titulo",
+   "tamanho": 19,
+   "alinha": "start"
+  },
+  {
+   "tipo": "texto",
+   "x": 2440,
+   "y": 596,
+   "texto": "OPCIONAL · Quadro",
+   "estilo": "rotulo",
+   "tamanho": 14,
+   "alinha": "start"
+  },
+  {
+   "tipo": "caixa",
+   "id": "k73",
+   "x": 2424,
+   "y": 622,
+   "w": 304,
+   "h": 140,
+   "texto": "",
+   "sub": "",
+   "estilo": "novo"
+  },
+  {
+   "tipo": "caixa",
+   "id": "b73",
+   "x": 2438,
+   "y": 634,
+   "w": 117,
+   "h": 28,
+   "texto": "AUTOMÁTICO",
+   "sub": "",
+   "estilo": "destaque",
+   "tamanho": 14,
+   "raio": 13
+  },
+  {
+   "tipo": "texto",
+   "x": 2440,
+   "y": 690,
+   "texto": "PR encadeado:",
+   "estilo": "titulo",
+   "tamanho": 19,
+   "alinha": "start"
+  },
+  {
+   "tipo": "texto",
+   "x": 2440,
+   "y": 716,
+   "texto": "o forge fecha a issue",
+   "estilo": "titulo",
+   "tamanho": 19,
+   "alinha": "start"
+  },
+  {
+   "tipo": "texto",
+   "x": 2440,
+   "y": 750,
+   "texto": "OPCIONAL · Quadro",
+   "estilo": "rotulo",
+   "tamanho": 14,
+   "alinha": "start"
+  },
+  {
+   "tipo": "seta",
+   "de": "c1.dir:0.1",
+   "para": "c2.esq:0.1",
+   "forma": "horizontal"
+  },
+  {
+   "tipo": "seta",
+   "de": "c2.dir:0.1",
+   "para": "c3.esq:0.1",
+   "forma": "horizontal"
+  },
+  {
+   "tipo": "seta",
+   "de": "c3.dir:0.1",
+   "para": "c4.esq:0.1",
+   "forma": "horizontal"
+  },
+  {
+   "tipo": "seta",
+   "de": "c4.dir:0.1",
+   "para": "c5.esq:0.1",
+   "forma": "horizontal"
+  },
+  {
+   "tipo": "seta",
+   "de": "c5.dir:0.1",
+   "para": "c6.esq:0.1",
+   "forma": "horizontal"
+  },
+  {
+   "tipo": "seta",
+   "de": "c6.dir:0.1",
+   "para": "c7.esq:0.1",
+   "forma": "horizontal"
+  },
+  {
+   "tipo": "seta",
+   "pontos": [
+    [
+     1400.0,
+     780
+    ],
+    [
+     1400.0,
+     832
+    ],
+    [
+     2184.0,
+     832
+    ],
+    [
+     2184.0,
+     780
+    ]
+   ]
+  },
+  {
+   "tipo": "caixa",
+   "id": "vr",
+   "x": 1482,
+   "y": 846,
+   "w": 620,
+   "h": 44,
+   "texto": "VIA RÁPIDA · só adr, rule ou documentação (sem código)",
+   "sub": "",
+   "estilo": "destaque",
+   "tamanho": 19,
+   "raio": 12
+  },
+  {
+   "tipo": "caixa",
+   "id": "band",
+   "x": 56,
+   "y": 920,
+   "w": 2688,
+   "h": 112,
+   "texto": "",
+   "sub": "",
+   "estilo": "normal"
+  },
+  {
+   "tipo": "texto",
+   "x": 84,
+   "y": 964,
+   "texto": "Sem o quadro (padrão): os mesmos passos acontecem só nos arquivos; nada é consultado no GitHub.",
+   "estilo": "titulo",
+   "tamanho": 24,
+   "alinha": "start"
+  },
+  {
+   "tipo": "texto",
+   "x": 84,
+   "y": 1004,
+   "texto": "OPCIONAL · Quadro = Quadro de acompanhamento ligado em github-projects   ·   OPCIONAL · Início automático = Início automático do Builder ligado em local   ·   os dois vêm desligados.",
+   "estilo": "legenda",
+   "tamanho": 19,
+   "alinha": "start"
+  }
+ ]
+}
