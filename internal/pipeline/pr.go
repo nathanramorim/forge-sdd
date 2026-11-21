@@ -1,14 +1,10 @@
 package pipeline
 
 import (
-	"bytes"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
-	"os/exec"
 	"path/filepath"
-	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -18,6 +14,7 @@ import (
 	"github.com/forge-sdd/cli/internal/gate"
 	"github.com/forge-sdd/cli/internal/layout"
 	"github.com/forge-sdd/cli/internal/queue"
+	"github.com/forge-sdd/cli/internal/vcs"
 )
 
 // PRTemplatePath é o modelo do corpo do PR (FLX-03); suas seções "## " são obrigatórias no corpo.
@@ -26,20 +23,8 @@ const PRTemplatePath = ".github/pull_request_template.md"
 // CmdRunner roda `name args...` em dir e devolve a saída; só git e gh passam (SEG-03). Injetável.
 type CmdRunner func(dir, name string, args ...string) (string, error)
 
-// RunGitOrGh é o CmdRunner real: argv explícito, sem shell.
-func RunGitOrGh(dir, name string, args ...string) (string, error) {
-	if name != "git" && name != "gh" {
-		return "", fmt.Errorf("comando %q não permitido", name)
-	}
-	cmd := exec.Command(name, args...)
-	cmd.Dir = dir
-	var stdout, stderr bytes.Buffer
-	cmd.Stdout, cmd.Stderr = &stdout, &stderr
-	if err := cmd.Run(); err != nil {
-		return strings.TrimSpace(stdout.String()), fmt.Errorf("%s %s: %w: %s", name, args[0], err, strings.TrimSpace(stderr.String()))
-	}
-	return strings.TrimSpace(stdout.String()), nil
-}
+// RunGitOrGh é o CmdRunner real (movido para internal/vcs; SEG-03).
+var RunGitOrGh CmdRunner = vcs.RunGitOrGh
 
 // PROptions controla `forge pipeline pr`.
 type PROptions struct {
@@ -63,8 +48,6 @@ type PRResult struct {
 	BaseFixed  bool // a base de um PR já aberto foi corrigida
 }
 
-var prNumberRe = regexp.MustCompile(`/pull/([0-9]+)\s*$`)
-
 // OpenPR é o passo mecânico do Builder feito pelo Go: Camada A, push com refspec explícito, PR com a
 // base da iniciativa (ou correção da base de um PR já aberto), registro no job e tasks em
 // review_pending. Nunca mescla nem aprova (ADR-0004).
@@ -79,6 +62,13 @@ func OpenPR(dir string, opts PROptions) (*PRResult, error) {
 	run := opts.Run
 	if run == nil {
 		run = RunGitOrGh
+	}
+	adapt, err := vcs.DaConstituicao(dir, vcs.Runner(run))
+	if err != nil {
+		return nil, err
+	}
+	if adapt.Nome() == "nenhum" {
+		return nil, fmt.Errorf("VCS nenhum: não há PR a abrir; a branch fica pronta e o merge é local (RN-25)")
 	}
 	now := opts.Now
 	if now.IsZero() {
@@ -128,29 +118,24 @@ func OpenPR(dir string, opts PROptions) (*PRResult, error) {
 	}
 
 	res := &PRResult{Branch: branch, Base: base, BaseSource: source}
-	existing, err := findOpenPR(dir, branch, run)
+	existing, err := adapt.ProcurarPRAberto(dir, branch)
 	if err != nil {
 		return nil, err
 	}
 	if existing != nil {
-		res.Number, res.URL = existing.Number, existing.URL
+		res.Number, res.URL = existing.Numero, existing.URL
 		if existing.Base != base {
-			if _, err := run(dir, "gh", "pr", "edit", strconv.Itoa(existing.Number), "--base", base); err != nil {
+			if err := adapt.CorrigirBase(dir, existing.Numero, base); err != nil {
 				return nil, err
 			}
 			res.BaseFixed = true
 		}
 	} else {
-		url, err := run(dir, "gh", "pr", "create", "--base", base, "--head", branch, "--title", prTitle(job), "--body-file", opts.BodyFile)
+		pr, err := adapt.CriarPRDraft(dir, vcs.NovoPR{Base: base, Branch: branch, Titulo: prTitle(job), CorpoArquivo: opts.BodyFile})
 		if err != nil {
 			return nil, err
 		}
-		m := prNumberRe.FindStringSubmatch(url)
-		if m == nil {
-			return nil, fmt.Errorf("não consegui ler o número do PR na saída do gh: %q", truncateStr(url, 80))
-		}
-		res.Number, _ = strconv.Atoi(m[1])
-		res.URL, res.Created = url, true
+		res.Number, res.URL, res.Created = pr.Numero, pr.URL, true
 	}
 
 	if _, err := bus.UpdatePR(dir, layout.RoleBuilder, opts.JobID, opts.Worker, res.Number, res.URL, branch, now); err != nil {
@@ -219,34 +204,6 @@ func commitsAhead(dir, base, branch string, run CmdRunner) int {
 		}
 	}
 	return 0
-}
-
-type openPR struct {
-	Number int
-	URL    string
-	Base   string
-}
-
-func findOpenPR(dir, branch string, run CmdRunner) (*openPR, error) {
-	out, err := run(dir, "gh", "pr", "list", "--head", branch, "--state", "open", "--json", "number,url,baseRefName", "--limit", "1")
-	if err != nil {
-		return nil, err
-	}
-	var list []struct {
-		Number      int    `json:"number"`
-		URL         string `json:"url"`
-		BaseRefName string `json:"baseRefName"`
-	}
-	if strings.TrimSpace(out) == "" {
-		return nil, nil
-	}
-	if err := json.Unmarshal([]byte(out), &list); err != nil {
-		return nil, fmt.Errorf("saída do gh pr list inválida: %w", err)
-	}
-	if len(list) == 0 {
-		return nil, nil
-	}
-	return &openPR{Number: list[0].Number, URL: list[0].URL, Base: list[0].BaseRefName}, nil
 }
 
 func prTitle(job *bus.Job) string {
