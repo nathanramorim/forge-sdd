@@ -1,7 +1,7 @@
 # fix-104-16 — Reviewer comenta o diagnóstico simples e libera o PR conforme
 
 **Iniciativa:** 104-pipeline-em-subagentes
-**Status:** ready (aguarda Gate 1 do dono)
+**Status:** ready (Gate 1 aprovado em 2026-11-21, escopo mínimo: instruções agora, código com a 106)
 **Tamanho:** P
 **Ordem:** avulsa; não depende da fila da 104 e não toca arquivos da 106.
 
@@ -28,7 +28,7 @@ Dono (21/11/2026): o PR já revisado pelo Reviewer deve ficar "iniciado" (fora d
 | `head_sha` no parecer | Reusar depois: 106: `feat-106-11` (toca `persistVerdict`, `review.go`) |
 | Comentário no `conforme`, formato simples, ordem de operações do Reviewer | Criar: falta; é este fix (só texto) |
 
-**PROPOSTA (a confirmar pelo dono): só instruções agora, código na 106/2.x.** Argumento: `review.go` e `internal/pipeline/pr.go` são arquivos das tasks 11 e 21 da 106 (colisão); o Reviewer tem `Bash` e `gh` e já publica comentário por `gh pr comment`, então o valor chega só mudando o texto. Quando a 106 entregar o adaptador, o passo 4 abaixo troca `gh pr ready` pelo `marcar pronto` do adaptador (anotar na `feat-106-21`; este fix não edita a 106).
+**DECISÃO (Gate 1 aprovado em 2026-11-21): só instruções agora; o código entra com a 106 (features 11, 21, 24a, 02).** Argumento: `review.go` e `internal/pipeline/pr.go` são arquivos das tasks 11 e 21 da 106 (colisão); o Reviewer tem `Bash` e `gh` e já publica comentário por `gh pr comment`, então o valor chega só mudando o texto. Quando a 106 entregar o adaptador, o passo 4 abaixo troca `gh pr ready` pelo `marcar pronto` do adaptador (anotar na `feat-106-21`; este fix não edita a 106).
 
 ## Decisões do projeto aplicadas
 
@@ -71,12 +71,13 @@ go test ./internal/scaffold/... ./internal/doctor/...
 ! grep -F 'gh pr merge' "$R" || exit 1
 # negativo: nenhum .go muda
 ! git diff --name-only origin/main | grep -E '\.go$' || exit 1
-# negativo: não existe teste que condicione o comentário simples à chave
-! go test -list '.*' ./internal/pipeline/ | grep -F 'ComentarioSimples' || exit 1
+grep -F 'Conforme: pode mesclar' "$R"
+# negativo: a reference não deixa o comentário simples depender da chave
+! grep -F 'se `reviewer.comment_on_pr` estiver ligado' "$R" || exit 1
 ```
 Lembrete: `forge doctor` e o gate sem violação nova. Sem `grep -c`.
 
-## Sinal "revisado só por IA" (PROPOSTA a confirmar pelo dono)
+## Sinal "revisado só por IA" (Gate 1 aprovado em 2026-11-21: só instruções)
 
 Requisito do dono (21/11/2026): quando só o Reviewer revisou e fechou, isso aparece na issue e no PR.
 
@@ -95,6 +96,10 @@ grep -F 'Atenção: fechado só com revisão de IA, sem conferência humana.' "$
 # negativo: o rótulo não é aplicado sem o modo sem-humano
 ! grep -F 'sempre aplique o rótulo revisado-só-por-ia' "$R" || exit 1
 ```
+
+## Piloto automático
+
+O piloto automático (memória do dono) NUNCA mescla PR que toque Constituição, ADRs, segurança, CI ou release. Quem mescla com `--admin` é o piloto, conforme a regra do dono, e só fora dessas áreas; este fix não dá ao Reviewer nenhum caminho de merge.
 
 ## Fora de escopo
 
