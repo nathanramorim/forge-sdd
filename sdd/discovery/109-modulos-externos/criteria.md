@@ -17,7 +17,7 @@ Legenda dos diagramas: **HUMANO** (decisões e aprovações do dono), **IA** (ag
 - **ADR-0012:** o Go grava o veredito; o evento `veredito.gravado` só o informa.
 - **ADR-0017** (MCP somente leitura com saída saneada) e **ADR-0018** (gravação segura): a saída do módulo é dado não confiável e o registro de confiança usa gravação segura.
 - **ADR-0003/P-24:** texto novo em comandos e skills entra por referência; a Constituição fica em 9.173 de 9.216 bytes.
-- **ADR do 109 (a escrever na task 4.1, número no merge; 0021 e 0022 já ocupados ou reservados):** contrato v1, modelo de confiança, quebra da lista fixa de comandos.
+- **ADR do 109 (a escrever na 109-11 ou antes, ver `plan.md`; número no merge; 0021 e 0022 já ocupados ou reservados):** contrato v1, modelo de confiança, quebra da lista fixa de comandos.
 - **Memória do dono:** handoff é menu (autorização do módulo é menu).
 
 ## O que já existe

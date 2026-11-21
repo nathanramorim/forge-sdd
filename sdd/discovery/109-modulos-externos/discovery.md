@@ -41,7 +41,7 @@ Lido em `origin/main` (8bd3a0a) neste worktree; **nada foi executado**.
 
 ## Contrato de módulos (v1, mínimo e estável)
 
-**Descoberta (decisão recomendada):** o core **não procura no PATH nem na pasta do projeto**. Um módulo só roda se (1) o nome está em `Módulos permitidos` na Constituição da **branch base**, (2) está instalado na pasta do **usuário** (`<os.UserConfigDir>/forge-sdd/modulos/<nome>/<versão>/`), (3) o `sha256` do binário e do manifesto bate com o registro de confiança e (4) o contrato é compatível. Repositório clonado não planta binário: o agente que escreve no projeto não consegue autorizar um módulo sozinho (duas travas: a lista versionada e o registro fora do repositório).
+**Descoberta (decidido pelo dono em 20/11/2026, decisão 1):** o core **não procura no PATH nem na pasta do projeto**. Um módulo só roda se (1) o nome está em `Módulos permitidos` na Constituição da **branch base**, (2) está instalado na pasta do **usuário** (`<os.UserConfigDir>/forge-sdd/modulos/<nome>/<versão>/`), (3) o `sha256` do binário e do manifesto bate com o registro de confiança e (4) o contrato é compatível. Repositório clonado não planta binário: o agente que escreve no projeto não consegue autorizar um módulo sozinho (duas travas: a lista versionada e o registro fora do repositório).
 
 **Manifesto** (`modulo.json`, arquivo ao lado do binário, lido **sem executar nada**):
 ```json
@@ -75,7 +75,7 @@ Resposta: `{"contrato": 1, "ok": true, "avisos": ["texto"]}`. Campos desconhecid
 **`forge --help` e `forge doctor`.** `--help` lista uma seção "Módulos" **só** para módulos autorizados e ok. O `doctor` ganha a checagem `modulos` **só** quando `Módulos permitidos` não for `nenhum`: lista nome, versão, contrato, autorização e hash; módulo ausente ou não autorizado: aviso; hash mudou ou contrato incompatível: aviso com recusa (nunca `falha`, para o código de saída 3 não mudar). A capacidade `doctor` do módulo acrescenta as checagens dele, com prefixo `modulo:<nome>`.
 
 ## Modelo de confiança (mínimo viável)
-1. **Origem:** só a pasta do usuário acima, preenchida por `forge modulo instalar` (a partir de um arquivo local ou de um endereço `https` de release, **sempre com `--sha256` esperado**, e de um registro fechado de módulos oficiais com 1 entrada, decisão 4). Nunca PATH, nunca a pasta do projeto, nunca caminho relativo (`exec.ErrDot` mantido).
+1. **Origem:** só a pasta do usuário acima, preenchida por `forge modulo instalar` (a partir de um arquivo local ou de um endereço `https` de release, **sempre com `--sha256` esperado**, decisão 4: **sem** registro de módulos oficiais no core). Nunca PATH, nunca a pasta do projeto, nunca caminho relativo (`exec.ErrDot` mantido).
 2. **Verificação:** `sha256` do binário e do manifesto; instalação grava o par no registro `confianca.json` (pasta do usuário, **fora do git**).
 3. **Autorização:** o dono, por **menu**, uma vez **por versão**, vendo nome, versão, hash e as `permissoes` declaradas. Sem resposta ou "não": não executa. Modo sem humano da 106 **não** autoriza módulo (decisão de segurança: instalar é sempre humano).
 4. **Binário mudou:** hash diferente do registrado = recusa e nova autorização; versão nova = nova autorização.
@@ -145,12 +145,12 @@ Base: a proposta de `constitution.proposta.md` na branch da 106 tem **9.182 byte
 - **RN-8** Eventos são semânticos (sem caminho de arquivo) e entregues no máximo uma vez, sem bloquear; o módulo é idempotente.
 - **RN-9** Testes (do core e do módulo) rodam sem rede (`TST-03`, `TST-04`): binário falso de teste (`TestMain` que reexecuta o próprio teste), `t.TempDir()`, `LookPath` e `CommandRunner` injetados, `gh` falso.
 - **RN-10** O repositório do módulo nasce **dentro da esteira SDD**, com o forge-sdd estável mais recente instalado e configurado (task de bootstrap).
-- **RN-11** Visibilidade e licença do módulo são **decisão do dono**; esta discovery só descreve as opções.
+- **RN-11** Repositório do módulo **privado, instalação por convite** (decidido pelo dono em 20/11/2026); a **licença** segue em aberto, decisão do dono. O repositório só é criado pelo dono, depois e fora desta iniciativa.
 
 ## Repositório e distribuição do módulo (só descrito; nada foi criado)
 - **Nome:** `forge-sdd-project` (binário `forge-project`). Convenção `forge-sdd-<nome>`/`forge-<nome>`.
 - **Layout mínimo:** `modulo.json`, `cmd/forge-project/`, `internal/{contrato,etapa,quadro,etiqueta,evento}/`, `docs/`, `sdd/` (esteira SDD própria), `LICENSE`, `README.md`, `.github/workflows/release.yml`, `testdata/gh-falso/`.
-- **Instalar (um comando):** `forge modulo instalar project` (registro fechado de módulos oficiais com uma entrada: fica como decisão, porque coloca um nome de módulo no core); alternativa neutra: `forge modulo instalar --de <arquivo|https> --sha256 <hash>`. Os dois mostram o menu de autorização.
+- **Instalar (decidido, decisão 4):** só `forge modulo instalar --de <arquivo|https> --sha256 <hash>`; o core não guarda nome de módulo oficial. O comando de um passo é alias documentado no README do módulo. Mostra o menu de autorização. **Consequência (repositório privado, decisão 3):** um asset de release privado não se baixa por `--de https` sem credencial, e o core não ganha tratamento de token. O convidado baixa com o próprio acesso (`gh release download` ou navegador) e instala com `--de <arquivo> --sha256 <hash>`.
 - **Atualizar:** nova versão = nova pasta, nova autorização; a anterior continua até `remover`. **Remover:** `forge modulo remover <nome> [versão]` apaga a pasta e o registro; tirar o nome da Constituição já desliga sem apagar.
 - **Teste sem rede:** `gh` falso no PATH do teste (executável de teste que imprime JSON de `testdata/`), servidor `httptest` de loopback para o instalador (rede local do próprio teste, não externa), relógio e diretórios injetados.
 
@@ -169,7 +169,7 @@ Serve a mais de um módulo porque o contrato tem só: manifesto, evento, `doctor
 ## Escopo
 **Dentro (core):** `internal/modulo` (manifesto, contrato v1, registro de confiança, execução, eventos, instantâneo), comando oculto `forge modulo`, comandos dinâmicos dos módulos autorizados, checagem do `doctor`, texto mínimo da doc, ADR, suíte de byte-identidade, e as alterações do PR único da Constituição.
 **Dentro (módulo, outro repositório):** tudo da tabela marcada "módulo", bootstrap e docs.
-**Fora:** criar o repositório do módulo; sandbox, assinatura e canal de volta; Azure; mexer na esteira; decidir visibilidade e licença.
+**Fora:** criar o repositório do módulo (privado; o dono cria); sandbox, assinatura e canal de volta; Azure; mexer na esteira; decidir a licença.
 
 ## Riscos
 | Risco | Mitigação |
@@ -183,15 +183,18 @@ Serve a mais de um módulo porque o contrato tem só: manifesto, evento, `doctor
 | Dependência circular de merge (PR único da Constituição) | o campo entra na 106/0.8; a task de leitura do campo depende da 106/0.5 |
 | Dois repositórios com ciclos diferentes | contrato versionado e `contrato.min` no módulo |
 
-## Decisões para o Gate 1 (recomendação de cada uma; a decisão é do dono)
-1. **Onde o módulo vive e como o core o acha:** pasta do usuário + lista na Constituição + hash autorizado (recomendado) **versus** PATH (o brief original). PATH aceita qualquer `forge-project` plantado; recomendo a pasta.
-2. **Comando visível ou oculto:** `forge modulo` oculto (recomendado, preserva `--help` byte a byte) **versus** visível (mais descobrível, muda a ajuda de todos).
-3. **Visibilidade e licença do repositório do módulo** (do dono; não decido). Opções:
+## Decisões do dono (Nathan, chat, 20/11/2026) e perguntas abertas
+**O Gate 1 desta discovery NÃO está aprovado**: o dono decidiu os pontos abaixo em conversa, mas ainda não aprovou formalmente. Resumo: **1 a 6 decididas** (3 só na visibilidade; a licença segue aberta); **7 e a licença abertas**. Plano de versão: 5.1.0-beta ao fim da onda 3 do core (a tag nasce na branch, o PR fica aberto, FLX-07) e 5.1.0 estável depois da onda 5; o release segue o checklist (README, `npm/README.md`, `sdd/releases/history.md`). Ordem das ondas: `plan.md`.
+
+## Decisões para o Gate 1 (texto original de cada uma; estado em cada título)
+1. **DECIDIDO pelo dono (pasta do usuário + `Módulos permitidos` + hash autorizado; PATH fora). Onde o módulo vive e como o core o acha:** pasta do usuário + lista na Constituição + hash autorizado (recomendado) **versus** PATH (o brief original). PATH aceita qualquer `forge-project` plantado; recomendo a pasta.
+2. **DECIDIDO pelo dono (oculto; `--help` idêntico sem módulo). Comando visível ou oculto:** `forge modulo` oculto (recomendado, preserva `--help` byte a byte) **versus** visível (mais descobrível, muda a ajuda de todos).
+3. **DECIDIDO pelo dono na visibilidade: PRIVADO, instalação por convite; licença ainda em aberto. Visibilidade e licença do repositório do módulo.** Opções:
    - **Privado, instalação por convite** (token ou colaborador): máxima proteção da expertise; custo: atrito, não há comunidade, o instalador precisa de autenticação. *Recomendação: começar aqui.*
    - **Público com licença própria** (fonte disponível, uso comercial restrito; por exemplo BUSL/PolyForm): transparência e confiança; custo: a expertise fica legível, difícil de fazer valer a licença.
    - **Distribuição paga ou por mentoria** (binário assinado entregue ao cliente): monetiza; custo: exige canal de entrega, suporte e licenciamento; pede a assinatura que fica adiada.
    - Observação: o contrato é aberto em qualquer cenário (o core é público); só o módulo é protegido.
-4. **Registro de módulos oficiais no core** (uma entrada) **versus** só `--de <arquivo|https> --sha256`. Recomendo só `--de` na v1 (core 100% neutro); o comando de um passo vira alias documentado no README do módulo.
-5. **Início automático (3.7) e regra de WIP** ficam no laço da 107: criar a task nova na 107 (número do dono). Recomendo: sim, task `107-13` proposta, fora do fecho.
-6. **Prioridade 0 da 108 e o fecho:** com a 108 fora do core, as 16 tasks externas continuam úteis por mérito próprio, mas **deixam de ser pré-requisito de um lançamento do quadro**. Recomendo reabrir só a ordem (ver `plan.md`), sem reduzir escopo.
-7. **Sem canal de volta (pedidos) em v1** (recomendado) **versus** já aceitar `pedidos` validados pelo core.
+4. **DECIDIDO pelo dono (só `--de <arquivo|https> --sha256`, sem registro oficial no core). Registro de módulos oficiais no core** (uma entrada) **versus** só `--de <arquivo|https> --sha256`. Recomendo só `--de` na v1 (core 100% neutro); o comando de um passo vira alias documentado no README do módulo.
+5. **DECIDIDO pelo dono: task `107-13` criada na spec 107 (PR #122), no core, antes na 108/3.7.** Início automático (3.7) e regra de WIP ficam no laço da 107; fica sujeita à aprovação formal da 107.
+6. **DECIDIDO pelo dono: a ordem das ondas é reaberta, sem cortar escopo.** A prioridade 0 da 108 deixa de ser o fecho obrigatório; o quadro vira módulo, o último a construir (ver `plan.md`, `## Ordem das ondas do core`).
+7. **EM ABERTO (recomendado: sem canal de volta). Sem canal de volta (pedidos) em v1** (recomendado) **versus** já aceitar `pedidos` validados pelo core.
