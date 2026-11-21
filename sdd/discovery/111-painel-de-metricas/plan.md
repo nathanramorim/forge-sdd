@@ -39,9 +39,9 @@ Ordem de baixo para cima. Até 7 tasks por onda. As tasks 111-xx rodam no reposi
 ## Onda 4 — Core (mínimo, aditivo, só com módulo ativo)
 | # | Task | Depende de | Rules |
 |---|---|---|---|
-| 111-C1 | Evento `sessao.registrada` e campo opcional `tool` (com a 110) | **109** | `ARQ-02`, `TST-02` |
+| 111-C1 | Consumir `sessao.registrada` e `tool` (donas: K-01/K-02 da 110; sem código novo no core, proposta a confirmar pelo dono) | **109**, **110 K-01/K-02** | `ARQ-02`, `TST-02` |
 | 111-C2 | Evento `volta.registrada` (Discovery, nova-feature, novo-fix) | 109 | `FLX-06`, `TST-02` |
 | 111-C3 | Suíte de byte-identidade estendida: sem módulo, saída igual | 109-01 | `TST-02` |
 
 ## Paralelismo e riscos de ordem
-Ondas 1 e 0 não dependem de 109, 110, 105-07/08 nem 106 (comando solto lendo arquivos). Onda 2 espera 105-07; Onda 3, 105-08. Onda 4 só depois da 109.
+Ondas 1 e 0 não dependem de 109, 110, 105-07/08 nem 106 (comando solto lendo arquivos). Onda 2 espera 105-07; Onda 3, 105-08. Onda 4 só depois da 109 e das tasks K-01/K-02 da 110 (donas de `sessao.registrada` e `tool`).

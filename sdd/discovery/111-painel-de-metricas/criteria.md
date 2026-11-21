@@ -61,7 +61,7 @@ test "$(wc -c < sdd/memory/constitution.md)" -le 9216
 # A: o painel usa os tokens da LP e cita o arquivo real
 grep -F 'docs/index.html:14-36' "$D/discovery.md"
 # A: nenhuma assinatura pessoal nos diagramas
-if grep -li 'linkedin' "$D"/diagramas/*.svg; then exit 1; fi
+if grep -liE 'linkedin|nathan' "$D"/diagramas/*.svg "$D"/diagramas/*.json 2>/dev/null; then exit 1; fi
 # B: módulo (repositório forge-sdd-metricas), nomes das tasks 111-01 a 111-07
 # go test ./... -run 'TestEsquemaV1CamposAditivosAceitos|TestLinhaRuimEContadaNaoDescartada'
 # go test ./... -run 'TestLeitorSessoesVazioEhRotuladoSemDado|TestRetornosPorRegraAgrupa'

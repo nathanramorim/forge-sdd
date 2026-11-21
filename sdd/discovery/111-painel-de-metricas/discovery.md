@@ -10,9 +10,9 @@ Conferido em 20/11/2026: `ls sdd/discovery | grep -E '^1[01]'` na main traz 100,
 Hoje o dono só sabe onde a esteira erra lendo arquivos um a um. O painel junta, num lugar só e sem sair da máquina, o que foi devolvido, por qual regra, quantas vezes a mesma regra falhou, quais comandos depreciados ainda são usados e quanto se gastou. O ganho é duplo: **menos retrabalho e menos token** (o erro que se repete vira lição aprovada pelo dono, e o comando depreciado com substituto mais barato é achado e trocado) e **previsibilidade** (o dono vê a tendência, com o tamanho da amostra sempre à mostra). Regra de honestidade: o painel nunca finge precisão; mostra `n`, a origem do dado e o rótulo `real` ou `estimado`.
 
 ## Clarify
-Sem pergunta antes de escrever: o pedido traz forma, fronteira e restrições. As lacunas viraram `**Gate 1 aprovado em 2026-11-20 (completo): o dono aceitou a recomendação de cada decisão abaixo.** nome `forge metricas`, leitura de arquivos na v0, lições gravadas pelo core, eventos e `tool` aditivos, onda 1 (Visão geral, Erros e retornos), repositório privado.
+Sem pergunta antes de escrever: o pedido traz forma, fronteira e restrições. As lacunas viraram as decisões da seção abaixo.
 
-## Decisões para o Gate 1`.
+**Gate 1 aprovado em 2026-11-20 (completo): o dono aceitou a recomendação de cada decisão abaixo.** nome `forge metricas`, leitura de arquivos na v0, lições gravadas pelo core, eventos e `tool` aditivos, onda 1 (Visão geral, Erros e retornos), repositório privado.
 
 ## 1. Que dados existem hoje (medido em `origin/main` 8bd3a0a, neste worktree; nada executado além de leitura)
 
@@ -66,7 +66,7 @@ Sem pergunta antes de escrever: o pedido traz forma, fronteira e restrições. A
 
 **Compatibilidade:** só aditivo dentro de `forge-metricas/1`; remover ou renomear exige `/2`; campo desconhecido é ignorado nos dois sentidos; **linha ruim é contada e mostrada** ("3 linhas ilegíveis"), nunca descartada em silêncio. O leitor de cada fonte do core é um adaptador com **versão do layout** (o `queue.json` de hoje e o `state/<sid>.json` da 106/0.7), rotulado frágil.
 
-**Core (mínimo, aditivo, só com módulo ativo; byte a byte sem módulo, RN-1 da 109):** nada na v0. Para a v1: o evento `sessao.registrada` (a mesma extensão que a 110 já propõe), o campo opcional `tool` na sessão gerada pelo pipeline, e um evento `volta.registrada` (Discovery, nova-feature, novo-fix), pois hoje esse fato não existe. `veredito.gravado` e `feature.estado_mudou` já estão no contrato da 109 e cobrem retornos. **O módulo calcula** tudo o mais: médias, medianas, reincidência, economia, tendência.
+**Core (mínimo, aditivo, só com módulo ativo; byte a byte sem módulo, RN-1 da 109):** nada na v0. Para a v1: o evento `sessao.registrada` e o campo opcional `tool` na sessão gerada pelo pipeline (donas: tasks K-01 e K-02 da 110; a 111 só depende delas e consome, proposta a confirmar pelo dono), e um evento `volta.registrada` (Discovery, nova-feature, novo-fix), pois hoje esse fato não existe. `veredito.gravado` e `feature.estado_mudou` já estão no contrato da 109 e cobrem retornos. **O módulo calcula** tudo o mais: médias, medianas, reincidência, economia, tendência.
 
 **Com a 110 (esquema compartilhado):** os dois módulos leem o **mesmo registro `sessao`**, com a mesma definição de token (com ou sem cache sempre explícita), o mesmo `papel` normalizado e o mesmo rótulo `medicao`. Como dois repositórios não importam código, o contrato é um **documento de esquema** (JSON Schema em cada repositório, igual byte a byte, conferido por teste). Decisão aberta: quem é o dono do documento; recomendo a 109 (contrato) como anexo.
 
@@ -117,7 +117,7 @@ O painel cruza `depreciado.comando` com o catálogo (`internal/deprecation`; ADR
 |---|---|
 | Manifesto | `nome: metricas`, `binario: forge-metricas`, `comandos: metricas`, `permissoes: {rede: false, executa: [], escreve: [".forge/modulos/metricas/"]}`, `capacidades: [doctor]` |
 | Eventos consumidos (v1 da 109) | `veredito.gravado`, `feature.estado_mudou`, `spec.aprovada`, `iniciativa.arquivada`; acumulados em JSONL em `FORGE_MODULO_DIR` |
-| Extensões aditivas (a propor, junto com a 110) | `sessao.registrada`, `volta.registrada` |
+| Extensões aditivas (`volta.registrada` é nossa; `sessao.registrada` vem da 110, K-01) | `sessao.registrada`, `volta.registrada` |
 | Instantâneo | `forge modulo contexto --json` para o estado atual (iniciativas, estados) |
 | `doctor` | capacidade `doctor`: fontes encontradas, versão do layout lida, linhas ruins, idade do último `gerar`; prefixo `modulo:metricas`, aviso, nunca falha |
 | `status` | sem linha nova no core; o módulo oferece `forge metricas resumo` |
@@ -128,7 +128,7 @@ Sem canal de volta (RN-7): aprovar lição passa pelo menu do **core**.
 **Recomendo módulo da 109** (`forge-sdd-metricas`, binário `forge-metricas`, repositório privado): determinístico, testável sem rede, multiagente, mesma confiança por hash. Plugin do Claude Code só entraria como skill fina que chama `forge metricas resumo --json` (depois, como na 110). Abrir: `forge metricas abrir` (abre o navegador padrão no `index.html`; imprime o caminho se não puder).
 
 ## 8. Fecho e ordem
-Detalhe em `plan.md`. **No core, só o mínimo:** nada na v0; v1 aditiva (`sessao.registrada`, `volta.registrada`, `tool`). **No módulo:** todo o resto. Dependências: **109** (contrato; sem ela só dá para prototipar como comando solto), **105-07/08** (aba Depreciados e `achados.csv`; sem elas, as abas mostram vazio rotulado), **106/0.7** (adaptador de `state/<sid>.json`), **110** (esquema `sessao` e aba Tokens estimado x real).
+Detalhe em `plan.md`. **No core, só o mínimo:** nada na v0; v1 aditiva (`volta.registrada` é nossa; `sessao.registrada` e `tool` vêm da 110, K-01/K-02). **No módulo:** todo o resto. Dependências: **109** (contrato; sem ela só dá para prototipar como comando solto), **105-07/08** (aba Depreciados e `achados.csv`; sem elas, as abas mostram vazio rotulado), **106/0.7** (adaptador de `state/<sid>.json`), **110** (esquema `sessao` e aba Tokens estimado x real).
 **Primeira entrega pequena e útil (onda 1):** painel só com **Visão geral e Erros e retornos**, sobre os dados que **existem hoje** (90 itens de fila, 17 vereditos, 19 achados, 97 sessões), com Depreciados e Tokens como abas honestamente vazias ou parciais. Nota: a ideia de abrir com Depreciados não rende, pois há 0 registros na main.
 
 ## 9. Bootstrap do repositório (task P-00, descrita, não executada)
