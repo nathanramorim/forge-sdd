@@ -154,3 +154,67 @@ func TestInstrucaoDoctorNoAgentsMd(t *testing.T) {
 		assert.Contains(t, string(data), "forge doctor --harness", f)
 	}
 }
+
+func TestMergePreToolUseHook(t *testing.T) {
+	t.Run("arquivo novo grava com matcher Bash", func(t *testing.T) {
+		dir := t.TempDir()
+		changed, err := MergeClaudePreToolUseHRook(dir)
+		require.NoError(t, err)
+		assert.True(t, changed)
+
+		m := readSettings(t, dir)
+		hooks, _ := m["hooks"].(map[string]any)
+		groups, _ := hooks["PreToolUse"].([]any)
+		require.Len(t, groups, 1)
+		entrada := groups[0].(map[string]any)
+		assert.Equal(t, "Bash", entrada["matcher"], "o hook só roda em comandos de shell")
+
+		inner := entrada["hooks"].([]any)
+		require.Len(t, inner, 1)
+		assert.Equal(t, prGuardCommand, inner[0].(map[string]any)["command"])
+	})
+
+	t.Run("preserva o hook do usuário e é idempotente", func(t *testing.T) {
+		dir := t.TempDir()
+		require.NoError(t, os.MkdirAll(filepath.Join(dir, ".claude"), 0o755))
+		existing := `{"hooks":{"PreToolUse":[{"matcher":"Bash","hooks":[{"type":"command","command":"echo antes"}]}]}}`
+		p := filepath.Join(dir, ".claude", "settings.json")
+		require.NoError(t, os.WriteFile(p, []byte(existing), 0o644))
+
+		changed, err := MergeClaudePreToolUseHRook(dir)
+		require.NoError(t, err)
+		assert.True(t, changed)
+		assert.Equal(t, []string{"echo antes", prGuardCommand}, eventoCmds(readSettings(t, dir), "PreToolUse"))
+
+		before, _ := os.ReadFile(p)
+		changed, err = MergeClaudePreToolUseHRook(dir)
+		require.NoError(t, err)
+		assert.False(t, changed, "segunda execução não muda nada")
+		after, _ := os.ReadFile(p)
+		assert.Equal(t, string(before), string(after))
+	})
+}
+
+func TestMergePreToolUseHookJSONInvalidoNaoETocado(t *testing.T) {
+	for name, content := range map[string]string{
+		"json inválido":          `{"hooks":`,
+		"conteúdo extra":         `{} {}`,
+		"não é objeto":           `[1,2]`,
+		"hooks não é objeto":     `{"hooks":[]}`,
+		"pretooluse não é lista": `{"hooks":{"PreToolUse":"x"}}`,
+		"null no topo":           `null`,
+		"texto qualquer":         `isto nao e json`,
+	} {
+		dir := t.TempDir()
+		require.NoError(t, os.MkdirAll(filepath.Join(dir, ".claude"), 0o755))
+		p := filepath.Join(dir, ".claude", "settings.json")
+		require.NoError(t, os.WriteFile(p, []byte(content), 0o644))
+
+		changed, err := MergeClaudePreToolUseHRook(dir)
+		require.Error(t, err, name)
+		assert.False(t, changed, name)
+		data, _ := os.ReadFile(p)
+		assert.Equal(t, content, string(data), "%s: o arquivo do usuário fica intacto", name)
+		assert.Contains(t, err.Error(), "manualmente", name)
+	}
+}

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 
@@ -144,6 +145,10 @@ inconsistências de configuração dos agentes de IA e progresso das features.`,
 				}
 			}
 		}
+
+		// 3b. Cobertura da barreira de PR (feat-106-15)
+		fmt.Println("\n🛡️  Barreira de PR (pr_guard):")
+		reportPRGuardCoverage(targetDir, rc.Agents)
 
 		// 4. Verificação de arquivos essenciais de metodologia
 		fmt.Println("\n📁 Arquivos de Metodologia:")
@@ -350,6 +355,46 @@ func runDoctorHarness(w io.Writer, dir string, asJSON bool, deps doctor.Deps) er
 		return exitCodeErr{code: code}
 	}
 	return nil
+}
+
+// reportPRGuardCoverage informa se o hook PreToolUse do pr_guard está instalado e em quais
+// agentes a barreira de fato vale. Só o Claude Code executa hooks (feat-106-15); nos demais, o
+// job "pronto?" do CI é quem segura o PR em draft.
+func reportPRGuardCoverage(targetDir string, agents []string) {
+	settings := filepath.Join(targetDir, ".claude", "settings.json")
+	instalado := false
+	if data, err := os.ReadFile(settings); err == nil {
+		instalado = strings.Contains(string(data), "pr_guard.py")
+	}
+
+	if instalado {
+		fmt.Println("  ✓ Hook PreToolUse instalado (.claude/settings.json)")
+	} else {
+		fmt.Println("  ⚠️  Hook PreToolUse ausente; rode 'forge update --upgrade' para instalar")
+	}
+
+	if _, err := exec.LookPath("uv"); err != nil {
+		fmt.Println("  ⚠️  'uv' não está no PATH; o hook não roda sem ele (instale em https://docs.astral.sh/uv/)")
+	} else {
+		fmt.Println("  ✓ 'uv' disponível no PATH")
+	}
+
+	var comHook, semHook []string
+	for _, a := range agents {
+		if a == config.AgentClaude {
+			comHook = append(comHook, a)
+		} else {
+			semHook = append(semHook, a)
+		}
+	}
+	if len(comHook) > 0 && instalado {
+		fmt.Printf("  ✓ Cobertura: %s (hook ativo)\n", strings.Join(comHook, ", "))
+	} else if len(comHook) > 0 {
+		fmt.Printf("  ⚠️  Cobertura: %s configurado, mas o hook não está instalado\n", strings.Join(comHook, ", "))
+	}
+	if len(semHook) > 0 {
+		fmt.Printf("  ℹ️  Sem hook: %s — nesses agentes vale o job \"pronto?\" do CI\n", strings.Join(semHook, ", "))
+	}
 }
 
 func init() {
