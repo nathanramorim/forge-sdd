@@ -115,3 +115,41 @@ func TestDecodeParecerInvalido(t *testing.T) {
 		})
 	}
 }
+
+func TestParecerGravaHeadSHA(t *testing.T) {
+	sha := "0123456789abcdef0123456789abcdef01234567"
+	v, err := DecodeParecer([]byte(`{"veredito":"conforme","resumo":"ok"}`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	c, err := v.ComProveniencia(sha, PontoEntrega, "normal", "feat-106-11")
+	if err != nil {
+		t.Fatalf("proveniência válida recusada: %v", err)
+	}
+	dados, err := json.Marshal(c)
+	if err != nil {
+		t.Fatal(err)
+	}
+	lido, err := DecodeParecer(dados)
+	if err != nil {
+		t.Fatalf("parecer carimbado não relê: %v", err)
+	}
+	if lido.HeadSHA != sha || lido.Ponto != PontoEntrega || lido.Modo != "normal" || lido.Feature != "feat-106-11" {
+		t.Errorf("proveniência perdida: %+v", lido)
+	}
+}
+
+func TestParecerSemHeadSHARecusado(t *testing.T) {
+	v := Parecer{Veredito: VereditoConforme, Resumo: "ok", Achados: []Retorno{}}
+	for nome, c := range map[string]struct{ sha, ponto string }{
+		"sha vazio":      {"", PontoSpec},
+		"sha inválido":   {"zzz", PontoSpec},
+		"ponto inválido": {"0123456789abcdef", "outro"},
+	} {
+		t.Run(nome, func(t *testing.T) {
+			if _, err := v.ComProveniencia(c.sha, c.ponto, "normal", "f"); err == nil {
+				t.Fatal("esperava recusa")
+			}
+		})
+	}
+}

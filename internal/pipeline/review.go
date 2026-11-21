@@ -12,6 +12,7 @@ import (
 
 	"github.com/forge-sdd/cli/internal/bus"
 	"github.com/forge-sdd/cli/internal/config"
+	"github.com/forge-sdd/cli/internal/harness"
 	"github.com/forge-sdd/cli/internal/layout"
 	"github.com/forge-sdd/cli/internal/notify"
 	"github.com/forge-sdd/cli/internal/queue"
@@ -97,7 +98,10 @@ func ApplyVerdict(dir, jobID, worker string, v queue.Verdict, deps notify.Deps, 
 		return nil, err
 	}
 
-	persistVerdict(dir, job, v)
+	v, err = persistVerdict(dir, job, harness.PontoEntrega, v)
+	if err != nil {
+		return nil, err
+	}
 
 	res := &ReviewResult{}
 	switch {
@@ -295,24 +299,42 @@ func notificationID(jobID, suffix string) string {
 	return jobID[:60] + "-" + hex.EncodeToString(sum[:4]) + "-" + suffix
 }
 
-// persistVerdict guarda uma cópia do veredito em sdd/discovery/<iniciativa>/verdicts/<job>.json.
+// lerHEAD lê o commit do HEAD da branch; variável para os testes sem repositório (TST-03).
+var lerHEAD = func(dir string) (string, error) { return layout.Git(dir, "rev-parse", "HEAD") }
+
+// persistVerdict carimba o veredito com a proveniência (head_sha do HEAD da branch, ponto, modo e
+// feature; task 1.1 da 106) e guarda uma cópia em sdd/discovery/<iniciativa>/verdicts/<job>.json.
 // O agente Reviewer é somente leitura e entrega o veredito em arquivo temporário; é o Go quem o
-// preserva na pasta da iniciativa, para o registro não se perder junto com o /tmp. Best-effort:
-// sem iniciativa válida ou com falha de escrita, o fluxo de aprovação segue sem a cópia.
-func persistVerdict(dir string, job bus.Job, v queue.Verdict) {
+// preserva na pasta da iniciativa, para o registro não se perder junto com o /tmp. Sem SHA do HEAD
+// o veredito é recusado (erro); sem iniciativa válida ou com falha de escrita, a cópia é
+// best-effort e o fluxo de aprovação segue.
+func persistVerdict(dir string, job bus.Job, ponto string, v queue.Verdict) (queue.Verdict, error) {
+	sha, err := lerHEAD(dir)
+	if err != nil {
+		return v, fmt.Errorf("veredito sem head_sha: não foi possível ler o HEAD: %w", err)
+	}
+	modo := config.AutonomyNormal
+	if cfg, found, cerr := config.LoadForgeConfig(dir); cerr == nil && found && cfg.Autonomy != "" {
+		modo = cfg.Autonomy
+	}
+	v, err = v.ComProveniencia(sha, ponto, modo, job.Feature)
+	if err != nil {
+		return v, err
+	}
 	if job.Initiative == "" {
-		return
+		return v, nil
 	}
 	base, err := layout.Initiative(dir, job.Initiative)
 	if err != nil {
-		return
+		return v, nil
 	}
 	if info, err := os.Stat(base); err != nil || !info.IsDir() {
-		return // não cria iniciativa que não existe
+		return v, nil // não cria iniciativa que não existe
 	}
 	vdir := filepath.Join(base, "verdicts")
 	if err := os.MkdirAll(vdir, 0o755); err != nil {
-		return
+		return v, nil
 	}
 	_ = queue.WriteJSONAtomic(filepath.Join(vdir, job.ID+".json"), v, 0o644)
+	return v, nil
 }
