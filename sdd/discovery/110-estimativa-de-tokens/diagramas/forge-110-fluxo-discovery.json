@@ -1,0 +1,139 @@
+{
+ "kicker": "// Forge SDD · iniciativa 110",
+ "titulo": "Onde a estimativa aparece na Discovery",
+ "largura": 1360,
+ "altura": 520,
+ "nota_rodape": "nada novo sem o módulo; handoff sempre em menu",
+ "elementos": [
+  {
+   "tipo": "caixa",
+   "id": "s1",
+   "x": 40,
+   "y": 128,
+   "w": 230,
+   "h": 100,
+   "texto": "1 · /discovery",
+   "sub": "IA · spec, criteria, plan",
+   "estilo": "normal"
+  },
+  {
+   "tipo": "caixa",
+   "id": "s2",
+   "x": 300,
+   "y": 128,
+   "w": 230,
+   "h": 100,
+   "texto": "2 · Estimar a iniciativa",
+   "sub": "AUTOMÁTICO · forge estimar",
+   "estilo": "destaque"
+  },
+  {
+   "tipo": "caixa",
+   "id": "s3",
+   "x": 560,
+   "y": 128,
+   "w": 230,
+   "h": 100,
+   "texto": "3 · Menu final",
+   "sub": "HUMANO · faixa, modelo, abrir pasta",
+   "estilo": "contorno"
+  },
+  {
+   "tipo": "caixa",
+   "id": "s4",
+   "x": 820,
+   "y": 128,
+   "w": 230,
+   "h": 100,
+   "texto": "4 · Gate 1",
+   "sub": "HUMANO · dono aprova",
+   "estilo": "contorno"
+  },
+  {
+   "tipo": "caixa",
+   "id": "s5",
+   "x": 1080,
+   "y": 128,
+   "w": 240,
+   "h": 100,
+   "texto": "5 · /split-features",
+   "sub": "IA · uma linha por feature",
+   "estilo": "normal"
+  },
+  {
+   "tipo": "caixa",
+   "id": "e1",
+   "x": 300,
+   "y": 320,
+   "w": 230,
+   "h": 100,
+   "texto": "estimativa.md",
+   "sub": "na pasta da iniciativa",
+   "estilo": "normal"
+  },
+  {
+   "tipo": "caixa",
+   "id": "e2",
+   "x": 820,
+   "y": 320,
+   "w": 230,
+   "h": 100,
+   "texto": "Corpo do PR",
+   "sub": "resumo curto, opcional",
+   "estilo": "tracejado"
+  },
+  {
+   "tipo": "caixa",
+   "id": "e3",
+   "x": 1080,
+   "y": 320,
+   "w": 240,
+   "h": 100,
+   "texto": "Menu do Builder",
+   "sub": "faixa da feature escolhida",
+   "estilo": "normal"
+  },
+  {
+   "tipo": "seta",
+   "de": "s1.dir",
+   "para": "s2.esq",
+   "forma": "horizontal"
+  },
+  {
+   "tipo": "seta",
+   "de": "s2.dir",
+   "para": "s3.esq",
+   "forma": "horizontal"
+  },
+  {
+   "tipo": "seta",
+   "de": "s3.dir",
+   "para": "s4.esq",
+   "forma": "horizontal"
+  },
+  {
+   "tipo": "seta",
+   "de": "s4.dir",
+   "para": "s5.esq",
+   "forma": "horizontal"
+  },
+  {
+   "tipo": "seta",
+   "de": "s2.baixo",
+   "para": "e1.cima",
+   "forma": "vertical"
+  },
+  {
+   "tipo": "seta",
+   "de": "s5.baixo",
+   "para": "e3.cima",
+   "forma": "vertical"
+  },
+  {
+   "tipo": "seta",
+   "de": "s4.baixo",
+   "para": "e2.cima",
+   "forma": "vertical"
+  }
+ ]
+}

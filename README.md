@@ -33,47 +33,6 @@ Quando você trabalha com uma IA, precisa repetir as mesmas instruções a cada 
 
 O **forge-sdd** resolve isso. Ele instala no seu projeto um conjunto de regras, comandos e agentes de IA que trabalham em etapas e lembram do que importa. Você conversa, planeja e aprova. A IA constrói e outra IA confere o resultado.
 
-## Como funciona
-
-Você usa três sessões de IA ao mesmo tempo:
-
-| Sessão | O que faz |
-|---|---|
-| **1. Discovery** | É onde você conversa e planeja a ideia. |
-| **2. Builder** | Constrói em paralelo e abre o PR. |
-| **3. Reviewer** | Confere as regras e as decisões, e devolve com comentários (até 3 vezes). |
-
-Quando o PR está conforme, você é avisado na sessão de Discovery e faz a aprovação final.
-
-```mermaid
-%%{init: {"flowchart": {"curve": "linear", "nodeSpacing": 40, "rankSpacing": 80, "htmlLabels": true}}}%%
-flowchart LR
-  classDef pessoa fill:#08427b,stroke:#052e56,color:#ffffff
-  classDef cont fill:#438dd5,stroke:#2e6295,color:#ffffff
-
-  u(["<b>Você</b><br/>[Humano]<br/>planeja e aprova"]):::pessoa
-
-  subgraph disc["1 · Discovery"]
-    direction TB
-    d["<b>PM + Arquiteto</b><br/>[Claude · Gemini · Copilot]<br/>transforma ideia em spec"]:::cont
-  end
-
-  subgraph build["2 · Builder"]
-    direction TB
-    b["<b>Builder</b><br/>[worktree isolado]<br/>implementa e abre PR"]:::cont
-  end
-
-  subgraph rev["3 · Reviewer"]
-    direction TB
-    r["<b>Reviewer</b><br/>[somente leitura]<br/>confere regras (até 3×)"]:::cont
-  end
-
-  u -->|"/discovery + plan"| disc
-  disc -->|"tasks na fila"| build
-  build -->|"PR aberto"| rev
-  rev -->|"conforme ✓"| u
-```
-
 ## Como a esteira funciona
 
 <p align="center">
@@ -81,10 +40,10 @@ flowchart LR
 </p>
 
 - **Você conversa com o Discovery** e aprova a spec. O Gate 1 é humano (no modo avançado, experimental, o Reviewer revisa a spec no seu lugar).
-- **O Builder** pega as tasks, implementa e abre o PR.
+- **O Builder** pega as tasks, implementa (em paralelo, em worktree isolado) e abre o PR.
 - **O Reviewer** confere em duas camadas: `forge gate` (regras checadas por código) e um parecer JSON de leitura apenas, que não edita nada.
 - Se o parecer aponta violação, o PR volta ao Builder, até o teto de `max_rework_attempts` (padrão 3). Passou do teto, escala para você.
-- **Você aprova o PR** e faz o merge.
+- **Você aprova o PR**. Quando o PR está conforme, você é avisado na sessão de Discovery e faz a aprovação final e o merge.
 - Modo `sessions` (padrão): `forge pipeline init` e `forge up` abrem as 3 sessões. Modo `chat`: o mesmo fluxo em subagentes, no mesmo chat. É opt-in e está **proposto** na [ADR-0015](sdd/spec/adr/adr-0015-pipeline-em-subagentes-no-chat.md); ainda não existe na 5.0.0.
 
 ## Quem faz o quê
@@ -195,7 +154,7 @@ sequenceDiagram
   Você->>G: aprova e faz merge
 ```
 
-> *Convenção: pipeline em flowchart LR com cores C4; ciclo em sequenceDiagram. Versões PNG em [docs/img/](docs/img/).*
+> *Ciclo da feature em sequenceDiagram. Versões PNG em [docs/img/](docs/img/).*
 
 ## Guias
 

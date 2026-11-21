@@ -1,0 +1,203 @@
+{
+ "kicker": "// Forge SDD · iniciativa 106",
+ "titulo": "A pipeline só publica: sem atestado válido, ela bloqueia",
+ "largura": 1360,
+ "altura": 620,
+ "nota_rodape": "prova do VCS adiada · cadeia de fallback só github e nenhum · modo no status.md",
+ "elementos": [
+  {
+   "tipo": "caixa",
+   "id": "v",
+   "x": 56,
+   "y": 128,
+   "w": 260,
+   "h": 92,
+   "texto": "Veredito conforme",
+   "sub": "IA · reviewer; SHA gravado pelo Go (AUTOMÁTICO)",
+   "estilo": "normal"
+  },
+  {
+   "tipo": "caixa",
+   "id": "s",
+   "x": 56,
+   "y": 244,
+   "w": 260,
+   "h": 92,
+   "texto": "Valida sem LLM",
+   "sub": "AUTOMÁTICO · regras, ADR, lições, fila, SHA",
+   "estilo": "contorno"
+  },
+  {
+   "tipo": "caixa",
+   "id": "h",
+   "x": 56,
+   "y": 360,
+   "w": 260,
+   "h": 92,
+   "texto": "Aprovação do dono",
+   "sub": "HUMANO · ou modo sem humano",
+   "estilo": "destaque"
+  },
+  {
+   "tipo": "caixa",
+   "id": "t",
+   "x": 400,
+   "y": 214,
+   "w": 260,
+   "h": 112,
+   "texto": "Atestado do PR da feature",
+   "sub": "o agente não emite sozinho",
+   "estilo": "destaque"
+  },
+  {
+   "tipo": "caixa",
+   "id": "m",
+   "x": 400,
+   "y": 360,
+   "w": 260,
+   "h": 92,
+   "texto": "Modo do repositório",
+   "sub": "AUTOMÁTICO · desligado ou local",
+   "estilo": "contorno"
+  },
+  {
+   "tipo": "caixa",
+   "id": "c",
+   "x": 760,
+   "y": 214,
+   "w": 240,
+   "h": 112,
+   "texto": "Pipeline confere",
+   "sub": "AUTOMÁTICO · 1 job, segundos",
+   "estilo": "contorno"
+  },
+  {
+   "tipo": "caixa",
+   "id": "p",
+   "x": 1100,
+   "y": 128,
+   "w": 200,
+   "h": 92,
+   "texto": "Publica",
+   "sub": "AUTOMÁTICO",
+   "estilo": "contorno"
+  },
+  {
+   "tipo": "caixa",
+   "id": "b",
+   "x": 1100,
+   "y": 244,
+   "w": 200,
+   "h": 92,
+   "texto": "Bloqueia",
+   "sub": "sem atestado ou commit novo",
+   "estilo": "apagado"
+  },
+  {
+   "tipo": "caixa",
+   "id": "f",
+   "x": 760,
+   "y": 360,
+   "w": 540,
+   "h": 92,
+   "texto": "Modo vcs adiado: recusado",
+   "sub": "mensagem 'modo adiado'; sem resposta no local, PERGUNTA a você",
+   "estilo": "destaque"
+  },
+  {
+   "tipo": "seta",
+   "de": "v.dir",
+   "para": "t.esq",
+   "forma": "horizontal"
+  },
+  {
+   "tipo": "seta",
+   "de": "s.dir",
+   "para": "t.esq",
+   "forma": "horizontal"
+  },
+  {
+   "tipo": "seta",
+   "de": "h.dir",
+   "para": "t.esq",
+   "forma": "horizontal"
+  },
+  {
+   "tipo": "seta",
+   "de": "t.dir",
+   "para": "c.esq",
+   "forma": "horizontal"
+  },
+  {
+   "tipo": "seta",
+   "de": "c.dir",
+   "para": "p.esq",
+   "forma": "horizontal",
+   "rotulo": "válido"
+  },
+  {
+   "tipo": "seta",
+   "de": "c.dir",
+   "para": "b.esq",
+   "forma": "horizontal",
+   "rotulo": "inválido"
+  },
+  {
+   "tipo": "seta",
+   "de": "m.dir",
+   "para": "f.esq",
+   "forma": "horizontal",
+   "rotulo": "vcs",
+   "estilo": "fraca"
+  },
+  {
+   "tipo": "texto",
+   "x": 56,
+   "y": 508,
+   "texto": "LEGENDA",
+   "estilo": "rotulo",
+   "alinha": "start"
+  },
+  {
+   "tipo": "caixa",
+   "id": "lg1",
+   "x": 186,
+   "y": 484,
+   "w": 180,
+   "h": 56,
+   "texto": "HUMANO",
+   "sub": "decisões do Nathan",
+   "estilo": "destaque"
+  },
+  {
+   "tipo": "caixa",
+   "id": "lg2",
+   "x": 386,
+   "y": 484,
+   "w": 180,
+   "h": 56,
+   "texto": "IA",
+   "sub": "pm-architect, builder, reviewer",
+   "estilo": "normal"
+  },
+  {
+   "tipo": "caixa",
+   "id": "lg3",
+   "x": 586,
+   "y": 484,
+   "w": 180,
+   "h": 56,
+   "texto": "AUTOMÁTICO",
+   "sub": "sem LLM: script, hook, pipeline",
+   "estilo": "contorno"
+  },
+  {
+   "tipo": "texto",
+   "x": 56,
+   "y": 580,
+   "texto": "A validação roda local, sem LLM, e não roda na pipeline. A pipeline só confere o atestado.",
+   "estilo": "nota",
+   "alinha": "start"
+  }
+ ]
+}

@@ -1,0 +1,156 @@
+{
+ "kicker": "// Forge SDD · iniciativa 110",
+ "titulo": "De onde vêm os dados e como viram estimativa",
+ "largura": 1360,
+ "altura": 640,
+ "nota_rodape": "hoje: 25 logs reais de job, 0 de Discovery; amostra pequena",
+ "elementos": [
+  {
+   "tipo": "caixa",
+   "id": "d1",
+   "x": 56,
+   "y": 128,
+   "w": 280,
+   "h": 96,
+   "texto": "Já medido",
+   "sub": "25 logs com tokens reais (builder, reviewer)",
+   "estilo": "normal"
+  },
+  {
+   "tipo": "caixa",
+   "id": "d2",
+   "x": 56,
+   "y": 256,
+   "w": 280,
+   "h": 96,
+   "texto": "Medido pela metade",
+   "sub": "97 sessões, 9 com tokens, 34 com modelo",
+   "estilo": "normal"
+  },
+  {
+   "tipo": "caixa",
+   "id": "d3",
+   "x": 56,
+   "y": 384,
+   "w": 280,
+   "h": 96,
+   "texto": "Falta medir",
+   "sub": "Discovery, ferramenta, cache em sessão",
+   "estilo": "tracejado"
+  },
+  {
+   "tipo": "caixa",
+   "id": "r1",
+   "x": 440,
+   "y": 200,
+   "w": 280,
+   "h": 120,
+   "texto": "Régua",
+   "sub": "mediana, p25 a p75, n visível",
+   "estilo": "destaque"
+  },
+  {
+   "tipo": "caixa",
+   "id": "r2",
+   "x": 440,
+   "y": 368,
+   "w": 280,
+   "h": 96,
+   "texto": "Tabela de preços",
+   "sub": "opcional, arquivo do dono com data",
+   "estilo": "contorno"
+  },
+  {
+   "tipo": "caixa",
+   "id": "o1",
+   "x": 832,
+   "y": 128,
+   "w": 232,
+   "h": 96,
+   "texto": "Por feature",
+   "sub": "faixa de tokens",
+   "estilo": "normal"
+  },
+  {
+   "tipo": "caixa",
+   "id": "o2",
+   "x": 832,
+   "y": 256,
+   "w": 232,
+   "h": 96,
+   "texto": "Recomendação",
+   "sub": "agente, modelo, ferramenta",
+   "estilo": "normal"
+  },
+  {
+   "tipo": "caixa",
+   "id": "o3",
+   "x": 832,
+   "y": 384,
+   "w": 232,
+   "h": 96,
+   "texto": "Total da iniciativa",
+   "sub": "e custo, se houver tabela",
+   "estilo": "normal"
+  },
+  {
+   "tipo": "caixa",
+   "id": "o4",
+   "x": 1120,
+   "y": 256,
+   "w": 200,
+   "h": 96,
+   "texto": "Real versus estimado",
+   "sub": "erro registrado, recalibra",
+   "estilo": "contorno"
+  },
+  {
+   "tipo": "seta",
+   "de": "d1.dir",
+   "para": "r1.esq",
+   "forma": "horizontal"
+  },
+  {
+   "tipo": "seta",
+   "de": "d2.dir",
+   "para": "r1.esq",
+   "forma": "horizontal"
+  },
+  {
+   "tipo": "seta",
+   "de": "d3.dir",
+   "para": "r1.esq",
+   "forma": "horizontal"
+  },
+  {
+   "tipo": "seta",
+   "de": "r1.dir",
+   "para": "o2.esq",
+   "forma": "horizontal"
+  },
+  {
+   "tipo": "seta",
+   "de": "r2.cima",
+   "para": "r1.baixo",
+   "forma": "vertical"
+  },
+  {
+   "tipo": "seta",
+   "de": "o2.dir",
+   "para": "o4.esq",
+   "forma": "horizontal"
+  },
+  {
+   "tipo": "seta",
+   "de": "o2.cima",
+   "para": "o1.baixo",
+   "forma": "vertical"
+  },
+  {
+   "tipo": "seta",
+   "de": "o2.baixo",
+   "para": "o3.cima",
+   "forma": "vertical"
+  }
+ ]
+}
