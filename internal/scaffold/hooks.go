@@ -31,7 +31,29 @@ func MergeClaudeSessionStartHook(targetDir string) (bool, error) {
 	return mergeClaudeHook(targetDir, "SessionStart", doctorHookCommand, []string{"forge doctor", "forge-sdd doctor"}, false)
 }
 
+// prGuardCommand roda a barreira de PR antes de qualquer Bash: bloqueia `gh pr create` sem
+// draft, `gh pr ready` e `gh pr merge` sem veredito conforme para o HEAD (feat-106-14).
+const prGuardCommand = "uv run scripts/pr_guard.py --hook"
+
+// prGuardMatcher restringe o hook a comandos de shell; sem ele o guard seria chamado em toda
+// ferramenta, inclusive Read/Edit, e o custo não se pagaria.
+const prGuardMatcher = "Bash"
+
+// MergeClaudePreToolUseHRook garante o hook PreToolUse do pr_guard em .claude/settings.json,
+// com as mesmas garantias dos demais hooks (não sobrescreve, não duplica, não toca JSON
+// inválido). Vale só no Claude Code; o aviso de cobertura fica no `forge doctor` (feat-106-15).
+func MergeClaudePreToolUseHRook(targetDir string) (bool, error) {
+	return mergeClaudeHookWithMatcher(targetDir, "PreToolUse", prGuardMatcher, prGuardCommand,
+		[]string{"pr_guard.py"}, false)
+}
+
 func mergeClaudeHook(targetDir, event, command string, markers []string, dryRun bool) (bool, error) {
+	return mergeClaudeHookWithMatcher(targetDir, event, "", command, markers, dryRun)
+}
+
+// mergeClaudeHookWithMatcher é o mergeClaudeHook com `matcher` opcional (só o PreToolUse usa).
+// Um matcher vazio não é gravado, para o JSON das entradas antigas ficar como está.
+func mergeClaudeHookWithMatcher(targetDir, event, matcher, command string, markers []string, dryRun bool) (bool, error) {
 	path := filepath.Join(targetDir, ".claude", "settings.json")
 	if err := checkSafeTarget(targetDir, path); err != nil {
 		return false, err
@@ -84,9 +106,13 @@ func mergeClaudeHook(targetDir, event, command string, markers []string, dryRun 
 			}
 		}
 	}
-	groups = append(groups, map[string]any{
+	entrada := map[string]any{
 		"hooks": []any{map[string]any{"type": "command", "command": command}},
-	})
+	}
+	if matcher != "" {
+		entrada["matcher"] = matcher
+	}
+	groups = append(groups, entrada)
 	hooks[event] = groups
 	root["hooks"] = hooks
 	if dryRun {

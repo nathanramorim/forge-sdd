@@ -138,6 +138,9 @@ func installClaudeInboxHook(agents []string, targetDir string) {
 		if _, err := MergeClaudeSessionStartHook(targetDir); err != nil {
 			fmt.Fprintf(os.Stderr, "aviso: hook SessionStart do doctor não instalado: %s\n", notify.Sanitize(err.Error(), 400, false))
 		}
+		if _, err := MergeClaudePreToolUseHRook(targetDir); err != nil {
+			fmt.Fprintf(os.Stderr, "aviso: hook PreToolUse do pr_guard não instalado: %s\n", notify.Sanitize(err.Error(), 400, false))
+		}
 		if _, err := MergeClaudeMCPServer(targetDir); err != nil {
 			fmt.Fprintf(os.Stderr, "aviso: servidor MCP não registrado: %s\n", notify.Sanitize(err.Error(), 400, false))
 		}
