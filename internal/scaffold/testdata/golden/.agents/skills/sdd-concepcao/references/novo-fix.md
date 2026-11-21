@@ -4,7 +4,7 @@
 
 1. **Brief primeiro:** rode `forge brief` no início; se o estado for `rascunho`, proponha `/constitution` antes de qualquer spec.
 2. **Clarify:** `sdd/memory/clarify.md`.
-3. **Branch primeiro:** pergunte a branch de partida (padrão `main`); `git branch --list fix/*` para retomar; `git checkout -b fix/<id>-<nome>`.
+3. **Branch da spec primeiro (ADR-0022):** pergunte a branch de partida (padrão `main`); `git branch --list fix/*` para retomar; `git checkout -b fix/<id>-<nome>`, **a partir da principal**. Esta branch carrega **só a spec do fix**; a correção de código vai numa branch por feature do split, aberta pelo Builder.
 4. **Origem:** identifique (ou pergunte) a feature ou iniciativa que gerou o bug.
 5. **Local:** `sdd/discovery/<id>-<nome>/fixes/fix-<id>-<nn>-<nome>.md`, na pasta da iniciativa de origem.
 6. **Conteúdo:** as seis seções obrigatórias da skill `sdd-concepcao` (incluindo `## Decisões do projeto aplicadas`) e a seção `## Feature Correlacionada` (arquivo de origem, causa-raiz e evidência do defeito).
@@ -19,5 +19,15 @@ Use AskUserQuestion com as opções:
 - "Pular"
 
 Execute a ação escolhida. Consulte `sdd/memory/clarify.md` → seção "Visualização pós-spec" para comportamento detalhado (macOS-only, fallbacks).
+
+## PR da spec do fix em draft (RN-1, RN-7)
+
+```bash
+git add sdd/discovery/<id>-<nome>/fixes && git commit -m "docs(<id>): spec do fix <nome>"
+git push -u origin fix/<id>-<nome>
+gh pr create --draft --base main --head fix/<id>-<nome> --fill
+```
+
+Grave o sinal `spec-para-revisao` no `status.md` e deixe a **Conferência 1** conferir o julgamento do fix (causa-raiz e escopo contra as rules). Com o **[Seguir]** do humano, grave `Gate 1: aprovado`, marque o PR pronto e **mescle a spec na principal**. A correção começa depois, a partir da principal, em **uma branch por feature** do split.
 
 Handoff: `/implementar`.
