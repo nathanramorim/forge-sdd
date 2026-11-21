@@ -22,11 +22,11 @@ Tasks do **módulo** têm prefixo `E-`; mudanças no **core** têm prefixo `K-` 
 | E-10 | Adaptador da transcrição do Claude (`usage` por mensagem), isolado | onda 1 |
 
 ## Onda 3 — contrato e calibração (depende da 109 e do dono)
-K-01 e K-02 são as donas, no core, do evento `sessao.registrada` e do campo `tool`; a 111 (task 111-C1) apenas consome (proposta a confirmar pelo dono).
+K-01 e K-02 são as donas, no core, do evento `sessao.registrada` e do campo `tool`; a 111 (task 111-C1) apenas consome (decisão do dono em 2026-11-21: ambas na onda 5 da 109, depois de 109-06 e 109-07).
 | Task | O quê | Depende |
 |---|---|---|
-| K-01 | Evento aditivo `spec.criada` e `sessao.registrada` no contrato v1 | 109 aprovada |
-| K-02 | Campo opcional `tool` no JSON da sessão gerado pelo pipeline | decisão 3, 107 |
+| K-01 | Evento aditivo `spec.criada` e `sessao.registrada` no contrato v1 (onda 5 da 109) | 109-06 |
+| K-02 | Campo opcional `tool` no JSON da sessão gerado pelo pipeline (onda 5 da 109) | decisão 3, 107; 109-07 |
 | E-11 | Reagir aos eventos; histórico estimado versus real | K-01 |
 | E-12 | `forge estimar calibrar` e meta de erro | E-11 |
 | E-13 | Skill fina (opção C) | E-08 |
