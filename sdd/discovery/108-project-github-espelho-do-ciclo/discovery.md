@@ -49,6 +49,7 @@ O dono do projeto (decide gates e merge; quer gestão à vista) e os agentes (`p
 - **RN-8** Issue publicada traz descrição comercial; o detalhe técnico fica na spec e a issue só leva o link. Repositório público: nada de cliente, cobrança, caminho local ou nome pessoal.
 - **RN-9** Nada é criado no GitHub sem `--executar` explícito; o padrão do script é `--dry-run`.
 - **RN-10** O quadro nasce **privado**; abrir ao público é decisão posterior do dono.
+- **RN-11** (nova, pedido do dono em 20/11/2026) Todo PR e toda issue carregam **etiquetas** que dizem se o item contém código, ADR, rule, documentação ou é só especificação. Etiquetas, não um campo do Project (decisão do dono no chat). O cálculo é por caminho dos arquivos (heurística, sem ler conteúdo).
 
 ## Escopo
 **Dentro:** mapeamento estado-arquivo para etapa; leitura somente leitura do quadro; mover cartão pelo CLI `forge project`; espelho nas duas vias com confirmação; verificação no `forge doctor`; reference única de rotina por agente; interface mínima no adaptador de VCS; issues preparadas e script de criação (rascunho, não executado).
@@ -75,6 +76,27 @@ O dono do projeto (decide gates e merge; quer gestão à vista) e os agentes (`p
 - **Colisão de texto** com 105/2.7, 106/2.6 e 107 nas mesmas references: declarado em `plan.md` (`Sequenciar com`).
 - **Visibilidade:** repositório público; issues e títulos ficam visíveis. Revisar o texto antes de publicar.
 
+## Etiquetas (o que o item contém)
+Pedido do dono: "devo conseguir identificar o que é código e o que é apenas ADR ou rule ou todos dois juntos". **Aplicado à mão no GitHub em 20/11/2026 (verificado pelo coordenador)**: 5 etiquetas no repositório e o Board "Quadro do ciclo" com os campos Título, Etiquetas e PRs vinculados (`updateProjectV2View` com `configuration.visibleFieldIds`, lido de volta).
+
+| Etiqueta | Cor | Significa |
+|---|---|---|
+| `código` | #4f8ef7 | Muda código (Go, scripts, testes, templates) |
+| `adr` | #9b7bff | Registro de decisão de arquitetura |
+| `rule` | #f5b04a | Mexe em regra: Constituição ou `.agents/rules` |
+| `documentação` | #99a2b8 | Muda documentação ou texto entregue |
+| `spec` | #4fd1b5 | Ainda é só especificação, sem construção |
+
+Várias por item: "só ADR" = `adr`; "código e ADR" = `código` + `adr`. `código`, `adr`, `rule` e `documentação` dizem o que o item **contém ou entregará**; `spec` diz que **ainda é só especificação** e some quando há construção; a coluna `Status` diz o andamento.
+
+**Regra de classificação por caminho** (ignora `sdd/.metrics/`): `sdd/spec/adr/**` = adr; `.agents/rules/**` ou `sdd/memory/constitution.md` = rule; `*.go`, `*.py`, `*.sh`, `*.js`, `.github/workflows/**`, `.gitattributes`, `**/templates/**`, `**/testdata/**` = código; `sdd/discovery/**`, `sdd/spec/**` e `sdd/memory/**` (que não sejam ADR) = spec; `README.md`, `docs/**` e outros `.md` = documentação. PR só de especificação (#120, #121, #122) recebe `spec` (o #121 também `adr`); nos demais a etiqueta `spec` não é usada.
+
+**Tabela aplicada em 20/11/2026** (issue / PR: etiquetas): 134/#123 adr; 135/#127 código+documentação+rule; 136/#126 código+documentação; 137/#125 código; 138/#124 código; 139/#128 código+documentação; 140/#129 código; 145/#131 código+documentação; 146/#130 documentação; 133 (iniciativa 105) código+adr+rule+documentação; 141 spec+código+documentação; 142 spec+código; 143 (106) spec+código+adr+rule; 144 (107) spec+código+adr+rule; 147 (108) spec+código+adr; backlog 148 a 151 sem etiqueta. O PR #132 (bots) recebeu código+documentação e ainda não tem issue.
+
+**Rotina dos agentes:** ao abrir um PR ou uma issue, o forge calcula as etiquetas dos arquivos alterados (função pura caminho para etiquetas, testável) e as aplica no PR e na issue vinculada. Ao mesclar, remove `spec` se houver código. O humano pode ajustar à mão; o forge não remove etiqueta que o humano pôs.
+
+**Limite:** a classificação é por caminho (heurística), sem ler o conteúdo: um `.md` que na prática é regra, ou um arquivo de outro tipo dentro de `docs/`, pode ser classificado errado. **Caminho fora das regras:** recomendo **ficar sem etiqueta e aparecer como aviso** (`forge project status` e `doctor` listam), em vez de cair em `documentação`: cair em `documentação` esconderia código de um tipo novo (por exemplo `.ts`) justamente na etiqueta que o dono usa para separar código. Exceção já na regra: `.md` desconhecido é documentação. Caminho com `..`, caractere de controle ou lista vazia é recusado e não gera etiqueta.
+
 ## Decisões para o Gate 1 (recomendação de cada uma; a decisão é do dono)
 1. **Fonte da verdade.** Recomendo o **arquivo** para o estado (spec, fila, PR) e o quadro como espelho; o humano só muda estado pelo menu do forge. Alternativa: o quadro como fonte para a etapa (mais simples de ver, mas qualquer pessoa com escrita no repositório público passa a decidir o fluxo).
 2. **O que arrastar o cartão autoriza.** Recomendo que arrastar seja **um pedido**: Spec-validation para Todo abre o menu do Gate 1; Validation para Done só vale com PR mesclado e atestado conforme o modo da 106. Se o `gh` não expuser o ator do evento (a verificar), arrastar nunca aprova sozinho.
@@ -84,7 +106,8 @@ O dono do projeto (decide gates e merge; quer gestão à vista) e os agentes (`p
 6. **`blocked`.** Recomendo **não criar a oitava coluna**: o cartão fica na etapa de origem com o campo `Bloqueado`. Alternativa: coluna extra.
 7. **Todo exige split feito?** O pedido diz "Gate 1 aprovado e split feito". Pela 106 o split é do Builder, sem nova aprovação. Recomendo que Todo signifique "Gate 1 aprovado, pronto para o Builder" (então 105, 106 e 107 entram em Todo). Se preferir split antes, 106 e 107 ficam em Spec-validation até o split.
 8. **Escopo do repositório e dos Projects.** Recomendo um Project de usuário "Forge SDD — ciclo" ligado (`gh project link --owner nathanramorim`; com `@me` o link falhou, verificado em 20/11/2026) ao repositório; sem mexer nos projetos 1 a 3 existentes. Alternativa: Project de organização (permite mais controles de ator, a verificar).
-9. **Quando publicar as issues.** Recomendo executar `criar-project.sh --executar` só depois do Gate 1 e de revisar o texto das issues (repositório público); o script é idempotente e começa em `--dry-run`.
+9. **Etiquetas em vez de campo (aprovado pelo dono no chat).** Etiquetas permitem várias por item e aparecem no PR e na issue. Recomendação para caminho desconhecido: sem etiqueta e com aviso (ver seção Etiquetas).
+10. **Quando publicar as issues.** Recomendo executar `criar-project.sh --executar` só depois do Gate 1 e de revisar o texto das issues (repositório público); o script é idempotente e começa em `--dry-run`.
 
 ## Descrição de negócio (release notes)
 - Entrega (em construção, ainda nada pronto): um quadro no GitHub com as sete etapas do ciclo, mantido em sincronia com os arquivos do projeto, para o dono ver de relance onde está cada coisa.

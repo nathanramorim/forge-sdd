@@ -21,6 +21,29 @@ VISAO="Quadro do ciclo"
 # nome:COR na ordem do pedido (cores aceitas pela API: GRAY BLUE GREEN YELLOW ORANGE RED PINK PURPLE)
 OPCOES_COR="Backlog:GRAY Spec:BLUE Spec-validation:PURPLE Todo:YELLOW Building:ORANGE Validation:PINK Done:GREEN"
 CORES_OK=" GRAY BLUE GREEN YELLOW ORANGE RED PINK PURPLE "
+# Etiquetas: lista fechada nome|cor|descrição (constantes; nada interpolado de fora).
+ETIQUETAS=(
+  "código|4f8ef7|Muda código (Go, scripts, testes, templates)"
+  "adr|9b7bff|Registro de decisão de arquitetura"
+  "rule|f5b04a|Mexe em regra: Constituição ou .agents/rules"
+  "documentação|99a2b8|Muda documentação ou texto entregue"
+  "spec|4fd1b5|Ainda é só especificação, sem construção"
+)
+NOMES_ETIQUETA=",código,adr,rule,documentação,spec,"
+CAMPOS_VISIVEIS=("Title" "Labels" "Linked pull requests")
+for e in "${ETIQUETAS[@]}"; do
+  IFS='|' read -r en ec ed <<< "$e"
+  [[ "$ec" =~ ^[0-9a-f]{6}$ ]] || { echo "cor de etiqueta inválida: $ec" >&2; exit 1; }
+  [ -n "$ed" ] && [ "${#ed}" -le 100 ] || { echo "descrição de etiqueta inválida: $en" >&2; exit 1; }
+done
+# Etiquetas do índice (separadas por +) precisam estar na lista fechada.
+etiquetas_validas() {
+  [ -z "$1" ] && return 0
+  local x
+  for x in ${1//+/ }; do
+    case "$NOMES_ETIQUETA" in *",$x,"*) ;; *) return 1 ;; esac
+  done
+}
 AQUI="$(cd "$(dirname "$0")" && pwd)"
 INDICE="$AQUI/issues/indice.csv"
 
@@ -53,11 +76,18 @@ if [ "$MODO" = "dry-run" ]; then
   echo "DRY-RUN: criaria o Project '$TITULO_PROJETO' (dono $DONO) se não existir, privado e ligado a $REPO"
   echo "DRY-RUN: garantiria as opções do $CAMPO via updateProjectV2Field (só se diferirem): $OPCOES_COR"
   echo "DRY-RUN: garantiria o Board '$VISAO' via createProjectV2View (BOARD_LAYOUT), sem duplicar"
+  echo "DRY-RUN: mostraria no Board os campos: ${CAMPOS_VISIVEIS[*]} (updateProjectV2View, visibleFieldIds buscados pelo nome)"
+  for e in "${ETIQUETAS[@]}"; do
+    IFS='|' read -r en ec ed <<< "$e"
+    echo "DRY-RUN: gh label create --force '$en' --color $ec --description '$ed'"
+  done
   # Linha 1 é o cabeçalho; os títulos não têm vírgula (verificado ao gerar o índice).
-  tail -n +2 "$INDICE" | while IFS=, read -r chave titulo coluna tipo pasta pr pai; do
+  tail -n +2 "$INDICE" | while IFS=, read -r chave titulo coluna tipo pasta pr pai etiq; do
+    etiq="${etiq%$'\r'}"
     etapa_valida "$coluna" || { echo "etapa inválida em $chave: $coluna" >&2; exit 1; }
     [ -f "$AQUI/issues/$chave.md" ] || { echo "falta issues/$chave.md" >&2; exit 1; }
-    echo "DRY-RUN: issue '$titulo' (se não existir) -> $CAMPO $coluna${pr:+; PR $pr}$([ "$coluna" = Validation ] && [ -n "$pr" ] && echo " vira cartão próprio em Validation")"
+    etiquetas_validas "$etiq" || { echo "etiqueta inválida em $chave: $etiq" >&2; exit 1; }
+    echo "DRY-RUN: issue '$titulo' (se não existir) -> $CAMPO $coluna${pr:+; PR $pr}$([ "$coluna" = Validation ] && [ -n "$pr" ] && echo " vira cartão próprio em Validation")${etiq:+; etiquetas: ${etiq//+/, }}"
   done
   echo "DRY-RUN: fim. Para criar de verdade: $0 --executar"
   exit 0
@@ -67,6 +97,13 @@ fi
 command -v gh >/dev/null 2>&1 || { echo "gh não encontrado" >&2; exit 1; }
 gh auth status >/dev/null 2>&1 || { echo "gh não autenticado (rode gh auth login)" >&2; exit 1; }
 gh auth status 2>&1 | grep -q "project" || { echo "o token do gh não tem o escopo project (gh auth refresh -s project)" >&2; exit 1; }
+
+# (0) Etiquetas, idempotente (--force atualiza se já existir). Valores vêm da lista fechada acima.
+for e in "${ETIQUETAS[@]}"; do
+  IFS='|' read -r en ec ed <<< "$e"
+  gh label create "$en" --repo "$REPO" --color "$ec" --description "$ed" --force >/dev/null
+  echo "etiqueta garantida: $en"
+done
 
 # (a) Project privado, sem duplicar: procura pelo título.
 numero="$(gh project list --owner "$DONO" --format json -q ".projects[] | select(.title==\"$TITULO_PROJETO\") | .number" | head -n1 || true)"
@@ -111,13 +148,28 @@ else
   echo "Board '$VISAO' criado"
 fi
 
+# (c2) Campos visíveis do Board: ids buscados pelo nome na listagem (nada hardcoded).
+visao_id="$(gh api graphql -f query='query($id:ID!){node(id:$id){... on ProjectV2{views(first:50){nodes{id name}}}}}' -f id="$project_id" -q ".data.node.views.nodes[] | select(.name==\"$VISAO\") | .id")"
+ids_json=""
+for nome_campo in "${CAMPOS_VISIVEIS[@]}"; do
+  fid="$(gh project field-list "$numero" --owner "$DONO" --format json -q ".fields[] | select(.name==\"$nome_campo\") | .id")"
+  [ -n "$fid" ] || { echo "campo $nome_campo não encontrado" >&2; exit 1; }
+  ids_json="${ids_json:+$ids_json,}\"$fid\""
+done
+corpo_v="$(mktemp)"
+printf '{"query":"mutation($input: UpdateProjectV2ViewInput!){updateProjectV2View(input:$input){projectV2View{id}}}","variables":{"input":{"viewId":"%s","configuration":{"visibleFieldIds":[%s]}}}}' "$visao_id" "$ids_json" > "$corpo_v"
+gh api graphql --input "$corpo_v" >/dev/null
+rm -f "$corpo_v"
+echo "Board '$VISAO' mostra: ${CAMPOS_VISIVEIS[*]}"
+
 opcao_id() {
   gh project field-list "$numero" --owner "$DONO" --format json \
     -q ".fields[] | select(.name==\"$CAMPO\") | .options[] | select(.name==\"$1\") | .id"
 }
 
 # (d) Issues sem duplicar, cartões e Status de cada um (reatribui também os cartões já existentes).
-tail -n +2 "$INDICE" | while IFS=, read -r chave titulo coluna tipo pasta pr pai; do
+tail -n +2 "$INDICE" | while IFS=, read -r chave titulo coluna tipo pasta pr pai etiq; do
+    etiq="${etiq%$'\r'}"
   etapa_valida "$coluna" || { echo "etapa inválida em $chave: $coluna" >&2; exit 1; }
   corpo="$AQUI/issues/$chave.md"
   [ -f "$corpo" ] || { echo "falta $corpo" >&2; exit 1; }
@@ -135,7 +187,15 @@ tail -n +2 "$INDICE" | while IFS=, read -r chave titulo coluna tipo pasta pr pai
   # Só PR de código (Validation) vira cartão próprio; PR de spec (#120 a #122) é compartilhado.
   if [ -n "$pr" ] && [ "$coluna" = "Validation" ]; then alvos="$alvos https://github.com/$REPO/pull/${pr#\#}"; fi
   opcao="$(opcao_id "$coluna")"
+  etiquetas_validas "$etiq" || { echo "etiqueta inválida em $chave: $etiq" >&2; exit 1; }
+  lista_et="${etiq//+/,}"
   for alvo in $alvos; do
+    if [ -n "$lista_et" ]; then
+      case "$alvo" in
+        */pull/*) gh pr edit "$alvo" --add-label "$lista_et" >/dev/null ;;
+        *) gh issue edit "$alvo" --add-label "$lista_et" >/dev/null ;;
+      esac
+    fi
     item="$(gh project item-add "$numero" --owner "$DONO" --url "$alvo" --format json -q .id)"
     gh project item-edit --id "$item" --project-id "$project_id" --field-id "$campo_id" --single-select-option-id "$opcao" >/dev/null
     echo "cartão: $alvo -> $CAMPO $coluna"

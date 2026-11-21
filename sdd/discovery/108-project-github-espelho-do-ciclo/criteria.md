@@ -4,7 +4,7 @@
 `ARQ-01` (`cmd/` só adapta flags do `forge project`; o mapa e a regra ficam em `internal/pipeline`, a chamada ao `gh` em `internal/vcs`), `ARQ-02` (sem ciclo: `vcs` não importa `pipeline`; `pipeline` define a interface que consome), `ARQ-04` (só stdlib em runtime; `gh` é binário externo opcional já listado em `allow_commands`), `ARQ-05` (`--dry-run` e a leitura do quadro não têm efeito em disco nem chamam escrita no GitHub), `ARQ-06` (o comando entra sob `forge project`, subcomando novo documentado em `--help`; ADR se o dono preferir raiz), `ARQ-11` (modelo do módulo declarado), `COD-01`, `COD-03`, `DUP-01` (um dono do mapa de estados), `DUP-03` (nenhum pacote paralelo ao `vcs` da 106), `FLX-01` (a Discovery só escreve spec; criar o Project é ato do dono), `FLX-06`, `GOV-01` (nenhuma regra nova sem ADR), `SEG-01` (validar entrada), `SEG-03` (só `gh` em `allow_commands`), `SEG-04` (token nunca em arquivo nem saída), `SEG-07` (sem dependência nova), `SEG-08` (saneamento de texto externo) e `TST-03` (teste negativo por regra de recusa).
 
 ## Modelo do módulo
-**Enxuto** (`ARQ-11`): sem pacote novo além do que a 106 já prevê. (a) O **mapa estado do arquivo para etapa** e a **lista fechada de 7 etapas** vivem em `internal/pipeline` (já dona de `queue`, `status` e do despacho; `DUP-01`). (b) O **adaptador do quadro** (ler etapa, mover cartão, vincular PR) é uma interface mínima `Quadro` declarada no consumidor (`internal/pipeline`) e implementada em `internal/vcs` pelo adaptador `github` (`gh project`), junto da interface `Adaptador` da 106 task 0.2; `azure-devops` ganha o equivalente Azure Boards **a verificar**; `nenhum` devolve "sem quadro". (c) `forge project` (`cmd/forge-sdd/project.go`) só adapta flags. Fronteira: enquanto `internal/vcs` não existir em `main` (a 106 ainda não foi implementada), a task 1.x cria **só o necessário** do pacote (interface `Quadro` e o adaptador `github`) sem duplicar o que a 106 vai definir, e **sequencia com a 106 task 0.2** (a verificar quem entra primeiro). Justificativa: um pacote `internal/project` novo duplicaria o conceito de adaptador de VCS (`DUP-03`).
+**Enxuto** (`ARQ-11`): sem pacote novo além do que a 106 já prevê. (a) O **mapa estado do arquivo para etapa** e a **lista fechada de 7 etapas** vivem em `internal/pipeline` (já dona de `queue`, `status` e do despacho; `DUP-01`). (b) O **adaptador do quadro** (ler etapa, mover cartão, vincular PR) é uma interface mínima `Quadro` declarada no consumidor (`internal/pipeline`) e implementada em `internal/vcs` pelo adaptador `github` (`gh project`), junto da interface `Adaptador` da 106 task 0.2; `azure-devops` ganha o equivalente Azure Boards **a verificar**; `nenhum` devolve "sem quadro". (c) `forge project` (`cmd/forge-sdd/project.go`) só adapta flags. (d) A **classificação de etiquetas** (função pura caminho para etiquetas, lista fechada de 5) mora em `internal/pipeline`, ao lado do mapa de estados: é regra de domínio sem I/O, e o `internal/vcs` só aplica o resultado (`gh pr edit` e `gh issue edit --add-label`), sem decidir nada (`ARQ-10`). Fronteira: enquanto `internal/vcs` não existir em `main` (a 106 ainda não foi implementada), a task 1.x cria **só o necessário** do pacote (interface `Quadro` e o adaptador `github`) sem duplicar o que a 106 vai definir, e **sequencia com a 106 task 0.2** (a verificar quem entra primeiro). Justificativa: um pacote `internal/project` novo duplicaria o conceito de adaptador de VCS (`DUP-03`).
 
 ## Decisões do projeto aplicadas
 - **ADR-0004:** o Go decide o que é determinístico (mapa de estados, validação da lista fechada, idempotência); o modelo não decide etapa.
@@ -33,6 +33,7 @@
 | Menus e `forge status` | 105 (2.2, 2.6) | Só desenhados/PRs | **Sequenciar com**: a coluna em `status` só depois | Evita conflito no mesmo arquivo |
 | Comando `gh project` | `gh project --help` (somente leitura) | `create`, `edit`, `field-create`, `field-list`, `item-add`, `item-edit`, `item-list`, `link` existem; **não** há `field-edit` (as opções do `Status` mudam por GraphQL `updateProjectV2Field`) | **Reusar** o `gh` (já em `allow_commands`); o campo da etapa é o `Status` (opções trocadas pela API GraphQL, verificado em 20/11/2026); não existe campo `Etapa` | `SEG-07`: nenhuma dependência nova |
 | Saneamento de texto externo | `internal/notify/notify.go:122` (`Sanitize`), `internal/gate` (`MaskSecrets`) | Saneadores prontos | **Reusar** para título e corpo de issue lidos do quadro | `SEG-08` |
+| Classificação do que o item contém (código, adr, rule, documentação, spec) | `gh label list` (somente leitura, 20/11/2026); `sdd/spec/adr/`, `.agents/rules/`, `sdd/memory/constitution.md` | 5 etiquetas já criadas à mão; nenhuma função no código | **Criar** função pura em `internal/pipeline`; **reusar** o adaptador `vcs` para aplicar | `DUP-01`: um dono da regra; heurística por caminho |
 | Reference de rotina por agente | `.agents/skills/sdd-operacao/references/` (`archive`, `doctor`, `pipeline`, `status`...) | Sem `project.md` | **Criar** `project.md` (ponto único); `SKILL.md` de `sdd-concepcao` não muda (2045 de 2048 bytes) | `DUP-01`, P-24 |
 | Conceito "quadro do ciclo" | `sdd/spec/concepts.md` | Sem linha | **Adicionar** linha (dono: `internal/pipeline`, adaptador em `internal/vcs`) | `DUP-01` |
 
@@ -157,6 +158,18 @@ go test -run 'TestMoverCartaoDryRunNaoEscreve' ./cmd/forge-sdd/
 # negativo: sem VCS (nenhum) não há quadro e o gh nunca é chamado
 go test -list 'TestQuadroSemVCSNaoChamaGh' ./internal/vcs/ | grep -F 'TestQuadroSemVCSNaoChamaGh'
 go test -run 'TestQuadroSemVCSNaoChamaGh' ./internal/vcs/
+# etiquetas: só ADR, Go mais documentação, Constituição como rule, só discovery como spec e sdd/.metrics ignorado
+go test -list 'TestClassificaEtiquetas' ./internal/pipeline/ | grep -F 'TestClassificaEtiquetas'
+go test -run 'TestClassificaEtiquetas' ./internal/pipeline/
+# negativo: caminho com .., caractere de controle ou lista vazia é recusado e não gera etiqueta
+go test -list 'TestClassificaEtiquetasRecusaEntradaInvalida' ./internal/pipeline/ | grep -F 'TestClassificaEtiquetasRecusaEntradaInvalida'
+go test -run 'TestClassificaEtiquetasRecusaEntradaInvalida' ./internal/pipeline/
+# negativo: caminho fora das regras fica sem etiqueta e gera aviso (nunca vira documentação em silêncio)
+go test -list 'TestClassificaEtiquetasCaminhoDesconhecidoSemEtiqueta' ./internal/pipeline/ | grep -F 'TestClassificaEtiquetasCaminhoDesconhecidoSemEtiqueta'
+go test -run 'TestClassificaEtiquetasCaminhoDesconhecidoSemEtiqueta' ./internal/pipeline/
+# negativo: ao mesclar remove spec se há código e nunca remove etiqueta posta à mão
+go test -list 'TestEtiquetasAoMesclarRemoveSpecComCodigo' ./internal/pipeline/ | grep -F 'TestEtiquetasAoMesclarRemoveSpecComCodigo'
+go test -run 'TestEtiquetasAoMesclarRemoveSpecComCodigo' ./internal/pipeline/
 # negativo: arrastar Spec-validation para Todo não grava o Gate 1 sem o menu de confirmação
 go test -list 'TestArrastarNaoAprovaGate1SemMenu' ./internal/pipeline/ | grep -F 'TestArrastarNaoAprovaGate1SemMenu'
 go test -run 'TestArrastarNaoAprovaGate1SemMenu' ./internal/pipeline/
