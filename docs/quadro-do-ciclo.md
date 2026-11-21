@@ -78,7 +78,7 @@ O campo do quadro se chama `Status`.
 
 1. **HUMANO:** você registra a ideia em Backlog. *(OPCIONAL, com o quadro: você cria a issue e o cartão.)*
 2. **IA (pm-architect):** escreve a spec. *(OPCIONAL, com o quadro: o forge põe o cartão em Spec.)*
-3. **IA (Reviewer):** faz a Conferência 1 e lê a spec. O cartão fica em Spec-validation.
+3. **IA (Reviewer):** faz a Conferência 1, lê a spec e comenta o resultado no PR da spec. O cartão fica em Spec-validation.
 4. **HUMANO:** aprova no menu do forge (Gate 1).
 5. **HUMANO:** mescla o PR da spec.
 6. **AUTOMÁTICO:** o forge vê o merge. O cartão vai para Todo.
@@ -87,10 +87,24 @@ O campo do quadro se chama `Status`.
    - Com o interruptor desligado: **HUMANO** inicia o Builder.
 8. **IA (Builder):** constrói num PR. Cartão em Building.
 9. **AUTOMÁTICO:** um script local valida (sem IA).
-10. **IA (Reviewer):** faz a Conferência 2. Cartão em Validation.
-11. **HUMANO:** você confere e mescla o PR. Cartão em Done.
+10. **IA (Reviewer):** faz a Conferência 2, escreve o diagnóstico num comentário simples do PR e, se for `conforme`, tira o PR de rascunho. Cartão em Validation.
+11. **HUMANO:** só mescla o PR (não precisa procurar o resultado em arquivos). Cartão em Done.
 
 Sem o quadro, os mesmos passos acontecem só nos arquivos.
+
+## Quem cuida de cada coluna
+
+O diagnóstico do Reviewer é um **comentário simples no PR**: até 8 linhas, em português simples, para `conforme`, `violação` e `dúvida`. Quem escreve esse comentário e tira o PR de rascunho é a **esteira do core**, não este módulo. O módulo só **mostra** o comentário e o resultado no cartão e move as colunas.
+
+| Coluna | Quem cuida | O que escreve ao sair da coluna |
+|---|---|---|
+| Backlog | HUMANO | A issue e o cartão. |
+| Spec | IA (Discovery/pm-architect) | A spec e o PR da spec; o cartão vai a Spec-validation. |
+| Spec-validation | IA (Reviewer); HUMANO decide | O Reviewer faz a Conferência 1 e comenta o diagnóstico no PR da spec. O HUMANO aprova o Gate 1 e mescla o PR da spec. |
+| Todo | AUTOMÁTICO (forge) | Move o cartão ao ver a spec mesclada. |
+| Building | IA (Builder) | O PR de entrega (em rascunho) e o cartão movido para Validation. |
+| Validation | IA (Reviewer); HUMANO decide | O Reviewer faz a Conferência 2 e comenta o diagnóstico no PR. Se `conforme`, o PR sai de rascunho (pronto para mesclar). Se `violação`, o cartão volta a Building e o PR segue em rascunho. Se `dúvida`, escala ao dono. O HUMANO só mescla o PR de entrega. |
+| Done | AUTOMÁTICO (forge) | A issue é fechada e o cartão vai a Done depois do merge. |
 
 ## O que acontece quando você arrasta um cartão
 

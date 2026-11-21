@@ -334,4 +334,12 @@ grep -F 'FonteDePendencias' sdd/discovery/108-project-github-espelho-do-ciclo/pl
 grep -F 'proposta do coordenador' sdd/discovery/108-project-github-espelho-do-ciclo/plan.md
 # negativo: guia e wiki não afirmam que os campos já existem na Constituição
 if grep -F 'já existem na Constituição' docs/quadro-do-ciclo.md docs/wiki.html; then exit 1; fi
+# P-25 (RN-17): o guia tem a tabela "Quem cuida de cada coluna" e a frase do comentário simples
+grep -F '## Quem cuida de cada coluna' docs/quadro-do-ciclo.md
+grep -F 'comentário simples no PR' docs/quadro-do-ciclo.md
+grep -F 'não este módulo' docs/quadro-do-ciclo.md
+# negativo: o guia não manda o humano procurar o resultado em arquivo nem diz que o módulo escreve o comentário
+if grep -F 'o módulo escreve o comentário' docs/quadro-do-ciclo.md; then exit 1; fi
+# negativo: a spec não põe a rotina de comentar no escopo do módulo
+if grep -F 'o módulo comenta no PR' sdd/discovery/108-project-github-espelho-do-ciclo/discovery.md; then exit 1; fi
 ```
