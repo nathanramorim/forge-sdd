@@ -58,6 +58,7 @@ var requerIniciativa = map[string]bool{
 	"forge queue review":   true,
 	"forge queue list":     true,
 	"forge queue panel":    true,
+	"forge context":        true,
 	"forge status":         true,
 	"forge archive":        true,
 	"forge doctor":         true,

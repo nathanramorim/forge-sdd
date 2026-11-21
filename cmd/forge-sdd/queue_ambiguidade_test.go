@@ -85,3 +85,18 @@ func TestDoctorStatusGateFalhamClaroEmAmbiguidadeEVariavelInvalida(t *testing.T)
 		t.Setenv("FORGE_INICIATIVA", "")
 	}
 }
+
+// forge context <task-id> lê a fila da iniciativa ativa: em ambiguidade falha claro, sem ler a legada.
+func TestContextFalhaClaroEmAmbiguidade(t *testing.T) {
+	dir, _ := projetoPorFeature(t, "fix/106-01-algo", "106-a", "106-b")
+	antes := fotoDoDisco(t, dir)
+	saida, err := runRoot(t, "context", "t1", "--dir", dir)
+	require.Error(t, err)
+	assert.ErrorIs(t, err, layout.ErrAmbiguousInitiative)
+	for _, quer := range []string{"106-a", "106-b", "--iniciativa", "FORGE_INICIATIVA"} {
+		assert.Contains(t, err.Error(), quer)
+	}
+	assert.NotContains(t, err.Error(), "não encontrada")
+	assert.NotContains(t, saida, "Usage:")
+	assert.Equal(t, antes, fotoDoDisco(t, dir))
+}
