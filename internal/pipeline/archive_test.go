@@ -209,10 +209,10 @@ func TestArchive_MoveIdempotente(t *testing.T) {
 
 func TestArchive_MoveIdempotente_RecusaForaDaBranchEComPendencia(t *testing.T) {
 	dir := archiveFixture(t, queue.StatusApproved)
-	res, err := AutoArchiveInitiative(dir, "79-clareza", now, onBranch("main"))
+	res, err := AutoArchiveInitiative(dir, "79-clareza", now, onBranch("chore/outra"))
 	require.NoError(t, err)
 	assert.False(t, res.Archived)
-	assert.Contains(t, res.Reason, "não é a da iniciativa")
+	assert.Contains(t, res.Reason, "não é a principal")
 	assert.DirExists(t, filepath.Join(dir, "sdd", "discovery", "79-clareza"))
 
 	pend := archiveFixture(t, queue.StatusReviewPending)

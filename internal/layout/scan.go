@@ -34,7 +34,7 @@ type InitiativeInfo struct {
 // trabalho; com allBranches une as de todas as branches locais e remotas, sem checkout.
 func ListInitiatives(dir string, allBranches bool) ([]InitiativeInfo, error) {
 	_, _, curErr := Current(dir)
-	if curErr != nil && !errors.Is(curErr, errNotRepo) {
+	if curErr != nil && !errors.Is(curErr, errNotRepo) && !errors.Is(curErr, ErrAmbiguousInitiative) {
 		return nil, curErr
 	}
 	// Em ambiguidade o marcador fica falso: é só listagem, sem erro.
