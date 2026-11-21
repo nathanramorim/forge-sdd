@@ -3,7 +3,7 @@
   "branch": "feat/112-lp-estavel-beta-e-estilo-forge",
   "base_branch": "main",
   "spec_status": "reviewed",
-  "updated_at": "2026-11-21T16:20:15Z",
+  "updated_at": "2026-11-21T20:10:00Z",
   "items": [
     {
       "task_id": "feat-112-01",
@@ -34,6 +34,30 @@
         "COD-01",
         "TST-01",
         "TST-05"
+      ],
+      "skills_used": [],
+      "attempts": 0
+    },
+    {
+      "task_id": "feat-112-03",
+      "title": "feat-112-03 — Seletor de novidades da versão na LP",
+      "spec_path": "sdd/discovery/112-lp-estavel-beta-e-estilo-forge/features/feat-112-03-seletor-de-novidades-na-lp.md",
+      "status": "queued",
+      "depends_on": [
+        "feat-112-01",
+        "feat-112-02"
+      ],
+      "rules": [
+        "DUP-01",
+        "DUP-02",
+        "DUP-10",
+        "SEG-01",
+        "SEG-02",
+        "SEG-05",
+        "SEG-07",
+        "TST-01",
+        "TST-05",
+        "FLX-07"
       ],
       "skills_used": [],
       "attempts": 0
