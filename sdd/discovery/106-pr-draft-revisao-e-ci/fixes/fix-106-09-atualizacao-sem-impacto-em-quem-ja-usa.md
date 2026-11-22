@@ -3,7 +3,7 @@
 **Branch:** `docs/106-specs-lugar-certo-e-compat` (PR único das specs 08 e 09)
 **Origem:** Iniciativa 106, pergunta do dono em 22/11/2026: "alguém já tem uma versão instalada anterior; como estruturar para os novos, sem gerar impacto ao que está rodando?"
 **Tamanho:** `L`
-**Status:** `spec` (aguarda Gate 1)
+**Status:** `spec` (Gate 1 aprovado em 22/11/2026, `[Seguir]`)
 
 ## Sintoma
 

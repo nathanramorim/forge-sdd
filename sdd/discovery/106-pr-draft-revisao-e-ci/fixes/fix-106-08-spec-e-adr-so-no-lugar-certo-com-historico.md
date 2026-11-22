@@ -3,7 +3,7 @@
 **Branch:** `docs/106-specs-lugar-certo-e-compat` (PR único das specs 08 e 09)
 **Origem:** Iniciativa 106, relato do dono sobre outro projeto que usa o forge-sdd (22/11/2026); `internal/layout` (ADR-0002)
 **Tamanho:** `M`
-**Status:** `spec` (aguarda Gate 1)
+**Status:** `spec` (Gate 1 aprovado em 22/11/2026, `[Seguir]`)
 
 ## Sintoma
 
