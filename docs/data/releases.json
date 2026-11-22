@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "chave_conteudo": "1e31742576d74cb3",
-  "versao_historico": "5223923",
+  "chave_conteudo": "5c31f5a68f386470",
+  "versao_historico": "68d654a",
   "versoes": [
     {
       "versao": "5.0.0",
@@ -58,72 +58,72 @@
       "titulo": "O CI Sai do Caminho, a Revisão Vem Antes e Cada Feature Tem o Seu PR (Beta)",
       "itens": [
         {
-          "titulo": "A LP não publica mais a cada push (fix-106-11)",
-          "texto": "o deploy virou `scripts/lp-deploy.sh` (regera, confere e publica; `--dry-run` e `--status` avisam LP desatualizada) e o workflow `Deploy LP` ficou só manual."
+          "titulo": "Agora a LP só vai ao ar quando você manda.",
+          "texto": "Antes, cada push publicava a página; agora o deploy é um comando que regera, confere e publica, e avisa quando a LP está desatualizada (`scripts/lp-deploy.sh`, com `--dry-run` e `--status`; o workflow `Deploy LP` ficou só manual)."
         },
         {
-          "titulo": "O tmux volta como opção (115-04)",
-          "texto": "o padrão continua sendo as janelas do sistema. Com `--terminal tmux` ou `terminal: tmux` no `forge.json`, `forge up` abre as três sessões em tmux (`--dry-run` só imprime); sem o tmux ele avisa e usa as janelas, sem erro. O modo `live` só vale com o tmux, e o `Preflight` só avisa do tmux quando ele foi escolhido."
+          "titulo": "Agora você escolhe o tmux de volta.",
+          "texto": "O padrão continua sendo as janelas do sistema, mas com `--terminal tmux` ou `terminal: tmux` no `forge.json`, o `forge up` abre as três sessões em tmux. Sem o tmux instalado, ele avisa e usa as janelas, sem erro (o modo `live` só vale com o tmux; `--dry-run` só imprime)."
         },
         {
-          "titulo": "O CI roda só no \"liberado para o CI\" (#181, fix-106-10)",
-          "texto": "a validação acontece na máquina, com `scripts/ci-local.sh`, que grava um selo do HEAD; `gh pr ready` exige esse selo junto do parecer. O GitHub Actions roda uma vez, quando o PR sai do draft (ou por `workflow_dispatch`), sem rodar em push de PR nem na principal. `concurrency` cancela a execução anterior, e o job `pronto?` recusa PR em draft. `scripts/ci-politica.py` mostra os runs por dia por evento."
+          "titulo": "Acabou gastar CI em trabalho que ninguém conferiu.",
+          "texto": "A validação roda na sua máquina e deixa um selo do commit; o `gh pr ready` exige esse selo junto do parecer. O GitHub Actions roda uma vez, quando o PR sai do rascunho, e não roda mais em cada push (`scripts/ci-local.sh`, `concurrency`, job `pronto?` recusando PR em draft; `scripts/ci-politica.py` mostra os runs por dia)."
         },
         {
-          "titulo": "A spec volta cedo, em PR próprio (#193, #199)",
-          "texto": "`/discovery`, `/nova-feature` e `/novo-fix` abrem só a spec, em PR draft. Depois da Conferência 1 e do seu `[Seguir]`, a spec é mesclada na principal e a construção começa — em vez de ficar presa numa branch de iniciativa até o fim. O Gate 1 passa a ser uma linha explícita no `status.md`, não a existência de um arquivo."
+          "titulo": "Agora a spec volta cedo, em PR próprio.",
+          "texto": "O `/discovery`, o `/nova-feature` e o `/novo-fix` abrem só a spec, em PR draft. Passada a Conferência 1 e o seu `[Seguir]`, a spec entra na principal e a construção começa, sem ficar presa numa branch até o fim (o Gate 1 virou uma linha explícita no `status.md`)."
         },
         {
-          "titulo": "Uma branch e um PR em draft por feature (#198, #201, #203, #206)",
-          "texto": "o Builder abre uma branch por feature do split, com base na principal, e cada uma tem o seu PR. Nenhum PR tem base em outro. Uma feature só começa com as dependências **mescladas**, não apenas abertas, e o `[Continuar]` é agrupado por onda."
+          "titulo": "Agora cada feature tem a sua branch e o seu PR em draft.",
+          "texto": "O Builder abre uma branch por feature do split, sempre a partir da principal, e nenhum PR depende de outro. Uma feature só começa quando as dependências já foram mescladas, e o `[Continuar]` vem agrupado por onda."
         },
         {
-          "titulo": "Instalar skill ou plugin só no projeto (98-02, ADR-0025)",
-          "texto": "`forge-sdd skills destinos` e `forge-sdd skills instalar <skill|plugin> <slug> --de <dir>` instalam por escolha, só no projeto aberto (ou hub/subprojeto), sem rede e sem `~/.claude`; se o hub já tem, nada é repetido."
+          "titulo": "Agora você instala uma skill ou plugin só no projeto.",
+          "texto": "Você escolhe o que instalar e onde, sem rede e sem mexer no `~/.claude`; se o hub já tem, nada se repete (`forge-sdd skills destinos` e `forge-sdd skills instalar <skill|plugin> <slug> --de <dir>`, ADR-0025)."
         },
         {
-          "titulo": "O `/toca-ai` não presume workers (fix-89-01)",
-          "texto": "sem worker ativo, `forge pipeline toca-ai` avisa que as etapas ficam na fila e a skill manda o chat orquestrar subagentes em paralelo, sem sugerir `forge up`; o `forge doctor` avisa fila parada sem worker."
+          "titulo": "O `/toca-ai` deixa de supor que há workers rodando.",
+          "texto": "Sem worker ativo, você é avisado de que as etapas ficam na fila, e o chat orquestra subagentes em paralelo em vez de mandar você rodar o `forge up` (o `forge doctor` também avisa fila parada)."
         },
         {
-          "titulo": "Ninguém marca \"pronto\" sem parecer válido (#185)",
-          "texto": "`gh pr ready` e `gh pr merge` exigem parecer `conforme` com `head_sha` igual ao HEAD atual. Parecer de outro commit — o código mudou depois da revisão — é recusado com os dois SHA lado a lado."
+          "titulo": "Acabou marcar \"pronto\" sem parecer válido.",
+          "texto": "O `gh pr ready` e o `gh pr merge` só passam com parecer `conforme` do commit atual; se o código mudou depois da revisão, os dois SHA aparecem lado a lado na recusa."
         },
         {
-          "titulo": "A barreira fica instalada (#182)",
-          "texto": "o hook `PreToolUse` que barra o `gh` entra sozinho no `.claude/settings.json`, e o `forge doctor` mostra em quais agentes ele vale. Nos outros agentes, o job `pronto?` do CI segura."
+          "titulo": "Agora a barreira de PR fica instalada sozinha.",
+          "texto": "O hook que barra o `gh` entra no `.claude/settings.json` sem você pedir, e o `forge doctor` mostra em quais agentes ele vale; nos outros, o job `pronto?` do CI segura (hook `PreToolUse`)."
         },
         {
-          "titulo": "A issue nasce junto com a spec (113)",
-          "texto": "com `create_on_conception: true` no `forge.json` (padrão desligado), o `/discovery`, o `/nova-feature` e o `/novo-fix` criam ou reaproveitam a issue no GitHub e gravam `card-evidence.json`; rodar de novo não duplica. Gestor por MCP registra com `forge queue card --feature <id> --provider <p> --id <id> --url <https>`. O dispatch lê a evidência, e falha externa vira aviso, sem bloquear a spec. Para renovar a evidência, apague o `card-evidence.json`."
+          "titulo": "Agora a issue nasce junto com a spec.",
+          "texto": "Com `create_on_conception: true` no `forge.json` (desligado por padrão), a issue é criada ou reaproveitada e nunca duplicada, e o dispatch lê a evidência. Falha externa vira aviso e não trava a spec (`card-evidence.json`; com gestor por MCP, `forge queue card --feature <id> --provider <p> --id <id> --url <https>`; para renovar, apague o arquivo)."
         },
         {
-          "titulo": "Skill de diagramas no repositório (98-01)",
-          "texto": "`diagramas-c4-mermaid` passa a viver em `.agents/skills/` e pergunta o motor, Mermaid (padrão) ou diagram-studio, sem instalar nada."
+          "titulo": "Agora a skill de diagramas vive no repositório.",
+          "texto": "Ela pergunta o motor, Mermaid (padrão) ou diagram-studio, e não instala nada sozinha (`diagramas-c4-mermaid` em `.agents/skills/`)."
         },
         {
-          "titulo": "Atestado conferido no CI (#196)",
-          "texto": "`scripts/atestado.py` verifica o parecer no PR de feature, no modo `local`, em segundos. O modo `desligado` diz em voz alta que nada foi conferido; `vcs` é recusado como adiado."
+          "titulo": "Agora o atestado é conferido em segundos no CI.",
+          "texto": "No modo `local`, o parecer do PR de feature é verificado na hora; o modo `desligado` diz em voz alta que nada foi conferido, e `vcs` é recusado como adiado (`scripts/atestado.py`)."
         },
         {
-          "titulo": "Quanto o CI custa, com número defensável (#188, #197)",
-          "texto": "`scripts/ci-politica.py` cruza a cobrança do GitHub com o cálculo por job e mostra a diferença. Jobs pulados e cancelados ficam à parte, e o CSV é seguro para abrir em planilha (células que começam com `=`, `+`, `@` ou `-` são neutralizadas)."
+          "titulo": "Agora você vê quanto o CI custa, com número que se defende.",
+          "texto": "O cálculo cruza a cobrança do GitHub com o custo por job e mostra a diferença; jobs pulados e cancelados ficam à parte e o CSV abre seguro na planilha (`scripts/ci-politica.py`; células iniciadas por `=`, `+`, `@` ou `-` são neutralizadas)."
         },
         {
-          "titulo": "Modos do projeto na Constituição (#177)",
-          "texto": "a tabela `Ferramentas e Integrações` ganha o modo do atestado, o modo de revisão humana, o WIP humano, os módulos permitidos e o início automático do Builder. `GOV-03` passa a guardar lições em `sdd/memory/licoes/`, um arquivo por regra."
+          "titulo": "Agora a Constituição guarda os modos do projeto.",
+          "texto": "A tabela `Ferramentas e Integrações` registra o modo do atestado, da revisão humana, o WIP humano, os módulos permitidos e o início automático do Builder, e as lições passam a ficar num arquivo por regra (`GOV-03`, em `sdd/memory/licoes/`)."
         },
         {
-          "titulo": "Modo sem humano, com os riscos à vista (#190)",
-          "texto": "só liga depois de o aviso de três riscos ser apresentado e aceito. Sem isso, o modo fica `com-humano` — recusar sempre mantém o padrão seguro."
+          "titulo": "O modo sem humano só liga depois de você ver os riscos.",
+          "texto": "O aviso dos três riscos precisa ser apresentado e aceito; recusar mantém o padrão seguro, `com-humano`."
         },
         {
-          "titulo": "`/upgrade-sdd` leva a política (#202)",
-          "texto": "quem já tem projeto recebe o hook, o job `pronto?`, os scripts e os campos de modo sem perder o `ci.yml` nem o `.claude/settings.json` — o forge mescla, nunca sobrescreve, e JSON inválido não é tocado."
+          "titulo": "Agora o `/upgrade-sdd` leva a política de PR para o seu projeto.",
+          "texto": "Você recebe o hook, o job `pronto?`, os scripts e os campos de modo sem perder o seu `ci.yml` nem o `.claude/settings.json`; o forge mescla, nunca sobrescreve, e JSON inválido não é tocado."
         },
         {
-          "titulo": "README com um prompt por ferramenta (#191)",
-          "texto": "quatro blocos \"cole isto na sua IA\", um para cada agente, apontando para o arquivo de instruções que ele lê."
+          "titulo": "Agora o README tem um prompt para cada ferramenta.",
+          "texto": "São quatro blocos \"cole isto na sua IA\", um por agente, cada um apontando para o arquivo de instruções que ele lê."
         },
         {
           "titulo": "Como atualizar",
