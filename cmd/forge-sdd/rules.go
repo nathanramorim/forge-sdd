@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"sort"
 	"strings"
 	"text/tabwriter"
 
@@ -37,29 +36,12 @@ Com argumentos: exibe apenas os IDs solicitados.`,
 		allIDs := gate.ConstitutionIDLines(string(data))
 		asJSON, _ := cmd.Flags().GetBool("json")
 
-		var ids []string
-		if len(args) == 0 {
-			for id := range allIDs {
-				ids = append(ids, id)
+		ids, ausentes := gate.SelecionaIDs(allIDs, args)
+		if len(ausentes) > 0 {
+			fmt.Fprintf(cmd.ErrOrStderr(), "ID(s) não encontrado(s) na Constituição: %s\n", strings.Join(ausentes, ", "))
+			if len(ids) == 0 {
+				return fmt.Errorf("nenhum ID válido encontrado")
 			}
-			sort.Strings(ids)
-		} else {
-			var missing []string
-			for _, id := range args {
-				upper := strings.ToUpper(id)
-				if _, ok := allIDs[upper]; !ok {
-					missing = append(missing, upper)
-				} else {
-					ids = append(ids, upper)
-				}
-			}
-			if len(missing) > 0 {
-				fmt.Fprintf(cmd.ErrOrStderr(), "ID(s) não encontrado(s) na Constituição: %s\n", strings.Join(missing, ", "))
-				if len(ids) == 0 {
-					return fmt.Errorf("nenhum ID válido encontrado")
-				}
-			}
-			sort.Strings(ids)
 		}
 
 		if asJSON {
