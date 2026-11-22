@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"sort"
@@ -34,6 +35,7 @@ Com argumentos: exibe apenas os IDs solicitados.`,
 		}
 
 		allIDs := gate.ConstitutionIDLines(string(data))
+		asJSON, _ := cmd.Flags().GetBool("json")
 
 		var ids []string
 		if len(args) == 0 {
@@ -60,6 +62,16 @@ Com argumentos: exibe apenas os IDs solicitados.`,
 			sort.Strings(ids)
 		}
 
+		if asJSON {
+			entries := make([]ruleEntry, 0, len(ids))
+			for _, id := range ids {
+				entries = append(entries, ruleEntry{ID: id, Description: allIDs[id]})
+			}
+			encoder := json.NewEncoder(cmd.OutOrStdout())
+			encoder.SetIndent("", "  ")
+			return encoder.Encode(entries)
+		}
+
 		w := tabwriter.NewWriter(cmd.OutOrStdout(), 0, 0, 2, ' ', 0)
 		for _, id := range ids {
 			fmt.Fprintf(w, "%s\t%s\n", id, allIDs[id])
@@ -68,7 +80,13 @@ Com argumentos: exibe apenas os IDs solicitados.`,
 	},
 }
 
+type ruleEntry struct {
+	ID          string `json:"id"`
+	Description string `json:"description"`
+}
+
 func init() {
 	rulesCmd.Flags().String("dir", ".", "Diretório alvo do projeto Forge-SDD")
+	rulesCmd.Flags().Bool("json", false, "Exibir resultado em formato JSON")
 	rootCmd.AddCommand(rulesCmd)
 }
