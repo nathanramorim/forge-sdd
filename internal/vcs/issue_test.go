@@ -2,6 +2,8 @@ package vcs
 
 import (
 	"errors"
+	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -32,7 +34,7 @@ func TestGitHubProcurarIssueAbertaIdempotente(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, is)
 	assert.Equal(t, 9, is.Numero)
-	assert.Equal(t, []string{"issue", "list", "--state", "open", "--search", "Minha spec", "--json", "number,url,title"}, gotArgs)
+	assert.Equal(t, []string{"issue", "list", "--state", "open", "--search", "Minha spec", "--limit", "200", "--json", "number,url,title"}, gotArgs)
 
 	g.run = func(_, _ string, _ ...string) (string, error) {
 		return `[{"number":3,"url":"u","title":"Minha spec"}]`, nil
@@ -52,6 +54,39 @@ func TestGitHubProcurarIssueAbertaIdempotente(t *testing.T) {
 	is, err = g.ProcurarIssueAberta("/p", "Minha spec")
 	require.NoError(t, err)
 	assert.Nil(t, is)
+}
+
+func TestProcurarIssueAbertaUsaLimite(t *testing.T) {
+	var gotArgs []string
+	g := &github{run: func(_, _ string, args ...string) (string, error) { gotArgs = args; return "[]", nil }}
+	_, err := g.ProcurarIssueAberta("/p", "Minha spec")
+	require.NoError(t, err)
+	i := -1
+	for k, a := range gotArgs {
+		if a == "--limit" {
+			i = k
+		}
+	}
+	require.GreaterOrEqual(t, i, 0)
+	require.Less(t, i+1, len(gotArgs))
+	assert.Equal(t, "200", gotArgs[i+1])
+}
+
+func TestProcurarIssueAbertaAchaAlemDos30(t *testing.T) {
+	var itens []string
+	for n := 1; n <= 200; n++ {
+		titulo := fmt.Sprintf("Outra %d", n)
+		if n == 45 {
+			titulo = "Minha spec"
+		}
+		itens = append(itens, fmt.Sprintf(`{"number":%d,"url":"https://github.com/o/r/issues/%d","title":%q}`, n, n, titulo))
+	}
+	saida := "[" + strings.Join(itens, ",") + "]"
+	g := &github{run: func(_, _ string, _ ...string) (string, error) { return saida, nil }}
+	is, err := g.ProcurarIssueAberta("/p", "Minha spec")
+	require.NoError(t, err)
+	require.NotNil(t, is)
+	assert.Equal(t, 45, is.Numero)
 }
 
 func TestNenhumCriarIssueRetornaSemPR(t *testing.T) {

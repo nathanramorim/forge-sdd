@@ -39,6 +39,11 @@ func (g *github) CriarIssue(dir string, n NovaIssue) (Issue, error) {
 	return Issue{Numero: num, URL: url, Titulo: titulo}, nil
 }
 
+// limiteBuscaIssue é o teto de itens do `gh issue list` (o padrão do gh é 30). O gh pagina a API
+// por dentro (100 por página), então 200 custa 2 requisições em vez de 1. O aviso de "busca no
+// limite" ficou como follow-up (exigiria canal novo: assinatura ou sentinela de erro).
+const limiteBuscaIssue = 200
+
 // ProcurarIssueAberta lista as abertas por busca e filtra no cliente (a busca do gh é aproximada):
 // vale título igual ao base ou terminado em "] <base>". Saída fora do esquema é recusada (SEG-01).
 func (g *github) ProcurarIssueAberta(dir, tituloBase string) (*Issue, error) {
@@ -47,7 +52,7 @@ func (g *github) ProcurarIssueAberta(dir, tituloBase string) (*Issue, error) {
 		return nil, errors.New("título-base da issue vazio")
 	}
 	out, err := g.run(dir, "gh", "issue", "list", "--state", "open", "--search", base,
-		"--json", "number,url,title")
+		"--limit", strconv.Itoa(limiteBuscaIssue), "--json", "number,url,title")
 	if err != nil {
 		return nil, err
 	}

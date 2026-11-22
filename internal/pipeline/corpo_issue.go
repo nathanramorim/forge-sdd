@@ -154,8 +154,8 @@ func validaEvidenciaParaGravar(ev CardEvidence) string {
 // CriarIssueConcepcao cria (ou reaproveita) a issue da concepção e grava a evidência. specRel e
 // iniciativaRel são relativos ao projeto. O adaptador `nenhum` devolve vcs.ErrSemPR: isso é "sem
 // efeito, sem erro" (nada criado, nada gravado). O título-base é o título da spec, estável, para o
-// filtro exato de ProcurarIssueAberta; esta busca vê só os 30 itens mais recentes do `gh`, então uma
-// issue antiga fora da janela pode ser duplicada (falha segura; follow-up: --limit maior em internal/vcs).
+// filtro exato de ProcurarIssueAberta; esta busca vê até 200 itens (limiteBuscaIssue em internal/vcs), então uma
+// issue fora dessa janela ainda pode ser duplicada (falha segura; follow-up: avisar quando a busca bate no limite).
 func CriarIssueConcepcao(dir, specRel, iniciativaRel string, ad vcs.Adaptador, now time.Time) (ResultadoIssue, error) {
 	var res ResultadoIssue
 	feature := filepath.Base(filepath.Clean(iniciativaRel))
