@@ -1,6 +1,6 @@
 # Etapa 6 — Implementar
 
-**Objetivo:** Builder implementa 115-04, 113 e 98, uma branch e um PR em draft por feature.
+**Objetivo:** Builder implementa 115-04, 113, fix-89-01 e 98, uma branch e um PR em draft por feature.
 
 **Entradas:** Features da fila.
 

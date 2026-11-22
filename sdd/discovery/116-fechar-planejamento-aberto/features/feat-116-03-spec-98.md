@@ -13,6 +13,6 @@
 ## Critérios de Aceitação Executáveis
 
 ```sh
-gh pr view 214 --json mergeable,isDraft
+gh pr view 214 --json state
 go build ./... && go test ./...
 ```

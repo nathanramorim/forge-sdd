@@ -13,6 +13,7 @@
 ## Critérios de Aceitação Executáveis
 
 ```sh
-gh pr view 211 --json mergeable,isDraft
+gh pr view 211 --json state
 git diff origin/main --name-only | grep -v "^sdd/" | wc -l   # deve ser 0
+go build ./...
 ```

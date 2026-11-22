@@ -13,6 +13,7 @@
 ## Critérios de Aceitação Executáveis
 
 ```sh
-gh pr view 175 --json mergeable,isDraft
+gh pr view 175 --json state
 grep -rn "forge card" sdd/discovery/113-criacao-automatica-issue-concepcao | wc -l   # deve ser 0
+go build ./...
 ```
