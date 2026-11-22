@@ -131,3 +131,11 @@ func TestVoltaDaSpecPropagaFalhaDoAdaptador(t *testing.T) {
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "mesclar a spec")
 }
+
+func (a *adaptadorDeSpec) CriarIssue(string, vcs.NovaIssue) (vcs.Issue, error) {
+	return vcs.Issue{}, vcs.ErrSemPR
+}
+
+func (a *adaptadorDeSpec) ProcurarIssueAberta(string, string) (*vcs.Issue, error) {
+	return nil, vcs.ErrSemPR
+}

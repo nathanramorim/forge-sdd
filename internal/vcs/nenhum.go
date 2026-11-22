@@ -17,6 +17,10 @@ func (n *nenhum) CorrigirBase(string, int, string) error { return ErrSemPR }
 
 func (n *nenhum) MarcarPronto(string, int) error { return ErrSemPR }
 
+func (n *nenhum) CriarIssue(string, NovaIssue) (Issue, error) { return Issue{}, ErrSemPR }
+
+func (n *nenhum) ProcurarIssueAberta(string, string) (*Issue, error) { return nil, ErrSemPR }
+
 // Mesclar faz o merge local de Branch na base, só se a base já é a branch atual (não troca de
 // branch nem mexe na árvore de trabalho de outra).
 func (n *nenhum) Mesclar(dir string, m Mescla) error {

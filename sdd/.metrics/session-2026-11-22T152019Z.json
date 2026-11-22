@@ -1,0 +1,27 @@
+{
+  "$schema": "forge-sdd/metrics/1.0",
+  "feature": "sdd/discovery/113-criacao-automatica-issue-concepcao/features/feat-113-01-vcs-issue.md",
+  "phase": "113-01",
+  "agent_path": [
+    "builder"
+  ],
+  "tokens_input": 3300,
+  "tokens_output": 3026,
+  "turns": 0,
+  "duration_seconds": 0,
+  "criterio_atendido": false,
+  "model": "claude-sonnet-5-5",
+  "rework_lines": 0,
+  "context7_calls": 0,
+  "git_calls": 0,
+  "files_touched": [
+    "internal/vcs/issue.go",
+    "internal/vcs/issue_test.go",
+    "internal/vcs/vcs.go",
+    "internal/vcs/nenhum.go"
+  ],
+  "outcome": "approved",
+  "sdd_version": "5.2.0-beta",
+  "medicao": "estimado",
+  "complexidade": null
+}

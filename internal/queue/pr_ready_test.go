@@ -152,3 +152,11 @@ func TestResumoParaPR(t *testing.T) {
 	assert.Empty(t, ResumoParaPR(nil))
 	assert.Empty(t, ResumoParaPR(&QueueItem{TaskID: "x"}))
 }
+
+func (a *adaptadorFalso) CriarIssue(string, vcs.NovaIssue) (vcs.Issue, error) {
+	return vcs.Issue{}, vcs.ErrSemPR
+}
+
+func (a *adaptadorFalso) ProcurarIssueAberta(string, string) (*vcs.Issue, error) {
+	return nil, vcs.ErrSemPR
+}
