@@ -13,6 +13,8 @@
 9. Se `Nível de Linguagem` na Constitution for `iniciante`, explique C4 e critério de aceitação com exemplos simples, sem alterar os critérios.
 10. **Telemetria:** `forge session record --sessao spec --feature "sdd/discovery/<id>-<nome>/discovery.md" --tokens-input <N> --tokens-output <N> --outcome approved --criterio-atendido=true --files-touched <lista>`. Nunca passe zeros: se não souber os tokens, omita as flags (o CLI vai estimar).
 
+**Issue/card (antes do Gate 1):** rode `forge queue card --feature <id>-<nome>` (o `--dry-run` só mostra). Gestor desligado (padrão, `create_on_conception` ausente): nada a fazer, em silêncio. GitHub: cria ou reaproveita a issue e grava `card-evidence.json`. Gestor por MCP ativo em `sdd/memory/mcps.md`: crie o card com a ferramenta do MCP e registre com `--provider <p> --id <id> --url <https>`. Falha externa vira aviso, nunca bloqueia a spec. O `Dispatch` lê a evidência e o módulo `project` recebe o evento `spec.aberta`.
+
 **Visualizar artefatos (antes do Gate 1)**
 
 Use AskUserQuestion com as opções:
