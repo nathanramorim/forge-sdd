@@ -16,7 +16,7 @@ func TestSelecionaIDs(t *testing.T) {
 		t.Fatalf("sem pedidos: ids=%v ausentes=%v", ids, ausentes)
 	}
 
-	ids, ausentes, err := SelecionaIDs(catalogo, []string{"gov-04", "xyz-99", "arq-01"})
+	ids, ausentes, err = SelecionaIDs(catalogo, []string{"gov-04", "xyz-99", "arq-01"})
 	if err != nil {
 		t.Fatal(err)
 	}
