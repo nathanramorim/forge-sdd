@@ -1,6 +1,0 @@
-{
-  "veredito": "conforme",
-  "achados": [],
-  "candidate_skill": null,
-  "resumo": "feat-98-01 aprovada. Camada A: todos os 5 critérios passaram (frontmatter, renderizar-mermaid.py preservado, 12 referências a diagram-studio, mapeamento grupo presente, AskUserQuestion declarado). Camada B: sem violações S-01..S-07. Desvio justificado: find substituiu ls para lidar com subdiretório de versão do plugin (S-05 resolvido a favor). Seções 1-6 preservadas byte-a-byte."
-}
