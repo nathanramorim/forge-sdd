@@ -34,6 +34,19 @@ type NovoPR struct {
 	Base, Branch, Titulo, Corpo, CorpoArquivo string
 }
 
+// NovaIssue reúne os dados para criar uma Issue.
+type NovaIssue struct {
+	Titulo, Corpo string
+	Etiquetas     []string
+}
+
+// Issue descreve uma Issue (aberta ou recém-criada).
+type Issue struct {
+	Numero int
+	URL    string
+	Titulo string
+}
+
 // Mescla identifica o que mesclar: Numero no github; Branch e Base no merge local do `nenhum`.
 type Mescla struct {
 	Numero       int
@@ -49,6 +62,10 @@ type Adaptador interface {
 	CorrigirBase(dir string, numero int, base string) error
 	MarcarPronto(dir string, numero int) error
 	Mesclar(dir string, m Mescla) error
+	// CriarIssue cria a Issue; o `nenhum` devolve ErrSemPR sem chamada externa.
+	CriarIssue(dir string, n NovaIssue) (Issue, error)
+	// ProcurarIssueAberta acha a Issue aberta cujo título é o base ou termina em "] <base>".
+	ProcurarIssueAberta(dir, tituloBase string) (*Issue, error)
 }
 
 // Novo devolve o adaptador do VCS; valor desconhecido ou adiado é recusado.

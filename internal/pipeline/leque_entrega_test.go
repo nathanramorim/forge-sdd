@@ -149,3 +149,11 @@ func TestJuntarNaoEhEntregaNoGitHub(t *testing.T) {
 	assert.NotNil(t, out[0].PR, "no github a entrega é o PR")
 	assert.Equal(t, 1, adapt.criados)
 }
+
+func (a *adaptadorDeLeque) CriarIssue(string, vcs.NovaIssue) (vcs.Issue, error) {
+	return vcs.Issue{}, vcs.ErrSemPR
+}
+
+func (a *adaptadorDeLeque) ProcurarIssueAberta(string, string) (*vcs.Issue, error) {
+	return nil, vcs.ErrSemPR
+}
