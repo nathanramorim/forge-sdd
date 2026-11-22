@@ -71,7 +71,7 @@ flowchart LR
     end
 
     subgraph CoreGo["Binário forge-sdd (Go stdlib)"]
-        CmdCard["cmd/forge-sdd<br/>subcomando de card/issue"]
+        CmdCard["cmd/forge-sdd<br/>forge queue card (subcomando de queue)"]
         Resolver["internal/config + internal/pipeline<br/>Resolvedor de Gestor Ativo<br/>(forge.json + mcps.md + sdd/modulos/project.json)"]
         VCS["internal/vcs<br/>Adaptador github (CriarIssue, ProcurarIssueAberta)<br/>Adaptador nenhum (No-Op)"]
         Evidencia["internal/pipeline<br/>CardEvidence (card-evidence.json)<br/>Higienizador (MaskSecrets + Sanitize)"]
