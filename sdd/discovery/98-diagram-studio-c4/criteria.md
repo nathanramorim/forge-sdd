@@ -2,7 +2,8 @@
 
 ## Modelo do módulo
 
-**Enxuto** (ARQ-11): sem pacote Go novo. Apenas arquivo de skill do repositório (`.agents/skills/diagramas-c4-mermaid/SKILL.md`).
+- **feat-98-01 — enxuto** (ARQ-11): só move/reescreve a skill em `.agents/skills/diagramas-c4-mermaid/`; sem Go.
+- **feat-98-02 — completo** (ARQ-11): Go em `internal/scaffold` (`instalar_skill.go`), reusando `WriteFileSafe` e `shouldPreserve`; sem pacote novo.
 
 ## O que já existe
 
@@ -14,11 +15,13 @@
 
 ## Decisões do projeto aplicadas
 
-- **ARQ-11**: spec declara modelo enxuto.
+- **ARQ-11**: 98-01 enxuto, 98-02 completo, cada um justificado na própria feature.
+- **SEG-01/SEG-02/SEG-07, TST-01**: validação de destino, gravação atômica com preservação, versões exatas e testes (98-02).
+- **FLX-05/GOV-01**: a política vale para todo o forge; follow-up declarado: nova ADR em `sdd/spec/adr/`.
 - **DUP-01**: os dois fluxos são independentes; nenhuma lógica duplicada.
 - **COD-01**: responsabilidade única por fluxo dentro do SKILL.md.
 - **ADR-0003**: skills por estação — a skill vive em `.agents/skills/diagramas-c4-mermaid/SKILL.md`, no repositório.
 
 ## Dependências novas
 
-Nenhuma dependência Go nova. O fluxo diagram-studio depende do plugin `nathanramorim/diagram-studio` externo, verificado em runtime; instalar é opcional por skill, limitado ao projeto aberto, e pergunta hub (master) ou subprojeto quando houver forge em subprojetos.
+Nenhuma dependência Go. Runtime do fluxo diagram-studio: plugin `diagram-studio` 0.2.0 e `uv` 0.9.7 (versões lidas localmente); consulta ao context7/documentação: versão a confirmar antes do Builder (SEG-07). Detalhe na feat-98-02.

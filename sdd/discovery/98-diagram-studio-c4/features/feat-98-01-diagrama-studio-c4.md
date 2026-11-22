@@ -6,7 +6,7 @@
 
 ## Objetivo
 
-Atualizar a skill `diagramas-c4-mermaid` (`~/.claude/skills/diagramas-c4-mermaid/SKILL.md`) para oferecer ao agente a **escolha entre dois motores de renderização** ao produzir diagramas:
+Atualizar a skill `diagramas-c4-mermaid` (`.agents/skills/diagramas-c4-mermaid/SKILL.md`, movida do `~/.claude/skills/` para o repositório) para oferecer ao agente a **escolha entre dois motores de renderização** ao produzir diagramas:
 
 - **Mermaid** (comportamento atual): blocos ` ```mermaid ` que renderizam nativamente no GitHub, VS Code e Obsidian.
 - **diagram-studio** (`github.com/nathanramorim/diagram-studio`): JSON → SVG/PNG dark-mode com assinatura, via `uv run scripts/diagrama.py`. Resultado visual superior; exige embed de imagem no markdown.
@@ -15,21 +15,21 @@ A escolha é feita via `AskUserQuestion` no início de cada uso da skill, antes 
 
 ## Modelo do módulo
 
-**Enxuto** (ARQ-11): sem código Go novo. Modifica apenas arquivos de skill fora do repositório (`~/.claude/skills/diagramas-c4-mermaid/`) e o `renderizar-mermaid.py` existente permanece inalterado. Nenhum pacote Go é criado.
+**Enxuto** (ARQ-11): esta feature só move e reescreve arquivos de skill dentro do repositório (`.agents/skills/diagramas-c4-mermaid/`). Não cria código Go nem pacote novo; a justificativa vale para esta feature, e não para a política de instalação, que vive na feat-98-02 (modelo completo, Go).
 
 ## O que já existe
 
 | Procurei | Onde | Achei | Decisão | Justificativa |
 |---|---|---|---|---|
-| Motor atual | `~/.claude/skills/diagramas-c4-mermaid/SKILL.md` | `renderizar-mermaid.py` via `mermaid-cli` + Chrome | Reusar | Mantém o fluxo Mermaid que renderiza nativamente no GitHub, VS Code e Obsidian. |
-| diagram-studio | `github.com/nathanramorim/diagram-studio` | plugin Claude Code com `scripts/diagrama.py` e `skills/diagrama-studio/SKILL.md` | Estender | A skill existente ganha o fluxo alternativo sem duplicar a renderização Mermaid. |
-| Skill existente | `~/.claude/skills/diagramas-c4-mermaid/scripts/renderizar-mermaid.py` | Script Python funcional | Reusar | O script atende à opção Mermaid e fica inalterado conforme o escopo. |
+| Skill de diagramas no repo | `.agents/skills/` | só `novo-subcomando-cli-sdd` e `sdd-*`; `diagramas-c4-mermaid` ausente | Criar no repo | A skill precisa viver no repositório (decisão do dono) |
+| Motor atual | `~/.claude/skills/diagramas-c4-mermaid/` (somente leitura) | `SKILL.md` e `scripts/renderizar-mermaid.py` | Reusar o conteúdo | Mantém o fluxo Mermaid; script copiado sem alteração |
+| diagram-studio | `~/.claude/plugins/marketplaces/diagram-studio/` | plugin 0.2.0 com `scripts/diagrama.py` | Referenciar como opção B | Output visual superior; instalação é tratada na feat-98-02 |
 
 ## Decisões do projeto aplicadas
 
-- **D1 / ADR-0003**: Skills por estação — a alteração é na skill de usuário, fora do repo. Sem impacto em `.agents/skills/`.
-- **ARQ-11**: Spec declara modelo enxuto (sem pacote novo).
-- **DUP-01**: O bloco "diagram-studio" não duplica a lógica Mermaid; são fluxos independentes dentro da mesma skill.
+- **ADR-0003**: skills por estação vivem em `.agents/skills/`, no repositório.
+- **ARQ-11**: modelo enxuto declarado e justificado acima.
+- **DUP-01**: o fluxo diagram-studio não duplica a lógica Mermaid.
 
 ## Conteúdo da alteração
 
@@ -56,7 +56,7 @@ Antes de qualquer esboço, o agente usa `AskUserQuestion` com:
 
 #### Novo fluxo para diagram-studio (seção paralela no SKILL.md)
 
-1. **Verificar instalação:** `ls ~/.claude/plugins/diagram-studio/scripts/diagrama.py 2>/dev/null || echo "AUSENTE"`. Se ausente, instruir:  
+1. **Verificar instalação:** `ls .agents/plugins/diagram-studio/scripts/diagrama.py 2>/dev/null || echo "AUSENTE"` (caminho relativo ao destino do projeto aberto; a política de instalação é a feat-98-02). Se ausente, instruir:  
    ```
    /plugin marketplace add nathanramorim/diagram-studio
    /plugin install diagram-studio@diagram-studio
@@ -73,27 +73,21 @@ Antes de qualquer esboço, o agente usa `AskUserQuestion` com:
    | Fronteira / Boundary | `caixa` com `estilo: "grupo"` |
    | Relacionamento | `seta` com `forma: "horizontal"` ou `"vertical"` |
 
-5. **Renderizar:** `uv run ~/.claude/plugins/diagram-studio/scripts/diagrama.py docs/diagramas/<nome>.json`
+5. **Renderizar:** `uv run <destino>/diagram-studio/scripts/diagrama.py docs/diagramas/<nome>.json` (o `<destino>` é o resolvido na verificação do passo 1)
 6. **Conferir PNG** (abrir imagem): texto apertado, setas cruzando caixas, blocos desalinhados.
 7. **Entregar:** SVG para README/docs (`![](diagrama.svg)`), PNG para slides e chat.
 
-### 2. Instalação opcional e restrita ao projeto aberto (decisão do dono)
+### 2. Instalação
 
-Toda instalação de skill ou plugin feita pelo forge obedece a três regras:
+A skill só descreve o fluxo e orienta a instalar. A política (opcional por skill, limitada ao projeto aberto, hub ou subprojeto) é implementada e testada na **feat-98-02**, que depende desta.
 
-1. **Opcional por skill:** a skill `diagramas-c4-mermaid` e o plugin `diagram-studio` só são instalados se o usuário escolher; o fluxo Mermaid funciona sem o plugin.
-2. **Limitada ao projeto aberto:** a instalação grava só dentro do projeto em que o forge foi aberto (`.agents/skills/`, `.claude/`), nunca em `~/.claude/` nem em outro projeto.
-3. **Hub ou subprojeto:** se existirem subprojetos com forge sob o projeto aberto, o forge pergunta onde instalar: no master (hub) ou em um dos subprojetos listados. Sem subprojetos, instala no projeto aberto sem perguntar.
-
-O caminho do script do plugin no fluxo passa a ser resolvido a partir do destino escolhido, não de `~/.claude/plugins/`.
-
-### 3. Sem alteração
+### 3. Sem alteração (copiado do original, sem editar)
 
 - `scripts/renderizar-mermaid.py` do fluxo Mermaid — inalterado.
 
 ## Dependências novas
 
-Nenhuma dependência Go. O fluxo diagram-studio requer o plugin `nathanramorim/diagram-studio` (verificado em runtime; orientação de instalação incluída no fluxo da skill).
+Nenhuma dependência Go. Plugin `diagram-studio` e `uv` são tratados na feat-98-02 (SEG-07).
 
 ## Rules e IDs da Constituição aplicáveis
 
@@ -105,12 +99,13 @@ Nenhuma dependência Go. O fluxo diagram-studio requer o plugin `nathanramorim/d
 # 1. A skill vive no repositório, com frontmatter válido
 head -5 .agents/skills/diagramas-c4-mermaid/SKILL.md | grep "name: diagramas-c4-mermaid"
 
-# 2. Fluxo Mermaid preservado e integração diagram-studio referenciada
+# 2. Fluxo Mermaid preservado e diagram-studio referenciado
+test -f .agents/skills/diagramas-c4-mermaid/scripts/renderizar-mermaid.py
 grep -c "renderizar-mermaid.py" .agents/skills/diagramas-c4-mermaid/SKILL.md   # >= 1
 grep -c "diagram-studio" .agents/skills/diagramas-c4-mermaid/SKILL.md          # >= 3
 
-# 3. Nada é gravado fora do projeto aberto, e hub/subprojeto é perguntado
-go test ./internal/scaffold -run 'TestInstalaSkillSoNoProjetoAberto|TestInstalaPerguntaHubOuSubprojeto|TestInstalaOpcionalPorSkill'
+# 3. Nenhuma referência a ~/.claude/ dentro da skill nem da spec executável
+! grep -rn "~/.claude" .agents/skills/diagramas-c4-mermaid/
 
 # 4. Build e suíte
 go build ./... && go test ./...

@@ -24,8 +24,9 @@ Agentes de IA (Claude Code, Gemini, Copilot) que usam a skill para gerar diagram
 
 ## Escopo
 
-**Dentro:** atualizar `.agents/skills/diagramas-c4-mermaid/SKILL.md` no repositório.
-**Fora:** modificar `renderizar-mermaid.py`; criar código Go no forge-sdd.
+**feat-98-01 (enxuto, sem Go):** mover/reescrever a skill para `.agents/skills/diagramas-c4-mermaid/` no repositório.
+**feat-98-02 (completo, Go em `internal/scaffold`):** política de instalação opcional, limitada ao projeto aberto, com pergunta hub ou subprojeto; depende da 98-01 e exige nova ADR (FLX-05/GOV-01), pois vale para todo o forge.
+**Fora:** modificar `renderizar-mermaid.py`.
 
 ## Riscos
 
