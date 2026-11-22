@@ -56,7 +56,7 @@ Antes de qualquer esboço, o agente usa `AskUserQuestion` com:
 
 #### Novo fluxo para diagram-studio (seção paralela no SKILL.md)
 
-1. **Verificar instalação:** `ls .agents/plugins/diagram-studio/scripts/diagrama.py 2>/dev/null || echo "AUSENTE"` (caminho único, relativo ao destino de instalação: o projeto aberto, ou o hub/subprojeto escolhido). Se ausente, oferecer a instalação restrita ao projeto da feat-98-02 (`forge skills instalar plugin diagram-studio`, que grava só em `<destino>/.agents/plugins/diagram-studio/`). **Não usar `/plugin marketplace add` nem `/plugin install`**, pois gravam em `~/.claude/`.
+1. **Verificar instalação (o comando vem do hub):** rode `forge-sdd skills destinos`. Se o plugin já estiver disponível no projeto aberto ou no hub acima, use-o de lá e **não instale nos demais** (política da feat-98-02). Só se estiver ausente, confira `ls .agents/plugins/diagram-studio/scripts/diagrama.py 2>/dev/null || echo "AUSENTE"` (caminho único, relativo ao destino de instalação: o projeto aberto, ou o hub/subprojeto escolhido). Se ausente, oferecer a instalação restrita ao projeto da feat-98-02 (`forge skills instalar plugin diagram-studio`, que grava só em `<destino>/.agents/plugins/diagram-studio/`). **Não usar `/plugin marketplace add` nem `/plugin install`**, pois gravam em `~/.claude/`.
 2. **Escolher modelo** (igual ao `SKILL.md` do diagram-studio): Fases, Personas, Fluxo ou Camadas.
 3. **Montar JSON** em `docs/diagramas/<nome>.json` usando a referência do JSON do diagram-studio.
 4. **Mapeamento C4 → diagram-studio**:
