@@ -2,7 +2,7 @@
 
 - **Data:** 2026-11-14
 - **Status:** `aprovado`
-- **Substituída em parte por:** ADR-0026 (o modo `live` como padrão de interface); o restante segue válido quando o tmux está ativo.
+- **Substituída em parte por:** ADR-0026 D-3 (o modo `live` passa a exigir `terminal: tmux` explícito); o restante segue válido quando o tmux está ativo.
 - **Regras afetadas (IDs da constitution):** `ARQ-01`, `ARQ-11`, `COD-01`, `COD-03`, `SEG-05`, `TST-03`, `TST-05`, `DUP-02`
 - **Autor / Responsável:** Líder (decisão do dono do produto no discovery 77)
 

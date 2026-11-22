@@ -4,7 +4,7 @@
 - **Status:** `proposto`
 - **Regras afetadas (IDs da constitution):** `Nenhuma` (nenhum ID criado, alterado ou removido; `ARQ-06` não ganha subcomando)
 - **Autor / Responsável:** Líder (decisão do dono do produto, 22/11/2026: "o tmux continua opcional")
-- **Substitui em parte:** ADR-0006 (D-6), ADR-0007 (D-3) e ADR-0008 (modo `live` como padrão de interface). Alinha-se à ADR-0015 (o chat orquestra subagentes) e à ADR-0024 (item 5: tmux é opção de interface).
+- **Substitui em parte:** ADR-0006 (D-6), ADR-0007 (D-3) e ADR-0008 (D-3 desta: o modo `live` passa a exigir `terminal: tmux` explícito). Alinha-se à ADR-0015 (o chat orquestra subagentes; a 0015 diz que a 0008 "convive", e convive: a 0026 só muda o que é padrão e o que é opcional) e à ADR-0024 (item 5: tmux é opção de interface).
 
 ## Contexto
 
@@ -19,10 +19,10 @@ As ADR-0006, 0007 e 0008 tornaram o tmux a interface natural do pipeline: `forge
 ## Decisão
 
 - **D-1 Padrão:** janelas do sistema. Nenhum comando exige tmux.
-- **D-2 Opt-in explícito:** `--terminal tmux` ou `terminal: tmux` no `forge.json` abrem as 3 sessões em tmux (`forge up`, `forge pipeline status --tmux`). Sem o tmux no PATH, o comando avisa e usa as janelas, sem erro.
+- **D-2 Opt-in explícito:** `--terminal tmux` ou `terminal: tmux` no `forge.json` fazem o `forge up` abrir as 3 sessões em tmux. Sem o tmux no PATH, o `forge up` avisa e usa as janelas, sem erro (se o tmux existe e a montagem da sessão falha, o erro é mantido). `terminal: auto` e `native` equivalem às janelas do sistema. `forge status --tmux` abre só o painel vivo e, sem tmux, devolve erro com o comando de instalação.
 - **D-3 Modo `live` só com tmux:** `session_mode: live` vale apenas com `terminal: tmux`; fora disso cai para `headless` nas janelas do sistema, com aviso. O `Preflight` só cobra o tmux quando ele foi escolhido.
 - **D-4 Sem instalação automática (substitui 0007 D-3):** o Forge **não executa** a instalação do tmux; mostra o comando do gerenciador de pacotes para a pessoa rodar.
-- **D-5 Permanece:** o restante das ADR-0006 (LiveView, máscara de segredos, `Requeue`, pausa por limite, "a Discovery não executa"), da 0007 (`brief`, `/constitution`, Windows Terminal) e da 0008 (despachante, `VerifyJobHandoff`, `capture-pane`) vale **quando o tmux está ativo**.
+- **D-5 Permanece:** o restante das ADR-0006 (LiveView, máscara de segredos, `Requeue`, pausa por limite, "a Discovery não executa"), da 0007 (`brief`, `/constitution`; o Windows Terminal, `wt.exe`, é caminho nativo e independe do tmux) e da 0008 (despachante, `VerifyJobHandoff`, `capture-pane`) vale **quando o tmux está ativo**.
 - **D-6 Chat:** quando o trabalho é no chat, nada disso se aplica; o chat orquestra subagentes (ADR-0015).
 
 ## Consequências
