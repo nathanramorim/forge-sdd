@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"io"
+	"os"
 	"path/filepath"
 	"runtime"
 	"strings"
@@ -49,11 +50,48 @@ não tiverem escolha própria. --dry-run só imprime os comandos.`,
 			return err
 		}
 		env := newLaunchEnv(runtime.GOOS, abs, pipeline.ResolveBin())
-		// O tmux saiu (feat-115-02). O pipeline abre em janelas do sistema, e o modo live —
-		// que injetava prompts num painel — não existe mais: o chat entrega ao subagente.
+		termFlag, _ := cmd.Flags().GetString("terminal")
 		out := cmd.OutOrStdout()
+		prompt := pipeline.TerminalPrompt{Env: env, Geteuid: os.Geteuid, Out: out}
+		decision, err := pipeline.DecideTerminal(termFlag, cfg, prompt)
+		if err != nil {
+			return err
+		}
+		if decision.Terminal == config.TerminalTmux {
+			plan, err := pipeline.BuildTmuxPlan(env, cfg, os.Getenv("TMUX") != "")
+			if err != nil {
+				return err
+			}
+			for _, step := range append(append([][]string{}, plan.Create...), plan.Attach) {
+				fmt.Fprintln(out, strings.Join(quoteArgs(step), " "))
+			}
+			if dry {
+				mode := cfg.SessionMode
+				if mode == "" {
+					mode = config.SessionModeHeadless
+				}
+				fmt.Fprintf(out, "[DRY-RUN] Nada foi aberto (sessão tmux %s, modo %s).\n", plan.Session, mode)
+				return nil
+			}
+			nativeFallback := func() error {
+				if cfg.SessionMode == config.SessionModeLive {
+					fmt.Fprintln(out, "modo live requer tmux; caindo para headless nas janelas do sistema")
+					cfg.SessionMode = config.SessionModeHeadless
+				}
+				natPlan, err := pipeline.LaunchPlanFor(env, cfg)
+				if err != nil {
+					return err
+				}
+				return pipeline.Launch(natPlan)
+			}
+			created, fellBack, err := pipeline.LaunchTerminalTmux(plan, pipeline.DefaultTmuxRunner(), decision.Auto, out, nativeFallback)
+			if err == nil && !created && !fellBack {
+				fmt.Fprintf(out, "A sessão %s já existia: reconectado.\n", plan.Session)
+			}
+			return err
+		}
 		if cfg.SessionMode == config.SessionModeLive {
-			fmt.Fprintln(out, "o modo live saiu junto com o tmux; as sessões abrem em headless nas janelas do sistema")
+			fmt.Fprintln(out, "modo live requer tmux; caindo para headless nas janelas do sistema")
 			cfg.SessionMode = config.SessionModeHeadless
 		}
 		plan, err := pipeline.LaunchPlanFor(env, cfg)
@@ -89,8 +127,7 @@ func init() {
 	upCmd.Flags().String("discovery", "", "Agente da sessão forge-discovery: claude, gemini, copilot ou codex")
 	upCmd.Flags().String("builder", "", "Agente da sessão forge-builder: claude, gemini, copilot ou codex")
 	upCmd.Flags().String("reviewer", "", "Agente da sessão forge-reviewer: claude, gemini, copilot ou codex")
-	upCmd.Flags().String("terminal", "", "Obsoleto e ignorado: o tmux saiu (feat-115-02); as sessões abrem nas janelas do sistema")
-	_ = upCmd.Flags().MarkDeprecated("terminal", "as sessões sempre abrem nas janelas do sistema")
+	upCmd.Flags().String("terminal", "", "Onde abrir: native ou auto (janelas do sistema, padrão) ou tmux (opção: três painéis; sem tmux, avisa e usa janelas)")
 	upCmd.Flags().Bool("dry-run", false, "Só imprime os comandos de abertura")
 	rootCmd.AddCommand(upCmd)
 }

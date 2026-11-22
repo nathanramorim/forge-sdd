@@ -484,9 +484,13 @@ func (e *menuEnv) configMenu() error {
 			cfg, err = e.choosePermissions(cfg)
 		case "mode":
 			var mode string
-			mode, err = e.p.Select("Modo de sessão do Builder e Reviewer", []menuOption{
+			modes := []menuOption{
 				{Label: "Headless (worker aguarda jobs e roda o agente em segundo plano)", Value: config.SessionModeHeadless},
-			}, cfg.SessionMode)
+			}
+			if cfg.Terminal == config.TerminalTmux { // o modo ao vivo só faz sentido com o tmux (ADR-0024)
+				modes = append([]menuOption{{Label: "Ao vivo (CLI aberta no painel desde o início; requer tmux)", Value: config.SessionModeLive}}, modes...)
+			}
+			mode, err = e.p.Select("Modo de sessão do Builder e Reviewer", modes, cfg.SessionMode)
 			if err == nil {
 				cfg.SessionMode = mode
 			}
@@ -519,22 +523,26 @@ func (e *menuEnv) diagnose() {
 	_ = e.p.Pause("Enter para voltar ao menu")
 }
 
-// terminalLabel diz onde as sessões vão abrir. O tmux saiu (feat-115-02): a escolha agora é
-// entre os painéis do Windows Terminal, quando existem, e as janelas do sistema.
-func (e *menuEnv) terminalLabel(config.ForgeConfig) string {
+// terminalLabel diz onde as sessões vão abrir: "no tmux (3 painéis)", "em painéis do Windows Terminal" ou "em janelas do sistema".
+func (e *menuEnv) terminalLabel(cfg config.ForgeConfig) string {
 	look := e.preflightEnv.LookPath
 	if look == nil {
 		look = pipeline.DefaultPreflightEnv().LookPath
 	}
-	if runtime.GOOS == "windows" {
-		if _, err := look("wt.exe"); err == nil {
-			return "em painéis do Windows Terminal"
+	env := pipeline.LaunchEnv{GOOS: runtime.GOOS, LookPath: look}
+	term, err := pipeline.ResolveTerminal("", cfg, env)
+	if err != nil || term == config.TerminalNative {
+		if runtime.GOOS == "windows" {
+			if _, err := look("wt.exe"); err == nil {
+				return "em painéis do Windows Terminal"
+			}
+			if _, err := look("wt"); err == nil {
+				return "em painéis do Windows Terminal"
+			}
 		}
-		if _, err := look("wt"); err == nil {
-			return "em painéis do Windows Terminal"
-		}
+		return "em janelas do sistema"
 	}
-	return "em janelas do sistema"
+	return "no tmux (3 painéis)"
 }
 
 // settingKey é uma chave liga/desliga mostrada no menu Settings.

@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "chave_conteudo": "093229787937a582",
-  "versao_historico": "cc84d53",
+  "chave_conteudo": "cfc18e52b37d6f44",
+  "versao_historico": "4c758b1",
   "versoes": [
     {
       "versao": "5.0.0",
@@ -57,6 +57,10 @@
       "canal": "beta",
       "titulo": "O CI Sai do Caminho, a Revisão Vem Antes e Cada Feature Tem o Seu PR (Beta)",
       "itens": [
+        {
+          "titulo": "O tmux volta como opção (115-04)",
+          "texto": "o padrão continua sendo as janelas do sistema. Com `--terminal tmux` ou `terminal: tmux` no `forge.json`, `forge up` abre as três sessões em tmux (`--dry-run` só imprime); sem o tmux ele avisa e usa as janelas, sem erro. O modo `live` só vale com o tmux, e o `Preflight` só avisa do tmux quando ele foi escolhido."
+        },
         {
           "titulo": "O CI roda no ponto certo (#181)",
           "texto": "PR em draft tem os jobs pulados e não consome runner. Ao sair do draft, teste e lint rodam uma vez, em três sistemas (Linux, macOS e Windows), e `concurrency` cancela a execução anterior quando você sobe um commit novo. Um job novo, `pronto?`, é obrigatório na principal e recusa PR em draft."

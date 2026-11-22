@@ -133,7 +133,7 @@ type ForgeConfig struct {
 	// AgentModels escolhe o modelo por papel no cabeçalho `model:` de .claude/agents/*.md (forge update
 	// escreve; feat 104-05). Sem a chave os agentes seguem em `inherit`.
 	AgentModels map[string]string `json:"agent_models,omitempty"`
-	// Terminal é legado: o tmux saiu (feat-115-02) e as sessões sempre abrem nas janelas do sistema; o valor só é validado.
+	// Terminal escolhe onde as sessões abrem: auto (tmux se existir), tmux ou native (janelas do sistema).
 	Terminal string `json:"terminal"`
 	// SessionMode escolhe o modo do worker: headless (padrão antigo) ou live (CLI aberta no painel).
 	SessionMode string `json:"session_mode,omitempty"`

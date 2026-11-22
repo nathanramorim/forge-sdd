@@ -13,7 +13,22 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestFormatLiveStatus_LeOLogMaisRecente(t *testing.T) {
+type mockTmuxDeliverer struct {
+	captured string
+	err      error
+}
+
+func (m mockTmuxDeliverer) CapturePane(target string) (string, error) {
+	return m.captured, m.err
+}
+func (mockTmuxDeliverer) LoadBuffer(name string, data []byte) error { return nil }
+func (mockTmuxDeliverer) PasteBuffer(name, target string) error     { return nil }
+func (mockTmuxDeliverer) SendKeys(target string, keys ...string) error {
+	return nil
+}
+func (mockTmuxDeliverer) SetPaneTitle(target, title string) error { return nil }
+
+func TestFormatLiveStatus_FallbackLogSemTmux(t *testing.T) {
 	dir := t.TempDir()
 	require.NoError(t, os.MkdirAll(filepath.Join(dir, ".git"), 0o755))
 	// Cria HEAD apontando para feat/80-status para simular git repo sem gastar processo git init
@@ -34,7 +49,7 @@ func TestFormatLiveStatus_LeOLogMaisRecente(t *testing.T) {
 	}
 
 	start := time.Now()
-	out, err := FormatLiveStatusWith(dir, gitFn)
+	out, err := FormatLiveStatusWith(dir, mockTmuxDeliverer{err: os.ErrNotExist}, gitFn)
 	elapsed := time.Since(start)
 
 	require.NoError(t, err)
@@ -72,7 +87,7 @@ func TestFormatLiveStatus_ComTodasTarefasAprovadas(t *testing.T) {
 		return nil, nil
 	}
 
-	out, err := FormatLiveStatusWith(dir, gitFn)
+	out, err := FormatLiveStatusWith(dir, nil, gitFn)
 	require.NoError(t, err)
 	assert.Contains(t, out, "Próximo passo: /archive ou novo /discovery")
 	assert.Contains(t, out, "(nenhum commit recente)")
@@ -96,7 +111,7 @@ func TestFormatRichDashboard(t *testing.T) {
 		return []string{"abc1234 feat: painel vivo implementado"}, nil
 	}
 
-	out, err := FormatRichDashboard(dir, gitFn, nil)
+	out, err := FormatRichDashboard(dir, mockTmuxDeliverer{captured: "linha ativa do painel"}, gitFn, nil)
 	require.NoError(t, err)
 
 	assert.Contains(t, out, "feat/80-status")
@@ -144,7 +159,7 @@ func TestFormatRichDashboard_LimitaTarefasEmFilaGrande(t *testing.T) {
 	itemsJSON.WriteString(`]}`)
 	require.NoError(t, os.WriteFile(filepath.Join(sddDir, "queue.json"), []byte(itemsJSON.String()), 0o644))
 
-	out, err := FormatRichDashboard(dir, nil, nil)
+	out, err := FormatRichDashboard(dir, nil, nil, nil)
 	require.NoError(t, err)
 
 	assert.Contains(t, out, "0% (0/24 tasks)")
