@@ -1,7 +1,7 @@
 # ADR-0026: tmux como opção de interface, não como padrão nem requisito
 
 - **Data:** 2026-11-22
-- **Status:** `proposto`
+- **Status:** `aprovado`
 - **Regras afetadas (IDs da constitution):** `Nenhuma` (nenhum ID criado, alterado ou removido; `ARQ-06` não ganha subcomando)
 - **Autor / Responsável:** Líder (decisão do dono do produto, 22/11/2026: "o tmux continua opcional")
 - **Substitui em parte:** ADR-0006 (D-6), ADR-0007 (D-3) e ADR-0008 (D-3 desta: o modo `live` passa a exigir `terminal: tmux` explícito). Alinha-se à ADR-0015 (o chat orquestra subagentes; a 0015 diz que a 0008 "convive", e convive: a 0026 só muda o que é padrão e o que é opcional) e à ADR-0024 (item 5: tmux é opção de interface).
@@ -29,4 +29,4 @@ As ADR-0006, 0007 e 0008 tornaram o tmux a interface natural do pipeline: `forge
 
 - **Positivas:** quem usa só o chat ou janelas não instala nada; quem usa tmux mantém painéis e `live`; o contrato fica escrito e testável (`TestTmux*`).
 - **Negativas / Trade-offs:** dois caminhos de interface para manter e testar; a instalação assistida do tmux deixa de existir.
-- **Ações de acompanhamento:** marcar nas ADR-0006, 0007 e 0008 que foram substituídas em parte por esta (feito neste PR); revisar as menções ao tmux nas skills de status (pendência do `status.md` da 115); promover esta ADR a `aprovado` com o `[Seguir]` do dono.
+- **Ações de acompanhamento:** marcar nas ADR-0006, 0007 e 0008 que foram substituídas em parte por esta (feito neste PR); revisar as menções ao tmux nas skills de status (pendência do `status.md` da 115); aprovada em 22/11/2026 com o `[Seguir]` do dono.
