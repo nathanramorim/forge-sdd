@@ -36,8 +36,8 @@ Arquivo `internal/scaffold/instalar_skill.go` (e `_test.go`):
 
 - `ListarDestinosInstalacao(projetoAberto string) ([]string, error)`: devolve o projeto aberto e, se houver, os subprojetos com forge (diretórios filhos com `sdd/.sddrc`), ordenados. Sem subprojetos devolve só o projeto aberto (o agente instala sem perguntar).
 - `DisponivelViaHub(projetoAberto, tipo, slug string) (string, bool)`: diz onde a skill ou o plugin já está disponível: no próprio projeto aberto ou no **hub** (o primeiro diretório ancestral com `sdd/.sddrc` que tem a skill ou o plugin instalado em `.agents/skills/<slug>/` ou `.agents/plugins/<slug>/`). Devolve o caminho e `true` quando achar; `false` quando não houver.
-- `InstalarSkill(projetoAberto, destino, slug string, arquivos map[string][]byte) ([]string, error)`: instala em `<destino>/.agents/skills/<slug>/` e devolve os preservados.
-- `InstalarPlugin(projetoAberto, destino, slug string, arquivos map[string][]byte) ([]string, error)`: mesmas regras, grava em `<destino>/.agents/plugins/<slug>/` (caminho único usado pela feat-98-01: `.agents/plugins/diagram-studio/scripts/diagrama.py`). Compartilha o validador e o gravador com `InstalarSkill` (DUP-01); só muda o prefixo.
+- `InstalarSkill(projetoAberto, destino, slug string, arquivos map[string][]byte) (Resultado, error)`: instala em `<destino>/.agents/skills/<slug>/` e devolve `Resultado{Gravados, Preservados []string; DisponivelEm string}`.
+- `InstalarPlugin(projetoAberto, destino, slug string, arquivos map[string][]byte) (Resultado, error)`: mesmas regras, grava em `<destino>/.agents/plugins/<slug>/` (caminho único usado pela feat-98-01: `.agents/plugins/diagram-studio/scripts/diagrama.py`). Compartilha o validador e o gravador com `InstalarSkill` (DUP-01); só muda o prefixo.
 
 ### Origem do plugin e como o conteúdo é obtido
 
@@ -55,7 +55,7 @@ Quem aciona: a skill `diagramas-c4-mermaid` (passo 1 do fluxo B da feat-98-01), 
 
 Regras:
 
-0. **O comando vem do hub (decisão do dono, 22/11/2026):** na esteira, quem aciona a skill é o hub e os subprojetos a herdam. Se `DisponivelViaHub` devolve `true`, **não se instala nos demais**: `skills destinos` informa "já disponível em <caminho>" e o agente não pergunta nem instala. Só quando a skill ou o plugin **não** está disponível (nem no projeto aberto nem em um hub acima) é que se instala, e aí vale a pergunta hub ou subprojeto. Quem abre um subprojeto sozinho, sem hub que tenha a skill, instala nele. A herança é só de leitura: o subprojeto não grava nada no hub.
+0. **O comando vem do hub (decisão do dono, 22/11/2026):** na esteira, quem aciona a skill é o hub e os subprojetos a herdam. Se `DisponivelViaHub` devolve `true`, **não se instala nos demais**, e quem aplica isso é o **domínio**: `InstalarSkill` e `InstalarPlugin` chamam `DisponivelViaHub` no início e, quando já disponível, devolvem sem gravar e sem erro (resultado com o campo `DisponivelEm`), de modo que o handler em `cmd/` só repassa o resultado (ARQ-10): `skills destinos` informa "já disponível em <caminho>" e o agente não pergunta nem instala. Só quando a skill ou o plugin **não** está disponível (nem no projeto aberto nem em um hub acima) é que se instala, e aí vale a pergunta hub ou subprojeto. Quem abre um subprojeto sozinho, sem hub que tenha a skill, instala nele. A herança é só de leitura: o subprojeto não grava nada no hub.
 1. **Opcional por skill:** a função só é chamada para o slug que o usuário escolheu; não há instalação em lote nem implícita.
 2. **Validação do destino (SEG-01/SEG-02):** `destino` precisa ser exatamente um item de `ListarDestinosInstalacao`; `slug` passa por `skills.ValidateSlug`; chaves de `arquivos` são relativas, sem `..` e sem caminho absoluto; o caminho final, resolvido com `EvalSymlinks`, precisa ficar dentro de `destino`; symlink no alvo é recusado.
 3. **Limitada ao projeto aberto:** nunca grava em `~/.claude/` nem fora de `projetoAberto`.
@@ -69,7 +69,7 @@ Em `internal/scaffold/instalar_skill_test.go`:
 - `TestInstalaSkillSoNoProjetoAberto`: instala com `HOME` apontando para um tmp e confirma que nada é gravado em `~/.claude/` nem fora do projeto; destino fora da lista, `slug` com `..`, chave com `..` e symlink para fora retornam erro e não gravam.
 - `TestInstalaPerguntaHubOuSubprojeto`: com forge em dois subprojetos, `ListarDestinosInstalacao` devolve hub e os dois subprojetos (3 itens); sem subprojetos devolve 1 item; instalar num subprojeto grava só nele.
 - `TestInstalaPluginSoNoProjetoAberto`: instala `diagram-studio` com `HOME` num tmp; grava só em `<destino>/.agents/plugins/diagram-studio/` (inclui `scripts/diagrama.py`); nada em `~/.claude/` nem fora do projeto; chave com `..`, caminho absoluto, destino fora da lista e symlink para fora retornam erro e não gravam; arquivo existente é preservado e reportado.
-- `TestInstalaNaoRepeteQuandoHubTem`: com a skill instalada no hub, `DisponivelViaHub` devolve o hub para o projeto e para cada subprojeto; `skills instalar` num subprojeto vira no-op informativo, sem gravar nada; `skills destinos` informa "já disponível em <hub>".
+- `TestInstalaNaoRepeteQuandoHubTem` (em `internal/scaffold`, prova o domínio) e `TestSkillsInstalarNoOpComHub` (em `cmd/forge-sdd`, prova que `skills instalar` apenas repassa o no-op e que `skills destinos` informa "já disponível em <hub>"): com a skill instalada no hub, `DisponivelViaHub` devolve o hub para o projeto e para cada subprojeto; `skills instalar` num subprojeto vira no-op informativo, sem gravar nada; `skills destinos` informa "já disponível em <hub>".
 - `TestInstalaNoSubprojetoQuandoSemHub`: sem a skill no hub (ou sem hub acima), `DisponivelViaHub` devolve `false`, e instalar no subprojeto grava só nele; instalar no hub depois torna os subprojetos "disponíveis" sem gravar neles.
 - `TestInstalaOpcionalPorSkill`: instalar a skill A não cria a skill B; chamar sem escolha (slug vazio) retorna erro e não grava; arquivo pré-existente do usuário em `.agents/skills/<slug>/` permanece intacto e é reportado como preservado; falha no meio não deixa arquivo `.tmp` para trás.
 
@@ -91,8 +91,8 @@ Resultado: o context7 não estava disponível para esta sessão, então a consul
 ## Critérios de Aceitação Executáveis
 
 ```bash
-# 1. Os seis testes existem e passam
-go test ./internal/scaffold -run 'TestInstalaSkillSoNoProjetoAberto|TestInstalaPluginSoNoProjetoAberto|TestInstalaPerguntaHubOuSubprojeto|TestInstalaNaoRepeteQuandoHubTem|TestInstalaNoSubprojetoQuandoSemHub|TestInstalaOpcionalPorSkill' -v
+# 1. Os sete testes existem e passam
+go test ./internal/scaffold ./cmd/forge-sdd -run 'TestSkillsInstalarNoOpComHub|TestInstalaSkillSoNoProjetoAberto|TestInstalaPluginSoNoProjetoAberto|TestInstalaPerguntaHubOuSubprojeto|TestInstalaNaoRepeteQuandoHubTem|TestInstalaNoSubprojetoQuandoSemHub|TestInstalaOpcionalPorSkill' -v
 
 # 2. Reuso da escrita segura, sem gravação direta
 grep -n "WriteFileSafe\|writeFileSafe" internal/scaffold/instalar_skill.go
