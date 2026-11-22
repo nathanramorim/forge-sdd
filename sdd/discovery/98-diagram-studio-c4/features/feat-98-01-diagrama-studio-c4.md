@@ -19,11 +19,11 @@ A escolha é feita via `AskUserQuestion` no início de cada uso da skill, antes 
 
 ## O que já existe
 
-| Procurei | Onde | Achei | Decisão |
-|---|---|---|---|
-| Motor atual | `~/.claude/skills/diagramas-c4-mermaid/SKILL.md` | `renderizar-mermaid.py` via `mermaid-cli` + Chrome | Manter como opção A |
-| diagram-studio | `github.com/nathanramorim/diagram-studio` | plugin Claude Code com `scripts/diagrama.py` e `skills/diagrama-studio/SKILL.md` | Integrar como opção B |
-| Skill existente | `~/.claude/skills/diagramas-c4-mermaid/scripts/renderizar-mermaid.py` | Script Python funcional | Preservar sem alteração |
+| Procurei | Onde | Achei | Decisão | Justificativa |
+|---|---|---|---|---|
+| Motor atual | `~/.claude/skills/diagramas-c4-mermaid/SKILL.md` | `renderizar-mermaid.py` via `mermaid-cli` + Chrome | Reusar | Mantém o fluxo Mermaid que renderiza nativamente no GitHub, VS Code e Obsidian. |
+| diagram-studio | `github.com/nathanramorim/diagram-studio` | plugin Claude Code com `scripts/diagrama.py` e `skills/diagrama-studio/SKILL.md` | Estender | A skill existente ganha o fluxo alternativo sem duplicar a renderização Mermaid. |
+| Skill existente | `~/.claude/skills/diagramas-c4-mermaid/scripts/renderizar-mermaid.py` | Script Python funcional | Reusar | O script atende à opção Mermaid e fica inalterado conforme o escopo. |
 
 ## Decisões do projeto aplicadas
 
