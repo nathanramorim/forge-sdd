@@ -40,3 +40,5 @@ Procedimentos operacionais para cumprir `FLX-01..03`, `FLX-05..08` e `GOV-01..03
 - **Fim de Onda e Release Beta (`GOV-03`, `FLX-07`):**
   - No fechamento (`/archive` ou conclusão da onda), registre erros evitáveis em `sdd/memory/lessons.md` e proponha Auto-Skills para padrões repetidos (`forge skills propose`).
   - Em versões `-beta`, documente os destaques reais e prévias de comandos em `sdd/releases/history.md`, publique a tag na própria branch da feature e mantenha o PR aberto até a promoção estável.
+    - Redação das notas: o título em negrito diz o ganho da pessoa ("Agora você…", "Acabou…"), sem PR, fix, arquivo ou flag; o detalhe técnico vai no fim, entre parênteses, fora do negrito.
+    - Tom com emoção sem exagero, sem marca de terceiros e sem prometer o que o código não cumpre.
