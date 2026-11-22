@@ -22,7 +22,10 @@ mencionado em vereditos do Reviewer ou saídas do forge brief.
 Sem argumentos: lista todos os IDs ordenados.
 Com argumentos: exibe apenas os IDs solicitados.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		dir, _ := cmd.Flags().GetString("dir")
+		dir, err := cmd.Flags().GetString("dir")
+		if err != nil {
+			return fmt.Errorf("ler flag --dir: %w", err)
+		}
 		if dir == "" {
 			dir = "."
 		}
@@ -40,11 +43,11 @@ Com argumentos: exibe apenas os IDs solicitados.`,
 		}
 
 		ids, ausentes, err := gate.SelecionaIDs(allIDs, args)
-		if err != nil {
-			return err
-		}
 		if len(ausentes) > 0 {
 			fmt.Fprintf(cmd.ErrOrStderr(), "ID(s) não encontrado(s) na Constituição: %s\n", strings.Join(ausentes, ", "))
+		}
+		if err != nil {
+			return fmt.Errorf("consultar IDs da Constituição: %w", err)
 		}
 
 		if asJSON {
