@@ -1,8 +1,8 @@
-# Status — 115-obsolescencia-do-tmux
+# Status — 115 pipeline e seleção de modelos
 
-**Status:** fix 115-01 implementada na branch `fix/115-01-workers-por-iniciativa`; aguardando revisão do PR.
-**Decisão do dono (21/11/2026):** o tmux não é mais usado; o chat orquestra e escala os subagentes.
-**Entrega:** o modo `sessions`/tmux sai do produto; `deliver.go` e `status_live.go` são adaptados; a configuração `terminal: tmux` recebe mensagem de transição; doc e release acompanham.
-**Base:** ADR-0015 (modo chat) passa a aceita; ADR-0008 (sessões no tmux) é substituída.
-**Próximo passo:** revisar o PR do fix 115-01; depois seguir o Gate 1 e `/split-features` da iniciativa principal (já há plano com 8 tasks em 3 ondas).
-**A confirmar:** transição de uma versão (aviso) ou corte direto; se `deliver.go` serve o modo `worker` headless.
+**Status:** Gate 1 aprovado; gates passaram; jobs 115 e fix-115-01 enfileirados. Fix 115-01 na branch `fix/115-01-workers-por-iniciativa`; 115-02 (remoção do tmux) no PR #224 em draft.
+**Decisão do dono (21/11/2026):** o tmux não é mais usado; o chat orquestra e escala os subagentes. Seleção de modelo por complexidade (tiers, 115-03).
+**Fluxo:** spec/plano aprovados → Builder com tier por task → Camada A/PR → Reviewer; workers escopados à iniciativa.
+**Base:** ADR-0004, ADR-0005, ADR-0014, ADR-0015 aceita; ADR-0008 substituída; ADR-0024 proposta.
+**Próximo passo:** Reviewer no PR #224 e no fix 115-01; Builder segue as features 115-03.
+**A confirmar:** uma nota anterior dizia "tmux é opcional", o que contradiz a decisão acima; confirmar qual vale. Corte direto ou transição de uma versão para `terminal: tmux`.

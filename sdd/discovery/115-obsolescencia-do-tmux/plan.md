@@ -1,37 +1,30 @@
-# Plano — Iniciativa 115 (Obsolescência do tmux)
+# Plano — Iniciativa 115 (pipeline e roteamento de modelos)
 
-Ordem: primeiro o levantamento (o que depende de tmux de forma não óbvia), depois a ADR, depois a remoção, e por último a documentação e a nota de release. Até 7 tasks por onda.
+A prioridade é manter o pipeline de agentes e atribuir o modelo certo por complexidade. O tmux é opcional e não bloqueia estas ondas. Limite de 7 tasks por onda.
 
-## Onda 1 — Decidir e levantar
-
-| # | Task | Depende de | Rules |
-|---|---|---|---|
-| 1.1 | **ADR-0024: o tmux sai; o chat é o único caminho de orquestração.** Fecha a ADR-0015 como aceita e substitui a ADR-0008. Diz o que sai, o que fica e como é a transição. | — | `FLX-05`, `GOV-01` |
-| 1.2 | **Levantamento de acoplamento:** ler `deliver.go`, `worker.go`, `status_live.go` e `preflight.go` e escrever, em `acoplamento.md`, o que quebra sem tmux e o que não depende dele. Fecha as dúvidas do `## A confirmar`. | — | `DUP-01` |
-
-## Onda 2 — Remover
+## Onda 1 — Contratos
 
 | # | Task | Depende de | Rules |
 |---|---|---|---|
-| 2.1 | Remover `tmux.go`, `tmuxinstall.go` e os três testes de tmux. Adaptar `preflight.go` e `menu.go` ao modo chat. | 1.2 | `COD-04`, `ARQ-01` |
-| 2.2 | Adaptar `deliver.go` e `status_live.go` ao que sobra do levantamento: sem `exec.Command("tmux")`, mantendo as fontes que não são tmux. | 1.2 | `COD-04`, `TST-05` |
-| 2.3 | Configuração: `terminal: tmux` recusado com mensagem de transição; `auto` e `native` deixam de existir como escolha se não houver terminal a escolher. Teste negativo `TestTerminalTmuxRecusado`. | 2.1 | `SEG-01`, `COD-03` |
+| 1.1 | ADR-0024 registra workers por iniciativa, política de complexidade/modelo e tmux como opção. | — | FLX-05, GOV-01 |
+| 1.2 | Fix 115-01: worker filtra jobs por iniciativa, preserva review/rework e encerra ao drenar. | 1.1 | ARQ-01, DUP-01, TST-03 |
+| 1.3 | feat-115-03-01: contratos de tier por task e configuração validada, mantendo feat-90-07 como fallback. | 1.1 | ARQ-11, SEG-01, DUP-01 |
 
-## Onda 3 — Fechar a frente
+## Onda 2 — Despacho de modelos
 
 | # | Task | Depende de | Rules |
 |---|---|---|---|
-| 3.1 | `forge doctor` deixa de falar de tmux e passa a diagnosticar o que o modo chat precisa (agente de IA configurado, barramento legível). | 2.3 | `ARQ-01` |
-| 3.2 | Documentação: README, `docs/`, `docs/comandos.md`, `/tutorial` e a skill `sdd-operacao`. Seção "o que saiu" para quem procura. | 2.3 | `COD-05`, `GOV-04` |
-| 3.3 | Nota de release na `history.md` e checklist de versão: a remoção entra numa **beta** antes de qualquer estável (`RN-4`). | 3.2 | `FLX-07` |
+| 2.1 | feat-115-03-02: dispatch propaga tier e worker resolve modelo pela CLI antes do fallback por papel; mantém Reviewer após Camada A/PR. | 1.3 | FLX-01, SEG-01, SEG-03, TST-03, TST-05 |
+
+## Onda 3 — Orquestração e validação
+
+| # | Task | Depende de | Rules |
+|---|---|---|---|
+| 3.1 | feat-115-03-03: atualizar skills comuns com rubrica, classificação por task e Advisor condicional. | 1.3 | COD-01, COD-05, DUP-01, FLX-01 |
+| 3.2 | Validar roteamento multi-CLI e handoff Builder→Reviewer após Camada A; manter tmux opcional. | 2.1, 3.1 | FLX-03, FLX-05, TST-03, TST-05 |
 
 ## Caminho crítico
 
-`1.2 → 2.1 → 2.3 → 3.1/3.2 → 3.3`
+1.1 → (1.2 || 1.3) → 2.1 → 3.1 → 3.2
 
-A 1.1 (ADR) pode correr em paralelo com 1.2, mas precisa estar aceita antes do merge da 2.x, porque muda arquitetura (`GOV-01`).
-
-## Observações de risco
-
-- **2.2 é a task de risco:** `deliver.go` pode estar no caminho do modo `worker` headless, que não é tmux. Por isso a 1.2 vem antes: sem o levantamento, a remoção cega quebra o worker.
-- **Transição:** a recomendação é a versão de aviso (uma beta com `terminal: tmux` ainda aceito + aviso), e a remoção do campo na beta seguinte. Confirmar no Gate 1.
+A retirada do tmux pode ser planejada como entrega separada, depois que a continuidade e a seleção de modelos estiverem entregues.

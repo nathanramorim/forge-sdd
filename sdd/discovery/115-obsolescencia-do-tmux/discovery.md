@@ -1,75 +1,45 @@
-# Discovery — 115 Obsolescência do tmux (o chat orquestra; as sessões de terminal saem)
+# Discovery — 115 Pipeline contínuo e seleção de modelos (tmux opcional)
+
+## Prioridade atualizada pelo dono
+
+O principal deve continuar coordenando os agentes. PM-Architect classifica complexidade e consulta um Advisor de raciocínio apenas quando há incerteza arquitetural relevante. O split marca o tier do Builder por task. Tmux passa a ser opcional e não bloqueia esta entrega.
 
 ## Problema
 
-O forge-sdd nasceu com o pipeline em **três sessões de terminal** abertas em painéis do tmux: Discovery, Builder e Reviewer, cada uma um processo com sua CLI, conversando pelo barramento em `.forge/runtime/`. Esse desenho tem **1.585 linhas de código** só de tmux (abertura de painéis, instalador por gerenciador de pacotes, despachante que injeta prompts e lê a tela).
-
-A **ADR-0015** já registrou o caminho novo: o pipeline acontece **no mesmo chat**, com cada papel como líder que coordena subagentes, e o Go como dono do laço. Com isso, o tmux deixa de ser necessário — ele era o transporte das sessões, e as sessões viraram subagentes.
-
-**A decisão do dono (21/11/2026):** *"a verdade é que não usa mais; agora quem faz toda a orquestração é o próprio chat e escala os subagentes."*
-
-## Para quem
-
-- **O dono**, que não quer instalar nem manter tmux, e quer o fluxo no chat.
-- **Quem instala o forge hoje em Windows**, onde o tmux não existe nativo e o modo `auto` já cai para janelas do sistema.
-- **Quem mantém o projeto**, que carrega três implementações paralelas de terminal (tmux, janelas nativas, Windows Terminal) para o mesmo objetivo.
-
-## Estado atual (levantado no código)
-
-| Peça | O que faz | Tamanho |
-|---|---|---|
-| `internal/pipeline/tmux.go` | monta o plano de janelas/painéis e abre o tmux | 333 linhas |
-| `internal/pipeline/tmuxinstall.go` | detecta gerenciador (brew, apt-get, dnf, pacman, apk, zypper) e instala o tmux | 292 linhas |
-| `internal/pipeline/deliver.go` | despachante: `tmux load-buffer`, `paste-buffer`, `capture-pane` para injetar prompt e ler a tela | usa `exec.Command("tmux", ...)` |
-| `internal/pipeline/status_live.go` | painel ao vivo, com o tmux como uma das fontes | consome tmux |
-| `internal/pipeline/preflight.go` | avisa quando o tmux falta e sugere `--terminal native` | ~10 linhas |
-| `cmd/forge-sdd/menu.go` | `terminalLabel`: "no tmux (3 painéis)" / "em janelas do sistema" | ~15 linhas |
-| **Testes** | `tmux_test.go` (437), `tmuxinstall_test.go` (295), `tmux_real_test.go` (228) | 960 linhas |
-
-Configuração existente: `terminal: auto | tmux | native` em `forge.json`; `auto` já cai para `native` quando o tmux falta.
+O projeto permite fixar modelos por papel, mas o job do Builder não carrega modelo por task. A sessão de Discovery não orienta quando uma demanda bem definida pode seguir com um modelo simples, nem quando usar um modelo de raciocínio. Assim, o Builder recebe apenas a configuração estática do papel.
 
 ## Jornada desejada
 
-1. `forge init` e `forge` não perguntam sobre terminal nem oferecem instalar tmux.
-2. O pipeline roda no chat: o `/implementar` e o `/revisar` escalam subagentes, sem abrir janela.
-3. Quem tiver `terminal: tmux` gravado recebe um aviso claro de que o modo saiu, com o que fazer — não um erro seco.
-4. O `forge doctor` não menciona tmux; menciona o que de fato importa para o modo chat.
+1. O agente principal aciona PM-Architect com brief e contexto.
+2. PM-Architect classifica cada task: simples e clara usa tier rápido; maior complexidade usa tier equilibrado; alta incerteza arquitetural pode chamar Advisor no tier de raciocínio.
+3. O split registra complexidade, justificativa e tier recomendado em cada task. Para Claude, Haiku é o padrão das tasks bem definidas, Sonnet atende tasks mais complexas e Opus fica como Advisor.
+4. Depois de spec/plano aprovados e gates satisfeitos, o job do Builder recebe o tier escolhido e o worker resolve o modelo conforme a CLI configurada.
+5. O Builder implementa e valida o código. O Reviewer só recebe o trabalho após Camada A e registro do PR.
+6. Cada worker atende somente a iniciativa para a qual foi iniciado, inclusive o ciclo de review/rework, e encerra quando ela drena. Jobs ativos concluem normalmente.
+
+**Interpretação de “enviar com o código pronto e validado”:** o handoff após código validado é para o Reviewer/PR. O Builder continua recebendo a spec aprovada antes de escrever o código; o fluxo atual já executa Camada A antes de enfileirar o Reviewer.
 
 ## Escopo
 
-**Dentro:**
-- Descontinuar o modo `sessions`/tmux como fluxo de produto (ADR substituindo a 0008 e fechando a 0015 como decidida).
-- Remover `tmux.go`, `tmuxinstall.go` e os testes correspondentes; adaptar `deliver.go` e `status_live.go` ao que sobra.
-- Migrar a configuração: `terminal: tmux` deixa de ser aceito, com mensagem de transição.
-- Atualizar README, `docs/`, `docs/comandos.md` e `/tutorial`, que hoje ensinam a instalar tmux.
-- Uma nota de release explicando a saída e o que fazer.
+**Dentro:** rubrica de complexidade; chamada condicional ao Advisor; tiers neutros de CLI; tier registrado na task e no job; resolução do modelo no worker; workers escopados por iniciativa; handoff validado ao Reviewer.
 
-**Fora:**
-- Remover o barramento (`.forge/runtime/`), que continua sendo o estado dos jobs no modo chat.
-- Mexer no modo `worker` headless, se ele não depender de tmux (a confirmar no critério).
-- Reimplementar o despachante de prompts por outro transporte: no modo chat ele não existe (o chat entrega o prompt ao subagente).
+**Opcional:** retirar tmux. A remoção pode seguir em outra entrega e não bloqueia o pipeline ou o roteamento de modelos.
 
-## Riscos
-
-- **R1 — Perda de quem usa o modo sessões.** Mitigação: uma versão de transição em que `terminal: tmux` avisa e não é removido ainda; só remove na versão seguinte.
-- **R2 — `deliver.go` e `status_live.go` acoplados ao tmux de forma não óbvia.** Mitigação: o critério lista tudo que importa `tmux`, e o teste prova que o binário não executa `tmux` em nenhum caminho.
-- **R3 — Documentação ensinando tmux espalhada.** Mitigação: um grep no critério (`grep -ri tmux docs/ README.md`) com lista fechada.
+**Fora:** instalar CLIs/modelos, alterar contas dos provedores, buscar catálogos pela rede ou aplicar modelo de raciocínio a todo trabalho.
 
 ## Regras de negócio
 
-- **RN-1** O produto tem **um** caminho de orquestração: o chat com subagentes. Modos alternativos de terminal saem; não são mantidos "por garantia".
-- **RN-2** Configuração antiga não quebra em silêncio: `terminal: tmux` recebe aviso explícito com o que fazer.
-- **RN-3** A saída é registrada em ADR, porque muda a arquitetura (ADR-0008 sai, ADR-0015 entra como decidida).
-- **RN-4** Nenhuma versão estável publicada com o tmux como obrigatório: a remoção entra numa beta primeiro.
+- Tasks novas registram complexidade, justificativa e tier do Builder.
+- Tasks claras usam o tier rápido; tier de raciocínio é reservado ao Advisor quando houver alta incerteza.
+- O job carrega o tier; a CLI resolve seu próprio modelo. Nunca usar silenciosamente o nome de modelo de outro provedor.
+- Jobs antigos sem tier continuam usando o modelo fixo por papel ou inherit.
+- O Advisor não escreve código nem substitui Gate 1.
+- O pipeline em execução não é interrompido para aplicar a política nova.
 
 ## Métricas de sucesso
 
-- `grep -ri 'tmux' internal/ cmd/` retorna **zero** ocorrências fora de mensagem de transição.
-- `go test ./...` verde sem `tmux_real_test.go` (que exige tmux instalado).
-- Um projeto novo faz `forge init` → `forge` → pipeline no chat, **sem instalar nada de terminal**.
+Jobs novos registram tier e modelo executado; tasks simples não usam tier de raciocínio sem justificativa; jobs de outra iniciativa permanecem intactos; Reviewer só recebe código após Gate A.
 
 ## A confirmar
 
-- [ ] `deliver.go` e o modo `worker` headless dependem de tmux, ou só o modo `live`? (levantar no `criteria.md`)
-- [ ] A transição fica **uma** versão (aviso) ou corta direto?
-- [ ] O `forge doctor` ganha o quê no lugar do aviso de tmux?
+A interpretação do handoff após código pronto está registrada na jornada e aguarda Gate 1.
