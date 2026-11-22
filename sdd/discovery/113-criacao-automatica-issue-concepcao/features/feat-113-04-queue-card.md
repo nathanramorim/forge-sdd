@@ -31,6 +31,10 @@ set -o pipefail
 go build ./... && go vet ./...
 go test ./cmd/forge-sdd -run 'TestQueueCardDesligadoCustoZero|TestQueueCardGitHubCriaIssueEGravaEvidencia|TestQueueCardIdempotenteNaoDuplica|TestQueueCardRegistraRetornoMCP|TestQueueCardDryRunNaoCriaNemGrava|TestQueueCardFalhaExternaViraAvisoSemErroFatal|TestQueueCardRecusaCamposInvalidos'
 go test ./internal/pipeline -run 'TestConcepcaoCustoZeroQuandoGestorNaoConfigurado|TestConcepcaoCriaIssueEGravaCardEvidence|TestConcepcaoFalhaExternaViraAvisoSemBloquearSpec'
+
+# Os testes citados existem de verdade (sem isso o -run passa vazio):
+test "$(go test ./cmd/forge-sdd -list 'TestQueueCardDesligadoCustoZero|TestQueueCardGitHubCriaIssueEGravaEvidencia|TestQueueCardIdempotenteNaoDuplica|TestQueueCardRegistraRetornoMCP|TestQueueCardDryRunNaoCriaNemGrava|TestQueueCardFalhaExternaViraAvisoSemErroFatal|TestQueueCardRecusaCamposInvalidos' | grep -c '^Test')" -ge 7   # pelo menos 7 (go test -run sem correspondência sai com 0)
+test "$(go test ./internal/pipeline -list 'TestConcepcaoCustoZeroQuandoGestorNaoConfigurado|TestConcepcaoCriaIssueEGravaCardEvidence|TestConcepcaoFalhaExternaViraAvisoSemBloquearSpec' | grep -c '^Test')" -ge 3   # pelo menos 3 (go test -run sem correspondência sai com 0)
 ```
 Casos: desligado não chama runner, não grava, não imprime erro; GitHub cria e grava `card-evidence.json`; segunda execução reaproveita; `--dry-run` não executa `gh issue create` nem toca o disco (ARQ-05); falha do `gh` sai com código 0 e aviso (RN-5); `--provider/--id/--url/--feature` inválidos (controle, tamanho, URL não http(s), provider fora de `supported`) recusados (SEG-01, negativo).
 

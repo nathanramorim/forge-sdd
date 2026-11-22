@@ -36,6 +36,11 @@ go test ./internal/gate -run 'TestCheckP24'
 go test ./internal/scaffold -run 'TestReferencesConcepcaoCitamForgeQueueCard|TestReferencesConcepcaoNaoPressupoemForgeUp'
 git diff --quiet origin/main -- .agents/skills/sdd-concepcao/SKILL.md
 grep -F 'forge queue card' .agents/skills/sdd-concepcao/references/discovery.md .agents/skills/sdd-concepcao/references/nova-feature.md .agents/skills/sdd-concepcao/references/novo-fix.md
+
+# Os testes citados existem de verdade (sem isso o -run passa vazio):
+test "$(go test ./internal/scaffold -list 'TestContextBudget_ConjuntoDeLeituraPorComando|TestContextBudget_ConstitutionDoScaffoldDentroDoLimite|TestGoldenInit' | grep -c '^Test')" -ge 3   # pelo menos 3 (go test -run sem correspondência sai com 0)
+test "$(go test ./internal/gate -list 'TestCheckP24' | grep -c '^Test')" -ge 1   # pelo menos 1 (go test -run sem correspondência sai com 0)
+test "$(go test ./internal/scaffold -list 'TestReferencesConcepcaoCitamForgeQueueCard|TestReferencesConcepcaoNaoPressupoemForgeUp' | grep -c '^Test')" -ge 2   # pelo menos 2 (go test -run sem correspondência sai com 0)
 ```
 Casos: as 3 references citam `forge queue card` e o caso "gestor desligado: nada a fazer"; nenhuma menciona `forge up` como pré-requisito (negativo); `SKILL.md` idêntico à `main`; goldens regenerados e coerentes com os templates.
 

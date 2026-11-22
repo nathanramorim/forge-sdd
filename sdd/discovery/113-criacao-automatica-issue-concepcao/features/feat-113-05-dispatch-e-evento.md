@@ -31,6 +31,10 @@ set -o pipefail
 go build ./... && go vet ./...
 go test ./internal/pipeline -run 'TestDispatchCarregaCardEvidenceOpcionalQuandoPresente|TestDispatchSemEvidenciaComCardOpcionalNaoBloqueia|TestDispatchEvidenciaInvalidaComCardOpcionalViraAviso|TestDispatchRequireExistingCardContinuaBloqueando|TestEmiteSpecAbertaSemModuloEhNoOp|TestEmiteSpecAbertaComModuloLevaIssue'
 go test ./internal/pipeline -run 'TestDispatch'
+
+# Os testes citados existem de verdade (sem isso o -run passa vazio):
+test "$(go test ./internal/pipeline -list 'TestDispatchCarregaCardEvidenceOpcionalQuandoPresente|TestDispatchSemEvidenciaComCardOpcionalNaoBloqueia|TestDispatchEvidenciaInvalidaComCardOpcionalViraAviso|TestDispatchRequireExistingCardContinuaBloqueando|TestEmiteSpecAbertaSemModuloEhNoOp|TestEmiteSpecAbertaComModuloLevaIssue' | grep -c '^Test')" -ge 6   # pelo menos 6 (go test -run sem correspondência sai com 0)
+test "$(go test ./internal/pipeline -list 'TestDispatch' | grep -c '^Test')" -ge 1   # pelo menos 1 (go test -run sem correspondência sai com 0)
 ```
 Casos: evidência válida preenche `job.Card` com `require_existing_card: false`; ausente não bloqueia; inválida ou vencida não bloqueia nesse modo (negativo) e `require_existing_card: true` segue bloqueando como hoje; evento sem módulo ativo faz zero chamadas; com módulo (fake) leva número, URL e título e não duplica o cartão.
 

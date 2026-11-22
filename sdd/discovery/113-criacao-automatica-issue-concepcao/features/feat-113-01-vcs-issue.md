@@ -30,6 +30,9 @@ set -o pipefail
 go build ./... && go vet ./...
 go test ./internal/vcs -run 'TestGitHubCriarIssueComDescricaoComercial|TestGitHubProcurarIssueAbertaIdempotente|TestNenhumCriarIssueRetornaSemPR|TestGitHubCriarIssueErroDoGh|TestGitHubCriarIssueRecusaTituloVazio|TestGitHubProcurarIssueSaidaJSONInvalida'
 go test ./internal/vcs
+
+# Os testes citados existem de verdade (sem isso o -run passa vazio):
+test "$(go test ./internal/vcs -list 'TestGitHubCriarIssueComDescricaoComercial|TestGitHubProcurarIssueAbertaIdempotente|TestNenhumCriarIssueRetornaSemPR|TestGitHubCriarIssueErroDoGh|TestGitHubCriarIssueRecusaTituloVazio|TestGitHubProcurarIssueSaidaJSONInvalida' | grep -c '^Test')" -ge 6   # pelo menos 6 (go test -run sem correspondência sai com 0)
 ```
 Casos: sucesso (argv `gh issue create --title ... --body ...`, `Dir` fixo, sem shell); idempotência (`gh issue list --state open --search ... --json number,url,title` com título base ou `] <base>` devolve a issue existente sem criar); `nenhum` devolve `ErrSemPR` sem chamar o runner; erro do `gh` propagado; título vazio recusado (negativo); JSON inválido ou campo fora do esquema recusado (SEG-01). Os testes de PR existentes continuam passando.
 

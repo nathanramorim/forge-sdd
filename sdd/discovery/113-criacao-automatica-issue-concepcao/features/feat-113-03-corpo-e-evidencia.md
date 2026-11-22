@@ -34,6 +34,9 @@ set -o pipefail
 go build ./... && go vet ./...
 go test ./internal/pipeline -run 'TestCorpoIssueExtraiDescricaoDeNegocio|TestCorpoIssueMascaraSegredosEAnsi|TestCorpoIssueSemCaminhoAbsoluto|TestCorpoIssueSemDescricaoDeNegocioFalha|TestGravaCardEvidenceAtomico|TestGravaCardEvidenceIdempotenteReaproveitaExistente|TestGravaCardEvidenceRecusaSymlinkEFora|TestGravaCardEvidenceCompativelComLoadEvidence'
 go test ./internal/pipeline ./internal/gate
+
+# Os testes citados existem de verdade (sem isso o -run passa vazio):
+test "$(go test ./internal/pipeline -list 'TestCorpoIssueExtraiDescricaoDeNegocio|TestCorpoIssueMascaraSegredosEAnsi|TestCorpoIssueSemCaminhoAbsoluto|TestCorpoIssueSemDescricaoDeNegocioFalha|TestGravaCardEvidenceAtomico|TestGravaCardEvidenceIdempotenteReaproveitaExistente|TestGravaCardEvidenceRecusaSymlinkEFora|TestGravaCardEvidenceCompativelComLoadEvidence' | grep -c '^Test')" -ge 8   # pelo menos 8 (go test -run sem correspondência sai com 0)
 ```
 Casos: corpo só com título, descrição de negócio e link relativo; token/segredo mascarado, ANSI e controle removidos (SEG-05/08); caminho absoluto nunca aparece; spec sem a seção falha com erro claro (negativo); symlink ou caminho fora do projeto recusado (SEG-02); evidência existente é reaproveitada sem reescrever (RN-4); o arquivo gravado passa em `loadEvidence`.
 
