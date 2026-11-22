@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "chave_conteudo": "5c31f5a68f386470",
-  "versao_historico": "68d654a",
+  "chave_conteudo": "293ade65bacd6eaa",
+  "versao_historico": "af3739c",
   "versoes": [
     {
       "versao": "5.0.0",
@@ -57,10 +57,6 @@
       "canal": "beta",
       "titulo": "O CI Sai do Caminho, a Revisão Vem Antes e Cada Feature Tem o Seu PR (Beta)",
       "itens": [
-        {
-          "titulo": "Agora a LP só vai ao ar quando você manda.",
-          "texto": "Antes, cada push publicava a página; agora o deploy é um comando que regera, confere e publica, e avisa quando a LP está desatualizada (`scripts/lp-deploy.sh`, com `--dry-run` e `--status`; o workflow `Deploy LP` ficou só manual)."
-        },
         {
           "titulo": "Agora você escolhe o tmux de volta.",
           "texto": "O padrão continua sendo as janelas do sistema, mas com `--terminal tmux` ou `terminal: tmux` no `forge.json`, o `forge up` abre as três sessões em tmux. Sem o tmux instalado, ele avisa e usa as janelas, sem erro (o modo `live` só vale com o tmux; `--dry-run` só imprime)."
