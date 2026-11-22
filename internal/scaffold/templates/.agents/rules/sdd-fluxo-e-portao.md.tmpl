@@ -29,6 +29,7 @@ Procedimentos operacionais para cumprir `FLX-01..03`, `FLX-05..08` e `GOV-01..03
   - O parecer deve ser emitido em JSON contendo `arquivo`, `linha` e `evidencia` para qualquer violação apontada, e submetido via `forge queue review`.
 - **Camada C e Pull Request (`FLX-03`):**
   - O Líder consolida o status para o humano e preenche o PR seguindo `.github/pull_request_template.md`.
+  - **Liberado para o CI (fix-106-10):** valide na máquina primeiro. `scripts/ci-local.sh` roda build, vet, testes, lint e cross-compile e grava o selo `.forge/runtime/ci-local.json` (`head_sha`); commit novo invalida o selo. O PR fica em draft; `gh pr ready` exige parecer e selo do HEAD. O GitHub Actions roda uma vez, em `ready_for_review` (ou `workflow_dispatch`); push não dispara CI. Nova rodada: volte a draft e marque pronto.
 
 ## 3. ADRs, Exceções Temporárias, Fim de Onda e Releases (`FLX-05`, `FLX-07`, `GOV-01`, `GOV-02`, `GOV-03`)
 

@@ -218,6 +218,20 @@ def formatar_tabela(linhas):
     return "\n".join(saida)
 
 
+def runs_por_dia_evento(runs):
+    """Conta execuções por dia (UTC) e por evento; só olha `workflow_runs`."""
+    contagem = {}
+    if isinstance(runs, dict):
+        for run in runs.get("workflow_runs") or []:
+            if not isinstance(run, dict):
+                continue
+            dia = str(run.get("created_at") or "")[:10] or "(sem data)"
+            evento = str(run.get("event") or "(sem evento)")
+            contagem.setdefault(dia, {})
+            contagem[dia][evento] = contagem[dia].get(evento, 0) + 1
+    return contagem
+
+
 def relatorio(uso, runs, teto_gasto=ALERTA_GASTO_PADRAO, acoes_por_uso=0):
     """Monta o relatório completo, com as duas fontes e a diferença."""
     jobs = normalizar_runs(runs)
@@ -275,6 +289,14 @@ def relatorio(uso, runs, teto_gasto=ALERTA_GASTO_PADRAO, acoes_por_uso=0):
         texto.append("Estados à parte (não contam minutos):")
         for estado, n in sorted(fora.items()):
             texto.append("  %-10s %d job(s)" % (estado, n))
+
+    por_dia = runs_por_dia_evento(runs)
+    if por_dia:
+        texto.append("")
+        texto.append("runs por dia por evento:")
+        for dia in sorted(por_dia):
+            partes = ", ".join("%s=%d" % (e, n) for e, n in sorted(por_dia[dia].items()))
+            texto.append("  %s  %s" % (dia, partes))
 
     # Métrica normalizada: por PR mesclado e por push, quando o chamador informa.
     texto.append("")

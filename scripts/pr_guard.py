@@ -11,6 +11,7 @@ Uso:
 
 Regras (RN-7, SEG-01, SEG-03, FLX-08):
 - `gh pr create`: permitido somente com `--draft` ou `-d`.
+- `gh pr ready` (e `az repos pr update --draft false`) exige também o selo de `scripts/ci-local.sh` do HEAD.
 - `gh pr ready` e `gh pr merge`: bloqueados sem veredito `conforme` válido para o HEAD atual.
 - `gh pr merge`: bloqueado quando a base do PR não é a principal. Um PR com base em outra branch
   entra por squash e deixa os commits de cima órfãos — o arquivo some da principal (feat-106-24d).
@@ -39,6 +40,10 @@ RE_CTRL = re.compile(r"[\x00-\x1f\x7f-\x9f]")
 AVISO_COBERTURA = (
     "Nota: pr_guard.py vale só no Claude Code; nos outros agentes valem os passos dos comandos "
     "e o job 'pronto?' da pipeline."
+)
+MSG_SELO = (
+    "bloqueado (fix-106-10): '{cmd}' exige o selo do CI local para o HEAD atual. "
+    "Rode scripts/ci-local.sh (grava .forge/runtime/ci-local.json) e tente de novo."
 )
 ENV_ASSIGN_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*=.*$")
 WRAPPERS_COM_ARGS = {"sudo", "env", "command", "builtin", "nohup", "time", "nice"}
@@ -177,6 +182,23 @@ def veredito_valido(arq, head):
     if not isinstance(sha, str) or not RE_SHA.match(sha):
         return False
     return bool(head) and (head.startswith(sha) or sha.startswith(head))
+
+
+def selo_local_valido(raiz, head_arg=None):
+    """Confere o selo de scripts/ci-local.sh (.forge/runtime/ci-local.json) para o HEAD atual."""
+    head = head_arg.strip().lower() if isinstance(head_arg, str) and head_arg.strip() else head_do_git(raiz)
+    if not head or not RE_SHA.match(head):
+        return False
+    try:
+        dados = json.loads((Path(raiz) / ".forge" / "runtime" / "ci-local.json").read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return False
+    if not isinstance(dados, dict):
+        return False
+    sha = dados.get("head_sha")
+    if not isinstance(sha, str) or not RE_SHA.match(sha):
+        return False
+    return head.startswith(sha) or sha.startswith(head)
 
 
 def tem_veredito_conforme(raiz, veredito_arg=None, head_arg=None):
@@ -337,7 +359,7 @@ def extrair_subcomando_az_pr(tokens):
     return None
 
 
-def avaliar_segmento(seg, veredito_ok, raiz="."):
+def avaliar_segmento(seg, veredito_ok, raiz=".", selo_ok=None):
     """Retorna None se permitido, ou mensagem de erro caso bloqueado."""
     tokens = desempacotar_wrappers(seg)
     if not tokens:
@@ -359,6 +381,8 @@ def avaliar_segmento(seg, veredito_ok, raiz="."):
                     f"bloqueado (RN-7): 'gh pr {acao}' exige veredito 'conforme' válido para o SHA do HEAD atual. "
                     f"{AVISO_COBERTURA}"
                 )
+            if acao == "ready" and selo_ok is not None and not selo_ok():
+                return MSG_SELO.format(cmd="gh pr ready") + f" {AVISO_COBERTURA}"
             if acao == "merge":
                 # A base do PR precisa ser a principal: um PR com base em outra branch entra
                 # por squash e deixa os commits de cima órfãos — o arquivo some da principal.
@@ -397,6 +421,8 @@ def avaliar_segmento(seg, veredito_ok, raiz="."):
                     "bloqueado (RN-7): 'az repos pr update' para tirar de draft ou completar o PR "
                     f"exige veredito 'conforme' válido para o SHA do HEAD atual. {AVISO_COBERTURA}"
                 )
+            if sai_do_draft and selo_ok is not None and not selo_ok():
+                return MSG_SELO.format(cmd="az repos pr update") + f" {AVISO_COBERTURA}"
             return None
         return None
 
@@ -412,6 +438,14 @@ def avaliar_comando(cmd, raiz=".", veredito_arg=None, head_arg=None):
 
     cache_veredito = None
 
+    cache_selo = None
+
+    def selo_ok():
+        nonlocal cache_selo
+        if cache_selo is None:
+            cache_selo = selo_local_valido(raiz, head_arg)
+        return cache_selo
+
     def veredito_ok():
         nonlocal cache_veredito
         if cache_veredito is None:
@@ -419,7 +453,7 @@ def avaliar_comando(cmd, raiz=".", veredito_arg=None, head_arg=None):
         return cache_veredito
 
     for seg in segmentar_comando(cmd):
-        motivo = avaliar_segmento(seg, veredito_ok, raiz)
+        motivo = avaliar_segmento(seg, veredito_ok, raiz, selo_ok)
         if motivo:
             return False, motivo
     return True, ""

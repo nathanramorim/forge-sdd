@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "chave_conteudo": "28bb817aac81b37d",
-  "versao_historico": "f4aa7cb",
+  "chave_conteudo": "496eef787c36bf7f",
+  "versao_historico": "ee4fef5",
   "versoes": [
     {
       "versao": "5.0.0",
@@ -62,8 +62,8 @@
           "texto": "o padrão continua sendo as janelas do sistema. Com `--terminal tmux` ou `terminal: tmux` no `forge.json`, `forge up` abre as três sessões em tmux (`--dry-run` só imprime); sem o tmux ele avisa e usa as janelas, sem erro. O modo `live` só vale com o tmux, e o `Preflight` só avisa do tmux quando ele foi escolhido."
         },
         {
-          "titulo": "O CI roda no ponto certo (#181)",
-          "texto": "PR em draft tem os jobs pulados e não consome runner. Ao sair do draft, teste e lint rodam uma vez, em três sistemas (Linux, macOS e Windows), e `concurrency` cancela a execução anterior quando você sobe um commit novo. Um job novo, `pronto?`, é obrigatório na principal e recusa PR em draft."
+          "titulo": "O CI roda só no \"liberado para o CI\" (#181, fix-106-10)",
+          "texto": "a validação acontece na máquina, com `scripts/ci-local.sh`, que grava um selo do HEAD; `gh pr ready` exige esse selo junto do parecer. O GitHub Actions roda uma vez, quando o PR sai do draft (ou por `workflow_dispatch`), sem rodar em push de PR nem na principal. `concurrency` cancela a execução anterior, e o job `pronto?` recusa PR em draft. `scripts/ci-politica.py` mostra os runs por dia por evento."
         },
         {
           "titulo": "A spec volta cedo, em PR próprio (#193, #199)",

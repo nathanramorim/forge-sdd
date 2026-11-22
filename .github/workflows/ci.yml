@@ -1,36 +1,33 @@
 name: CI
 
-# Política de CI do Forge-SDD (feat-106-31, ADR-0022):
+# Política de CI do Forge-SDD (fix-106-10, ADR-0022): local primeiro.
 #
-# - O trabalho é conferido **antes** de virar PR: `forge gate` (Camada A),
-#   `go vet`/`go test` e `scripts/validar_entrega.py` rodam locais, no Builder.
-# - O CI caro (teste em 3 sistemas e lint completo) só roda quando o PR **sai
-#   do draft** (`ready_for_review`) e na `main`. Um PR em draft não consome
-#   runner: os jobs aparecem como "skipped".
-# - `concurrency` cancela a execução anterior do mesmo PR ao subir um commit
-#   novo, em vez de manter duas filas.
+# - O trabalho é conferido na máquina: `scripts/ci-local.sh` roda os mesmos passos
+#   deste workflow e grava o selo `.forge/runtime/ci-local.json` com o HEAD.
+# - O GitHub Actions roda **uma vez**, quando o PR é liberado para o CI
+#   (`ready_for_review`), ou à mão (`workflow_dispatch`). Push em draft, em PR
+#   pronto e na `main` não cria run. Nova rodada: voltar a draft e marcar pronto.
+# - `concurrency` cancela a execução anterior do mesmo PR.
 # - O evento de PR é sempre `pull_request` (o código do PR nunca roda com os
 #   segredos do repositório).
 
 on:
-  push:
-    branches: [main]
   pull_request:
     branches: [main]
-    types: [opened, synchronize, reopened, ready_for_review]
+    types: [ready_for_review]
+  workflow_dispatch:
 
 env:
   ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: 'true'
 
 concurrency:
-  # Só agrupa por PR; push na main roda sempre (um por branch).
+  # Agrupa por PR; o disparo manual agrupa pela ref.
   group: ci-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+  cancel-in-progress: true
 
 jobs:
-  # Job obrigatório na main: recusa PR em draft. A verificação do parecer do
-  # Reviewer entra na feat-106-32. Na main (push) o job não tem o que conferir
-  # e sai verde sem custo.
+  # Recusa PR em draft (rede de segurança para o workflow_dispatch). Não é check
+  # obrigatório: a proteção da main não exige checks (required_status_checks vazio).
   pronto:
     name: pronto?
     if: github.event_name == 'pull_request'
@@ -50,8 +47,6 @@ jobs:
           echo "PR #$PR pronto para revisão."
 
   test:
-    # Um PR em draft não roda teste: economiza runner e segura o CI para o fim.
-    if: github.event_name == 'push' || github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -62,18 +57,10 @@ jobs:
           go-version-file: go.mod
           cache: true
 
-      - name: go test
-        run: go test ./...
-
-      # Windows e macOS: só compila (e roda o vet). Pega erro de build nos sistemas
-      # em que o produto é publicado, sem gastar runner deles (decisão do dono, 22/11/2026).
-      - name: Compilação cruzada (windows e darwin)
-        run: |
-          GOOS=windows go build ./... && GOOS=windows go vet ./...
-          GOOS=darwin go build ./... && GOOS=darwin go vet ./...
+      - name: Passos do CI (scripts/ci-local.sh)
+        run: scripts/ci-local.sh test
 
   lint:
-    if: github.event_name == 'push' || github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
