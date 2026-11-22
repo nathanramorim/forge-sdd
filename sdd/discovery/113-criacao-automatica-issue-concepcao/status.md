@@ -2,10 +2,7 @@
 
 **Gate 1:** aprovado
 - **Iniciativa:** `113-criacao-automatica-issue-concepcao`
-- **Branch:** `feat/113-criacao-automatica-issue-concepcao`
-- **Status:** `spec-para-revisao` (Discovery, Criteria e Plan concluídos; aguardando Gate 1)
-- **Próximo passo:** Aprovação humana no Gate 1 (`[Seguir]` / `[Ajustar]`) e posterior `/split-features`.
-- **A confirmar (Gate 1):**
-  1. Interruptor de ativação no GitHub: ativar quando o módulo `project` (109) estiver configurado ou `pm_mcp` habilitar `github-projects` / `create_on_conception: true`, mantendo desligado (custo zero) por padrão.
-  2. Granularidade: 1 issue-mãe no `/discovery`, 1 issue por `/nova-feature` e 1 issue por `/novo-fix`.
-  3. Escala para outros painéis (`clickup`, `jira`, `azure-devops`): criação pelo agente via servidor MCP ativo em `sdd/memory/mcps.md` + registro determinístico em `card-evidence.json`.
+- **Status:** split aprovado pelo dono em 22/11/2026 (6 features, 113-01..06); Reviewer conforme. Sem `queue.json` ainda.
+- **Próximo passo:** o chat monta a fila e dispara o Builder pela onda 1, uma branch e um PR em draft por feature (sem `forge up`).
+- **Ondas:** 1) 113-01 e 113-02 em paralelo; 113-03 (após 01 e 02). 2) 113-04 e 113-05 em paralelo (após 03); 113-06 (após 04 e 05).
+- **Decidido:** 113-05 emite `spec.aberta` só como gancho aditivo (no-op) até a 109 mesclar (`internal/modulo` não está na `main`); 113-06 não toca `.claude/commands`; `forge queue card` com flags de registro.
