@@ -4,12 +4,9 @@ name: CI
 #
 # - O trabalho é conferido **antes** de virar PR: `forge gate` (Camada A),
 #   `go vet`/`go test` e `scripts/validar_entrega.py` rodam locais, no Builder.
-# - O CI só roda quando o PR **sai do draft** (`ready_for_review`) e na `main`.
-#   Um PR em draft não consome runner: os jobs aparecem como "skipped".
-# - **Só Linux.** A conferência por sistema operacional é do `forge doctor`, na
-#   máquina de quem instala (feat-106-35): quem usa Windows ou macOS roda o
-#   diagnóstico ali. Rodar a matriz inteira no CI custa caro para cobrir o que
-#   já é verificado no ponto de uso.
+# - O CI caro (teste em 3 sistemas e lint completo) só roda quando o PR **sai
+#   do draft** (`ready_for_review`) e na `main`. Um PR em draft não consome
+#   runner: os jobs aparecem como "skipped".
 # - `concurrency` cancela a execução anterior do mesmo PR ao subir um commit
 #   novo, em vez de manter duas filas.
 # - O evento de PR é sempre `pull_request` (o código do PR nunca roda com os
@@ -45,7 +42,7 @@ jobs:
           PR: ${{ github.event.pull_request.number }}
         run: |
           set -euo pipefail
-          draft=$(gh pr view "$PR" --json isDraft -q .isDraft)
+          draft=$(gh pr view "$PR" --repo "$GITHUB_REPOSITORY" --json isDraft -q .isDraft)
           if [ "$draft" = "true" ]; then
             echo "::error::O PR #$PR está em draft. Marque como pronto só depois da conferência do Reviewer."
             exit 1
@@ -58,7 +55,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        os: [ubuntu-latest, macos-15, windows-latest]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4

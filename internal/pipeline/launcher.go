@@ -10,7 +10,6 @@ import (
 	"strings"
 
 	"github.com/forge-sdd/cli/internal/config"
-	"github.com/forge-sdd/cli/internal/layout"
 )
 
 // Nomes das três sessões do pipeline.
@@ -138,14 +137,6 @@ func Sessions(env LaunchEnv, cli string) ([]Session, error) {
 // (interactive_args do perfil, agente "lider"); Builder e Reviewer rodam `forge-sdd worker --cli <agente>`. O título é
 // fixado também por escape ANSI (`\033]0;<nome>\007`), que cobre CLIs sem flag de título.
 func SessionsFor(env LaunchEnv, cfg config.ForgeConfig) ([]Session, error) {
-	return SessionsForInitiative(env, cfg, "")
-}
-
-// SessionsForInitiative associa Builder e Reviewer à iniciativa selecionada.
-func SessionsForInitiative(env LaunchEnv, cfg config.ForgeConfig, initiative string) ([]Session, error) {
-	if initiative != "" && !layout.ValidInitiative(initiative) {
-		return nil, fmt.Errorf("iniciativa %q inválida", initiative)
-	}
 	windows := env.GOOS == "windows"
 	for name, v := range map[string]string{"diretório do projeto": env.Dir, "binário do forge-sdd": env.Bin} {
 		if v == "" {
@@ -176,11 +167,7 @@ func SessionsForInitiative(env LaunchEnv, cfg config.ForgeConfig, initiative str
 		}
 		// --cli sempre explícito: o worker usa exatamente o agente que esta abertura escolheu, mesmo
 		// quando a escolha veio de uma flag e não foi gravada em forge.json.
-		args := "forge-sdd worker --role " + role + " --name " + name + " --cli " + cli
-		if initiative != "" {
-			args += " --initiative " + initiative
-		}
-		return args, nil
+		return "forge-sdd worker --role " + role + " --name " + name + " --cli " + cli, nil
 	}
 	build := func(title, args string) Session {
 		if windows {
@@ -214,12 +201,7 @@ func LaunchPlan(env LaunchEnv, cli string) ([]LaunchCommand, error) {
 
 // LaunchPlanFor devolve os comandos que abrem as três sessões com o agente de cada uma.
 func LaunchPlanFor(env LaunchEnv, cfg config.ForgeConfig) ([]LaunchCommand, error) {
-	return LaunchPlanForInitiative(env, cfg, "")
-}
-
-// LaunchPlanForInitiative monta a abertura das sessões com os workers limitados à iniciativa.
-func LaunchPlanForInitiative(env LaunchEnv, cfg config.ForgeConfig, initiative string) ([]LaunchCommand, error) {
-	sessions, err := SessionsForInitiative(env, cfg, initiative)
+	sessions, err := SessionsFor(env, cfg)
 	if err != nil {
 		return nil, err
 	}

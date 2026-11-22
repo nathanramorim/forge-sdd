@@ -1,0 +1,28 @@
+{
+  "$schema": "forge-sdd/metrics/1.0",
+  "feature": "sdd/discovery/114-reutilizacao-codigo-existente-na-proposta/features/feat-114-01-reutilizacao-de-codigo-na-proposta-e-agentes.md",
+  "agent_path": null,
+  "tokens_input": 19891,
+  "tokens_output": 5208,
+  "turns": 0,
+  "duration_seconds": 0,
+  "criterio_atendido": false,
+  "model": "",
+  "rework_lines": 0,
+  "context7_calls": 0,
+  "git_calls": 0,
+  "files_touched": [
+    "sdd/discovery/114-reutilizacao-codigo-existente-na-proposta/features/feat-114-01-reutilizacao-de-codigo-na-proposta-e-agentes.md",
+    "sdd/discovery/114-reutilizacao-codigo-existente-na-proposta/status.md"
+  ],
+  "outcome": "blocked",
+  "sdd_version": "5.0.0",
+  "medicao": "estimado",
+  "complexidade": null,
+  "spec": {
+    "tipo": "feature",
+    "iniciativa": "114-reutilizacao-codigo-existente-na-proposta",
+    "bytes": 19891,
+    "secoes_obrigatorias": 6
+  }
+}

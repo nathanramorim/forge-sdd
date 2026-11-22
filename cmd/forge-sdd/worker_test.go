@@ -21,12 +21,11 @@ func resetWorkerFlags() {
 	_ = pipelinePROpenedCmd.Flags().Set("worker", "")
 	_ = pipelinePROpenedCmd.Flags().Set("branch", "")
 	_ = workerCmd.Flags().Set("once", "false")
-	_ = workerCmd.Flags().Set("initiative", "")
 	_ = workerCmd.Flags().Set("name", "")
 	_ = workerCmd.Flags().Set("cli", "")
 	_ = workerCmd.Flags().Set("deliver", "")
 	_ = workerCmd.Flags().Set("raw", "false")
-	for _, f := range []string{"cli", "discovery", "builder", "reviewer", "terminal", "initiative"} {
+	for _, f := range []string{"cli", "discovery", "builder", "reviewer", "terminal"} {
 		_ = upCmd.Flags().Set(f, "")
 	}
 	_ = upCmd.Flags().Set("dry-run", "false")
@@ -137,7 +136,7 @@ func TestBusPlan_MostraOndasPorDependencia(t *testing.T) {
 func TestWorkerCLI_OnceSemJobsSaiELimpo(t *testing.T) {
 	dir := t.TempDir()
 	resetWorkerFlags()
-	_, err := runRoot(t, "worker", "--dir", dir, "--role", "builder", "--initiative", "77-example", "--once")
+	_, err := runRoot(t, "worker", "--dir", dir, "--role", "builder", "--once")
 	require.Error(t, err, "sem forge.json o worker não roda")
 	assert.Contains(t, fmt.Sprint(err), "pipeline init")
 
@@ -145,10 +144,6 @@ func TestWorkerCLI_OnceSemJobsSaiELimpo(t *testing.T) {
 	testutil.WriteFile(t, dir, ".forge/config/forge.json", string(cfg))
 	resetWorkerFlags()
 	_, err = runRoot(t, "worker", "--dir", dir, "--role", "builder", "--once")
-	require.Error(t, err)
-	assert.Contains(t, err.Error(), "informe --initiative")
-	resetWorkerFlags()
-	_, err = runRoot(t, "worker", "--dir", dir, "--role", "builder", "--initiative", "77-example", "--once")
 	require.NoError(t, err)
 
 	resetWorkerFlags()
@@ -175,8 +170,8 @@ func TestWorker_ChatFeed_Sequence(t *testing.T) {
 		ID: "job-chat-feed", Type: bus.TypeFeatureBuild, Priority: bus.PriorityNormal,
 		Feature: "84-chat-feed", Title: "Painel Conversacional", Initiative: "84-painel",
 		SpecPath: "sdd/discovery/84-painel/criteria.md",
-		PR:       bus.PR{Branch: "feat/84-chat-feed", BaseBranch: "main"},
-		Attempt:  1, MaxReworkAttempts: 3,
+		PR: bus.PR{Branch: "feat/84-chat-feed", BaseBranch: "main"},
+		Attempt: 1, MaxReworkAttempts: 3,
 	}
 	_, _, err := bus.Enqueue(dir, layout.RoleBuilder, j, time.Now())
 	require.NoError(t, err)

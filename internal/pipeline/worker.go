@@ -29,9 +29,7 @@ const (
 type WorkerOptions struct {
 	Dir  string
 	Role string // builder ou reviewer
-	// Initiative limita os jobs atendidos e encerra o worker quando a iniciativa drena.
-	Initiative string
-	Name       string // nome da sessão e do lease (forge-builder)
+	Name string // nome da sessão e do lease (forge-builder)
 	// Sleep espera uma duração e devolve false se o contexto acabar (injetável nos testes da pausa).
 	Sleep func(context.Context, time.Duration) bool
 	// Raw devolve a saída bruta do agente ao terminal (sem a visão limpa).
@@ -45,11 +43,7 @@ type WorkerOptions struct {
 	Poll       time.Duration
 	RenewEvery time.Duration
 	Out        io.Writer
-	Runner     Runner
-	// DeliverTarget é o alvo tmux (ex: =sessao:forge.1) para entrega de prompts no modo live (feat 77).
-	DeliverTarget string
-	// Deliverer executa operações no tmux para o modo live (injetável nos testes).
-	Deliverer TmuxDeliverer
+	Runner Runner
 	Now       func() time.Time
 	// OnJobDone recebe o desfecho de cada job (telemetria); erros dele são ignorados.
 	OnJobDone func(job bus.Job, outcome string)
@@ -60,9 +54,6 @@ type WorkerOptions struct {
 // RunWorker é o laço do worker: recupera leases vencidos, reivindica o próximo job, executa o
 // agente de forma não interativa e fecha o job conforme o resultado (D-1).
 func RunWorker(ctx context.Context, opts WorkerOptions) error {
-	if opts.DeliverTarget != "" {
-		return RunDeliverWorker(ctx, opts)
-	}
 	if opts.Role != layout.RoleBuilder && opts.Role != layout.RoleReviewer {
 		return fmt.Errorf("papel %q inválido para o worker (use builder ou reviewer)", opts.Role)
 	}
@@ -114,11 +105,7 @@ func RunWorker(ctx context.Context, opts WorkerOptions) error {
 		if ctx.Err() != nil {
 			return nil
 		}
-		n, recoverErr := bus.RecoverForInitiative(opts.Dir, opts.Role, opts.Initiative, opts.Now())
-		if recoverErr != nil {
-			return recoverErr
-		}
-		if n > 0 {
+		if n, err := bus.Recover(opts.Dir, opts.Role, opts.Now()); err == nil && n > 0 {
 			fmt.Fprintf(opts.Out, "[%s] %d job(s) com lease vencido devolvido(s) à fila\n", opts.Name, n)
 		}
 		if reason := HaltReason(opts.Dir, cfg, opts.Now()); reason != "" {
@@ -132,20 +119,10 @@ func RunWorker(ctx context.Context, opts WorkerOptions) error {
 			}
 			continue
 		}
-		entry, err := bus.ClaimForInitiative(opts.Dir, opts.Role, opts.Name, opts.Initiative, bus.DefaultLeaseTTL, opts.Now())
+		entry, err := bus.Claim(opts.Dir, opts.Role, opts.Name, bus.DefaultLeaseTTL, opts.Now())
 		if err == bus.ErrEmpty {
-			if opts.Once && opts.Initiative == "" {
+			if opts.Once {
 				return nil
-			}
-			if opts.Initiative != "" {
-				busy, err := initiativeHasJobs(opts.Dir, opts.Initiative)
-				if err != nil {
-					return err
-				}
-				if !busy {
-					fmt.Fprintf(opts.Out, "[%s] iniciativa %s drenada; worker encerrado\n", opts.Name, opts.Initiative)
-					return nil
-				}
 			}
 			if !wasIdle {
 				fmt.Fprintf(opts.Out, "[%s] Aguardando jobs na fila...\n", opts.Name)
@@ -172,16 +149,6 @@ func RunWorker(ctx context.Context, opts WorkerOptions) error {
 			return nil
 		}
 	}
-}
-
-func initiativeHasJobs(dir, initiative string) (bool, error) {
-	for _, role := range []string{layout.RoleBuilder, layout.RoleReviewer} {
-		busy, err := bus.HasJobsForInitiative(dir, role, initiative)
-		if err != nil || busy {
-			return busy, err
-		}
-	}
-	return false, nil
 }
 
 func processJob(ctx context.Context, opts WorkerOptions, cfg config.ForgeConfig, entry *bus.Entry) error {

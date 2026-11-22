@@ -4,7 +4,6 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
-	"runtime"
 	"strings"
 	"testing"
 
@@ -55,25 +54,6 @@ func TestPreflight_TudoCerto(t *testing.T) {
 	for _, it := range items {
 		assert.Equal(t, LevelOK, it.Level, "%+v", it)
 	}
-}
-
-func TestPreflight_TmuxAusenteAvisaComComando(t *testing.T) {
-	cfg := config.DefaultForgeConfig()
-	cfg.Terminal = config.TerminalAuto
-	cfg.Sessions = map[string]string{config.SessionRoleDiscovery: config.CLIClaude, config.SessionRoleBuilder: config.CLICodex, config.SessionRoleReviewer: config.CLIGemini}
-	env := penv([]string{"claude", "codex", "agy", "brew"}, "CLAUDE.md", "AGENTS.md", "GEMINI.md", ".claude/agents/lider.md")
-	items := Preflight("/proj", cfg, env)
-	assert.False(t, PreflightBlocked(items), "tmux ausente só avisa")
-	var tmuxWarn *Item
-	for i := range items {
-		if strings.Contains(items[i].Message, "tmux ausente") {
-			tmuxWarn = &items[i]
-			break
-		}
-	}
-	require.NotNil(t, tmuxWarn)
-	assert.Equal(t, LevelWarn, tmuxWarn.Level)
-	assert.Contains(t, tmuxWarn.Action, "instale")
 }
 
 func TestPreflight_CLIAusenteBloqueia(t *testing.T) {
@@ -149,11 +129,7 @@ func TestPreflight_NaoExecutaAAgenteNemLeOAmbiente(t *testing.T) {
 		Exists:   func(string) bool { return true },
 	}
 	_ = Preflight("/proj", cfg, env)
-	wantCalled := 3
-	if runtime.GOOS != "windows" {
-		wantCalled = 4 // 3 sessões + tmux
-	}
-	assert.Equal(t, wantCalled, called, "só LookPath, uma vez por sessão e uma para o tmux")
+	assert.Equal(t, 3, called, "só LookPath, uma vez por sessão (o tmux saiu, feat-115-02)")
 }
 
 func TestPreflight_ConstituicaoRascunho(t *testing.T) {

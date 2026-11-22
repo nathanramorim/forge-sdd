@@ -3,13 +3,11 @@ package main
 import (
 	"fmt"
 	"io"
-	"os"
 	"path/filepath"
 	"runtime"
 	"strings"
 
 	"github.com/forge-sdd/cli/internal/config"
-	"github.com/forge-sdd/cli/internal/layout"
 	"github.com/forge-sdd/cli/internal/pipeline"
 	"github.com/forge-sdd/cli/internal/survey"
 	"github.com/spf13/cobra"
@@ -33,20 +31,6 @@ não tiverem escolha própria. --dry-run só imprime os comandos.`,
 		if dir == "" {
 			dir = "."
 		}
-		initiative, _ := cmd.Flags().GetString("initiative")
-		if initiative == "" {
-			resolved, ok, err := layout.Current(dir)
-			if err != nil {
-				return fmt.Errorf("resolver iniciativa atual; informe --initiative: %w", err)
-			}
-			if !ok {
-				return fmt.Errorf("nenhuma iniciativa resolvível; informe --initiative <id-nome>")
-			}
-			initiative = resolved
-		}
-		if !layout.ValidInitiative(initiative) {
-			return fmt.Errorf("--initiative %q inválida; use <id-nome> em minúsculas", initiative)
-		}
 		cfg, found, err := config.LoadForgeConfig(dir)
 		if err != nil {
 			return err
@@ -65,59 +49,14 @@ não tiverem escolha própria. --dry-run só imprime os comandos.`,
 			return err
 		}
 		env := newLaunchEnv(runtime.GOOS, abs, pipeline.ResolveBin())
-		termFlag, _ := cmd.Flags().GetString("terminal")
+		// O tmux saiu (feat-115-02). O pipeline abre em janelas do sistema, e o modo live —
+		// que injetava prompts num painel — não existe mais: o chat entrega ao subagente.
 		out := cmd.OutOrStdout()
-		prompt := pipeline.TerminalPrompt{
-			Env:         env,
-			Geteuid:     os.Geteuid,
-			Interactive: isInteractive() && !dry,
-			Confirm:     survey.ConfirmYesNo,
-			Runner:      pipeline.DefaultInstallRunner(),
-			Out:         out,
-			Remember:    pipeline.RememberNative(abs),
-		}
-		decision, err := pipeline.DecideTerminal(termFlag, cfg, prompt)
-		if err != nil {
-			return err
-		}
-		if decision.Terminal == config.TerminalTmux {
-			plan, err := pipeline.BuildTmuxPlan(env, cfg, os.Getenv("TMUX") != "")
-			if err != nil {
-				return err
-			}
-			for _, step := range append(append([][]string{}, plan.Create...), plan.Attach) {
-				fmt.Fprintln(out, strings.Join(quoteArgs(step), " "))
-			}
-			if dry {
-				mode := cfg.SessionMode
-				if mode == "" {
-					mode = config.SessionModeHeadless
-				}
-				fmt.Fprintf(out, "[DRY-RUN] Nada foi aberto (sessão tmux %s, modo %s).\n", plan.Session, mode)
-				return nil
-			}
-			nativeFallback := func() error {
-				if cfg.SessionMode == config.SessionModeLive {
-					fmt.Fprintln(out, "modo live requer tmux; caindo para headless nas janelas do sistema")
-					cfg.SessionMode = config.SessionModeHeadless
-				}
-				natPlan, err := pipeline.LaunchPlanFor(env, cfg)
-				if err != nil {
-					return err
-				}
-				return pipeline.Launch(natPlan)
-			}
-			created, fellBack, err := pipeline.LaunchTerminalTmux(plan, pipeline.DefaultTmuxRunner(), decision.Auto, out, nativeFallback)
-			if err == nil && !created && !fellBack {
-				fmt.Fprintf(out, "A sessão %s já existia: reconectado.\n", plan.Session)
-			}
-			return err
-		}
 		if cfg.SessionMode == config.SessionModeLive {
-			fmt.Fprintln(out, "modo live requer tmux; caindo para headless nas janelas do sistema")
+			fmt.Fprintln(out, "o modo live saiu junto com o tmux; as sessões abrem em headless nas janelas do sistema")
 			cfg.SessionMode = config.SessionModeHeadless
 		}
-		plan, err := pipeline.LaunchPlanForInitiative(env, cfg, initiative)
+		plan, err := pipeline.LaunchPlanFor(env, cfg)
 		if err != nil {
 			return err
 		}
@@ -150,8 +89,8 @@ func init() {
 	upCmd.Flags().String("discovery", "", "Agente da sessão forge-discovery: claude, gemini, copilot ou codex")
 	upCmd.Flags().String("builder", "", "Agente da sessão forge-builder: claude, gemini, copilot ou codex")
 	upCmd.Flags().String("reviewer", "", "Agente da sessão forge-reviewer: claude, gemini, copilot ou codex")
-	upCmd.Flags().String("terminal", "", "Onde abrir: tmux (três painéis), native (janelas do sistema) ou auto (padrão: tmux se existir)")
-	upCmd.Flags().String("initiative", "", "ID da iniciativa atendida pelos workers (padrão: branch atual)")
+	upCmd.Flags().String("terminal", "", "Obsoleto e ignorado: o tmux saiu (feat-115-02); as sessões abrem nas janelas do sistema")
+	_ = upCmd.Flags().MarkDeprecated("terminal", "as sessões sempre abrem nas janelas do sistema")
 	upCmd.Flags().Bool("dry-run", false, "Só imprime os comandos de abertura")
 	rootCmd.AddCommand(upCmd)
 }
@@ -183,11 +122,32 @@ func checkStaleWorktrees(dir string, out io.Writer) {
 	if len(safe) == 0 {
 		return
 	}
-	fmt.Fprintf(out, "\n%d worktree(s) ocioso(s) encontrado(s):\n", len(safe))
+	options := make([]survey.MultiSelectOption, 0, len(safe))
+	byPath := make(map[string]pipeline.StaleWorktree, len(safe))
 	for _, w := range safe {
-		fmt.Fprintf(out, "  %s/%s — %s\n", w.JobID, w.TaskID, w.Reason)
+		key := w.JobID + "/" + w.TaskID
+		options = append(options, survey.MultiSelectOption{Label: key + " — " + w.Reason, Value: key})
+		byPath[key] = w
 	}
-	fmt.Fprintln(out, "  → rode `forge pipeline worktree gc` para limpar.")
+	selected, err := survey.RunMultiSelect("Worktrees ociosos", "Selecione os worktrees seguros que deseja remover", options)
+	if err != nil {
+		fmt.Fprintf(out, "não foi possível selecionar worktrees: %v\n", err)
+		return
+	}
+	targets := make([]pipeline.StaleWorktree, 0, len(selected))
+	for _, key := range selected {
+		if w, ok := byPath[key]; ok {
+			targets = append(targets, w)
+		}
+	}
+	if len(targets) == 0 {
+		return
+	}
+	if errs := pipeline.SweepWorktrees(dir, targets); len(errs) > 0 {
+		for _, sweepErr := range errs {
+			fmt.Fprintf(out, "erro ao limpar worktree: %v\n", sweepErr)
+		}
+	}
 }
 
 // applySessionFlags aplica --cli e --discovery/--builder/--reviewer sobre a configuração, sem gravar.

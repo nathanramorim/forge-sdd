@@ -22,9 +22,10 @@ A prioridade é manter o pipeline de agentes e atribuir o modelo certo por compl
 |---|---|---|---|
 | 3.1 | feat-115-03-03: atualizar skills comuns com rubrica, classificação por task e Advisor condicional. | 1.3 | COD-01, COD-05, DUP-01, FLX-01 |
 | 3.2 | Validar roteamento multi-CLI e handoff Builder→Reviewer após Camada A; manter tmux opcional. | 2.1, 3.1 | FLX-03, FLX-05, TST-03, TST-05 |
+| 3.3 | feat-115-04: o tmux volta como opção (a 115-02, #224, o removeu do código); o padrão segue em janelas do sistema. | 3.2 | ARQ-11, DUP-01, TST-03, TST-05 |
 
 ## Caminho crítico
 
-1.1 → (1.2 || 1.3) → 2.1 → 3.1 → 3.2
+1.1 → (1.2 || 1.3) → 2.1 → 3.1 → 3.2 → 3.3
 
-A retirada do tmux pode ser planejada como entrega separada, depois que a continuidade e a seleção de modelos estiverem entregues.
+A 115-02 (#224) removeu o tmux do código; a decisão do dono é que ele continua opcional, e a feat-115-04 o devolve como opção.
