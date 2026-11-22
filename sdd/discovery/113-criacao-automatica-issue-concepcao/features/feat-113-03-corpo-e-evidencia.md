@@ -40,5 +40,12 @@ test "$(go test ./internal/pipeline -list 'TestCorpoIssueExtraiDescricaoDeNegoci
 ```
 Casos: corpo só com título, descrição de negócio e link relativo; token/segredo mascarado, ANSI e controle removidos (SEG-05/08); caminho absoluto nunca aparece; spec sem a seção falha com erro claro (negativo); symlink ou caminho fora do projeto recusado (SEG-02); evidência existente é reaproveitada sem reescrever (RN-4); o arquivo gravado passa em `loadEvidence`.
 
+Casos adicionais (observações do Reviewer da 113-01 e desvios do código real):
+- `vcs.ErrSemPR` de `CriarIssue`/`ProcurarIssueAberta` (`nenhum`) é "sem efeito, sem erro": nada criado, nada gravado, `Feito=false` com `Motivo`; difere de `ProcurarPRAberto`, que devolve `(nil, nil)` (`TestCriarIssueConcepcaoSemPRSemEfeito`).
+- `ProcurarIssueAberta` vê só 30 itens do `gh issue list` e filtra no cliente: issue antiga fora da janela pode ser duplicada (falha segura); o título-base é o `# ` da spec, estável; follow-up proposto: `--limit` maior em `internal/vcs`.
+- Desvio: o provider gravado é `github-projects` (o `github` não está em `pm_mcp.supported`, e o `loadEvidence` o recusaria); `Status` inicial `Spec`; `Feature` é o nome da pasta da iniciativa.
+- Desvio: sem `WriteFileSafe` (vive em `scaffold`, ciclo de import): usa `queue.WriteJSONAtomic` + `gate.ConfineToDir` na pasta e `Lstat` no alvo. Código em `internal/pipeline/corpo_issue.go` (`MontaCorpoIssue`, `GravaCardEvidence`, `CriarIssueConcepcao`).
+- A evidência válida da mesma feature tem precedência sobre a busca (RN-4): `CriarIssueConcepcao` a lê antes de `ProcurarIssueAberta`/`CriarIssue` e reaproveita sem chamada externa; com isso a janela de 30 itens, issue fechada e título editado deixam de duplicar. Evidência inválida ou de outra feature não conta e nada é apagado (`TestCriarIssueConcepcaoEvidenciaExistenteNaoCriaOutra`, `...ReexecucaoCriaUmaSoVez`, `...EvidenciaInvalidaNaoBloqueia`, `...EvidenciaDeOutraFeatureNaoImpede`).
+
 ## Depende de
 113-01, 113-02.

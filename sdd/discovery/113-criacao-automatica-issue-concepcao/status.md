@@ -2,7 +2,8 @@
 
 **Gate 1:** aprovado
 - **Iniciativa:** `113-criacao-automatica-issue-concepcao`
-- **Status:** split aprovado pelo dono em 22/11/2026 (6 features, 113-01..06); Reviewer conforme. Sem `queue.json` ainda.
+- **Status:** split aprovado pelo dono em 22/11/2026 (6 features, 113-01..06); Reviewer conforme. Sem `queue.json`.
+- **113-03:** implementada (PR em draft); aguardando Reviewer.
 - **113-02:** implementada (PR em draft), aguardando Reviewer.
 - **113-01:** implementada (PR em draft, branch `feat/113-01-vcs-issue`); aguardando Reviewer.
 - **Próximo passo:** o chat monta a fila e dispara o Builder pela onda 1, uma branch e um PR em draft por feature (sem `forge up`).

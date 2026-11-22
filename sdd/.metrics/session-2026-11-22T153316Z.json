@@ -1,0 +1,24 @@
+{
+  "$schema": "forge-sdd/metrics/1.0",
+  "feature": "sdd/discovery/113-criacao-automatica-issue-concepcao/features/feat-113-03-corpo-e-evidencia.md",
+  "agent_path": [
+    "builder"
+  ],
+  "tokens_input": 4953,
+  "tokens_output": 3572,
+  "turns": 0,
+  "duration_seconds": 0,
+  "criterio_atendido": true,
+  "model": "claude-sonnet-5-5",
+  "rework_lines": 0,
+  "context7_calls": 0,
+  "git_calls": 0,
+  "files_touched": [
+    "internal/pipeline/corpo_issue.go",
+    "internal/pipeline/corpo_issue_test.go"
+  ],
+  "outcome": "approved",
+  "sdd_version": "5.2.0-beta",
+  "medicao": "estimado",
+  "complexidade": null
+}
