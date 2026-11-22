@@ -6,3 +6,4 @@
 **Próximo passo:** `/archive` da 106 e a nota de release da próxima versão.
 **Colisões resolvidas:** 105 e 107 seguem com as suas ondas, sem conflito com esta.**Gate 1:** aprovado (fix-106-10, CI local primeiro, 22/11/2026, `[Seguir]` do dono)
 **Fix aberto:** fix-106-10 — CI só em `ready_for_review`, selo local e sem CI no push da main.
+**Gate 1:** aprovado (fix-106-11, deploy da LP manual, 22/11/2026, `[Seguir]` do dono)
