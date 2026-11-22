@@ -34,7 +34,7 @@ go test ./internal/config
 # Os testes citados existem de verdade (sem isso o -run passa vazio):
 test "$(go test ./internal/config -list 'TestResolverGestorConcepcaoDesligadoPorPadrao|TestResolverGestorConcepcaoGitHubQuandoConfigurado|TestResolverGestorConcepcaoMCPAtivo|TestResolverGestorConcepcaoMCPIndisponivelDesliga|TestResolverGestorConcepcaoProviderDesconhecidoRecusado|TestResolverGestorConcepcaoMcpsMdAusenteOuMalformado|TestLoadForgeConfigSemCreateOnConceptionRetrocompativel' | grep -c '^Test')" -ge 7   # pelo menos 7 (go test -run sem correspondência sai com 0)
 ```
-Casos: sem `forge.json`/`pm_mcp`/módulo, resultado `desligado`; `VCS=github` sozinho NÃO ativa (risco do discovery); `project.json` presente ou `create_on_conception: true` ativa GitHub; `clickup`/`jira`/`azure-devops` só ativa com `ativo` em `mcps.md`; `indisponível` ou "não verificado" desliga; provider fora de `Supported` recusado (negativo); `mcps.md` ausente ou malformado não gera erro fatal; `forge.json` antigo sem o campo segue carregando.
+Casos: sem `forge.json`/`pm_mcp`/módulo, resultado `desligado`; `project.json` regular e confinado ativa o GitHub mesmo sem `forge.json` (ainda com `VCS=github`); provider `github-projects` equivale a `github`; `VCS=github` sozinho NÃO ativa (risco do discovery); `project.json` presente ou `create_on_conception: true` ativa GitHub; `clickup`/`jira`/`azure-devops` só ativa com `ativo` em `mcps.md`; `indisponível` ou "não verificado" desliga; provider fora de `Supported` recusado (negativo); `mcps.md` ausente ou malformado não gera erro fatal; `forge.json` antigo sem o campo segue carregando.
 
 ## Depende de
 Nenhuma.

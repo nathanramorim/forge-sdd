@@ -1,0 +1,25 @@
+{
+  "$schema": "forge-sdd/metrics/1.0",
+  "feature": "sdd/discovery/113-criacao-automatica-issue-concepcao/features/feat-113-02-resolvedor-gestor.md",
+  "agent_path": [
+    "builder"
+  ],
+  "tokens_input": 3563,
+  "tokens_output": 7476,
+  "turns": 0,
+  "duration_seconds": 0,
+  "criterio_atendido": true,
+  "model": "claude-sonnet-5-5",
+  "rework_lines": 0,
+  "context7_calls": 0,
+  "git_calls": 0,
+  "files_touched": [
+    "internal/config/forge.go",
+    "internal/config/gestor_concepcao.go",
+    "internal/config/gestor_concepcao_test.go"
+  ],
+  "outcome": "approved",
+  "sdd_version": "5.2.0-beta",
+  "medicao": "estimado",
+  "complexidade": null
+}

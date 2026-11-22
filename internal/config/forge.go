@@ -96,6 +96,8 @@ type PMConfig struct {
 	StatusOnImplement     string   `json:"status_on_implement"`
 	StatusOnPRApproved    string   `json:"status_on_pr_approved"`
 	EvidenceMaxAgeMinutes int      `json:"evidence_max_age_minutes"`
+	// CreateOnConception liga a criação de issue/card na concepção (feat 113-02). Padrão desligado.
+	CreateOnConception bool `json:"create_on_conception,omitempty"`
 }
 
 // BuilderConfig configura a sessão Builder.
