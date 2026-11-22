@@ -214,6 +214,71 @@ func TestWorker_OciosoMostraMensagemERespeitaCancelamento(t *testing.T) {
 	}
 }
 
+func TestWorker_InitiativeDrenaBuilderEReviewerSemTocarEmOutrasIniciativas(t *testing.T) {
+	dir := workerProject(t)
+	const initiative = "115-obsolescencia-do-tmux"
+	for _, j := range []bus.Job{
+		{ID: "job-115", Type: bus.TypeFeatureBuild, Priority: bus.PriorityNormal, Feature: "115", Title: "Workers", Initiative: initiative, SpecPath: "sdd/discovery/115-obsolescencia-do-tmux/fixes/fix-115-01.md", PR: bus.PR{Branch: "fix/115-01-workers-por-iniciativa", BaseBranch: "feat/115-obsolescencia-do-tmux"}, Attempt: 1, MaxReworkAttempts: 3},
+		{ID: "job-other", Type: bus.TypeFeatureBuild, Priority: bus.PriorityNormal, Feature: "97", Title: "Outra", Initiative: "97-outra", SpecPath: "sdd/discovery/97-outra/criteria.md", PR: bus.PR{Branch: "feat/97-outra", BaseBranch: "main"}, Attempt: 1, MaxReworkAttempts: 3},
+	} {
+		_, _, err := bus.Enqueue(dir, func() string {
+			if j.Type == bus.TypePRReview {
+				return layout.RoleReviewer
+			}
+			return layout.RoleBuilder
+		}(), j, now)
+		require.NoError(t, err)
+	}
+	runner := &fakeRunner{fn: func(spec RunSpec) (RunResult, error) {
+		if strings.Contains(spec.Prompt, `"job-115"`) {
+			_, err := bus.UpdatePR(dir, layout.RoleBuilder, "job-115", "forge-builder", 5, "https://example.test/pr/5", "fix/115-01-workers-por-iniciativa", now)
+			return RunResult{}, err
+		}
+		return RunResult{ExitCode: 1}, nil
+	}}
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	var out strings.Builder
+	done := make(chan error, 1)
+	go func() {
+		done <- RunWorker(ctx, WorkerOptions{Dir: dir, Role: layout.RoleBuilder, Initiative: initiative, Out: &out, Poll: 10 * time.Millisecond, Runner: runner, Now: func() time.Time { return now }})
+	}()
+	require.Eventually(t, func() bool { return len(runner.prompts) == 1 }, 2*time.Second, 10*time.Millisecond)
+	require.Eventually(t, func() bool {
+		entry, err := bus.Find(dir, layout.RoleBuilder, "job-115")
+		return err == nil && entry.State == layout.StateDone
+	}, 2*time.Second, 10*time.Millisecond)
+	review, err := bus.Claim(dir, layout.RoleReviewer, "forge-reviewer", time.Hour, now)
+	require.NoError(t, err)
+	require.Equal(t, "job-115-review", review.Job.ID)
+	select {
+	case err := <-done:
+		t.Fatalf("worker encerrou enquanto Reviewer ainda processava: %v", err)
+	case <-time.After(50 * time.Millisecond):
+	}
+
+	rework := bus.Job{ID: "rework-115", Type: bus.TypePRRework, Priority: bus.PriorityHigh, Feature: "115", Title: "Rework", Initiative: initiative, SpecPath: "sdd/discovery/115-obsolescencia-do-tmux/fixes/fix-115-01.md", PR: bus.PR{Branch: "fix/115-01-workers-por-iniciativa", BaseBranch: "feat/115-obsolescencia-do-tmux"}, Attempt: 2, MaxReworkAttempts: 3}
+	_, _, err = bus.Enqueue(dir, layout.RoleBuilder, rework, now.Add(time.Second))
+	require.NoError(t, err)
+	_, err = bus.Complete(dir, layout.RoleReviewer, "job-115-review", "forge-reviewer", "aprovado: sem achados", now.Add(time.Second))
+	require.NoError(t, err)
+	select {
+	case err := <-done:
+		require.NoError(t, err)
+	case <-time.After(3 * time.Second):
+		builderPending, _ := bus.List(dir, layout.RoleBuilder, layout.StatePending)
+		builderProcessing, _ := bus.List(dir, layout.RoleBuilder, layout.StateProcessing)
+		reviewerProcessing, _ := bus.List(dir, layout.RoleReviewer, layout.StateProcessing)
+		t.Fatalf("worker não encerrou depois de drenar a iniciativa: prompts=%d pending=%v builder_processing=%v reviewer_processing=%v output=%s", len(runner.prompts), builderPending, builderProcessing, reviewerProcessing, out.String())
+	}
+	require.Len(t, runner.prompts, 2)
+	assert.Contains(t, runner.prompts[1], `"rework-115"`)
+	pending, err := bus.List(dir, layout.RoleBuilder, layout.StatePending)
+	require.NoError(t, err)
+	require.Len(t, pending, 1)
+	assert.Equal(t, "job-other", pending[0].Job.ID)
+}
+
 func TestWorker_RecuperaLeaseVencidoAntesDeReivindicar(t *testing.T) {
 	dir := workerProject(t)
 	seedJob(t, dir, layout.RoleBuilder, "job-preso", bus.TypeFeatureBuild, bus.PriorityNormal, now.Add(-time.Hour))

@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/forge-sdd/cli/internal/config"
+	"github.com/forge-sdd/cli/internal/layout"
 	"github.com/forge-sdd/cli/internal/pipeline"
 	"github.com/forge-sdd/cli/internal/survey"
 	"github.com/spf13/cobra"
@@ -31,6 +32,20 @@ não tiverem escolha própria. --dry-run só imprime os comandos.`,
 		dir, _ := cmd.Flags().GetString("dir")
 		if dir == "" {
 			dir = "."
+		}
+		initiative, _ := cmd.Flags().GetString("initiative")
+		if initiative == "" {
+			resolved, ok, err := layout.Current(dir)
+			if err != nil {
+				return fmt.Errorf("resolver iniciativa atual; informe --initiative: %w", err)
+			}
+			if !ok {
+				return fmt.Errorf("nenhuma iniciativa resolvível; informe --initiative <id-nome>")
+			}
+			initiative = resolved
+		}
+		if !layout.ValidInitiative(initiative) {
+			return fmt.Errorf("--initiative %q inválida; use <id-nome> em minúsculas", initiative)
 		}
 		cfg, found, err := config.LoadForgeConfig(dir)
 		if err != nil {
@@ -102,7 +117,7 @@ não tiverem escolha própria. --dry-run só imprime os comandos.`,
 			fmt.Fprintln(out, "modo live requer tmux; caindo para headless nas janelas do sistema")
 			cfg.SessionMode = config.SessionModeHeadless
 		}
-		plan, err := pipeline.LaunchPlanFor(env, cfg)
+		plan, err := pipeline.LaunchPlanForInitiative(env, cfg, initiative)
 		if err != nil {
 			return err
 		}
@@ -136,6 +151,7 @@ func init() {
 	upCmd.Flags().String("builder", "", "Agente da sessão forge-builder: claude, gemini, copilot ou codex")
 	upCmd.Flags().String("reviewer", "", "Agente da sessão forge-reviewer: claude, gemini, copilot ou codex")
 	upCmd.Flags().String("terminal", "", "Onde abrir: tmux (três painéis), native (janelas do sistema) ou auto (padrão: tmux se existir)")
+	upCmd.Flags().String("initiative", "", "ID da iniciativa atendida pelos workers (padrão: branch atual)")
 	upCmd.Flags().Bool("dry-run", false, "Só imprime os comandos de abertura")
 	rootCmd.AddCommand(upCmd)
 }

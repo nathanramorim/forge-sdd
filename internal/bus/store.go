@@ -215,8 +215,17 @@ func Enqueue(dir, role string, job Job, now time.Time) (path string, created boo
 // Claim reivindica o próximo job (prioridade e depois FIFO) com um rename atômico de pending para
 // processing e grava o lease. Só um worker vence a disputa; a fila vazia devolve ErrEmpty.
 func Claim(dir, role, worker string, ttl time.Duration, now time.Time) (*Entry, error) {
+	return ClaimForInitiative(dir, role, worker, "", ttl, now)
+}
+
+// ClaimForInitiative reivindica apenas jobs da iniciativa indicada. Initiative vazio preserva o
+// comportamento global usado por consumidores legados.
+func ClaimForInitiative(dir, role, worker, initiative string, ttl time.Duration, now time.Time) (*Entry, error) {
 	if err := checkWorkerRole(role); err != nil {
 		return nil, err
+	}
+	if initiative != "" && !layout.ValidInitiative(initiative) {
+		return nil, fmt.Errorf("%w: %q", layout.ErrInvalidInitiative, initiative)
 	}
 	if !ValidWorker(worker) {
 		return nil, fmt.Errorf("%w: worker %q inválido", ErrInvalidJob, worker)
@@ -233,6 +242,15 @@ func Claim(dir, role, worker string, ttl time.Duration, now time.Time) (*Entry, 
 		return nil, err
 	}
 	for _, name := range names {
+		if initiative != "" {
+			candidate, err := readJob(filepath.Join(pd, name))
+			if err != nil {
+				return nil, fmt.Errorf("%s: %w", name, err)
+			}
+			if candidate.Initiative != initiative {
+				continue
+			}
+		}
 		if err := os.MkdirAll(prd, 0o755); err != nil {
 			return nil, err
 		}
@@ -267,6 +285,28 @@ func Claim(dir, role, worker string, ttl time.Duration, now time.Time) (*Entry, 
 		return &Entry{State: layout.StateProcessing, Path: dst, Job: *job}, nil
 	}
 	return nil, ErrEmpty
+}
+
+// HasJobsForInitiative verifica se há jobs pendentes ou em execução para essa iniciativa.
+func HasJobsForInitiative(dir, role, initiative string) (bool, error) {
+	if err := checkWorkerRole(role); err != nil {
+		return false, err
+	}
+	if !layout.ValidInitiative(initiative) {
+		return false, fmt.Errorf("%w: %q", layout.ErrInvalidInitiative, initiative)
+	}
+	for _, state := range []string{layout.StatePending, layout.StateProcessing} {
+		entries, err := List(dir, role, state)
+		if err != nil {
+			return false, err
+		}
+		for _, entry := range entries {
+			if entry.Job.Initiative == initiative {
+				return true, nil
+			}
+		}
+	}
+	return false, nil
 }
 
 func ownEntry(dir, role, id, worker string) (*Entry, error) {
@@ -367,8 +407,16 @@ func Renew(dir, role, id, worker string, ttl time.Duration, now time.Time) error
 // Recover devolve a pending os jobs de processing com lease vencido (ou sem lease legível e parados
 // além da carência) e devolve quantos foram recuperados.
 func Recover(dir, role string, now time.Time) (int, error) {
+	return RecoverForInitiative(dir, role, "", now)
+}
+
+// RecoverForInitiative recupera leases vencidos apenas da iniciativa indicada. Vazio é global.
+func RecoverForInitiative(dir, role, initiative string, now time.Time) (int, error) {
 	if err := checkWorkerRole(role); err != nil {
 		return 0, err
+	}
+	if initiative != "" && !layout.ValidInitiative(initiative) {
+		return 0, fmt.Errorf("%w: %q", layout.ErrInvalidInitiative, initiative)
 	}
 	prd, _ := stateDir(dir, role, layout.StateProcessing)
 	pd, _ := stateDir(dir, role, layout.StatePending)
@@ -380,6 +428,12 @@ func Recover(dir, role string, now time.Time) (int, error) {
 	for _, name := range names {
 		p := filepath.Join(prd, name)
 		job, rerr := readJob(p)
+		if rerr != nil && initiative != "" {
+			continue // sem JSON válido, a iniciativa não pode ser determinada com segurança.
+		}
+		if rerr == nil && initiative != "" && job.Initiative != initiative {
+			continue
+		}
 		expired := false
 		switch {
 		case rerr != nil:
