@@ -2,6 +2,7 @@
 
 - **Data:** 2026-11-14
 - **Status:** `aprovado`
+- **Substituída em parte por:** ADR-0026 (D-6 (tmux por argv como padrão)); o restante segue válido quando o tmux está ativo.
 - **Regras afetadas (IDs da constitution):** `SEG-03`, `SEG-05`, `DUP-01`, `FLX-08`, `GOV-01` (este ADR; nenhum ID foi criado ou removido; `ARQ-06` não ganha subcomando: `up`, `worker`, `queue` e `bus` ganham flags e `requeue`)
 - **Autor / Responsável:** Líder (decisão do dono do produto no discovery 72)
 

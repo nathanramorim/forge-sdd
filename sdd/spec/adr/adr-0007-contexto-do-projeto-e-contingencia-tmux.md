@@ -2,6 +2,7 @@
 
 - **Data:** 2026-11-14
 - **Status:** `aprovado`
+- **Substituída em parte por:** ADR-0026 (D-3 (instalação assistida do tmux)); o restante segue válido quando o tmux está ativo.
 - **Regras afetadas (IDs da constitution):** `DUP-01`, `DUP-02`, `DUP-05`, `FLX-01`, `FLX-05`, `GOV-01`, `ARQ-06`
 - **Autor / Responsável:** Líder (decisão do dono do produto no discovery 75)
 
