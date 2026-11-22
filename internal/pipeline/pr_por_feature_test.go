@@ -127,3 +127,11 @@ func TestFeixesParalelosIgnoraRepetidas(t *testing.T) {
 	_, err = FeixesParalelos("", []string{"a"}, "main")
 	require.Error(t, err)
 }
+
+func (a *adaptadorDeFeature) CriarIssue(string, vcs.NovaIssue) (vcs.Issue, error) {
+	return vcs.Issue{}, vcs.ErrSemPR
+}
+
+func (a *adaptadorDeFeature) ProcurarIssueAberta(string, string) (*vcs.Issue, error) {
+	return nil, vcs.ErrSemPR
+}
