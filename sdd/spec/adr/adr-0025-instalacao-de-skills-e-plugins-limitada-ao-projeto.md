@@ -1,9 +1,9 @@
 # ADR-0025 — Instalação de skills e plugins limitada ao projeto
 
-- **Status:** Proposta
+- **Status:** Aceita
 - **Data:** 2026-11-22
 - **Regras afetadas (IDs da constitution):** `ARQ-06` (só o texto do grupo `skills`: dois subcomandos novos), `GOV-01` e `FLX-05` (esta ADR). Nenhum ID é criado ou removido.
-- **Autor / Responsável:** Concepção (iniciativa `98-diagram-studio-c4`, feat-98-02); aprovação do dono pendente.
+- **Autor / Responsável:** Concepção (iniciativa `98-diagram-studio-c4`, feat-98-02); aprovada pelo dono (22/11/2026).
 
 ## Relação com ADRs vigentes
 
@@ -37,11 +37,11 @@ Verificado no código: `internal/scaffold/hooks.go` já tem `checkSafeTarget` e 
    O Go não faz rede: o conteúdo vem do diretório de origem. O plugin `diagram-studio` é obtido fora do Go por `git clone` mais `checkout` do commit fixado `3996fd2e2bcdc2462e6f0d1edd7f6d18f649bc03`. O repositório não tem tags e o dono não quer tag criada.
 6. **Alcance:** a política vale para todo skill ou plugin que o forge instale, não só o `diagram-studio`.
 
-## Atualização de `ARQ-06` (a fazer no PR da feat-98-02)
+## Atualização de `ARQ-06` (feita no PR da feat-98-02)
 
 Linha atual (`sdd/memory/constitution.md`, linha 62): `... `gate`, `skills`, `governance`, ...`
 
-Texto proposto: acrescentar ao fim da frase, antes de `(`modulo` chega na 109.)`, a oração "O grupo `skills` inclui `destinos` e `instalar` (instalação opcional, limitada ao projeto aberto; ADR-0025)." A lista de nomes de topo não muda. Fica assim: `... `rules`) com contratos explícitos (Regra 10). O grupo `skills` inclui `destinos` e `instalar` (instalação opcional, limitada ao projeto aberto; ADR-0025). (`modulo` chega na 109.)`
+Texto aplicado: acrescentado antes de `(`modulo` chega na 109.)`, a oração "`skills`: ver ADR-0025." A lista de nomes de topo não muda. O contrato dos dois subcomandos novos (`skills destinos` e `skills instalar`, instalação opcional e limitada ao projeto aberto) fica nesta ADR, e não na Constituição: a Constituição tem teto de bytes (`MaxConstitutionSize`, P-24) e só cabe a remissão. O `FLX-02` e as demais regras não foram reescritos.
 
 ## Consequências
 
@@ -52,4 +52,4 @@ Texto proposto: acrescentar ao fim da frase, antes de `(`modulo` chega na 109.)`
   - Plugin fixado por commit sem tag: a rastreabilidade depende do hash, e o histórico do repositório externo pode ser reescrito.
   - `resvg-py>=0.1` é faixa aberta (SEG-07); o Builder da feat-98-02 fixa a versão exata.
   - `shouldPreserve` hoje não cobre `.agents/plugins/`; sem a extensão, uma reinstalação sobrescreveria o plugin do usuário.
-- **Ações de acompanhamento:** implementar a feat-98-02; atualizar a linha de `ARQ-06` no mesmo PR; fixar `resvg-py`; avaliar uma definição oficial de hub.
+- **Ações de acompanhamento:** feat-98-02 implementada com a linha de `ARQ-06` atualizada no mesmo PR; fixar `resvg-py` (a fixar: o `diagrama.py` do plugin declara `resvg-py>=0.1` e o commit fixado não o trava; fixar exige mudar o plugin externo); avaliar uma definição oficial de hub.

@@ -1,0 +1,22 @@
+{
+  "$schema": "forge-sdd/metrics/1.0",
+  "feature": "sdd/discovery/98-diagram-studio-c4/features/feat-98-02-instalacao-opcional-skill-plugin.md",
+  "phase": "98-02",
+  "agent_path": [
+    "builder"
+  ],
+  "tokens_input": 11649,
+  "tokens_output": 500,
+  "turns": 0,
+  "duration_seconds": 0,
+  "criterio_atendido": false,
+  "model": "claude-sonnet-5-5",
+  "rework_lines": 0,
+  "context7_calls": 0,
+  "git_calls": 0,
+  "files_touched": null,
+  "outcome": "approved",
+  "sdd_version": "5.2.0-beta",
+  "medicao": "estimado",
+  "complexidade": null
+}

@@ -102,10 +102,11 @@ Corrija e renderize de novo até tudo estar limpo. Renderizar é barato; entrega
 
 ## 8. Motor B — diagram-studio
 
-### 8.1. Verificar o plugin (sem instalar nada por conta própria)
-1. Rode `forge-sdd skills destinos`. Se o plugin já estiver disponível no projeto aberto ou no hub, use-o de lá e **não instale nos demais**.
-2. Enquanto esse subcomando não existir, confira `ls .agents/plugins/diagram-studio/scripts/diagrama.py 2>/dev/null || echo AUSENTE` (caminho único, relativo ao destino: projeto aberto ou hub).
-3. Se AUSENTE, pare e oriente a pessoa a pedir a instalação restrita ao projeto (feat-98-02 do diagram-studio). Não instale por outro meio nem fora do projeto.
+### 8.1. Verificar e, se faltar, oferecer a instalação (opcional, só no projeto)
+1. Rode `forge-sdd skills destinos --tipo plugin --slug diagram-studio`. Se responder "já disponível em <caminho>" (projeto aberto ou hub), use o plugin de lá e **não instale nos demais**.
+2. Se não estiver disponível, ofereça a instalação com `AskUserQuestion` (a pessoa escolhe; nunca instale por conta própria). Havendo mais de um destino listado por `forge-sdd skills destinos`, pergunte hub ou subprojeto.
+3. Instalação, fora do Go só o clone: `git clone https://github.com/nathanramorim/diagram-studio <tmp>`, `git -C <tmp> checkout 3996fd2e2bcdc2462e6f0d1edd7f6d18f649bc03` e então `forge-sdd skills instalar plugin diagram-studio --de <tmp> [--destino <dir>]`. Grava só em `.agents/plugins/diagram-studio/` do destino. Não use o instalador do Claude: ele grava fora do projeto.
+4. Se a pessoa recusar, pare e informe que o motor B depende do plugin.
 
 ### 8.2. Assinatura e modelo
 Siga o passo de assinatura do `SKILL.md` do plugin (`.agents/plugins/diagram-studio/`). Escolha o modelo: Fases, Personas, Fluxo ou Camadas.
