@@ -9,8 +9,10 @@ import (
 	"strings"
 
 	"github.com/forge-sdd/cli/internal/config"
+	"github.com/forge-sdd/cli/internal/pipeline"
 	"github.com/forge-sdd/cli/internal/queue"
 	"github.com/forge-sdd/cli/internal/survey"
+	"github.com/forge-sdd/cli/internal/vcs"
 	"github.com/spf13/cobra"
 )
 
@@ -522,4 +524,55 @@ func firstLineOf(s string) string {
 		return s[:i]
 	}
 	return s
+}
+
+// queueCardRunner permite injetar o Runner nos testes (TST-04); nil usa o gh real.
+var queueCardRunner vcs.Runner
+
+var queueCardCmd = &cobra.Command{
+	Use:   "card",
+	Short: "Vincula a spec a um card: cria/reaproveita a issue (GitHub) ou registra o retorno do MCP",
+	Long: `Vincula a spec da feature ao card do gestor, gravando card-evidence.json na iniciativa.
+Sem --provider/--id/--url, resolve o gestor: desligado não faz nada, em silêncio; github cria ou
+reaproveita a issue. Com os três, registra o card criado por um MCP (https obrigatório).
+Falha externa vira aviso e sai com código 0. --dry-run não chama o gh nem grava.
+Para renovar a evidência, apague o card-evidence.json da iniciativa e rode de novo.`,
+	Args: cobra.NoArgs,
+	RunE: func(cmd *cobra.Command, args []string) error {
+		dir, _ := cmd.Flags().GetString("dir")
+		if dir == "" {
+			dir = "."
+		}
+		o := pipeline.OpcoesConcepcao{Dir: dir, Run: queueCardRunner}
+		o.Feature, _ = cmd.Flags().GetString("feature")
+		o.Provider, _ = cmd.Flags().GetString("provider")
+		o.ID, _ = cmd.Flags().GetString("id")
+		o.URL, _ = cmd.Flags().GetString("url")
+		o.DryRun, _ = cmd.Flags().GetBool("dry-run")
+		res, err := pipeline.Concepcao(o)
+		if err != nil {
+			return fmt.Errorf("%s", pipeline.Higieniza(err.Error()))
+		}
+		out := cmd.OutOrStdout()
+		if res.Aviso != "" {
+			fmt.Fprintf(out, "aviso: %s\n", pipeline.Higieniza(res.Aviso))
+		}
+		switch {
+		case res.Modo == "" || res.Modo == config.GestorDesligado:
+		case res.Evidencia.ID != "":
+			fmt.Fprintf(out, "card %s: %s (%s)\n", pipeline.Higieniza(res.Evidencia.ID), pipeline.Higieniza(res.Evidencia.URL), pipeline.Higieniza(res.Evidencia.Feature))
+		case res.Motivo != "":
+			fmt.Fprintln(out, pipeline.Higieniza(res.Motivo))
+		}
+		return nil
+	},
+}
+
+func init() {
+	queueCardCmd.Flags().String("feature", "", "ID da feature (nome do arquivo da spec sem .md)")
+	queueCardCmd.Flags().String("provider", "", "Provider do MCP (de pm_mcp.supported)")
+	queueCardCmd.Flags().String("id", "", "ID do card criado pelo MCP")
+	queueCardCmd.Flags().String("url", "", "URL https do card criado pelo MCP")
+	queueCardCmd.Flags().Bool("dry-run", false, "Mostra o que faria, sem chamar o gh nem gravar")
+	queueCmd.AddCommand(queueCardCmd)
 }
