@@ -19,9 +19,9 @@ O dono perguntou se o limite foi contornado ou se havia modo automático configu
 | O campo foi desligado | O valor está `3`, não `desligado` | **Não foi desligado** |
 | Havia modo automático ligado que quebrou | `Início automático do Builder` está `desligado` (padrão) e `.forge/config/forge.json` não tem chave de início automático | **Nunca esteve ligado** |
 | O laço automático existe e falhou | O código do laço da 107 **não está na `main`**: só o discovery foi mesclado (#122). Nenhum código lê `Início automático do Builder` | **Não existe ainda; não quebrou** |
-| O modo de revisão humana foi contornado | `com-humano` (padrão) e **tem código** (`internal/pipeline/modo_humano.go`, `volta_da_spec.go`) | **Funciona; é o único campo de modo aplicado** |
+| O modo de revisão humana foi contornado | `com-humano` (padrão) e **tem código** (`internal/pipeline/modo_humano.go`, `volta_da_spec.go`), **mas nenhuma função exportada desses arquivos tem chamador fora de testes** (corrigido em 22/11/2026; ver `fix-106-06`) | **Não foi contornado; também não é aplicado** |
 
-Resumo: dois dos campos de modo (`WIP humano` e `Início automático do Builder`) foram escritos na Constituição **sem a implementação correspondente**. O critério da 106 só conferia que a linha existia (`grep -F '| WIP humano | 3 |'`), então a lacuna passou.
+Resumo: os três campos de modo (`WIP humano`, `Início automático do Builder` e `Modo de revisão humana`) foram escritos na Constituição **sem a ligação ao fluxo**. No último, o código existe e é testado, mas nada o chama (`fix-106-06`). O critério da 106 só conferia que a linha existia (`grep -F '| WIP humano | 3 |'`), então a lacuna passou.
 
 ## Feature Correlacionada
 
