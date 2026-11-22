@@ -45,7 +45,7 @@ Quando o gestor configurado para acompanhamento é o GitHub — seja porque o m�
 ### Cenário C — Outros painéis de acompanhamento via MCP (`clickup`, `jira`, `azure-devops`)
 Quando o projeto usa outro gestor configurado em `pm_mcp.provider` (ou detectado via `auto`) e registrado como `ativo` em `sdd/memory/mcps.md`:
 1. **Conexão via MCP:** o `forge` não embute SDK nem cliente HTTP de ClickUp, Jira ou Azure Boards no binário Go (`ARQ-04`). A escala para outros gestores ocorre pelo **MCP do painel de acompanhamento** declarado em `sdd/memory/mcps.md` e configurado no ambiente do agente (`.mcp.json` / `.gemini/mcp.json`).
-2. **Contrato de criação e registro:** durante `/discovery`, `/nova-feature` ou `/novo-fix`, a estação de Concepção consulta o status do gestor (`forge card status` / `pm_mcp` + `sdd/memory/mcps.md`). Estando o provedor MCP ativo:
+2. **Contrato de criação e registro:** durante `/discovery`, `/nova-feature` ou `/novo-fix`, a estação de Concepção consulta o status do gestor (`pm_mcp` + `sdd/memory/mcps.md`). Estando o provedor MCP ativo:
    - Se `card-evidence.json` do alvo ainda não existir, o agente invoca a ferramenta MCP de criação de card/task do provedor configurado (com título e descrição comercial saneados, `SEG-08`).
    - Em seguida, registra o retorno (`id`, `url`, `provider`, `status`) por meio do comando determinístico do core (`forge queue card registrar --provider <p> --id <id> --url <url> --feature <alvo>`), que valida os campos na borda (`SEG-01`) e grava `card-evidence.json` de forma segura (`SEG-02`).
 3. **Sem MCP ativo ou não configurado:** se o provedor MCP estiver `indisponível` ou não configurado, não cria nada, emite no máximo um aviso informativo e segue a concepção sem bloquear.
