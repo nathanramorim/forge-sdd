@@ -25,7 +25,7 @@ Dependências indiretas relevantes: `bubbletea` e `lipgloss` (renderização da 
 ## Distribuição
 - Pacote npm `@nathanramorim/forge-sdd`: um launcher (`bin/run.js`) baixa o binário da versão do GitHub Releases, confere o SHA256 e o guarda em `~/.cache/forge-sdd/<versão>/`.
 - Binários: linux/amd64, linux/arm64, darwin/amd64, darwin/arm64 e windows/amd64.
-- Site: `site/` (Astro 5 SSG, `ARQ-04`) e **LP estática em `docs/`**, publicada em `https://forge-sdd.org` por **Cloudflare Workers** (`site/wrangler.jsonc` serve `../docs`; workflow `.github/workflows/deploy-lp.yml`, ADR-0020).
+- Site: `site/` (Astro 5 SSG, `ARQ-04`) e **LP estática em `docs/`**, publicada em `https://forge-sdd.org` por **Cloudflare Workers** (`site/wrangler.jsonc` serve `../docs`), por deploy manual: `scripts/lp-deploy.sh` local ou o workflow `deploy-lp.yml` só com `workflow_dispatch` (ADR-0020, D-2 emendada).
 - Workflows em `.github/workflows/`: `ci.yml`, `release.yml`, `npm-publish.yml`, `deploy-lp.yml`, `encerrar-edicao.yml`.
 - Divergência registrada: `npm/package.json` ainda declara `4.9.1` enquanto a tag git é `v5.0.0` (não corrigido aqui).
 

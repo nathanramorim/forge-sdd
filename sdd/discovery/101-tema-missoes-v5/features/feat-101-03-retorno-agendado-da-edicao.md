@@ -32,7 +32,7 @@ O visual do site não depende deste PR: a troca acontece na hora, pelo porteiro 
    - Sem esse arquivo, ou antes da data: termina sem fazer nada.
    - Depois da data: roda o script, envia a branch `chore/101-encerrar-edicao` e abre o PR. Se o PR já existir, não abre outro.
 3. **O que fica depois do encerramento:** o design system (`docs/design/edicao-missoes/`), o banner da edição e a entrada da 5.0.0 no histórico, como registro. O arquivo do workflow também fica, inerte: o token do Actions não pode apagar workflows, e o corpo do PR avisa que ele pode ser removido à mão.
-4. **Publicação.** O merge do PR muda `docs/` e dispara o `Deploy LP`, que publica o site já sem a camada.
+4. **Publicação.** O merge do PR muda `docs/`; a publicação é manual (`scripts/lp-deploy.sh` ou `Deploy LP` por `workflow_dispatch`, fix-106-11) e deixa o site sem a camada. `scripts/lp-deploy.sh --status` avisa se a LP ficou desatualizada.
 
 O agendamento do GitHub pode atrasar alguns minutos. Isso só afeta a hora em que o PR aparece.
 
@@ -70,7 +70,7 @@ Ligar a opção em Settings → Actions → General é opcional: com ela, o pass
 | Cabeçalho padrão do README | `README.md` e `npm/README.md` antes do #113 (commit `24c1b51`), com `docs/img/banner.svg` e os selos azuis | Versão anterior do cabeçalho | reusar o texto, já com "Versão atual: 5.0.0" |
 | Workflow agendado | `.github/workflows/` | `ci.yml`, `npm-publish.yml`, `release.yml`, `deploy-lp.yml`; nenhum com `schedule` | criar |
 | Scripts de apoio a workflow | `.github/` | Não existem | criar em `.github/scripts/encerrar-edicao/` |
-| Publicação depois do merge | `.github/workflows/deploy-lp.yml` | Dispara em mudanças de `docs/**` | reusar |
+| Publicação depois do merge | `.github/workflows/deploy-lp.yml` | Só `workflow_dispatch` desde fix-106-11 | reusar |
 
 ## Dependências novas
 

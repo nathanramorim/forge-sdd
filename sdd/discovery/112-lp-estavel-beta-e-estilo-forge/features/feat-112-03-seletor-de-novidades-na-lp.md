@@ -28,7 +28,7 @@
    - **Estados:** carregando (esqueleto discreto), vazio ("As novidades desta versão ainda não foram publicadas") e erro (mantém a última lista carregada na sessão).
 4. **Consumo na LP:** função `buscarNovidades()` isolada entre `/* novidades:inicio */` e `/* novidades:fim */`, com `AbortController` e timeout de 3 s, no mesmo espírito de `buscarCanalNpm`. Ordem de tentativa: `docs/data/releases.json` (mesma origem) → raw do `history.md` no GitHub → última lista conhecida → vazio. Todo texto entra por `textContent`/`createElement`, **nunca** `innerHTML` (`SEG-01`); `link` só é aceito com `https://` e domínio do próprio GitHub do projeto.
 5. **Automatizado em toda publicação** — duas emendas, sem criar caminho de release novo (`FLX-07`):
-   - `.github/workflows/deploy-lp.yml`: passo que roda `uv run scripts/novidades_lp.py` antes do deploy; o site nunca sai sem a seção.
+   - `scripts/lp-deploy.sh` (chamado também pelo `deploy-lp.yml`, só manual desde 22/11/2026, fix-106-11): roda `scripts/novidades_lp.py` e o `--check` antes do deploy; o site nunca sai sem a seção.
    - `.github/workflows/release.yml`: depois de publicar a tag, roda o gerador e commita `docs/data/releases.json` na `main` (com `[skip ci]` ou caminho que não dispare release), para o arquivo versionado não divergir do histórico.
 6. **Privacidade:** nenhuma chamada nova a terceiros — o JSON é da própria origem, e o fallback vai ao GitHub, que já é link do rodapé. Sem cookie, sem telemetria, `credentials: 'omit'`, `referrerPolicy: 'no-referrer'`.
 7. **CSP:** não existe hoje em `docs/`, `site/wrangler.jsonc` nem `site/public/_headers`; nenhum cabeçalho muda. Se um dia houver, `connect-src 'self' https://raw.githubusercontent.com` passa a ser obrigatório (registrado aqui, não feito).
