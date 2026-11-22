@@ -17,7 +17,7 @@
 
 ## Modelo do módulo
 
-**Enxuto.** Uma flag e testes em `internal/vcs`; sem comando novo (`ARQ-06`).
+**Enxuto.** Uma flag, um comentário e testes em `internal/vcs` e `internal/pipeline`; sem comando novo nem mudança de assinatura.
 
 ## Dependências novas
 
@@ -25,12 +25,13 @@ Nenhuma (`SEG-07`).
 
 ## Rules e IDs da Constituição Aplicáveis
 
-`SEG-01` (a saída do `gh` continua validada contra o esquema), `TST-03` (caso negativo: a issue está além da posição 30), `DUP-01` (o limite é uma constante nomeada, um lugar só).
+`SEG-01` (a saída do `gh` continua validada contra o esquema), `TST-03` (casos conformes e negativos), `DUP-01` (o limite é uma constante nomeada, um lugar só), `SEG-07` (nenhuma dependência).
 
 ## Decisões do projeto aplicadas
 
 - A busca segue server-side por título e filtrada no cliente (a busca do `gh` é aproximada).
-- Limite maior em vez de paginação: simples, determinístico e sem rede extra.
+- Limite maior em vez de paginação. O `gh` pagina a API por dentro (100 por página): `--limit 200` custa **2 requisições** em vez de 1, aceito. A busca do GitHub tem teto de 1000 resultados.
+- **Aviso de "busca no limite" fica fora desta spec** (follow-up): ele exigiria um canal novo (mudar a assinatura de `ProcurarIssueAberta` atinge github, nenhum, `corpo_issue.go` e 5 fakes de teste, ou uma sentinela de erro). Com 200 o risco restante é pequeno.
 
 ## O que já existe
 
@@ -41,20 +42,26 @@ Nenhuma (`SEG-07`).
 
 ## Comportamento esperado
 
-1. `ProcurarIssueAberta` passa `--limit 200` (constante `limiteBuscaIssue`), documentada: acima disso a busca devolve "não achou" e a criação segue.
-2. Se a lista voltar com exatamente `limiteBuscaIssue` itens e nenhum casar, o resultado inclui um **aviso** ("busca no limite; pode existir issue além da janela") que o `forge queue card` imprime higienizado (SEG-08). Não bloqueia.
+1. `ProcurarIssueAberta` passa `--limit 200` (constante `limiteBuscaIssue`), documentada. O comentário em `internal/pipeline/corpo_issue.go` (~linhas 157-159) que cita esse follow-up é atualizado.
+2. O restante não muda: a busca segue server-side por título, filtrada no cliente.
 
 ## Critérios de Aceitação Executáveis
 
-Os testes novos ficam **vermelhos até o Builder** criá-los.
+Vermelhos **até o Builder**: os 2 testes novos não existem, e o teste existente `TestGitHubProcurarIssueAbertaIdempotente` (`internal/vcs/issue_test.go:41`) afirma o argv antigo e **deve ser atualizado** para `... --search 'Minha spec' --limit 200 --json number,url,title`; só então o último comando fica verde.
 
 ```bash
 set -o pipefail
-go test ./internal/vcs -run 'TestProcurarIssueAbertaUsaLimite|TestProcurarIssueAbertaAvisaNoLimite' -count=1
-[ "$(go test ./internal/vcs -list 'TestProcurarIssueAbertaUsaLimite|TestProcurarIssueAbertaAvisaNoLimite' | grep -c '^Test')" -eq 2 ]
+# 1. o argv leva --limit 200 (o runner falso registra o argv e afirma o par `--limit`,`200`)
+go test ./internal/vcs -run 'TestProcurarIssueAbertaUsaLimite' -count=1
+# 2. issue na posição >30 de uma lista de 200 itens, com um casando por título: é achada (runner falso devolve 200 itens)
+go test ./internal/vcs -run 'TestProcurarIssueAbertaAchaAlemDos30' -count=1
+# 3. existência (só prova que existem; a aprovação é o -run acima)
+[ "$(go test ./internal/vcs -list 'TestProcurarIssueAbertaUsaLimite|TestProcurarIssueAbertaAchaAlemDos30' | grep -c '^Test')" -eq 2 ]
+# 4. o teste existente atualizado e o conjunto afetado
 go test ./internal/vcs ./internal/pipeline ./cmd/forge-sdd -count=1
 ```
 
 ## Fora do escopo
 
-- Paginação completa; busca por label ou por corpo.
+- Aviso de busca no limite (follow-up, pede canal novo) e paginação completa.
+- Busca por label ou por corpo.
