@@ -36,4 +36,4 @@ Skill **e plugin** ficam restritos ao projeto aberto (ou ao destino hub/subproje
 
 ## Critérios executáveis resumidos
 
-`go test ./internal/scaffold -run 'TestSkillsInstalarNoOpComHub|TestInstalaSkillSoNoProjetoAberto|TestInstalaPluginSoNoProjetoAberto|TestInstalaPerguntaHubOuSubprojeto|TestInstalaNaoRepeteQuandoHubTem|TestInstalaNoSubprojetoQuandoSemHub|TestInstalaOpcionalPorSkill'`; `ls sdd/spec/adr/adr-0025-instalacao-de-skills-e-plugins-limitada-ao-projeto.md`; `! grep -rn "/plugin install" .agents/skills/diagramas-c4-mermaid/`.
+`go test ./internal/scaffold ./cmd/forge-sdd -run 'TestSkillsInstalarNoOpComHub|TestInstalaSkillSoNoProjetoAberto|TestInstalaPluginSoNoProjetoAberto|TestInstalaPerguntaHubOuSubprojeto|TestInstalaNaoRepeteQuandoHubTem|TestInstalaNoSubprojetoQuandoSemHub|TestInstalaOpcionalPorSkill'`; `ls sdd/spec/adr/adr-0025-instalacao-de-skills-e-plugins-limitada-ao-projeto.md`; `! grep -rn "/plugin install" .agents/skills/diagramas-c4-mermaid/`.
