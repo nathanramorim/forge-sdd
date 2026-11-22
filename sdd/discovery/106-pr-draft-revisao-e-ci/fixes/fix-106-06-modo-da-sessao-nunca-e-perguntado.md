@@ -3,7 +3,7 @@
 **Branch:** `docs/106-specs-worktree-modo-ask` (PR único das três specs 05, 06 e 07)
 **Origem:** Iniciativa 106 (ADR-0022, `feat-106-08`) e `internal/pipeline/modo_humano.go`
 **Tamanho:** `M`
-**Status:** `spec` (aguarda Gate 1)
+**Status:** `spec` (Gate 1 aprovado em 22/11/2026, `[Seguir]`)
 
 ## Sintoma
 
@@ -71,11 +71,11 @@ Rules: `sdd-arquitetura`, `sdd-codigo-e-testes`, `sdd-fluxo-e-portao`, `sdd-modo
 5. **Ligar a escolha ao fluxo:** `AutorizaVoltaDaSpec` passa a ser chamada no `[Seguir]` do Gate 1. No `sem-humano`, a spec volta à principal depois de veredito conforme sem esperar o dono; no `com-humano`, continua esperando.
 6. `forge brief` e `forge status` mostram o modo efetivo da sessão.
 
-**Decisão aberta para o Gate 1 — como gravar a escolha:**
+**Decisão do dono no Gate 1 (22/11/2026): opção A, subcomando `forge session mode`.** Opções avaliadas:
 
 | Opção | O que é | Custo |
 |---|---|---|
-| **A. Subcomando `forge session mode`** (recomendada) | O Go valida (`ResolveModoDeRevisao`) e grava; o agente só chama | muda `ARQ-06`, exige ADR curto no mesmo PR |
+| **A. Subcomando `forge session mode`** (**escolhida**) | O Go valida (`ResolveModoDeRevisao`) e grava; o agente só chama | muda `ARQ-06`, exige ADR curto no mesmo PR |
 | **B. O agente grava o arquivo direto** | Sem subcomando novo | o agente passa a escrever estado de runtime; a validação só na leitura (`SEG-01` mais fraco) |
 
 **Fora:**

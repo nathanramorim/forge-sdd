@@ -4,7 +4,7 @@
 **Origem:** Iniciativa 106, `feat-106-26a` (comandos de concepção) e `sdd/memory/clarify.md`
 **Tamanho:** `M`
 **Depende de:** `fix-106-04` (reescreve a seção de visualização e o Gate 1 do `clarify.md`)
-**Status:** `spec` (aguarda Gate 1)
+**Status:** `spec` (Gate 1 aprovado em 22/11/2026, `[Seguir]`)
 
 ## Sintoma
 

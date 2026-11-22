@@ -3,7 +3,7 @@
 **Branch:** `docs/106-specs-worktree-modo-ask` (PR único das três specs 05, 06 e 07)
 **Origem:** Iniciativa 97, `feat-97-02` (`feat-96-01`, limpeza de worktrees), mesclada em 22/11/2026; e iniciativa 106 (branch e PR por feature)
 **Tamanho:** `M`
-**Status:** `spec` (aguarda Gate 1)
+**Status:** `spec` (Gate 1 aprovado em 22/11/2026, `[Seguir]`)
 
 ## Sintoma
 
