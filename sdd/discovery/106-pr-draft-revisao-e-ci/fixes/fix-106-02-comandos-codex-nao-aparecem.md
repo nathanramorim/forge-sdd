@@ -1,11 +1,11 @@
 # fix-106-02 — Ações Forge SDD não aparecem no seletor do Codex
 
 **Iniciativa:** 106-pr-draft-revisao-e-ci  
-**Branch:** `fix/106-02-codex-slash-commands`  
+**Branch da spec:** `fix/106-02-spec-codex`; **Branch da correção:** `fix/106-02-impl-codex`, aberta pelo Builder a partir da principal  
 **Origem:** relato do usuário e auditoria do scaffold Codex (21/11/2026)  
 **GitHub:** [issue #200](https://github.com/nathanramorim/forge-sdd/issues/200)  
-**Tamanho:** `M`  
-**Status:** `queued` (backlog; Gate 1 aprovado pelo pedido explícito do usuário em 21/11/2026)
+**Tamanho:** `L`  
+**Status:** `spec` (Conferência 1 em 22/11/2026 devolveu ajustes; Gate 1 depende do `[Seguir]` do dono e da confirmação manual no Codex)
 
 ## Descrição de negócio (release notes)
 
@@ -28,39 +28,57 @@ O mecanismo antigo de custom prompts do Codex é local ao `CODEX_HOME`, não é 
 
 **Enxuto** — correção de integração e artefatos gerados para Codex, sem novo serviço ou estado persistente (`ARQ-11`).
 
+## Evidência sobre o Codex (a confirmar pelo dono)
+
+Verificado: `codex --version` = 0.171.0; `~/.codex/prompts` não existe e `~/.codex/skills` está vazio; `internal/scaffold/templates/agents/openai/AGENTS.md.tmpl` (linha 19) lista `/discovery`, `/split-features`, `/implementar`, `/revisar`, `/status` e termina com `(.openai/prompts/)`; `cheatsheet.go` (linha 49) mapeia o destino `templates/agents/openai/.openai/prompts`.
+**Não verificado** (só o dono confirma numa sessão limpa do Codex, e a spec cita a fonte ao confirmar): (a) que custom prompts estão oficialmente obsoletos; (b) que o seletor de `/` não mostra skills; (c) que `$nome-da-skill` invoca a skill. Enquanto (a)-(c) não forem confirmadas, o Builder **não** altera o texto do `AGENTS.md`.
+
 ## Decisões do projeto aplicadas
 
 | Decisão | ID | Aplicação |
 |---|---|---|
-| Adaptadores e contratos por agente | ADR-0004, ADR-0005 | A instrução e a superfície de ativação devem corresponder ao Codex real, preservando os comandos dos demais agentes. |
-| Skills como fluxo reutilizável e fonte única | ADR-0003, ADR-0012 | Preferir mecanismo suportado e compartilhável; não duplicar o corpo dos comandos em prompts locais obsoletos. |
-| Compatibilidade documentada | ARQ-06, FLX-01 | Não anunciar um comando como disponível sem prova de descoberta e invocação na interface alvo. |
+| Adaptadores finos sobre fonte única | `DUP-10`, ADR-0021 | A superfície de ativação do Codex aponta para `.agents/skills/` sem copiar o corpo dos comandos. (ADR-0003 e 0004 estão em parte substituídas pela ADR-0021.) |
+| Template e golden no mesmo PR | `TST-02` | Mudou o texto gerado, muda o golden. |
+| Caso negativo | `TST-03` | Os outros agentes mantêm os comandos. |
+| Dependência nova exige consulta | `SEG-07` | Sem dependência; a superfície do Codex é confirmada na fonte citada. |
 
 ## O que já existe
 
-| Procurei | Onde | Achei | Decisão | Justificativa |
-|---|---|---|---|---|
-| Comandos de concepção | `feat-106-26a`, `.agents/skills/sdd-concepcao/` | Skill canônica e referências por comando; comandos listados em arquivos de instrução | Estender | Reusar o fluxo canônico sem copiar conteúdo. |
-| Integração Codex | `.openai/`, `.agents/skills/`, templates em `internal/scaffold/` | `system_instructions.md`, `constitution.prompt.md` e skills por estação; sem registro dos aliases da lista | Corrigir | A localização atual não registra os comandos no Codex. |
-| Descoberta de prompts e skills | Documentação oficial atual do Codex | Skills são recomendadas; custom prompts são obsoletos, locais ao `CODEX_HOME` | Adotar mecanismo suportado | Evitar depender de uma superfície local e depreciada. |
+| Procurei | Onde | Achei | Decisão |
+|---|---|---|---|
+| Lista de comandos do Codex | `templates/agents/openai/AGENTS.md.tmpl` | anuncia `/` comandos sem registro | **corrigir** (só após a confirmação acima) |
+| Prompts do Codex | `templates/agents/openai/.openai/prompts` | vazio no template; `constitution.prompt.md` só em instalação antiga | **decidir**: manter vazio e listar em `cleanObsoleteFiles` o que sair |
+| Atualização sem impacto | fix-106-09 (`shouldPreserve`, `cleanObsoleteFiles`, `--dry-run`) | contrato de atualização | **seguir**: `AGENTS.md` sem o marcador `<!-- forge-sdd:generated -->` permanece intocado |
+| Nome de `/status` | fix-106-09 | pode virar `/forge-status` | **usar o nome vigente na main** ao publicar a lista |
+| References de concepção | feat-113-06 (mesclada) | já alteradas na main | **partir da main atual** |
 
-## Dependências novas
+## Dependências e ordem
 
-Nenhuma dependência de runtime. Consultar documentação oficial/context7 na implementação para confirmar a superfície suportada na versão mínima do Codex (`SEG-07`).
-
-## Rules e IDs da Constituição Aplicáveis
-
-`ARQ-06`, `DUP-10`, `FLX-01`, `TST-02`, `TST-03`, `GOV-04`, `SEG-07`.
+- Não "depende" da `feat-106-26a` (ela mesma está bloqueada). **Colide** com ela nos goldens de `agents/openai`; vale a ordem de merge: quem chegar primeiro na principal, o outro rebaseia. A `feat-106-37` está superada pelo fix-106-10 e não conta.
+- Estado: `spec`. O Builder só começa depois da confirmação manual do Codex e do Gate 1.
 
 ## Critérios de Aceitação Executáveis
 
-1. O scaffold gerado para Codex não anuncia `/discovery` ou outros aliases como comandos disponíveis sem que a instalação registre esses comandos numa superfície suportada pelo Codex.
-2. Os fluxos Forge SDD necessários ficam descobríveis e invocáveis pelo caminho suportado do Codex (por exemplo, skill via seletor de skills ou `$nome-da-skill`), apontando para as referências canônicas sem duplicar o procedimento.
-3. O README/instruções gerados mostram o caminho exato para localizar e acionar cada fluxo no Codex; a nomenclatura não promete um alias `/` que o Codex não oferece.
-4. A verificação de scaffold cobre o alvo Codex e confirma que os caminhos emitidos correspondem ao mecanismo suportado; os adaptadores Claude Code, Gemini/agy e Copilot mantêm os comandos que já registram.
-5. A descoberta e a invocação são confirmadas numa sessão limpa do Codex da versão mínima declarada. Se a UI não oferecer alias customizado, a entrega documenta a alternativa suportada e não marca `/discovery` como disponível.
+Os testes novos ficam **vermelhos até o Builder** (antes da correção o golden do `AGENTS.md` do Codex ainda cita `/discovery` e `(.openai/prompts/)`). `-list` só prova existência; a aprovação é o `-run`.
 
-## Dependências e backlog
+```bash
+set -o pipefail
+# 1. o AGENTS.md do Codex não anuncia alias "/" sem registro
+go test ./internal/scaffold -run 'TestCodexAgentsSemAliasNaoRegistrado' -count=1
+# 2. o caminho suportado aparece (skill, apontando para .agents/skills)
+go test ./internal/scaffold -run 'TestCodexCaminhoSuportadoApontaParaSkills' -count=1
+# 3. os outros agentes mantêm os comandos (caso negativo, TST-03)
+go test ./internal/scaffold -run 'TestOutrosAgentesMantemComandos' -count=1
+# 4. atualização N-1 para N: AGENTS.md sem marcador intocado; prompts obsoletos listados; --dry-run lista o que sai
+go test ./internal/scaffold ./cmd/forge-sdd -run 'TestCodexUpdateDeN1' -count=1
+# 5. existência dos 4
+[ "$(go test ./internal/scaffold ./cmd/forge-sdd -list 'TestCodex|TestOutrosAgentesMantemComandos' | grep -c '^Test')" -ge 4 ]
+go test ./internal/scaffold -run 'Golden|ContextBudget' -count=1
+```
 
-- Depende de: `feat-106-26a` (comandos de concepção), para sequenciar mudanças nos mesmos templates.
-- Estado: `queued`; não iniciar Builder até a dependência e a ordem de colisão serem resolvidas.
+6. **Manual, não verificável por CI:** numa sessão limpa do Codex (0.171.0 ou superior), o dono digita `/` e `$` e confirma o que aparece; o resultado e a fonte entram nesta spec antes do Gate 1.
+
+## Fora do escopo
+
+- Mudar os adaptadores de Claude Code, Gemini/agy e Copilot.
+- Reescrever as skills `sdd-*`.
