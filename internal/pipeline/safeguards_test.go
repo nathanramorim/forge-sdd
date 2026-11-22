@@ -125,21 +125,3 @@ func TestSalvaguardas_Stop(t *testing.T) {
 	assert.Contains(t, out, "esteira parada")
 }
 
-// liveStopProject monta um projeto live no modo avançado com teto diário de 1 job já gasto.
-func liveStopProject(t *testing.T) (string, config.ForgeConfig) {
-	t.Helper()
-	dir, _ := setupProjectWithJob(t, layout.RoleBuilder)
-	cfg, _, err := config.LoadForgeConfig(dir)
-	require.NoError(t, err)
-	cfg.Permissions = config.PermissionFull
-	cfg.Autonomy = config.AutonomyAdvanced
-	cfg.IsolatedConfirmed = true
-	cfg.Safeguards.MaxJobsPerDay = 1
-	require.NoError(t, config.SaveForgeConfig(dir, cfg))
-	seedJob(t, dir, layout.RoleBuilder, "job-gasto", "feature_build", "normal", now)
-	runOnce(t, dir, layout.RoleBuilder, &fakeRunner{fn: func(RunSpec) (RunResult, error) { return RunResult{}, nil }}, nil)
-	reason, _ := DailyPause(dir, cfg, now)
-	require.NotEmpty(t, reason)
-	return dir, cfg
-}
-
