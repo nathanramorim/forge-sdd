@@ -90,6 +90,7 @@ func init() {
 	upCmd.Flags().String("builder", "", "Agente da sessão forge-builder: claude, gemini, copilot ou codex")
 	upCmd.Flags().String("reviewer", "", "Agente da sessão forge-reviewer: claude, gemini, copilot ou codex")
 	upCmd.Flags().String("terminal", "", "Obsoleto e ignorado: o tmux saiu (feat-115-02); as sessões abrem nas janelas do sistema")
+	_ = upCmd.Flags().MarkDeprecated("terminal", "as sessões sempre abrem nas janelas do sistema")
 	upCmd.Flags().Bool("dry-run", false, "Só imprime os comandos de abertura")
 	rootCmd.AddCommand(upCmd)
 }

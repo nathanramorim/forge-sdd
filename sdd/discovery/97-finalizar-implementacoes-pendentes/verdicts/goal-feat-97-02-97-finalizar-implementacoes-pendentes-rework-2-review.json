@@ -1,5 +1,0 @@
-{
-  "veredito": "conforme",
-  "achados": [],
-  "resumo": "Diff aderente à spec: o hook interativo oferece seleção múltipla somente dos worktrees seguros e remove apenas os selecionados; o adaptador huh permanece em internal/survey. A seção O que já existe é coerente com o código-base. ADRs vigentes e rules aplicáveis sem conflito; forge-sdd gate passou. Critérios no HEAD do PR: go build ./..., testes TestWorktreeGC e TestLoadForInitiative e pipeline worktree gc --dry-run passaram."
-}

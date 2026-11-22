@@ -1,7 +1,7 @@
 {
   "project": "forge-sdd",
-  "version": "5.2.0-beta",
-  "agents": ["claude", "gemini", "copilot", "openai"],
+  "version": "4.5.0-beta",
+  "agents": ["claude", "gemini"],
   "telemetry": {
     "enabled": true,
     "anonymous": true,

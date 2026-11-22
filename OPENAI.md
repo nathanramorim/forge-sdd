@@ -1,3 +1,0 @@
-# OPENAI.md — forge-sdd
-
-As instruções deste projeto para o Codex e demais agentes da OpenAI estão em `AGENTS.md` (é o arquivo que o Codex lê). Fluxo por feature em `sdd/FLOW.md`.
