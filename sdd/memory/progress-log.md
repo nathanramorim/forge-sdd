@@ -51,3 +51,4 @@ Restricoes: zero deps runtime (ARQ-03/04), sem emojis, UI em pt-BR.
 - 2026-06-12 — feat-14-discovery-command concluída: Novo comando /discovery adicionado a todos os agentes. Gera artefatos de produto e critérios técnicos simulando personas sênior. Pasta sdd/discovery criada.
 - 2026-11-18: Iniciativa 88-modo-pipeline-avancado concluída e arquivada com sucesso.
 - 2026-11-19: Iniciativa 94-finalizar-fixes-pendentes concluída e arquivada com sucesso.
+- 2026-11-22: Iniciativa 113-criacao-automatica-issue-concepcao concluída e arquivada: 6 features (#236 a #241), fix-113-01 (#254) e nota da 5.2.0 (#242).
