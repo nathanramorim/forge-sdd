@@ -2,18 +2,40 @@
   "feature_id": "feat-98-01",
   "branch": "feat/98-diagram-studio-c4",
   "base_branch": "main",
-  "spec_status": "reviewed",
+  "spec_status": "draft",
   "updated_at": "2026-11-19T10:37:45Z",
   "items": [
     {
       "task_id": "feat-98-01-diagrama-studio-c4",
-      "title": "feat-98-01 — skill diagramas-c4-mermaid: escolha entre Mermaid e diagram-studio",
+      "title": "feat-98-01 — skill diagramas-c4-mermaid no repositório (escolha de motor)",
       "spec_path": "sdd/discovery/98-diagram-studio-c4/features/feat-98-01-diagrama-studio-c4.md",
       "status": "queued",
       "rules": [
         "ARQ-11",
         "DUP-01",
         "COD-01"
+      ],
+      "skills_used": [],
+      "attempts": 0
+    },
+    {
+      "task_id": "feat-98-02-instalacao-opcional-skill-plugin",
+      "title": "feat-98-02 — instalação opcional de skill/plugin limitada ao projeto aberto",
+      "spec_path": "sdd/discovery/98-diagram-studio-c4/features/feat-98-02-instalacao-opcional-skill-plugin.md",
+      "status": "queued",
+      "depends_on": [
+        "feat-98-01-diagrama-studio-c4"
+      ],
+      "rules": [
+        "ARQ-11",
+        "DUP-01",
+        "COD-01",
+        "SEG-01",
+        "SEG-02",
+        "SEG-07",
+        "TST-01",
+        "FLX-05",
+        "GOV-01"
       ],
       "skills_used": [],
       "attempts": 0

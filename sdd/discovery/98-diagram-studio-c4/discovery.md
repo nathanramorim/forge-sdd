@@ -20,12 +20,13 @@ Agentes de IA (Claude Code, Gemini, Copilot) que usam a skill para gerar diagram
 
 - A escolha é feita a cada uso (não persiste entre sessões).
 - O fluxo Mermaid existente não é alterado.
-- O fluxo diagram-studio requer que o plugin esteja instalado; se ausente, orienta a instalação.
+- O fluxo diagram-studio requer o plugin; se ausente, a skill oferece instalar. Instalar skill/plugin (sem `/plugin install`, que grava em `~/.claude/`) é opcional por skill, limitado ao projeto aberto, e pergunta hub (master) ou subprojeto quando houver forge em subprojetos.
 
 ## Escopo
 
-**Dentro:** atualizar `~/.claude/skills/diagramas-c4-mermaid/SKILL.md`.
-**Fora:** modificar `renderizar-mermaid.py`; criar código Go no forge-sdd; alterar `.agents/skills/`.
+**feat-98-01 (enxuto, sem Go):** mover/reescrever a skill para `.agents/skills/diagramas-c4-mermaid/` no repositório.
+**feat-98-02 (completo, Go em `internal/scaffold`):** política de instalação opcional, limitada ao projeto aberto, com pergunta hub ou subprojeto; depende da 98-01 e exige nova ADR (FLX-05/GOV-01), pois vale para todo o forge.
+**Fora:** modificar `renderizar-mermaid.py`.
 
 ## Riscos
 
