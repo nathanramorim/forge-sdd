@@ -1,5 +1,6 @@
 # Status — 113 Criação automática de issue/card na concepção
 
+**Gate 1:** aprovado
 - **Iniciativa:** `113-criacao-automatica-issue-concepcao`
 - **Branch:** `feat/113-criacao-automatica-issue-concepcao`
 - **Status:** `spec-para-revisao` (Discovery, Criteria e Plan concluídos; aguardando Gate 1)
