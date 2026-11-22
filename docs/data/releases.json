@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "chave_conteudo": "f5dc00df926f0065",
-  "versao_historico": "945b4d4",
+  "chave_conteudo": "1e31742576d74cb3",
+  "versao_historico": "5223923",
   "versoes": [
     {
       "versao": "5.0.0",
@@ -92,6 +92,10 @@
         {
           "titulo": "A barreira fica instalada (#182)",
           "texto": "o hook `PreToolUse` que barra o `gh` entra sozinho no `.claude/settings.json`, e o `forge doctor` mostra em quais agentes ele vale. Nos outros agentes, o job `pronto?` do CI segura."
+        },
+        {
+          "titulo": "A issue nasce junto com a spec (113)",
+          "texto": "com `create_on_conception: true` no `forge.json` (padrão desligado), o `/discovery`, o `/nova-feature` e o `/novo-fix` criam ou reaproveitam a issue no GitHub e gravam `card-evidence.json`; rodar de novo não duplica. Gestor por MCP registra com `forge queue card --feature <id> --provider <p> --id <id> --url <https>`. O dispatch lê a evidência, e falha externa vira aviso, sem bloquear a spec. Para renovar a evidência, apague o `card-evidence.json`."
         },
         {
           "titulo": "Skill de diagramas no repositório (98-01)",
