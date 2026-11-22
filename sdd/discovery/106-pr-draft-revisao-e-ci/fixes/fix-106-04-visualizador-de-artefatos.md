@@ -3,7 +3,7 @@
 **Branch:** `fix/106-04-visualizador-de-artefatos`
 **Origem:** Iniciativa 106, `feat-106-26a` (comandos de concepção) e `sdd/memory/clarify.md` (seção "Visualização pós-spec")
 **Tamanho:** `L`
-**Status:** `spec` (aguarda Gate 1)
+**Status:** `spec` (Gate 1 aprovado em 22/11/2026, `[Seguir]` com a opção C)
 
 ## Sintoma
 
@@ -71,7 +71,7 @@ O pedido sugeria avaliar as duas. **Resultado: o script Python é inviável aqui
 
 ## Dependências novas (`SEG-07`)
 
-`Nenhuma` no Go. **Decisão aberta (Gate 1):** como a página obtém o renderizador de Mermaid e de Markdown:
+`Nenhuma` no Go. **Decisão do dono no Gate 1 (22/11/2026): opção C, híbrido.** Como a página obtém o renderizador de Mermaid e de Markdown:
 
 | Opção | Custo | Offline |
 |---|---|---|
@@ -79,7 +79,7 @@ O pedido sugeria avaliar as duas. **Resultado: o script Python é inviável aqui
 | **B. Embutir** os dois `.js` em `embed.FS` | binário **cresce** (Mermaid minificado é da ordem de MB) | funciona offline |
 | **C. Híbrido** | embute `marked` (pequeno) e usa CDN só para Mermaid | Markdown sempre; Mermaid com internet |
 
-**Recomendação: C.** Markdown, que está em toda spec, nunca depende de rede; Mermaid, que aparece em poucas, degrada com elegância. **O CDN carrega código de terceiros no navegador do dono:** a URL fica fixa com versão exata e hash de integridade (`SRI`), e o HTML é gerado localmente, nunca servido.
+**Escolhida: C.** Markdown, que está em toda spec, nunca depende de rede; Mermaid, que aparece em poucas, degrada com elegância. **O CDN carrega código de terceiros no navegador do dono:** a URL fica fixa com versão exata e hash de integridade (`SRI`), e o HTML é gerado localmente, nunca servido.
 
 ## Rules e IDs da Constituição Aplicáveis
 
