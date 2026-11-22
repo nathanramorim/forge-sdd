@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/forge-sdd/cli/internal/monitor"
 	"github.com/forge-sdd/cli/internal/notify"
 	"github.com/forge-sdd/cli/internal/pipeline"
 	"github.com/forge-sdd/cli/internal/survey"
@@ -14,6 +15,12 @@ import (
 
 // askConsent pergunta à pessoa; variável para os testes. Só roda em terminal interativo.
 var askConsent = func(text string) (bool, error) { return survey.ConfirmYesNo(text, false) }
+
+// workerRunner executa ps/tmux na detecção de workers; variável para os testes (nil usa o sistema).
+var workerRunner monitor.CommandRunner
+
+// semWorkerAviso é o aviso de fila sem consumidor; só informa, nunca falha.
+const semWorkerAviso = "nenhum worker ativo: as etapas ficam na fila; para executar neste chat, oriente os subagentes (veja a skill) ou inicie os workers"
 
 var pipelineTocaAiCmd = &cobra.Command{
 	Use:   "toca-ai <iniciativa>",
@@ -65,6 +72,11 @@ uma vez, sem enfileirar nada. Com --block registra um imprevisto: bloqueia a eta
 		}
 		fmt.Fprintf(out, "Base do PR: %s (fonte: %s)\n", res.BaseBranch, res.BaseSource)
 		fmt.Fprintf(out, "Etapas %s: %d novas, %d já estavam na fila (ordem: %s)\n", verb, len(res.Created), len(res.Existing), strings.Join(res.Steps, " → "))
+		if !dry {
+			if n, err := monitor.ActiveWorkers(dir, workerRunner); err != nil || n == 0 {
+				fmt.Fprintln(out, semWorkerAviso)
+			}
+		}
 		return nil
 	},
 }
