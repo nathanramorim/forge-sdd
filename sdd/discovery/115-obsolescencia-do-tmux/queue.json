@@ -1,0 +1,17 @@
+{
+  "feature_id": "115-obsolescencia-do-tmux",
+  "branch": "",
+  "spec_status": "reviewed",
+  "updated_at": "2026-11-22T01:27:40Z",
+  "items": [
+    {
+      "task_id": "fix-115-01",
+      "title": "fix-115-01-workers-por-iniciativa",
+      "spec_path": "sdd/discovery/115-obsolescencia-do-tmux/fixes/fix-115-01-workers-por-iniciativa.md",
+      "status": "queued",
+      "rules": [],
+      "skills_used": [],
+      "attempts": 0
+    }
+  ]
+}

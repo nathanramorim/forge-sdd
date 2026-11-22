@@ -1,0 +1,32 @@
+{
+  "$schema": "forge-sdd/metrics/1.0",
+  "feature": "sdd/discovery/115-obsolescencia-do-tmux/features/feat-115-03-01-contratos-de-tier.md",
+  "phase": "115-03",
+  "agent_path": [
+    "orquestrador",
+    "pm-architect",
+    "plan"
+  ],
+  "tokens_input": 1463,
+  "tokens_output": 5248,
+  "turns": 0,
+  "duration_seconds": 0,
+  "criterio_atendido": true,
+  "model": "",
+  "rework_lines": 0,
+  "context7_calls": 0,
+  "git_calls": 0,
+  "files_touched": [
+    "sdd/spec/adr/adr-0024-orquestracao-por-iniciativa-e-tier-de-modelo.md",
+    "sdd/discovery/115-obsolescencia-do-tmux/discovery.md",
+    "sdd/discovery/115-obsolescencia-do-tmux/criteria.md",
+    "sdd/discovery/115-obsolescencia-do-tmux/plan.md",
+    "sdd/discovery/115-obsolescencia-do-tmux/status.md",
+    "sdd/discovery/115-obsolescencia-do-tmux/features",
+    "sdd/discovery/115-obsolescencia-do-tmux/fixes/fix-115-01-workers-por-iniciativa.md"
+  ],
+  "outcome": "approved",
+  "sdd_version": "5.0.0",
+  "medicao": "estimado",
+  "complexidade": null
+}

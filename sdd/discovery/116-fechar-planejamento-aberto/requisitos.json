@@ -1,0 +1,15 @@
+{
+  "comandos": [
+    ["gh", "pr", "view"],
+    ["gh", "pr", "ready"],
+    ["gh", "pr", "merge"],
+    ["git", "merge-base", "--is-ancestor", "v5.1.0-beta", "main"],
+    ["go", "test", "./..."]
+  ],
+  "ferramentas": ["gh", "git", "go", "forge"],
+  "arquivos": [],
+  "consentimentos": [
+    {"id": "merge-main-specs", "texto": "Autorizo mesclar na main as specs 113, 115 e 98 depois do Reviewer conforme e do meu [Seguir]."},
+    {"id": "merge-commit-5-1", "texto": "Autorizo mesclar o #226 na main com merge commit (release)."}
+  ]
+}
