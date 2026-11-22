@@ -101,15 +101,8 @@ func GravaCardEvidence(dir, iniciativaRel string, ev CardEvidence) (CardEvidence
 	case err == nil && fi.Mode()&os.ModeSymlink != 0:
 		return ev, false, fmt.Errorf("%s é link simbólico: recusado (SEG-02)", CardEvidenceFile)
 	case err == nil:
-		if fi.Size() <= 16*1024 {
-			if raw, rerr := os.ReadFile(alvo); rerr == nil {
-				var atual CardEvidence
-				dec := json.NewDecoder(bytes.NewReader(raw))
-				dec.DisallowUnknownFields()
-				if dec.Decode(&atual) == nil && atual.Feature == ev.Feature && atual.ID != "" && atual.URL != "" {
-					return atual, true, nil
-				}
-			}
+		if atual, ok := leEvidenciaExistente(alvo, ev.Feature); ok {
+			return atual, true, nil
 		}
 	case !errors.Is(err, os.ErrNotExist):
 		return ev, false, fmt.Errorf("não foi possível inspecionar %s: %w", CardEvidenceFile, err)
@@ -121,6 +114,26 @@ func GravaCardEvidence(dir, iniciativaRel string, ev CardEvidence) (CardEvidence
 		return ev, false, err
 	}
 	return ev, false, nil
+}
+
+// leEvidenciaExistente devolve a evidência válida da mesma feature; inválida, ilegível, symlink ou
+// de outra feature não conta (nada é apagado).
+func leEvidenciaExistente(alvo, feature string) (CardEvidence, bool) {
+	var atual CardEvidence
+	fi, err := os.Lstat(alvo)
+	if err != nil || !fi.Mode().IsRegular() || fi.Size() > 16*1024 {
+		return atual, false
+	}
+	raw, err := os.ReadFile(alvo)
+	if err != nil {
+		return atual, false
+	}
+	dec := json.NewDecoder(bytes.NewReader(raw))
+	dec.DisallowUnknownFields()
+	if dec.Decode(&atual) != nil || atual.Feature != feature || atual.ID == "" || atual.URL == "" {
+		return CardEvidence{}, false
+	}
+	return atual, true
 }
 
 func validaEvidenciaParaGravar(ev CardEvidence) string {
@@ -152,6 +165,12 @@ func CriarIssueConcepcao(dir, specRel, iniciativaRel string, ad vcs.Adaptador, n
 	}
 	semEfeito := func() (ResultadoIssue, error) {
 		return ResultadoIssue{Motivo: "VCS sem suporte a issue: nada foi criado nem gravado"}, nil
+	}
+	// A evidência tem precedência sobre a busca por título (RN-4): sem chamada externa.
+	if pasta, cerr := gate.ConfineToDir(dir, iniciativaRel); cerr == nil {
+		if atual, ok := leEvidenciaExistente(filepath.Join(pasta, CardEvidenceFile), feature); ok {
+			return ResultadoIssue{Reaprovei: true, Motivo: fmt.Sprintf("a evidência já existe (id %s, %s): nada foi criado", atual.ID, atual.URL), Evidencia: atual}, nil
+		}
 	}
 	iss, err := ad.ProcurarIssueAberta(dir, corpo.Titulo)
 	if errors.Is(err, vcs.ErrSemPR) {

@@ -229,3 +229,69 @@ func TestCriarIssueConcepcaoCriaEReaproveita(t *testing.T) {
 		t.Fatalf("err=%v res=%+v", err, res)
 	}
 }
+
+func evidenciaBruta(t *testing.T, dir, conteudo string) string {
+	t.Helper()
+	alvo := filepath.Join(dir, filepath.FromSlash(iniTeste), CardEvidenceFile)
+	if err := os.WriteFile(alvo, []byte(conteudo), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	return alvo
+}
+
+func TestCriarIssueConcepcaoEvidenciaExistenteNaoCriaOutra(t *testing.T) {
+	dir := projetoComSpec(t, specOk)
+	if _, _, err := GravaCardEvidence(dir, iniTeste, evTeste()); err != nil {
+		t.Fatal(err)
+	}
+	alvo := filepath.Join(dir, filepath.FromSlash(iniTeste), CardEvidenceFile)
+	antes, _ := os.ReadFile(alvo)
+	ad := &adFake{}
+	res, err := CriarIssueConcepcao(dir, specTeste, iniTeste, ad, time.Now())
+	depois, _ := os.ReadFile(alvo)
+	if err != nil || res.Feito || !res.Reaprovei || res.Motivo == "" || res.Evidencia.ID != "7" || res.Evidencia.URL == "" {
+		t.Fatalf("err=%v res=%+v", err, res)
+	}
+	if ad.criadas != 0 || ad.buscadas != 0 || string(antes) != string(depois) {
+		t.Fatalf("chamadas externas ou reescrita: criadas=%d buscadas=%d", ad.criadas, ad.buscadas)
+	}
+}
+
+func TestCriarIssueConcepcaoReexecucaoCriaUmaSoVez(t *testing.T) {
+	dir := projetoComSpec(t, specOk)
+	ad := &adFake{} // a busca nunca acha a issue
+	for i := 0; i < 2; i++ {
+		if _, err := CriarIssueConcepcao(dir, specTeste, iniTeste, ad, time.Now()); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if ad.criadas != 1 {
+		t.Fatalf("CriarIssue chamada %d vezes, esperava 1", ad.criadas)
+	}
+}
+
+func TestCriarIssueConcepcaoEvidenciaInvalidaNaoBloqueia(t *testing.T) {
+	for nome, conteudo := range map[string]string{"corrompida": "{nao-json", "campo-extra": `{"id":"1","url":"https://x/1","feature":"900-teste","extra":1}`, "sem-id": `{"feature":"900-teste"}`} {
+		t.Run(nome, func(t *testing.T) {
+			dir := projetoComSpec(t, specOk)
+			evidenciaBruta(t, dir, conteudo)
+			ad := &adFake{}
+			res, err := CriarIssueConcepcao(dir, specTeste, iniTeste, ad, time.Now())
+			if err != nil || ad.criadas != 1 || !res.Feito {
+				t.Fatalf("err=%v criadas=%d res=%+v", err, ad.criadas, res)
+			}
+		})
+	}
+}
+
+func TestCriarIssueConcepcaoEvidenciaDeOutraFeatureNaoImpede(t *testing.T) {
+	dir := projetoComSpec(t, specOk)
+	outra := evTeste()
+	outra.Feature = "901-outra"
+	evidenciaBruta(t, dir, `{"provider":"github-projects","id":"3","url":"https://github.com/o/r/issues/3","status":"Spec","feature":"901-outra","checked_at":"`+outra.CheckedAt+`"}`)
+	ad := &adFake{}
+	res, err := CriarIssueConcepcao(dir, specTeste, iniTeste, ad, time.Now())
+	if err != nil || ad.criadas != 1 || !res.Feito {
+		t.Fatalf("err=%v criadas=%d res=%+v", err, ad.criadas, res)
+	}
+}
