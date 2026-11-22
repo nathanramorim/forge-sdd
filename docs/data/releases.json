@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "chave_conteudo": "a54050fa26f99bdf",
-  "versao_historico": "1b72a8c",
+  "chave_conteudo": "093229787937a582",
+  "versao_historico": "cc84d53",
   "versoes": [
     {
       "versao": "5.0.0",
@@ -80,6 +80,10 @@
         {
           "titulo": "A barreira fica instalada (#182)",
           "texto": "o hook `PreToolUse` que barra o `gh` entra sozinho no `.claude/settings.json`, e o `forge doctor` mostra em quais agentes ele vale. Nos outros agentes, o job `pronto?` do CI segura."
+        },
+        {
+          "titulo": "Skill de diagramas no repositório (98-01)",
+          "texto": "`diagramas-c4-mermaid` passa a viver em `.agents/skills/` e pergunta o motor, Mermaid (padrão) ou diagram-studio, sem instalar nada."
         },
         {
           "titulo": "Atestado conferido no CI (#196)",
