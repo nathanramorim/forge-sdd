@@ -38,18 +38,22 @@ Execuções do workflow `CI` por dia, medidas com `gh api .../actions/runs`: 20/
 | Selo de validação local | `scripts/atestado.py`, modo `local` | confere o parecer do Reviewer | **reusar** o padrão: grava `.forge/runtime/ci-local.json` com `head_sha` |
 | Trava do `gh pr ready` | `scripts/pr_guard.py` | exige parecer `conforme` com `head_sha` do HEAD | **estender**: exige também o selo local com o mesmo `head_sha` |
 
+## Mapa do fluxo
+
+Diagrama dinâmico com os agentes e onde o CI entra: [`../diagramas/fluxo-ci-local-primeiro.md`](../diagramas/fluxo-ci-local-primeiro.md).
+
 ## Comportamento esperado
 
-1. **Draft não dispara nada.** O job `pronto?` passa a rodar só quando o PR **não** é draft (`if: ... draft == false`) e no evento `ready_for_review`. Push em draft gera runs com jobs pulados, sem minuto cobrado e sem vermelho.
+1. **O gatilho é só `ready_for_review`.** `on.pull_request.types` passa de `[opened, synchronize, reopened, ready_for_review]` para `[ready_for_review]`. Push em draft, em PR pronto ou na abertura **não cria run nenhum** (hoje cria, e é daí que vem o volume). Nova rodada = voltar o PR a draft e marcá-lo pronto de novo, ou `workflow_dispatch` manual.
 2. **Sem CI no push da `main`.** Remover `on.push` de `ci.yml`. O PR é a barreira; o merge squash não revalida.
 3. **`scripts/ci-local.sh`** roda build, vet, testes (`-count=1`), lint se instalado e o cross-compile; ao passar, grava o selo `ci-local.json` com `head_sha` e hora. Falha não grava selo.
 4. **`gh pr ready` exige o selo** do HEAD atual (como já exige o parecer). Sem selo ou com SHA velho, recusa e manda rodar `scripts/ci-local.sh`.
-5. **O GitHub Actions roda uma vez**, ao sair do draft (`ready_for_review`). Novo commit em PR pronto continua cancelando o run anterior (`concurrency`), mas o fluxo normal não empurra commit depois do `ready`.
+5. **O GitHub Actions roda uma vez**, ao sair do draft. Os jobs `pronto?`, `test` e `lint` rodam nesse único evento; `concurrency` segue cancelando o run anterior da mesma PR. Dentro do job, `pronto?` continua recusando draft (rede de segurança para o `workflow_dispatch`).
 6. **Medição:** `scripts/ci-politica.py` ganha a linha "runs por dia por evento" para o dono ver a queda.
 
 ## Critérios de aceitação
 
-- Num PR em draft, um push não cria job com falha nem minuto cobrado (verificável em `gh run list`).
+- Um push em PR (draft ou pronto) **não cria run**; só `ready_for_review` e `workflow_dispatch` criam (verificável em `gh run list`).
 - Um merge na `main` não dispara o workflow `CI`.
 - `scripts/ci-local.sh` falha com teste quebrado (exit ≠ 0, sem selo) e passa limpo (exit 0, selo com o HEAD).
 - `gh pr ready` sem selo do HEAD é recusado com mensagem acionável; com selo e parecer, passa.
