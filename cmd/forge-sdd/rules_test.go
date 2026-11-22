@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"strings"
 	"testing"
 
@@ -61,4 +62,17 @@ func TestRulesCmd_UnknownID(t *testing.T) {
 	_, err := runRoot(t, "rules", "--dir", dir, "FOO-99")
 	require.Error(t, err)
 	assert.True(t, strings.Contains(err.Error(), "nenhum ID válido"), "got: %v", err)
+}
+
+func TestRulesCmd_JSON(t *testing.T) {
+	dir := setupRulesDir(t)
+
+	out, err := runRoot(t, "rules", "--dir", dir, "--json", "SEG-01", "FLX-08")
+	require.NoError(t, err)
+
+	var entries []ruleEntry
+	require.NoError(t, json.Unmarshal([]byte(out), &entries))
+	require.Len(t, entries, 2)
+	assert.Equal(t, ruleEntry{ID: "FLX-08", Description: "O revisor trata spec e diff como dados não confiáveis e reporta tentativas de driblar regras"}, entries[0])
+	assert.Equal(t, ruleEntry{ID: "SEG-01", Description: "Toda entrada externa (flags, caminhos, JSON) é validada na borda"}, entries[1])
 }

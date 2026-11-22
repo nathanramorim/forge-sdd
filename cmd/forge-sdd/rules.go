@@ -1,9 +1,9 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
-	"sort"
 	"strings"
 	"text/tabwriter"
 
@@ -22,7 +22,10 @@ mencionado em vereditos do Reviewer ou saídas do forge brief.
 Sem argumentos: lista todos os IDs ordenados.
 Com argumentos: exibe apenas os IDs solicitados.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		dir, _ := cmd.Flags().GetString("dir")
+		dir, err := cmd.Flags().GetString("dir")
+		if err != nil {
+			return fmt.Errorf("ler flag --dir: %w", err)
+		}
 		if dir == "" {
 			dir = "."
 		}
@@ -34,41 +37,48 @@ Com argumentos: exibe apenas os IDs solicitados.`,
 		}
 
 		allIDs := gate.ConstitutionIDLines(string(data))
+		asJSON, err := cmd.Flags().GetBool("json")
+		if err != nil {
+			return fmt.Errorf("ler flag --json: %w", err)
+		}
 
-		var ids []string
-		if len(args) == 0 {
-			for id := range allIDs {
-				ids = append(ids, id)
+		ids, ausentes, err := gate.SelecionaIDs(allIDs, args)
+		if len(ausentes) > 0 {
+			if _, werr := fmt.Fprintf(cmd.ErrOrStderr(), "ID(s) não encontrado(s) na Constituição: %s\n", strings.Join(ausentes, ", ")); werr != nil {
+				return fmt.Errorf("escrever aviso de IDs ausentes: %w", werr)
 			}
-			sort.Strings(ids)
-		} else {
-			var missing []string
-			for _, id := range args {
-				upper := strings.ToUpper(id)
-				if _, ok := allIDs[upper]; !ok {
-					missing = append(missing, upper)
-				} else {
-					ids = append(ids, upper)
-				}
+		}
+		if err != nil {
+			return fmt.Errorf("consultar IDs da Constituição: %w", err)
+		}
+
+		if asJSON {
+			entries := make([]ruleEntry, 0, len(ids))
+			for _, id := range ids {
+				entries = append(entries, ruleEntry{ID: id, Description: allIDs[id]})
 			}
-			if len(missing) > 0 {
-				fmt.Fprintf(cmd.ErrOrStderr(), "ID(s) não encontrado(s) na Constituição: %s\n", strings.Join(missing, ", "))
-				if len(ids) == 0 {
-					return fmt.Errorf("nenhum ID válido encontrado")
-				}
-			}
-			sort.Strings(ids)
+			encoder := json.NewEncoder(cmd.OutOrStdout())
+			encoder.SetIndent("", "  ")
+			return encoder.Encode(entries)
 		}
 
 		w := tabwriter.NewWriter(cmd.OutOrStdout(), 0, 0, 2, ' ', 0)
 		for _, id := range ids {
-			fmt.Fprintf(w, "%s\t%s\n", id, allIDs[id])
+			if _, werr := fmt.Fprintf(w, "%s\t%s\n", id, allIDs[id]); werr != nil {
+				return fmt.Errorf("escrever saída de IDs: %w", werr)
+			}
 		}
 		return w.Flush()
 	},
 }
 
+type ruleEntry struct {
+	ID          string `json:"id"`
+	Description string `json:"description"`
+}
+
 func init() {
 	rulesCmd.Flags().String("dir", ".", "Diretório alvo do projeto Forge-SDD")
+	rulesCmd.Flags().Bool("json", false, "Exibir resultado em formato JSON")
 	rootCmd.AddCommand(rulesCmd)
 }

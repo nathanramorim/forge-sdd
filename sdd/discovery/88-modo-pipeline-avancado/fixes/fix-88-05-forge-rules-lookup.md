@@ -19,7 +19,7 @@
 
 ## Modelo do módulo
 
-**Enxuto** (ARQ-11): novo subcomando `forge rules [ID...]` em `cmd/forge-sdd/` usando `ConstitutionIDLines` já existente em `internal/gate/`. Sem nova dependência.
+**Enxuto** (ARQ-11): novo subcomando `forge rules [ID...]` em `cmd/forge-sdd/` usando `ConstitutionIDLines` (`internal/gate/context.go`) e a seleção `gate.SelecionaIDs` (`internal/gate/rules.go`). Sem nova dependência.
 
 ## Decisões do projeto aplicadas
 
@@ -29,12 +29,12 @@
 
 ## O que já existe
 
-| Procurei | Onde | Achei | Decisão |
-|---|---|---|---|
-| Função de lookup de IDs | `internal/gate/brief.go` | `ConstitutionIDLines(constitution string) map[string]string` já mapeia ID→descrição completa | **reusar** diretamente |
-| Subcomando `rules` | `cmd/forge-sdd/` | Ausente | **criar** |
-| Subcomando `constitution` | `cmd/forge-sdd/` | Ausente; existe `/constitution` como slash command | **não duplicar** — slash command já existe; `forge rules` é CLI rápido |
-| Leitura da constitution | `cmd/forge-sdd/brief.go` | `loadConstitutionPath` ou similar | verificar e reusar |
+| Procurei | Onde | Achei | Decisão (reusar, estender, criar) | Justificativa |
+|---|---|---|---|---|
+| Função de lookup de IDs | `internal/gate/context.go` | `ConstitutionIDLines(constitution string) map[string]string` já mapeia ID→descrição completa | **reusar** diretamente | A função já extrai os IDs e descrições completas no formato necessário, evitando lógica duplicada. |
+| Subcomando `rules` | `cmd/forge-sdd/` | Ausente | **criar** | Nenhum subcomando CLI existente oferece lookup de IDs da Constituição. |
+| Subcomando `constitution` | `cmd/forge-sdd/` | Ausente; existe `/constitution` como slash command | **não duplicar** — usar `forge rules` para lookup | O slash command atende ao fluxo interativo; este fix precisa de uma consulta rápida via CLI. |
+| Leitura da Constitution | `internal/gate/context.go` | `BuildContext` lê `layout.Constitution(dir)` com `os.ReadFile` (context.go:74); não há helper `loadConstitutionPath` em `cmd/forge-sdd/brief.go` | **reusar** `layout.Constitution` para localizar o arquivo e a leitura padrão | O `forge brief` não oferece um helper de leitura reutilizável em `cmd/`; `layout.Constitution` centraliza o caminho e `os.ReadFile` evita duplicar abstrações inexistentes. |
 
 ## Dependências novas
 
