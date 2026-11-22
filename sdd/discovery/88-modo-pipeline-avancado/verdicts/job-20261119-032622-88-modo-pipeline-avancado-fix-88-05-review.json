@@ -1,0 +1,30 @@
+{
+  "veredito": "violacao",
+  "achados": [
+    {
+      "verificacao": "S-02",
+      "regra": "DUP-02",
+      "regra_descricao": "Toda spec traz `## O que já existe` (procurei, onde, achei, decisão `reusar`, `estender` ou `criar`).",
+      "classificacao": "violacao",
+      "severidade": "media",
+      "arquivo": "sdd/discovery/88-modo-pipeline-avancado/fixes/fix-88-05-forge-rules-lookup.md",
+      "linha": 32,
+      "evidencia": "| Procurei | Onde | Achei | Decisão |",
+      "explicacao": "A tabela não inclui justificativa, exigida pelo procedimento DUP-02 em `.agents/rules/sdd-reuso-e-duplicacao.md`. A linha de leitura da Constituição termina com “verificar e reusar”, sem registrar qual implementação foi encontrada nem uma decisão final.",
+      "correcao": "Complete a tabela com a coluna de justificativa e registre o achado e a decisão concreta para a leitura da Constituição."
+    },
+    {
+      "verificacao": "S-05",
+      "regra": "FLX-03",
+      "regra_descricao": "Todo PR preenche `.github/pull_request_template.md` e entrega exatamente o escopo da Spec.",
+      "classificacao": "violacao",
+      "severidade": "baixa",
+      "arquivo": "sdd/memory/progress-log.md",
+      "linha": 52,
+      "evidencia": "- 2026-11-18: Iniciativa 88-modo-pipeline-avancado concluída e arquivada com sucesso.",
+      "explicacao": "A spec limita a entrega ao lookup `forge rules`, mas o PR também altera `progress-log.md` com duas entradas de fechamento de iniciativas sem relação com este fix.",
+      "correcao": "Remova as alterações de `sdd/memory/progress-log.md` deste PR."
+    }
+  ],
+  "resumo": "A Camada A (`forge gate --mode bloqueio`) passou e build, vet e testes passaram no commit do PR. A revisão semântica encontrou uma spec com tabela de reuso incompleta e alterações de histórico fora do escopo."
+}

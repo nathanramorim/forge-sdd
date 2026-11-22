@@ -11,17 +11,8 @@
 - **Com argumento:** procure `sdd/discovery/*<nome>*`. Se houver mais de uma correspondência, liste e pergunte. Use `forge status --all-branches` para achar iniciativas que vivem em outra branch.
 - Reporte iniciativa, branch e tasks na fila (por situação) e aguarde confirmação do usuário, a menos que `--yes` tenha sido pedido.
 
-## 2. Uma branch e um PR por feature (Regra 15, `FLX-02`, ADR-0022)
-
-**Não existe mais "uma branch cobre toda a iniciativa".** A spec já voltou à principal; a construção
-parte dela:
-
-- **Uma branch por feature do split:** `feat/<id>-<nome>-<sid>` (ou `fix/...` quando a task é fix),
-  sempre **aberta a partir da principal** — nunca da branch da spec, que já foi mesclada e sumiu.
-- **Um PR em draft por feature**, com a base na principal. Nenhum PR tem base em outro PR.
-- Se a branch da feature já existir, pergunte se retoma; se não, crie a partir de `main`.
-- A ordem dentro da onda respeita o plano: uma feature só começa com as dependências **mescladas**
-  (feat-106-24c), não apenas abertas.
+## 2. Branch (Regra 15, `FLX-02`)
+Uma única branch cobre toda a pasta da iniciativa. Se a branch já existir, pergunte se retoma; se não, pergunte a branch de partida (padrão `main`) e crie `feat/<id>-<nome>`.
 
 ## 3. Laço da fila
 Para cada task em ordem de dependência:
@@ -32,12 +23,5 @@ Para cada task em ordem de dependência:
 
 ## 4. Fechamento
 - Atualize `status.md` da iniciativa (até 1 KB) e escreva a release note no topo de `sdd/releases/history.md` (seção `## Entregas`).
-- **PR da feature em draft, pelo adaptador:** consulte `VCS / Work Item System` na Constitution.
-  - `github`: `gh pr create --draft --base main --head <branch> --fill`. O `--draft` é **obrigatório**
-    — um PR que nasce pronto fura a Conferência 2 e o CI roda caro antes da revisão (`RN-7`).
-  - `azure-devops`: `az repos pr create --draft true`.
-  - `nenhum`: só informe a branch pronta; o merge é local (`RN-25`).
-  **Nunca** use `gh pr create --fill` sozinho: sem `--draft` o PR nasce pronto.
-- **Marcar pronto é outra etapa:** só depois da Conferência 2 e do `[Continuar]`, com parcel
-  `conforme` para o **HEAD atual** (feat-106-21). `gh pr ready` antes disso é recusado.
+- `git push origin <branch>` (sem `gh`, informe o link da branch); consulte `VCS / Work Item System` na Constitution: `github` usa `gh pr create --fill` (versões `-beta` não mesclam em `main`), `azure-devops` usa `az repos pr create`, `nenhum` só informa a branch pronta.
 - Telemetria por task: `forge session record --feature "<spec>" --phase "<id>" --agent-path "lider,builder,governance" --outcome approved|rejected|blocked --criterio-atendido=true|false --tokens-input <n> --tokens-output <n> --turns <n> --duration-seconds <n> --model "<modelo>" --files-touched "<arquivos>"`. Estime os tokens de forma realista (1 token ≈ 4 caracteres) e nunca zerados se houve interação. Sessão interrompida, cancelada ou com timeout: `--outcome blocked --criterio-atendido=false`.

@@ -22,32 +22,28 @@ import (
 )
 
 // FormatLiveStatus consolida a verificação rápida de status em tempo real (tríplice):
-// 1. Ao Vivo no Painel (painel tmux ou últimas linhas de log de runtime)
+// 1. Ao Vivo no Painel (últimas linhas de log de runtime)
 // 2. Commits Recentes no Git
 // 3. Fila de Tarefas
 // Retorna a saída canônica formatada (< 200 tokens).
 func FormatLiveStatus(dir string) (string, error) {
-	return FormatLiveStatusWith(dir, nil, nil)
+	return FormatLiveStatusWith(dir, nil)
 }
 
 // GitRunnerFn define o contrato de busca de commits para testes e desacoplamento.
 type GitRunnerFn func(dir string, max int) ([]string, error)
 
 // FormatLiveStatusWith permite injeção de dependências para testes determinísticos.
-func FormatLiveStatusWith(dir string, deliverer TmuxDeliverer, gitFn GitRunnerFn) (string, error) {
+func FormatLiveStatusWith(dir string, gitFn GitRunnerFn) (string, error) {
 	if dir == "" {
 		dir = "."
 	}
 
-	absDir, err := filepath.Abs(dir)
-	proj := TmuxProjectName(dir)
-	if err == nil {
-		proj = TmuxProjectName(absDir)
-	}
+	proj := nomeDoProjeto(dir)
 	branch := currentBranch(dir)
 
 	role := detectActiveRole(dir)
-	liveLines := captureLiveLines(dir, role, deliverer)
+	liveLines := captureLiveLines(dir, role)
 
 	if gitFn == nil {
 		gitFn = gitRecentCommits
@@ -206,19 +202,15 @@ func formatProgressBar(completed, total int, width int) string {
 }
 
 // FormatRichDashboard gera a interface visual completa do painel vivo da esteira.
-func FormatRichDashboard(dir string, deliverer TmuxDeliverer, gitFn GitRunnerFn, report *monitor.ProjectProcessReport) (string, error) {
+func FormatRichDashboard(dir string, gitFn GitRunnerFn, report *monitor.ProjectProcessReport) (string, error) {
 	if dir == "" {
 		dir = "."
 	}
 
-	absDir, err := filepath.Abs(dir)
-	proj := TmuxProjectName(dir)
-	if err == nil {
-		proj = TmuxProjectName(absDir)
-	}
+	proj := nomeDoProjeto(dir)
 	branch := currentBranch(dir)
 	role := detectActiveRole(dir)
-	liveLines := captureLiveLines(dir, role, deliverer)
+	liveLines := captureLiveLines(dir, role)
 
 	if gitFn == nil {
 		gitFn = gitRecentCommits
@@ -394,7 +386,7 @@ func RunLiveDashboard(ctx context.Context, dir string, out io.Writer, once bool)
 	}
 
 	if once {
-		content, err := FormatRichDashboard(dir, nil, nil, nil)
+		content, err := FormatRichDashboard(dir, nil, nil)
 		if err != nil {
 			return err
 		}
@@ -412,7 +404,7 @@ func RunLiveDashboard(ctx context.Context, dir string, out io.Writer, once bool)
 	defer fmt.Fprint(out, "\033[?1049l\033[?25h")
 
 	render := func() error {
-		content, err := FormatRichDashboard(dir, nil, nil, nil)
+		content, err := FormatRichDashboard(dir, nil, nil)
 		if err != nil {
 			return err
 		}
@@ -470,28 +462,9 @@ func detectActiveRole(dir string) string {
 	return "Ocioso"
 }
 
-func captureLiveLines(dir string, role string, deliverer TmuxDeliverer) []string {
-	proj := TmuxProjectName(dir)
-	sess := TmuxSessionName(dir)
-	exact := "=" + sess
-	win := exact + ":forge:" + proj
-
-	if deliverer == nil {
-		deliverer = DefaultTmuxDeliverer()
-	}
-
-	targetPane := win + ".1"
-	if role == "Reviewer" {
-		targetPane = win + ".2"
-	}
-	out, err := deliverer.CapturePane(targetPane)
-	if err == nil {
-		lines := extractLastInformativeLines(out, 2)
-		if len(lines) > 0 {
-			return lines
-		}
-	}
-
+func captureLiveLines(dir string, role string) []string {
+	// O painel vivo lê só o log de runtime: o tmux saiu (feat-115-02). A função antiga já
+	// caía para cá quando o tmux falhava; agora ele é o único caminho.
 	return readLastLogLines(dir, role)
 }
 
@@ -619,4 +592,13 @@ func humanizeLine(line string) []string {
 		return out
 	}
 	return []string{t}
+}
+
+// nomeDoProjeto é o nome exibido no painel: o nome da pasta do projeto (antes vinha do tmux).
+func nomeDoProjeto(dir string) string {
+	abs, err := filepath.Abs(dir)
+	if err != nil {
+		abs = dir
+	}
+	return filepath.Base(filepath.Clean(abs))
 }

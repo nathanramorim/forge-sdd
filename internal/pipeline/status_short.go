@@ -43,7 +43,7 @@ func FormatShortStatusAll(dir string, all bool) (string, error) {
 	}
 
 	var b strings.Builder
-	fmt.Fprintf(&b, "Esteira — %s (%s)\n", TmuxProjectName(abs), currentBranch(dir))
+	fmt.Fprintf(&b, "Esteira — %s (%s)\n", nomeDoProjeto(abs), currentBranch(dir))
 	if len(active) == 0 {
 		b.WriteString("Nenhuma iniciativa ativa.\nPróximo passo: /discovery\n")
 	} else {

@@ -6,7 +6,7 @@
 2. **Gate (`FLX-01`):** leia `plan.md` e `criteria.md` da iniciativa e confirme a revisão humana da Spec.
 3. **ADRs e rules:** carregue as ADRs e as rules aplicáveis antes de fatiar; nenhuma task pode violá-las, e cada task cita as que a governam na seção `## Decisões do projeto aplicadas`.
 4. **Critérios de quebra:** fatie quando a feature cruzar mais de um contexto delimitado ou tiver mais de 7 tarefas. Sem dependência circular; cada task testável sozinha; ordem de baixo para cima (infraestrutura, domínio, aplicação, interface).
-5. **Sem branch nova aqui (`FLX-01`, ADR-0022):** o split **não** cria branch. A spec já voltou à principal pelo PR dela; cada feature terá **a sua própria branch** (`feat/<id>-<nome>-<sid>`), aberta pelo Builder a partir da principal, com o seu PR em draft. Só cria specs em `sdd/discovery/<id>-<nome>/features/`, na branch atual.
+5. **Branch única (Regra 15):** `git branch --list feat/<id>-*`; pergunte a branch de partida (padrão `main`) e se retoma branch existente; `git checkout -b feat/<id>-<nome>` antes de criar as specs.
 6. **Tasks:** crie `sdd/discovery/<id>-<nome>/features/feat-<id>-<nn>-<nome>.md` com `Modelo do módulo`, `Decisões do projeto aplicadas`, `O que já existe`, `Dependências novas`, `Rules e IDs da Constituição Aplicáveis` e `Critérios de Aceitação Executáveis`.
 7. **Estado:** atualize `status.md` da iniciativa; não escreva índice nem progresso globais.
 

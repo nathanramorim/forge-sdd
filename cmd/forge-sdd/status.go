@@ -50,11 +50,6 @@ Com --compact, imprime a versão tríplice enxuta (< 200 tokens) para agentes.`,
 			return err
 		}
 
-		tmuxFlag, _ := cmd.Flags().GetBool("tmux")
-		if tmuxFlag {
-			return pipeline.OpenLiveStatusInTmux(dir)
-		}
-
 		live, _ := cmd.Flags().GetBool("live")
 		if live {
 			once, _ := cmd.Flags().GetBool("once")
@@ -86,7 +81,7 @@ Com --compact, imprime a versão tríplice enxuta (< 200 tokens) para agentes.`,
 		}
 
 		// forge status padrão: snapshot do painel executivo rico da esteira
-		dashboard, err := pipeline.FormatRichDashboard(dir, nil, nil, nil)
+		dashboard, err := pipeline.FormatRichDashboard(dir, nil, nil)
 		if err != nil {
 			return err
 		}

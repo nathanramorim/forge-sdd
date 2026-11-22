@@ -1,0 +1,24 @@
+{
+  "$schema": "forge-sdd/metrics/1.0",
+  "feature": "sdd/discovery/97-finalizar-implementacoes-pendentes/features/feat-97-02-feat-96-01-limpeza-worktrees.md",
+  "phase": "97-02",
+  "agent_path": [
+    "builder"
+  ],
+  "tokens_input": 4669,
+  "tokens_output": 1168,
+  "turns": 1,
+  "duration_seconds": 900,
+  "criterio_atendido": true,
+  "model": "",
+  "rework_lines": 4,
+  "context7_calls": 0,
+  "git_calls": 0,
+  "files_touched": [
+    "sdd/discovery/97-finalizar-implementacoes-pendentes/features/feat-97-02-feat-96-01-limpeza-worktrees.md"
+  ],
+  "outcome": "approved",
+  "sdd_version": "5.0.0",
+  "medicao": "estimado",
+  "complexidade": null
+}

@@ -1,0 +1,18 @@
+{
+  "veredito": "violacao",
+  "achados": [
+    {
+      "verificacao": "S-01",
+      "regra": "ARQ-01",
+      "regra_descricao": "`cmd/` só adapta a CLI (flags); regras e domínio ficam em `internal/`, que nunca importa `cmd/`.",
+      "classificacao": "violacao",
+      "severidade": "media",
+      "arquivo": "cmd/forge-sdd/rules.go",
+      "linha": 48,
+      "evidencia": "if _, ok := allIDs[upper]; !ok {",
+      "explicacao": "O handler Cobra decide quais IDs existem, separa entradas válidas das inválidas e determina quando a solicitação deve falhar (linhas 46–58). Essa validação e política de lookup são comportamento do domínio implementado em `cmd/`, contrariando a fronteira definida por ARQ-01.",
+      "correcao": "Extraia a seleção e validação dos IDs para uma função de domínio em `internal/` e deixe o handler apenas ler flags/argumentos e formatar a resposta."
+    }
+  ],
+  "resumo": "A revisão encontrou lógica de lookup e validação no handler CLI, em desacordo com ARQ-01. A seção O que já existe está preenchida e o forge gate passou na Camada A."
+}

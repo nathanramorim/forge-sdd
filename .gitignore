@@ -8,3 +8,4 @@ site/.astro/
 site/.wrangler/
 sdd/.runtime/
 .forge/
+.claude/bkp.settings.local.json

@@ -1,0 +1,18 @@
+{
+  "veredito": "violacao",
+  "achados": [
+    {
+      "verificacao": "S-03",
+      "regra": "FLX-02",
+      "regra_descricao": "Isolamento de branch e iniciativa: sem commit direto em `main` (Regra 1); branch por feature (`feat/*`, `fix/*`, Regra 2); tasks agrupadas em `sdd/discovery/\u003cid\u003e-\u003cnome\u003e/` (Regra 13); a spec em branch e PR próprios que voltam para a principal, e a construção em uma branch por feature a partir da principal (Regra 15).",
+      "classificacao": "violacao",
+      "severidade": "media",
+      "arquivo": "internal/queue/pr.go",
+      "linha": 114,
+      "evidencia": "\"gh\", \"pr\", \"create\",\n\t\t\"--title\", title,\n\t\t\"--body\", resumo,\n\t\t\"--base\", baseBranch,",
+      "explicacao": "A feature promete abrir o PR em draft e manter esse estado até a Conferência 2 e a decisão [Continuar] (spec, linhas 22–26 e ADR-0022/0023). O comando do diff cria o PR sem a opção --draft, então o PR nasce pronto para revisão e pode disparar CI antes do ponto definido.",
+      "correcao": "Passe --draft para gh pr create (ou use o adaptador de VCS que cria PR em draft) e cubra essa opção em teste."
+    }
+  ],
+  "resumo": "O gate forge gate passou em modo de observação. O PR não atende à política vigente de criação de PRs em draft: o comando de criação não inclui --draft, contrariando o comportamento da spec e as ADRs 0022/0023."
+}

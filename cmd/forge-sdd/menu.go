@@ -520,26 +520,22 @@ func (e *menuEnv) diagnose() {
 	_ = e.p.Pause("Enter para voltar ao menu")
 }
 
-// terminalLabel diz onde as sessões vão abrir: "no tmux (3 painéis)", "em painéis do Windows Terminal" ou "em janelas do sistema".
-func (e *menuEnv) terminalLabel(cfg config.ForgeConfig) string {
+// terminalLabel diz onde as sessões vão abrir. O tmux saiu (feat-115-02): a escolha agora é
+// entre os painéis do Windows Terminal, quando existem, e as janelas do sistema.
+func (e *menuEnv) terminalLabel(config.ForgeConfig) string {
 	look := e.preflightEnv.LookPath
 	if look == nil {
 		look = pipeline.DefaultPreflightEnv().LookPath
 	}
-	env := pipeline.LaunchEnv{GOOS: runtime.GOOS, LookPath: look}
-	term, err := pipeline.ResolveTerminal("", cfg, env)
-	if err != nil || term == config.TerminalNative {
-		if runtime.GOOS == "windows" {
-			if _, err := look("wt.exe"); err == nil {
-				return "em painéis do Windows Terminal"
-			}
-			if _, err := look("wt"); err == nil {
-				return "em painéis do Windows Terminal"
-			}
+	if runtime.GOOS == "windows" {
+		if _, err := look("wt.exe"); err == nil {
+			return "em painéis do Windows Terminal"
 		}
-		return "em janelas do sistema"
+		if _, err := look("wt"); err == nil {
+			return "em painéis do Windows Terminal"
+		}
 	}
-	return "no tmux (3 painéis)"
+	return "em janelas do sistema"
 }
 
 // settingKey é uma chave liga/desliga mostrada no menu Settings.

@@ -10,4 +10,3 @@ Rode `forge doctor` e reporte verde ou vermelho para cada item, sem corrigir nad
 5. `sdd/.metrics/schema.json` presente.
 6. Nome do projeto no `.sddrc` ainda no padrão `meu-projeto`.
 7. Inclua o resumo de telemetria (sessões approved, rejected e blocked).
-8. `forge doctor --harness [--json]` diagnostica o harness do pipeline (versão do binário, skills, contrato skill x binário, pareceres gravados, worktrees e workers) e sai com 3 se houver falha. Só lê: não corrija nem apague por conta própria.

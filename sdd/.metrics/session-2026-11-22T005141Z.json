@@ -1,0 +1,22 @@
+{
+  "$schema": "forge-sdd/metrics/1.0",
+  "feature": "sdd/discovery/97-finalizar-implementacoes-pendentes/features/feat-97-03-feat-95-01-visualizador-discovery-apos-spec.md",
+  "phase": "goal-feat-97-03-97-finalizar-implementacoes-pendentes",
+  "agent_path": [
+    "builder"
+  ],
+  "tokens_input": 3586,
+  "tokens_output": 21691,
+  "turns": 0,
+  "duration_seconds": 0,
+  "criterio_atendido": false,
+  "model": "",
+  "rework_lines": 0,
+  "context7_calls": 0,
+  "git_calls": 0,
+  "files_touched": null,
+  "outcome": "blocked",
+  "sdd_version": "5.0.0",
+  "medicao": "estimado",
+  "complexidade": null
+}
