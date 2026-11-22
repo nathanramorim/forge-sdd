@@ -60,7 +60,7 @@ Nada liga o `[Seguir]` aos passos seguintes. O quadro como módulo (108 e 109) e
 | Mover o card | agente via MCP (`/implementar`) e `card-evidence.json` | existe, manual | **manter no agente**; acrescentar o passo no fluxo do `[Seguir]` |
 | Status do card | `internal/config/forge.go` (`pm_mcp.status_on_*`) | só `implement` e `pr_approved` | **acrescentar** `status_on_spec_approved` (opcional; vazio = pular) |
 | Subir vários workers | `forge up`, `forge worker` | um worker por processo | **reusar** para subir até N workers headless (a confirmar) |
-| CI em PR só de spec | `.github/workflows/ci.yml`, `scripts/ci-politica.py` | matriz de 3 sistemas em qualquer PR fora do draft | **estender**: PR que só muda `sdd/**` e `*.md` não roda a matriz |
+| CI em PR só de spec | `.github/workflows/ci.yml` | **superada pelo fix-106-10**: CI só em `ready_for_review`, sem matriz | **nada a construir** |
 
 ## Dependências novas (`SEG-07`)
 
@@ -82,7 +82,7 @@ Rules: `sdd-arquitetura`, `sdd-codigo-e-testes`, `sdd-fluxo-e-portao`, `sdd-modo
 4. **Despacho:** `forge dispatch <iniciativa> --liberar` enfileira as tasks **prontas** (status `queued`, todas as `depends_on` aprovadas), **até** `min(builder.max_parallel_tasks, prontas)`.
 5. **Paralelização:** sobe até N workers de Builder headless, cada um em **worktree próprio** e **branch e PR em draft por feature**. Quando uma task é aprovada, as que dependiam dela viram prontas e são enfileiradas, até o teto, sem nova ação do dono.
 6. **Parada e visibilidade:** respeita `.forge/runtime/STOP`; `forge status` mostra "N em execução, M na fila, K bloqueadas". No teto de tentativas (3 por delegação), escala em menu.
-7. **CI em PR só de spec:** o job `test` decide por `git diff --name-only` e sai verde **sem rodar a matriz** quando só mudaram `sdd/**` e `*.md`. Remove o vermelho de macOS e Windows de PRs que não tocam código.
+7. ~~**CI em PR só de spec:** filtro por `git diff --name-only`~~ *Superada pelo fix-106-10 (22/11/2026): não há mais matriz de sistemas; o CI roda uma vez, só em `ready_for_review`, então o filtro por tipo de arquivo é desnecessário.*
 
 **Fora:**
 - Tirar do draft o PR de **feature**, ou mesclar código: continua do dono (`[Continuar]`).
@@ -110,7 +110,7 @@ go test ./internal/pipeline/... -run 'TestLiberarSemPmMcpPulaOCard'
 go test ./internal/pipeline/... -run 'TestLiberarNaoTiraPRDeFeatureDoDraft'
 # 7. --dry-run não grava, não mescla, não enfileira.
 go test ./cmd/forge-sdd/... -run 'TestDispatchLiberarDryRunNaoGrava'
-# 8. CI de PR só de spec não roda a matriz.
+# 8. (superado pelo fix-106-10: sem filtro de CI por tipo de arquivo)
 go test ./scripts/... -run 'TestCIPoliticaPulaMatrizQuandoSoMudaSddEMarkdown'
 # 9. Sem subcomando novo (ARQ-06 intacto).
 ! grep -rn 'Use: *"liberar' cmd/forge-sdd || exit 1
@@ -125,5 +125,5 @@ go vet ./... && go test ./...
 - **R1 — Disparo indesejado.** Mitigação: opt-in por campo da Constituição, o `[Seguir]` explícito, o gate antes de mesclar, `--dry-run` e a parada por `STOP`.
 - **R2 — Tasks paralelas mexem nos mesmos arquivos** e geram conflito de merge. Mitigação: só `depends_on` define o que roda junto; cada task tem worktree e PR próprios; o conflito aparece na revisão, não em silêncio. Evolução possível: declarar os arquivos de cada task no plan.
 - **R3 — Custo.** N workers de Builder rodam ao mesmo tempo. Mitigação: o teto `max_parallel_tasks` (padrão 3) e `max_jobs_per_day`.
-- **R4 — O filtro de CI esconde falha de PR misto** (docs e código juntos). Mitigação: qualquer arquivo fora de `sdd/**` e `*.md` liga a matriz inteira.
+- ~~**R4 — O filtro de CI esconde falha de PR misto.**~~ *Superada pelo fix-106-10 (22/11/2026): não há mais matriz de sistemas; o CI roda uma vez, só em `ready_for_review`, então o filtro por tipo de arquivo é desnecessário.*
 - **R5 — Dependência de specs ainda não implementadas** (`106-06`, `107-09`). Mitigação: a ordem de implementação é parte da spec; sem elas, o disparo fica desligado.
