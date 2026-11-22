@@ -42,7 +42,7 @@ jobs:
           PR: ${{ github.event.pull_request.number }}
         run: |
           set -euo pipefail
-          draft=$(gh pr view "$PR" --json isDraft -q .isDraft)
+          draft=$(gh pr view "$PR" --repo "$GITHUB_REPOSITORY" --json isDraft -q .isDraft)
           if [ "$draft" = "true" ]; then
             echo "::error::O PR #$PR está em draft. Marque como pronto só depois da conferência do Reviewer."
             exit 1

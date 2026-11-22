@@ -167,11 +167,32 @@ func checkStaleWorktrees(dir string, out io.Writer) {
 	if len(safe) == 0 {
 		return
 	}
-	fmt.Fprintf(out, "\n%d worktree(s) ocioso(s) encontrado(s):\n", len(safe))
+	options := make([]survey.MultiSelectOption, 0, len(safe))
+	byPath := make(map[string]pipeline.StaleWorktree, len(safe))
 	for _, w := range safe {
-		fmt.Fprintf(out, "  %s/%s — %s\n", w.JobID, w.TaskID, w.Reason)
+		key := w.JobID + "/" + w.TaskID
+		options = append(options, survey.MultiSelectOption{Label: key + " — " + w.Reason, Value: key})
+		byPath[key] = w
 	}
-	fmt.Fprintln(out, "  → rode `forge pipeline worktree gc` para limpar.")
+	selected, err := survey.RunMultiSelect("Worktrees ociosos", "Selecione os worktrees seguros que deseja remover", options)
+	if err != nil {
+		fmt.Fprintf(out, "não foi possível selecionar worktrees: %v\n", err)
+		return
+	}
+	targets := make([]pipeline.StaleWorktree, 0, len(selected))
+	for _, key := range selected {
+		if w, ok := byPath[key]; ok {
+			targets = append(targets, w)
+		}
+	}
+	if len(targets) == 0 {
+		return
+	}
+	if errs := pipeline.SweepWorktrees(dir, targets); len(errs) > 0 {
+		for _, sweepErr := range errs {
+			fmt.Fprintf(out, "erro ao limpar worktree: %v\n", sweepErr)
+		}
+	}
 }
 
 // applySessionFlags aplica --cli e --discovery/--builder/--reviewer sobre a configuração, sem gravar.

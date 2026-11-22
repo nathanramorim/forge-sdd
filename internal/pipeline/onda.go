@@ -152,14 +152,6 @@ func ContinuarPorOnda(plano [][]Task, estados map[string]string) (ResumoDaOnda, 
 	return res, todasFechadas, nil
 }
 
-func idsDaOnda(onda []Task) []string {
-	out := make([]string, 0, len(onda))
-	for _, t := range onda {
-		out = append(out, t.ID)
-	}
-	return out
-}
-
 // TextoDoContinuar é a pergunta do `[Continuar]`, agrupada por onda: o humano decide pela onda
 // inteira, não por task. Bloqueadas aparecem nomeadas, para não passarem por aprovadas.
 func TextoDoContinuar(res ResumoDaOnda, onda int) string {
