@@ -20,7 +20,7 @@ Agentes de IA (Claude Code, Gemini, Copilot) que usam a skill para gerar diagram
 
 - A escolha é feita a cada uso (não persiste entre sessões).
 - O fluxo Mermaid existente não é alterado.
-- O fluxo diagram-studio requer o plugin; se ausente, a skill oferece instalar. Instalar skill/plugin é opcional por skill, limitado ao projeto aberto, e pergunta hub (master) ou subprojeto quando houver forge em subprojetos.
+- O fluxo diagram-studio requer o plugin; se ausente, a skill oferece instalar. Instalar skill/plugin (sem `/plugin install`, que grava em `~/.claude/`) é opcional por skill, limitado ao projeto aberto, e pergunta hub (master) ou subprojeto quando houver forge em subprojetos.
 
 ## Escopo
 

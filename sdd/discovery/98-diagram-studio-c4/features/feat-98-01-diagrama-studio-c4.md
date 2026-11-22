@@ -56,11 +56,7 @@ Antes de qualquer esboço, o agente usa `AskUserQuestion` com:
 
 #### Novo fluxo para diagram-studio (seção paralela no SKILL.md)
 
-1. **Verificar instalação:** `ls .agents/plugins/diagram-studio/scripts/diagrama.py 2>/dev/null || echo "AUSENTE"` (caminho relativo ao destino do projeto aberto; a política de instalação é a feat-98-02). Se ausente, instruir:  
-   ```
-   /plugin marketplace add nathanramorim/diagram-studio
-   /plugin install diagram-studio@diagram-studio
-   ```
+1. **Verificar instalação:** `ls .agents/plugins/diagram-studio/scripts/diagrama.py 2>/dev/null || echo "AUSENTE"` (caminho único, relativo ao destino de instalação: o projeto aberto, ou o hub/subprojeto escolhido). Se ausente, oferecer a instalação restrita ao projeto da feat-98-02 (`forge skills instalar plugin diagram-studio`, que grava só em `<destino>/.agents/plugins/diagram-studio/`). **Não usar `/plugin marketplace add` nem `/plugin install`**, pois gravam em `~/.claude/`.
 2. **Escolher modelo** (igual ao `SKILL.md` do diagram-studio): Fases, Personas, Fluxo ou Camadas.
 3. **Montar JSON** em `docs/diagramas/<nome>.json` usando a referência do JSON do diagram-studio.
 4. **Mapeamento C4 → diagram-studio**:
@@ -73,13 +69,13 @@ Antes de qualquer esboço, o agente usa `AskUserQuestion` com:
    | Fronteira / Boundary | `caixa` com `estilo: "grupo"` |
    | Relacionamento | `seta` com `forma: "horizontal"` ou `"vertical"` |
 
-5. **Renderizar:** `uv run <destino>/diagram-studio/scripts/diagrama.py docs/diagramas/<nome>.json` (o `<destino>` é o resolvido na verificação do passo 1)
+5. **Renderizar:** `uv run .agents/plugins/diagram-studio/scripts/diagrama.py docs/diagramas/<nome>.json --saida docs/diagramas/<nome>` (rodar a partir do destino resolvido no passo 1; mesmo caminho do passo 1)
 6. **Conferir PNG** (abrir imagem): texto apertado, setas cruzando caixas, blocos desalinhados.
 7. **Entregar:** SVG para README/docs (`![](diagrama.svg)`), PNG para slides e chat.
 
 ### 2. Instalação
 
-A skill só descreve o fluxo e orienta a instalar. A política (opcional por skill, limitada ao projeto aberto, hub ou subprojeto) é implementada e testada na **feat-98-02**, que depende desta.
+A skill só descreve o fluxo e aciona o comando de instalação restrita ao projeto. A política (opcional por skill, limitada ao projeto aberto, hub ou subprojeto) é implementada e testada na **feat-98-02**, que depende desta.
 
 ### 3. Sem alteração (copiado do original, sem editar)
 
@@ -106,6 +102,9 @@ grep -c "diagram-studio" .agents/skills/diagramas-c4-mermaid/SKILL.md          #
 
 # 3. Nenhuma referência a ~/.claude/ dentro da skill nem da spec executável
 ! grep -rn "~/.claude" .agents/skills/diagramas-c4-mermaid/
+
+# 3b. Nenhum /plugin install na skill
+! grep -rn "/plugin install\|/plugin marketplace" .agents/skills/diagramas-c4-mermaid/
 
 # 4. Build e suíte
 go build ./... && go test ./...

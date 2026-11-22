@@ -3,7 +3,7 @@
 ## Modelo do módulo
 
 - **feat-98-01 — enxuto** (ARQ-11): só move/reescreve a skill em `.agents/skills/diagramas-c4-mermaid/`; sem Go.
-- **feat-98-02 — completo** (ARQ-11): Go em `internal/scaffold` (`instalar_skill.go`), reusando `WriteFileSafe` e `shouldPreserve`; sem pacote novo.
+- **feat-98-02 — completo** (ARQ-11): Go em `internal/scaffold` (`instalar_skill.go`: `InstalarSkill`, `InstalarPlugin`, `ListarDestinosInstalacao`), chamado pelos subcomandos `skills destinos` e `skills instalar` do grupo existente `skills`; reusando `WriteFileSafe` e `shouldPreserve`; sem pacote novo.
 
 ## O que já existe
 
@@ -24,4 +24,16 @@
 
 ## Dependências novas
 
-Nenhuma dependência Go. Runtime do fluxo diagram-studio: plugin `diagram-studio` 0.2.0 e `uv` 0.9.7 (versões lidas localmente); consulta ao context7/documentação: versão a confirmar antes do Builder (SEG-07). Detalhe na feat-98-02.
+Nenhuma dependência Go. Runtime do fluxo diagram-studio (SEG-07, consultado em 2026-11-22):
+
+- plugin `diagram-studio` 0.2.0, commit `3996fd2e2bcdc2462e6f0d1edd7f6d18f649bc03` (`plugin.json` local; `git ls-remote` confirma o commit; sem tags).
+- `uv` 0.9.7 (`uv --version`); docs.astral.sh/uv confirma que `uv run` respeita metadados inline do script. O context7 não estava disponível: sem consulta nele.
+- Pendente: `resvg-py>=0.1` do `diagrama.py` é faixa aberta; o Builder fixa a versão exata. Detalhe na feat-98-02.
+
+## Política de instalação
+
+Skill **e plugin** ficam restritos ao projeto aberto (ou ao destino hub/subprojeto escolhido); `/plugin install` não é usado. ADR nova: `sdd/spec/adr/adr-0025-instalacao-de-skills-e-plugins-limitada-ao-projeto.md` (0024 existe em outra branch).
+
+## Critérios executáveis resumidos
+
+`go test ./internal/scaffold -run 'TestInstalaSkillSoNoProjetoAberto|TestInstalaPluginSoNoProjetoAberto|TestInstalaPerguntaHubOuSubprojeto|TestInstalaOpcionalPorSkill'`; `ls sdd/spec/adr/adr-0025-instalacao-de-skills-e-plugins-limitada-ao-projeto.md`; `! grep -rn "/plugin install" .agents/skills/diagramas-c4-mermaid/`.

@@ -1,3 +1,3 @@
-**Status:** spec dividida em feat-98-01 e feat-98-02; aguardando Reviewer e Gate 1; nada implementado
+**Status:** spec ajustada após Reviewer (plugin restrito ao projeto, chamador, ADR-0025); aguardando novo Reviewer e Gate 1; nada implementado
 **Próximo passo:** Reviewer, Gate 1 do dono, split e Builder (98-01, depois 98-02)
-**A confirmar:** consulta context7/documentação do plugin diagram-studio 0.2.0 e do uv 0.9.7 (SEG-07); número da nova ADR
+**A confirmar:** versão exata do resvg-py (SEG-07); consulta no context7 (indisponível); número da ADR se outro PR tomar o 0025
