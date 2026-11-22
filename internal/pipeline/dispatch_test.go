@@ -413,3 +413,89 @@ func TestDispatchFix_SpecIncompletaOuFixInexistenteBloqueia(t *testing.T) {
 	require.NoError(t, err)
 	assert.Contains(t, strings.Join(res.Pending, "\n"), "inválido")
 }
+
+func projetoCardOpcional(t *testing.T, ev string) string {
+	return project(t, func(dir string) {
+		cfg := config.DefaultForgeConfig()
+		cfg.PMMCP.RequireExistingCard = false
+		data, _ := json.Marshal(cfg)
+		testutil.WriteFile(t, dir, ".forge/config/forge.json", string(data))
+		p := "sdd/discovery/77-auth-oauth/card-evidence.json"
+		if ev == "" {
+			_ = os.Remove(filepath.Join(dir, p))
+		} else {
+			testutil.WriteFile(t, dir, p, ev)
+		}
+	})
+}
+
+func TestDispatchCarregaCardEvidenceOpcionalQuandoPresente(t *testing.T) {
+	dir := projetoCardOpcional(t, evidence("auth-oauth", now.Add(-5*time.Minute)))
+	res, err := Dispatch(dir, "auth-oauth", DispatchOptions{Now: now})
+	require.NoError(t, err)
+	require.False(t, res.Blocked(), "%v", res.Pending)
+	assert.Equal(t, "CU-8421", res.Job.Card.ID)
+	assert.Equal(t, "https://app.clickup.com/t/8421", res.Job.Card.URL)
+	assert.Empty(t, res.Warnings)
+}
+
+func TestDispatchSemEvidenciaComCardOpcionalNaoBloqueia(t *testing.T) {
+	dir := projetoCardOpcional(t, "")
+	res, err := Dispatch(dir, "auth-oauth", DispatchOptions{Now: now})
+	require.NoError(t, err)
+	require.False(t, res.Blocked())
+	assert.Equal(t, bus.Card{}, res.Job.Card)
+}
+
+func TestDispatchEvidenciaInvalidaComCardOpcionalViraAviso(t *testing.T) {
+	casos := map[string]string{
+		"vencida":    evidence("auth-oauth", now.Add(-48*time.Hour)),
+		"quebrada":   "{nao e json",
+		"http":       strings.Replace(evidence("auth-oauth", now), "https://", "http://", 1),
+		"javascript": strings.Replace(evidence("auth-oauth", now), "https://app.clickup.com/t/8421", "javascript:alert(1)", 1),
+	}
+	for nome, ev := range casos {
+		t.Run(nome, func(t *testing.T) {
+			dir := projetoCardOpcional(t, ev)
+			res, err := Dispatch(dir, "auth-oauth", DispatchOptions{Now: now})
+			require.NoError(t, err)
+			require.False(t, res.Blocked(), "%v", res.Pending)
+			assert.Equal(t, bus.Card{}, res.Job.Card)
+			if nome != "quebrada" {
+				assert.NotEmpty(t, res.Warnings)
+			}
+		})
+	}
+}
+
+func TestDispatchRequireExistingCardContinuaBloqueando(t *testing.T) {
+	dir := project(t, func(dir string) {
+		testutil.WriteFile(t, dir, "sdd/discovery/77-auth-oauth/card-evidence.json", evidence("auth-oauth", now.Add(-48*time.Hour)))
+	})
+	res, err := Dispatch(dir, "auth-oauth", DispatchOptions{Now: now})
+	require.NoError(t, err)
+	assert.True(t, res.Blocked())
+}
+
+func TestEmiteSpecAbertaSemModuloEhNoOp(t *testing.T) {
+	ok, err := EmiteSpecAberta(nil, SpecAberta{Numero: "1"})
+	require.NoError(t, err)
+	assert.False(t, ok)
+	dir := projetoCardOpcional(t, evidence("auth-oauth", now))
+	_, err = Dispatch(dir, "auth-oauth", DispatchOptions{Now: now})
+	require.NoError(t, err)
+}
+
+func TestEmiteSpecAbertaComModuloLevaIssue(t *testing.T) {
+	var got []SpecAberta
+	em := func(e SpecAberta) error { got = append(got, e); return nil }
+	dir := projetoCardOpcional(t, evidence("auth-oauth", now))
+	for i := 0; i < 2; i++ {
+		_, err := Dispatch(dir, "auth-oauth", DispatchOptions{Now: now, EmiteSpecAberta: em})
+		require.NoError(t, err)
+	}
+	require.Len(t, got, 1, "o reenvio idempotente não duplica o cartão")
+	assert.Equal(t, "CU-8421", got[0].Numero)
+	assert.Equal(t, "https://app.clickup.com/t/8421", got[0].URL)
+	assert.Equal(t, "Discovery 77 — Autenticação OAuth2", got[0].Titulo)
+}

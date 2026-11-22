@@ -13,8 +13,8 @@ var (
 
 	// Genéricas: só valem na última linha útil ou numa linha com marcador de erro, acompanhadas de api/token/credential.
 	agentUnavailableGenericRe = regexp.MustCompile(`(?i)(\b401\b|unauthorized|forbidden|permission[_ ]denied)`)
-	credentialMarkerRe       = regexp.MustCompile(`(?i)(api|token|credential)`)
-	unavailableErrorMarkerRe = regexp.MustCompile(`(?i)(✗|\berror\b|api error|fatal)`)
+	credentialMarkerRe        = regexp.MustCompile(`(?i)(api|token|credential)`)
+	unavailableErrorMarkerRe  = regexp.MustCompile(`(?i)(✗|\berror\b|api error|fatal)`)
 )
 
 // AgentUnavailable descreve uma falha de ambiente, autenticação ou plano de um agente.
