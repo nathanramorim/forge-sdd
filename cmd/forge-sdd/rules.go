@@ -44,7 +44,9 @@ Com argumentos: exibe apenas os IDs solicitados.`,
 
 		ids, ausentes, err := gate.SelecionaIDs(allIDs, args)
 		if len(ausentes) > 0 {
-			fmt.Fprintf(cmd.ErrOrStderr(), "ID(s) não encontrado(s) na Constituição: %s\n", strings.Join(ausentes, ", "))
+			if _, werr := fmt.Fprintf(cmd.ErrOrStderr(), "ID(s) não encontrado(s) na Constituição: %s\n", strings.Join(ausentes, ", ")); werr != nil {
+				return fmt.Errorf("escrever aviso de IDs ausentes: %w", werr)
+			}
 		}
 		if err != nil {
 			return fmt.Errorf("consultar IDs da Constituição: %w", err)
@@ -62,7 +64,9 @@ Com argumentos: exibe apenas os IDs solicitados.`,
 
 		w := tabwriter.NewWriter(cmd.OutOrStdout(), 0, 0, 2, ' ', 0)
 		for _, id := range ids {
-			fmt.Fprintf(w, "%s\t%s\n", id, allIDs[id])
+			if _, werr := fmt.Fprintf(w, "%s\t%s\n", id, allIDs[id]); werr != nil {
+				return fmt.Errorf("escrever saída de IDs: %w", werr)
+			}
 		}
 		return w.Flush()
 	},

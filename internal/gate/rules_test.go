@@ -8,7 +8,10 @@ import (
 func TestSelecionaIDs(t *testing.T) {
 	catalogo := map[string]string{"ARQ-01": "a", "FLX-08": "b", "GOV-04": "c"}
 
-	ids, ausentes, _ := SelecionaIDs(catalogo, nil)
+	ids, ausentes, err := SelecionaIDs(catalogo, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
 	if !reflect.DeepEqual(ids, []string{"ARQ-01", "FLX-08", "GOV-04"}) || ausentes != nil {
 		t.Fatalf("sem pedidos: ids=%v ausentes=%v", ids, ausentes)
 	}
