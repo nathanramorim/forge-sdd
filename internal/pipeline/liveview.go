@@ -21,13 +21,13 @@ const (
 )
 
 var (
-	ansiRe      = regexp.MustCompile(`\x1b\[[0-9;?]*[ -/]*[@-~]|\x1b\][^\x07\x1b]*(?:\x07|\x1b\\)`)
+	ansiRe          = regexp.MustCompile(`\x1b\[[0-9;?]*[ -/]*[@-~]|\x1b\][^\x07\x1b]*(?:\x07|\x1b\\)`)
 	hookNoiseRe     = regexp.MustCompile(`(?i)\bhook \[[^\]]*\] failed:`)
 	skillConflictRe = regexp.MustCompile(`(?i)Skill conflict detected`)
 	yoloNoiseRe     = regexp.MustCompile(`(?i)YOLO mode is enabled`)
 	ripgrepNoiseRe  = regexp.MustCompile(`(?i)Ripgrep is not available`)
 	editTools       = map[string]bool{"edit": true, "write": true, "multiedit": true, "notebookedit": true, "write_file": true, "replace": true, "create_file": true, "edit_file": true, "apply_patch": true, "file_change": true}
-	shellTools  = map[string]bool{"bash": true, "run_shell_command": true, "shell": true, "run_command": true, "command_execution": true, "exec_command": true}
+	shellTools      = map[string]bool{"bash": true, "run_shell_command": true, "shell": true, "run_command": true, "command_execution": true, "exec_command": true}
 )
 
 // LiveOptions configura a visão limpa do que o agente faz.
@@ -42,18 +42,18 @@ type LiveOptions struct {
 // entende é ignorado, nunca impresso; segredos são mascarados; o ruído de hooks globais vira uma
 // linha só.
 type LiveView struct {
-	mu        sync.Mutex
-	term      io.Writer
-	log       io.Writer
-	opts      LiveOptions
-	partial   bytes.Buffer
-	lastEvent time.Time
+	mu                  sync.Mutex
+	term                io.Writer
+	log                 io.Writer
+	opts                LiveOptions
+	partial             bytes.Buffer
+	lastEvent           time.Time
 	hookShown           bool
 	skillConflicts      int
 	skillConflictsShown bool
 	inKey               bool // dentro de um bloco de chave privada: nada dele vai ao terminal
-	dropNL    bool // descartando uma linha gigante até a próxima quebra
-	tail      []string
+	dropNL              bool // descartando uma linha gigante até a próxima quebra
+	tail                []string
 }
 
 // NewLiveView liga o terminal e o log (que pode ser nil).

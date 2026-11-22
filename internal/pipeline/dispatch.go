@@ -56,6 +56,8 @@ type DispatchOptions struct {
 	// Fix despacha um fix da iniciativa (ex.: fix-88-01) em vez das tasks de features/.
 	Fix string
 	Git queue.GitFunc // injetável nos testes; padrão: git real
+	// EmiteSpecAberta é o gancho aditivo do evento spec.aberta; nil = no-op (113-05).
+	EmiteSpecAberta EmissorSpecAberta
 }
 
 // DispatchResult descreve o resultado do gate e, se passou, do despacho.
@@ -66,8 +68,9 @@ type DispatchResult struct {
 	JobPath         string
 	CardInstruction string
 	Created         bool
-	BaseBranch      string // base do PR da iniciativa
-	BaseSource      string // de onde a base veio (flag, fila, git ou forge.json)
+	BaseBranch      string   // base do PR da iniciativa
+	BaseSource      string   // de onde a base veio (flag, fila, git ou forge.json)
+	Warnings        []string // avisos que não bloqueiam (ex.: evidência opcional descartada)
 }
 
 // Blocked informa se o gate reprovou.
@@ -209,6 +212,15 @@ func Dispatch(dir, feature string, opts DispatchOptions) (*DispatchResult, error
 		var pend []string
 		ev, pend = loadEvidence(dir, evPath, feature, initiative, cfg, now)
 		res.Pending = append(res.Pending, pend...)
+	} else if !filepath.IsAbs(evPath) {
+		// Card opcional: a evidência presente é aproveitada; inválida ou vencida vira aviso.
+		if _, serr := os.Lstat(filepath.Join(dir, evPath)); serr == nil {
+			var aviso string
+			ev, aviso = cardOpcional(filepath.Join(dir, evPath), feature, initiative, now, cfg.PMMCP.EvidenceMaxAgeMinutes)
+			if aviso != "" {
+				res.Warnings = append(res.Warnings, aviso)
+			}
+		}
 	}
 
 	sort.Strings(res.Pending)
@@ -268,6 +280,12 @@ func Dispatch(dir, feature string, opts DispatchOptions) (*DispatchResult, error
 		return nil, err
 	}
 	res.JobPath, res.Created = path, created
+	if created && !cfg.PMMCP.RequireExistingCard && ev.ID != "" {
+		// Só na criação do job: o reenvio idempotente não duplica o cartão. Falha do gancho é aviso.
+		if _, eerr := EmiteSpecAberta(opts.EmiteSpecAberta, SpecAberta{Numero: ev.ID, URL: ev.URL, Titulo: higieniza(job.Title, 120, false)}); eerr != nil {
+			res.Warnings = append(res.Warnings, eerr.Error())
+		}
+	}
 	if opts.Fix != "" {
 		if err := queue.AddItem(dir, initiative, queue.QueueItem{
 			TaskID: opts.Fix, Title: fixName, SpecPath: job.SpecPath, Status: queue.StatusQueued,
