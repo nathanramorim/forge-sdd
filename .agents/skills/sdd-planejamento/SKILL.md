@@ -25,4 +25,4 @@ Comando: `/split-features` (`references/split-features.md`).
 Devolva plano e tasks ao Líder; o humano aprova a quebra e o enfileiramento (`forge queue enqueue`).
 
 ## Como perguntar ao usuário
-`AskUserQuestion`; ver `sdd/memory/clarify.md`.
+`AskUserQuestion` em escolhas/sim-não; ver `sdd/memory/clarify.md`.

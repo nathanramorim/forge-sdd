@@ -9,6 +9,7 @@ import (
 
 	"github.com/forge-sdd/cli/internal/config"
 	"github.com/forge-sdd/cli/internal/pipeline"
+	"github.com/forge-sdd/cli/internal/survey"
 	"github.com/spf13/cobra"
 )
 
@@ -88,7 +89,7 @@ func init() {
 	upCmd.Flags().String("discovery", "", "Agente da sessão forge-discovery: claude, gemini, copilot ou codex")
 	upCmd.Flags().String("builder", "", "Agente da sessão forge-builder: claude, gemini, copilot ou codex")
 	upCmd.Flags().String("reviewer", "", "Agente da sessão forge-reviewer: claude, gemini, copilot ou codex")
-	upCmd.Flags().String("terminal", "", "Onde abrir: tmux (três painéis), native (janelas do sistema) ou auto (padrão: tmux se existir)")
+	upCmd.Flags().String("terminal", "", "Obsoleto e ignorado: o tmux saiu (feat-115-02); as sessões abrem nas janelas do sistema")
 	upCmd.Flags().Bool("dry-run", false, "Só imprime os comandos de abertura")
 	rootCmd.AddCommand(upCmd)
 }

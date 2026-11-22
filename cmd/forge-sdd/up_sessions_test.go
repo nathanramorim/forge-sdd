@@ -103,25 +103,18 @@ func TestUp_Terminal(t *testing.T) {
 	out, err := runRoot(t, "up", "--dir", dir, "--terminal", "native", "--dry-run")
 	require.NoError(t, err)
 	assert.Contains(t, out, "forge-discovery")
-	assert.NotContains(t, out, "tmux new-session")
+	assert.NotContains(t, out, "tmux")
 
+	// O tmux saiu (feat-115-02): --terminal é obsoleto e ignorado; o destino é sempre as janelas do sistema.
 	resetWorkerFlags()
-	_, err = runRoot(t, "up", "--dir", dir, "--terminal", "janelas", "--dry-run")
-	assert.Error(t, err, "valor fora da lista é recusado")
-
-	if _, lookErr := exec.LookPath("tmux"); lookErr == nil {
-		resetWorkerFlags()
-		out, err = runRoot(t, "up", "--dir", dir, "--terminal", "tmux", "--dry-run")
-		require.NoError(t, err)
-		assert.Contains(t, out, "tmux new-session -d -s forge-")
-		assert.Contains(t, out, "split-window -h")
-		assert.Contains(t, out, "-T forge-reviewer")
-		assert.Contains(t, out, "[DRY-RUN] Nada foi aberto (sessão tmux forge-")
-	}
+	out, err = runRoot(t, "up", "--dir", dir, "--terminal", "tmux", "--dry-run")
+	require.NoError(t, err)
+	assert.NotContains(t, out, "tmux new-session")
+	assert.Contains(t, out, "[DRY-RUN] Nenhuma sessão foi aberta (modo headless).")
 }
 
 func TestLiveFallback(t *testing.T) {
-	// 1. live com terminal: native reverte para headless e avisa
+	// O modo live saiu junto com o tmux: reverte para headless e avisa.
 	dir := pipelineDir(t, func(c *config.ForgeConfig) {
 		c.SessionMode = config.SessionModeLive
 		c.Terminal = config.TerminalNative
@@ -129,20 +122,7 @@ func TestLiveFallback(t *testing.T) {
 	resetWorkerFlags()
 	out, err := runRoot(t, "up", "--dir", dir, "--dry-run")
 	require.NoError(t, err)
-	assert.Contains(t, out, "modo live requer tmux; caindo para headless nas janelas do sistema")
+	assert.Contains(t, out, "o modo live saiu junto com o tmux; as sessões abrem em headless nas janelas do sistema")
 	assert.Contains(t, out, "[DRY-RUN] Nenhuma sessão foi aberta (modo headless).")
 	assert.Contains(t, out, "worker --role builder --name forge-builder")
-
-	// 2. dry-run em tmux com live mostra o modo
-	if _, lookErr := exec.LookPath("tmux"); lookErr == nil {
-		dirTmux := pipelineDir(t, func(c *config.ForgeConfig) {
-			c.SessionMode = config.SessionModeLive
-			c.Terminal = config.TerminalTmux
-		})
-		resetWorkerFlags()
-		outTmux, errTmux := runRoot(t, "up", "--dir", dirTmux, "--dry-run")
-		require.NoError(t, errTmux)
-		assert.Contains(t, outTmux, "modo live")
-		assert.Contains(t, outTmux, "forge-ctl")
-	}
 }

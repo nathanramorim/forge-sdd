@@ -30,4 +30,4 @@ Comando: `/implementar [feature]` (`references/implementar.md`); `/proxima-featu
 4. Handoff ao Líder para o Portão de Governança.
 
 ## Como perguntar ao usuário
-`AskUserQuestion`; ver `sdd/memory/clarify.md`.
+`AskUserQuestion` em escolhas/sim-não; ver `sdd/memory/clarify.md`.

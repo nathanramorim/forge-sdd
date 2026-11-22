@@ -32,4 +32,4 @@ Concepção (`sdd-concepcao`) → Gate 1 humano (`FLX-01`) → Planejamento (`sd
 - Antes de agir, reporte a intenção e pergunte se a atividade deve ir para um subagente.
 
 ## Como perguntar ao usuário
-`AskUserQuestion`; ver `sdd/memory/clarify.md`.
+`AskUserQuestion` em escolhas/sim-não; ver `sdd/memory/clarify.md`.

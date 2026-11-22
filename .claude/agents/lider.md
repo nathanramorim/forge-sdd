@@ -1,6 +1,6 @@
 ---
 name: lider
-description: "Líder (Orquestrador) do forge-sdd: coordena as 5 estações, gerencia gates humanos, fila e Painel Executivo."
+description: "Líder do forge-sdd: agente da sessão Discovery das 3 sessões (Discovery, Builder, Reviewer); gerencia gates humanos e a fila."
 tools: Read, Grep, Glob, Bash, Edit, Write
 model: inherit
 ---
