@@ -4,7 +4,7 @@
 **Branch:** `feat/106-37-liberacao-automatica-da-spec`
 **Tamanho:** `L`
 **Depende de:** `fix-106-03` (WIP humano), `fix-106-06` (modo da sessão e volta da spec), `fix-106-09` (atualização sem impacto), `feat-107-09` (teto de delegações)
-**Status:** `spec` (aguarda Gate 1)
+**Status:** `spec` (Gate 1 aprovado em 22/11/2026, `[Seguir]`, com opt-in)
 
 ## Problema
 
