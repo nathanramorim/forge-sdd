@@ -7,13 +7,14 @@ import (
 	"strings"
 
 	"github.com/forge-sdd/cli/internal/config"
+	"github.com/forge-sdd/cli/internal/layout"
 	"github.com/forge-sdd/cli/internal/scaffold"
 	"github.com/forge-sdd/cli/internal/survey"
 	"github.com/spf13/cobra"
 )
 
-// version é injetada via ldflags: -X main.version=4.9.1-beta
-var version = "4.9.1-beta"
+// version é injetada via ldflags: -X main.version=5.2.0-beta
+var version = "5.2.0-beta"
 
 func init() { config.SetBinaryVersion(version) }
 
@@ -21,7 +22,47 @@ var rootCmd = &cobra.Command{
 	Use:   "forge",
 	Short: "Scaffolda estruturas Forge-SDD em qualquer projeto",
 	Long: `forge é um CLI que gera a estrutura completa Forge-SDD
-(sdd/, .github/, .vscode/) pronta para uso com GitHub Copilot.`,
+(sdd/, .agents/, arquivos de instrução por agente) e conduz o fluxo em 3 sessões
+(Discovery, Builder, Reviewer) com aprovação humana. Funciona com Claude Code,
+Gemini CLI, Codex e GitHub Copilot.`,
+	// Ponto único: grava a flag --iniciativa e, nos comandos que leem a fila ou o status da
+	// iniciativa, falha cedo se ela for ambígua ou inexistente (nada lê a fila legada).
+	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+		id, _ := cmd.Flags().GetString("iniciativa")
+		layout.SetOverride(id)
+		cmd.SilenceUsage, cmd.SilenceErrors = false, false
+		path := cmd.CommandPath()
+		interativo, _ := cmd.Flags().GetBool("interactive")
+		if !requerIniciativa[path] && !(path == "forge queue" && interativo) {
+			return nil
+		}
+		dir := "."
+		if f := cmd.Flags().Lookup("dir"); f != nil {
+			dir = f.Value.String()
+		}
+		if err := layout.RequireInitiative(dir); err != nil {
+			// Uma só mensagem clara (main a imprime), sem uso nem eco duplicado do cobra.
+			cmd.SilenceUsage = true
+			cmd.SilenceErrors = true
+			return err
+		}
+		return nil
+	},
+}
+
+// requerIniciativa lista os comandos que chamam layout.RequireInitiative antes de ler a fila.
+var requerIniciativa = map[string]bool{
+	"forge queue enqueue":  true,
+	"forge queue next":     true,
+	"forge queue complete": true,
+	"forge queue review":   true,
+	"forge queue list":     true,
+	"forge queue panel":    true,
+	"forge context":        true,
+	"forge status":         true,
+	"forge archive":        true,
+	"forge doctor":         true,
+	"forge gate":           true,
 }
 
 var versionCmd = &cobra.Command{
@@ -183,6 +224,10 @@ func runUpdateFlow(cmd *cobra.Command, targetDir string) error {
 
 	yes, _ := cmd.Flags().GetBool("yes")
 	dryRun, _ := cmd.Flags().GetBool("dry-run")
+	if err := reportAgentModels(cmd, targetDir, dryRun); err != nil {
+		return err
+	}
+	reportClaudeIntegration(cmd, targetDir, rc.Agents, dryRun)
 	if dryRun {
 		// Plano da atualização de estrutura: não consulta o NPM, não pergunta nada e não grava.
 		planCfg := rc.ToConfig()
@@ -390,17 +435,18 @@ func init() {
 	initCmd.Flags().String("stack", "", "Stack principal: go, node, python, rust, other")
 	initCmd.Flags().String("db", "", "Banco de dados: postgres, sqlite, mongo, none")
 	initCmd.Flags().String("lang", "", "Idioma: pt-BR, en")
-	initCmd.Flags().String("version", "", "Versão Forge-SDD (default: 2.4.0)")
+	initCmd.Flags().String("version", "", "Versão Forge-SDD (default: 5.0.0)")
 	initCmd.Flags().Bool("no-telemetry", false, "Desabilitar telemetria local")
 	initCmd.Flags().String("agent", "", "Agente(s) de IA: copilot, claude, gemini (csv, default: copilot)")
 	initCmd.Flags().String("naming-convention", "", "Convenção de nomenclatura: sequencial, hash, workitem")
+	rootCmd.PersistentFlags().String("iniciativa", "", "Iniciativa a usar (id <N>-<nome>); vence FORGE_INICIATIVA e a branch")
 	rootCmd.AddCommand(initCmd)
 
 	updateCmd.Flags().Bool("yes", false, "Pular prompts e usar flags")
 	updateCmd.Flags().Bool("dry-run", false, "Mostrar a migração de layout e a limpeza de obsoletos sem gravar nada")
 	updateCmd.Flags().String("agent", "", "Agente(s) a adicionar: copilot, claude, gemini, openai (csv)")
 	updateCmd.Flags().Bool("upgrade", false, "Atualizar estrutura para a versão mais recente do binário")
-	updateCmd.Flags().String("version", "", "Atualizar estrutura para uma versão específica (ex: 2.4.0)")
+	updateCmd.Flags().String("version", "", "Atualizar estrutura para uma versão específica (ex: 5.0.0)")
 	updateCmd.Flags().String("naming-convention", "", "Convenção de nomenclatura: sequencial, hash, workitem")
 	rootCmd.AddCommand(updateCmd)
 
@@ -416,6 +462,7 @@ func init() {
 	rootCmd.AddCommand(governanceCmd)
 	rootCmd.AddCommand(acpCmd)
 	rootCmd.AddCommand(attachCmd)
+	rootCmd.AddCommand(evalCmd)
 }
 
 type exitCoder interface {

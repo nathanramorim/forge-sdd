@@ -1,12 +1,12 @@
 ---
 description: Como aplicar validação de entrada, proteção de arquivos de domínio, higiene de segredos/logs e governança de dependências.
 globs: ["**/*"]
-regras: [SEG-01, SEG-02, SEG-04, SEG-05, SEG-07]
+regras: [SEG-01, SEG-02, SEG-04, SEG-05, SEG-07, SEG-08]
 ---
 
 # Guia Prático — Segurança, Segredos e Dependências
 
-Procedimentos práticos para atender aos IDs `SEG-01`, `SEG-02`, `SEG-04`, `SEG-05` e `SEG-07` de `sdd/memory/constitution.md` (`GOV-04`).
+Procedimentos práticos para atender aos IDs `SEG-01`, `SEG-02`, `SEG-04`, `SEG-05`, `SEG-07` e `SEG-08` de `sdd/memory/constitution.md` (`GOV-04`).
 
 ## 1. Validação de Borda e Escrita Segura (`SEG-01`, `SEG-02`)
 
@@ -29,3 +29,8 @@ Procedimentos práticos para atender aos IDs `SEG-01`, `SEG-02`, `SEG-04`, `SEG-
   1. Confirme se o requisito não pode ser atendido pela `stdlib` do Go (`ARQ-04`).
   2. Caso indispensável, verifique o status do MCP `context7` em `sdd/memory/mcps.md` (ou consulte a documentação oficial na versão exata).
   3. Preencha a seção `## Dependências novas` na Spec da feature indicando nome do pacote, versão exata, licença e motivo pelo qual a `stdlib` não atende. Se não houver novas bibliotecas, registre explicitamente `Nenhuma.` nessa seção.
+
+## 4. Saída de Modelo e Dado Externo (`SEG-08`)
+
+- Antes de exibir ou repassar texto de modelo, agente ou arquivo externo, use `notify.Sanitize` ou o saneador do MCP (`mcpSaneia`): remove ESC, controles e caracteres bidi e limita o tamanho.
+- Escrita em arquivo do usuário usa `writeFileSafe` (`SEG-02`).

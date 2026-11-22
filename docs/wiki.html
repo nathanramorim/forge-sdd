@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wiki — Forge-SDD</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="wiki.css">
+</head>
+<body>
+
+<header class="wiki-header">
+  <a href="/" class="wiki-brand">Forge-SDD <span class="wiki-badge">v5.0</span></a>
+  <a href="/" class="wiki-back">&#8592; forge-sdd.org</a>
+</header>
+
+<div class="layout">
+  <aside class="sidebar">
+    <nav class="sidebar-nav">
+      <a href="#get-started" class="sidebar-link" data-pt="Get Started" data-en="Get Started">Get Started</a>
+      <a href="#jornada" class="sidebar-link" data-pt="Jornada" data-en="Journey">Jornada</a>
+      <a href="#exemplos" class="sidebar-link" data-pt="Exemplos" data-en="Examples">Exemplos</a>
+      <a href="#hub-mode" class="sidebar-link" data-pt="Hub mode" data-en="Hub mode">Hub mode</a>
+    </nav>
+  </aside>
+
+  <main class="content">
+
+    <section id="get-started">
+      <h2 class="section-title" data-pt="Começando com o Forge-SDD" data-en="Getting Started with Forge-SDD">Começando com o Forge-SDD</h2>
+      <p class="section-lead">O Forge-SDD é um orquestrador de desenvolvimento que conecta você e sua IA num fluxo de trabalho claro: você decide, a IA implementa, você aprova.</p>
+
+      <h3 class="subsection-title">1. Instalação e setup</h3>
+      <p>O <code>forge init</code> faz perguntas interativas sobre o projeto (nome, stack, banco). Se a sua IA faz o setup por você, use o prompt abaixo — ele coleta essas respostas antes de rodar o comando, sem travar em prompts interativos.</p>
+
+      <div class="ai-prompt">
+        <div class="ai-prompt__header">
+          <span class="ai-prompt__label" data-pt="Prompt para IA" data-en="AI Prompt">Prompt para IA</span>
+          <button class="ai-prompt__copy" onclick="copyPrompt(this)" data-pt="Copiar" data-en="Copy">Copiar</button>
+        </div>
+        <pre class="ai-prompt__code" data-pt="Quero instalar o forge-sdd aqui. Me ajude a configurar.
+
+Primeira pergunta: o que você está construindo?
+Descreva com suas palavras — pode ser simples, ex:
+&quot;um app de agendamentos&quot;, &quot;uma API para meu e-commerce&quot;, &quot;um script que lê planilhas&quot;.
+
+Com base no que você me contar, vou sugerir a melhor configuração
+seguindo boas práticas de mercado e confirmar com você antes de rodar.
+
+Depois da confirmação, instale assim:
+npm install -g @nathanramorim/forge-sdd
+forge init --yes --name &quot;[nome]&quot; --stack [stack] --db [db] --agent [agente]
+
+Se preferir instalar agora com configuração padrão e ajustar depois,
+responda apenas: padrão" data-en="I want to install forge-sdd here. Help me set it up.
+
+First question: what are you building?
+Describe in your own words — keep it simple, e.g.:
+&quot;a scheduling app&quot;, &quot;an API for my e-commerce&quot;, &quot;a script that reads spreadsheets&quot;.
+
+Based on what you tell me, I'll suggest the best configuration
+following market best practices and confirm before running anything.
+
+After confirmation, install with:
+npm install -g @nathanramorim/forge-sdd
+forge init --yes --name &quot;[name]&quot; --stack [stack] --db [db] --agent [agent]
+
+If you'd rather install now with default settings and adjust later,
+just reply: default">Quero instalar o forge-sdd aqui. Me ajude a configurar.
+
+Primeira pergunta: o que você está construindo?
+Descreva com suas palavras — pode ser simples, ex:
+"um app de agendamentos", "uma API para meu e-commerce", "um script que lê planilhas".
+
+Com base no que você me contar, vou sugerir a melhor configuração
+seguindo boas práticas de mercado e confirmar com você antes de rodar.
+
+Depois da confirmação, instale assim:
+npm install -g @nathanramorim/forge-sdd
+forge init --yes --name "[nome]" --stack [stack] --db [db] --agent [agente]
+
+Se preferir instalar agora com configuração padrão e ajustar depois,
+responda apenas: padrão</pre>
+      </div>
+
+      <h3 class="subsection-title" id="constitution">2. Defina as regras do projeto (<code>/constitution</code>)</h3>
+      <p>Antes da primeira feature, você precisa registrar as decisões invioláveis do projeto: qual banco usar, como nomear branches, se usa ORM ou SQL direto, qualquer escolha que a IA não deve questionar. Essas regras formam a <strong>Constitution</strong> — um arquivo que todos os agentes leem antes de trabalhar.</p>
+      <p>Sem a Constitution, a IA toma decisões arbitrárias que você vai reverter mais tarde. Com ela, cada feature nasce alinhada com o que você decidiu.</p>
+
+      <p class="tip-label">Exemplo de instrução para a Constitution:</p>
+      <pre class="code-block">Nunca use ORM; acesso a banco sempre via SQL direto com prepared statements.</pre>
+      <pre class="code-block">Branches de feature seguem o padrão feat/[número]-[nome-curto].</pre>
+
+      <div class="ai-prompt">
+        <div class="ai-prompt__header">
+          <span class="ai-prompt__label" data-pt="Prompt para IA" data-en="AI Prompt">Prompt para IA</span>
+          <button class="ai-prompt__copy" onclick="copyPrompt(this)" data-pt="Copiar" data-en="Copy">Copiar</button>
+        </div>
+        <pre class="ai-prompt__code" data-pt="Vamos definir as regras do projeto com /constitution.
+Execute /constitution e me ajude a cadastrar as primeiras decisões arquiteturais.
+Comece me fazendo as 3 perguntas mais importantes para este tipo de projeto:
+quais são as decisões que mais causam atrito se não forem definidas logo no início?" data-en="Let's define the project rules with /constitution.
+Run /constitution and help me register the first architectural decisions.
+Start by asking me the 3 most important questions for this type of project:
+which decisions cause the most friction when left undefined at the start?">Vamos definir as regras do projeto com /constitution.
+Execute /constitution e me ajude a cadastrar as primeiras decisões arquiteturais.
+Comece me fazendo as 3 perguntas mais importantes para este tipo de projeto:
+quais são as decisões que mais causam atrito se não forem definidas logo no início?</pre>
+      </div>
+
+      <h3 class="subsection-title">3. Primeira feature</h3>
+      <p>Com o setup e a Constitution no lugar, peça à IA para criar a primeira feature. Ela vai rodar o discovery, montar um plano e aguardar sua aprovação antes de escrever uma linha de código.</p>
+
+      <div class="ai-prompt">
+        <div class="ai-prompt__header">
+          <span class="ai-prompt__label" data-pt="Prompt para IA" data-en="AI Prompt">Prompt para IA</span>
+          <button class="ai-prompt__copy" onclick="copyPrompt(this)" data-pt="Copiar" data-en="Copy">Copiar</button>
+        </div>
+        <pre class="ai-prompt__code" data-pt="Vamos criar a primeira feature com o forge-sdd.
+Execute /discovery [descreva aqui o que você quer construir].
+Me mostre o plano antes de implementar." data-en="Let's create the first feature with forge-sdd.
+Run /discovery [describe what you want to build here].
+Show me the plan before implementing.">Vamos criar a primeira feature com o forge-sdd.
+Execute /discovery [descreva aqui o que você quer construir].
+Me mostre o plano antes de implementar.</pre>
+      </div>
+    </section>
+
+    <section id="jornada">
+      <h2 class="section-title" data-pt="Jornada ideal" data-en="Ideal Journey">Jornada ideal</h2>
+      <p class="section-lead">O Forge-SDD organiza o trabalho em três papéis simples. Você não precisa saber programar — só precisa tomar decisões.</p>
+
+      <div class="steps">
+        <div class="step">
+          <div class="step-number">1</div>
+          <div class="step-body">
+            <h3 class="step-title">Discovery</h3>
+            <p class="step-desc">Você descreve o que quer. A IA analisa o projeto, levanta riscos e monta um plano detalhado. Você lê e decide se faz sentido.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-number">2</div>
+          <div class="step-body">
+            <h3 class="step-title">Builder implementa</h3>
+            <p class="step-desc">Depois da sua aprovação, a IA segue exatamente o plano: escreve o código, cria os testes e prepara tudo para você conferir.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-number">3</div>
+          <div class="step-body">
+            <h3 class="step-title">Você aprova</h3>
+            <p class="step-desc">As mudanças chegam sem surpresas. Você confere o que foi feito e aprova. Se não estiver bom, a IA corrige até ficar.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="exemplos">
+      <h2 class="section-title" data-pt="Exemplos práticos" data-en="Practical Examples">Exemplos práticos</h2>
+      <p class="section-lead">Veja como adicionar uma feature real do início ao fim.</p>
+
+      <h3 class="subsection-title">Adicionar comando <code>forge greet</code></h3>
+      <p>Neste exemplo, vamos adicionar um comando que imprime "Olá, mundo!" no terminal.</p>
+
+      <ol class="example-steps">
+        <li>
+          <strong>Inicie o discovery.</strong>
+          <p>Mande o prompt abaixo para sua IA:</p>
+          <div class="ai-prompt">
+            <div class="ai-prompt__header">
+              <span class="ai-prompt__label">Prompt para IA</span>
+              <button class="ai-prompt__copy" onclick="copyPrompt(this)">Copiar</button>
+            </div>
+            <pre class="ai-prompt__code">Inicie o discovery para: adicionar comando forge greet
+Execute /discovery e me mostre o plano antes de implementar.</pre>
+          </div>
+        </li>
+        <li>
+          <strong>Aprove o plano.</strong>
+          <p>A IA vai mostrar o que pretende criar. Se estiver certo, diga "aprovado" ou "pode implementar".</p>
+        </li>
+        <li>
+          <strong>Revise o PR no GitHub.</strong>
+          <p>Quando a IA terminar, ela abre um PR com o código. Você revisa o diff e faz o merge.</p>
+        </li>
+      </ol>
+    </section>
+
+    <section id="hub-mode">
+      <h2 class="section-title" data-pt="Hub mode — um forge para vários repos" data-en="Hub mode — one forge for many repos">Hub mode — um forge para vários repos</h2>
+      <p class="section-lead">Em vez de rodar <code>forge init</code> em cada repo separado, você elege um repo como hub e os outros como satélites. O hub rastreia o status de todos os projetos do time em um único lugar.</p>
+
+      <h3 class="subsection-title">Passo a passo</h3>
+      <ol class="example-steps">
+        <li>
+          <strong>Inicialize o repo hub.</strong>
+          <p>No repositório que será o hub central, rode:</p>
+          <pre class="code-block">forge init</pre>
+        </li>
+        <li>
+          <strong>Vincule os repos satélites.</strong>
+          <p>Para cada repo do time que você quer rastrear:</p>
+          <pre class="code-block">forge init --link ../outro-repo</pre>
+        </li>
+        <li>
+          <strong>Veja o status de todos.</strong>
+          <p>No repo hub, rode <code>forge pipeline</code> para ver o estado de cada repo vinculado:</p>
+          <pre class="code-block">forge pipeline</pre>
+        </li>
+      </ol>
+
+      <div class="ai-prompt">
+        <div class="ai-prompt__header">
+          <span class="ai-prompt__label">Prompt para IA</span>
+          <button class="ai-prompt__copy" onclick="copyPrompt(this)">Copiar</button>
+        </div>
+        <pre class="ai-prompt__code">Configure o forge-sdd como hub neste workspace.
+O repo atual é o hub. Para cada repo satélite, rode:
+forge init --link &lt;caminho-do-repo&gt;
+Me diga quando terminar e mostre os repos vinculados.</pre>
+      </div>
+
+      <div class="ai-prompt">
+        <div class="ai-prompt__header">
+          <span class="ai-prompt__label">Prompt para IA</span>
+          <button class="ai-prompt__copy" onclick="copyPrompt(this)">Copiar</button>
+        </div>
+        <pre class="ai-prompt__code">Liste todos os repos vinculados ao hub e o status de cada um:
+forge pipeline
+Mostre quais têm features abertas e quais estão sem atividade.</pre>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+function copyPrompt(btn) {
+  const code = btn.closest('.ai-prompt').querySelector('.ai-prompt__code').textContent;
+  navigator.clipboard.writeText(code).catch(() => {
+    const ta = document.createElement('textarea');
+    ta.value = code;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+  });
+  btn.textContent = 'Copiado!';
+  setTimeout(() => { btn.textContent = 'Copiar'; }, 2000);
+}
+
+// i18n mínimo
+(function() {
+  const lang = navigator.language || 'pt-BR';
+  const isEn = lang.startsWith('en');
+  if (isEn) {
+    document.querySelectorAll('[data-en]').forEach(el => {
+      el.textContent = el.getAttribute('data-en');
+    });
+  }
+})();
+</script>
+
+</body>
+</html>

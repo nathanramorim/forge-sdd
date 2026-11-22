@@ -9,6 +9,7 @@ import (
 
 	"github.com/forge-sdd/cli/internal/bus"
 	"github.com/forge-sdd/cli/internal/config"
+	"github.com/forge-sdd/cli/internal/harness"
 	"github.com/forge-sdd/cli/internal/layout"
 	"github.com/forge-sdd/cli/internal/notify"
 	"github.com/forge-sdd/cli/internal/queue"
@@ -105,7 +106,10 @@ func ApplySpecVerdict(dir, jobID, worker string, v queue.Verdict, deps notify.De
 		return nil, err
 	}
 
-	persistVerdict(dir, job, v)
+	v, err = persistVerdict(dir, job, harness.PontoSpec, v)
+	if err != nil {
+		return nil, err
+	}
 	if err := writeSpecReview(dir, job, v, now); err != nil {
 		return nil, err
 	}

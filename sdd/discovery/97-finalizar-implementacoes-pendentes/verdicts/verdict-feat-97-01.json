@@ -1,0 +1,58 @@
+{
+  "task_id": "feat-97-01",
+  "pr": 104,
+  "veredito": "violacao",
+  "achados": [
+    {
+      "verificacao": "S-02",
+      "regra": "ARQ-11",
+      "regra_descricao": "Toda spec declara o modelo do módulo (`completo` ou `enxuto`) com justificativa.",
+      "classificacao": "violacao",
+      "severidade": "alta",
+      "arquivo": "sdd/discovery/97-finalizar-implementacoes-pendentes/features/feat-97-01-fix-90-02-metrics-token-e-complexidade.md",
+      "linha": null,
+      "evidencia": "Ausente: nenhuma seção `## Modelo do módulo` encontrada no arquivo da spec.",
+      "explicacao": "A Constituição (ARQ-11) exige que toda spec declare o modelo do módulo como `completo` ou `enxuto`, com justificativa. O arquivo de spec introduz código novo em `internal/monitor/usage.go` (nova função `EstimateSessionUsage`, lógica de estimativa por bytes) e campo novo na struct `SessionMetrics`, o que configura modelo `completo`. Essa declaração está ausente, impossibilitando rastrear intenção de design ao rever o PR.",
+      "correcao": "Adicionar seção `## Modelo do módulo` com `completo` e justificativa: a entrega adiciona função `EstimateSessionUsage` com estado de domínio (estimativa por bytes, glob de IDs) e modifica struct persistida."
+    },
+    {
+      "verificacao": "S-04",
+      "regra": "DUP-04",
+      "regra_descricao": "Constantes, schemas e nomes canônicos têm definição única.",
+      "classificacao": "violacao",
+      "severidade": "media",
+      "arquivo": "internal/monitor/usage.go",
+      "linha": 125,
+      "evidencia": "EstimateJobUsage (linha 100): `specBytes := 4000` e `logBytes := 2000` como variáveis locais. EstimateSessionUsage (linha 125): `const fallbackInput = 4000` e `const fallbackOutput = 2000` como constantes locais. Mesmo valor duplicado sem definição compartilhada.\nAlém disso, EstimateJobUsage aplica `specBytes * 4` (linha 115) mas EstimateSessionUsage não aplica o `*4` ao inputBytes (linha 159), produzindo tokens 4× menores para o mesmo fallback de 4000 bytes.",
+      "explicacao": "Os valores 4000 (fallback de input) e 2000 (fallback de output) existem em dois lugares diferentes do mesmo arquivo: como variáveis inline em `EstimateJobUsage` e como constantes locais em `EstimateSessionUsage`. DUP-04 exige definição única para constantes canônicas. A divergência no multiplicador `*4` agrava o problema: o mesmo fallback de 4000 bytes produz `EstimateTokensFromBytes(16000)` em `EstimateJobUsage` mas `EstimateTokensFromBytes(4000)` em `EstimateSessionUsage`. A spec (seção ### 3) exigia explicitamente compartilhamento dessas constantes e lógica (nota DUP-01).",
+      "correcao": "Promover os fallbacks a constantes de pacote nomeadas (ex.: `const estimateFallbackInputBytes = 4000; const estimateFallbackOutputBytes = 2000`) e referenciar a partir de ambas as funções. Decidir e alinhar o multiplicador `*4`: aplicar em ambas ou em nenhuma, documentando a heurística."
+    },
+    {
+      "verificacao": "S-02",
+      "regra": "COD-02",
+      "regra_descricao": "`go vet ./...` passa sem alertas após cada task (Regra 7).",
+      "classificacao": "duvida",
+      "severidade": "baixa",
+      "arquivo": "internal/monitor/usage.go",
+      "linha": 125,
+      "evidencia": "`gofmt -l internal/monitor/usage.go` retorna o arquivo; diff mostra `const fallbackInput  = 4000` com espaço duplo antes de `=`.",
+      "explicacao": "`go vet ./...` passou sem alertas (COD-02 formalmente satisfeito). Contudo, `gofmt -l` sinaliza `usage.go` pela linha 125 (`const fallbackInput  = 4000`, espaço duplo). Esse defeito foi introduzido neste PR. A regra COD-02 cita apenas `go vet`; fica como dúvida se gofmt é exigido implicitamente pelo portão.",
+      "correcao": "Corrigir para `const fallbackInput = 4000` (espaço único) e executar `gofmt -w internal/monitor/usage.go`."
+    },
+    {
+      "verificacao": "S-03",
+      "regra": "TST-01",
+      "regra_descricao": "Toda feature ou fix tem critério executável com `go build` ou `go test` (Regra 6).",
+      "classificacao": "duvida",
+      "severidade": "baixa",
+      "arquivo": "internal/monitor/usage_test.go",
+      "linha": 78,
+      "evidencia": "`TestEstimateSessionUsage_SemFeature` apenas asserta `assert.Positive(t, u.TokensInput)`. A spec (seção ### 3) diz: `TestEstimateSessionUsage_SemFeature: feature ausente → usa fallback 4000 bytes`. `TestEstimateSessionUsage_SemFiles` idem para `fallback 2000 bytes`.",
+      "explicacao": "Os testes existem e passam (TST-01 formalmente satisfeito). Porém, `SemFeature` e `SemFiles` verificam apenas positividade, sem confirmar os valores de fallback exatos nomeados na spec. Também não exercitam o caminho `feature ausente com glob inexistente` (string não vazia que não corresponde a nenhum arquivo). Fica como dúvida se isso exige correcao neste PR ou é risco aceitável.",
+      "correcao": "Adicionar assercoes `assert.Equal(t, EstimateTokensFromBytes(4000), u.TokensInput)` em `SemFeature` e `assert.Equal(t, EstimateTokensFromBytes(2000), u.TokensOutput)` em `SemFiles`; adicionar caso com feature ID inexistente para cobrir o branch de glob."
+    }
+  ],
+  "candidate_skill": null,
+  "resumo": "Duas violacoes bloqueantes: ARQ-11 (spec sem declaracao de modelo do módulo) e DUP-04 (constantes de fallback 4000/2000 duplicadas entre EstimateJobUsage e EstimateSessionUsage, com divergencia de multiplicador *4). Duas duvidas nao bloqueantes: gofmt sinaliza espaco duplo em usage.go linha 125 (COD-02 nao e explicitamente violado pois go vet passa), e testes SemFeature/SemFiles nao verificam os valores exatos de fallback citados na spec (TST-01). Camada A executada no worktree: go build, go vet e go test passam; TestGolden pass (91 arquivos); grep tokens-input retornou 8 (>= 7 OK). `forge bus review` nao foi executado: job ID nao fornecido no prompt.",
+  "revisado_em": "2026-11-19T05:50:00Z"
+}

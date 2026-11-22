@@ -1,0 +1,76 @@
+# feat-104-06 — Laço no Go: lock, retorno estruturado e spike de aninhamento
+
+**Iniciativa:** 104-pipeline-em-subagentes
+**Branch:** feat/104-pipeline-em-subagentes
+**Status:** implementada em 2026-11-20
+**Depende de:** feat-104-01
+
+## Problema
+O fluxo, os limites e a ordem precisam morar em código determinístico, não em prompt. Falta lock por iniciativa, retomada após falha no meio e tratamento de falha parcial no leque (A passou, B falhou). Também falta provar, num spike, se um subagente cria outro (decide o desenho).
+
+## Comportamento
+1. `pipeline.RunChat` conduz o ciclo `spec -> build -> review -> retorno` com estados gravados em `.forge/runtime/`; o modelo só devolve conteúdo pelo contrato (feat-104-01).
+2. Lock por iniciativa (arquivo com dono e lease, publicado por `os.Link` atômico e sem sobrescrever; lock vencido é tomado sob um guarda); segundo coordenador na mesma iniciativa é recusado.
+3. Retorno: `ApplyVerdict` devolve achados (`arquivo`, `linha`) ao Builder até `max_rework_attempts` (3); no teto escala ao humano pelo inbox; `retomar` continua do último estado gravado.
+4. Leque: o resultado de cada subagente é gravado; falha parcial deixa o lote em `parcial`, repete só o que falhou.
+5. Spike (documentado em `sdd/discovery/104-.../spike-aninhamento.md`): tentar criar subagente a partir de subagente e de teammate; o resultado decide o desenho A/D da ADR-0015.
+
+## Modelo do módulo
+**Completo**: `internal/pipeline` (laço) usa `internal/harness` (contratos, lock) e `internal/bus` (jobs).
+
+## Decisões do projeto aplicadas
+ADR-0004 (o Go decide o fluxo), ADR-0008 (modo `sessions` convive), ADR-0015 (proposta desta iniciativa), ADR-0003 (orçamento), mais: ADR-0012, ADR-0013 (modo avançado), FLX-08.
+
+## O que já existe
+| Procurei | Onde | Achei | Decisão | Justificativa |
+|---|---|---|---|---|
+| Jobs e estados | `internal/bus` | Claim atômico com lease, `Recover`, `Renew` | **Reusar** para o lock | `DUP-01` |
+| Retorno | `internal/pipeline/review.go` (`ApplyVerdict`), `pr_rework` | Teto `max_rework_attempts`, escalada | **Reusar**, só estruturar os achados | ADR-0004 D-3 |
+| Ondas | `internal/pipeline/waves.go` (`PlanWaves`) | Lotes por dependência | **Reusar** | — |
+| Worker headless | `internal/pipeline/worker.go` | Executa jobs | **Reusar** no modo `sessions` | Convivência |
+| Lock por iniciativa | — | Não existe (workers e outra sessão no mesmo worktree) | **Criar** em `harness` | Dor real |
+
+## Dependências novas
+Nenhuma (`SEG-07`).
+
+## Rules e IDs da Constituição Aplicáveis
+`ARQ-01`, `ARQ-02`, `COD-01`, `COD-03`, `FLX-01`, `FLX-08`, `TST-01`, `TST-05`. Rules: `sdd-arquitetura`, `sdd-fluxo-e-portao`.
+
+## Critérios de Aceitação Executáveis
+```bash
+set -o pipefail
+go test -list 'TestLockPorIniciativa|TestRetornoEscalaNoTeto|TestLegueParcialRepeteSoFalho|TestRetomaDoUltimoEstado' ./internal/pipeline | grep -F 'TestLockPorIniciativa' >/dev/null
+go test -list 'TestRetornoEscalaNoTeto' ./internal/pipeline | grep -F 'TestRetornoEscalaNoTeto' >/dev/null
+go test -list 'TestLockNomeInvalidoNaoSaiDoDiretorio' ./internal/harness | grep -F 'TestLockNomeInvalidoNaoSaiDoDiretorio' >/dev/null
+go test -list 'TestEstadoInvalidoNaoDerruba' ./internal/pipeline | grep -F 'TestEstadoInvalidoNaoDerruba' >/dev/null
+go test -list 'TestLockSymlinkNoLugarDoLock' ./internal/harness | grep -F 'TestLockSymlinkNoLugarDoLock' >/dev/null
+go test -list 'TestLeaseRenovaAntesDeCadaPasso' ./internal/pipeline | grep -F 'TestLeaseRenovaAntesDeCadaPasso' >/dev/null
+go test -list 'TestEstadoRecusaArquivoMalformado' ./internal/pipeline | grep -F 'TestEstadoRecusaArquivoMalformado' >/dev/null
+go test -list 'TestEstadoAchadosHostisSaoSanitizados' ./internal/pipeline | grep -F 'TestEstadoAchadosHostisSaoSanitizados' >/dev/null
+go test -list 'TestEstadoRecusaSymlink' ./internal/pipeline | grep -F 'TestEstadoRecusaSymlink' >/dev/null
+# negativo: estado gravado forjado (estado desconhecido, revisando sem resultado, voltas fora do teto, JSON enorme) não derruba nem dá voltas extras; lease perdida para o laço; symlink no lock
+go test ./internal/pipeline -run 'TestEstadoInvalidoNaoDerruba|TestEstadoRecusaArquivoMalformado|TestEstadoAchadosHostisSaoSanitizados|TestEstadoRecusaSymlink|TestLeaseRenovaAntesDeCadaPasso'
+go test ./internal/harness -run 'TestLockSymlinkNoLugarDoLock'
+# negativo: nome de iniciativa com ../ ou separador é recusado e nada é criado fora do diretório de locks
+go test ./internal/harness -run 'TestLockNomeInvalidoNaoSaiDoDiretorio'
+go test -list 'TestLockNomeIgualAoLayout' ./internal/pipeline | grep -F 'TestLockNomeIgualAoLayout' >/dev/null
+go test ./internal/pipeline -run 'TestLockNomeIgualAoLayout'
+go test ./internal/pipeline -run 'TestLockPorIniciativa|TestRetornoEscalaNoTeto|TestLegueParcialRepeteSoFalho|TestRetomaDoUltimoEstado'
+# negativo: segundo coordenador na mesma iniciativa falha; na 4a devolução escala
+go test ./internal/pipeline -run 'TestLockPorIniciativa|TestRetornoEscalaNoTeto'
+go vet ./... && go test ./...
+```
+- Teste negativo: segundo coordenador na mesma iniciativa falha; na 4a devolução escala em vez de voltar.
+- Spike registrado com comando e saída literais em `spike-aninhamento.md`.
+
+## Decisões da implementação
+- **Teto de voltas continua 3:** `LimiteDeVoltas` lê o `max_rework_attempts` de `forge.json` (padrão 3). Com teto 3, as 3 primeiras violações voltam ao Builder e a 4ª escala, como em `ApplyVerdict`.
+- **Spike não muda o desenho:** a evidência local não contradiz a opção A (ver `spike-aninhamento.md`); D e C ficam sem decisão, pendentes de execução real fora de `go test` e de nova ADR.
+- **Lock em `harness`, não no `bus`:** o `bus` reivindica jobs, não iniciativas. O lock é publicado por `os.Link` (atômico, sem sobrescrever) e `os.Rename` para tomar órfão, com lease de 15 min renovada a cada task. Processo morto: o arquivo `.forge/runtime/chat/locks/<iniciativa>.lock` fica até a lease vencer; depois o próximo coordenador o recupera sozinho. Não se checa PID vivo (portabilidade).
+- **Escalada pelo retorno, não pelo inbox:** o laço devolve `Retorno` com achados (arquivo e linha, sanitizados, FLX-08) e o menu (`Opcoes`, `Recomendada`, RN-9); notificar a pessoa fica para a camada de entrada (feat-104-09), para não duplicar `ApplyVerdict` do modo `sessions`.
+- **Leque sequencial:** as tasks do lote rodam em ordem; paralelismo com worktree por subagente é a feat-104-07. Falha de build ou review deixa a task em `falhou` e o lote em `parcial`; `Retomar` repete só o que falhou ou parou no meio.
+- Estado gravado em `.forge/runtime/chat/<iniciativa>.json`.
+- **Validação do lock (SEG-01):** `AdquirirLock` valida por conta própria a iniciativa (mesma regra de `layout.ValidInitiative`, copiada porque `harness` não importa o projeto; `TestLockNomeIgualAoLayout` compara as duas), o `dono` (sem controle, até 64 caracteres) e confere com `filepath.Rel` que o arquivo fica dentro do diretório de locks. No laço, `arquivoLaco` valida a iniciativa com `layout.ValidInitiative` antes de montar o caminho do estado e o `dono` só é gravado no lock, que o valida; nenhuma outra gravação usa esses nomes.
+- **Estado em disco é entrada não confiável (SEG-01):** `validarEstado` lê com limite de 4 MiB, recusa link simbólico, decodifica de forma estrita (campo desconhecido e conteúdo extra recusados) e exige spec válida e de 1 a 200 tasks. Task com estado fora do enum, `revisando` sem resultado ou voltas fora de 0..teto vira `falhou` (voltas ajustadas ao intervalo, nunca mais voltas que o teto), é repetida do zero no build e o motivo vai em `Retorno.Avisos`. Os achados lidos do arquivo passam por `sanitizarAchados`.
+- **Lease renovada antes de cada Build e de cada Review:** se o lock foi perdido, o laço para sem gravar mais nada (o estado é de quem tomou o lock) e devolve `Retorno` de escalada com menu (`abortar` recomendado, `retomar`).
+- **Lock e links:** `lerLock` usa `Lstat`; o que não for arquivo regular (symlink pendente ou para fora) é tratado como órfão e removido sob o guarda `.tomada`, sem escrever no alvo. Todos os temporários nascem com `O_EXCL` e nome único.

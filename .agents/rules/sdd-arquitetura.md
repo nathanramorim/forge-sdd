@@ -16,6 +16,7 @@ Instruções operacionais para aplicar os IDs `ARQ-01` a `ARQ-06` e `ARQ-11` def
 - **Direção de dependências (`ARQ-02`):**
   - Pacotes em `internal/` podem importar pacotes utilitários/configuração de nível inferior (como `internal/config`), mas nunca `cmd/` nem criar dependências circulares entre si.
   - Ao expor um novo subcomando CLI (`ARQ-06`), documente suas flags no `--help` do comando e mantenha compatibilidade com os fluxos existentes de `init` e `update`.
+  - Contratos dos subcomandos de `ARQ-06` mais recentes: `mcp serve` só expõe `forge_doctor`, somente leitura; `brief --check` sai com 0 apenas no estado `pronta`; `ps` e `rules` só leem; `eval run|report` só grava em `sdd/.metrics/`.
 
 ## 2. Recursos Embutidos, Runtime Enxuto e `--dry-run` (`ARQ-03`, `ARQ-04`, `ARQ-05`)
 

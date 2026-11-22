@@ -11,7 +11,7 @@
 
 <h3 align="center">Seu time de IA, com método.<br>Do plano ao PR, sem repetir instruções.</h3>
 
-<p align="center"><strong>Versão atual: 4.8.0 (estável)</strong> · <a href="https://github.com/nathanramorim/forge-sdd/blob/main/sdd/releases/history.md">veja as novidades</a></p>
+<p align="center"><strong>Versão atual: 5.0.0 (estável) · prévia: 5.2.0-beta (<code>@beta</code>)</strong> · <a href="https://github.com/nathanramorim/forge-sdd/blob/main/sdd/releases/history.md">veja as novidades</a></p>
 
 <p align="center">
   <a href="https://forge-sdd.org">Site oficial</a> ·
@@ -105,10 +105,12 @@ A telemetria é opcional e fica no seu projeto. No modo `forge worker --raw`, a 
 
 | Versão | Novidades |
 |---|---|
+| **5.2.0-beta** | Prévia (`@beta`, fora da `main`): o CI só roda quando o PR sai do draft, a revisão acontece em dois pontos (spec e feature), cada feature tem branch e PR em draft, e `gh pr ready`/`merge` exigem parecer do commit atual. `/upgrade-sdd` leva a política aos projetos existentes. |
+| **5.0.0** | Edição Missões: wiki Get Started com prompts prontos para IA e modo Hub, PR aberto sozinho quando a revisão dá conforme, limpeza de worktrees ociosos e revisão dos artefatos da spec sem sair da conversa. |
 | **4.8.0** | Versão estável do painel interativo: stream de chat nos workers, fila com abas e drill-down, popup no tmux e fila que acompanha a aprovação do Reviewer. |
 | **4.6.x** | Comando único `forge`, painel vivo executivo e tokens por janela com reset suave. |
 | **4.2.0-beta** | Pipeline multi-sessão: Discovery, Builder e Reviewer trabalhando juntos. |
-| **3.0.0-beta** | Esteira de 5 especialistas, portão de governança (A/B/C), regras por ID e auto-skills. |
+| **3.0.0-beta** | *(histórico, obsoleto como fluxo)* Esteira de 5 especialistas, portão de governança (A/B/C), regras por ID e auto-skills. O fluxo atual são 3 sessões. |
 | **2.2.0-beta** | Regras e comandos compartilhados em `.agents/`, uma fonte para vários agentes. |
 | **2.0.0-beta** | Versão enxuta: telemetria confiável, `lessons.md` e um fluxo único em `sdd/FLOW.md`. |
 

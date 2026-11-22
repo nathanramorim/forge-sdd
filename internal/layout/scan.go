@@ -33,10 +33,12 @@ type InitiativeInfo struct {
 // ListInitiatives devolve as iniciativas de dir. Sem allBranches lê apenas a árvore de
 // trabalho; com allBranches une as de todas as branches locais e remotas, sem checkout.
 func ListInitiatives(dir string, allBranches bool) ([]InitiativeInfo, error) {
-	current, _, curErr := Current(dir)
-	if curErr != nil && !errors.Is(curErr, errNotRepo) {
+	_, _, curErr := Current(dir)
+	if curErr != nil && !errors.Is(curErr, errNotRepo) && !errors.Is(curErr, ErrAmbiguousInitiative) {
 		return nil, curErr
 	}
+	// Em ambiguidade o marcador fica falso: é só listagem, sem erro.
+	current, _, _ := ResolveInitiative(dir)
 	workTree := map[string]InitiativeInfo{}
 
 	entries, err := os.ReadDir(Discovery(dir))

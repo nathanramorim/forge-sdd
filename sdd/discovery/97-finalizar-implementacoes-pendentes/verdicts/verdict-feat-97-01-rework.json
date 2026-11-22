@@ -1,0 +1,59 @@
+{
+  "task_id": "feat-97-01",
+  "pr": 104,
+  "tentativa": 2,
+  "veredito": "duvida",
+  "achados": [
+    {
+      "verificacao": "S-04",
+      "regra": "DUP-04",
+      "regra_descricao": "Constantes, schemas e nomes canônicos têm definição única.",
+      "classificacao": "conforme",
+      "severidade": null,
+      "arquivo": "internal/monitor/usage.go",
+      "linha": 16,
+      "evidencia": "Constantes de pacote `estimateFallbackInputBytes = 4000` (linha 16) e `estimateFallbackOutputBytes = 2000` (linha 17) promovidas ao nível do pacote. `EstimateJobUsage` referencia `specBytes := estimateFallbackInputBytes` (linha 106) e `logBytes := estimateFallbackOutputBytes` (linha 116). `EstimateSessionUsage` referencia `inputBytes = estimateFallbackInputBytes` (linha 148) e `outputBytes = estimateFallbackOutputBytes` (linha 158). Multiplicador `*4` aplicado em ambas: `EstimateTokensFromBytes(specBytes * 4)` (linha 121) e `EstimateTokensFromBytes(int(inputBytes) * 4)` (linha 162).",
+      "explicacao": "A violação DUP-04 original foi integralmente corrigida na branch remota (origin/feat/97-finalizar-implementacoes-pendentes-feat-97-01). Constantes compartilhadas existem, ambas as funções as referenciam, e o multiplicador *4 é agora consistente.",
+      "correcao": null
+    },
+    {
+      "verificacao": "S-02",
+      "regra": "COD-02",
+      "regra_descricao": "`go vet ./...` passa sem alertas após cada task (Regra 7).",
+      "classificacao": "conforme",
+      "severidade": null,
+      "arquivo": "internal/monitor/usage.go",
+      "linha": 16,
+      "evidencia": "`git show origin/feat/97-finalizar-implementacoes-pendentes-feat-97-01:internal/monitor/usage.go | gofmt | diff - <(git show ...)` retornou saída vazia, confirmando que gofmt não produz alterações no arquivo do PR remoto. O alinhamento de `estimateFallbackInputBytes  = 4000` / `estimateFallbackOutputBytes = 2000` dentro do bloco `const` é preservado pelo gofmt.",
+      "explicacao": "A dúvida COD-02 original foi resolvida: o arquivo no PR remoto passa em `gofmt -l` sem desvios.",
+      "correcao": null
+    },
+    {
+      "verificacao": "S-03",
+      "regra": "TST-01",
+      "regra_descricao": "Toda feature ou fix tem critério executável com `go build` ou `go test` (Regra 6).",
+      "classificacao": "conforme",
+      "severidade": null,
+      "arquivo": "internal/monitor/usage_test.go",
+      "linha": 85,
+      "evidencia": "`TestEstimateSessionUsage_SemFeature` (linha 85–86): `expectedInput := EstimateTokensFromBytes(estimateFallbackInputBytes * 4)` seguido de `assert.Equal(t, expectedInput, u.TokensInput)`. `TestEstimateSessionUsage_SemFiles` (linha 93–94): `expectedOutput := EstimateTokensFromBytes(estimateFallbackOutputBytes)` seguido de `assert.Equal(t, expectedOutput, u.TokensOutput)`. Ambos os testes usam constantes de pacote para asserts de valor exato.",
+      "explicacao": "A dúvida TST-01 original foi resolvida: `SemFeature` e `SemFiles` agora verificam os valores exatos de fallback usando as constantes de pacote `estimateFallbackInputBytes` e `estimateFallbackOutputBytes`.",
+      "correcao": null
+    },
+    {
+      "verificacao": "S-02",
+      "regra": "ARQ-11",
+      "regra_descricao": "Toda spec declara o modelo do módulo (`completo` ou `enxuto`) com justificativa.",
+      "classificacao": "duvida",
+      "severidade": "media",
+      "arquivo": "sdd/discovery/97-finalizar-implementacoes-pendentes/features/feat-97-01-fix-90-02-metrics-token-e-complexidade.md",
+      "linha": null,
+      "evidencia": "Spec adicionada pelo PR (origin/feat/97-finalizar-implementacoes-pendentes-feat-97-01) contém as seções: `## Objetivo`, `## Contexto`, `## Parte A`, `## Parte B`, `## Regenerar goldens`, `## Rules e IDs`, `## Critérios de Aceitação Executáveis` — sem `## Modelo do módulo`. Na branch da iniciativa (`feat/97-finalizar-implementacoes-pendentes`, commit 653299d), a seção `## Modelo do módulo` está presente na linha 11 do mesmo arquivo.",
+      "explicacao": "O PR adiciona o arquivo de spec como arquivo novo, mas sem a seção `## Modelo do módulo`. A correção existe apenas na branch da iniciativa (commit 653299d). Se o PR for mesclado em `main` antes da branch da iniciativa, `main` receberá a versão incompleta da spec. A conformidade com ARQ-11 depende da ordem de merge.",
+      "correcao": "Incluir a seção `## Modelo do módulo` diretamente na branch do PR, ou garantir que a branch da iniciativa seja mesclada em `main` somente após este PR, substituindo o arquivo pela versão corrigida."
+    }
+  ],
+  "candidate_skill": null,
+  "resumo": "Três achados da revisão anterior foram corrigidos na branch remota: DUP-04 (constantes de pacote compartilhadas com *4 consistente), COD-02 (gofmt passa sem desvios), TST-01 (asserts de valor exato usando constantes de pacote em SemFeature e SemFiles). ARQ-11 permanece como dúvida: a correção existe no commit 653299d da branch da iniciativa (feat/97-finalizar-implementacoes-pendentes, linha 11), mas o PR adiciona a spec sem a seção `## Modelo do módulo`. O merge seguro exige que a branch da iniciativa seja aplicada após este PR ou que a seção seja incluída diretamente. `forge bus review` não foi executado: job ID não fornecido no prompt.",
+  "revisado_em": "2026-11-19T09:53:36Z"
+}

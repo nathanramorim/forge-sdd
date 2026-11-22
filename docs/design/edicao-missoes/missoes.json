@@ -1,0 +1,38 @@
+{
+  "edicao": "Edição Missões",
+  "promessa": "A IA executa, o plano segura, você aprova.",
+  "missoes": [
+    {
+      "numero": 1,
+      "sessao": "Discovery",
+      "estacoes": [
+        "Concepção",
+        "Planejamento"
+      ],
+      "titulo": "Missão 1: o plano"
+    },
+    {
+      "numero": 2,
+      "sessao": "Builder",
+      "estacoes": [
+        "Construção"
+      ],
+      "titulo": "Missão 2: a obra"
+    },
+    {
+      "numero": 3,
+      "sessao": "Reviewer",
+      "estacoes": [
+        "Governança"
+      ],
+      "titulo": "Missão 3: o vigia"
+    }
+  ],
+  "fecho": {
+    "sessao": "Você aprova",
+    "estacoes": [
+      "Operação"
+    ],
+    "titulo": "Missão cumprida"
+  }
+}

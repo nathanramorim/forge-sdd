@@ -130,7 +130,10 @@ type ForgeConfig struct {
 	// Sem a chave vale o padrão da CLI; os perfis aplicam por {model} e {effort}.
 	Models  map[string]string `json:"models,omitempty"`
 	Efforts map[string]string `json:"efforts,omitempty"`
-	// Terminal escolhe onde as sessões abrem: auto (tmux se existir), tmux ou native (janelas do sistema).
+	// AgentModels escolhe o modelo por papel no cabeçalho `model:` de .claude/agents/*.md (forge update
+	// escreve; feat 104-05). Sem a chave os agentes seguem em `inherit`.
+	AgentModels map[string]string `json:"agent_models,omitempty"`
+	// Terminal é legado: o tmux saiu (feat-115-02) e as sessões sempre abrem nas janelas do sistema; o valor só é validado.
 	Terminal string `json:"terminal"`
 	// SessionMode escolhe o modo do worker: headless (padrão antigo) ou live (CLI aberta no painel).
 	SessionMode string `json:"session_mode,omitempty"`
@@ -290,6 +293,9 @@ func (c ForgeConfig) Validate() error {
 		}
 	}
 	if err := c.validateSessions(); err != nil {
+		return err
+	}
+	if err := c.validateAgentModels(); err != nil {
 		return err
 	}
 	if c.SessionMode != "" && !ValidSessionMode(c.SessionMode) {

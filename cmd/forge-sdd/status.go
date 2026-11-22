@@ -24,10 +24,9 @@ tokens consumidos, progresso DAG, commits recentes e painel ativo).
 Com --live (ou -l), abre o painel vivo contínuo da esteira (living dashboard), atualizado
 a cada 2 segundos em tempo real no terminal atual (usando Alternate Screen Buffer, sem sujar o histórico).
 
-Com --tmux (ou -t), abre ou conecta diretamente ao painel vivo em uma janela/sessão dedicada do tmux.
-
 Com --all-branches, inclui iniciativas de todas as branches locais e remotas.
 Sem terminal (saída lida por agente), imprime só o status curto (até 1,5 KB); --full mostra tudo.
+Com --all, o status curto inclui as iniciativas com fila concluída (o padrão as esconde).
 Com --compact, imprime a versão tríplice enxuta (< 200 tokens) para agentes.`,
 	Args: cobra.NoArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -47,11 +46,6 @@ Com --compact, imprime a versão tríplice enxuta (< 200 tokens) para agentes.`,
 			}
 			_, err = fmt.Fprint(cmd.OutOrStdout(), out)
 			return err
-		}
-
-		tmuxFlag, _ := cmd.Flags().GetBool("tmux")
-		if tmuxFlag {
-			return pipeline.OpenLiveStatusInTmux(dir)
 		}
 
 		live, _ := cmd.Flags().GetBool("live")
@@ -74,8 +68,9 @@ Com --compact, imprime a versão tríplice enxuta (< 200 tokens) para agentes.`,
 
 		// Sem terminal (um agente lendo a saída) o padrão é o status curto; --full traz tudo.
 		full, _ := cmd.Flags().GetBool("full")
+		showAll, _ := cmd.Flags().GetBool("all")
 		if !full && !isatty.IsTerminal(os.Stdout.Fd()) {
-			short, err := pipeline.FormatShortStatus(dir)
+			short, err := pipeline.FormatShortStatusAll(dir, showAll)
 			if err != nil {
 				return err
 			}
@@ -84,7 +79,7 @@ Com --compact, imprime a versão tríplice enxuta (< 200 tokens) para agentes.`,
 		}
 
 		// forge status padrão: snapshot do painel executivo rico da esteira
-		dashboard, err := pipeline.FormatRichDashboard(dir, nil, nil, nil)
+		dashboard, err := pipeline.FormatRichDashboard(dir, nil, nil)
 		if err != nil {
 			return err
 		}
@@ -194,9 +189,11 @@ func init() {
 	statusCmd.Flags().Bool("all-branches", false, "Inclui iniciativas de todas as branches locais e remotas, sem checkout")
 	statusCmd.Flags().Bool("initiatives", false, "Lista somente as iniciativas de sdd/discovery")
 	statusCmd.Flags().BoolP("live", "l", false, "Exibe o painel vivo contínuo da esteira (living dashboard) em tempo real")
-	statusCmd.Flags().BoolP("tmux", "t", false, "Abre ou anexa o painel vivo diretamente em uma janela/sessão do tmux")
+	statusCmd.Flags().BoolP("tmux", "t", false, "Obsoleto e ignorado")
+	_ = statusCmd.Flags().MarkDeprecated("tmux", "o painel vivo roda no terminal atual")
 	statusCmd.Flags().Bool("once", false, "Executa uma única iteração do painel vivo e encerra")
 	statusCmd.Flags().Bool("compact", false, "Exibe o status tríplice compacto (< 200 tokens) para prompts de IA")
+	statusCmd.Flags().Bool("all", false, "Inclui as iniciativas com fila concluída, marcadas (o padrão as esconde)")
 	statusCmd.Flags().Bool("full", false, "Mostra o painel completo mesmo sem terminal (sem terminal o padrão é o status curto)")
 	statusCmd.Flags().BoolP("interactive", "i", false, "Exibe a fila de tarefas interativa com drill-down de detalhes")
 	nextIDCmd.Flags().String("dir", ".", "Diretório alvo do projeto Forge-SDD")

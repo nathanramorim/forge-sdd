@@ -1,0 +1,16 @@
+{
+  "jobs": [
+    { "name": "test (ubuntu-latest)", "repository": "nathanramorim/forge-sdd", "conclusion": "success",
+      "started_at": "2026-11-21T10:00:00Z", "completed_at": "2026-11-21T10:12:30Z" },
+    { "name": "lint", "repository": "nathanramorim/forge-sdd", "conclusion": "success",
+      "started_at": "2026-11-21T10:00:00Z", "completed_at": "2026-11-21T10:04:00Z" },
+    { "name": "test (macos-latest)", "repository": "nathanramorim/forge-sdd", "conclusion": "success",
+      "started_at": "2026-11-21T10:00:00Z", "completed_at": "2026-11-21T10:06:00Z" },
+    { "name": "test (windows-latest)", "repository": "nathanramorim/outro", "conclusion": "success",
+      "started_at": "2026-11-21T10:00:00Z", "completed_at": "2026-11-21T10:05:00Z" },
+    { "name": "lint", "repository": "nathanramorim/outro", "conclusion": "skipped",
+      "started_at": "2026-11-21T10:00:00Z", "completed_at": "2026-11-21T10:00:01Z" },
+    { "name": "deploy", "repository": "nathanramorim/outro", "conclusion": "cancelled",
+      "started_at": "2026-11-21T10:00:00Z", "completed_at": "2026-11-21T10:02:00Z" }
+  ]
+}

@@ -1,6 +1,7 @@
 package scaffold
 
 import (
+	"encoding/json"
 	"os"
 	"path/filepath"
 	"strings"
@@ -427,3 +428,127 @@ func TestUpgradeMigratesForgeJSONGeminiToAgy(t *testing.T) {
 	assert.NotContains(t, disk, `"command": "gemini"`)
 }
 
+// TestUpgradeNaoSobrescreveSettingsDoUsuario: o upgrade leva o hook da política sem perder
+// o que o dono configurou em .claude/settings.json (feat-106-36).
+func TestUpgradeNaoSobrescreveSettingsDoUsuario(t *testing.T) {
+	dir := t.TempDir()
+
+	cfg := config.Config{
+		Project:    "demo",
+		Stack:      "go",
+		DB:         "none",
+		Lang:       "pt-BR",
+		SddVersion: "1.5.2",
+		Agents:     []string{config.AgentClaude},
+	}
+	_, err := Run(cfg, dir)
+	require.NoError(t, err)
+
+	// O dono personalizou o settings: modelo, permissão e um hook próprio.
+	settingsPath := filepath.Join(dir, ".claude", "settings.json")
+	require.NoError(t, os.MkdirAll(filepath.Dir(settingsPath), 0o755))
+	personalizado := `{
+  "model": "opus",
+  "permissions": {"allow": ["Bash(go test:*)"]},
+  "hooks": {"UserPromptSubmit": [{"hooks": [{"type": "command", "command": "echo meu"}]}]}
+}`
+	require.NoError(t, os.WriteFile(settingsPath, []byte(personalizado), 0o644))
+
+	// Upgrade para a versão nova.
+	cfgUpgrade := cfg
+	cfgUpgrade.SddVersion = "5.2.0"
+	_, err = Run(cfgUpgrade, dir)
+	require.NoError(t, err)
+
+	data, err := os.ReadFile(settingsPath)
+	require.NoError(t, err)
+	var m map[string]any
+	require.NoError(t, json.Unmarshal(data, &m), "settings.json precisa continuar JSON válido")
+
+	// O que o dono configurou continua lá.
+	assert.Equal(t, "opus", m["model"])
+	assert.NotNil(t, m["permissions"])
+	hooks, ok := m["hooks"].(map[string]any)
+	require.True(t, ok)
+	assert.NotNil(t, hooks["UserPromptSubmit"], "hook do usuário preservado")
+
+	// E a política foi levada: o hook da barreira de PR está presente.
+	assert.Contains(t, string(data), "pr_guard.py", "o upgrade leva a barreira de PR")
+
+	// JSON inválido nunca é tocado: o upgrade avisa e mantém o arquivo do usuário.
+	quebrado := `{"model":`
+	require.NoError(t, os.WriteFile(settingsPath, []byte(quebrado), 0o644))
+	_, err = Run(cfgUpgrade, dir)
+	require.NoError(t, err, "JSON inválido não derruba o upgrade; ele avisa")
+	inalterado, err := os.ReadFile(settingsPath)
+	require.NoError(t, err)
+	assert.Equal(t, quebrado, string(inalterado), "o arquivo do usuário fica intacto")
+}
+
+// TestComandosDeConcepcaoSemBranchDaIniciativa: os comandos de concepção criam só a branch
+// da spec, nunca a branch de construção (feat-106-26a, ADR-0022).
+func TestComandosDeConcepcaoSemBranchDaIniciativa(t *testing.T) {
+	comandos := map[string]string{
+		"discovery":    ".agents/skills/sdd-concepcao/references/discovery.md",
+		"nova-feature": ".agents/skills/sdd-concepcao/references/nova-feature.md",
+		"novo-fix":     ".agents/skills/sdd-concepcao/references/novo-fix.md",
+	}
+
+	for nome, caminho := range comandos {
+		data, err := os.ReadFile(filepath.Join("..", "..", caminho))
+		require.NoError(t, err, nome)
+		texto := string(data)
+
+		// Cada comando fala do PR da spec em draft, com o caminho do merge pela principal.
+		assert.Contains(t, texto, "draft", "%s: precisa do PR em draft", nome)
+		assert.Contains(t, texto, "Conferência 1", "%s: precisa da Conferência 1", nome)
+
+		// O fluxo novo manda a construção ir para uma branch por feature, aberta pelo Builder.
+		assert.Contains(t, texto, "branch por feature", "%s: precisa apontar a branch por feature", nome)
+
+		// O template e o golden precisam estar em sincronia com o texto que os comandos leem.
+		for _, espelho := range []string{
+			filepath.Join("templates", caminho+".tmpl"),
+			filepath.Join("testdata", "golden", caminho),
+		} {
+			espelhado, err := templatesFS.ReadFile(filepath.ToSlash(espelho))
+			if err != nil {
+				espelhado, err = os.ReadFile(filepath.Join("..", "..", strings.TrimPrefix(espelho, "templates/")))
+				if err != nil {
+					continue
+				}
+			}
+			assert.Equal(t, texto, string(espelhado), "%s: %s fora de sincronia", nome, espelho)
+		}
+	}
+}
+
+// TestImplementarSemGhPrCreateFill: o Builder nunca abre PR sem `--draft` (feat-106-26b, RN-7).
+func TestImplementarSemGhPrCreateFill(t *testing.T) {
+	data, err := os.ReadFile(filepath.Join("..", "..", ".agents/skills/sdd-build/references/implementar.md"))
+	require.NoError(t, err)
+	texto := string(data)
+
+	// Toda menção a `gh pr create` precisa trazer `--draft`.
+	for _, linha := range strings.Split(texto, "\n") {
+		if !strings.Contains(linha, "gh pr create") {
+			continue
+		}
+		// A linha que proíbe o uso sem draft também cita o comando; ela é permitida.
+		if strings.Contains(linha, "Nunca") || strings.Contains(linha, "sem `--draft`") {
+			continue
+		}
+		assert.Contains(t, linha, "--draft", "PR da feature precisa nascer em draft: %s", linha)
+	}
+
+	// A política do PR por feature está declarada.
+	assert.Contains(t, texto, "Uma branch e um PR por feature")
+	assert.Contains(t, texto, "base na principal")
+	assert.Contains(t, texto, "gh pr ready", "marcar pronto é etapa separada, com parecer do HEAD")
+
+	// O split não cria mais a branch da construção.
+	split, err := os.ReadFile(filepath.Join("..", "..", ".agents/skills/sdd-planejamento/references/split-features.md"))
+	require.NoError(t, err)
+	assert.Contains(t, string(split), "Sem branch nova aqui",
+		"o split não pode criar a branch da iniciativa")
+}

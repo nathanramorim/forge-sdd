@@ -1,7 +1,7 @@
 # ADR-0010: `forge` como Único Nome de Comando
 
 - **Data:** 2026-11-14
-- **Status:** `proposto`
+- **Status:** `aceito` (2026-11-20, aprovado pelo dono no Gate 1 da 105)
 - **Regras afetadas (IDs da constitution):** `ARQ-06`, `DUP-01`, `COD-05`, `GOV-01` (este ADR; nenhum ID foi criado ou removido)
 - **Autor / Responsável:** Líder (discovery 82)
 

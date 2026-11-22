@@ -418,7 +418,10 @@ func (d *RPCDispatcher) Dispatch(ctx context.Context, raw []byte) *Response {
 
 	var idVal any
 	if env.ID != nil {
-		_ = json.Unmarshal(*env.ID, &idVal)
+		if err := json.Unmarshal(*env.ID, &idVal); err != nil {
+			resp := NewErrorResponse(nil, NewRPCError(CodeInvalidRequest, "Invalid Request: 'id' inválido"))
+			return &resp
+		}
 	}
 
 	// Validação de conformidade com JSON-RPC 2.0

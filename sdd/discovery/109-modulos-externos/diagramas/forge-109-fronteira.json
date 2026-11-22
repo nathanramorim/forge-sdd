@@ -1,0 +1,139 @@
+{
+ "kicker": "// Forge SDD · iniciativa 109",
+ "titulo": "O core guarda a esteira; o módulo opera o quadro; o contrato fica no meio",
+ "largura": 1360,
+ "altura": 640,
+ "nota_rodape": "sem módulo, o core se comporta byte a byte como hoje",
+ "elementos": [
+  {
+   "tipo": "caixa",
+   "id": "c1",
+   "x": 56,
+   "y": 128,
+   "w": 360,
+   "h": 92,
+   "texto": "Esteira intacta",
+   "sub": "AUTOMÁTICO · spec, Builder, validador, merge",
+   "estilo": "normal"
+  },
+  {
+   "tipo": "caixa",
+   "id": "c2",
+   "x": 56,
+   "y": 244,
+   "w": 360,
+   "h": 92,
+   "texto": "Fila, estado por feature, atestado",
+   "sub": "AUTOMÁTICO · 106 e laço da 107 (WIP, início automático)",
+   "estilo": "normal"
+  },
+  {
+   "tipo": "caixa",
+   "id": "c3",
+   "x": 56,
+   "y": 360,
+   "w": 360,
+   "h": 92,
+   "texto": "Constituição e gates",
+   "sub": "HUMANO decide · campo Módulos permitidos",
+   "estilo": "destaque"
+  },
+  {
+   "tipo": "caixa",
+   "id": "k",
+   "x": 500,
+   "y": 200,
+   "w": 360,
+   "h": 200,
+   "texto": "Contrato v1",
+   "sub": "manifesto · eventos · doctor · pendentes · instantâneo; só aditivo",
+   "estilo": "destaque"
+  },
+  {
+   "tipo": "caixa",
+   "id": "m1",
+   "x": 944,
+   "y": 128,
+   "w": 360,
+   "h": 92,
+   "texto": "Espelho do quadro",
+   "sub": "módulo · colunas e estado para coluna",
+   "estilo": "contorno"
+  },
+  {
+   "tipo": "caixa",
+   "id": "m2",
+   "x": 944,
+   "y": 244,
+   "w": 360,
+   "h": 92,
+   "texto": "Etiquetas, via rápida, issues",
+   "sub": "módulo · prefixo de título, linguagem comercial",
+   "estilo": "contorno"
+  },
+  {
+   "tipo": "caixa",
+   "id": "m3",
+   "x": 944,
+   "y": 360,
+   "w": 360,
+   "h": 92,
+   "texto": "Sincronia e rotina dos agentes",
+   "sub": "módulo · forge project, doctor dele, docs",
+   "estilo": "contorno"
+  },
+  {
+   "tipo": "seta",
+   "de": "c2.dir",
+   "para": "k.esq",
+   "forma": "horizontal"
+  },
+  {
+   "tipo": "seta",
+   "de": "k.dir",
+   "para": "m2.esq",
+   "forma": "horizontal"
+  },
+  {
+   "tipo": "caixa",
+   "id": "lg1",
+   "x": 56,
+   "y": 500,
+   "w": 200,
+   "h": 56,
+   "texto": "HUMANO",
+   "sub": "autoriza e decide",
+   "estilo": "destaque"
+  },
+  {
+   "tipo": "caixa",
+   "id": "lg2",
+   "x": 276,
+   "y": 500,
+   "w": 200,
+   "h": 56,
+   "texto": "IA",
+   "sub": "agentes seguem na esteira",
+   "estilo": "normal"
+  },
+  {
+   "tipo": "caixa",
+   "id": "lg3",
+   "x": 496,
+   "y": 500,
+   "w": 260,
+   "h": 56,
+   "texto": "AUTOMÁTICO",
+   "sub": "código sem LLM; módulo em outro repositório",
+   "estilo": "contorno"
+  },
+  {
+   "tipo": "texto",
+   "x": 56,
+   "y": 600,
+   "texto": "O módulo nunca aprova nem escreve estado do core. Ausente, quebrado ou incompatível: ignorado.",
+   "estilo": "nota",
+   "alinha": "start"
+  }
+ ]
+}

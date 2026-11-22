@@ -187,6 +187,16 @@ var queueReviewCmd = &cobra.Command{
 			return err
 		}
 		fmt.Printf("✓ Parecer registrado para %s: veredito=%s → status=%s\n", item.TaskID, item.GovernanceVerdict.Veredito, item.Status)
+
+		noPR, _ := cmd.Flags().GetBool("no-pr")
+		if item.GovernanceVerdict.Veredito == queue.VerdictConforme && !noPR {
+			q, loadErr := queue.Load(dir)
+			if loadErr == nil {
+				if prErr := queue.OpenPR(dir, q, item, os.Stdout); prErr != nil {
+					fmt.Fprintf(os.Stderr, "aviso: PR não criado: %v\n", prErr)
+				}
+			}
+		}
 		return nil
 	},
 }
@@ -293,7 +303,8 @@ func RunInteractiveQueue(dir string, out io.Writer) error {
 
 var queueHandoffCmd = &cobra.Command{
 	Use:   "handoff",
-	Short: "Transfere um artefato de forma idempotente entre duas estações",
+	Short:  "[depreciado] Transfere um artefato de forma idempotente entre duas estações",
+	PreRun: avisoDepreciado(),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		dir, _ := cmd.Flags().GetString("dir")
 		from, _ := cmd.Flags().GetString("from")
@@ -325,7 +336,8 @@ var queueHandoffCmd = &cobra.Command{
 
 var queueStationsCmd = &cobra.Command{
 	Use:   "stations",
-	Short: "Lista o estado e versão das 5 filas de estações",
+	Short:  "[depreciado] Lista o estado e versão das 5 filas de estações",
+	PreRun: avisoDepreciado(),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		dir, _ := cmd.Flags().GetString("dir")
 		stations := queue.CanonicalStations()
@@ -447,6 +459,7 @@ func init() {
 	queueReviewCmd.Flags().String("dir", ".", "Diretório alvo do projeto Forge-SDD")
 	queueReviewCmd.Flags().String("verdict-file", "", "Caminho para arquivo JSON com o parecer da Camada B")
 	queueReviewCmd.Flags().String("verdict-json", "", "String JSON com o parecer da Camada B")
+	queueReviewCmd.Flags().Bool("no-pr", false, "Pular criação automática de PR após veredito conforme")
 
 	queueListCmd.Flags().String("dir", ".", "Diretório alvo do projeto Forge-SDD")
 	queueListCmd.Flags().Bool("json", false, "Exibir saída em formato JSON")

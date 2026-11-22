@@ -3,13 +3,17 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 
 	"github.com/forge-sdd/cli/internal/config"
+	"github.com/forge-sdd/cli/internal/doctor"
 	"github.com/forge-sdd/cli/internal/gate"
 	"github.com/forge-sdd/cli/internal/layout"
+	"github.com/forge-sdd/cli/internal/notify"
 	"github.com/forge-sdd/cli/internal/scaffold"
 	"github.com/spf13/cobra"
 )
@@ -27,11 +31,16 @@ var doctorCmd = &cobra.Command{
 inconsistências de configuração dos agentes de IA e progresso das features.`,
 	Args: cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		targetDir := "."
+		targetDir, _ := cmd.Flags().GetString("dir")
 		if len(args) == 1 {
 			targetDir = args[0]
 		}
+		if harnessMode, _ := cmd.Flags().GetBool("harness"); harnessMode {
+			asJSON, _ := cmd.Flags().GetBool("json")
+			return runDoctorHarness(cmd.OutOrStdout(), targetDir, asJSON, doctor.DefaultDeps())
+		}
 
+		verbose, _ := cmd.Flags().GetBool("verbose")
 		fmt.Printf("🩺 Iniciando diagnóstico da metodologia em '%s'...\n\n", targetDir)
 
 		sddrcPath := layout.Sddrc(targetDir)
@@ -91,10 +100,9 @@ inconsistências de configuração dos agentes de IA e progresso das features.`,
 			} else {
 				vStr := strings.TrimSpace(string(verData))
 				if vStr != rc.Version {
-					fmt.Printf("⚠️  Descompasso de versão: sdd/.sddrc indica v%s mas sdd/.sdd-version indica v%s\n", rc.Version, vStr)
-				} else {
-					fmt.Printf("✓ Versão registrada em sincronia: v%s\n", vStr)
+					fmt.Printf("⚠️  Descompasso de versão: sdd/.sddrc indica v%s mas sdd/.sdd-version indica v%s\n", notify.Sanitize(rc.Version, 40, false), notify.Sanitize(vStr, 40, false))
 				}
+				reportDoctorVersao(vStr)
 			}
 		} else {
 			fmt.Println("⚠️  Arquivo sdd/.sdd-version não encontrado.")
@@ -137,6 +145,10 @@ inconsistências de configuração dos agentes de IA e progresso das features.`,
 				}
 			}
 		}
+
+		// 3b. Cobertura da barreira de PR (feat-106-15)
+		fmt.Println("\n🛡️  Barreira de PR (pr_guard):")
+		reportPRGuardCoverage(targetDir, rc.Agents)
 
 		// 4. Verificação de arquivos essenciais de metodologia
 		fmt.Println("\n📁 Arquivos de Metodologia:")
@@ -191,7 +203,7 @@ inconsistências de configuração dos agentes de IA e progresso das features.`,
 
 		if scannedAny {
 			fmt.Printf("\n📋 Features Registradas: %d cadastrada(s)\n", len(activeFeatures))
-			if len(activeFeatures) > 0 {
+			if verbose && len(activeFeatures) > 0 {
 				fmt.Println("  Caminhos:")
 				for _, feat := range activeFeatures {
 					fmt.Printf("   - sdd/%s\n", feat)
@@ -301,7 +313,93 @@ inconsistências de configuração dos agentes de IA e progresso das features.`,
 	},
 }
 
+// reportDoctorVersao compara a versão do projeto com a do binário e imprime o veredito.
+func reportDoctorVersao(projeto string) {
+	st, msg := doctor.CompararVersao(projeto, config.BinaryVersion())
+	switch st {
+	case doctor.VersaoOK:
+		fmt.Println("✓ " + msg)
+	case doctor.VersaoBinarioAntigo:
+		fmt.Println("✗ " + msg)
+	default:
+		fmt.Println("⚠️  " + msg)
+	}
+}
+
 func fileExists(path string) bool {
 	_, err := os.Stat(path)
 	return err == nil
+}
+
+// runDoctorHarness imprime o diagnóstico do harness (texto ou JSON) e sai com 3 se algo falhou.
+func runDoctorHarness(w io.Writer, dir string, asJSON bool, deps doctor.Deps) error {
+	rel := doctor.Diagnose(dir, deps)
+	if err := doctor.ValidateRelatorio(rel); err != nil {
+		return err
+	}
+	if asJSON {
+		data, err := json.Marshal(rel)
+		if err != nil {
+			return fmt.Errorf("serializar relatório do doctor: %w", err)
+		}
+		fmt.Fprintln(w, string(data))
+	} else {
+		for _, c := range rel.Checagens {
+			fmt.Fprintf(w, "[%s] %s: %s\n", c.Status, c.ID, c.Detalhe)
+			if c.Sugestao != "" {
+				fmt.Fprintf(w, "      sugestão: %s\n", c.Sugestao)
+			}
+		}
+	}
+	if code := rel.ExitCode(); code != 0 {
+		return exitCodeErr{code: code}
+	}
+	return nil
+}
+
+// reportPRGuardCoverage informa se o hook PreToolUse do pr_guard está instalado e em quais
+// agentes a barreira de fato vale. Só o Claude Code executa hooks (feat-106-15); nos demais, o
+// job "pronto?" do CI é quem segura o PR em draft.
+func reportPRGuardCoverage(targetDir string, agents []string) {
+	settings := filepath.Join(targetDir, ".claude", "settings.json")
+	instalado := false
+	if data, err := os.ReadFile(settings); err == nil {
+		instalado = strings.Contains(string(data), "pr_guard.py")
+	}
+
+	if instalado {
+		fmt.Println("  ✓ Hook PreToolUse instalado (.claude/settings.json)")
+	} else {
+		fmt.Println("  ⚠️  Hook PreToolUse ausente; rode 'forge update --upgrade' para instalar")
+	}
+
+	if _, err := exec.LookPath("uv"); err != nil {
+		fmt.Println("  ⚠️  'uv' não está no PATH; o hook não roda sem ele (instale em https://docs.astral.sh/uv/)")
+	} else {
+		fmt.Println("  ✓ 'uv' disponível no PATH")
+	}
+
+	var comHook, semHook []string
+	for _, a := range agents {
+		if a == config.AgentClaude {
+			comHook = append(comHook, a)
+		} else {
+			semHook = append(semHook, a)
+		}
+	}
+	if len(comHook) > 0 && instalado {
+		fmt.Printf("  ✓ Cobertura: %s (hook ativo)\n", strings.Join(comHook, ", "))
+	} else if len(comHook) > 0 {
+		fmt.Printf("  ⚠️  Cobertura: %s configurado, mas o hook não está instalado\n", strings.Join(comHook, ", "))
+	}
+	if len(semHook) > 0 {
+		fmt.Printf("  ℹ️  Sem hook: %s — nesses agentes vale o job \"pronto?\" do CI\n", strings.Join(semHook, ", "))
+	}
+}
+
+func init() {
+	doctorCmd.Flags().String("dir", ".", "Diretório alvo do projeto Forge-SDD")
+	doctorCmd.Flags().Bool("harness", false, "Diagnostica o harness do pipeline (somente leitura; sai com 3 se houver falha)")
+	doctorCmd.Flags().Bool("verbose", false, "Lista os caminhos de features/tasks (o padrão imprime só o resumo)")
+	doctorCmd.Flags().Bool("json", false, "Com --harness, emite o relatório em JSON")
 }

@@ -1,7 +1,6 @@
 package pipeline
 
 import (
-	"encoding/json"
 	"fmt"
 	"io"
 	"os"
@@ -48,7 +47,7 @@ func CheckAndAutoArchive(dir string, job bus.Job, now time.Time, ncfg config.Not
 		return &ArchiveResult{Archived: false, Reason: "diretório da iniciativa não encontrado"}, nil
 	}
 	name := filepath.Base(initDir)
-	if reason := pendingReason(initDir); reason != "" {
+	if reason := pendingReason(dir, name); reason != "" {
 		return &ArchiveResult{Initiative: name, Reason: reason}, nil
 	}
 	if q, _ := queue.LoadInitiative(dir, name); q != nil && q.Origem == queue.OrigemTocaAi {
@@ -73,18 +72,19 @@ var fixDoneStatuses = map[string]bool{"done": true, "approved": true, "merged": 
 // pendingReason devolve por que a iniciativa não pode ser arquivada; vazio quando não há pendência.
 // Pendente é task ou fix da fila fora de approved e fix de fixes/ cujo `**Status:**` ainda não é de
 // entregue (done, approved ou merged) e que não tem item aprovado na fila.
-func pendingReason(initDir string) string {
+func pendingReason(dir, name string) string {
+	initDir := filepath.Join(layout.Discovery(dir), name)
 	approved := map[string]bool{}
-	if data, err := os.ReadFile(filepath.Join(initDir, layout.QueueFileName)); err == nil {
-		var q queue.Queue
-		if json.Unmarshal(data, &q) == nil {
-			for _, it := range q.Items {
-				if it.Status != queue.StatusApproved {
-					return fmt.Sprintf("tarefa %s ainda pendente (status: %s)", it.TaskID, it.Status)
-				}
-				approved[it.TaskID] = true
-			}
+	// Load da fila respeita o estado por feature (state/<sid>.json) quando a pasta existe.
+	q, err := queue.LoadForInitiative(dir, name)
+	if err != nil {
+		return fmt.Sprintf("não consegui ler a fila da iniciativa: %v", err)
+	}
+	for _, it := range q.Items {
+		if it.Status != queue.StatusApproved {
+			return fmt.Sprintf("tarefa %s ainda pendente (status: %s)", it.TaskID, it.Status)
 		}
+		approved[it.TaskID] = true
 	}
 	entries, _ := os.ReadDir(filepath.Join(initDir, "fixes"))
 	for _, e := range entries {
@@ -118,7 +118,7 @@ func AutoArchiveInitiative(dir, initiativeID string, now time.Time, git queue.Gi
 	}
 	name := filepath.Base(initDir)
 
-	if reason := pendingReason(initDir); reason != "" {
+	if reason := pendingReason(dir, name); reason != "" {
 		return &ArchiveResult{Initiative: name, Reason: reason}, nil
 	}
 	if git == nil {
@@ -183,17 +183,26 @@ func AutoArchiveInitiative(dir, initiativeID string, now time.Time, git queue.Gi
 	}, nil
 }
 
-// branchGuard exige estar na branch da iniciativa; vazio quando está.
+// branchGuard exige estar na branch principal (base_branch do forge.json, padrão main), onde a spec e
+// os estados por feature já foram mesclados, ou, em iniciativa antiga, na branch da própria iniciativa;
+// vazio quando está. A fila de outra branch nunca é lida (Decisão xvi).
 func branchGuard(dir, name string, git queue.GitFunc) string {
 	branch, err := git(dir, "rev-parse", "--abbrev-ref", "HEAD")
 	branch = strings.TrimSpace(branch)
 	if err != nil || branch == "" {
-		return "não consegui saber a branch atual; rode na branch da iniciativa"
+		return "não consegui saber a branch atual; rode na branch principal"
 	}
-	if id, ok := layout.FromBranch(branch); !ok || id != name {
-		return fmt.Sprintf("a branch atual (%s) não é a da iniciativa (%s); troque de branch antes de arquivar", branch, layout.InitiativeBranch(name))
+	base := config.DefaultForgeConfig().BaseBranch
+	if cfg, found, cerr := config.LoadForgeConfig(dir); cerr == nil && found && cfg.BaseBranch != "" {
+		base = cfg.BaseBranch
 	}
-	return ""
+	if branch == base {
+		return ""
+	}
+	if id, ok := layout.FromBranch(branch); ok && id == name {
+		return ""
+	}
+	return fmt.Sprintf("a branch atual (%s) não é a principal (%s) nem a da iniciativa (%s); troque de branch antes de arquivar", branch, base, layout.InitiativeBranch(name))
 }
 
 func archivedDir(dir, id string) string {
@@ -237,13 +246,8 @@ func ListArchiveCandidates(dir string) []string {
 		if !e.IsDir() || !layout.ValidInitiative(e.Name()) {
 			continue
 		}
-		initDir := filepath.Join(layout.Discovery(dir), e.Name())
-		data, err := os.ReadFile(filepath.Join(initDir, layout.QueueFileName))
-		if err != nil {
-			continue
-		}
-		var q queue.Queue
-		if json.Unmarshal(data, &q) != nil || len(q.Items) == 0 || pendingReason(initDir) != "" {
+		q, err := queue.LoadForInitiative(dir, e.Name())
+		if err != nil || len(q.Items) == 0 || pendingReason(dir, e.Name()) != "" {
 			continue
 		}
 		out = append(out, e.Name())

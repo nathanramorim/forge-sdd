@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/forge-sdd/cli/internal/layout"
+	"github.com/forge-sdd/cli/internal/scaffold"
 )
 
 // SessionMetrics espelha sdd/.metrics/schema.json.
@@ -35,10 +36,31 @@ type SessionMetrics struct {
 	Medicao             string  `json:"medicao,omitempty"`
 
 	Complexidade *string `json:"complexidade"` // reservado; preenchimento definido por ADR futura
+
+	// Spec é opcional: só as sessões de concepção (--sessao spec) o preenchem; sem ele o arquivo não muda.
+	Spec *SpecMetrics `json:"spec,omitempty"`
+}
+
+// MarshalSessionMetrics devolve o JSON que RecordSessionMetrics gravaria, sem tocar o disco (--dry-run).
+func MarshalSessionMetrics(metrics SessionMetrics) ([]byte, error) {
+	if metrics.Spec != nil && metrics.Spec.validate() != nil {
+		metrics.Spec = nil
+	}
+	if metrics.Schema == "" {
+		metrics.Schema = "forge-sdd/metrics/1.0"
+	}
+	data, err := json.MarshalIndent(metrics, "", "  ")
+	if err != nil {
+		return nil, fmt.Errorf("falha ao serializar telemetria: %w", err)
+	}
+	return append(data, '\n'), nil
 }
 
 // RecordSessionMetrics grava um arquivo de telemetria em sdd/.metrics/session-<ISO8601>.json.
 func RecordSessionMetrics(targetDir string, metrics SessionMetrics, at time.Time) (string, error) {
+	if metrics.Spec != nil && metrics.Spec.validate() != nil {
+		metrics.Spec = nil // campo inválido nunca entra no bloco
+	}
 	metricsDir := layout.Metrics(targetDir)
 	if err := os.MkdirAll(metricsDir, 0o755); err != nil {
 		return "", fmt.Errorf("falha ao criar sdd/.metrics: %w", err)
@@ -62,7 +84,7 @@ func RecordSessionMetrics(targetDir string, metrics SessionMetrics, at time.Time
 	}
 	data = append(data, '\n')
 
-	if err := os.WriteFile(path, data, 0o644); err != nil {
+	if err := scaffold.WriteFileSafe(targetDir, path, data); err != nil {
 		return "", fmt.Errorf("falha ao gravar %s: %w", path, err)
 	}
 	return path, nil

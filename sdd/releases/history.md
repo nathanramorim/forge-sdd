@@ -4,6 +4,55 @@ Este arquivo registra o histórico de entregas de produto deste projeto.
 
 ## Entregas
 
+### Versão 5.2.0 — O CI Sai do Caminho, a Revisão Vem Antes e Cada Feature Tem o Seu PR (Beta)
+
+Compatível com a 5.0.0. Consolida a iniciativa 106 inteira: o CI deixa de rodar em trabalho não conferido, a revisão acontece em dois pontos (a spec e a feature) e cada feature do split tem branch e PR próprios.
+
+*   **O CI roda no ponto certo (#181):** PR em draft tem os jobs pulados e não consome runner. Ao sair do draft, teste e lint rodam uma vez, em três sistemas (Linux, macOS e Windows), e `concurrency` cancela a execução anterior quando você sobe um commit novo. Um job novo, `pronto?`, é obrigatório na principal e recusa PR em draft.
+*   **A spec volta cedo, em PR próprio (#193, #199):** `/discovery`, `/nova-feature` e `/novo-fix` abrem só a spec, em PR draft. Depois da Conferência 1 e do seu `[Seguir]`, a spec é mesclada na principal e a construção começa — em vez de ficar presa numa branch de iniciativa até o fim. O Gate 1 passa a ser uma linha explícita no `status.md`, não a existência de um arquivo.
+*   **Uma branch e um PR em draft por feature (#198, #201, #203, #206):** o Builder abre uma branch por feature do split, com base na principal, e cada uma tem o seu PR. Nenhum PR tem base em outro. Uma feature só começa com as dependências **mescladas**, não apenas abertas, e o `[Continuar]` é agrupado por onda.
+*   **Ninguém marca "pronto" sem parecer válido (#185):** `gh pr ready` e `gh pr merge` exigem parecer `conforme` com `head_sha` igual ao HEAD atual. Parecer de outro commit — o código mudou depois da revisão — é recusado com os dois SHA lado a lado.
+*   **A barreira fica instalada (#182):** o hook `PreToolUse` que barra o `gh` entra sozinho no `.claude/settings.json`, e o `forge doctor` mostra em quais agentes ele vale. Nos outros agentes, o job `pronto?` do CI segura.
+*   **Atestado conferido no CI (#196):** `scripts/atestado.py` verifica o parecer no PR de feature, no modo `local`, em segundos. O modo `desligado` diz em voz alta que nada foi conferido; `vcs` é recusado como adiado.
+*   **Quanto o CI custa, com número defensável (#188, #197):** `scripts/ci-politica.py` cruza a cobrança do GitHub com o cálculo por job e mostra a diferença. Jobs pulados e cancelados ficam à parte, e o CSV é seguro para abrir em planilha (células que começam com `=`, `+`, `@` ou `-` são neutralizadas).
+*   **Modos do projeto na Constituição (#177):** a tabela `Ferramentas e Integrações` ganha o modo do atestado, o modo de revisão humana, o WIP humano, os módulos permitidos e o início automático do Builder. `GOV-03` passa a guardar lições em `sdd/memory/licoes/`, um arquivo por regra.
+*   **Modo sem humano, com os riscos à vista (#190):** só liga depois de o aviso de três riscos ser apresentado e aceito. Sem isso, o modo fica `com-humano` — recusar sempre mantém o padrão seguro.
+*   **`/upgrade-sdd` leva a política (#202):** quem já tem projeto recebe o hook, o job `pronto?`, os scripts e os campos de modo sem perder o `ci.yml` nem o `.claude/settings.json` — o forge mescla, nunca sobrescreve, e JSON inválido não é tocado.
+*   **README com um prompt por ferramenta (#191):** quatro blocos "cole isto na sua IA", um para cada agente, apontando para o arquivo de instruções que ele lê.
+*   **Como atualizar:** `npm install -g @nathanramorim/forge-sdd@beta` para a prévia; nos projetos existentes, `forge update --upgrade` e depois `/upgrade-sdd`, que leva a política de PR. Rode `forge doctor` no fim: a seção "Barreira de PR" diz o que ficou instalado.
+*   **Avisos da beta:** esta versão não está na `main` (`FLX-07`); quem usa `npm install -g @nathanramorim/forge-sdd` sem `@beta` continua na linha estável.
+
+### Versão 5.1.0 — CLI Mais Claro, Métricas de Discovery e Parecer com Proveniência e Fila por Branch de Feature (Beta)
+
+Compatível com a 5.0.0 (Iniciativas 97, 104, 105 e 106). Beta: a versão não está na `main`; a estável continua sendo a 5.0.0.
+
+*   **`forge doctor` compara versões e fala menos (#125):** o diagnóstico compara a versão do projeto com a do programa e avisa quando o projeto está atrás. Os caminhos de features e tasks só aparecem com `--verbose`.
+*   **`forge status` esconde o que já terminou (#124):** iniciativa com a fila concluída sai da lista; `forge status --all` mostra todas, marcando as concluídas.
+*   **Aviso de comando depreciado (#126, #129):** `queue stations`, `queue handoff` e `attach` mostram o substituto ao serem usados, e o aviso aparece também na documentação dos atalhos `/implement` e `/proxima-feature`. Os usos dos comandos do programa (`queue stations`, `queue handoff` e `attach`) são registrados em `sdd/memory/logs/depreciados.csv`, para você ver o que ainda está em uso antes da remoção; os atalhos de barra não geram linha no CSV. A decisão está na ADR-0021 (#123).
+*   **"3 sessões" no lugar de "5 estações" (#127, #128):** a ajuda do programa e os textos entregues passam a falar de Discovery, Builder e Reviewer; a descrição do agente `lider` segue o mesmo caminho. Nenhum comando foi renomeado.
+*   **Métricas de Discovery (#131):** as métricas das sessões de concepção ganham o bloco `spec`.
+*   **Parecer do Reviewer com proveniência (feature 106-11, #159):** o parecer guarda `head_sha`, `ponto` (`spec` ou `entrega`), `modo` e `feature`, gravados pelo Go a partir do HEAD da branch. Veredito sem commit válido é recusado.
+*   **A fila acha a iniciativa em branch por feature (fix-106-01, #163):** em branches como `feat/106-11-...` ou `fix/106-01-...`, os comandos que leem a fila (`forge queue list`, `forge queue next` e os demais subcomandos de `queue`) passam a achar a iniciativa casando o número do começo da branch com a pasta em `sdd/discovery/`. Se duas pastas tiverem o mesmo número, o comando falha com erro claro e lista as pastas. `forge status`, `forge doctor`, `forge gate`, `forge archive` e `forge context` conferem isso antes de ler a fila. Nova flag global `--iniciativa <id>` e variável `FORGE_INICIATIVA` escolhem a iniciativa à mão (a flag vence a variável, e a variável vence a branch); id que não existe dá erro.
+*   **README mais claro (#130, #132):** a esteira é contada uma vez só, e os diagramas usam as cores e as marcas dos robôs da página.
+*   **O que vem a seguir (em desenho, sem data):** contrato de módulos, régua de estimativa de tokens, painel de métricas, orquestrador e política de PR em rascunho com CI. Nada disso está nesta beta.
+*   **Como atualizar:** `npm install -g @nathanramorim/forge-sdd@beta` para instalar a prévia; nos projetos existentes, rode `forge update --upgrade` e depois `forge doctor` para conferir se o projeto está em sincronia com o programa. Para voltar à estável, `npm install -g @nathanramorim/forge-sdd` sem `@beta`.
+*   **Avisos da beta:** esta versão não está na `main` (`FLX-07`); quem usa `npm install -g @nathanramorim/forge-sdd` sem `@beta` continua na 5.0.0 estável.
+
+### Versão 5.0.0 — Wiki Get Started, PR Automático e Edição Missões (Estável)
+
+Compatível com a 4.8.0. Consolida em versão estável tudo o que foi entregue na linha 4.9.x e nas Iniciativas 97 a 100.
+
+*   **Wiki Get Started (`forge-sdd.org/wiki`):** uma jornada guiada de instalação, primeira feature e ciclo completo. Cada passo traz um bloco "Prompt para IA", pronto para copiar e colar no seu agente. Inclui o modo Hub, para usar o forge-sdd em vários repositórios, e uma seção sobre `/constitution`. O botão "Get Started" da landing page leva direto para lá (Iniciativa 99).
+*   **PR automático depois da revisão (`forge queue review`):** quando o veredito é `conforme`, o comando envia a branch e abre o PR com `gh pr create`, sem perguntar. Use `--no-pr` para pular (Iniciativa 100).
+*   **Revise a spec sem sair da conversa:** ao encerrar `/discovery`, `/nova-feature`, `/novo-fix` ou `/split-features`, o agente pergunta se você quer revisar os artefatos gerados antes de seguir para o Gate 1, sem navegar pelas pastas (`feat-97-03`).
+*   **Worktrees ociosos não se acumulam:** ao iniciar `forge up`, `forge worker` ou `forge inbox`, o forge detecta worktrees em `.forge/runtime/worktrees/` que podem ser removidos com segurança e oferece a limpeza (`feat-97-02`).
+*   **Métricas de sessão com tokens de verdade:** corrigidos os `tokens_input: 0` e `tokens_output: 0` em `sdd/.metrics/session-*.json`. O campo `complexidade` fica reservado no schema, ainda sem preenchimento (`feat-97-01`).
+*   **Diagramas C4 com dois motores:** a skill de diagramas pergunta, a cada uso, se você quer Mermaid ou diagram-studio (Iniciativa 98).
+*   **`forge rules` volta a achar os IDs da Constituição** (`fix-88-05`).
+*   **Vindo da linha 4.9.x:** o modo pipeline avançado (experimental), o menu Settings e os tetos desligados por padrão passam a fazer parte da versão estável. O modo normal não muda.
+*   **Edição Missões:** o README ganha um banner temático e as sessões do pipeline aparecem como missões: Discovery é o plano, Builder é a obra, Reviewer é o vigia, e a sua aprovação fecha com "Missão cumprida". O design system da edição fica em `docs/design/edicao-missoes/`. É uma homenagem ao clima de pôr do sol, neon e palmeiras, com marca, tipografia e ilustrações próprias.
+*   **Como atualizar:** `npm install -g @nathanramorim/forge-sdd` e, nos projetos existentes, `forge update`.
+
 ### Versão 4.9.1 — Correções do Modo Avançado: Fila, Teto Diário e Tetos no Settings (Beta)
 
 Compatível com a 4.9.0-beta (Iniciativas 84 e 88).

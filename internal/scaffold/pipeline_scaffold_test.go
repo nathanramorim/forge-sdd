@@ -1,6 +1,7 @@
 package scaffold
 
 import (
+	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -264,5 +265,71 @@ func TestScaffold_DocsCitamBriefConstituicaoETmux(t *testing.T) {
 		assert.True(t, strings.Contains(content, "brief") || strings.Contains(content, "forge-sdd brief"), "%s deve citar brief", doc)
 		assert.True(t, strings.Contains(content, "/constitution") || strings.Contains(content, "Constituição"), "%s deve citar constitution", doc)
 		assert.True(t, strings.Contains(content, "tmux"), "%s deve citar tmux", doc)
+	}
+}
+
+func validarMarcadoresEdicao(conteudo string, exigirPresente bool) error {
+	linhas := strings.Split(conteudo, "\n")
+	abertos := 0
+	pares := 0
+	for i, linha := range linhas {
+		temInicio := strings.Contains(linha, "edicao:inicio")
+		temFim := strings.Contains(linha, "edicao:fim")
+		if temInicio && temFim {
+			return fmt.Errorf("linha %d mistura edicao:inicio e edicao:fim", i+1)
+		}
+		if temInicio {
+			if abertos > 0 {
+				return fmt.Errorf("linha %d abre edicao:inicio sem fechar o bloco anterior", i+1)
+			}
+			abertos++
+		}
+		if temFim {
+			if abertos == 0 {
+				return fmt.Errorf("linha %d fecha edicao:fim sem abertura correspondente", i+1)
+			}
+			abertos--
+			pares++
+		}
+	}
+	if abertos != 0 {
+		return fmt.Errorf("edicao:inicio sem edicao:fim correspondente")
+	}
+	if exigirPresente && pares == 0 {
+		return fmt.Errorf("nenhum par edicao:inicio/edicao:fim encontrado")
+	}
+	if !exigirPresente && pares > 0 {
+		return fmt.Errorf("marcador edicao:inicio/edicao:fim residual encontrado após encerramento")
+	}
+	return nil
+}
+
+func TestScaffold_DocsEdicao(t *testing.T) {
+	root := filepath.Join("..", "..")
+	edicaoDir := filepath.Join(root, "docs", "edicao")
+
+	_, dirErr := os.Stat(edicaoDir)
+	require.True(t, os.IsNotExist(dirErr), "docs/edicao não deve existir após o encerramento da edição")
+
+	for _, rel := range []string{"docs/index.html", "docs/wiki.html", "README.md", "npm/README.md"} {
+		raw, err := os.ReadFile(filepath.Join(root, filepath.FromSlash(rel)))
+		require.NoError(t, err, "arquivo %s deve existir", rel)
+		assert.NoError(t, validarMarcadoresEdicao(string(raw), false), "sem marcadores após encerramento em %s", rel)
+	}
+
+	assert.Error(t, validarMarcadoresEdicao("<!-- edicao:inicio -->\nsem fim", true), "marcador sem fechamento deve falhar")
+	assert.Error(t, validarMarcadoresEdicao("<!-- edicao:fim -->", true), "fechamento sem abertura deve falhar")
+	assert.Error(t, validarMarcadoresEdicao("<!-- edicao:inicio -->\n<!-- edicao:fim -->", false), "marcador residual pós-encerramento deve falhar")
+}
+
+func TestLP_SemTemaDaEdicao(t *testing.T) {
+	root := filepath.Join("..", "..")
+	for _, rel := range []string{"docs/index.html", "docs/wiki.html"} {
+		raw, err := os.ReadFile(filepath.Join(root, filepath.FromSlash(rel)))
+		require.NoError(t, err, "arquivo %s deve existir", rel)
+		conteudo := string(raw)
+		assert.NotContains(t, conteudo, "forgeEdicao", "sem referência a forgeEdicao em %s", rel)
+		assert.NotContains(t, conteudo, "data-edicao", "sem referência a data-edicao em %s", rel)
+		assert.NotContains(t, conteudo, "edicao/", "sem referência a edicao/ em %s", rel)
 	}
 }

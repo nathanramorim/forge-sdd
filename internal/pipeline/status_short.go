@@ -21,6 +21,12 @@ const (
 // FormatShortStatus devolve o status curto para agentes: só iniciativas ativas, a fila de cada uma
 // e o próximo passo, em até ShortStatusMaxBytes e sem eventos do log.
 func FormatShortStatus(dir string) (string, error) {
+	return FormatShortStatusAll(dir, false)
+}
+
+// FormatShortStatusAll é o FormatShortStatus com a opção de incluir as iniciativas concluídas
+// (`forge status --all`), que aparecem marcadas com "[concluída]".
+func FormatShortStatusAll(dir string, all bool) (string, error) {
 	items, err := layout.ListInitiatives(dir, false)
 	if err != nil {
 		return "", err
@@ -31,17 +37,21 @@ func FormatShortStatus(dir string) (string, error) {
 	}
 	var active []layout.InitiativeInfo
 	for _, it := range items {
-		if initiativeActive(it) {
+		if all || initiativeActive(it) {
 			active = append(active, it)
 		}
 	}
 
 	var b strings.Builder
-	fmt.Fprintf(&b, "Esteira — %s (%s)\n", TmuxProjectName(abs), currentBranch(dir))
+	fmt.Fprintf(&b, "Esteira — %s (%s)\n", nomeDoProjeto(abs), currentBranch(dir))
 	if len(active) == 0 {
 		b.WriteString("Nenhuma iniciativa ativa.\nPróximo passo: /discovery\n")
 	} else {
-		fmt.Fprintf(&b, "Iniciativas ativas: %d\n", len(active))
+		label := "Iniciativas ativas"
+		if all {
+			label = "Iniciativas"
+		}
+		fmt.Fprintf(&b, "%s: %d\n", label, len(active))
 		for i, it := range active {
 			if i >= shortMaxInitiatives {
 				fmt.Fprintf(&b, "(+%d; use --full)\n", len(active)-i)
@@ -51,7 +61,11 @@ func FormatShortStatus(dir string) (string, error) {
 			if it.Current {
 				marker = "*"
 			}
-			fmt.Fprintf(&b, "%s %s\n", marker, clip(it.ID, shortLineMax))
+			tag := ""
+			if IsConcluded(it.Tasks) {
+				tag = " [concluída]"
+			}
+			fmt.Fprintf(&b, "%s %s%s\n", marker, clip(it.ID, shortLineMax), tag)
 			fmt.Fprintf(&b, "    fila: %s\n", clip(shortQueue(it.Tasks), shortLineMax))
 			fmt.Fprintf(&b, "    próximo: %s\n", clip(shortNext(it.Next), shortLineMax))
 		}
@@ -64,16 +78,28 @@ func FormatShortStatus(dir string) (string, error) {
 	return out, nil
 }
 
+// initiativeActive: a iniciativa da branch atual sempre aparece; as demais somem quando a fila
+// está toda concluída. Fila ausente ou vazia não é "concluída" e continua visível.
 func initiativeActive(it layout.InitiativeInfo) bool {
 	if it.Current {
 		return true
 	}
-	for status, n := range it.Tasks {
-		if n > 0 && status != queue.StatusApproved && status != "done" {
-			return true
+	return !IsConcluded(it.Tasks)
+}
+
+// IsConcluded é a regra pura: há itens e todos estão concluídos (completed, approved ou done).
+func IsConcluded(tasks map[string]int) bool {
+	total := 0
+	for status, n := range tasks {
+		if n <= 0 {
+			continue
 		}
+		if status != "completed" && status != queue.StatusApproved && status != "done" {
+			return false
+		}
+		total += n
 	}
-	return false
+	return total > 0
 }
 
 func shortQueue(tasks map[string]int) string {

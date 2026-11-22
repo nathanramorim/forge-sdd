@@ -1,0 +1,118 @@
+{
+  "feature_id": "",
+  "branch": "feat/105-experiencia-cli-e-harness",
+  "base_branch": "main",
+  "spec_status": "reviewed",
+  "updated_at": "2026-11-20T15:21:08Z",
+  "items": [
+    {
+      "task_id": "feat-105-01-adr-obsolescencia",
+      "title": "feat-105-01 — ADR de obsolescência (5 estações, depreciações, `lider`)",
+      "spec_path": "sdd/discovery/105-experiencia-cli-e-harness/features/feat-105-01-adr-obsolescencia.md",
+      "status": "queued",
+      "rules": [
+        "FLX-05",
+        "GOV-01",
+        "ARQ-06"
+      ],
+      "skills_used": [],
+      "attempts": 0
+    },
+    {
+      "task_id": "feat-105-04-doctor-versao-e-verbose",
+      "title": "feat-105-04 — `doctor` compara `.sdd-version` com o binário; lista só com `--verbose`",
+      "spec_path": "sdd/discovery/105-experiencia-cli-e-harness/features/feat-105-04-doctor-versao-e-verbose.md",
+      "status": "queued",
+      "rules": [
+        "ARQ-01",
+        "SEG-01",
+        "TST-03"
+      ],
+      "skills_used": [],
+      "attempts": 0
+    },
+    {
+      "task_id": "feat-105-05-status-esconde-concluida",
+      "title": "feat-105-05 — `status` esconde iniciativa concluída; `--all` mostra",
+      "spec_path": "sdd/discovery/105-experiencia-cli-e-harness/features/feat-105-05-status-esconde-concluida.md",
+      "status": "queued",
+      "rules": [
+        "ARQ-10",
+        "DUP-06",
+        "TST-03"
+      ],
+      "skills_used": [],
+      "attempts": 0
+    },
+    {
+      "task_id": "feat-105-02-corrigir-texto-3-sessoes",
+      "title": "feat-105-02 — Corrigir texto: \"5 estações\" vira \"3 sessões\" e versões",
+      "spec_path": "sdd/discovery/105-experiencia-cli-e-harness/features/feat-105-02-corrigir-texto-3-sessoes.md",
+      "status": "queued",
+      "depends_on": [
+        "feat-105-01"
+      ],
+      "rules": [
+        "COD-05",
+        "TST-02",
+        "DUP-06"
+      ],
+      "skills_used": [],
+      "attempts": 0
+    },
+    {
+      "task_id": "feat-105-03-avisar-depreciados",
+      "title": "feat-105-03 — Avisar: depreciação de `queue stations`, `attach`, `queue handoff` e aliases",
+      "spec_path": "sdd/discovery/105-experiencia-cli-e-harness/features/feat-105-03-avisar-depreciados.md",
+      "status": "queued",
+      "depends_on": [
+        "feat-105-01"
+      ],
+      "rules": [
+        "ARQ-06",
+        "COD-04",
+        "TST-03"
+      ],
+      "skills_used": [],
+      "attempts": 0
+    },
+    {
+      "task_id": "feat-105-06-lider-descricao",
+      "title": "feat-105-06 — `lider`: trocar descrição e texto, sem renomear nem remover",
+      "spec_path": "sdd/discovery/105-experiencia-cli-e-harness/features/feat-105-06-lider-descricao.md",
+      "status": "queued",
+      "depends_on": [
+        "feat-105-01"
+      ],
+      "rules": [
+        "COD-04",
+        "TST-02",
+        "FLX-02"
+      ],
+      "skills_used": [],
+      "attempts": 0
+    },
+    {
+      "task_id": "feat-105-07-registro-de-depreciados",
+      "title": "feat-105-07 — Registro CSV dos comandos depreciados (vale para o forge inteiro)",
+      "spec_path": "sdd/discovery/105-experiencia-cli-e-harness/features/feat-105-07-registro-de-depreciados.md",
+      "status": "queued",
+      "depends_on": [
+        "feat-105-03"
+      ],
+      "rules": [
+        "ARQ-01",
+        "ARQ-05",
+        "ARQ-10",
+        "COD-03",
+        "COD-05",
+        "SEG-01",
+        "SEG-02",
+        "SEG-04",
+        "TST-03"
+      ],
+      "skills_used": [],
+      "attempts": 0
+    }
+  ]
+}

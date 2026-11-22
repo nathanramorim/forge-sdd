@@ -27,6 +27,10 @@ type Options struct {
 	PRBodyPath   string
 	PRBodyText   string
 	Now          time.Time
+	// Criteria habilita o P-25: verificação estática dos critérios executáveis da Spec.
+	Criteria bool
+	// CriteriaExec, junto com Criteria, também executa o bloco de critérios com bash -e.
+	CriteriaExec bool
 }
 
 // CheckResult representa o resultado de uma verificação individual P-xx da Camada A.
@@ -137,6 +141,11 @@ func RunChecks(dir string, opts Options) ([]CheckResult, error) {
 		// P-14 (SEG-07): se GoModChanged, exige seção "## Dependências novas" não-vazia na Spec
 		if opts.GoModChanged {
 			results = append(results, checkP14NewDependencies(opts.SpecPath, specContent, p02.Passed))
+		}
+
+		// P-25 (TST-01): qualidade dos critérios executáveis da Spec
+		if opts.Criteria {
+			results = append(results, checkP25Criteria(dir, opts.SpecPath, specContent, p02.Passed, opts.CriteriaExec))
 		}
 	}
 

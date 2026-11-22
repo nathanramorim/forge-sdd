@@ -1,5 +1,7 @@
 # ADR-0003: Skills por Estação e Orçamento de Contexto
 
+> Parcialmente superseded pela ADR-0021: as 5 estações deixam de ser o fluxo; as skills `sdd-*` seguem como apoio das 3 sessões.
+
 - **Data:** 2026-11-13
 - **Status:** `aprovado`
 - **Regras afetadas (IDs da constitution):** `DUP-10`, `ARQ-06`, `FLX-02`, `FLX-06`, `DUP-06`, `DUP-01`, `GOV-01` (este ADR)

@@ -1,0 +1,352 @@
+{
+ "kicker": "// Forge SDD · iniciativa 106 · BPMN 2 de 2",
+ "titulo": "Construção: uma branch e um PR em draft por feature",
+ "largura": 2400,
+ "altura": 894,
+ "nota_rodape": "◇ = decisão · tracejado = retrabalho",
+ "elementos": [
+  {
+   "tipo": "caixa",
+   "id": "LH",
+   "x": 24,
+   "y": 100,
+   "w": 2352,
+   "h": 150,
+   "texto": "",
+   "sub": "",
+   "estilo": "contorno",
+   "tamanho": 20
+  },
+  {
+   "tipo": "texto",
+   "x": 48,
+   "y": 128,
+   "texto": "HUMANO · Nathan",
+   "estilo": "rotulo",
+   "alinha": "start"
+  },
+  {
+   "tipo": "caixa",
+   "id": "LR",
+   "x": 24,
+   "y": 250,
+   "w": 2352,
+   "h": 150,
+   "texto": "",
+   "sub": "",
+   "estilo": "contorno",
+   "tamanho": 20
+  },
+  {
+   "tipo": "texto",
+   "x": 48,
+   "y": 278,
+   "texto": "IA · reviewer",
+   "estilo": "rotulo",
+   "alinha": "start"
+  },
+  {
+   "tipo": "caixa",
+   "id": "LA",
+   "x": 24,
+   "y": 400,
+   "w": 2352,
+   "h": 150,
+   "texto": "",
+   "sub": "",
+   "estilo": "contorno",
+   "tamanho": 20
+  },
+  {
+   "tipo": "texto",
+   "x": 48,
+   "y": 428,
+   "texto": "AUTOMÁTICO · sem LLM",
+   "estilo": "rotulo",
+   "alinha": "start"
+  },
+  {
+   "tipo": "caixa",
+   "id": "LB",
+   "x": 24,
+   "y": 550,
+   "w": 2352,
+   "h": 150,
+   "texto": "",
+   "sub": "",
+   "estilo": "contorno",
+   "tamanho": 20
+  },
+  {
+   "tipo": "texto",
+   "x": 48,
+   "y": 578,
+   "texto": "IA · builder",
+   "estilo": "rotulo",
+   "alinha": "start"
+  },
+  {
+   "tipo": "caixa",
+   "id": "a0",
+   "x": 270,
+   "y": 424,
+   "w": 200,
+   "h": 100,
+   "texto": "Spec na principal",
+   "sub": "início",
+   "estilo": "pill",
+   "tamanho": 20
+  },
+  {
+   "tipo": "caixa",
+   "id": "b1",
+   "x": 500,
+   "y": 574,
+   "w": 200,
+   "h": 100,
+   "texto": "Split e PR por feature",
+   "sub": "em draft, em paralelo",
+   "estilo": "normal",
+   "tamanho": 20
+  },
+  {
+   "tipo": "caixa",
+   "id": "a3",
+   "x": 730,
+   "y": 424,
+   "w": 200,
+   "h": 100,
+   "texto": "Valida a feature",
+   "sub": "sem LLM",
+   "estilo": "contorno",
+   "tamanho": 20
+  },
+  {
+   "tipo": "caixa",
+   "id": "r2",
+   "x": 960,
+   "y": 274,
+   "w": 200,
+   "h": 100,
+   "texto": "Conferência 2",
+   "sub": "só o julgamento",
+   "estilo": "normal",
+   "tamanho": 20
+  },
+  {
+   "tipo": "caixa",
+   "id": "g2",
+   "x": 1190,
+   "y": 274,
+   "w": 200,
+   "h": 100,
+   "texto": "Conforme?",
+   "sub": "◇ código",
+   "estilo": "normal",
+   "tamanho": 20
+  },
+  {
+   "tipo": "caixa",
+   "id": "r3",
+   "x": 1420,
+   "y": 274,
+   "w": 200,
+   "h": 100,
+   "texto": "Abre novo-fix",
+   "sub": "e grava a lição",
+   "estilo": "normal",
+   "tamanho": 20
+  },
+  {
+   "tipo": "caixa",
+   "id": "b2",
+   "x": 1420,
+   "y": 574,
+   "w": 200,
+   "h": 100,
+   "texto": "Corrige o novo-fix",
+   "sub": "prioridade, em paralelo",
+   "estilo": "normal",
+   "tamanho": 20
+  },
+  {
+   "tipo": "caixa",
+   "id": "h2",
+   "x": 1650,
+   "y": 124,
+   "w": 200,
+   "h": 100,
+   "texto": "Continuar ou ajustar?",
+   "sub": "◇ por onda",
+   "estilo": "destaque",
+   "tamanho": 20
+  },
+  {
+   "tipo": "caixa",
+   "id": "a4",
+   "x": 1650,
+   "y": 424,
+   "w": 200,
+   "h": 100,
+   "texto": "Sai do draft",
+   "sub": "CI roda 1 vez",
+   "estilo": "contorno",
+   "tamanho": 20
+  },
+  {
+   "tipo": "caixa",
+   "id": "a5",
+   "x": 1880,
+   "y": 424,
+   "w": 200,
+   "h": 100,
+   "texto": "Confere o atestado",
+   "sub": "modo e fallback",
+   "estilo": "contorno",
+   "tamanho": 20
+  },
+  {
+   "tipo": "caixa",
+   "id": "h3",
+   "x": 2110,
+   "y": 124,
+   "w": 200,
+   "h": 100,
+   "texto": "Decide o merge",
+   "sub": "fim",
+   "estilo": "pill",
+   "tamanho": 20
+  },
+  {
+   "tipo": "seta",
+   "de": "a0.baixo",
+   "para": "b1.cima",
+   "forma": "vertical"
+  },
+  {
+   "tipo": "seta",
+   "de": "b1.dir",
+   "para": "a3.baixo",
+   "forma": "horizontal"
+  },
+  {
+   "tipo": "seta",
+   "de": "a3.cima",
+   "para": "r2.baixo",
+   "forma": "vertical"
+  },
+  {
+   "tipo": "seta",
+   "de": "r2.dir",
+   "para": "g2.esq",
+   "forma": "horizontal"
+  },
+  {
+   "tipo": "seta",
+   "de": "g2.dir",
+   "para": "r3.esq",
+   "forma": "horizontal",
+   "rotulo": "não"
+  },
+  {
+   "tipo": "seta",
+   "de": "r3.baixo",
+   "para": "b2.cima",
+   "forma": "vertical"
+  },
+  {
+   "tipo": "seta",
+   "de": "b2.esq",
+   "para": "a3.baixo",
+   "forma": "horizontal",
+   "rotulo": "revalida"
+  },
+  {
+   "tipo": "seta",
+   "de": "g2.cima",
+   "para": "h2.esq",
+   "forma": "vertical",
+   "rotulo": "sim"
+  },
+  {
+   "tipo": "seta",
+   "de": "h2.baixo",
+   "para": "a4.cima",
+   "forma": "vertical",
+   "rotulo": "continuar"
+  },
+  {
+   "tipo": "seta",
+   "de": "a4.dir",
+   "para": "a5.esq",
+   "forma": "horizontal"
+  },
+  {
+   "tipo": "seta",
+   "de": "a5.dir",
+   "para": "h3.baixo",
+   "forma": "horizontal",
+   "rotulo": "válido"
+  },
+  {
+   "tipo": "texto",
+   "x": 56,
+   "y": 758,
+   "texto": "LEGENDA",
+   "estilo": "rotulo",
+   "alinha": "start"
+  },
+  {
+   "tipo": "caixa",
+   "id": "lg1",
+   "x": 186,
+   "y": 734,
+   "w": 200,
+   "h": 60,
+   "texto": "HUMANO",
+   "sub": "decisões do Nathan",
+   "estilo": "destaque",
+   "tamanho": 18
+  },
+  {
+   "tipo": "caixa",
+   "id": "lg2",
+   "x": 406,
+   "y": 734,
+   "w": 200,
+   "h": 60,
+   "texto": "IA",
+   "sub": "pm-architect, builder, reviewer",
+   "estilo": "normal",
+   "tamanho": 18
+  },
+  {
+   "tipo": "caixa",
+   "id": "lg3",
+   "x": 626,
+   "y": 734,
+   "w": 200,
+   "h": 60,
+   "texto": "AUTOMÁTICO",
+   "sub": "sem LLM: script, hook, pipeline",
+   "estilo": "contorno",
+   "tamanho": 18
+  },
+  {
+   "tipo": "texto",
+   "x": 56,
+   "y": 820,
+   "texto": "Cada feature repete este fluxo, com o seu estado na própria branch. Feature dependente espera a predecessora ser mesclada.",
+   "estilo": "nota",
+   "alinha": "start"
+  },
+  {
+   "tipo": "texto",
+   "x": 56,
+   "y": 852,
+   "texto": "Teto de 3 passadas por feature; depois o Forge pergunta a você. Sem VCS: sem PR, merge local.",
+   "estilo": "nota",
+   "alinha": "start"
+  }
+ ]
+}

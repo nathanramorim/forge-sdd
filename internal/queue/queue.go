@@ -1,10 +1,10 @@
 package queue
 
 import (
-	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/forge-sdd/cli/internal/harness"
 	"github.com/forge-sdd/cli/internal/layout"
 	"os"
 	"path/filepath"
@@ -21,9 +21,9 @@ const (
 	StatusChangesRequested = "changes_requested"
 	StatusBlocked          = "blocked"
 
-	VerdictConforme = "conforme"
-	VerdictViolacao = "violacao"
-	VerdictDuvida   = "duvida"
+	VerdictConforme = harness.VereditoConforme
+	VerdictViolacao = harness.VereditoViolacao
+	VerdictDuvida   = harness.VereditoDuvida
 )
 
 // Queue representa a fila persistida em sdd/discovery/<id>/queue.json (ou na fila legada sdd/.queue/queue.json).
@@ -51,34 +51,14 @@ type QueueItem struct {
 	GovernanceVerdict *Verdict `json:"governance_verdict,omitempty"`
 }
 
-// Verdict representa o parecer semântico da Camada B (Analista de Governança).
-type Verdict struct {
-	Veredito       string          `json:"veredito"`
-	Achados        []Finding       `json:"achados"`
-	CandidateSkill *CandidateSkill `json:"candidate_skill,omitempty"`
-	Resumo         string          `json:"resumo"`
-}
+// Verdict é o Parecer da Camada B; o dono do contrato é internal/harness (DUP-01).
+type Verdict = harness.Parecer
 
-// Finding representa um achado individual dentro do parecer da Camada B.
-type Finding struct {
-	Verificacao     string `json:"verificacao"`
-	Regra           string `json:"regra"`
-	RegraDescricao  string `json:"regra_descricao,omitempty"`
-	Classificacao   string `json:"classificacao"`
-	Severidade      string `json:"severidade"`
-	Arquivo         string `json:"arquivo"`
-	Linha           int    `json:"linha"`
-	Evidencia       string `json:"evidencia"`
-	Explicacao      string `json:"explicacao"`
-	Correcao        string `json:"correcao"`
-}
+// Finding é um achado do parecer (harness.Retorno).
+type Finding = harness.Retorno
 
-// CandidateSkill representa uma proposta de auto-skill identificada durante a execução/revisão.
-type CandidateSkill struct {
-	Name         string `json:"name"`
-	Reason       string `json:"reason"`
-	ProposedPath string `json:"proposed_path"`
-}
+// CandidateSkill é a proposta de auto-skill do parecer (harness.CandidateSkill).
+type CandidateSkill = harness.CandidateSkill
 
 // QueueFilePath retorna o caminho de persistência da fila no diretório alvo.
 func QueueFilePath(dir string) string {
@@ -110,6 +90,9 @@ func Load(dir string) (*Queue, error) {
 	if q.Items == nil {
 		q.Items = []QueueItem{}
 	}
+	if _, err := overlayStates(dir, initiativeOfQueuePath(dir, path), &q); err != nil {
+		return nil, err
+	}
 	return &q, nil
 }
 
@@ -122,6 +105,16 @@ func Save(dir string, q *Queue) error {
 	}
 	q.UpdatedAt = time.Now().UTC().Format(time.RFC3339)
 
+	// Itens com arquivo em state/ mantêm no plano o que já estava gravado (estado fica por feature).
+	if id := initiativeOfQueuePath(dir, path); id != "" {
+		probe := Queue{Items: append([]QueueItem(nil), q.Items...)}
+		if ov, err := overlayStates(dir, id, &probe); err == nil && len(ov) > 0 {
+			planned := *q
+			planned.Items = append([]QueueItem(nil), q.Items...)
+			restorePlan(path, &planned, ov)
+			q = &planned
+		}
+	}
 	if err := WriteJSONAtomic(path, q, 0o644); err != nil {
 		return fmt.Errorf("falha ao gravar fila %s: %w", path, err)
 	}
@@ -235,8 +228,16 @@ func Enqueue(dir, featureID, branch, taskID, title, specPath string, rules []str
 		q.FeatureID = featureID
 	}
 	if branch != "" {
-		if id, ok := layout.FromBranch(branch); ok {
-			if activeID, _, active := layout.ActiveInitiative(dir); active && activeID != id {
+		id, ok, err := layout.InitiativeOfBranch(dir, branch)
+		if err != nil {
+			return err
+		}
+		if ok {
+			activeID, _, err := layout.ResolveInitiative(dir)
+			if err != nil {
+				return err
+			}
+			if activeID != "" && activeID != id {
 				return fmt.Errorf("a branch %q pertence à iniciativa %q, mas a branch atual é da iniciativa %q; troque de branch antes de enfileirar", branch, id, activeID)
 			}
 		}
@@ -470,7 +471,7 @@ func Next(dir string) (*QueueItem, error) {
 		if st == StatusQueued || st == StatusChangesRequested {
 			q.Items[i].Status = StatusBuilding
 			q.Items[i].Attempts++
-			if err := Save(dir, q); err != nil {
+			if err := saveItem(dir, q, i); err != nil {
 				return nil, err
 			}
 			itemCopy := q.Items[i]
@@ -493,71 +494,22 @@ func Complete(dir, taskID string) error {
 				return fmt.Errorf("task %q não está em %q (status atual: %q)", taskID, StatusBuilding, q.Items[i].Status)
 			}
 			q.Items[i].Status = StatusReviewPending
-			return Save(dir, q)
+			return saveItem(dir, q, i)
 		}
 	}
 	return fmt.Errorf("task %q não encontrada na fila", taskID)
 }
 
-// ValidateVerdict valida o schema estrito da Camada B (Analista de Governança).
+// ValidateVerdict valida o schema estrito da Camada B pelo contrato harness.Parecer.
 func ValidateVerdict(v Verdict) error {
-	switch v.Veredito {
-	case VerdictConforme, VerdictViolacao, VerdictDuvida:
-	default:
-		return fmt.Errorf("veredito inválido %q: deve ser %q, %q ou %q", v.Veredito, VerdictConforme, VerdictViolacao, VerdictDuvida)
-	}
-
-	if strings.TrimSpace(v.Resumo) == "" {
-		return fmt.Errorf("campo 'resumo' do veredito não pode ser vazio")
-	}
-
-	for idx, f := range v.Achados {
-		switch f.Classificacao {
-		case VerdictViolacao, VerdictDuvida:
-		default:
-			return fmt.Errorf("achado[%d]: classificacao inválida %q (esperado %q ou %q)", idx, f.Classificacao, VerdictViolacao, VerdictDuvida)
-		}
-
-		if f.Classificacao == VerdictViolacao {
-			if strings.TrimSpace(f.Regra) == "" {
-				return fmt.Errorf("achado[%d]: violação sem 'regra' preenchida", idx)
-			}
-			if strings.TrimSpace(f.Arquivo) == "" {
-				return fmt.Errorf("achado[%d]: violação sem 'arquivo' preenchido", idx)
-			}
-			if f.Linha <= 0 {
-				return fmt.Errorf("achado[%d]: violação exige 'linha' > 0 (recebido %d)", idx, f.Linha)
-			}
-			if strings.TrimSpace(f.Evidencia) == "" {
-				return fmt.Errorf("achado[%d]: violação sem 'evidencia' explícita (violação sem evidência é inválida)", idx)
-			}
-		}
-	}
-
-	if v.CandidateSkill != nil {
-		if strings.TrimSpace(v.CandidateSkill.Name) == "" || strings.TrimSpace(v.CandidateSkill.Reason) == "" || strings.TrimSpace(v.CandidateSkill.ProposedPath) == "" {
-			return fmt.Errorf("candidate_skill incompleta: 'name', 'reason' e 'proposed_path' são obrigatórios quando presente")
-		}
-	}
-
-	return nil
+	return harness.ValidateParecer(v)
 }
 
 // Review decodifica estritamente o JSON de parecer da Camada B, valida suas regras e atualiza o status da task na fila.
 func Review(dir, taskID string, verdictJSON []byte) (*QueueItem, error) {
-	dec := json.NewDecoder(bytes.NewReader(verdictJSON))
-	dec.DisallowUnknownFields()
-
-	var v Verdict
-	if err := dec.Decode(&v); err != nil {
-		return nil, fmt.Errorf("parecer JSON inválido: %w", err)
-	}
-	if v.Achados == nil {
-		v.Achados = []Finding{}
-	}
-
-	if err := ValidateVerdict(v); err != nil {
-		return nil, err
+	v, err := harness.DecodeParecer(verdictJSON)
+	if err != nil {
+		return nil, fmt.Errorf("parecer da task %s: %w", taskID, err)
 	}
 
 	q, err := Load(dir)
@@ -576,7 +528,7 @@ func Review(dir, taskID string, verdictJSON []byte) (*QueueItem, error) {
 			case VerdictDuvida:
 				q.Items[i].Status = StatusReviewPending
 			}
-			if err := Save(dir, q); err != nil {
+			if err := saveItem(dir, q, i); err != nil {
 				return nil, err
 			}
 			itemCopy := q.Items[i]
@@ -698,6 +650,9 @@ func LoadForInitiative(dir, initiative string) (*Queue, error) {
 	}
 	if q.Items == nil {
 		q.Items = []QueueItem{}
+	}
+	if _, err := overlayStates(dir, initiative, q); err != nil {
+		return nil, err
 	}
 	return q, nil
 }

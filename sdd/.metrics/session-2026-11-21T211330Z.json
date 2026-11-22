@@ -1,0 +1,26 @@
+{
+  "$schema": "forge-sdd/metrics/1.0",
+  "feature": "sdd/discovery/106-pr-draft-revisao-e-ci/features/feat-106-06-fallback-do-atestado.md,sdd/discovery/106-pr-draft-revisao-e-ci/features/feat-106-22a-pr-da-spec-e-merge.md",
+  "agent_path": null,
+  "tokens_input": 4000,
+  "tokens_output": 500,
+  "turns": 0,
+  "duration_seconds": 0,
+  "criterio_atendido": true,
+  "model": "",
+  "rework_lines": 0,
+  "context7_calls": 0,
+  "git_calls": 0,
+  "files_touched": [
+    "internal/vcs/atestado.go",
+    "internal/vcs/atestado_test.go",
+    "internal/pipeline/volta_da_spec.go",
+    "internal/pipeline/volta_da_spec_test.go",
+    "internal/pipeline/sinais.go",
+    "internal/pipeline/sinais_test.go"
+  ],
+  "outcome": "approved",
+  "sdd_version": "5.0.0",
+  "medicao": "estimado",
+  "complexidade": null
+}
