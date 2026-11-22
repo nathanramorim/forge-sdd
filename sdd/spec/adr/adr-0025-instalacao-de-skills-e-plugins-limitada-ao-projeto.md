@@ -1,9 +1,9 @@
 # ADR-0025 — Instalação de skills e plugins limitada ao projeto
 
-- **Status:** Proposta
+- **Status:** Aceita
 - **Data:** 2026-11-22
 - **Regras afetadas (IDs da constitution):** `ARQ-06` (só o texto do grupo `skills`: dois subcomandos novos), `GOV-01` e `FLX-05` (esta ADR). Nenhum ID é criado ou removido.
-- **Autor / Responsável:** Concepção (iniciativa `98-diagram-studio-c4`, feat-98-02); aprovação do dono pendente.
+- **Autor / Responsável:** Concepção (iniciativa `98-diagram-studio-c4`, feat-98-02); aprovada pelo dono (22/11/2026).
 
 ## Relação com ADRs vigentes
 
@@ -52,4 +52,4 @@ Texto proposto: acrescentar ao fim da frase, antes de `(`modulo` chega na 109.)`
   - Plugin fixado por commit sem tag: a rastreabilidade depende do hash, e o histórico do repositório externo pode ser reescrito.
   - `resvg-py>=0.1` é faixa aberta (SEG-07); o Builder da feat-98-02 fixa a versão exata.
   - `shouldPreserve` hoje não cobre `.agents/plugins/`; sem a extensão, uma reinstalação sobrescreveria o plugin do usuário.
-- **Ações de acompanhamento:** implementar a feat-98-02; atualizar a linha de `ARQ-06` no mesmo PR; fixar `resvg-py`; avaliar uma definição oficial de hub.
+- **Ações de acompanhamento:** feat-98-02 implementada com a linha de `ARQ-06` atualizada no mesmo PR; fixar `resvg-py` (a fixar: o `diagrama.py` do plugin declara `resvg-py>=0.1` e o commit fixado não o trava; fixar exige mudar o plugin externo); avaliar uma definição oficial de hub.

@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "chave_conteudo": "cfc18e52b37d6f44",
-  "versao_historico": "4c758b1",
+  "chave_conteudo": "28bb817aac81b37d",
+  "versao_historico": "f4aa7cb",
   "versoes": [
     {
       "versao": "5.0.0",
@@ -72,6 +72,10 @@
         {
           "titulo": "Uma branch e um PR em draft por feature (#198, #201, #203, #206)",
           "texto": "o Builder abre uma branch por feature do split, com base na principal, e cada uma tem o seu PR. Nenhum PR tem base em outro. Uma feature só começa com as dependências **mescladas**, não apenas abertas, e o `[Continuar]` é agrupado por onda."
+        },
+        {
+          "titulo": "Instalar skill ou plugin só no projeto (98-02, ADR-0025)",
+          "texto": "`forge-sdd skills destinos` e `forge-sdd skills instalar <skill|plugin> <slug> --de <dir>` instalam por escolha, só no projeto aberto (ou hub/subprojeto), sem rede e sem `~/.claude`; se o hub já tem, nada é repetido."
         },
         {
           "titulo": "O `/toca-ai` não presume workers (fix-89-01)",

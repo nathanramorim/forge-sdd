@@ -327,7 +327,8 @@ func shouldPreserve(dest string, targetDir string) bool {
 	if strings.HasPrefix(rel, ".agents/skills/sdd-") {
 		return false
 	}
-	if strings.HasPrefix(rel, ".agents/rules/") || strings.HasPrefix(rel, ".agents/skills/") {
+	if strings.HasPrefix(rel, ".agents/rules/") || strings.HasPrefix(rel, ".agents/skills/") ||
+		strings.HasPrefix(rel, ".agents/plugins/") {
 		return true
 	}
 

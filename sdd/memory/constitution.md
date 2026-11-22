@@ -59,7 +59,7 @@ As regras abaixo indexam as decisões invioláveis por IDs estáveis. O **como c
 - **ARQ-03:** Templates e assets de scaffold só via `embed.FS` (Regra 3).
 - **ARQ-04:** O binário não depende de nada além da biblioteca padrão em runtime (Regra 8).
 - **ARQ-05:** `--dry-run` não tem efeito colateral no disco (Regra 9).
-- **ARQ-06:** A CLI expõe os comandos de ciclo de vida (`init`, `update`) e subcomandos determinísticos de suporte (`doctor`, `status`, `next-id`, `context`, `session`, `lessons`, `report`, `queue`, `gate`, `skills`, `governance`, `acp`, `mcp`, `attach`, `autopilot`, `destroy`, `pipeline`, `dispatch`, `bus`, `worker`, `inbox`, `up`, `eval`, `brief`, `ps`, `rules`) com contratos explícitos (Regra 10). (`modulo` chega na 109.)
+- **ARQ-06:** A CLI expõe os comandos de ciclo de vida (`init`, `update`) e subcomandos determinísticos de suporte (`doctor`, `status`, `next-id`, `context`, `session`, `lessons`, `report`, `queue`, `gate`, `skills`, `governance`, `acp`, `mcp`, `attach`, `autopilot`, `destroy`, `pipeline`, `dispatch`, `bus`, `worker`, `inbox`, `up`, `eval`, `brief`, `ps`, `rules`) com contratos explícitos (Regra 10). O grupo `skills` inclui `destinos` e `instalar` (instalação opcional, limitada ao projeto aberto; ADR-0025). (`modulo` chega na 109.)
 - **ARQ-10:** Domínio e validação não vazam para handlers de CLI nem para templates.
 - **ARQ-11:** Toda spec declara o modelo do módulo (`completo` ou `enxuto`) com justificativa.
 
@@ -97,7 +97,7 @@ As regras abaixo indexam as decisões invioláveis por IDs estáveis. O **como c
 
 ### Fluxo SDD e Portões (`FLX`)
 - **FLX-01:** Spec antes do código: nada é implementado nem enfileirado sem Spec revisada e aprovada pelo humano no Gate 1 ([Seguir]/[Ajustar]); com o Gate 1 aprovado o Builder faz o split e enfileira sem nova aprovação, só dentro do escopo do `plan.md` aprovado; mudança de escopo revalida a Spec.
-- **FLX-02:** Isolamento de branch e iniciativa: sem commit direto em `main` (Regra 1); branch por feature (`feat/*`, `fix/*`, Regra 2); tasks agrupadas em `sdd/discovery/<id>-<nome>/` (Regra 13); a spec em branch e PR próprios que voltam para a principal, e a construção em uma branch por feature a partir da principal (Regra 15).
+- **FLX-02:** Isolamento de branch e iniciativa: sem commit direto em `main` (Regra 1); branch por feature (`feat/*`, `fix/*`, Regra 2); tasks agrupadas em `sdd/discovery/<id>-<nome>/` (Regra 13); spec e construção seguem a Regra 15.
 - **FLX-03:** Todo PR preenche `.github/pull_request_template.md` e entrega exatamente o escopo da Spec.
 - **FLX-04:** Telemetria gravada ao fim de cada sessão em `sdd/.metrics/session-<ISO8601>.json` com o caminho completo da feature ou task (Regra 14).
 - **FLX-05:** Mudança arquitetural ou de contrato estrutural exige ADR em `sdd/spec/adr/`.
