@@ -28,11 +28,29 @@ func TestResolverGestorConcepcaoDesligadoPorPadrao(t *testing.T) {
 	g, err = ResolverGestorConcepcao(projetoGestor(t, ""), "github")
 	require.NoError(t, err)
 	assert.Equal(t, GestorDesligado, g.Modo)
-	// project.json sem forge.json também fica desligado
+	// sem forge.json e sem project.json fica desligado
+	g, _ = ResolverGestorConcepcao(t.TempDir(), "github")
+	assert.Equal(t, GestorDesligado, g.Modo)
+}
+
+func TestResolverGestorConcepcaoProjectJSONSemForgeJSON(t *testing.T) {
 	d := t.TempDir()
 	writeForge(t, d, "sdd/modulos/project.json", "{}")
-	g, _ = ResolverGestorConcepcao(d, "github")
+	g, err := ResolverGestorConcepcao(d, "github")
+	require.NoError(t, err)
+	assert.Equal(t, GestorGitHub, g.Modo)
+	g, _ = ResolverGestorConcepcao(d, "gitlab")
 	assert.Equal(t, GestorDesligado, g.Modo)
+
+	fora := filepath.Join(t.TempDir(), "p.json")
+	require.NoError(t, os.WriteFile(fora, []byte("{}"), 0o644))
+	d2 := t.TempDir()
+	require.NoError(t, os.MkdirAll(filepath.Join(d2, "sdd", "modulos"), 0o755))
+	if err := os.Symlink(fora, filepath.Join(d2, "sdd", "modulos", "project.json")); err == nil {
+		g, err = ResolverGestorConcepcao(d2, "github")
+		require.NoError(t, err)
+		assert.Equal(t, GestorDesligado, g.Modo)
+	}
 }
 
 func TestResolverGestorConcepcaoGitHubQuandoConfigurado(t *testing.T) {
@@ -81,10 +99,14 @@ func TestResolverGestorConcepcaoProviderDesconhecidoRecusado(t *testing.T) {
 	d := projetoGestor(t, `,"pm_mcp":{"provider":"trello","create_on_conception":true}`)
 	_, err := ResolverGestorConcepcao(d, "github")
 	require.Error(t, err)
-	// provider válido em supported, mas sem suporte na concepção
+	// github-projects equivale ao gestor GitHub e ainda exige VCS=github
 	d = projetoGestor(t, `,"pm_mcp":{"provider":"github-projects","create_on_conception":true}`)
-	_, err = ResolverGestorConcepcao(d, "github")
-	require.Error(t, err)
+	g, err := ResolverGestorConcepcao(d, "github")
+	require.NoError(t, err)
+	assert.Equal(t, GestorGitHub, g.Modo)
+	g, err = ResolverGestorConcepcao(d, "gitlab")
+	require.NoError(t, err)
+	assert.Equal(t, GestorDesligado, g.Modo)
 }
 
 func TestResolverGestorConcepcaoMcpsMdAusenteOuMalformado(t *testing.T) {

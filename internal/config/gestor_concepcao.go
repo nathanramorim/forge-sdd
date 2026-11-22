@@ -26,21 +26,19 @@ type GestorConcepcao struct {
 	Provider string
 }
 
-// ResolverGestorConcepcao decide o gestor ativo na concepção. Sem forge.json, sem create_on_conception
+// ResolverGestorConcepcao decide o gestor ativo na concepção. Sem create_on_conception
 // e sem sdd/modulos/project.json o resultado é desligado, sem efeito externo. vcs é o VCS da
 // Constituição (vcs.LeVCS), recebido por parâmetro porque internal/vcs não pode ser importado aqui.
 // Conteúdo de mcps.md é entrada não confiável: só o valor exato "ativo" liga (SEG-01).
 func ResolverGestorConcepcao(dir, vcs string) (GestorConcepcao, error) {
 	off := GestorConcepcao{Modo: GestorDesligado}
-	cfg, found, err := LoadForgeConfig(dir)
+	// Sem forge.json vale o padrão (provider auto); project.json ainda pode ativar o gestor GitHub.
+	cfg, _, err := LoadForgeConfig(dir)
 	if err != nil {
 		return off, err
 	}
-	if !found {
-		return off, nil
-	}
 	prov := cfg.PMMCP.Provider
-	if prov != "auto" && prov != "github" && !contains(provedoresMCP, prov) {
+	if prov != "auto" && prov != "github" && prov != "github-projects" && !contains(provedoresMCP, prov) {
 		return off, fmt.Errorf("pm_mcp.provider %q não suportado na concepção", prov)
 	}
 	if !cfg.PMMCP.CreateOnConception && !arquivoRegularConfinado(dir, filepath.Join("sdd", "modulos", "project.json")) {
