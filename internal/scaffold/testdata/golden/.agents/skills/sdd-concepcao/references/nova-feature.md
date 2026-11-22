@@ -9,6 +9,8 @@
 5. **Local:** dentro de uma iniciativa existente, `sdd/discovery/<id>-<nome>/features/feat-<id>-<nn>-<nome>.md`. Sem discovery, crie uma iniciativa enxuta `sdd/discovery/<id>-<nome>/` com `status.md` e `features/`.
 6. **Conteúdo:** as seis seções obrigatórias da skill `sdd-concepcao` (incluindo `## Decisões do projeto aplicadas`).
 
+**Issue/card (antes do Gate 1):** rode `forge queue card --feature feat-<id>-<nn>-<nome> --dir sdd/discovery/<id>-<nome>`. Gestor desligado: nada a fazer, em silêncio. GitHub: cria ou reaproveita a issue (`card-evidence.json`). MCP ativo em `sdd/memory/mcps.md`: crie o card e registre com `--provider/--id/--url`. Falha vira aviso e não bloqueia a spec.
+
 **Visualizar artefatos (antes do Gate 1)**
 
 Use AskUserQuestion com as opções:
