@@ -34,14 +34,17 @@ Com argumentos: exibe apenas os IDs solicitados.`,
 		}
 
 		allIDs := gate.ConstitutionIDLines(string(data))
-		asJSON, _ := cmd.Flags().GetBool("json")
+		asJSON, err := cmd.Flags().GetBool("json")
+		if err != nil {
+			return fmt.Errorf("ler flag --json: %w", err)
+		}
 
-		ids, ausentes := gate.SelecionaIDs(allIDs, args)
+		ids, ausentes, err := gate.SelecionaIDs(allIDs, args)
+		if err != nil {
+			return err
+		}
 		if len(ausentes) > 0 {
 			fmt.Fprintf(cmd.ErrOrStderr(), "ID(s) não encontrado(s) na Constituição: %s\n", strings.Join(ausentes, ", "))
-			if len(ids) == 0 {
-				return fmt.Errorf("nenhum ID válido encontrado")
-			}
 		}
 
 		if asJSON {
