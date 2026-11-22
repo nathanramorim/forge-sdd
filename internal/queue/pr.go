@@ -99,6 +99,7 @@ func OpenPR(dir string, q *Queue, item *QueueItem, out io.Writer) error {
 
 	// 9. gh pr create
 	prOut, err := prRunCmd(dir, "gh", "pr", "create",
+		"--draft",
 		"--title", title,
 		"--body", resumo,
 		"--base", baseBranch,

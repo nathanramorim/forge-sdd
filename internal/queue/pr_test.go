@@ -171,6 +171,7 @@ func TestOpenPR_CaminhoFeliz(t *testing.T) {
 		}
 	}
 	assert.Contains(t, createCall, "--base main", "base deve ser main quando BaseBranch está vazio")
+	assert.Contains(t, createCall, "--draft", "PR deve ser criado em draft")
 }
 
 func TestOpenPR_CaminhoFelizComBaseBranch(t *testing.T) {
@@ -219,4 +220,5 @@ func TestOpenPR_CaminhoFelizComBaseBranch(t *testing.T) {
 		}
 	}
 	assert.Contains(t, createCall, "--base develop", "base deve ser BaseBranch quando definido")
+	assert.Contains(t, createCall, "--draft", "PR deve ser criado em draft")
 }
