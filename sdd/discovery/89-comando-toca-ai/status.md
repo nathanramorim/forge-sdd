@@ -1,9 +1,5 @@
-# Status — Iniciativa 89
+# Status — 89 comando toca-ai
 
-**Iniciativa:** 89-comando-toca-ai
-**Branch:** feat/89-comando-toca-ai
-**Status:** 89-01 e 89-02 implementadas; PR aberto para o Reviewer
-**Próximo passo:** Reviewer confere o PR.
-
-## A confirmar
-- [ ] Spike: etapa sem PR (conclusão e revisão) — ver nota no PR
+**Status:** 89-01 e 89-02 implementadas; fix-89-01 (esteira sem worker no chat) em spec, aguardando Reviewer.
+**Próximo passo:** Reviewer confere o fix; depois [Seguir] e split.
+**A confirmar:** nenhum.
