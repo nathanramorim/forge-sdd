@@ -33,7 +33,7 @@ A escolha é feita via `AskUserQuestion` no início de cada uso da skill, antes 
 
 ## Conteúdo da alteração
 
-### 1. `~/.claude/skills/diagramas-c4-mermaid/SKILL.md` — reescrever
+### 1. `.agents/skills/diagramas-c4-mermaid/SKILL.md` — reescrever (a skill vive no repositório, nunca em `~/.claude/`)
 
 #### Novo `description` (frontmatter)
 
@@ -77,10 +77,19 @@ Antes de qualquer esboço, o agente usa `AskUserQuestion` com:
 6. **Conferir PNG** (abrir imagem): texto apertado, setas cruzando caixas, blocos desalinhados.
 7. **Entregar:** SVG para README/docs (`![](diagrama.svg)`), PNG para slides e chat.
 
-### 2. Sem alteração
+### 2. Instalação opcional e restrita ao projeto aberto (decisão do dono)
 
-- `~/.claude/skills/diagramas-c4-mermaid/scripts/renderizar-mermaid.py` — inalterado.
-- `.agents/skills/` e qualquer arquivo dentro do repositório forge-sdd — inalterados.
+Toda instalação de skill ou plugin feita pelo forge obedece a três regras:
+
+1. **Opcional por skill:** a skill `diagramas-c4-mermaid` e o plugin `diagram-studio` só são instalados se o usuário escolher; o fluxo Mermaid funciona sem o plugin.
+2. **Limitada ao projeto aberto:** a instalação grava só dentro do projeto em que o forge foi aberto (`.agents/skills/`, `.claude/`), nunca em `~/.claude/` nem em outro projeto.
+3. **Hub ou subprojeto:** se existirem subprojetos com forge sob o projeto aberto, o forge pergunta onde instalar: no master (hub) ou em um dos subprojetos listados. Sem subprojetos, instala no projeto aberto sem perguntar.
+
+O caminho do script do plugin no fluxo passa a ser resolvido a partir do destino escolhido, não de `~/.claude/plugins/`.
+
+### 3. Sem alteração
+
+- `scripts/renderizar-mermaid.py` do fluxo Mermaid — inalterado.
 
 ## Dependências novas
 
@@ -93,18 +102,16 @@ Nenhuma dependência Go. O fluxo diagram-studio requer o plugin `nathanramorim/d
 ## Critérios de Aceitação Executáveis
 
 ```bash
-# 1. Skill carregada sem erro de sintaxe (frontmatter válido)
-head -5 ~/.claude/skills/diagramas-c4-mermaid/SKILL.md | grep "name: diagramas-c4-mermaid"
+# 1. A skill vive no repositório, com frontmatter válido
+head -5 .agents/skills/diagramas-c4-mermaid/SKILL.md | grep "name: diagramas-c4-mermaid"
 
-# 2. Escolha A (Mermaid) — fluxo original preservado
-grep -c "renderizar-mermaid.py" ~/.claude/skills/diagramas-c4-mermaid/SKILL.md
-# deve retornar >= 1
+# 2. Fluxo Mermaid preservado e integração diagram-studio referenciada
+grep -c "renderizar-mermaid.py" .agents/skills/diagramas-c4-mermaid/SKILL.md   # >= 1
+grep -c "diagram-studio" .agents/skills/diagramas-c4-mermaid/SKILL.md          # >= 3
 
-# 3. Escolha B (diagram-studio) — integração referenciada
-grep -c "diagram-studio" ~/.claude/skills/diagramas-c4-mermaid/SKILL.md
-# deve retornar >= 3
+# 3. Nada é gravado fora do projeto aberto, e hub/subprojeto é perguntado
+go test ./internal/scaffold -run 'TestInstalaSkillSoNoProjetoAberto|TestInstalaPerguntaHubOuSubprojeto|TestInstalaOpcionalPorSkill'
 
-# 4. Mapeamento C4 presente
-grep -c "grupo" ~/.claude/skills/diagramas-c4-mermaid/SKILL.md
-# deve retornar >= 1
+# 4. Build e suíte
+go build ./... && go test ./...
 ```
