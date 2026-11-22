@@ -20,6 +20,10 @@ Ao iniciar qualquer sessão do forge-sdd (`forge up`, `forge worker`, `forge inb
 | Prompts de seleção múltipla | `internal/survey/survey.go` | Adaptadores `huh` usados por outras configurações | estender | Manter `huh` encapsulado em `internal/survey` e fornecer uma API reutilizável para a CLI. |
 | Hook de inicialização | `cmd/forge-sdd/up.go`, `worker.go`, `inbox.go` | `checkStaleWorktrees` já chamado nos três comandos | estender | Completar o hook com seleção e remoção dos itens escolhidos sem duplicar lógica nos comandos. |
 
+## Modelo do módulo
+
+**completo** — a entrega introduz regras de negócio para determinar quando worktrees podem ser removidas e integra essa decisão ao pipeline, à fila e aos comandos de sessão.
+
 ### 1. `internal/queue/queue.go` — helper novo
 
 ```go
