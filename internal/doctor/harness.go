@@ -74,6 +74,7 @@ func Diagnose(dir string, d Deps) Relatorio {
 		checaPareceres(dir),
 		checaWorktrees(dir),
 		checaWorkers(d),
+		checaFilaSemWorker(dir, d),
 	}}
 	for _, c := range r.Checagens {
 		switch c.Status {

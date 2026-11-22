@@ -8,6 +8,8 @@ regras: [FLX-01, FLX-02, FLX-03, FLX-05, FLX-06, FLX-07, FLX-08, GOV-01, GOV-02,
 
 Procedimentos operacionais para cumprir `FLX-01..03`, `FLX-05..08` e `GOV-01..03` de `sdd/memory/constitution.md` (`GOV-04`).
 
+**Modo de trabalho:** Não presuma `forge up`. Quem não o iniciou trabalha no chat; o chat orquestra os subagentes. Só ofereça workers se a pessoa pedir.
+
 ## 1. Gate de Spec, Branches e Subpastas (`FLX-01`, `FLX-02`)
 
 - **Aprovação prévia da Spec (`FLX-01`):**

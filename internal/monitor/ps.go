@@ -364,3 +364,19 @@ func KillZombiesWithSignaler(report *ProjectProcessReport, signaler Signaler) ([
 	}
 	return killed, nil
 }
+
+// ActiveWorkers conta os workers (despachantes de fila) vivos do projeto, reaproveitando a
+// inspeção de processos de InspectProjectProcesses.
+func ActiveWorkers(dir string, runner CommandRunner) (int, error) {
+	rep, err := InspectProjectProcesses(dir, runner)
+	if err != nil {
+		return 0, err
+	}
+	n := 0
+	for _, p := range rep.Processes {
+		if strings.Contains(p.Role, "despachante") {
+			n++
+		}
+	}
+	return n, nil
+}

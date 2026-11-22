@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "chave_conteudo": "5400e651d3d2c991",
-  "versao_historico": "4134fc3",
+  "chave_conteudo": "a54050fa26f99bdf",
+  "versao_historico": "1b72a8c",
   "versoes": [
     {
       "versao": "5.0.0",
@@ -68,6 +68,10 @@
         {
           "titulo": "Uma branch e um PR em draft por feature (#198, #201, #203, #206)",
           "texto": "o Builder abre uma branch por feature do split, com base na principal, e cada uma tem o seu PR. Nenhum PR tem base em outro. Uma feature só começa com as dependências **mescladas**, não apenas abertas, e o `[Continuar]` é agrupado por onda."
+        },
+        {
+          "titulo": "O `/toca-ai` não presume workers (fix-89-01)",
+          "texto": "sem worker ativo, `forge pipeline toca-ai` avisa que as etapas ficam na fila e a skill manda o chat orquestrar subagentes em paralelo, sem sugerir `forge up`; o `forge doctor` avisa fila parada sem worker."
         },
         {
           "titulo": "Ninguém marca \"pronto\" sem parecer válido (#185)",

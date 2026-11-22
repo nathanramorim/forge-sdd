@@ -78,3 +78,35 @@ func TestPipelineTocaAi_ConsentSoInterativoEEnfileiraDepois(t *testing.T) {
 	require.NoError(t, err)
 	assert.Len(t, list, 2)
 }
+
+func runnerWorkers(dir string, vivo bool) func(string, ...string) ([]byte, error) {
+	return func(name string, _ ...string) ([]byte, error) {
+		if name != "ps" {
+			return nil, os.ErrNotExist
+		}
+		out := "PID PPID %CPU RSS ELAPSED COMMAND\n"
+		if vivo {
+			out += "42 1 0.5 1000 01:00 /bin/forge-sdd worker --role builder --dir " + dir + "\n"
+		}
+		return []byte(out), nil
+	}
+}
+
+func tocaAiComWorker(t *testing.T, vivo bool) string {
+	dir := tocaAiProject(t)
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "sdd", "discovery", "90-meta-longa", "requisitos.json"), []byte(`{}`), 0o644))
+	workerRunner = runnerWorkers(dir, vivo)
+	t.Cleanup(func() { workerRunner = nil })
+	resetTocaAiFlags()
+	out, err := runRoot(t, "pipeline", "toca-ai", "90-meta-longa", "--dir", dir)
+	require.NoError(t, err)
+	return out
+}
+
+func TestTocaAIAvisaSemWorker(t *testing.T) {
+	assert.Contains(t, tocaAiComWorker(t, false), "nenhum worker ativo")
+}
+
+func TestTocaAISemAvisoComWorker(t *testing.T) {
+	assert.NotContains(t, tocaAiComWorker(t, true), "nenhum worker ativo")
+}
