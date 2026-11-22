@@ -44,10 +44,6 @@ type WorkerOptions struct {
 	RenewEvery time.Duration
 	Out        io.Writer
 	Runner Runner
-	// DeliverTarget é o alvo tmux (ex: =sessao:forge.1) para entrega de prompts no modo live (feat 77).
-	DeliverTarget string
-	// Deliverer executa operações no tmux para o modo live (injetável nos testes).
-	Deliverer TmuxDeliverer
 	Now       func() time.Time
 	// OnJobDone recebe o desfecho de cada job (telemetria); erros dele são ignorados.
 	OnJobDone func(job bus.Job, outcome string)
@@ -58,9 +54,6 @@ type WorkerOptions struct {
 // RunWorker é o laço do worker: recupera leases vencidos, reivindica o próximo job, executa o
 // agente de forma não interativa e fecha o job conforme o resultado (D-1).
 func RunWorker(ctx context.Context, opts WorkerOptions) error {
-	if opts.DeliverTarget != "" {
-		return RunDeliverWorker(ctx, opts)
-	}
 	if opts.Role != layout.RoleBuilder && opts.Role != layout.RoleReviewer {
 		return fmt.Errorf("papel %q inválido para o worker (use builder ou reviewer)", opts.Role)
 	}
