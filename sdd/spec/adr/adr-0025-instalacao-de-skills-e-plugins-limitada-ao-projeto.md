@@ -37,11 +37,11 @@ Verificado no código: `internal/scaffold/hooks.go` já tem `checkSafeTarget` e 
    O Go não faz rede: o conteúdo vem do diretório de origem. O plugin `diagram-studio` é obtido fora do Go por `git clone` mais `checkout` do commit fixado `3996fd2e2bcdc2462e6f0d1edd7f6d18f649bc03`. O repositório não tem tags e o dono não quer tag criada.
 6. **Alcance:** a política vale para todo skill ou plugin que o forge instale, não só o `diagram-studio`.
 
-## Atualização de `ARQ-06` (a fazer no PR da feat-98-02)
+## Atualização de `ARQ-06` (feita no PR da feat-98-02)
 
 Linha atual (`sdd/memory/constitution.md`, linha 62): `... `gate`, `skills`, `governance`, ...`
 
-Texto proposto: acrescentar ao fim da frase, antes de `(`modulo` chega na 109.)`, a oração "O grupo `skills` inclui `destinos` e `instalar` (instalação opcional, limitada ao projeto aberto; ADR-0025)." A lista de nomes de topo não muda. Fica assim: `... `rules`) com contratos explícitos (Regra 10). O grupo `skills` inclui `destinos` e `instalar` (instalação opcional, limitada ao projeto aberto; ADR-0025). (`modulo` chega na 109.)`
+Texto aplicado: acrescentado antes de `(`modulo` chega na 109.)`, a oração "`skills`: ver ADR-0025." A lista de nomes de topo não muda. O contrato dos dois subcomandos novos (`skills destinos` e `skills instalar`, instalação opcional e limitada ao projeto aberto) fica nesta ADR, e não na Constituição: a Constituição tem teto de bytes (`MaxConstitutionSize`, P-24) e só cabe a remissão. O `FLX-02` e as demais regras não foram reescritos.
 
 ## Consequências
 
