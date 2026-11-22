@@ -106,13 +106,14 @@ func TestPRGuardBloqueiaTentativasDeBypassComEncadeamento(t *testing.T) {
 
 func TestPRGuardReadyEMergePassamComVereditoConformeDoHEAD(t *testing.T) {
 	v := veredito(t, vJSON(headFalso, "entrega", "conforme"))
+	raiz := raizComSelo(t, headFalso)
 	for _, c := range []string{
 		"gh pr ready 7",
 		"gh pr merge 7",
 		"az repos pr update --id 7 --draft false",
 		"az repos pr update --id 7 --status completed",
 	} {
-		out, rc := rodarPRGuard(t, "", "--check", c, "--veredito", v, "--head", headFalso)
+		out, rc := rodarPRGuard(t, "", "--check", c, "--veredito", v, "--head", headFalso, "--raiz", raiz)
 		if rc != 0 {
 			t.Fatalf("comando %q com veredito conforme do HEAD deveria passar: rc=%d out=%s", c, rc, out)
 		}
@@ -242,4 +243,43 @@ func mustRun(t *testing.T, dir, name string, args ...string) []byte {
 		t.Fatalf("%s %v: %v", name, args, err)
 	}
 	return out
+}
+
+// raizComSelo cria uma raiz temporária com o selo de scripts/ci-local.sh para o SHA dado.
+func raizComSelo(t *testing.T, sha string) string {
+	t.Helper()
+	raiz := t.TempDir()
+	dir := filepath.Join(raiz, ".forge", "runtime")
+	if err := os.MkdirAll(dir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(dir, "ci-local.json"), []byte(`{"head_sha":"`+sha+`","gerado_em":"2026-11-22T00:00:00Z"}`), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	return raiz
+}
+
+func TestPRGuardExigeSeloLocalNoReady(t *testing.T) {
+	v := veredito(t, vJSON(headFalso, "entrega", "conforme"))
+	semSelo := t.TempDir()
+	for _, c := range []string{"gh pr ready 7", "az repos pr update --id 7 --draft false"} {
+		out, rc := rodarPRGuard(t, "", "--check", c, "--veredito", v, "--head", headFalso, "--raiz", semSelo)
+		if rc == 0 || !strings.Contains(out, "scripts/ci-local.sh") {
+			t.Fatalf("%q sem selo deveria bloquear apontando ci-local.sh: rc=%d out=%s", c, rc, out)
+		}
+	}
+	// Selo de outro commit também recusa.
+	velho := raizComSelo(t, "1111111")
+	_, rc := rodarPRGuard(t, "", "--check", "gh pr ready 7", "--veredito", v, "--head", headFalso, "--raiz", velho)
+	if rc == 0 {
+		t.Fatalf("selo de SHA velho deveria bloquear")
+	}
+}
+
+func TestPRGuardExigeSeloLocalNaoAfetaMerge(t *testing.T) {
+	v := veredito(t, vJSON(headFalso, "entrega", "conforme"))
+	_, rc := rodarPRGuard(t, "", "--check", "az repos pr update --id 7 --status completed", "--veredito", v, "--head", headFalso, "--raiz", t.TempDir())
+	if rc != 0 {
+		t.Fatalf("completar PR não exige selo (o selo vale na saída do draft)")
+	}
 }

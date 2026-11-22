@@ -41,7 +41,7 @@ Legenda dos diagramas (todos): **HUMANO** (decisões e aprovações do Nathan), 
 | Modo da sessão | `status.md` (teto 1 KB, P-21), `forge.json` | Sem campo de modo humano | **Estender** com uma linha `Modo:` no `status.md` e `modo` no veredito | RN-14 |
 | Veredito e SHA | `internal/harness/parecer.go:16-21`; `internal/pipeline/review.go:298-318` (`persistVerdict` em `sdd/discovery/<id>/verdicts/<job>.json`) | `Parecer` sem SHA; amostra `sdd/discovery/100-auto-pr-apos-review/verdicts/feat-100-01-veredito.json` | **Estender** `Parecer` com `head_sha` e `ponto`; o Go os preenche | Contrato único (`DUP-06`) |
 | Auto-PR da 100 | `sdd/discovery/100-auto-pr-apos-review/` | Veredito conforme abre PR sem pedir | **Substituir a ordem** (não o código de PR) | Conflito declarado no discovery |
-| Workflows | `.github/workflows/ci.yml` (jobs `test` e `lint`, só `ubuntu-latest`, `pull_request` e `push` em `main`), `deploy-lp.yml`, `encerrar-edicao.yml`, `npm-publish.yml`, `release.yml` | Sem `draft`, sem `concurrency`, sem matriz de SO (só `ubuntu-latest`) | **Estender** `ci.yml`; os demais não mudam | O CI daqui já só roda com base `main` |
+| Workflows | `.github/workflows/ci.yml` (jobs `test` e `lint`, só `ubuntu-latest`; após o fix-106-10, só `ready_for_review` e `workflow_dispatch`, sem `push`), `deploy-lp.yml`, `encerrar-edicao.yml`, `npm-publish.yml`, `release.yml` | Passos duplicados entre CI e máquina; sem selo local | **Estender** `ci.yml` e criar `scripts/ci-local.sh` (selo); os demais não mudam | O CI daqui já só roda com base `main` |
 | Hooks no scaffold | `internal/scaffold/hooks.go:21-35` (`UserPromptSubmit` do inbox, `SessionStart` do doctor), `mergeClaudeHook` | Mescla sem sobrescrever; JSON inválido não é tocado | **Estender** com `PreToolUse` (matcher `Bash`) | Mesmo instalador (`SEG-02`); suporte a matcher no `mergeClaudeHook`: **não verificado** |
 | Hooks do repo | `.claude/settings.json` | Só `UserPromptSubmit` (inbox) | **Estender** | Dogfooding |
 | Lições | `sdd/memory/lessons.md` (6 linhas, 2 entradas), `cmd/forge-sdd/lessons.go` (`lessons add`, 2 KB) | Arquivo único com poda automática | **Substituir** por `sdd/memory/licoes/<id>.md` + `licoes.py`; `lessons add` grava lá | Princípio do dono; depende da Decisão v |
@@ -265,3 +265,10 @@ if uv run scripts/pr_guard.py --check 'gh pr merge 7'; then exit 1; fi
 - `validar_entrega.py` nunca chama LLM nem rede, e não é referenciado em nenhum workflow (conferência na task 3.2).
 - Goldens: `go test ./internal/scaffold/...` verde após regenerar (`TST-02`).
 - Portão: `forge gate --mode bloqueio --criterios` verde nesta spec e em cada feature.
+
+## Critérios do fix-106-10 (CI local primeiro)
+
+- `ci.yml` dispara só em `pull_request: [ready_for_review]` e `workflow_dispatch`; sem `push`.
+- `scripts/ci-local.sh` falha sem gravar selo com teste quebrado e, ao passar, grava `.forge/runtime/ci-local.json` com o HEAD.
+- `gh pr ready` (e `az repos pr update --draft false`) exige parecer e selo do HEAD; a mensagem aponta `scripts/ci-local.sh`.
+- `scripts/ci-politica.py` imprime "runs por dia por evento".
