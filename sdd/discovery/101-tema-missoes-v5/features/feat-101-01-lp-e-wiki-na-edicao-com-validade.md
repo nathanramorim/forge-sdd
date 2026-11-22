@@ -98,7 +98,7 @@ A virada usa o relógio do visitante, comparado em tempo absoluto: o fuso de que
 
 Nenhuma. Fontes (Montserrat e JetBrains Mono) e Three.js já são carregadas pela LP.
 
-**Dependência de entrega:** o deploy automático só funciona depois do PR #112 (`fix(lp)`), que corrige o workflow `Deploy LP`.
+**Dependência de entrega:** desde 22/11/2026 (fix-106-11) o deploy não é mais automático: rode `scripts/lp-deploy.sh` (ou o workflow `Deploy LP` por `workflow_dispatch`).
 
 ## Rules e IDs da Constituição Aplicáveis
 
