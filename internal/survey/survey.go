@@ -229,4 +229,25 @@ func RunConfirm(title, description string, defaultVal bool) (bool, error) {
 	return result, err
 }
 
+// MultiSelectOption representa uma opção apresentada em uma seleção múltipla.
+type MultiSelectOption struct {
+	Label string
+	Value string
+}
 
+// RunMultiSelect apresenta opções e retorna os valores selecionados.
+func RunMultiSelect(title, description string, options []MultiSelectOption) ([]string, error) {
+	choices := make([]huh.Option[string], 0, len(options))
+	for _, option := range options {
+		choices = append(choices, huh.NewOption(option.Label, option.Value))
+	}
+	var selected []string
+	err := huh.NewForm(huh.NewGroup(
+		huh.NewMultiSelect[string]().
+			Title(title).
+			Description(description).
+			Options(choices...).
+			Value(&selected),
+	)).Run()
+	return selected, err
+}
