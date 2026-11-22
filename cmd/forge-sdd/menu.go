@@ -485,7 +485,6 @@ func (e *menuEnv) configMenu() error {
 		case "mode":
 			var mode string
 			mode, err = e.p.Select("Modo de sessão do Builder e Reviewer", []menuOption{
-				{Label: "Ao vivo (CLI aberta no painel desde o início; requer tmux)", Value: config.SessionModeLive},
 				{Label: "Headless (worker aguarda jobs e roda o agente em segundo plano)", Value: config.SessionModeHeadless},
 			}, cfg.SessionMode)
 			if err == nil {

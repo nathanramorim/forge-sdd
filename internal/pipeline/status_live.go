@@ -411,7 +411,7 @@ func RunLiveDashboard(ctx context.Context, dir string, out io.Writer, once bool)
 		// Move o cursor para (1,1) e limpa a tela alternativa
 		fmt.Fprint(out, "\033[H\033[2J")
 		fmt.Fprint(out, content)
-		fmt.Fprint(out, "\n[Atualizando a cada 2s • Ctrl+C para sair • Dica: 'forge status -l -t' para janela tmux]\n")
+		fmt.Fprint(out, "\n[Atualizando a cada 2s • Ctrl+C para sair]\n")
 		return nil
 	}
 
