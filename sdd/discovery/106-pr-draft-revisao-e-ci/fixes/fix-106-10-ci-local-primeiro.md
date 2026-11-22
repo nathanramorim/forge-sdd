@@ -45,6 +45,7 @@ Diagrama dinâmico com os agentes e onde o CI entra: [`../diagramas/fluxo-ci-loc
 ## Comportamento esperado
 
 1. **O gatilho é só `ready_for_review`.** `on.pull_request.types` passa de `[opened, synchronize, reopened, ready_for_review]` para `[ready_for_review]`. Push em draft, em PR pronto ou na abertura **não cria run nenhum** (hoje cria, e é daí que vem o volume). Nova rodada = voltar o PR a draft e marcá-lo pronto de novo, ou `workflow_dispatch` manual.
+   **Sentido do gatilho (alinhamento do dono):** o PR fica em draft por toda a esteira (Builder, selo local, Reviewer). `ready_for_review` é o sinal de "a esteira terminou e o Reviewer liberou: rode o CI final". Nos textos e na ajuda o evento se chama **liberado para o CI** (o GitHub não aceita nome de evento próprio; o evento real continua `ready_for_review`).
 2. **Sem CI no push da `main`.** Remover `on.push` de `ci.yml`. O PR é a barreira; o merge squash não revalida.
 3. **`scripts/ci-local.sh`** roda build, vet, testes (`-count=1`), lint se instalado e o cross-compile; ao passar, grava o selo `ci-local.json` com `head_sha` e hora. Falha não grava selo.
 4. **`gh pr ready` exige o selo** do HEAD atual (como já exige o parecer). Sem selo ou com SHA velho, recusa e manda rodar `scripts/ci-local.sh`.
