@@ -32,3 +32,11 @@ func TestReferencesConcepcaoNaoPressupoemForgeUp(t *testing.T) {
 		require.False(t, strings.Contains(lerReferenciaConcepcao(t, n), "forge up"), n)
 	}
 }
+
+func TestReferencesConcepcaoFlagsDoQueueCard(t *testing.T) {
+	for _, n := range referenciasConcepcao {
+		s := lerReferenciaConcepcao(t, n)
+		require.Contains(t, s, "forge queue card --feature", n)
+		require.NotContains(t, s, "--dir", n)
+	}
+}

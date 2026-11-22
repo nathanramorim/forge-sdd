@@ -10,7 +10,7 @@
 6. **Conteúdo:** as seis seções obrigatórias da skill `sdd-concepcao` (incluindo `## Decisões do projeto aplicadas`) e a seção `## Feature Correlacionada` (arquivo de origem, causa-raiz e evidência do defeito).
 7. **Telemetria:** `forge session record --sessao spec --feature "<arquivo criado>" --tokens-input <N> --tokens-output <N> --outcome blocked --criterio-atendido=false --files-touched <lista>`. Nunca passe zeros: se não souber os tokens, omita as flags (o CLI vai estimar).
 
-**Issue/card (antes do Gate 1):** rode `forge queue card --feature fix-<id>-<nn>-<nome> --dir sdd/discovery/<id>-<nome>`. Gestor desligado: nada a fazer, em silêncio. GitHub: cria ou reaproveita a issue (`card-evidence.json`). MCP ativo em `sdd/memory/mcps.md`: crie o card e registre com `--provider/--id/--url`. Falha vira aviso e não bloqueia a spec.
+**Issue/card (antes do Gate 1):** rode `forge queue card --feature fix-<id>-<nn>-<nome>` na raiz do projeto. Gestor desligado: nada a fazer, em silêncio. GitHub: cria ou reaproveita a issue (`card-evidence.json`). MCP ativo em `sdd/memory/mcps.md`: crie o card e registre com `--provider/--id/--url`. Falha vira aviso e não bloqueia a spec.
 
 **Visualizar artefatos (antes do Gate 1)**
 
