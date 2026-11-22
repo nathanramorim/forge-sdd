@@ -191,10 +191,11 @@ var queueReviewCmd = &cobra.Command{
 		noPR, _ := cmd.Flags().GetBool("no-pr")
 		if item.GovernanceVerdict.Veredito == queue.VerdictConforme && !noPR {
 			q, loadErr := queue.Load(dir)
-			if loadErr == nil {
-				if prErr := queue.OpenPR(dir, q, item, os.Stdout); prErr != nil {
-					fmt.Fprintf(os.Stderr, "aviso: PR não criado: %v\n", prErr)
-				}
+			if loadErr != nil {
+				return fmt.Errorf("falha ao carregar fila para abrir PR após veredito conforme: %w", loadErr)
+			}
+			if prErr := queue.OpenPR(dir, q, item, os.Stdout); prErr != nil {
+				fmt.Fprintf(os.Stderr, "aviso: PR não criado: %v\n", prErr)
 			}
 		}
 		return nil

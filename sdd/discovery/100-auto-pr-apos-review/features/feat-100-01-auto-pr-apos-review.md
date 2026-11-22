@@ -2,7 +2,7 @@
 
 ## Modelo do módulo
 
-**Enxuto** (ARQ-11): sem pacote novo. Estende `cmd/forge-sdd/queue.go` (`queueReviewCmd`) e `internal/queue/queue.go` para, quando o veredito for `conforme`, executar `git push` + `gh pr create` via `os/exec`. Nenhuma dependência Go nova.
+**Enxuto** (ARQ-11): sem pacote novo. Estende `cmd/forge-sdd/queue.go` (`queueReviewCmd`) e `internal/queue/queue.go` para, quando o veredito for `conforme`, executar `git push` + criar PR em draft via adaptador VCS. Nenhuma dependência Go nova.
 
 ## O que já existe
 
@@ -23,7 +23,9 @@
 $ forge queue review feat-98-01 --verdict-file veredito.json
 ✓ Parecer registrado para feat-98-01: veredito=conforme → status=approved
 → empurrando feat/98-diagram-studio-c4...  ok
-→ PR aberto: https://github.com/owner/repo/pull/105
+→ PR aberto em draft: https://github.com/owner/repo/pull/105
+
+O PR de feature permanece em draft após este veredito. Só sai de draft depois da Conferência 2 (`ponto: entrega`) e de `[Continuar]`, conforme ADRs 0022 e 0023.
 
 # Com --no-pr:
 $ forge queue review feat-98-01 --verdict-file veredito.json --no-pr
@@ -44,6 +46,8 @@ $ forge queue review feat-98-01 --verdict-file veredito.json --no-pr
 - **ARQ-10**: título e corpo do PR são montados em `internal/queue/pr.go`, não em `cmd/`.
 - **COD-01**: `openPR(dir string, q *Queue, item *Item, out io.Writer)` — responsabilidade única.
 - **COD-03**: erros de `git push` e `gh pr create` enriquecidos com contexto.
+- **FLX-02 (ADRs 0022/0023)**: todo PR de feature nasce em draft; o veredito `conforme` não o marca como pronto.
+- Falha ao recarregar a fila após registrar o veredito retorna erro contextual; falhas operacionais ao abrir o PR continuam como aviso gracioso.
 
 ## Dependências novas
 
