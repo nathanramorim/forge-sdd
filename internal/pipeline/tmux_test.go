@@ -1,0 +1,441 @@
+package pipeline
+
+import (
+	"encoding/json"
+	"errors"
+	"fmt"
+	"os"
+	"path/filepath"
+	"strings"
+	"testing"
+
+	"github.com/forge-sdd/cli/internal/config"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+)
+
+func TestTmux_PlanoExato(t *testing.T) {
+	env := lenv("linux", map[string]bool{"tmux": true}, nil)
+	env.Dir = "/work/meu-app"
+	cfg := config.DefaultForgeConfig()
+	cfg.Sessions = map[string]string{config.SessionRoleBuilder: config.CLICodex}
+	plan, err := BuildTmuxPlan(env, cfg, false)
+	require.NoError(t, err)
+	name := TmuxSessionName(env.Dir)
+	assert.Regexp(t, `^forge-meu-app-[0-9a-f]{6}$`, name)
+	assert.Equal(t, name, plan.Session)
+	win := "=" + name + ":forge:meu-app"
+
+	c := plan.Create
+	require.GreaterOrEqual(t, len(c), 13)
+	assert.Equal(t, []string{"tmux", "new-session", "-d", "-s", name, "-n", "forge:meu-app", "-c", "/work/meu-app"}, c[0][:9])
+	assert.Contains(t, c[0][9], "claude -n forge-discovery --agent lider", "painel da Discovery")
+	assert.Equal(t, []string{"tmux", "set-window-option", "-t", win, "pane-base-index", "0"}, c[3], "painéis endereçáveis mesmo com pane-base-index 1 no tmux.conf")
+	assert.Equal(t, []string{"tmux", "split-window", "-h", "-t", win, "-c", "/work/meu-app"}, c[4][:7])
+	assert.Contains(t, c[4][7], "worker --role builder --name forge-builder --cli codex", "Builder à direita no alto")
+	assert.Equal(t, []string{"tmux", "split-window", "-v", "-t", win + ".1", "-c", "/work/meu-app"}, c[5][:7])
+	assert.Contains(t, c[5][7], "worker --role reviewer --name forge-reviewer --cli claude", "Reviewer embaixo")
+	assert.Equal(t, []string{"tmux", "set-window-option", "-t", win, "pane-border-status", "top"}, c[6])
+	var titles []string
+	for _, step := range c {
+		if step[1] == "select-pane" && len(step) > 4 && step[4] == "-T" {
+			titles = append(titles, step[5])
+		}
+	}
+	assert.Equal(t, []string{"forge-discovery", "forge-builder", "forge-reviewer"}, titles)
+	assert.Equal(t, []string{"tmux", "select-pane", "-t", win + ".0"}, c[len(c)-1], "o foco termina na Discovery")
+	assert.Equal(t, []string{"tmux", "attach-session", "-t", "=" + name}, plan.Attach, "alvo exato: sem casar por prefixo com outra sessão")
+
+	inside, err := BuildTmuxPlan(env, cfg, true)
+	require.NoError(t, err)
+	assert.Equal(t, []string{"tmux", "switch-client", "-t", "=" + name}, inside.Attach, "dentro do tmux troca o cliente")
+}
+
+func TestTmuxLivePlan(t *testing.T) {
+	env := lenv("linux", map[string]bool{"tmux": true}, nil)
+	env.Dir = "/work/meu-app"
+	cfg := config.DefaultForgeConfig()
+	cfg.SessionMode = config.SessionModeLive
+	cfg.Sessions = map[string]string{
+		config.SessionRoleBuilder:  config.CLICodex,
+		config.SessionRoleReviewer: config.CLIGemini,
+	}
+
+	plan, err := BuildTmuxPlan(env, cfg, false)
+	require.NoError(t, err)
+
+	name := TmuxSessionName(env.Dir)
+	win := "=" + name + ":forge:meu-app"
+	winCtl := "=" + name + ":forge-ctl"
+
+	c := plan.Create
+	// Janela principal: Discovery, Builder CLI, Reviewer CLI
+	assert.Contains(t, c[0][9], "claude -n forge-discovery --agent lider", "painel 0 da Discovery")
+	assert.Contains(t, c[4][7], "codex", "painel 1 do Builder com CLI interativa")
+	assert.Contains(t, c[4][7], "--sandbox workspace-write", "permissões project do codex presentes")
+	assert.Contains(t, c[5][7], "agy", "painel 2 do Reviewer com CLI interativa")
+	assert.NotContains(t, c[5][7], "-i", "sem prompt inicial não passa -i órfão")
+	assert.Contains(t, c[5][7], "--dangerously-skip-permissions", "permissões do agy presentes")
+
+	// Janela oculta forge-ctl com os despachantes
+	foundNewWin := false
+	var ctlCmds []string
+	for _, step := range c {
+		if step[1] == "new-window" {
+			foundNewWin = true
+			assert.Equal(t, "forge-ctl", step[4])
+			ctlCmds = append(ctlCmds, step[len(step)-1])
+		}
+		if step[1] == "split-window" && len(step) > 4 && step[4] == winCtl {
+			ctlCmds = append(ctlCmds, step[len(step)-1])
+		}
+	}
+	require.True(t, foundNewWin, "deve criar janela forge-ctl")
+	require.Len(t, ctlCmds, 2, "deve ter despachante do builder e do reviewer")
+	assert.Contains(t, ctlCmds[0], fmt.Sprintf("worker --role builder --name forge-builder --cli codex --deliver %s", shQuote(win+".1")))
+	assert.Contains(t, ctlCmds[1], fmt.Sprintf("worker --role reviewer --name forge-reviewer --cli gemini --deliver %s", shQuote(win+".2")))
+
+	// Modo headless permanece idêntico
+	cfgHeadless := config.DefaultForgeConfig()
+	cfgHeadless.SessionMode = config.SessionModeHeadless
+	cfgHeadless.Sessions = cfg.Sessions
+	planHeadless, err := BuildTmuxPlan(env, cfgHeadless, false)
+	require.NoError(t, err)
+	assert.NotContains(t, planHeadless.Create[4][7], "--sandbox", "headless roda worker, não CLI interativa com sandbox no argv externo")
+	assert.Contains(t, planHeadless.Create[4][7], "worker --role builder")
+}
+
+func TestTmuxPlanProjectIdentity(t *testing.T) {
+	env := lenv("linux", map[string]bool{"tmux": true}, nil)
+	env.Dir = "/work/meu-app"
+	cfg := config.DefaultForgeConfig()
+	plan, err := BuildTmuxPlan(env, cfg, false)
+	require.NoError(t, err)
+
+	name := TmuxSessionName(env.Dir)
+	proj := TmuxProjectName(env.Dir)
+	assert.Equal(t, "meu-app", proj)
+
+	winName := "forge:" + proj
+
+	var foundStatusLeft, foundStatusLength, foundBorderFormat, foundWindowName bool
+	for _, cmd := range plan.Create {
+		assert.NotContains(t, cmd, "-g", "nunca deve usar opções globais (-g)")
+		if cmd[1] == "new-session" {
+			for i, arg := range cmd {
+				if arg == "-n" && i+1 < len(cmd) && cmd[i+1] == winName {
+					foundWindowName = true
+				}
+			}
+		}
+		if cmd[1] == "set-option" && len(cmd) >= 5 {
+			assert.Equal(t, name, cmd[3], "alvo de set-option deve ser o nome da sessão")
+			if cmd[4] == "status-left" {
+				foundStatusLeft = true
+				assert.Contains(t, cmd[5], proj)
+				assert.Contains(t, cmd[5], "📦")
+			}
+			if cmd[4] == "status-left-length" {
+				foundStatusLength = true
+				assert.Equal(t, "60", cmd[5])
+			}
+		}
+		if cmd[1] == "set-window-option" && len(cmd) >= 5 {
+			if cmd[4] == "pane-border-format" {
+				foundBorderFormat = true
+				assert.Contains(t, cmd[5], proj+" ❯ #{pane_title}")
+			}
+		}
+	}
+	assert.True(t, foundWindowName, "nome da janela deve ser forge:<projeto>")
+	assert.True(t, foundStatusLeft, "status-left deve conter o nome do projeto")
+	assert.True(t, foundStatusLength, "status-left-length deve ser 60")
+	assert.True(t, foundBorderFormat, "pane-border-format deve conter <projeto> ❯ #{pane_title}")
+}
+
+func TestTmux_NomeDaSessaoSaneadoEUnicoPorCaminho(t *testing.T) {
+	for in, base := range map[string]string{
+		"/p/meu app":                    "forge-meu-app-",
+		"/p/a:b.c":                      "forge-a-b-c-",
+		"/p/x;rm -rf ~":                 "forge-x-rm--rf-",
+		"/p/" + strings.Repeat("a", 80): "forge-" + strings.Repeat("a", 40) + "-",
+		"/":                             "forge-projeto-",
+	} {
+		got := TmuxSessionName(in)
+		assert.True(t, strings.HasPrefix(got, base), "%q -> %q", in, got)
+		assert.Regexp(t, `^forge-[A-Za-z0-9_-]+-[0-9a-f]{6}$`, got)
+		assert.True(t, IsValidTmuxSessionName(got))
+	}
+	assert.False(t, IsValidTmuxSessionName("invalid"))
+	assert.NotEqual(t, TmuxSessionName("/a/app"), TmuxSessionName("/b/app"), "duas pastas com o mesmo nome não dividem a sessão")
+	assert.Equal(t, TmuxSessionName("/a/app"), TmuxSessionName("/a/app/"), "determinístico")
+}
+
+func TestTmux_InjecaoEmNomeDeProjetoNaoViraComando(t *testing.T) {
+	env := lenv("linux", map[string]bool{"tmux": true}, nil)
+	env.Dir = "/work/x; touch /tmp/pwn #"
+	plan, err := BuildTmuxPlan(env, config.DefaultForgeConfig(), false)
+	require.NoError(t, err)
+	assert.NotContains(t, plan.Session, ";")
+	assert.NotContains(t, plan.Session, " ")
+	// O diretório vai como argumento próprio de -c e, no comando do painel, entre aspas simples.
+	assert.Equal(t, env.Dir, plan.Create[0][8])
+	assert.Contains(t, plan.Create[0][9], `cd '/work/x; touch /tmp/pwn #'`)
+}
+
+func TestTmux_NaoExisteNoWindowsNativo(t *testing.T) {
+	env := lenv("windows", map[string]bool{"tmux": true}, nil)
+	env.Dir, env.Bin = `C:\work\proj`, `C:\f\forge-sdd.exe`
+	_, err := BuildTmuxPlan(env, config.DefaultForgeConfig(), false)
+	assert.Error(t, err)
+	term, err := ResolveTerminal("", config.DefaultForgeConfig(), env)
+	require.NoError(t, err)
+	assert.Equal(t, config.TerminalNative, term, "no Windows o auto fica nas janelas do sistema")
+	term, err = ResolveTerminal("tmux", config.DefaultForgeConfig(), env)
+	require.NoError(t, err)
+	assert.Equal(t, config.TerminalNative, term, "tmux pedido no Windows cai para as janelas, sem erro")
+}
+
+func TestTmux_ResolverTerminalPorPrecedencia(t *testing.T) {
+	with := lenv("darwin", map[string]bool{"tmux": true}, nil)
+	without := lenv("darwin", nil, nil)
+	cfg := config.DefaultForgeConfig()
+
+	term, _ := ResolveTerminal("", cfg, with)
+	assert.Equal(t, config.TerminalNative, term, "auto com tmux continua nas janelas (tmux é opção)")
+	term, _ = ResolveTerminal("", cfg, without)
+	assert.Equal(t, config.TerminalNative, term, "auto sem tmux mantém o terminal do sistema")
+
+	cfg.Terminal = config.TerminalNative
+	term, _ = ResolveTerminal("", cfg, with)
+	assert.Equal(t, config.TerminalNative, term, "forge.json vence o auto")
+	term, _ = ResolveTerminal("tmux", cfg, with)
+	assert.Equal(t, config.TerminalTmux, term, "a flag vence o forge.json")
+
+	term, err := ResolveTerminal("tmux", config.DefaultForgeConfig(), without)
+	require.NoError(t, err)
+	assert.Equal(t, config.TerminalNative, term, "tmux pedido e ausente cai para as janelas")
+	cfg.Terminal = config.TerminalTmux
+	term, _ = ResolveTerminal("", cfg, with)
+	assert.Equal(t, config.TerminalTmux, term, "terminal: tmux no forge.json")
+	_, err = ResolveTerminal("janelas", cfg, with)
+	assert.Error(t, err)
+}
+
+type fakeTmux struct {
+	existing  bool
+	runs      [][]string
+	attached  []string
+	failAt    string
+	attachErr error
+}
+
+func (f *fakeTmux) Run(argv []string) error {
+	f.runs = append(f.runs, argv)
+	if argv[1] == "has-session" {
+		if f.existing {
+			return nil
+		}
+		return errors.New("sem sessão")
+	}
+	if f.failAt != "" && argv[1] == f.failAt {
+		return errors.New("falhou")
+	}
+	return nil
+}
+func (f *fakeTmux) Attach(argv []string) error {
+	f.attached = argv
+	return f.attachErr
+}
+
+func TestTmux_SessaoExistenteSoConecta(t *testing.T) {
+	env := lenv("linux", map[string]bool{"tmux": true}, nil)
+	plan, err := BuildTmuxPlan(env, config.DefaultForgeConfig(), false)
+	require.NoError(t, err)
+
+	f := &fakeTmux{existing: true}
+	created, err := LaunchTmux(plan, f)
+	require.NoError(t, err)
+	assert.False(t, created)
+	assert.Len(t, f.runs, 1, "só o has-session: nada é recriado")
+	assert.Equal(t, plan.Attach, f.attached)
+
+	f = &fakeTmux{}
+	created, err = LaunchTmux(plan, f)
+	require.NoError(t, err)
+	assert.True(t, created)
+	assert.Equal(t, 1+len(plan.Create), len(f.runs))
+	assert.Equal(t, []string{"tmux", "has-session", "-t", "=" + plan.Session}, f.runs[0], "alvo exato")
+	assert.Equal(t, plan.Attach, f.attached)
+}
+
+func TestTmux_FalhaDepoisDeCriarLimpaSoOQueCriou(t *testing.T) {
+	plan, err := BuildTmuxPlan(lenv("linux", map[string]bool{"tmux": true}, nil), config.DefaultForgeConfig(), false)
+	require.NoError(t, err)
+	f := &fakeTmux{failAt: "split-window"}
+	_, err = LaunchTmux(plan, f)
+	require.Error(t, err)
+	assert.Nil(t, f.attached, "não conecta a uma sessão pela metade")
+	assert.Equal(t, []string{"tmux", "kill-session", "-t", "=" + plan.Session}, f.runs[len(f.runs)-1], "alvo exato")
+}
+
+func TestTmux_FalhaNoPrimeiroPassoNaoMataNada(t *testing.T) {
+	plan, err := BuildTmuxPlan(lenv("linux", map[string]bool{"tmux": true}, nil), config.DefaultForgeConfig(), false)
+	require.NoError(t, err)
+	f := &fakeTmux{failAt: "new-session"}
+	_, err = LaunchTmux(plan, f)
+	require.Error(t, err)
+	for _, run := range f.runs {
+		assert.NotEqual(t, "kill-session", run[1], "nada foi criado: nada a limpar, e nunca a sessão de outro")
+	}
+}
+
+type racingTmux struct {
+	fakeTmux
+	hasCalls int
+}
+
+func (r *racingTmux) Run(argv []string) error {
+	if argv[1] == "has-session" {
+		r.hasCalls++
+		r.runs = append(r.runs, argv)
+		if r.hasCalls == 1 {
+			return errors.New("sem sessão") // ainda não existia
+		}
+		return nil // outra execução criou no mesmo instante
+	}
+	if argv[1] == "new-session" {
+		r.runs = append(r.runs, argv)
+		return errors.New("duplicate session")
+	}
+	return r.fakeTmux.Run(argv)
+}
+
+func TestTmux_CorridaEntreDoisUpsSoConecta(t *testing.T) {
+	plan, err := BuildTmuxPlan(lenv("linux", map[string]bool{"tmux": true}, nil), config.DefaultForgeConfig(), false)
+	require.NoError(t, err)
+	r := &racingTmux{}
+	created, err := LaunchTmux(plan, r)
+	require.NoError(t, err)
+	assert.False(t, created)
+	assert.Equal(t, plan.Attach, r.attached)
+	for _, run := range r.runs {
+		assert.NotEqual(t, "kill-session", run[1], "a sessão que a outra execução criou não é derrubada")
+	}
+}
+
+func TestTmux_DiretorioRelativoERecusado(t *testing.T) {
+	env := lenv("linux", map[string]bool{"tmux": true}, nil)
+	env.Dir = "."
+	_, err := BuildTmuxPlan(env, config.DefaultForgeConfig(), false)
+	assert.Error(t, err, "com . o hash seria igual para projetos distintos")
+}
+
+func TestTmux_FalhaAoConectarDizOQueFazer(t *testing.T) {
+	plan, err := BuildTmuxPlan(lenv("linux", map[string]bool{"tmux": true}, nil), config.DefaultForgeConfig(), false)
+	require.NoError(t, err)
+	f := &fakeTmux{attachErr: errors.New("exit status 1")}
+	created, err := LaunchTmux(plan, f)
+	require.Error(t, err)
+	assert.True(t, created, "a sessão foi criada mesmo sem conseguir conectar")
+	assert.Contains(t, err.Error(), "tmux attach -t =forge-")
+	assert.Contains(t, err.Error(), "está pronta")
+}
+
+func TestTmux_BordaBadgeDeTokensEStatusRight(t *testing.T) {
+	tempDir := t.TempDir()
+	metricsDir := filepath.Join(tempDir, "sdd", ".metrics")
+	require.NoError(t, os.MkdirAll(metricsDir, 0o755))
+
+	sessions := []struct {
+		filename string
+		role     string
+		in       int
+		out      int
+	}{
+		{"session-2026-11-14T100000Z.json", "discovery", 10000, 2000},
+		{"session-2026-11-14T103000Z.json", "builder", 60000, 18000},
+		{"session-2026-11-14T110000Z.json", "reviewer", 22000, 6000},
+	}
+
+	for _, s := range sessions {
+		rec := map[string]interface{}{
+			"$schema":       "forge-sdd/metrics/1.0",
+			"feature":       fmt.Sprintf("sdd/%s/spec.md", s.role),
+			"agent_path":    []string{s.role},
+			"tokens_input":  s.in,
+			"tokens_output": s.out,
+		}
+		data, err := json.Marshal(rec)
+		require.NoError(t, err)
+		require.NoError(t, os.WriteFile(filepath.Join(metricsDir, s.filename), data, 0o644))
+	}
+
+	env := lenv("linux", map[string]bool{"tmux": true}, nil)
+	env.Dir = tempDir
+	for _, mode := range []string{config.SessionModeLive, config.SessionModeHeadless} {
+		cfg := config.DefaultForgeConfig()
+		cfg.SessionMode = mode
+
+		plan, err := BuildTmuxPlan(env, cfg, false)
+		require.NoError(t, err)
+
+		var titles []string
+		var foundStatusRight, foundStatusRightLen bool
+		var statusRightVal string
+
+		for _, step := range plan.Create {
+			if step[1] == "select-pane" && len(step) > 4 && step[4] == "-T" {
+				titles = append(titles, step[5])
+			}
+			if step[1] == "set-option" && len(step) > 4 {
+				assert.Equal(t, plan.Session, step[3], "tmux set-option (%s, modo %s) não aceita prefixo '=' no nome da sessão", step[4], mode)
+				assert.False(t, strings.HasPrefix(step[3], "="), "alvo de set-option nunca deve começar com '='")
+				if step[4] == "status-right" {
+					foundStatusRight = true
+					statusRightVal = step[5]
+				}
+				if step[4] == "status-right-length" {
+					foundStatusRightLen = true
+					assert.Equal(t, "140", step[5])
+				}
+			}
+		}
+
+		require.NotEmpty(t, titles)
+		assert.Contains(t, titles[0], "forge-discovery │ 🪙 12k tok")
+		assert.Contains(t, titles[1], "forge-builder │ 🪙 78k tok ⚠️")
+		assert.Contains(t, titles[2], "forge-reviewer │ 🪙 28k tok")
+
+		assert.True(t, foundStatusRight, "deve configurar status-right com dicas e resumo de tokens (modo %s)", mode)
+		assert.True(t, foundStatusRightLen, "deve configurar status-right-length=140 (modo %s)", mode)
+		assert.Contains(t, statusRightVal, "Ctrl+b q abre Fila")
+		assert.Contains(t, statusRightVal, "Tokens Totais: 118k")
+		assert.Contains(t, statusRightVal, "Disc: 12k")
+		assert.Contains(t, statusRightVal, "Bld: 78k")
+		assert.Contains(t, statusRightVal, "Rev: 28k")
+	}
+}
+
+func TestTmux_PopupQueue(t *testing.T) {
+	env := lenv("linux", map[string]bool{"tmux": true}, nil)
+	env.Dir = "/work/meu-app"
+	cfg := config.DefaultForgeConfig()
+	plan, err := BuildTmuxPlan(env, cfg, false)
+	require.NoError(t, err)
+
+	popupBindCount := 0
+	for _, step := range plan.Create {
+		if step[1] == "bind-key" && len(step) >= 9 && step[3] == "display-popup" {
+			popupBindCount++
+			assert.Equal(t, "q", step[2])
+			assert.Equal(t, "85%", step[5])
+			assert.Equal(t, "85%", step[7])
+			assert.Contains(t, step[9], "queue --interactive")
+		}
+	}
+	assert.Equal(t, 1, popupBindCount, "deve configurar atalho de popup modal para a fila interativa exatamente uma vez")
+
+	popupCmd := TmuxPopupQueueCommand("/usr/local/bin/forge-sdd")
+	assert.Equal(t, []string{"tmux", "display-popup", "-w", "85%", "-h", "85%", "-E", "'/usr/local/bin/forge-sdd' queue --interactive"}, popupCmd)
+}

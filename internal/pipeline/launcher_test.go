@@ -250,6 +250,29 @@ func TestSessions_DiscoveryGeminiAbreAgyComPromptI(t *testing.T) {
 	assert.NotContains(t, ss[0].Inner, "gemini")
 }
 
+func TestSessions_LiveModeBuilderReviewerGeminiAbreAgySemFlagI(t *testing.T) {
+	cfg := config.DefaultForgeConfig()
+	cfg.SessionMode = config.SessionModeLive
+	cfg.Sessions = map[string]string{
+		config.SessionRoleBuilder:  config.CLIGemini,
+		config.SessionRoleReviewer: config.CLIGemini,
+	}
+	plan, err := BuildTmuxPlan(lenv("linux", map[string]bool{"tmux": true}, nil), cfg, false)
+	require.NoError(t, err)
+
+	// Painel 1 (Builder) e Painel 2 (Reviewer) devem rodar agy sem flag -i
+	bldCmd := plan.Create[4][7]
+	revCmd := plan.Create[5][7]
+
+	assert.Contains(t, bldCmd, "agy --dangerously-skip-permissions")
+	assert.NotContains(t, bldCmd, "-i")
+	assert.NotContains(t, bldCmd, "gemini")
+
+	assert.Contains(t, revCmd, "agy --dangerously-skip-permissions")
+	assert.NotContains(t, revCmd, "-i")
+	assert.NotContains(t, revCmd, "gemini")
+}
+
 // Negativo (feat-105-06): forge up ainda resolve o agente lider na sessão Discovery.
 func TestLauncherDiscoveryUsaLider(t *testing.T) {
 	ss, err := Sessions(lenv("linux", nil, nil), "claude")

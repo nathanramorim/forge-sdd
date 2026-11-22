@@ -4,6 +4,7 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 
@@ -53,6 +54,40 @@ func TestPreflight_TudoCerto(t *testing.T) {
 	assert.False(t, PreflightBlocked(items), FormatPreflight(items))
 	for _, it := range items {
 		assert.Equal(t, LevelOK, it.Level, "%+v", it)
+	}
+}
+
+func TestPreflight_TmuxEscolhidoEAusenteAvisa(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("o tmux não existe no Windows nativo; o preflight não o checa lá")
+	}
+	cfg := config.DefaultForgeConfig()
+	cfg.Terminal = config.TerminalTmux
+	cfg.Sessions = map[string]string{config.SessionRoleDiscovery: config.CLIClaude, config.SessionRoleBuilder: config.CLICodex, config.SessionRoleReviewer: config.CLIGemini}
+	env := penv([]string{"claude", "codex", "agy", "brew"}, "CLAUDE.md", "AGENTS.md", "GEMINI.md", ".claude/agents/lider.md")
+	items := Preflight("/proj", cfg, env)
+	assert.False(t, PreflightBlocked(items), "tmux ausente só avisa")
+	var tmuxWarn *Item
+	for i := range items {
+		if strings.Contains(items[i].Message, "tmux escolhido") {
+			tmuxWarn = &items[i]
+			break
+		}
+	}
+	require.NotNil(t, tmuxWarn)
+	assert.Equal(t, LevelWarn, tmuxWarn.Level)
+	assert.Contains(t, tmuxWarn.Action, "instale")
+}
+
+func TestPreflight_TmuxNaoEExigido(t *testing.T) {
+	for _, term := range []string{config.TerminalAuto, config.TerminalNative} {
+		cfg := config.DefaultForgeConfig()
+		cfg.Terminal = term
+		cfg.Sessions = map[string]string{config.SessionRoleDiscovery: config.CLIClaude, config.SessionRoleBuilder: config.CLICodex, config.SessionRoleReviewer: config.CLIGemini}
+		env := penv([]string{"claude", "codex", "agy"}, "CLAUDE.md", "AGENTS.md", "GEMINI.md", ".claude/agents/lider.md")
+		for _, it := range Preflight("/proj", cfg, env) {
+			assert.NotContains(t, it.Message, "tmux", "terminal %q: tmux não escolhido não gera item", term)
+		}
 	}
 }
 
@@ -129,7 +164,7 @@ func TestPreflight_NaoExecutaAAgenteNemLeOAmbiente(t *testing.T) {
 		Exists:   func(string) bool { return true },
 	}
 	_ = Preflight("/proj", cfg, env)
-	assert.Equal(t, 3, called, "só LookPath, uma vez por sessão (o tmux saiu, feat-115-02)")
+	assert.Equal(t, 3, called, "só LookPath, uma vez por sessão (o tmux só é checado quando escolhido)")
 }
 
 func TestPreflight_ConstituicaoRascunho(t *testing.T) {
