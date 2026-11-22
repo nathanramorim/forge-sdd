@@ -2,10 +2,7 @@
 
 **Gate 1:** aprovado
 - **Iniciativa:** `113-criacao-automatica-issue-concepcao`
-- **Status:** split aprovado pelo dono em 22/11/2026 (6 features, 113-01..06); Reviewer conforme. Sem `queue.json`.
-- **113-03:** implementada (PR em draft); aguardando Reviewer.
-- **113-02:** implementada (PR em draft), aguardando Reviewer.
-- **113-01:** implementada (PR em draft, branch `feat/113-01-vcs-issue`); aguardando Reviewer.
-- **Próximo passo:** o chat monta a fila e dispara o Builder pela onda 1, uma branch e um PR em draft por feature (sem `forge up`).
-- **Ondas:** 1) 113-01 e 113-02 em paralelo; 113-03 (após 01 e 02). 2) 113-04 e 113-05 em paralelo (após 03); 113-06 (após 04 e 05).
-- **Decidido:** 113-05 emite `spec.aberta` só como gancho aditivo (no-op) até a 109 mesclar (`internal/modulo` não está na `main`); 113-06 não toca `.claude/commands`; `forge queue card` com flags de registro.
+- **Status:** as 6 features estão na `main` (PRs #236 a #241) e a nota da 5.2.0 entrou (#242).
+- **fix-113-01** (`--limit 200` na busca de issue): Gate 1 aprovado em 22/11/2026 (`[Seguir]` do dono); o aviso de "busca no limite" fica como follow-up.
+- **Decidido:** `spec.aberta` é só gancho aditivo (no-op) até a 109 mesclar; `.claude/commands` não é tocado.
+- **Próximo passo:** Builder do fix-113-01; depois `/archive` da 113.
