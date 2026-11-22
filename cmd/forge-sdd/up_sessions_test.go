@@ -50,12 +50,21 @@ func pipelineDir(t *testing.T, mut func(*config.ForgeConfig)) string {
 func TestUp_FlagsPorSessao(t *testing.T) {
 	dir := pipelineDir(t, nil)
 	resetWorkerFlags()
-	out, err := runRoot(t, "up", "--dir", dir, "--discovery", "claude", "--builder", "codex", "--reviewer", "gemini", "--dry-run", "--terminal", "native")
+	out, err := runRoot(t, "up", "--dir", dir, "--initiative", "77-example", "--discovery", "claude", "--builder", "codex", "--reviewer", "gemini", "--dry-run", "--terminal", "native")
 	require.NoError(t, err)
 	assert.Contains(t, out, "claude -n forge-discovery --agent lider")
 	assert.Contains(t, out, "--role builder --name forge-builder --cli codex")
 	assert.Contains(t, out, "--role reviewer --name forge-reviewer --cli gemini")
+	assert.Contains(t, out, "--initiative 77-example")
 	assert.Contains(t, out, "[DRY-RUN]")
+}
+
+func TestUp_SemIniciativaFalhaComOrientacao(t *testing.T) {
+	dir := pipelineDir(t, nil)
+	resetWorkerFlags()
+	_, err := runRoot(t, "up", "--dir", dir, "--dry-run", "--terminal", "native")
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "informe --initiative")
 }
 
 func TestUp_Precedencia(t *testing.T) {
@@ -64,14 +73,14 @@ func TestUp_Precedencia(t *testing.T) {
 		c.Sessions = map[string]string{config.SessionRoleBuilder: config.CLICopilot}
 	})
 	resetWorkerFlags()
-	out, err := runRoot(t, "up", "--dir", dir, "--cli", "gemini", "--dry-run", "--terminal", "native")
+	out, err := runRoot(t, "up", "--dir", dir, "--initiative", "77-example", "--cli", "gemini", "--dry-run", "--terminal", "native")
 	require.NoError(t, err)
 	assert.Contains(t, out, "--name forge-builder --cli copilot", "sessions de forge.json vence --cli")
 	assert.Contains(t, out, "--name forge-reviewer --cli gemini", "--cli vale para a sessão sem escolha")
 	assert.Contains(t, out, "agy -i", "a Discovery usa --cli")
 
 	resetWorkerFlags()
-	out, err = runRoot(t, "up", "--dir", dir, "--builder", "codex", "--dry-run", "--terminal", "native")
+	out, err = runRoot(t, "up", "--dir", dir, "--initiative", "77-example", "--builder", "codex", "--dry-run", "--terminal", "native")
 	require.NoError(t, err)
 	assert.Contains(t, out, "--name forge-builder --cli codex", "a flag da sessão vence sessions")
 }
@@ -82,7 +91,7 @@ func TestUp_ValoresInvalidosERecusados(t *testing.T) {
 		{"--builder", "gpt"}, {"--cli", "cursor"}, {"--reviewer", "codex; rm -rf ~"}, {"--discovery", "../x"},
 	} {
 		resetWorkerFlags()
-		_, err := runRoot(t, append([]string{"up", "--dir", dir, "--dry-run"}, args...)...)
+		_, err := runRoot(t, append([]string{"up", "--dir", dir, "--initiative", "77-example", "--dry-run"}, args...)...)
 		assert.Error(t, err, args)
 	}
 }
@@ -91,7 +100,7 @@ func TestUp_NaoGravaForgeJSON(t *testing.T) {
 	dir := pipelineDir(t, nil)
 	before, _ := os.ReadFile(filepath.Join(dir, ".forge", "config", "forge.json"))
 	resetWorkerFlags()
-	_, err := runRoot(t, "up", "--dir", dir, "--builder", "codex", "--dry-run", "--terminal", "native")
+	_, err := runRoot(t, "up", "--dir", dir, "--initiative", "77-example", "--builder", "codex", "--dry-run", "--terminal", "native")
 	require.NoError(t, err)
 	after, _ := os.ReadFile(filepath.Join(dir, ".forge", "config", "forge.json"))
 	assert.Equal(t, string(before), string(after), "as flags não alteram forge.json")
@@ -100,18 +109,18 @@ func TestUp_NaoGravaForgeJSON(t *testing.T) {
 func TestUp_Terminal(t *testing.T) {
 	dir := pipelineDir(t, nil)
 	resetWorkerFlags()
-	out, err := runRoot(t, "up", "--dir", dir, "--terminal", "native", "--dry-run")
+	out, err := runRoot(t, "up", "--dir", dir, "--initiative", "77-example", "--terminal", "native", "--dry-run")
 	require.NoError(t, err)
 	assert.Contains(t, out, "forge-discovery")
 	assert.NotContains(t, out, "tmux new-session")
 
 	resetWorkerFlags()
-	_, err = runRoot(t, "up", "--dir", dir, "--terminal", "janelas", "--dry-run")
+	_, err = runRoot(t, "up", "--dir", dir, "--initiative", "77-example", "--terminal", "janelas", "--dry-run")
 	assert.Error(t, err, "valor fora da lista é recusado")
 
 	if _, lookErr := exec.LookPath("tmux"); lookErr == nil {
 		resetWorkerFlags()
-		out, err = runRoot(t, "up", "--dir", dir, "--terminal", "tmux", "--dry-run")
+		out, err = runRoot(t, "up", "--dir", dir, "--initiative", "77-example", "--terminal", "tmux", "--dry-run")
 		require.NoError(t, err)
 		assert.Contains(t, out, "tmux new-session -d -s forge-")
 		assert.Contains(t, out, "split-window -h")
@@ -127,7 +136,7 @@ func TestLiveFallback(t *testing.T) {
 		c.Terminal = config.TerminalNative
 	})
 	resetWorkerFlags()
-	out, err := runRoot(t, "up", "--dir", dir, "--dry-run")
+	out, err := runRoot(t, "up", "--dir", dir, "--initiative", "77-example", "--dry-run")
 	require.NoError(t, err)
 	assert.Contains(t, out, "modo live requer tmux; caindo para headless nas janelas do sistema")
 	assert.Contains(t, out, "[DRY-RUN] Nenhuma sessão foi aberta (modo headless).")
@@ -140,7 +149,7 @@ func TestLiveFallback(t *testing.T) {
 			c.Terminal = config.TerminalTmux
 		})
 		resetWorkerFlags()
-		outTmux, errTmux := runRoot(t, "up", "--dir", dirTmux, "--dry-run")
+		outTmux, errTmux := runRoot(t, "up", "--dir", dirTmux, "--initiative", "77-example", "--dry-run")
 		require.NoError(t, errTmux)
 		assert.Contains(t, outTmux, "modo live")
 		assert.Contains(t, outTmux, "forge-ctl")

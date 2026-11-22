@@ -37,6 +37,20 @@ Reviewer: exige que o agente aplique o veredito (forge bus review).`,
 		}
 		checkStaleWorktrees(dir, cmd.OutOrStdout())
 		role, _ := cmd.Flags().GetString("role")
+		initiative, _ := cmd.Flags().GetString("initiative")
+		if initiative == "" {
+			resolved, ok, err := layout.Current(dir)
+			if err != nil {
+				return fmt.Errorf("resolver iniciativa atual; informe --initiative: %w", err)
+			}
+			if !ok {
+				return fmt.Errorf("nenhuma iniciativa resolvível; informe --initiative <id-nome>")
+			}
+			initiative = resolved
+		}
+		if !layout.ValidInitiative(initiative) {
+			return fmt.Errorf("--initiative %q inválida; use <id-nome> em minúsculas", initiative)
+		}
 		name, _ := cmd.Flags().GetString("name")
 		once, _ := cmd.Flags().GetBool("once")
 		poll, _ := cmd.Flags().GetDuration("poll")
@@ -47,7 +61,7 @@ Reviewer: exige que o agente aplique o veredito (forge bus review).`,
 		ctx, cancel := signal.NotifyContext(cmd.Context(), os.Interrupt, syscall.SIGTERM)
 		defer cancel()
 		return pipeline.RunWorker(ctx, pipeline.WorkerOptions{
-			Dir: dir, Role: role, Name: name, CLI: cli, Raw: raw, Once: once, Poll: poll,
+			Dir: dir, Role: role, Name: name, CLI: cli, Raw: raw, Once: once, Poll: poll, Initiative: initiative,
 			DeliverTarget: deliver,
 			Out:           cmd.OutOrStdout(),
 			OnJobDone:     recordJobTelemetry(dir, role),
@@ -159,6 +173,7 @@ var busPlanCmd = &cobra.Command{
 func init() {
 	workerCmd.Flags().String("dir", ".", "Diretório alvo do projeto Forge-SDD")
 	workerCmd.Flags().String("role", "", "Papel do worker: builder ou reviewer")
+	workerCmd.Flags().String("initiative", "", "ID da iniciativa que o worker atende (padrão: branch atual)")
 	_ = workerCmd.MarkFlagRequired("role")
 	workerCmd.Flags().String("name", "", "Nome da sessão (padrão: forge-<papel>)")
 	workerCmd.Flags().String("cli", "", "Agente desta sessão: claude, gemini, copilot ou codex (padrão: sessions de forge.json)")

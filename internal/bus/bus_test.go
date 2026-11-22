@@ -124,6 +124,32 @@ func TestClaim_MoveParaProcessingComLeaseEEvento(t *testing.T) {
 	assert.ErrorIs(t, err, ErrEmpty)
 }
 
+func TestClaimForInitiative_IsolaJobsEHasJobsIncluiProcessing(t *testing.T) {
+	dir := t.TempDir()
+	job115 := newJob("job-115", TypeFeatureBuild, PriorityNormal)
+	job115.Initiative = "115-obsolescencia-do-tmux"
+	job97 := newJob("job-97", TypeFeatureBuild, PriorityNormal)
+	job97.Initiative = "97-outra"
+	mustEnqueue(t, dir, layout.RoleBuilder, job97, t0)
+	mustEnqueue(t, dir, layout.RoleBuilder, job115, t0.Add(time.Second))
+
+	e, err := ClaimForInitiative(dir, layout.RoleBuilder, "forge-builder", "115-obsolescencia-do-tmux", time.Minute, t0)
+	require.NoError(t, err)
+	assert.Equal(t, "job-115", e.Job.ID)
+	_, err = ClaimForInitiative(dir, layout.RoleBuilder, "forge-builder", "115-obsolescencia-do-tmux", time.Minute, t0)
+	assert.ErrorIs(t, err, ErrEmpty)
+	busy, err := HasJobsForInitiative(dir, layout.RoleBuilder, "115-obsolescencia-do-tmux")
+	require.NoError(t, err)
+	assert.True(t, busy, "processing também mantém a iniciativa ativa")
+	busy, err = HasJobsForInitiative(dir, layout.RoleBuilder, "97-outra")
+	require.NoError(t, err)
+	assert.True(t, busy, "job alheio continua pendente")
+	assert.Error(t, func() error {
+		_, err := ClaimForInitiative(dir, layout.RoleBuilder, "forge-builder", "../97", time.Minute, t0)
+		return err
+	}())
+}
+
 func TestClaim_Concorrente(t *testing.T) {
 	dir := t.TempDir()
 	const jobs = 24
