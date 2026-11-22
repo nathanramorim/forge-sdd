@@ -52,11 +52,7 @@ jobs:
   test:
     # Um PR em draft não roda teste: economiza runner e segura o CI para o fim.
     if: github.event_name == 'push' || github.event.pull_request.draft == false
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, macos-15, windows-latest]
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
@@ -68,6 +64,13 @@ jobs:
 
       - name: go test
         run: go test ./...
+
+      # Windows e macOS: só compila (e roda o vet). Pega erro de build nos sistemas
+      # em que o produto é publicado, sem gastar runner deles (decisão do dono, 22/11/2026).
+      - name: Compilação cruzada (windows e darwin)
+        run: |
+          GOOS=windows go build ./... && GOOS=windows go vet ./...
+          GOOS=darwin go build ./... && GOOS=darwin go vet ./...
 
   lint:
     if: github.event_name == 'push' || github.event.pull_request.draft == false
