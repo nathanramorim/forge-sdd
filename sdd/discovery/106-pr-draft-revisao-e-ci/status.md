@@ -7,4 +7,4 @@
 **Colisões resolvidas:** 105 e 107 seguem com as suas ondas, sem conflito com esta.
 **Gate 1:** aprovado (fixes 106-10, 106-11 e 106-12, 22/11/2026, `[Seguir]` do dono)
 **Fixes:** 106-10 e 106-11 entregues (CI local primeiro, deploy da LP manual); 106-12 (tag da LP e tom das notas) em construção.
-**Gate 1:** aprovado (fix-106-14a, 22/11/2026, `[Seguir]` do dono); a 14b aguarda o aceite da ARQ-06 e da ADR-0027.
+**Gate 1:** aprovado (fixes 106-14a e 14b, 22/11/2026, `[Seguir]` do dono; a 14b inclui a emenda da ARQ-06 e a ADR-0027).
