@@ -51,10 +51,12 @@ Vermelhos **até o Builder**.
 
 ```bash
 set -o pipefail
-go test ./cmd/forge-sdd -run '^(TestDoctorSemClaudeNaoMandaUpgrade|TestDoctorNaoCitaProntoSemWorkflow|TestDoctorCitaProntoComWorkflow|TestUpdateConfirmaOHookNoLog)$' -count=1
-[ "$(go test ./cmd/forge-sdd -list '^(TestDoctorSemClaudeNaoMandaUpgrade|TestDoctorNaoCitaProntoSemWorkflow|TestDoctorCitaProntoComWorkflow|TestUpdateConfirmaOHookNoLog)$' | grep -c '^Test')" -eq 4 ]
+go test ./cmd/forge-sdd -run '^(TestDoctorSemClaudeNaoMandaUpgrade|TestUpdateConfirmaOHookNoLog)$' -count=1
+[ "$(go test ./cmd/forge-sdd -list '^(TestDoctorSemClaudeNaoMandaUpgrade|TestUpdateConfirmaOHookNoLog)$' | grep -c '^Test')" -eq 2 ]
 go test ./cmd/forge-sdd -count=1
 ```
+
+**Divergência (Builder):** `TestDoctorNaoCitaProntoSemWorkflow` e `TestDoctorCitaProntoComWorkflow` saíram: o item já foi entregue pela 118-05 e é coberto por `TestDoctorNaoPrometeProtecaoDoWorkflow` (`ci_flag_test.go`). A linha "já presente" não foi criada (a 2ª rodada segue silenciosa, como no SessionStart).
 
 ## Fora do escopo
 
