@@ -1700,6 +1700,18 @@ footer {
 /* ==========================================================================
    MOTOR DE PERSONAGENS DAS SESSÕES DO PIPELINE
    ========================================================================== */
+/* tremor:inicio */
+const TREMOR_ERRO = { duracao: 0.5, amplitude: 0.025, frequencia: 28 };
+function deslocamentoTremor(t, desde, reduzMovimento) {
+  if (reduzMovimento || desde === null) return 0;
+  const dt = t - desde;
+  if (dt < 0 || dt >= TREMOR_ERRO.duracao) return 0;
+  return Math.sin(dt * TREMOR_ERRO.frequencia) * TREMOR_ERRO.amplitude * (1 - dt / TREMOR_ERRO.duracao);
+}
+/* tremor:fim */
+const mqMenosMovimento = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : null;
+const reduzMovimento = () => (mqMenosMovimento ? mqMenosMovimento.matches : false);
+
 const STATE_DEFS = {
   working:  { label: 'Trabalhando',  orb: 0x4f8ef7, cssOrb: '#4f8ef7', eyes: 'cap' },
   approval: { label: 'Aguarda você', orb: 0xf5b04a, cssOrb: '#f5b04a', eyes: 'round' },
@@ -1861,6 +1873,7 @@ function createForgeMascot3D(mountEl, agentHex, initialState, markType) {
 
   let currentState = initialState || 'working';
   let hopTimer = 0;
+  let errorSince = null;
 
   function setState(nextState, nextColorHex) {
     currentState = STATE_DEFS[nextState] ? nextState : 'working';
@@ -1872,6 +1885,7 @@ function createForgeMascot3D(mountEl, agentHex, initialState, markType) {
     happyGroup.visible = def.eyes === 'happy';
     xGroup.visible = def.eyes === 'x';
     hopTimer = 0.45;
+    errorSince = null;
   }
 
   setState(currentState);
@@ -1906,7 +1920,8 @@ function createForgeMascot3D(mountEl, agentHex, initialState, markType) {
       }
 
       if (currentState === 'error') {
-        botGroup.position.x = Math.sin(t * 28) * 0.025;
+        if (errorSince === null) errorSince = t;
+        botGroup.position.x = deslocamentoTremor(t, errorSince, reduzMovimento());
       } else {
         botGroup.position.x = 0;
       }
