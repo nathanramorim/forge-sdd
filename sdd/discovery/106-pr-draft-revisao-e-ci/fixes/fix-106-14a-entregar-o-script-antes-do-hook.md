@@ -2,7 +2,7 @@
 
 **Branch da spec:** `fix/106-14-spec-hook-sem-script`; **da correção:** `fix/106-14a-impl-script-antes-do-hook`, a partir da principal
 **Origem:** Iniciativa 106, teste do upgrade 5.0 para a beta em projeto descartável (22/11/2026), depois da pergunta do dono sobre o comando de reconfiguração. Metade 1 de 2 (a metade 2 é o fix-106-14b).
-**Tamanho:** `M`
+**Tamanho:** `L`
 **Status:** `spec`
 
 ## Sintoma
@@ -25,12 +25,12 @@ Nenhuma (`SEG-07`). O `pr_guard.py` usa só a biblioteca padrão e **não** depe
 
 ## Rules e IDs da Constituição Aplicáveis
 
-`ARQ-11`, `SEG-02` (gravação atômica; não sobrescreve script do usuário), `SEG-01` (entrada externa validada na borda: caminho confinado), `TST-02` (template e golden no mesmo PR), `TST-03` (casos negativos), `DUP-01` (um conceito, uma casa: a cópia do template é validada contra o `scripts/pr_guard.py` do repositório por teste).
+`ARQ-11`, `SEG-02` (gravação atômica; não sobrescreve script do usuário), `SEG-01` (entrada externa validada na borda: caminho confinado), `TST-02` (template e golden no mesmo PR), `TST-03` (casos negativos), `DUP-02` (reusar o que já existe: a cópia do template é validada contra o `scripts/pr_guard.py` do repositório por teste de igualdade, em vez de duplicada à mão).
 
 ## Decisões do projeto aplicadas
 
 - Nunca instalar o hook sem o script.
-- O script embutido leva uma segunda linha `# forge-sdd:generated v<versão>` (injetada pelo instalador). Sem a linha = editado pelo usuário = **intocado**; com a linha e versão menor = atualizado. O teste de igualdade compara o template com `scripts/pr_guard.py` **ignorando** essa linha.
+- O script embutido leva a linha `# forge-sdd:generated v<versão>` **entre o shebang e o bloco PEP 723** (`# /// script`), injetada **na gravação** pelo instalador (não está no template). Sem a linha = editado pelo usuário = **intocado**; com a linha e versão menor = atualizado. O teste de igualdade compara o template com `scripts/pr_guard.py`; o golden de `init` que incluir `scripts/pr_guard.py` leva o marcador ou fica fora da comparação. `shouldPreserve` ganha a regra do marcador **antes** do laço genérico (hoje não há regra para `scripts/`, e o template novo sobrescreveria o script do usuário).
 - **Selo do `ci-local.sh`:** o `ci-local.sh` do repositório é específico do forge-sdd (Go) e **não** é entregue. O `pr_guard.py` passa a exigir o selo **só quando `scripts/ci-local.sh` existe no projeto**; sem ele o `gh pr ready` exige apenas o parecer. No repositório do forge-sdd nada muda.
 
 ## O que já existe
@@ -40,7 +40,7 @@ Nenhuma (`SEG-07`). O `pr_guard.py` usa só a biblioteca padrão e **não** depe
 | Script do guard | `scripts/pr_guard.py` (só no repo) | sem template | **embutir** em `internal/scaffold/templates/scripts/pr_guard.py.tmpl` |
 | Preservação | `shouldPreserve` (`scaffold.go`) | sem regra para `scripts/` | **estender** com a regra do marcador |
 | Diagnóstico | `doctor.go` `reportPRGuardCoverage` | só procura o texto no settings | **checar** que `scripts/pr_guard.py` existe (`os.Stat`); sem `--selftest` |
-| `/upgrade-sdd` | `upgrade-sdd.md.tmpl` linhas 18-20 | trata o guard como cópia manual | **atualizar** o texto e o golden: o `forge` entrega o guard; `atestado.py` e `ci-politica.py` seguem manuais |
+| `/upgrade-sdd` | `internal/scaffold/templates/.agents/skills/sdd-operacao/references/upgrade-sdd.md.tmpl` (linhas 18 e 20) e o golden `testdata/golden/.agents/skills/sdd-operacao/references/upgrade-sdd.md` | trata o guard como cópia manual | **atualizar** o texto e o golden: o `forge` entrega o guard; `atestado.py` e `ci-politica.py` seguem manuais |
 
 ## Comportamento esperado
 
@@ -48,7 +48,7 @@ Nenhuma (`SEG-07`). O `pr_guard.py` usa só a biblioteca padrão e **não** depe
 2. `update` repara projeto com hook sem script (grava o script, não duplica o hook).
 3. Script com o marcador e versão menor é atualizado; sem o marcador, permanece intocado e o `update --dry-run` o lista.
 4. `forge doctor` acusa **erro de configuração** quando o hook existe e o script não, com a correção (`forge update`).
-5. Sem `scripts/ci-local.sh` no projeto, `gh pr ready` não exige selo.
+5. Sem `scripts/ci-local.sh` no projeto, `gh pr ready` não exige selo. O teste existente `TestPRGuardExigeSeloLocalNoReady` (`scripts/pr_guard_test.go`, ~262-276) **deve ser ajustado**: a raiz temporária ganha `scripts/ci-local.sh`, e fica um caso negativo com o script presente e o selo ausente (bloqueia) e outro com o script ausente (libera).
 
 ## Critérios de Aceitação Executáveis
 
