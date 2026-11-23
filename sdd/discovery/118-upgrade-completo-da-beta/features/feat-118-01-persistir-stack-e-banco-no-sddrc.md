@@ -15,7 +15,11 @@
 ## Saídas
 
 - `.sddrc` com `"stack"` e `"db"`; `Sddrc.ToConfig()` os repassa (hoje não, `config.go:46-55`).
-- Projeto 5.0 (sem os campos): o `update` recupera o valor **uma vez** das linhas "Stack:"/"Banco:" dos adaptadores existentes; se não houver valor, deixa vazio. **Nunca** troca por `go`/`none` em silêncio.
+- Projeto 5.0 (sem os campos): o `update` recupera o valor **uma vez**, nesta ordem de fontes (a primeira que der valor válido vence, por campo):
+  1. `sdd/memory/constitution.md`: linhas de tabela `| Runtime |` e `| DB |` (linhas 9-10 num projeto 5.0) e, se faltarem, a tabela de `sdd/spec/stack.md` (template `stack.md.tmpl`, linhas 7-8);
+  2. `- **Stack:**` e `- **Banco:**` de `.gemini/system_instructions.md` e `.openai/system_instructions.md` (só estes têm as linhas);
+  3. regex `stack (\S+)\.` na prosa de `CLAUDE.md`, `GEMINI.md` e `AGENTS.md` (`proj: stack node.`); o banco **não** aparece nesses arquivos.
+  Sem valor em nenhuma fonte, o campo fica vazio. **Nunca** troca por `go`/`none` em silêncio. Projeto só-Claude é caso de teste próprio.
 
 ## Modelo do módulo
 
@@ -37,6 +41,7 @@
 | Struct do `.sddrc` | `config.go:34-43` | sem `stack`/`db` | **estender** | achado 2 |
 | Conversão para Config | `config.go:46-55` `ToConfig` | não copia `Stack`/`DB` | **estender** | causa-raiz |
 | Gravação do `.sddrc` | `scaffold.go:280` `UpdateSddrc` e `templates/sdd/.sddrc.tmpl` | só `project`, `version`, `agents`, `telemetry`, `lang`, `naming_convention` | **estender** | template ganha os campos |
+| Fontes da stack numa 5.0 | `constitution.md` (`| Runtime |`, `| DB |`), `spec/stack.md.tmpl`, `system_instructions.md` (gemini/openai), prosa de `CLAUDE.md`/`GEMINI.md`/`AGENTS.md` | só gemini/openai têm `- **Stack:**`; banco só na Constituição e no `stack.md` | **reusar** como fontes de leitura | achado 2 sem perda |
 | Uso nos adaptadores | `templates/agents/claude/CLAUDE.md.tmpl:3` (`stack {{.Stack}}`) e demais | renderizam `Config` | **reusar** | sem mudança de template |
 | Fluxo do `update` | `cmd/forge-sdd/main.go:311-325` | `baseCfg := rc.ToConfig()` | **estender** | recebe os campos |
 
@@ -56,9 +61,9 @@ Vermelhos **até o Builder** (os testes não existem). `-list` só prova existê
 set -o pipefail
 go test ./internal/config -run '^(TestSddrcGravaEPreservaStackEBanco|TestSddrcDe50SemStackNaoAssumeDefault)$' -count=1
 go test ./internal/scaffold -run '^TestUpdateNaoPerdeDadoDoUsuario$/^stack_e_banco$' -count=1
-go test ./internal/scaffold -run '^(TestUpdateRepopulaStackNosAdaptadores|TestRecuperaStackDoAdaptadorRecusaValorInvalido)$' -count=1
+go test ./internal/scaffold -run '^(TestUpdateRepopulaStackNosAdaptadores|TestRecuperaStackDoAdaptadorRecusaValorInvalido|TestRecuperaStackNaOrdemDasFontes|TestRecuperaStackProjetoSoClaude)$' -count=1
 go test ./cmd/forge-sdd -run '^TestUpdateUpgradeMantemStackDoSddrc$' -count=1
-[ "$(go test ./internal/config ./internal/scaffold ./cmd/forge-sdd -list '^(TestSddrcGravaEPreservaStackEBanco|TestSddrcDe50SemStackNaoAssumeDefault|TestUpdateNaoPerdeDadoDoUsuario|TestUpdateRepopulaStackNosAdaptadores|TestRecuperaStackDoAdaptadorRecusaValorInvalido|TestUpdateUpgradeMantemStackDoSddrc)$' | grep -c '^Test')" -eq 6 ]
+[ "$(go test ./internal/config ./internal/scaffold ./cmd/forge-sdd -list '^(TestSddrcGravaEPreservaStackEBanco|TestSddrcDe50SemStackNaoAssumeDefault|TestUpdateNaoPerdeDadoDoUsuario|TestUpdateRepopulaStackNosAdaptadores|TestRecuperaStackDoAdaptadorRecusaValorInvalido|TestRecuperaStackNaOrdemDasFontes|TestRecuperaStackProjetoSoClaude|TestUpdateUpgradeMantemStackDoSddrc)$' | grep -c '^Test')" -eq 8 ]
 go test ./internal/config ./internal/scaffold ./cmd/forge-sdd -count=1
 ```
 

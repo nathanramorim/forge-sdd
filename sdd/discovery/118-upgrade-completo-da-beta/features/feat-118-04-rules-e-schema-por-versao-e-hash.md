@@ -5,7 +5,7 @@
 
 ## Objetivo
 
-Rule não editada e `sdd/.metrics/schema.json` não editado recebem a versão nova no `update`; arquivo **editado** pelo usuário é preservado, o conteúdo novo vai para `<nome>.novo.<ext>` ao lado e o `update` e o `doctor` avisam. Implementa o contrato do fix-106-09 reservado a esta feature pelo `plan.md` (rules com dono; furos 1, 3 e 6 entre 02, 04 e 07) sem reimplementá-lo (`DUP-03`).
+Rule não editada e `sdd/.metrics/schema.json` não editado recebem a versão nova no `update`; arquivo **editado** pelo usuário é preservado, o conteúdo novo vai para `<nome>.novo.<ext>` ao lado e o `update` e o `doctor` avisam. Implementa o **furo 1** do fix-106-09 (rule alterada não chega ao projeto antigo; rules com dono) sem reimplementar o contrato (`DUP-03`). Reusa a tabela `embed.FS` e o hash criados na 118-02 e os estende a rules e `schema.json`.
 
 ## Entradas
 

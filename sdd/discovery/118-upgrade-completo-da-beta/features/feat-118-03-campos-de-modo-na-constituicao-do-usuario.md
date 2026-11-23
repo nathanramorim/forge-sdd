@@ -5,7 +5,7 @@
 
 ## Objetivo
 
-Projeto novo nasce com a seção `## Ferramentas e Integrações` e os cinco campos de modo; projeto 5.0 recebe os campos **que faltam** no `update`, com padrões seguros, sem alterar nenhum valor existente. Traz a **ADR curta (`FLX-05`)** que registra o acréscimo na Constituição do **usuário** e a exceção no `shouldPreserve`. A `GOV-01` rege só a Constituição **deste** repositório e não se aplica ao arquivo do usuário.
+Projeto novo nasce com a seção `## Ferramentas e Integrações` e os cinco campos de modo; projeto 5.0 recebe os campos **que faltam** no `update`, com padrões seguros, sem alterar nenhum valor existente. Traz a **ADR-0028 curta (`FLX-05`)** que registra o acréscimo na Constituição do **usuário** como passo à parte (o `shouldPreserve` segue preservando o arquivo). A `GOV-01` rege só a Constituição **deste** repositório e não se aplica ao arquivo do usuário.
 
 ## Entradas
 
@@ -15,9 +15,11 @@ Projeto novo nasce com a seção `## Ferramentas e Integrações` e os cinco cam
 ## Saídas
 
 - Template do `init` com os campos e padrões de `modosPadrao()` (atestado `local`, revisão `com-humano`, WIP `3`, módulos `nenhum`, início automático `desligado`; o VCS segue o já escolhido).
-- `update`: função de acréscimo que, **só se a linha do campo não existir**, insere a linha na tabela (cria a seção se faltar); valor existente, mesmo inválido, nunca é tocado; resultado gravado de forma atômica.
-- `shouldPreserve` ganha exceção explícita e estreita: `sdd/memory/constitution.md` continua preservado, **exceto** pelo acréscimo de campos ausentes.
-- ADR em `sdd/spec/adr/` (próximo número livre; conferir o índice e as ADRs 0027 em aberto antes de numerar).
+- `shouldPreserve(dest, targetDir) bool` **não muda**: continua `true` para `sdd/memory/constitution.md`, então `Run`/`renderDir` nunca tocam o arquivo.
+- O acréscimo é um **passo à parte** (ex.: `AcrescentaCamposDeModo(targetDir)`), chamado pelo `update` **depois** de `Run`: só se a linha do campo não existir, insere a linha na tabela; valor existente, mesmo inválido, nunca é tocado; gravação atômica (`writeFileSafe`).
+- **Idempotente:** segunda execução, com todas as linhas presentes, não grava (arquivo e mtime intactos).
+- Seção `## Ferramentas e Integrações` ausente: é criada ao fim. Seção presente **sem tabela** (ou tabela ilegível): não grava e avisa em stderr.
+- ADR em `sdd/spec/adr/` com o número **0028** (a 0027 é da 14b) e nome contendo `constituicao-do-usuario`; registra o acréscimo como passo à parte, fora do `shouldPreserve`.
 
 ## Modelo do módulo
 
@@ -35,7 +37,7 @@ Projeto novo nasce com a seção `## Ferramentas e Integrações` e os cinco cam
 | Procurei | Onde | Achei | Decisão | Justificativa |
 |---|---|---|---|---|
 | Leitura e padrões dos modos | `internal/vcs/modos.go` (`modosPadrao`, `LeModos`, `aplicar`) | já lê os cinco campos da tabela | **reusar** | fonte única dos padrões |
-| Preservação de `sdd/` | `shouldPreserve` `scaffold.go:312-319` | tudo sob `sdd/` é preservado | **estender** com exceção estreita | achado 5 |
+| Preservação de `sdd/` | `shouldPreserve` `scaffold.go:312-319` (assinatura `bool`) | tudo sob `sdd/` é preservado; não comporta "exceto acréscimo" | **reusar sem mudar**; acréscimo em passo à parte | achado 5 |
 | Template da Constituição | `templates/sdd/memory/constitution.md.tmpl` | sem os campos | **estender** | projeto novo |
 | Acréscimo seguro de JSON | `hooks.go` `mergeClaudeHook*` | padrão de mesclagem sem duplicar | **reusar a ideia** | mesma garantia, em Markdown |
 | Constituição deste repo | `sdd/memory/constitution.md:22-30` | modelo da seção | **reusar** como texto | consistência |
@@ -54,12 +56,15 @@ Vermelhos **até o Builder**.
 
 ```bash
 set -o pipefail
-go test ./internal/scaffold -run '^(TestInitConstituicaoTemCamposDeModo|TestUpdateAcrescentaSoOsCamposQueFaltam|TestUpdateNaoAlteraValorExistenteDeModo|TestUpdateConstituicaoIlegivelNaoETocada|TestShouldPreserveConstituicaoSoAceitaAcrescimo)$' -count=1
+go test ./internal/scaffold -run '^(TestInitConstituicaoTemCamposDeModo|TestUpdateAcrescentaSoOsCamposQueFaltam|TestUpdateNaoAlteraValorExistenteDeModo|TestUpdateConstituicaoIlegivelNaoETocada|TestAcrescimoDeModoEIdempotente|TestAcrescimoDeModoSecaoSemTabelaNaoGravaEAvisa|TestShouldPreserveConstituicaoSoAceitaAcrescimo)$' -count=1
 go test ./internal/vcs -run '^TestLeModosAposAcrescimoDoUpdate$' -count=1
-[ "$(go test ./internal/scaffold ./internal/vcs -list '^(TestInitConstituicaoTemCamposDeModo|TestUpdateAcrescentaSoOsCamposQueFaltam|TestUpdateNaoAlteraValorExistenteDeModo|TestUpdateConstituicaoIlegivelNaoETocada|TestShouldPreserveConstituicaoSoAceitaAcrescimo|TestLeModosAposAcrescimoDoUpdate)$' | grep -c '^Test')" -eq 6 ]
+[ "$(go test ./internal/scaffold ./internal/vcs -list '^(TestInitConstituicaoTemCamposDeModo|TestUpdateAcrescentaSoOsCamposQueFaltam|TestUpdateNaoAlteraValorExistenteDeModo|TestUpdateConstituicaoIlegivelNaoETocada|TestAcrescimoDeModoEIdempotente|TestAcrescimoDeModoSecaoSemTabelaNaoGravaEAvisa|TestShouldPreserveConstituicaoSoAceitaAcrescimo|TestLeModosAposAcrescimoDoUpdate)$' | grep -c '^Test')" -eq 8 ]
 ls sdd/spec/adr/ | grep -c 'constituicao-do-usuario' | grep -qx 1
+ls sdd/spec/adr/ | grep -q '^adr-0028-'
 go test ./internal/scaffold ./internal/vcs -count=1
 ```
+
+`TestShouldPreserveConstituicaoSoAceitaAcrescimo` afirma que `Run`/`renderDir` não tocam `sdd/memory/constitution.md` (só o passo de acréscimo o grava).
 
 ## Fora do escopo
 
