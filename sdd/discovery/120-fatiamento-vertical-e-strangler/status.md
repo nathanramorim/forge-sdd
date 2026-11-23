@@ -1,5 +1,6 @@
 # Status — 120 Fatiamento vertical e Strangler Fig
 
-**Status:** spec escrita; aguardando Gate 1 (sem push, PR ou fila).
-**Próximo passo:** Nathan decide DA-1..DA-4; depois PR da spec e `/split-features`.
-**A confirmar:** DA-1 S-08 sem ID próprio (usar FLX-03 ou criar ID via Constituição/ADR); DA-2 contrato do Parecer não muda (string livre); DA-3 alinhar template de governança; DA-4 sem template de plan.md.
+**Gate 1:** aprovado pelo dono em 2026-11-23 (DA-1..DA-4 em `discovery.md`, "Decisões do Gate 1")
+**Status:** spec revisada; sem código, sem fila.
+**Próximo passo:** mesclar a spec na main e rodar `/split-features`.
+**A confirmar:** nada. O alinhamento do template de governança (`regra_descricao`) vira fix separado.

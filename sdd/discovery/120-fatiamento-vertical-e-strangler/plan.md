@@ -12,6 +12,6 @@ Esta iniciativa se aplica a si: cada task é uma fatia vertical (arquivo do repo
 |---|---|---|---|
 | 1 | Passo 4 do split-features: exigir fatia vertical que valida e entra na main sozinha; "baixo para cima" só dentro da fatia | `split-features.md` | ARQ-03, DUP-01, COD-05 |
 | 2 | Seção `Fatias e validação` (piloto, validação, reversão, Strangler por roteador ou flag; aponta o critério, não repete) | `discovery.md` passo 7, `sdd-planejamento/SKILL.md` | ARQ-03, DUP-01, DUP-04 |
-| 3 | S-08 acoplamento de implantação; alinhar a deriva do template (DA-3) | `sdd-governanca/SKILL.md`, `pr-review.md` | ARQ-03, FLX-08, DUP-04 |
+| 3 | S-08 acoplamento de implantação (cita `FLX-03`; `duvida` sem evidência literal) | `sdd-governanca/SKILL.md`, `pr-review.md` | ARQ-03, FLX-08, DUP-04 |
 
 Cada task regenera o golden (`go test ./internal/scaffold/ -update`, depois sem a flag) e roda `go build ./... && go vet ./...`. Sem conflito de arquivo entre 1, 2 e 3.

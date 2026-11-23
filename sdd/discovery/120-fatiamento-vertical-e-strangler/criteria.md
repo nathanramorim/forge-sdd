@@ -20,7 +20,7 @@
 | verificações do Reviewer | `sdd-governanca/SKILL.md` S-01..S-07, `pr-review.md` + `.tmpl` | lista S-01..S-07 | estender com S-08 | mesma lista; Go não valida o valor |
 | contrato do Parecer | `internal/harness/parecer.go`, `references/veredito.md` | `verificacao` é string livre | reusar sem mudar | S-08 cabe sem código nem ADR (DA-2) |
 | cópia embutida e testes | `internal/scaffold/templates/**/*.tmpl`, `testdata/golden`, `golden_test.go` (`-update`) | embed.FS + golden comparado em teste | reusar | alterar `.tmpl` e regenerar golden |
-| deriva repo x template | `sdd-governanca/SKILL.md` vs `.tmpl` | diferem em 2 linhas (`regra_descricao`) | alinhar na task 3 | DA-3 |
+| deriva repo x template | `sdd-governanca/SKILL.md` vs `.tmpl` | diferem em 2 linhas (`regra_descricao`) | não alinhar aqui | fora do escopo (DA-3); vira fix separado |
 
 ## Dependências novas
 Nenhuma (`ARQ-04`).

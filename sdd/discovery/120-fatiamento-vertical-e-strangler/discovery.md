@@ -30,11 +30,11 @@ Cada um no arquivo do repositório, no template embutido (`internal/scaffold/tem
 
 **Fora:** encaixe 3 e demais; Constituição; ADR; código Go; o código do forge-sdd em si; `forge dispatch`/fila.
 
-## Decisões em aberto para o Gate 1
-- DA-1 (**Constituição/ADR**): S-08 não tem ID da Constituição próprio. Sem criar regra, o achado cita `regra` de um ID existente (proposta: `FLX-03`, aderência à spec) e nasce como `duvida` quando não houver evidência literal. Criar ID novo exigiria Constituição/ADR, fora do escopo; decisão do Nathan.
-- DA-2 (**contrato do Parecer**): o contrato aceita `verificacao` como string livre (`internal/harness/parecer.go`, sem validação de valores), então S-08 **não exige mudança de código Go nem ADR**. Campo estruturado novo (ex.: `acoplamento`) exigiria Go e ADR; não proposto.
-- DA-3 (**deriva do template**): `sdd-governanca/SKILL.md` do repositório já difere do template (`regra_descricao` e texto de AskUserQuestion só no repositório). Proposta: alinhar o template ao repositório na task 3, ampliando o golden além do S-08. Confirmar.
-- DA-4: `plan.md` do projeto não tem template próprio no `forge init`; a seção vive só nas instruções (discovery.md e SKILL). Aceitável? Template de plan seria escopo novo.
+## Decisões do Gate 1 (Nathan, 2026-11-23)
+- DA-1: a S-08 cita `FLX-03` e nasce como `duvida` quando não houver evidência literal. Sem ID novo, sem Constituição e sem ADR.
+- DA-2: o contrato do Parecer não muda; `verificacao` segue como texto livre. Sem código Go e sem ADR.
+- DA-3: o alinhamento do template de governança (`regra_descricao`) fica **fora** desta iniciativa; vira um fix separado, com o seu golden.
+- DA-4: a seção "Fatias e validação" vive só nas instruções; sem template de `plan.md` no `forge init`.
 
 ## Riscos
 - R-1: golden e cópia do repositório divergirem do template (mitigado: `go test ./internal/scaffold/ -update` e depois sem a flag).
