@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"io"
 	"github.com/forge-sdd/cli/internal/doctor"
 	"os"
 	"path/filepath"
@@ -83,7 +84,7 @@ func TestDoctorHarness_JSONECodigoDeSaida(t *testing.T) {
 	}
 	// Projeto sem sdd/.sddrc: a checagem de versão falha, logo o código é 3 e o JSON sai igual.
 	var buf bytes.Buffer
-	err := runDoctorHarness(&buf, t.TempDir(), true, deps)
+	err := runDoctorHarness(&buf, io.Discard, t.TempDir(), true, deps)
 	var ec exitCodeErr
 	require.ErrorAs(t, err, &ec)
 	assert.Equal(t, 3, ec.ExitCode())
@@ -94,7 +95,7 @@ func TestDoctorHarness_JSONECodigoDeSaida(t *testing.T) {
 
 	// Modo texto lista cada checagem.
 	buf.Reset()
-	_ = runDoctorHarness(&buf, t.TempDir(), false, deps)
+	_ = runDoctorHarness(&buf, io.Discard, t.TempDir(), false, deps)
 	assert.Contains(t, buf.String(), "[falha] versao:")
 }
 
@@ -109,4 +110,90 @@ func TestDoctorAvisaRuleComVersaoNova(t *testing.T) {
 		require.NoError(t, err)
 	})
 	assert.Contains(t, out, ".agents/rules/sdd-seguranca.md tem versão nova do forge")
+}
+
+func depsHarnessTeste() doctor.Deps {
+	return doctor.Deps{
+		Versao: "5.0.0",
+		Runner: func(string, ...string) ([]byte, error) { return nil, nil },
+	}
+}
+
+func TestDoctorHarnessFalhaEscreveEmStderr(t *testing.T) {
+	for _, asJSON := range []bool{false, true} {
+		var out, errB bytes.Buffer
+		err := runDoctorHarness(&out, &errB, t.TempDir(), asJSON, depsHarnessTeste())
+		var ec exitCodeErr
+		require.ErrorAs(t, err, &ec)
+		assert.Equal(t, 3, ec.ExitCode())
+		assert.Contains(t, errB.String(), "[falha] versao:")
+		assert.Contains(t, errB.String(), "sugestão:")
+		assert.Contains(t, errB.String(), "forge update")
+		assert.NotContains(t, errB.String(), "{")
+		if asJSON {
+			var rel doctor.Relatorio
+			require.NoError(t, json.Unmarshal(out.Bytes(), &rel))
+		} else {
+			assert.Contains(t, out.String(), "[falha] versao:")
+		}
+	}
+}
+
+func TestDoctorHarnessSaudavelNaoEscreveEmStderr(t *testing.T) {
+	dir := t.TempDir()
+	const ver = ".agents/skills/sdd-governanca/references/veredito.md"
+	real, err := os.ReadFile(filepath.Join("..", "..", filepath.FromSlash(ver)))
+	require.NoError(t, err)
+	grava := func(rel, c string) {
+		p := filepath.Join(dir, filepath.FromSlash(rel))
+		require.NoError(t, os.MkdirAll(filepath.Dir(p), 0o755))
+		require.NoError(t, os.WriteFile(p, []byte(c), 0o644))
+	}
+	grava("sdd/.sddrc", `{"project":"p","version":"5.0.0"}`)
+	grava("sdd/.sdd-version", "5.0.0\n")
+	grava(ver, string(real))
+	for _, e := range []string{"sdd-concepcao", "sdd-planejamento", "sdd-build", "sdd-governanca", "sdd-operacao"} {
+		grava(".agents/skills/"+e+"/SKILL.md", "# "+e)
+	}
+	grava(".agents/rules/sdd-seguranca.md", "# regra")
+	var out, errB bytes.Buffer
+	d := depsHarnessTeste()
+	d.Usuario = "eu"
+	require.NoError(t, runDoctorHarness(&out, &errB, dir, false, d))
+	assert.Empty(t, errB.String())
+	assert.Contains(t, out.String(), "[ok] versao:")
+}
+
+func TestDoctorHarnessSemErroVazioNemUsoViaRootCmd(t *testing.T) {
+	var out, errB bytes.Buffer
+	_ = doctorCmd.Flags().Set("harness", "false")
+	t.Cleanup(func() {
+		_ = doctorCmd.Flags().Set("harness", "false")
+		rootCmd.SetOut(nil)
+		rootCmd.SetErr(nil)
+	})
+	rootCmd.SetOut(&out)
+	rootCmd.SetErr(&errB)
+	rootCmd.SetArgs([]string{"doctor", "--harness", t.TempDir()})
+	err := rootCmd.Execute()
+	var ec exitCodeErr
+	require.ErrorAs(t, err, &ec)
+	assert.Equal(t, 3, ec.ExitCode())
+	assert.Contains(t, errB.String(), "[falha] versao:")
+	assert.NotContains(t, errB.String(), "Error:")
+	assert.NotContains(t, errB.String(), "Usage:")
+}
+
+func TestBriefEHookMantemSaidaDeExitCode(t *testing.T) {
+	assert.False(t, briefCmd.SilenceErrors)
+	assert.False(t, briefCmd.SilenceUsage)
+	dir := t.TempDir()
+	out, err := runRoot(t, "brief", "--check", "--dir", dir)
+	var ec exitCodeErr
+	require.ErrorAs(t, err, &ec)
+	assert.Equal(t, 3, ec.ExitCode())
+	assert.Contains(t, out, "Usage:")
+	assert.Contains(t, out, "Error:")
+	// forge hook segue silencioso por conta própria.
+	assert.Contains(t, hookPRGuardCmd.Short, "avisa")
 }
