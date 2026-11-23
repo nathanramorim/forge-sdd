@@ -271,6 +271,28 @@ npm install -g @nathanramorim/forge-sdd@beta     # prévia</pre>
         <li>O workflow de CI do forge é opcional e só entra se você pedir (<code>--ci</code>). CI próprio nunca é tocado.</li>
         <li>Se algo estranho aparecer, rode <code>forge doctor</code> e envie a saída a quem mantém o projeto.</li>
       </ul>
+
+      <h3 class="subsection-title">Recuperação: rodei o update com a 5.2.0-beta</h3>
+      <p>A 5.2.0-beta antiga reescrevia arquivos de instrução e copiava o script da barreira de PR sem marcá-lo, e o forge passava a tratá-los como seus. Se o <code>forge update</code> avisou que manteve algum deles e você <strong>não</strong> os editou, recupere assim. Use só os arquivos que o aviso citou, e lembre que o <code>git restore</code> descarta alterações ainda não commitadas neles.</p>
+      <ol class="example-steps">
+        <li>
+          <strong>Volte ao que estava no git os arquivos que o aviso citou.</strong>
+          <p>Por exemplo, se o aviso citou o <code>CLAUDE.md</code> e o <code>GEMINI.md</code>:</p>
+          <pre class="code-block">git restore CLAUDE.md GEMINI.md</pre>
+          <p>Os nomes possíveis são <code>CLAUDE.md</code>, <code>GEMINI.md</code>, <code>AGENTS.md</code>, <code>OPENAI.md</code>, <code>.github/copilot-instructions.md</code>, <code>.gemini/system_instructions.md</code> e <code>.openai/system_instructions.md</code>.</p>
+        </li>
+        <li>
+          <strong>Apague, com confirmação, só o <code>.novo</code> de cada arquivo que você restaurou.</strong>
+          <pre class="code-block">rm -i CLAUDE.novo.md GEMINI.novo.md</pre>
+          <p>Se o aviso citou <code>scripts/pr_guard.py</code>, apague também o <code>scripts/pr_guard.py</code> copiado à mão: com a 5.2.2-beta o forge o reconhece sozinho quando ele é idêntico a uma versão que ele entregou.</p>
+        </li>
+        <li>
+          <strong>Rode o update de novo e confira.</strong>
+          <pre class="code-block">forge update --upgrade
+forge doctor</pre>
+        </li>
+      </ol>
+      <p>Se você de fato editou algum desses arquivos, não restaure: compare com o <code>.novo</code> ao lado e junte à mão.</p>
     </section>
 
   </main>
