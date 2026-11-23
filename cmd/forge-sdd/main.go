@@ -479,7 +479,7 @@ func init() {
 	initCmd.Flags().String("version", "", "Versão Forge-SDD (default: 5.0.0)")
 	initCmd.Flags().Bool("no-telemetry", false, "Desabilitar telemetria local")
 	initCmd.Flags().String("agent", "", "Agente(s) de IA: copilot, claude, gemini (csv, default: copilot)")
-	initCmd.Flags().Bool("ci", false, "Criar .github/workflows/forge-pronto.yml (job pronto? que recusa PR em draft); opt-in")
+	initCmd.Flags().Bool("ci", false, "Criar .github/workflows/forge-pronto.yml (job pronto? que registra a transição de draft para pronto); opt-in")
 	initCmd.Flags().String("naming-convention", "", "Convenção de nomenclatura: sequencial, hash, workitem")
 	rootCmd.PersistentFlags().String("iniciativa", "", "Iniciativa a usar (id <N>-<nome>); vence FORGE_INICIATIVA e a branch")
 	rootCmd.AddCommand(initCmd)
@@ -489,7 +489,7 @@ func init() {
 	updateCmd.Flags().String("agent", "", "Agente(s) a adicionar: copilot, claude, gemini, openai (csv)")
 	updateCmd.Flags().Bool("upgrade", false, "Atualizar estrutura para a versão mais recente do binário")
 	updateCmd.Flags().String("version", "", "Atualizar estrutura para uma versão específica (ex: 5.0.0)")
-	updateCmd.Flags().Bool("ci", false, "Criar .github/workflows/forge-pronto.yml (job pronto? que recusa PR em draft); opt-in")
+	updateCmd.Flags().Bool("ci", false, "Criar .github/workflows/forge-pronto.yml (job pronto? que registra a transição de draft para pronto); opt-in")
 	updateCmd.Flags().String("naming-convention", "", "Convenção de nomenclatura: sequencial, hash, workitem")
 	rootCmd.AddCommand(updateCmd)
 

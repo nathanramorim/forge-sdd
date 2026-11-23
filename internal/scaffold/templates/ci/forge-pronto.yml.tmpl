@@ -17,7 +17,7 @@ jobs:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
-      - name: Registra PR pronto (recusa se ainda draft)
+      - name: Registra a transição do PR para pronto
         env:
           GH_TOKEN: ${{ "{{" }} secrets.GITHUB_TOKEN {{ "}}" }}
           PR: ${{ "{{" }} github.event.pull_request.number {{ "}}" }}
