@@ -156,3 +156,13 @@ func TestUpdateReparaHookSemScript(t *testing.T) {
 	s, _ := os.ReadFile(filepath.Join(dir, ".claude", "settings.json"))
 	assert.Equal(t, 1, strings.Count(string(s), "hook pr-guard"), "não duplica o hook")
 }
+
+func TestUpdateConfirmaOHookNoLog(t *testing.T) {
+	dir := modelProject(t, nil)
+	require.NoError(t, os.WriteFile(filepath.Join(dir, ".claude", "settings.json"), []byte(`{}`), 0o644))
+	out, err := updateRun(t, dir, false)
+	require.NoError(t, err)
+	assert.Contains(t, out, "hook PreToolUse instalado")
+	s, _ := os.ReadFile(filepath.Join(dir, ".claude", "settings.json"))
+	assert.Contains(t, string(s), "PreToolUse")
+}

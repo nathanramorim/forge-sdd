@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"slices"
 	"strings"
 
 	"github.com/forge-sdd/cli/internal/config"
@@ -388,8 +389,11 @@ func reportPRGuardCoverage(targetDir string, agents []string) (hookSemScript boo
 			hookSemScript = true
 			fmt.Println("  ✗ Erro de configuração: o hook existe, mas scripts/pr_guard.py não; o hook bloquearia todo Bash. Rode 'forge update' para gravá-lo")
 		}
+	} else if slices.Contains(agents, config.AgentClaude) {
+		// `forge update` (sem --upgrade) já instala o hook em projeto com Claude.
+		fmt.Println("  ⚠️  Hook PreToolUse ausente; rode 'forge update' para instalar")
 	} else {
-		fmt.Println("  ⚠️  Hook PreToolUse ausente; rode 'forge update --upgrade' para instalar")
+		fmt.Println("  ℹ️  Sem hook neste agente: o update só instala o hook PreToolUse quando o Claude está entre os agentes")
 	}
 
 	if _, err := exec.LookPath("uv"); err != nil {
