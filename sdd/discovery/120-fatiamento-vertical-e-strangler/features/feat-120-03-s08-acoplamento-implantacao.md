@@ -36,9 +36,18 @@ Editar só a linha/bloco de S-08 nos `.tmpl`, sem tocar a deriva `regra_descrica
 `ARQ-03`, `FLX-03`, `FLX-08`, `DUP-04`
 
 ## Critérios de Aceitação Executáveis
-- `go test ./internal/scaffold/ -update` e, em seguida, `go test ./internal/scaffold/` (sem a flag) sai 0.
-- `grep -q "S-08" .agents/skills/sdd-governanca/SKILL.md` e `grep -q "S-08" .agents/skills/sdd-governanca/references/pr-review.md` saem 0.
-- `grep -q "S-08" internal/scaffold/templates/.agents/skills/sdd-governanca/SKILL.md.tmpl` e `grep -q "S-08" internal/scaffold/templates/.agents/skills/sdd-governanca/references/pr-review.md.tmpl` saem 0.
-- `grep -q "FLX-03" .agents/skills/sdd-governanca/SKILL.md` e `grep -q "duvida" .agents/skills/sdd-governanca/SKILL.md` saem 0.
-- `go test ./internal/harness/... && go build ./... && go vet ./...` sai 0 (`veredito.md` e `parecer.go` intactos).
-- `! git diff --name-only origin/main | grep -E '^(sdd/memory/constitution\.md|sdd/spec/adr/)|\.go$' | grep -v '/testdata/'` sai 0 (não toca Constituição, ADR nem `*.go` fora de testdata).
+
+Cada linha deve sair 0 (`set -o pipefail`); a última garante que só documentação e testdata mudaram.
+
+```bash
+set -o pipefail
+go test ./internal/scaffold/ -update && go test ./internal/scaffold/
+grep -q "S-08" .agents/skills/sdd-governanca/SKILL.md
+grep -q "S-08" .agents/skills/sdd-governanca/references/pr-review.md
+grep -q "S-08" internal/scaffold/templates/.agents/skills/sdd-governanca/SKILL.md.tmpl
+grep -q "S-08" internal/scaffold/templates/.agents/skills/sdd-governanca/references/pr-review.md.tmpl
+grep -q "FLX-03" .agents/skills/sdd-governanca/SKILL.md
+grep -q "duvida" .agents/skills/sdd-governanca/SKILL.md
+go test ./internal/harness/... && go build ./... && go vet ./...
+! git diff --name-only origin/main | grep -E '^(sdd/memory/constitution\.md|sdd/spec/adr/)|\.go$' | grep -v '/testdata/'
+```

@@ -31,9 +31,15 @@ Passo 4 passa a exigir **fatia vertical** que valida e entra na main sozinha; "b
 `ARQ-03`, `DUP-01`, `COD-05`
 
 ## Critérios de Aceitação Executáveis
-- `go test ./internal/scaffold/ -update` e, em seguida, `go test ./internal/scaffold/` (sem a flag) sai 0.
-- `grep -q "fatia vertical" .agents/skills/sdd-planejamento/references/split-features.md` sai 0.
-- `grep -q "fatia vertical" internal/scaffold/templates/.agents/skills/sdd-planejamento/references/split-features.md.tmpl` sai 0.
-- `grep -q "testável sozinha" .agents/skills/sdd-planejamento/references/split-features.md` sai 0.
-- `go test ./internal/harness/... && go build ./... && go vet ./...` sai 0.
-- `! git diff --name-only origin/main | grep -E '^(sdd/memory/constitution\.md|sdd/spec/adr/)|\.go$' | grep -v '/testdata/'` sai 0 (não toca Constituição, ADR nem `*.go` fora de testdata).
+
+Cada linha deve sair 0 (`set -o pipefail`); a última garante que só documentação e testdata mudaram.
+
+```bash
+set -o pipefail
+go test ./internal/scaffold/ -update && go test ./internal/scaffold/
+grep -q "fatia vertical" .agents/skills/sdd-planejamento/references/split-features.md
+grep -q "fatia vertical" internal/scaffold/templates/.agents/skills/sdd-planejamento/references/split-features.md.tmpl
+grep -q "testável sozinha" .agents/skills/sdd-planejamento/references/split-features.md
+go test ./internal/harness/... && go build ./... && go vet ./...
+! git diff --name-only origin/main | grep -E '^(sdd/memory/constitution\.md|sdd/spec/adr/)|\.go$' | grep -v '/testdata/'
+```
