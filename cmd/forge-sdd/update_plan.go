@@ -48,6 +48,14 @@ func printUpgradePlan(w io.Writer, targetDir string, cfg config.Config) (bool, e
 		fmt.Fprintf(w, "  mantido %s (sem o marcador forge-sdd:generated; é seu e não é atualizado; o conteúdo novo vai para o .novo.md)\n", rel)
 	}
 
+	atualizar, manter := scaffold.PlanoRegras(targetDir, cfg)
+	for _, rel := range atualizar {
+		fmt.Fprintf(w, "  atualizar %s (igual ao entregue pelo forge; recebe a versão nova)\n", rel)
+	}
+	for _, rel := range manter {
+		fmt.Fprintf(w, "  mantido %s (editado por você; a versão nova vai para o .novo)\n", rel)
+	}
+
 	acted := len(migration.Moves) > 0 || len(obsolete.Remove) > 0
 	if !acted {
 		fmt.Fprintln(w, "Nenhuma migração de layout nem limpeza de obsoletos necessária.")
