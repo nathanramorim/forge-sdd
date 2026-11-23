@@ -63,3 +63,7 @@ go test ./internal/scaffold ./cmd/forge-sdd -count=1
 
 - `queue.json` e esquemas de estado do fix-106-09 (versão de esquema, job rodando, versão mínima do binário).
 - Rules da Constituição do usuário (118-03).
+
+## Nota da Conferência 1
+
+A tabela de hashes das rules da 5.0 é gerada a partir da tag `v5.0.0` (`git show v5.0.0:...`), nunca do HEAD, e fica embutida (ARQ-03).

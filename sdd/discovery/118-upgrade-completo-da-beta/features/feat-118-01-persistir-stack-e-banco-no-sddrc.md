@@ -73,3 +73,7 @@ go test ./internal/config ./internal/scaffold ./cmd/forge-sdd -count=1
 
 - Marcador de arquivo gerado e arquivo editado pelo usuário (118-02).
 - Detectar a stack lendo o projeto.
+
+## Nota da Conferência 1
+
+Fonte 3 da recuperação: inclua também `.github/copilot-instructions.md`, que traz a prosa `stack X.` como o CLAUDE.md e o GEMINI.md.

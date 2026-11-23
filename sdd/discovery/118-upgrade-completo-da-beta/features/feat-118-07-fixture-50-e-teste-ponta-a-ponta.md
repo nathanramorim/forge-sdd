@@ -64,3 +64,7 @@ A contagem é 6: `TestUpgradeDe50` existe nos dois pacotes (2) mais `TestUpgrade
 
 - Hooks para Gemini, Copilot e Codex (não têm hook).
 - Achado 11 (reserialização do `settings.json`).
+
+## Nota da Conferência 1
+
+`snapshotArquivos` está em `cmd/forge-sdd` (`doctor_versao_test.go:99`): o `TestUpgradeDe50` de `internal/scaffold` não pode reusá-lo; o Builder cria um helper próprio em `internal/testutil` (ou equivalente) e o `cmd/forge-sdd` pode passar a usá-lo.

@@ -70,3 +70,7 @@ go test ./internal/scaffold ./internal/vcs -count=1
 
 - Mudar valor de campo já escolhido pelo dono.
 - Reescrever a Constituição inteira ou as regras `ID` dela.
+
+## Nota da Conferência 1
+
+O número da ADR é o próximo livre na `main` quando o Builder começar (a 0027 é da 14b; se a 14b ainda não mesclou, a 0028 deixa a 0027 reservada, o que é inofensivo). Confira com `ls sdd/spec/adr`.
