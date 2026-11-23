@@ -33,10 +33,18 @@ A seção cita piloto, validação, reversão e Strangler (roteador ou flag; só
 `ARQ-03`, `DUP-01`, `DUP-04`
 
 ## Critérios de Aceitação Executáveis
-- `go test ./internal/scaffold/ -update` e, em seguida, `go test ./internal/scaffold/` (sem a flag) sai 0.
-- `grep -q "Fatias e validação" .agents/skills/sdd-concepcao/references/discovery.md` sai 0.
-- `grep -q "Fatias e validação" .agents/skills/sdd-planejamento/SKILL.md` sai 0.
-- `grep -q "Fatias e validação" internal/scaffold/templates/.agents/skills/sdd-concepcao/references/discovery.md.tmpl` e `grep -q "Fatias e validação" internal/scaffold/templates/.agents/skills/sdd-planejamento/SKILL.md.tmpl` saem 0.
-- `grep -qi "strangler" .agents/skills/sdd-planejamento/SKILL.md` e `grep -qi "roteador" .agents/skills/sdd-planejamento/SKILL.md` saem 0.
-- `go test ./internal/harness/... && go build ./... && go vet ./...` sai 0.
-- `! git diff --name-only origin/main | grep -E '^(sdd/memory/constitution\.md|sdd/spec/adr/)|\.go$' | grep -v '/testdata/'` sai 0 (não toca Constituição, ADR nem `*.go` fora de testdata).
+
+Cada linha deve sair 0 (`set -o pipefail`); a última garante que só documentação e testdata mudaram.
+
+```bash
+set -o pipefail
+go test ./internal/scaffold/ -update && go test ./internal/scaffold/
+grep -q "Fatias e validação" .agents/skills/sdd-concepcao/references/discovery.md
+grep -q "Fatias e validação" .agents/skills/sdd-planejamento/SKILL.md
+grep -q "Fatias e validação" internal/scaffold/templates/.agents/skills/sdd-concepcao/references/discovery.md.tmpl
+grep -q "Fatias e validação" internal/scaffold/templates/.agents/skills/sdd-planejamento/SKILL.md.tmpl
+grep -qi "strangler" .agents/skills/sdd-planejamento/SKILL.md
+grep -qi "roteador" .agents/skills/sdd-planejamento/SKILL.md
+go test ./internal/harness/... && go build ./... && go vet ./...
+! git diff --name-only origin/main | grep -E '^(sdd/memory/constitution\.md|sdd/spec/adr/)|\.go$' | grep -v '/testdata/'
+```
