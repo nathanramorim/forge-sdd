@@ -62,3 +62,65 @@ func printUpgradePlan(w io.Writer, targetDir string, cfg config.Config) (bool, e
 	}
 	return acted, nil
 }
+
+// printPlanoCompleto lista o plano inteiro do update além do layout (ARQ-05: nada é gravado): arquivos
+// reescritos, criados e preservados, campos de modo da Constituição, hook do inbox, workflow --ci e a
+// versão que seria gravada. Instruções e rules preservadas já saíram em printUpgradePlan. Só imprime;
+// a decisão vem de scaffold.PlanoDoUpdate (ARQ-01).
+func printPlanoCompleto(w io.Writer, targetDir string, cfg config.Config, ci bool, versao string) error {
+	itens, err := scaffold.PlanoDoUpdate(targetDir, cfg)
+	if err != nil {
+		return err
+	}
+	var reescrever, criar, preservar []string
+	iguais, mantidosDoProjeto := 0, 0
+	for _, it := range itens {
+		switch it.Acao {
+		case scaffold.AcaoReescrever:
+			reescrever = append(reescrever, it.Rel)
+		case scaffold.AcaoCriar:
+			criar = append(criar, it.Rel)
+		case scaffold.AcaoIgual:
+			iguais++
+		case scaffold.AcaoPreservar:
+			if it.Tipo == "outro" {
+				mantidosDoProjeto++
+			} else {
+				preservar = append(preservar, it.Rel)
+			}
+		}
+	}
+	fmt.Fprintf(w, "Serão reescritos (%d):\n", len(reescrever))
+	for _, rel := range reescrever {
+		fmt.Fprintf(w, "  reescrever %s\n", rel)
+	}
+	fmt.Fprintf(w, "Serão criados (%d):\n", len(criar))
+	for _, rel := range criar {
+		fmt.Fprintf(w, "  criar %s\n", rel)
+	}
+	fmt.Fprintf(w, "Serão preservados (editados por você) (%d):\n", len(preservar))
+	for _, rel := range preservar {
+		fmt.Fprintf(w, "  preservar %s (a versão nova vai para o .novo)\n", rel)
+	}
+	fmt.Fprintf(w, "Sem mudança: %d arquivo(s) idêntico(s); %d do projeto (sdd/, skills e rules suas) nunca são sobrescritos.\n", iguais, mantidosDoProjeto)
+
+	rotulos, err := scaffold.PlanoCamposDeModo(targetDir, io.Discard)
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(w, "Serão acrescentados na Constituição (%d):\n", len(rotulos))
+	for _, r := range rotulos {
+		fmt.Fprintf(w, "  acrescentar %s\n", r)
+	}
+
+	if slices.Contains(cfg.Agents, config.AgentClaude) {
+		if seria, herr := scaffold.PlanoHookInbox(targetDir); herr == nil && seria {
+			fmt.Fprintln(w, "hook UserPromptSubmit seria instalado")
+		}
+	}
+	if ci {
+		fmt.Fprintln(w, "  criar .github/workflows/forge-pronto.yml (--ci)")
+	}
+	fmt.Fprintf(w, "Versão que seria gravada: %s\n", versao)
+	return nil
+}

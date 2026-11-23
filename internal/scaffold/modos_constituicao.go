@@ -24,13 +24,32 @@ var (
 // acrescentar não grava. Seção sem tabela: não grava e avisa em warn. Devolve quantas linhas
 // acrescentou. Constituição ausente: nada a fazer.
 func AcrescentaCamposDeModo(targetDir string, warn io.Writer) (int, error) {
-	path := filepath.Join(targetDir, "sdd", "memory", "constitution.md")
+	path, out, rotulos, err := calculaCamposDeModo(targetDir, warn)
+	if err != nil || len(rotulos) == 0 {
+		return 0, err
+	}
+	if err := writeFileSafe(targetDir, path, []byte(out)); err != nil {
+		return 0, fmt.Errorf("gravar a Constituição: %w", err)
+	}
+	return len(rotulos), nil
+}
+
+// PlanoCamposDeModo devolve os rótulos de modo que AcrescentaCamposDeModo acrescentaria, sem gravar
+// nada (ARQ-05). Mesma decisão do update real (DUP-06).
+func PlanoCamposDeModo(targetDir string, warn io.Writer) ([]string, error) {
+	_, _, rotulos, err := calculaCamposDeModo(targetDir, warn)
+	return rotulos, err
+}
+
+// calculaCamposDeModo decide o que acrescentar e devolve o novo texto da Constituição, sem gravar.
+func calculaCamposDeModo(targetDir string, warn io.Writer) (path, out string, rotulos []string, err error) {
+	path = filepath.Join(targetDir, "sdd", "memory", "constitution.md")
 	data, err := os.ReadFile(path)
 	if err != nil {
 		if os.IsNotExist(err) {
-			return 0, nil
+			return path, "", nil, nil
 		}
-		return 0, fmt.Errorf("ler a Constituição: %w", err)
+		return path, "", nil, fmt.Errorf("ler a Constituição: %w", err)
 	}
 	texto := string(data)
 	linhas := strings.Split(texto, "\n")
@@ -43,15 +62,13 @@ func AcrescentaCamposDeModo(targetDir string, warn io.Writer) (int, error) {
 		}
 	}
 
-	var out string
-	var novas int
 	if ini < 0 {
 		var b strings.Builder
 		b.WriteString(strings.TrimRight(texto, "\n"))
 		b.WriteString("\n\n" + secaoFerramentas + "\n| Campo | Valor |\n|-------|-------|\n")
 		for _, c := range vcs.CamposDeModoPadrao() {
 			fmt.Fprintf(&b, "| %s | %s |\n", c.Rotulo, c.Valor)
-			novas++
+			rotulos = append(rotulos, c.Rotulo)
 		}
 		out = b.String()
 	} else {
@@ -82,25 +99,22 @@ func AcrescentaCamposDeModo(targetDir string, warn io.Writer) (int, error) {
 		}
 		if sep < 0 {
 			fmt.Fprintf(warn, "aviso: %q em sdd/memory/constitution.md não tem tabela legível; campos de modo não acrescentados (padrões seguros seguem valendo)\n", secaoFerramentas)
-			return 0, nil
+			return path, "", nil, nil
 		}
 		var add []string
 		for _, c := range vcs.CamposDeModoPadrao() {
 			if !existentes[c.Rotulo] {
 				add = append(add, fmt.Sprintf("| %s | %s |", c.Rotulo, c.Valor))
+				rotulos = append(rotulos, c.Rotulo)
 			}
 		}
 		if len(add) == 0 {
-			return 0, nil
+			return path, "", nil, nil
 		}
-		novas = len(add)
 		res := append([]string{}, linhas[:ultima+1]...)
 		res = append(res, add...)
 		res = append(res, linhas[ultima+1:]...)
 		out = strings.Join(res, "\n")
 	}
-	if err := writeFileSafe(targetDir, path, []byte(out)); err != nil {
-		return 0, fmt.Errorf("gravar a Constituição: %w", err)
-	}
-	return novas, nil
+	return path, out, rotulos, nil
 }
