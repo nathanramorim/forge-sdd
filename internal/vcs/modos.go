@@ -64,6 +64,25 @@ func modosPadrao() Modos {
 	}
 }
 
+// CampoDeModo é uma linha `| Campo | Valor |` da tabela da Constituição com seu valor padrão.
+type CampoDeModo struct {
+	Rotulo string
+	Valor  string
+}
+
+// CamposDeModoPadrao devolve, na ordem da tabela, os cinco campos de modo com os padrões seguros
+// de modosPadrao (fonte única, DUP-06). O VCS fica de fora: ele já vem da escolha do `init`.
+func CamposDeModoPadrao() []CampoDeModo {
+	p := modosPadrao()
+	return []CampoDeModo{
+		{"Modo do atestado", p.Atestado},
+		{"Modo de revisão humana", p.RevisaoHumana},
+		{"WIP humano", strconv.Itoa(p.WIPHumano)},
+		{"Módulos permitidos", p.ModulosPermitidos},
+		{"Início automático do Builder", p.InicioAutomatico},
+	}
+}
+
 // camposModos mapeia o rótulo da tabela ao ponteiro do campo.
 func (m *Modos) aplicar(campo, valor string) error {
 	v := strings.TrimSpace(valor)

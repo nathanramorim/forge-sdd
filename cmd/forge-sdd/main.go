@@ -337,6 +337,12 @@ func runUpdateFlow(cmd *cobra.Command, targetDir string) error {
 		if err != nil {
 			return fmt.Errorf("upgrade falhou: %w", err)
 		}
+		// Passo à parte (ADR-0028): a Constituição do usuário segue preservada por Run.
+		if n, err := scaffold.AcrescentaCamposDeModo(targetDir, cmd.ErrOrStderr()); err != nil {
+			fmt.Fprintf(cmd.ErrOrStderr(), "aviso: campos de modo não acrescentados: %v\n", err)
+		} else if n > 0 {
+			fmt.Fprintf(cmd.OutOrStdout(), "✓ Constituição: %d campo(s) de modo acrescentado(s) com padrão seguro\n", n)
+		}
 	} else if len(toAdd) > 0 {
 		baseCfg.Agents = toAdd
 		created, err = scaffold.RunAgents(baseCfg, toAdd, targetDir)
