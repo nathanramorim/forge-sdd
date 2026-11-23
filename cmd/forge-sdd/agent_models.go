@@ -29,9 +29,20 @@ func reportAgentModels(cmd *cobra.Command, dir string, dryRun bool) error {
 
 // reportClaudeIntegration aplica (ou, com dryRun, lista) o hook SessionStart e o MCP forge-sdd antes
 // de qualquer retorno "Nenhuma atualização necessária". Só para projetos com o agente Claude.
-func reportClaudeIntegration(cmd *cobra.Command, dir string, agents []string, dryRun bool) {
+func reportClaudeIntegration(cmd *cobra.Command, dir string, agents []string, dryRun bool) error {
 	if !slices.Contains(agents, config.AgentClaude) {
-		return
+		return nil
+	}
+	// JSON inválido: avisa uma vez por arquivo e não toca em nada (SEG-01). Fora do dry-run o update
+	// aborta antes de gravar qualquer coisa, inclusive a versão (SEG-02); no dry-run só relata.
+	if bad := scaffold.ClaudeJSONInvalidos(dir); len(bad) > 0 {
+		for _, b := range bad {
+			fmt.Fprintf(cmd.ErrOrStderr(), "aviso: %s\n", b.Error())
+		}
+		if dryRun {
+			return nil
+		}
+		return fmt.Errorf("update abortado: %d arquivo(s) JSON inválido(s); corrija-os (ou apague-os para o forge recriar) e rode forge update de novo; nada foi gravado, nem a versão", len(bad))
 	}
 	changed, warns := scaffold.SyncClaudeIntegration(dir, version, dryRun)
 	verb := "instalado"
@@ -44,4 +55,5 @@ func reportClaudeIntegration(cmd *cobra.Command, dir string, agents []string, dr
 	for _, w := range warns {
 		fmt.Fprintf(cmd.ErrOrStderr(), "aviso: %s\n", w)
 	}
+	return nil
 }
