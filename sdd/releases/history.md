@@ -4,6 +4,15 @@ Este arquivo registra o histórico de entregas de produto deste projeto.
 
 ## Entregas
 
+### Versão 5.2.2 — A Barreira de PR Se Atualiza Sozinha e o Aviso ao Abrir o Claude Fala Claro (Beta)
+
+Compatível com a 5.0.0 e inclui tudo da 5.2.1-beta. Corrige dois pontos que apareceram ao atualizar um projeto real.
+
+*   **Agora a barreira de PR que você copiou à mão também é atualizada.** Se o `scripts/pr_guard.py` do projeto é idêntico a um que o forge já entregou, o `forge update` o reconhece, grava a versão nova e passa a cuidar dele; se você o editou de verdade, ele fica como está e a versão nova vem num `pr_guard.novo.py`, com o aviso de que a barreira não recebe correções enquanto isso (`forge update --dry-run` mostra a adoção antes; `forge doctor` avisa).
+*   **Acabou o "Error:" vazio ao abrir o Claude Code.** Quando o diagnóstico de início de sessão encontra um problema, a mensagem agora diz o que está errado e o que fazer, em vez de mostrar só `Error:` (`forge doctor --harness` escreve as falhas e avisos na saída de erro).
+*   **Como atualizar:** `npm install -g @nathanramorim/forge-sdd@beta` para a prévia; nos projetos existentes, veja o plano com `forge update --dry-run`, rode `forge update --upgrade` (fora do agente, no terminal) e depois `/upgrade-sdd`. Rode `forge doctor` no fim: a seção "Barreira de PR" diz o que ficou instalado.
+*   **Avisos da beta:** esta versão não substitui a estável; quem usa `npm install -g @nathanramorim/forge-sdd` sem `@beta` continua na 5.0.0. Se você rodou o `forge update --upgrade` com a 5.2.0-beta, veja a seção "Recuperação" da wiki antes de seguir.
+
 ### Versão 5.2.1 — Atualizar o Projeto da 5.0 Agora Funciona de Ponta a Ponta (Beta)
 
 Compatível com a 5.0.0 e inclui tudo da 5.2.0-beta. Corrige a atualização de projetos que já usam o forge: a 5.2.0-beta publicada não trazia essa lógica.
