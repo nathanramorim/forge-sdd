@@ -10,7 +10,7 @@
 
 ## Decisões do projeto aplicadas
 
-ADR-0021 (3 sessões), ADR-0022/0023 (PR e CI em dois pontos), ADR-0025 (instalação limitada ao projeto), fix-106-09 (contrato de atualização sem impacto), fix-106-14a e 14b (hook e script).
+**Decisões do dono (22/11/2026):** (1) CI: workflow **próprio e opt-in** (`forge-pronto.yml`, flag `--ci`), o `ci.yml` do usuário nunca é tocado; (2) Constituição: o `update` **acrescenta** os campos de modo que faltam, com padrões seguros, sem alterar o que existe. ADR-0021 (3 sessões), ADR-0022/0023 (PR e CI em dois pontos), ADR-0025 (instalação limitada ao projeto), fix-106-09 (contrato de atualização sem impacto), fix-106-14a e 14b (hook e script).
 
 ## O que já existe
 
