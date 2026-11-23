@@ -207,10 +207,10 @@ func TestUpgradePreservesDomain(t *testing.T) {
 	require.NoError(t, err)
 	assert.Contains(t, string(versionData), "1.9.4")
 
-	// c. GEMINI.md DEVE ter sido atualizado (sobrescrito com o template da nova versão)
+	// c. GEMINI.md sem marcador é do usuário (118-02): fica intocado
 	geminiData, err := os.ReadFile(geminiFile)
 	require.NoError(t, err)
-	assert.NotEqual(t, "conteudo customizado do agente", string(geminiData))
+	assert.Equal(t, "conteudo customizado do agente", string(geminiData))
 }
 
 func TestUpgradePreservesAgentRulesButRegeneratesCommands(t *testing.T) {

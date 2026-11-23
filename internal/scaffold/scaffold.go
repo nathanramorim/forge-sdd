@@ -189,25 +189,29 @@ func renderDir(fsys embed.FS, root, stripPrefix string, cfg config.Config, targe
 			return nil
 		}
 
-		// Se o arquivo destino já existe e deve ser preservado, pulamos a escrita física
-		if shouldPreserve(dest, targetDir) {
-			created = append(created, dest)
-			return nil
-		}
-
 		data, err := fsys.ReadFile(path)
 		if err != nil {
 			return fmt.Errorf("read template %s: %w", path, err)
 		}
 
-		tmpl, err := template.New(path).Parse(string(data))
-		if err != nil {
-			return fmt.Errorf("parse template %s: %w", path, err)
+		// Instrução sem marcador: só a 5.0 idêntica ao template é adotada; senão é do usuário.
+		relSlash := filepath.ToSlash(rel)
+		adotada := isInstrucao(relSlash) && !IsGeneratedInstrucao(dest) && adotavelDe50(relSlash, dest, cfg)
+
+		// Se o arquivo destino já existe e deve ser preservado, pulamos a escrita física
+		if !adotada && shouldPreserve(dest, targetDir) {
+			if isInstrucao(relSlash) {
+				if rendered, rerr := renderTemplate(path, data, cfg); rerr == nil {
+					avisaInstrucaoPreservada(targetDir, dest, rendered)
+				}
+			}
+			created = append(created, dest)
+			return nil
 		}
 
-		var buf bytes.Buffer
-		if err := tmpl.Execute(&buf, cfg); err != nil {
-			return fmt.Errorf("render template %s: %w", path, err)
+		rendered, err := renderTemplate(path, data, cfg)
+		if err != nil {
+			return err
 		}
 
 		perm := os.FileMode(0644)
@@ -216,7 +220,7 @@ func renderDir(fsys embed.FS, root, stripPrefix string, cfg config.Config, targe
 		}
 		// SEG-02: destino derivado de dado externo (link simbólico, pai fora do projeto, FIFO) é
 		// recusado com aviso; os demais arquivos seguem.
-		if err := writeFileSafeMode(targetDir, dest, buf.Bytes(), perm); err != nil {
+		if err := writeFileSafeMode(targetDir, dest, rendered, perm); err != nil {
 			refusals.Add(1)
 			fmt.Fprintf(os.Stderr, "aviso: %s não instalado: %s\n", notify.Sanitize(dest, 300, false), notify.Sanitize(err.Error(), 400, false))
 			return nil
@@ -227,6 +231,18 @@ func renderDir(fsys embed.FS, root, stripPrefix string, cfg config.Config, targe
 	})
 
 	return created, err
+}
+
+func renderTemplate(path string, data []byte, cfg config.Config) ([]byte, error) {
+	tmpl, err := template.New(path).Parse(string(data))
+	if err != nil {
+		return nil, fmt.Errorf("parse template %s: %w", path, err)
+	}
+	var buf bytes.Buffer
+	if err := tmpl.Execute(&buf, cfg); err != nil {
+		return nil, fmt.Errorf("render template %s: %w", path, err)
+	}
+	return buf.Bytes(), nil
 }
 
 // RunAgents renderiza apenas os templates de agente(s) especificados, sem tocar em sdd/.
@@ -340,31 +356,11 @@ func shouldPreserve(dest string, targetDir string) bool {
 
 	// AGENTS.md é um arquivo neutro que muitos projetos já têm: só é atualizado se foi gerado pelo
 	// forge-sdd (cabeçalho e marcador `<!-- forge-sdd:generated -->`); um arquivo do usuário nunca é sobrescrito.
-	if rel == "AGENTS.md" {
-		return !IsGeneratedAgentsMD(dest)
+	if isInstrucao(rel) {
+		return !IsGeneratedInstrucao(dest)
 	}
 
 	// Arquivos fora de sdd/ (configurações e instruções de agente) devem ser atualizados
-	return false
-}
-
-// IsGeneratedAgentsMD diz se o AGENTS.md foi gerado pelo scaffold: cabeçalho conhecido E o marcador
-// inequívoco `<!-- forge-sdd:generated -->` nas três primeiras linhas. Só o título não basta: um
-// AGENTS.md do usuário pode começar igual.
-func IsGeneratedAgentsMD(path string) bool {
-	data, err := os.ReadFile(path)
-	if err != nil {
-		return false
-	}
-	head := strings.SplitN(string(data), "\n", 4)
-	if len(head) < 2 || !strings.HasPrefix(head[0], "# AGENTS.md — ") {
-		return false
-	}
-	for _, l := range head[1:min(len(head), 3)] {
-		if strings.TrimSpace(l) == "<!-- forge-sdd:generated -->" {
-			return true
-		}
-	}
 	return false
 }
 

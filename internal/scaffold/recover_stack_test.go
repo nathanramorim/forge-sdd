@@ -48,6 +48,21 @@ func TestUpdateNaoPerdeDadoDoUsuario(t *testing.T) {
 		assert.Equal(t, "node", rc2.Stack)
 		assert.Equal(t, "postgres", rc2.DB)
 	})
+
+	t.Run("edicao_em_instrucao", func(t *testing.T) {
+		dir := t.TempDir()
+		cfg := config.Defaults()
+		cfg.Project, cfg.Stack, cfg.DB = "proj", "node", "postgres"
+		cfg.Agents = []string{"claude", "gemini", "openai", "copilot"}
+		antigos := projeto5_0(t, dir, cfg)
+		editado := antigos["CLAUDE.md"] + "MINHA REGRA\n"
+		escreverRel(t, dir, "CLAUDE.md", editado)
+		_, err := Run(cfg, dir)
+		require.NoError(t, err)
+		assert.Equal(t, editado, lerRel(t, dir, "CLAUDE.md"))
+		assert.Contains(t, lerRel(t, dir, "CLAUDE.novo.md"), "<!-- forge-sdd:generated -->")
+		assert.Contains(t, lerRel(t, dir, "GEMINI.md"), "<!-- forge-sdd:generated -->")
+	})
 }
 
 func TestUpdateRepopulaStackNosAdaptadores(t *testing.T) {

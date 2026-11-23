@@ -1,4 +1,5 @@
 # Copilot Instructions — demo
+<!-- forge-sdd:generated -->
 
 demo: stack go. Fluxo por feature em `sdd/FLOW.md`.
 
