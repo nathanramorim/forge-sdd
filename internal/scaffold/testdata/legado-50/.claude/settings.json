@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": ["Bash(npm test)", "Bash(ls:*)"]
+  },
+  "hooks": {
+    "UserPromptSubmit": [
+      {"hooks": [{"command": "forge inbox --unread --hook", "type": "command"}]}
+    ],
+    "PostToolUse": [
+      {"matcher": "Edit", "hooks": [{"type": "command", "command": "npx prettier --write ."}]}
+    ]
+  }
+}

@@ -1,0 +1,5 @@
+{
+  "mcpServers": {
+    "meu-servidor": {"command": "node", "args": ["tools/meu-mcp.js"]}
+  }
+}
