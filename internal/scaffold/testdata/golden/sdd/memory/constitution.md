@@ -19,8 +19,13 @@
 | Campo | Valor |
 |-------|-------|
 | VCS / Work Item System | github |
+| Modo do atestado | local |
+| Modo de revisão humana | com-humano |
+| WIP humano | 3 |
+| Módulos permitidos | nenhum |
+| Início automático do Builder | desligado |
 
-Consulte `sdd/memory/mcps.md` para o status real de cada MCP configurado (`ativo`/`indisponível`) antes de assumir que ele responde. Se "VCS / Work Item System" for `azure-devops`, use `az repos pr create` (ou instrução equivalente documentada) em vez de `gh pr create`. Se `nenhum`, deixe a branch pronta e informe o usuário, sem tentar nenhum comando de VCS.
+Status real dos MCPs: `sdd/memory/mcps.md`. VCS `azure-devops`: use `az repos pr create` em vez de `gh pr create`; `nenhum`: deixe a branch pronta e informe o usuário.
 
 ## Regras (máx. 15)
 0. Idioma: pt-BR (chat, commits e PRs). Nível de Linguagem: padrão. (`COD-05`)
