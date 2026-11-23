@@ -135,7 +135,7 @@ func TestScaffold_OpenAIGeraAGENTSmdEPreservaODoUsuario(t *testing.T) {
 	assert.LessOrEqual(t, len(agents), 1536)
 	openai, _ := os.ReadFile(filepath.Join(dir, "OPENAI.md"))
 	assert.Contains(t, string(openai), "AGENTS.md", "OPENAI.md vira ponteiro, sem duplicar o conteúdo")
-	assert.True(t, IsGeneratedAgentsMD(filepath.Join(dir, "AGENTS.md")))
+	assert.True(t, IsGeneratedInstrucao(filepath.Join(dir, "AGENTS.md")))
 
 	// Um AGENTS.md do usuário nunca é sobrescrito.
 	own := "# Meu AGENTS.md\nregras do time\n"
@@ -145,14 +145,14 @@ func TestScaffold_OpenAIGeraAGENTSmdEPreservaODoUsuario(t *testing.T) {
 	require.NoError(t, err)
 	got, _ := os.ReadFile(filepath.Join(dir2, "AGENTS.md"))
 	assert.Equal(t, own, string(got))
-	assert.False(t, IsGeneratedAgentsMD(filepath.Join(dir2, "AGENTS.md")))
+	assert.False(t, IsGeneratedInstrucao(filepath.Join(dir2, "AGENTS.md")))
 }
 
 func TestAgentsMD_TituloIgualDoUsuarioNaoEhGerado(t *testing.T) {
 	dir := t.TempDir()
 	own := "# AGENTS.md — Regras do time\n\nNão mexer.\n"
 	require.NoError(t, os.WriteFile(filepath.Join(dir, "AGENTS.md"), []byte(own), 0o644))
-	assert.False(t, IsGeneratedAgentsMD(filepath.Join(dir, "AGENTS.md")), "só o título não basta: falta o marcador")
+	assert.False(t, IsGeneratedInstrucao(filepath.Join(dir, "AGENTS.md")), "só o título não basta: falta o marcador")
 
 	cfg := config.Config{Project: "demo", Stack: "go", DB: "none", Lang: "pt-BR", Agents: []string{config.AgentOpenAI}, SddVersion: "4.2.0-beta"}
 	_, err := Run(cfg, dir)
@@ -164,7 +164,7 @@ func TestAgentsMD_TituloIgualDoUsuarioNaoEhGerado(t *testing.T) {
 	dir2 := t.TempDir()
 	_, err = Run(cfg, dir2)
 	require.NoError(t, err)
-	assert.True(t, IsGeneratedAgentsMD(filepath.Join(dir2, "AGENTS.md")))
+	assert.True(t, IsGeneratedInstrucao(filepath.Join(dir2, "AGENTS.md")))
 	gen, _ := os.ReadFile(filepath.Join(dir2, "AGENTS.md"))
 	assert.Contains(t, string(gen), "<!-- forge-sdd:generated -->")
 }

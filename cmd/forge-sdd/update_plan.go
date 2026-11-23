@@ -44,6 +44,10 @@ func printUpgradePlan(w io.Writer, targetDir string, cfg config.Config) (bool, e
 		fmt.Fprintln(w, "  mantido scripts/pr_guard.py (sem o marcador forge-sdd:generated; é do usuário e não é atualizado)")
 	}
 
+	for _, rel := range scaffold.InstrucoesDoUsuario(targetDir, cfg) {
+		fmt.Fprintf(w, "  mantido %s (sem o marcador forge-sdd:generated; é seu e não é atualizado; o conteúdo novo vai para o .novo.md)\n", rel)
+	}
+
 	acted := len(migration.Moves) > 0 || len(obsolete.Remove) > 0
 	if !acted {
 		fmt.Fprintln(w, "Nenhuma migração de layout nem limpeza de obsoletos necessária.")

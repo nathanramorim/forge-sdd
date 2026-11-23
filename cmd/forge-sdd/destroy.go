@@ -60,7 +60,7 @@ dos agentes de IA (CLAUDE.md, GEMINI.md, .claude/, .gemini/, etc.) instalados no
 			filepath.Join(targetDir, ".vscode", "mcp.json"),
 		}
 		// AGENTS.md só sai se foi gerado pelo forge-sdd: um arquivo do usuário nunca é removido.
-		if agentsMD := filepath.Join(targetDir, "AGENTS.md"); scaffold.IsGeneratedAgentsMD(agentsMD) {
+		if agentsMD := filepath.Join(targetDir, "AGENTS.md"); scaffold.IsGeneratedInstrucao(agentsMD) {
 			pathsToRemove = append(pathsToRemove, agentsMD)
 		}
 
