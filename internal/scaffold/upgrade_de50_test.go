@@ -17,8 +17,6 @@ import (
 // versaoAlvo50 é a versão explícita do upgrade nos testes (nunca consulta o NPM).
 const versaoAlvo50 = "5.2.0-beta"
 
-var instrucoes50 = []string{"CLAUDE.md", "GEMINI.md", "AGENTS.md", "OPENAI.md", ".github/copilot-instructions.md", ".gemini/system_instructions.md", ".openai/system_instructions.md"}
-
 // copiaLegado50 copia a fixture congelada (projeto 5.0.0 gerado pelo binário 5.0) para um diretório temporário.
 func copiaLegado50(t *testing.T) string {
 	t.Helper()
