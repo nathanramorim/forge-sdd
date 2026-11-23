@@ -16,7 +16,7 @@ Ver o sintoma completo em `fix-106-14a-entregar-o-script-antes-do-hook.md`: o ho
 
 ## Modelo do módulo
 
-**Completo** (`ARQ-11`): subcomando, troca do comando do hook, migração no merge e doctor. **`ARQ-06` (definitivo):** `forge hook pr-guard` é subcomando novo, e a ADR-0025 cobre só `skills`. Este fix **emenda a `ARQ-06`** em `sdd/memory/constitution.md` (acrescenta `hook`) e traz a **ADR-0027** no mesmo PR (`GOV-01`). Isso é Constituição e ADR: o merge **exige aprovação explícita do dono**, fora do piloto automático.
+**Completo** (`ARQ-11`): subcomando, troca do comando do hook, migração no merge e doctor. **`ARQ-06` (definitivo):** `forge hook pr-guard` é subcomando novo, e a ADR-0025 cobre só `skills`. Este fix **emenda a `ARQ-06`** em `sdd/memory/constitution.md` (acrescenta `hook`) e traz a **ADR-0027** no mesmo PR (`GOV-01`). **Orçamento de bytes (P-24):** `MaxConstitutionSize = 9216` (`internal/gate/gate.go:789`) e a Constituição tem **9212 bytes**; acrescentar `hook` custa pelo menos 8 e daria 9220. A mesma emenda **compensa** encurtando o trecho final "(`modulo` chega na 109.)" (~24 bytes) ou outra frase, e confere com `wc -c`; a remissão "`hook`: ver ADR-0027" só entra se couber. Isso é Constituição e ADR: o merge **exige aprovação explícita do dono**, fora do piloto automático.
 
 ## Dependências novas
 
@@ -24,7 +24,7 @@ Nenhuma (`SEG-07`).
 
 ## Rules e IDs da Constituição Aplicáveis
 
-`ARQ-06`, `GOV-01`, `SEG-01`, `SEG-02`, `TST-02`, `TST-03`, `DUP-01`.
+`ARQ-06`, `GOV-01`, `SEG-01`, `SEG-02`, `TST-02`, `TST-03`, `DUP-02`, `P-24` (limite de bytes da Constituição).
 
 ## Decisões do projeto aplicadas
 
@@ -54,6 +54,9 @@ Nenhuma (`SEG-07`).
 
 ```bash
 set -o pipefail
+# a emenda da ARQ-06 cabe no teto da Constituição
+[ "$(wc -c < sdd/memory/constitution.md)" -le 9216 ]
+go test ./internal/gate -run 'P24|Constitution' -count=1
 # os testes de repasse usam um `uv` FALSO (stub no PATH do teste), nunca o uv real: a CI roda em Linux e a validação local em macOS
 go test ./cmd/forge-sdd -run '^(TestHookPRGuardSemScriptSaiZero|TestHookPRGuardRepassaCodigo2|TestHookPRGuardRepassaStdin)$' -count=1
 go test ./cmd/forge-sdd -run '^(TestHookPRGuardSemUvSaiZero|TestDoctorReconheceOsDoisComandosDoHook)$' -count=1
