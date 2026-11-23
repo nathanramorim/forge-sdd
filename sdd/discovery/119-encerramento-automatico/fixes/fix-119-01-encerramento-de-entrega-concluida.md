@@ -52,7 +52,7 @@ Nada novo duplica conceito: tudo estende o que já existe.
 2. `forge archive --reconciliar [--aplicar]` lista as tarefas cujo PR está mesclado; com `--aplicar` fecha na fila, atualiza `Status` e `Próximo passo` do `status.md` (≤ 1 KB) e sugere `/archive`.
 3. Iniciativa sem fila, com a linha `Estado: concluida` no `status.md`, entra em `--concluidas`. Se o `status.md` ainda diz "Não arquivar até a T…" e a fila (ou o PR) já está fechada, o `forge archive` avisa a divergência.
 4. `ListArchiveCandidates` e `status` usam a mesma função de "concluída".
-5. O CLOSE das skills de Builder e Reviewer manda rodar a reconciliação após o merge.
+5. O CLOSE das skills de Builder e Reviewer passa a propor, como passo manual após o merge, rodar `forge archive --reconciliar`; só `--aplicar` grava.
 6. `forge doctor` avisa (não falha) sobre iniciativa entregue e não encerrada.
 
 ## Decisões do gate (Nathan, 2026-11-23)
