@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/mattn/go-isatty"
 	"os"
 	"path/filepath"
 	"strings"
@@ -243,10 +244,12 @@ func runUpdateFlow(cmd *cobra.Command, targetDir string) error {
 	yes, _ := cmd.Flags().GetBool("yes")
 	dryRun, _ := cmd.Flags().GetBool("dry-run")
 	ci, _ := cmd.Flags().GetBool("ci")
+	if err := reportClaudeIntegration(cmd, targetDir, rc.Agents, dryRun); err != nil {
+		return err
+	}
 	if err := reportAgentModels(cmd, targetDir, dryRun); err != nil {
 		return err
 	}
-	reportClaudeIntegration(cmd, targetDir, rc.Agents, dryRun)
 	if dryRun {
 		// Plano da atualização de estrutura: não consulta o NPM, não pergunta nada e não grava.
 		planCfg := rc.ToConfig()
@@ -309,6 +312,9 @@ func runUpdateFlow(cmd *cobra.Command, targetDir string) error {
 			return nil
 		}
 	} else {
+		if !stdinIsTerminal() {
+			return fmt.Errorf("sem terminal interativo para perguntar: use --yes para rodar sem perguntas (ex.: forge update --upgrade --yes)")
+		}
 		// Modo interativo: busca versões remoto no NPM Registry
 		fmt.Print("Buscando versões disponíveis no NPM Registry...")
 		latest, beta, fetchErr := config.FetchNpmVersions()
@@ -417,6 +423,11 @@ func runUpdateFlow(cmd *cobra.Command, targetDir string) error {
 		}
 	}
 	return nil
+}
+
+// stdinIsTerminal é variável para os testes simularem terminal interativo ou ausência dele.
+var stdinIsTerminal = func() bool {
+	return isatty.IsTerminal(os.Stdin.Fd()) || isatty.IsCygwinTerminal(os.Stdin.Fd())
 }
 
 func printSummaryReport(cfg config.Config, targetDir string, fileCount int) {

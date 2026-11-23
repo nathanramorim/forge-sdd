@@ -1,7 +1,7 @@
 # feat-118-06c — JSON inválido devolve erro e não grava versão; terminal sem TTY orienta `--yes`
 
 **Depende de:** feat-118-06b (ambas mexem em `main.go` e no relato do `update`; ordem a, b, c evita conflito)
-**Achado:** 9 e o item (e) do escopo. **Tamanho:** `S`. **Status:** `spec`
+**Achado:** 9 e o item (e) do escopo. **Tamanho:** `S`. **Status:** `implementada`
 
 ## Objetivo
 
@@ -58,6 +58,10 @@ go test ./cmd/forge-sdd -run '^(TestUpdateJSONInvalidoSaiComErroENaoGravaVersao|
 [ "$(go test ./internal/scaffold ./cmd/forge-sdd -list '^(TestJSONInvalidoNoSettingsRetornaErroTipado|TestJSONInvalidoNaoReescreveOArquivo|TestAvisoDoMCPSaiUmaVez|TestUpdateJSONInvalidoSaiComErroENaoGravaVersao|TestUpdateSemTTYOrientaYes|TestUpdateDryRunRelataJSONInvalidoSemFalhar)$' | grep -c '^Test')" -eq 6 ]
 go test ./internal/scaffold ./cmd/forge-sdd -count=1
 ```
+
+## Decisão de implementação (Builder)
+
+Com JSON inválido, o `update` **aborta antes de gravar qualquer coisa** (nem arquivos regerados, nem hooks, nem versão): a checagem (`scaffold.ClaudeJSONInvalidos`, erro tipado `InvalidJSONError`) roda primeiro em `reportClaudeIntegration`. É o caminho mais seguro e reversível: o usuário corrige o arquivo e roda de novo. No `--dry-run` só relata. A 06b não foi tocada (`update_plan.go` intacto).
 
 ## Fora do escopo
 
