@@ -151,3 +151,24 @@ func TestLPDeployIgnoraContaDoAmbienteDoShell(t *testing.T) {
 		t.Fatalf("CLOUDFLARE_ACCOUNT_ID do ambiente nao pode bastar: %v %s", err, out)
 	}
 }
+
+func TestLPDeployLeContaDeJSONEmVariasLinhas(t *testing.T) {
+	raiz := repoLP(t, true)
+	_ = os.MkdirAll(filepath.Join(raiz, ".forge", "config"), 0o755)
+	_ = os.WriteFile(filepath.Join(raiz, ".forge", "config", "lp-deploy.json"), []byte("{\n  \"account_id\":\n    \""+contaTeste+"\"\n}\n"), 0o644)
+	out, err := rodaLP(t, raiz, "--dry-run")
+	if err != nil || !strings.Contains(out, "****cdef") {
+		t.Fatalf("deveria ler a conta de JSON em varias linhas: %v %s", err, out)
+	}
+}
+
+func TestDeployLPWorkflowFornecaAConta(t *testing.T) {
+	dir, _ := os.Getwd()
+	wf, err := os.ReadFile(filepath.Join(dir, "..", ".github", "workflows", "deploy-lp.yml"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(wf), "LP_CLOUDFLARE_ACCOUNT_ID: ${{ vars.LP_CLOUDFLARE_ACCOUNT_ID }}") {
+		t.Error("o workflow manual precisa passar LP_CLOUDFLARE_ACCOUNT_ID ao scripts/lp-deploy.sh")
+	}
+}

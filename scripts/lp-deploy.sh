@@ -29,7 +29,7 @@ arquivo_conta=".forge/config/lp-deploy.json"
 resolve_conta() {
   if [ -n "$conta_arg" ]; then printf '%s' "$conta_arg"; return; fi
   if [ -n "${LP_CLOUDFLARE_ACCOUNT_ID:-}" ]; then printf '%s' "$LP_CLOUDFLARE_ACCOUNT_ID"; return; fi
-  if [ -f "$arquivo_conta" ]; then sed -n 's/.*"account_id"[^"]*"\([^"]*\)".*/\1/p' "$arquivo_conta" | head -n1; fi
+  if [ -f "$arquivo_conta" ]; then tr -d '\n' < "$arquivo_conta" | sed -n 's/.*"account_id"[^"]*"\([^"]*\)".*/\1/p' | head -n1; fi
 }
 mascara() { printf '****%s' "${1: -4}"; }
 
@@ -72,7 +72,8 @@ if ! [[ "$conta" =~ ^[0-9a-f]{32}$ ]]; then
   echo "recusado: conta do Cloudflare nao definida ou invalida. Use --conta <id>, LP_CLOUDFLARE_ACCOUNT_ID ou $arquivo_conta ({\"account_id\": \"...\"}, fora do git)." >&2
   exit 1
 fi
-if ! (cd site && npx "$wrangler" whoami 2>/dev/null) | grep -q "$conta"; then
+ident="$(cd site && npx "$wrangler" whoami 2>/dev/null)" || ident=""
+if ! grep -qF -- "$conta" <<<"$ident"; then
   echo "recusado: a conta $(mascara "$conta") nao esta entre as contas do login atual do Wrangler (confira XDG_CONFIG_HOME e 'wrangler whoami')." >&2
   exit 1
 fi
