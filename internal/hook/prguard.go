@@ -31,6 +31,7 @@ func ProjectRoot() string {
 // RunPRGuard executa o pr_guard do projeto em root e devolve o código de saída do hook.
 // Sem o script ou sem `uv`, avisa em stderr e devolve 0 (fail-open consciente: o job "pronto?"
 // do CI é o apoio). Com os dois, repassa stdin/stdout/stderr e devolve o código do guard.
+// Fonte do bloqueio por código 2 em PreToolUse: https://code.claude.com/docs/en/hooks (ADR-0027).
 func RunPRGuard(root string, stdin io.Reader, stdout, stderr io.Writer) int {
 	script := filepath.Join(root, PRGuardScript)
 	if fi, err := os.Stat(script); err != nil || fi.IsDir() {

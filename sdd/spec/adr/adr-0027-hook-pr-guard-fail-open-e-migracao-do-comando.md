@@ -7,7 +7,7 @@
 
 ## Contexto
 
-O hook `PreToolUse` do `pr_guard` chamava `uv run scripts/pr_guard.py --hook`. Se o script não existisse (apagado, branch antiga, checkout parcial), o `uv` falhava com código 2, que o Claude Code trata como bloqueio, e todo comando Bash ficava barrado. O fix-106-14a passou a entregar o script antes do hook; resta o caso de o arquivo sumir depois. Um comando de shell (`[ -f ... ] && ... || exit 0`) não serve: é POSIX, e `A && B || C` também sai 0 quando o guard devolve 2, mascarando o bloqueio legítimo.
+O hook `PreToolUse` do `pr_guard` chamava `uv run scripts/pr_guard.py --hook`. Se o script não existisse (apagado, branch antiga, checkout parcial), o `uv` falhava com código 2, que o Claude Code trata como bloqueio (fonte: https://code.claude.com/docs/en/hooks, tabela de códigos de saída: exit 2 é erro bloqueante e a chamada `PreToolUse` continua bloqueada), e todo comando Bash ficava barrado. O fix-106-14a passou a entregar o script antes do hook; resta o caso de o arquivo sumir depois. Um comando de shell (`[ -f ... ] && ... || exit 0`) não serve: é POSIX, e `A && B || C` também sai 0 quando o guard devolve 2, mascarando o bloqueio legítimo.
 
 ## Opções Consideradas
 
@@ -27,5 +27,5 @@ O hook `PreToolUse` do `pr_guard` chamava `uv run scripts/pr_guard.py --hook`. S
 ## Consequências
 
 - **Positivas:** o hook nunca bloqueia o Bash por arquivo ausente; portável em Windows, macOS e Linux; o bloqueio legítimo continua valendo.
-- **Negativas / Trade-offs:** sem `uv` ou sem o script a barreira local fica inativa (só o CI segura); depende de o `forge` estar no PATH, como os hooks do doctor e do inbox.
+- **Negativas / Trade-offs:** sem `uv` ou sem o script a barreira local fica inativa (só o CI segura); depende de o `forge` estar no PATH, como os hooks do doctor e do inbox; se o guard morrer por sinal, o wrapper devolve 0 com aviso (fail-open); sem `CLAUDE_PROJECT_DIR`, a raiz vem do `git rev-parse --show-toplevel`, que num projeto dentro de outro repositório pode apontar para a raiz errada e silenciar o guard (o Claude Code sempre define a variável).
 - **Ações de acompanhamento:** nenhuma; a ADR-0025 não precisa de linha nova.
