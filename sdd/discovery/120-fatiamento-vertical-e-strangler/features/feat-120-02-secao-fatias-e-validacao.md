@@ -24,8 +24,8 @@ Nenhuma (`ARQ-04`).
 - `.agents/skills/sdd-concepcao/references/discovery.md` (passo 7)
 - `.agents/skills/sdd-planejamento/SKILL.md`
 - `internal/scaffold/templates/.agents/skills/sdd-concepcao/references/discovery.md.tmpl`
-- `internal/scaffold/templates/.agents/skills/sdd-planejamento/SKILL.md.tmpl` (confirmar o nome exato; se `SKILL.md` for gerado sem `.tmpl`, editar o arquivo embutido equivalente)
-- golden: `internal/scaffold/testdata/golden/.agents/skills/sdd-planejamento/SKILL.md` (regenerado por `-update`)
+- `internal/scaffold/templates/.agents/skills/sdd-planejamento/SKILL.md.tmpl`
+- golden: `internal/scaffold/testdata/golden/.agents/skills/sdd-planejamento/SKILL.md` e `internal/scaffold/testdata/golden/.agents/skills/sdd-concepcao/references/discovery.md` (regenerados por `-update`)
 
 A seção cita piloto, validação, reversão e Strangler (roteador ou flag; só para migração de legado). Sem conflito com feat-120-01 (outro arquivo) e feat-120-03.
 
@@ -36,7 +36,7 @@ A seção cita piloto, validação, reversão e Strangler (roteador ou flag; só
 - `go test ./internal/scaffold/ -update` e, em seguida, `go test ./internal/scaffold/` (sem a flag) sai 0.
 - `grep -q "Fatias e validação" .agents/skills/sdd-concepcao/references/discovery.md` sai 0.
 - `grep -q "Fatias e validação" .agents/skills/sdd-planejamento/SKILL.md` sai 0.
-- `grep -q "Fatias e validação"` sai 0 nos dois `.tmpl` correspondentes.
+- `grep -q "Fatias e validação" internal/scaffold/templates/.agents/skills/sdd-concepcao/references/discovery.md.tmpl` e `grep -q "Fatias e validação" internal/scaffold/templates/.agents/skills/sdd-planejamento/SKILL.md.tmpl` saem 0.
 - `grep -qi "strangler" .agents/skills/sdd-planejamento/SKILL.md` e `grep -qi "roteador" .agents/skills/sdd-planejamento/SKILL.md` saem 0.
 - `go test ./internal/harness/... && go build ./... && go vet ./...` sai 0.
-- `git diff origin/main --stat` não toca `sdd/memory/constitution.md`, `sdd/spec/adr/` nem `*.go` fora de testdata.
+- `! git diff --name-only origin/main | grep -E '^(sdd/memory/constitution\.md|sdd/spec/adr/)|\.go$' | grep -v '/testdata/'` sai 0 (não toca Constituição, ADR nem `*.go` fora de testdata).

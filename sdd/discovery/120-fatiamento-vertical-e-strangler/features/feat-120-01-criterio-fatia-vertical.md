@@ -23,7 +23,7 @@ Nenhuma (`ARQ-04`).
 ## Arquivos que toca
 - `.agents/skills/sdd-planejamento/references/split-features.md`
 - `internal/scaffold/templates/.agents/skills/sdd-planejamento/references/split-features.md.tmpl`
-- golden correspondente em `internal/scaffold/testdata/golden/` (só se existir entrada; regenerado por `-update`)
+- golden: `internal/scaffold/testdata/golden/.agents/skills/sdd-planejamento/references/split-features.md` (regenerado por `-update`)
 
 Passo 4 passa a exigir **fatia vertical** que valida e entra na main sozinha; "baixo para cima" vale só dentro da fatia; manter "testável sozinha". Sem conflito com feat-120-02 e feat-120-03.
 
@@ -31,10 +31,9 @@ Passo 4 passa a exigir **fatia vertical** que valida e entra na main sozinha; "b
 `ARQ-03`, `DUP-01`, `COD-05`
 
 ## Critérios de Aceitação Executáveis
-- Editar o repo e o `.tmpl` com o mesmo texto.
 - `go test ./internal/scaffold/ -update` e, em seguida, `go test ./internal/scaffold/` (sem a flag) sai 0.
 - `grep -q "fatia vertical" .agents/skills/sdd-planejamento/references/split-features.md` sai 0.
 - `grep -q "fatia vertical" internal/scaffold/templates/.agents/skills/sdd-planejamento/references/split-features.md.tmpl` sai 0.
 - `grep -q "testável sozinha" .agents/skills/sdd-planejamento/references/split-features.md` sai 0.
 - `go test ./internal/harness/... && go build ./... && go vet ./...` sai 0.
-- `git diff origin/main --stat` não toca `sdd/memory/constitution.md`, `sdd/spec/adr/` nem `*.go` fora de testdata.
+- `! git diff --name-only origin/main | grep -E '^(sdd/memory/constitution\.md|sdd/spec/adr/)|\.go$' | grep -v '/testdata/'` sai 0 (não toca Constituição, ADR nem `*.go` fora de testdata).
