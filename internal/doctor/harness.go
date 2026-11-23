@@ -170,7 +170,7 @@ func checaVersao(dir, binario string) Checagem {
 	const id = "versao"
 	data, err := os.ReadFile(layout.Sddrc(dir))
 	if err != nil {
-		return falha(id, fmt.Sprintf("não foi possível ler sdd/.sddrc: %v", err), "rode forge init neste repositório")
+		return falha(id, fmt.Sprintf("não foi possível ler sdd/.sddrc: %v", err), "rode forge update para atualizar o projeto, ou forge init se ele ainda não foi iniciado")
 	}
 	var rc struct {
 		Version string `json:"version"`

@@ -39,7 +39,14 @@ inconsistências de configuração dos agentes de IA e progresso das features.`,
 		}
 		if harnessMode, _ := cmd.Flags().GetBool("harness"); harnessMode {
 			asJSON, _ := cmd.Flags().GetBool("json")
-			return runDoctorHarness(cmd.OutOrStdout(), targetDir, asJSON, doctor.DefaultDeps())
+			err := runDoctorHarness(cmd.OutOrStdout(), cmd.ErrOrStderr(), targetDir, asJSON, doctor.DefaultDeps())
+			var ec exitCodeErr
+			if errors.As(err, &ec) && ec.msg == "" {
+				// O relatório já foi escrito; o cobra não deve somar "Error:" vazio nem o uso.
+				cmd.SilenceErrors = true
+				cmd.SilenceUsage = true
+			}
+			return err
 		}
 
 		verbose, _ := cmd.Flags().GetBool("verbose")
@@ -343,7 +350,7 @@ func fileExists(path string) bool {
 }
 
 // runDoctorHarness imprime o diagnóstico do harness (texto ou JSON) e sai com 3 se algo falhou.
-func runDoctorHarness(w io.Writer, dir string, asJSON bool, deps doctor.Deps) error {
+func runDoctorHarness(w, errW io.Writer, dir string, asJSON bool, deps doctor.Deps) error {
 	rel := doctor.Diagnose(dir, deps)
 	if err := doctor.ValidateRelatorio(rel); err != nil {
 		return err
@@ -363,6 +370,16 @@ func runDoctorHarness(w io.Writer, dir string, asJSON bool, deps doctor.Deps) er
 		}
 	}
 	if code := rel.ExitCode(); code != 0 {
+		// O hook de sessão só mostra o stderr: leva falhas e avisos para lá.
+		for _, c := range rel.Checagens {
+			if c.Status == doctor.StatusOK {
+				continue
+			}
+			fmt.Fprintf(errW, "[%s] %s: %s\n", c.Status, c.ID, c.Detalhe)
+			if c.Sugestao != "" {
+				fmt.Fprintf(errW, "      sugestão: %s\n", c.Sugestao)
+			}
+		}
 		return exitCodeErr{code: code}
 	}
 	return nil
