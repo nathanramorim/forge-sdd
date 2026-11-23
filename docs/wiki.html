@@ -271,6 +271,25 @@ npm install -g @nathanramorim/forge-sdd@beta     # prévia</pre>
         <li>O workflow de CI do forge é opcional e só entra se você pedir (<code>--ci</code>). CI próprio nunca é tocado.</li>
         <li>Se algo estranho aparecer, rode <code>forge doctor</code> e envie a saída a quem mantém o projeto.</li>
       </ul>
+
+      <h3 class="subsection-title">Recuperação: rodei o update com a 5.2.0-beta</h3>
+      <p>A 5.2.0-beta antiga reescrevia arquivos de instrução e o script da barreira de PR, e o forge passava a tratá-los como seus. Se o <code>forge update</code> avisar que manteve <code>CLAUDE.md</code>, <code>GEMINI.md</code>, <code>AGENTS.md</code> ou <code>scripts/pr_guard.py</code>, e você não os editou, faça assim (antes de qualquer commit):</p>
+      <ol class="example-steps">
+        <li>
+          <strong>Volte os arquivos ao que estava no git.</strong>
+          <pre class="code-block">git restore CLAUDE.md GEMINI.md AGENTS.md OPENAI.md .github/copilot-instructions.md</pre>
+        </li>
+        <li>
+          <strong>Apague os <code>.novo.md</code> e o guard antigo.</strong>
+          <pre class="code-block">rm -f *.novo.md .gemini/*.novo.md .github/*.novo.md .openai/*.novo.md scripts/pr_guard.novo.py</pre>
+        </li>
+        <li>
+          <strong>Rode o update de novo e confira.</strong>
+          <pre class="code-block">forge update --upgrade
+forge doctor</pre>
+        </li>
+      </ol>
+      <p>Se você de fato editou algum desses arquivos, não restaure: compare com o <code>.novo.md</code> e junte à mão.</p>
     </section>
 
   </main>
