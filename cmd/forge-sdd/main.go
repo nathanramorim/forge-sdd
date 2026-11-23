@@ -211,6 +211,17 @@ func runUpdateFlow(cmd *cobra.Command, targetDir string) error {
 		return err
 	}
 
+	// 5.0 não guardava stack/banco: recupera uma vez dos arquivos do projeto; sem valor, fica vazio.
+	if rc.Stack == "" || rc.DB == "" {
+		stack, db := scaffold.RecoverStack(targetDir)
+		if rc.Stack == "" {
+			rc.Stack = stack
+		}
+		if rc.DB == "" {
+			rc.DB = db
+		}
+	}
+
 	namingConventionChanged := false
 	if f := cmd.Flags().Lookup("naming-convention"); f != nil && f.Changed {
 		rc.NamingConvention = f.Value.String()

@@ -40,6 +40,9 @@ type Sddrc struct {
 		Enabled bool `json:"enabled"`
 	} `json:"telemetry"`
 	NamingConvention string `json:"naming_convention"`
+	// Stack e DB são opcionais (omitempty): um .sddrc da 5.0 não os tem e um binário antigo ignora-os.
+	Stack string `json:"stack,omitempty"`
+	DB    string `json:"db,omitempty"`
 }
 
 // ToConfig converte Sddrc em Config para reuso nos comandos de scaffold.
@@ -51,6 +54,8 @@ func (r Sddrc) ToConfig() Config {
 		Telemetry:        r.Telemetry.Enabled,
 		Agents:           r.Agents,
 		NamingConvention: r.NamingConvention,
+		Stack:            r.Stack,
+		DB:               r.DB,
 	}
 }
 
