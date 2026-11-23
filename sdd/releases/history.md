@@ -4,6 +4,21 @@ Este arquivo registra o histórico de entregas de produto deste projeto.
 
 ## Entregas
 
+### Versão 5.2.1 — Atualizar o Projeto da 5.0 Agora Funciona de Ponta a Ponta (Beta)
+
+Compatível com a 5.0.0 e inclui tudo da 5.2.0-beta. Corrige a atualização de projetos que já usam o forge: a 5.2.0-beta publicada não trazia essa lógica.
+
+*   **Atualizar do 5.0 não deixa mais o Claude Code travado.** O `forge update` agora grava o script da barreira de PR antes de instalar o hook, e o hook tolera a falta do script em vez de bloquear todo comando do agente (`scripts/pr_guard.py` e `forge hook pr-guard`, ADR-0027).
+*   **Agora o update respeita o que você escreveu.** Stack e banco ficam guardados no projeto e voltam nos arquivos dos agentes; `CLAUDE.md`, `GEMINI.md`, `AGENTS.md` e os demais arquivos de instrução que você editou ficam intactos, e a versão nova do forge vai para um `.novo.md` ao lado (marcador `<!-- forge-sdd:generated -->`).
+*   **As regras e o schema chegam ao projeto antigo sem pisar nas suas edições.** Quem não editou recebe a versão nova; quem editou mantém o arquivo e ganha um `.novo.md` com o aviso (`.agents/rules/sdd-*` e `sdd/.metrics/schema.json`).
+*   **A Constituição do projeto ganha os modos novos por acréscimo.** Atestado, revisão humana, WIP, módulos e início automático entram com valores seguros só quando faltam, sem alterar uma linha sua (ADR-0028).
+*   **Agora você vê tudo o que o update vai fazer antes de ele fazer.** O `forge update --dry-run` lista hooks, arquivos reescritos, o que fica preservado, os campos de modo e a versão, sem gravar nada.
+*   **Acabou o update pela metade.** Se `settings.json` ou `.mcp.json` estiverem com JSON inválido, o update para antes de gravar qualquer coisa, diz o que consertar uma vez só e não troca a versão; sem terminal interativo, ele pede `--yes` em vez de falhar com mensagem de TTY.
+*   **Quer o aviso de PR pronto no GitHub? Peça.** `forge init --ci` e `forge update --ci` criam o `forge-pronto.yml`, um workflow separado que só registra a passagem do PR para pronto; o seu `ci.yml` nunca é tocado.
+*   **O `forge doctor` fala a verdade sobre a barreira.** Ele confere se o script existe e diz que, fora do Claude Code, não há barreira local de PR.
+*   **Como atualizar:** `npm install -g @nathanramorim/forge-sdd@beta` para a prévia; nos projetos existentes, veja o plano com `forge update --dry-run`, rode `forge update --upgrade` (fora do agente, no terminal) e depois `/upgrade-sdd`. Rode `forge doctor` no fim: a seção "Barreira de PR" diz o que ficou instalado.
+*   **Avisos da beta:** esta versão não substitui a estável; quem usa `npm install -g @nathanramorim/forge-sdd` sem `@beta` continua na 5.0.0. Se você rodou o `forge update --upgrade` com a 5.2.0-beta, confira o `git diff` antes de seguir.
+
 ### Versão 5.2.0 — O CI Sai do Caminho, a Revisão Vem Antes e Cada Feature Tem o Seu PR (Beta)
 
 Compatível com a 5.0.0. Consolida a iniciativa 106 inteira: o CI deixa de rodar em trabalho não conferido, a revisão acontece em dois pontos (a spec e a feature) e cada feature do split tem branch e PR próprios.
@@ -24,14 +39,6 @@ Compatível com a 5.0.0. Consolida a iniciativa 106 inteira: o CI deixa de rodar
 *   **O modo sem humano só liga depois de você ver os riscos.** O aviso dos três riscos precisa ser apresentado e aceito; recusar mantém o padrão seguro, `com-humano`.
 *   **Agora o `/upgrade-sdd` leva a política de PR para o seu projeto.** Você recebe o hook, o job `pronto?`, os scripts e os campos de modo sem perder o seu `ci.yml` nem o `.claude/settings.json`; o forge mescla, nunca sobrescreve, e JSON inválido não é tocado.
 *   **Agora o README tem um prompt para cada ferramenta.** São quatro blocos "cole isto na sua IA", um por agente, cada um apontando para o arquivo de instruções que ele lê.
-*   **Atualizar do 5.0 não deixa mais o Claude Code travado.** O `forge update` agora grava o script da barreira de PR antes de instalar o hook, e o hook tolera a falta do script em vez de bloquear todo comando do agente (`scripts/pr_guard.py` e `forge hook pr-guard`, ADR-0027).
-*   **Agora o update respeita o que você escreveu.** Stack e banco ficam guardados no projeto e voltam nos arquivos dos agentes; `CLAUDE.md`, `GEMINI.md`, `AGENTS.md` e os demais arquivos de instrução que você editou ficam intactos, e a versão nova do forge vai para um `.novo.md` ao lado (marcador `<!-- forge-sdd:generated -->`).
-*   **As regras e o schema chegam ao projeto antigo sem pisar nas suas edições.** Quem não editou recebe a versão nova; quem editou mantém o arquivo e ganha um `.novo.md` com o aviso (`.agents/rules/sdd-*` e `sdd/.metrics/schema.json`).
-*   **A Constituição do projeto ganha os modos novos por acréscimo.** Atestado, revisão humana, WIP, módulos e início automático entram com valores seguros só quando faltam, sem alterar uma linha sua (ADR-0028).
-*   **Agora você vê tudo o que o update vai fazer antes de ele fazer.** O `forge update --dry-run` lista hooks, arquivos reescritos, o que fica preservado, os campos de modo e a versão, sem gravar nada.
-*   **Acabou o update pela metade.** Se `settings.json` ou `.mcp.json` estiverem com JSON inválido, o update para antes de gravar qualquer coisa, diz o que consertar uma vez só e não troca a versão; sem terminal interativo, ele pede `--yes` em vez de falhar com mensagem de TTY.
-*   **Quer o aviso de PR pronto no GitHub? Peça.** `forge init --ci` e `forge update --ci` criam o `forge-pronto.yml`, um workflow separado que só registra a passagem do PR para pronto; o seu `ci.yml` nunca é tocado.
-*   **O `forge doctor` fala a verdade sobre a barreira.** Ele confere se o script existe e diz que, fora do Claude Code, não há barreira local de PR.
 *   **Como atualizar:** `npm install -g @nathanramorim/forge-sdd@beta` para a prévia; nos projetos existentes, veja o plano com `forge update --dry-run`, rode `forge update --upgrade` (fora do agente, no terminal) e depois `/upgrade-sdd`. Rode `forge doctor` no fim: a seção "Barreira de PR" diz o que ficou instalado.
 *   **Avisos da beta:** esta versão não está na `main` (`FLX-07`); quem usa `npm install -g @nathanramorim/forge-sdd` sem `@beta` continua na linha estável.
 

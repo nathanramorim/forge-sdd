@@ -14,8 +14,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// version é injetada via ldflags: -X main.version=5.2.0-beta
-var version = "5.2.0-beta"
+// version é injetada via ldflags: -X main.version=5.2.1-beta
+var version = "5.2.1-beta"
 
 func init() { config.SetBinaryVersion(version) }
 

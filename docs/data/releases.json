@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "chave_conteudo": "c5209b83a13e4b72",
-  "versao_historico": "b345692",
+  "chave_conteudo": "422e7b967daa9de6",
+  "versao_historico": "eb2b6b6",
   "versoes": [
     {
       "versao": "5.0.0",
@@ -52,75 +52,11 @@
       ]
     },
     {
-      "versao": "5.2.0",
-      "rotulo": "5.2.0-beta",
+      "versao": "5.2.1",
+      "rotulo": "5.2.1-beta",
       "canal": "beta",
-      "titulo": "O CI Sai do Caminho, a Revisão Vem Antes e Cada Feature Tem o Seu PR (Beta)",
+      "titulo": "Atualizar o Projeto da 5.0 Agora Funciona de Ponta a Ponta (Beta)",
       "itens": [
-        {
-          "titulo": "Agora você escolhe o tmux de volta.",
-          "texto": "O padrão continua sendo as janelas do sistema, mas com `--terminal tmux` ou `terminal: tmux` no `forge.json`, o `forge up` abre as três sessões em tmux. Sem o tmux instalado, ele avisa e usa as janelas, sem erro (o modo `live` só vale com o tmux; `--dry-run` só imprime)."
-        },
-        {
-          "titulo": "Acabou gastar CI em trabalho que ninguém conferiu.",
-          "texto": "A validação roda na sua máquina e deixa um selo do commit; o `gh pr ready` exige esse selo junto do parecer. O GitHub Actions roda uma vez, quando o PR sai do rascunho, e não roda mais em cada push (`scripts/ci-local.sh`, `concurrency`, job `pronto?` recusando PR em draft; `scripts/ci-politica.py` mostra os runs por dia)."
-        },
-        {
-          "titulo": "Agora a spec volta cedo, em PR próprio.",
-          "texto": "O `/discovery`, o `/nova-feature` e o `/novo-fix` abrem só a spec, em PR draft. Passada a Conferência 1 e o seu `[Seguir]`, a spec entra na principal e a construção começa, sem ficar presa numa branch até o fim (o Gate 1 virou uma linha explícita no `status.md`)."
-        },
-        {
-          "titulo": "Agora cada feature tem a sua branch e o seu PR em draft.",
-          "texto": "O Builder abre uma branch por feature do split, sempre a partir da principal, e nenhum PR depende de outro. Uma feature só começa quando as dependências já foram mescladas, e o `[Continuar]` vem agrupado por onda."
-        },
-        {
-          "titulo": "Agora você instala uma skill ou plugin só no projeto.",
-          "texto": "Você escolhe o que instalar e onde, sem rede e sem mexer no `~/.claude`; se o hub já tem, nada se repete (`forge-sdd skills destinos` e `forge-sdd skills instalar <skill|plugin> <slug> --de <dir>`, ADR-0025)."
-        },
-        {
-          "titulo": "O `/toca-ai` deixa de supor que há workers rodando.",
-          "texto": "Sem worker ativo, você é avisado de que as etapas ficam na fila, e o chat orquestra subagentes em paralelo em vez de mandar você rodar o `forge up` (o `forge doctor` também avisa fila parada)."
-        },
-        {
-          "titulo": "Acabou marcar \"pronto\" sem parecer válido.",
-          "texto": "O `gh pr ready` e o `gh pr merge` só passam com parecer `conforme` do commit atual; se o código mudou depois da revisão, os dois SHA aparecem lado a lado na recusa."
-        },
-        {
-          "titulo": "Agora a barreira de PR fica instalada sozinha.",
-          "texto": "O hook que barra o `gh` entra no `.claude/settings.json` sem você pedir, e o `forge doctor` mostra em quais agentes ele vale; nos outros, o job `pronto?` do CI segura (hook `PreToolUse`)."
-        },
-        {
-          "titulo": "Agora a issue nasce junto com a spec.",
-          "texto": "Com `create_on_conception: true` no `forge.json` (desligado por padrão), a issue é criada ou reaproveitada e nunca duplicada, e o dispatch lê a evidência. Falha externa vira aviso e não trava a spec (`card-evidence.json`; com gestor por MCP, `forge queue card --feature <id> --provider <p> --id <id> --url <https>`; para renovar, apague o arquivo)."
-        },
-        {
-          "titulo": "Agora a skill de diagramas vive no repositório.",
-          "texto": "Ela pergunta o motor, Mermaid (padrão) ou diagram-studio, e não instala nada sozinha (`diagramas-c4-mermaid` em `.agents/skills/`)."
-        },
-        {
-          "titulo": "Agora o atestado é conferido em segundos no CI.",
-          "texto": "No modo `local`, o parecer do PR de feature é verificado na hora; o modo `desligado` diz em voz alta que nada foi conferido, e `vcs` é recusado como adiado (`scripts/atestado.py`)."
-        },
-        {
-          "titulo": "Agora você vê quanto o CI custa, com número que se defende.",
-          "texto": "O cálculo cruza a cobrança do GitHub com o custo por job e mostra a diferença; jobs pulados e cancelados ficam à parte e o CSV abre seguro na planilha (`scripts/ci-politica.py`; células iniciadas por `=`, `+`, `@` ou `-` são neutralizadas)."
-        },
-        {
-          "titulo": "Agora a Constituição guarda os modos do projeto.",
-          "texto": "A tabela `Ferramentas e Integrações` registra o modo do atestado, da revisão humana, o WIP humano, os módulos permitidos e o início automático do Builder, e as lições passam a ficar num arquivo por regra (`GOV-03`, em `sdd/memory/licoes/`)."
-        },
-        {
-          "titulo": "O modo sem humano só liga depois de você ver os riscos.",
-          "texto": "O aviso dos três riscos precisa ser apresentado e aceito; recusar mantém o padrão seguro, `com-humano`."
-        },
-        {
-          "titulo": "Agora o `/upgrade-sdd` leva a política de PR para o seu projeto.",
-          "texto": "Você recebe o hook, o job `pronto?`, os scripts e os campos de modo sem perder o seu `ci.yml` nem o `.claude/settings.json`; o forge mescla, nunca sobrescreve, e JSON inválido não é tocado."
-        },
-        {
-          "titulo": "Agora o README tem um prompt para cada ferramenta.",
-          "texto": "São quatro blocos \"cole isto na sua IA\", um por agente, cada um apontando para o arquivo de instruções que ele lê."
-        },
         {
           "titulo": "Atualizar do 5.0 não deixa mais o Claude Code travado.",
           "texto": "O `forge update` agora grava o script da barreira de PR antes de instalar o hook, e o hook tolera a falta do script em vez de bloquear todo comando do agente (`scripts/pr_guard.py` e `forge hook pr-guard`, ADR-0027)."
@@ -159,7 +95,7 @@
         },
         {
           "titulo": "Avisos da beta",
-          "texto": "esta versão não está na `main` (`FLX-07`); quem usa `npm install -g @nathanramorim/forge-sdd` sem `@beta` continua na linha estável."
+          "texto": "esta versão não substitui a estável; quem usa `npm install -g @nathanramorim/forge-sdd` sem `@beta` continua na 5.0.0. Se você rodou o `forge update --upgrade` com a 5.2.0-beta, confira o `git diff` antes de seguir."
         }
       ]
     }

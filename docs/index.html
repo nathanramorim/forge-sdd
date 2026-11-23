@@ -1189,7 +1189,7 @@ footer {
         <span>Forge-SDD</span>
       </a>
       <a class="chip" href="#novidades" data-nv-alvo="stable" title="Ver o que mudou nesta versão"><i style="--o:var(--accent)"></i>Estável <span data-versao="latest">5.0.0</span></a>
-      <a class="chip" href="#novidades" data-nv-alvo="beta" title="Ver o que mudou nesta versão"><i style="--o:var(--warn)"></i>Beta <span data-versao="beta">5.2.0-beta</span></a>
+      <a class="chip" href="#novidades" data-nv-alvo="beta" title="Ver o que mudou nesta versão"><i style="--o:var(--warn)"></i>Beta <span data-versao="beta">5.2.1-beta</span></a>
       <span class="chip chip-mit" title="Licença MIT Open Source"><i style="--o:var(--ok)"></i>MIT License</span>
     </div>
     <nav aria-label="Navegação Principal">
@@ -1374,7 +1374,7 @@ footer {
           <div class="term" style="margin-top:10px">
             <div># 1. Instale globalmente via NPM (estável, recomendado)</div>
             <div style="color:#fff;font-weight:600">npm install -g @nathanramorim/forge-sdd</div>
-            <div style="margin-top:8px"># Ou canal Beta (v<span data-versao="beta">5.2.0-beta</span>)</div>
+            <div style="margin-top:8px"># Ou canal Beta (v<span data-versao="beta">5.2.1-beta</span>)</div>
             <div style="color:#fff;font-weight:600">npm install -g @nathanramorim/forge-sdd@beta</div>
             <div style="margin-top:8px"># 2. Inicialize dentro do seu projeto</div>
             <div style="color:#fff;font-weight:600">forge init</div>
@@ -1658,7 +1658,7 @@ footer {
         <button class="nv-tab" data-nv="beta" type="button" role="tab" aria-selected="false">
           <span class="nv-tab-top">
             <span class="chip"><i style="--o:var(--warn)"></i>Beta</span>
-            <span class="mono" data-versao="beta">5.2.0-beta</span>
+            <span class="mono" data-versao="beta">5.2.1-beta</span>
           </span>
           <span class="nv-tab-hint">Novidades em teste, com <code>@beta</code></span>
         </button>
@@ -2570,7 +2570,7 @@ function extrairVersao(payload) {
 function escolherVersoes(respLatest, respBeta, fallback) {
   const fb = fallback && typeof fallback === 'object' ? fallback : {};
   const fbLatest = typeof fb.latest === 'string' ? fb.latest : '5.0.0';
-  const fbBeta = typeof fb.beta === 'string' ? fb.beta : '5.2.0-beta';
+  const fbBeta = typeof fb.beta === 'string' ? fb.beta : '5.2.1-beta';
   const candLatest = typeof respLatest === 'string' ? respLatest : extrairVersao(respLatest);
   const candBeta = typeof respBeta === 'string' ? respBeta : extrairVersao(respBeta);
   return {
@@ -2832,7 +2832,7 @@ async function carregarVersoesAoVivo() {
   const elBeta = document.querySelector('[data-versao="beta"]');
   const fallback = {
     latest: elLatest ? elLatest.textContent.trim() : '5.0.0',
-    beta: elBeta ? elBeta.textContent.trim() : '5.2.0-beta'
+    beta: elBeta ? elBeta.textContent.trim() : '5.2.1-beta'
   };
   const [dLatest, dBeta] = await Promise.all([
     buscarCanalNpm('latest'),
