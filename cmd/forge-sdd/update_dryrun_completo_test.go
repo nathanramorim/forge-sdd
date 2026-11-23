@@ -53,7 +53,7 @@ func TestUpdateDryRunListaArquivosReescritos(t *testing.T) {
 	dir := projetoParaDryRun(t)
 	out := dryRun(t, dir, "--ci")
 	assert.Contains(t, out, "reescrever .agents/skills/sdd-build/SKILL.md")
-	assert.Contains(t, out, "criar .github/workflows/forge-pronto.yml (--ci)")
+	assert.Contains(t, out, "criar .github/workflows/forge-pronto.yml")
 	assert.Contains(t, out, "scripts/pr_guard.py seria instalado")
 }
 
@@ -82,4 +82,15 @@ func TestUpdateDryRunNaoAlteraNada(t *testing.T) {
 	antes := snapshotArquivos(t, dir)
 	dryRun(t, dir, "--upgrade", "--ci")
 	assert.Equal(t, antes, snapshotArquivos(t, dir), "o --dry-run não pode alterar nenhum arquivo")
+}
+
+func TestUpdateDryRunCIPreservaWorkflowDoUsuario(t *testing.T) {
+	dir := projetoParaDryRun(t)
+	testutil.WriteFile(t, dir, ".github/workflows/forge-pronto.yml", "name: meu\n")
+	out := dryRun(t, dir, "--ci")
+	assert.Contains(t, out, "preservar .github/workflows/forge-pronto.yml")
+	assert.NotContains(t, out, "criar .github/workflows/forge-pronto.yml")
+	b, err := os.ReadFile(filepath.Join(dir, ".github/workflows/forge-pronto.yml"))
+	require.NoError(t, err)
+	assert.Equal(t, "name: meu\n", string(b))
 }

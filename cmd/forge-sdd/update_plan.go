@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"io"
+	"os"
 	"slices"
 
 	"github.com/forge-sdd/cli/internal/config"
@@ -118,9 +119,15 @@ func printPlanoCompleto(w io.Writer, targetDir string, cfg config.Config, ci boo
 			fmt.Fprintln(w, "hook UserPromptSubmit seria instalado")
 		}
 	}
-	if ci {
-		fmt.Fprintln(w, "  criar .github/workflows/forge-pronto.yml (--ci)")
-	}
 	fmt.Fprintf(w, "Versão que seria gravada: %s\n", versao)
+	if ci {
+		fmt.Fprintln(w, "Workflow (--ci):")
+		dest := scaffold.ForgeProntoPath(targetDir)
+		if _, err := os.Lstat(dest); err == nil && !scaffold.IsGeneratedCI(dest) {
+			fmt.Fprintln(w, "  preservar .github/workflows/forge-pronto.yml (não é do forge-sdd; sem o marcador)")
+		} else {
+			fmt.Fprintln(w, "  criar .github/workflows/forge-pronto.yml")
+		}
+	}
 	return nil
 }

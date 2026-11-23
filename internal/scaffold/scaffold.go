@@ -2,7 +2,6 @@ package scaffold
 
 import (
 	"bytes"
-	"slices"
 	"embed"
 	"fmt"
 	"github.com/forge-sdd/cli/internal/notify"
@@ -10,6 +9,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"slices"
 	"strings"
 	"sync/atomic"
 	"text/template"
