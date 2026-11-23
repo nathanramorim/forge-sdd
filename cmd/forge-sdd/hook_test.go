@@ -120,3 +120,17 @@ func TestDoctorSemClaudeNaoMandaUpgrade(t *testing.T) {
 	assert.NotContains(t, out, "update --upgrade")
 	assert.Contains(t, out, "rode 'forge update'")
 }
+
+func TestDoctorAvisaGuardDoUsuario(t *testing.T) {
+	dir := t.TempDir()
+	require.NoError(t, os.MkdirAll(filepath.Join(dir, "scripts"), 0o755))
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "scripts", "pr_guard.py"), []byte("#!/usr/bin/env python3\n# meu guard\n"), 0o755))
+	out := captureStdout(t, func() { reportPRGuardCoverage(dir, []string{"claude"}) })
+	assert.Contains(t, out, "scripts/pr_guard.py é do usuário e não recebe atualização")
+	assert.Contains(t, out, "pr_guard.novo.py")
+
+	// negativo: guard gerado pelo forge não avisa
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "scripts", "pr_guard.py"), []byte("#!/usr/bin/env python3\n# forge-sdd:generated v5.2.0\n"), 0o755))
+	out = captureStdout(t, func() { reportPRGuardCoverage(dir, []string{"claude"}) })
+	assert.NotContains(t, out, "é do usuário")
+}

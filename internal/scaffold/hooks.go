@@ -272,6 +272,9 @@ func SyncClaudeIntegration(targetDir, version string, dryRun bool) (changed, war
 	} else {
 		changed = append(changed, c...)
 	}
+	if PRGuardUserOwned(targetDir) {
+		warnings = append(warnings, PRGuardAvisoSemCorrecoes)
+	}
 	if ok, err := mergeClaudeMCPServer(targetDir, dryRun); err != nil {
 		warnings = append(warnings, "MCP forge-sdd não registrado: "+err.Error())
 	} else if ok {

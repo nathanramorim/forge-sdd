@@ -413,6 +413,10 @@ func reportPRGuardCoverage(targetDir string, agents []string) (hookSemScript boo
 		fmt.Println("  ℹ️  Sem hook neste agente: o update só instala o hook PreToolUse quando o Claude está entre os agentes")
 	}
 
+	if scaffold.PRGuardUserOwned(targetDir) {
+		fmt.Println("  ⚠️  scripts/pr_guard.py é do usuário e não recebe atualização; compare com scripts/pr_guard.novo.py (gerado pelo 'forge update')")
+	}
+
 	if _, err := exec.LookPath("uv"); err != nil {
 		fmt.Println("  ⚠️  'uv' não está no PATH; o hook não roda sem ele (instale em https://docs.astral.sh/uv/)")
 	} else {

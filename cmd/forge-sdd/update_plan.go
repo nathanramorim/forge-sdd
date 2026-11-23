@@ -41,8 +41,12 @@ func printUpgradePlan(w io.Writer, targetDir string, cfg config.Config) (bool, e
 	for _, p := range obsolete.Preserve {
 		fmt.Fprintf(w, "  mantido %s (editado pelo usuário ou fora do padrão)\n", p)
 	}
-	if slices.Contains(cfg.Agents, config.AgentClaude) && scaffold.PRGuardUserOwned(targetDir) {
-		fmt.Fprintln(w, "  mantido scripts/pr_guard.py (sem o marcador forge-sdd:generated; é do usuário e não é atualizado)")
+	if slices.Contains(cfg.Agents, config.AgentClaude) {
+		if v, ok := scaffold.PRGuardAdotavel(targetDir); ok {
+			fmt.Fprintf(w, "  atualizar scripts/pr_guard.py (igual ao entregue pelo forge na %s)\n", v)
+		} else if scaffold.PRGuardUserOwned(targetDir) {
+			fmt.Fprintln(w, "  mantido scripts/pr_guard.py (sem o marcador forge-sdd:generated; é do usuário e não é atualizado; a versão nova vai para scripts/pr_guard.novo.py)")
+		}
 	}
 
 	for _, rel := range scaffold.InstrucoesDoUsuario(targetDir, cfg) {
