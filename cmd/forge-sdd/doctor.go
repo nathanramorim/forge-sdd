@@ -366,14 +366,19 @@ func runDoctorHarness(w io.Writer, dir string, asJSON bool, deps doctor.Deps) er
 // job "pronto?" do CI é quem segura o PR em draft.
 func reportPRGuardCoverage(targetDir string, agents []string) (hookSemScript bool) {
 	settings := filepath.Join(targetDir, ".claude", "settings.json")
-	instalado := false
+	instalado, legado := false, false
 	if data, err := os.ReadFile(settings); err == nil {
-		instalado = strings.Contains(string(data), "pr_guard.py")
+		txt := string(data)
+		novo := strings.Contains(txt, "hook pr-guard")
+		antigo := strings.Contains(txt, "pr_guard.py")
+		instalado = novo || antigo
+		legado = antigo && !novo
 	}
 
 	if instalado {
 		fmt.Println("  ✓ Hook PreToolUse instalado (.claude/settings.json)")
-		if _, err := os.Stat(scaffold.PRGuardScriptPath(targetDir)); err != nil {
+		// O comando novo (`forge hook pr-guard`) tolera script ausente; só o antigo bloqueia o Bash.
+		if _, err := os.Stat(scaffold.PRGuardScriptPath(targetDir)); err != nil && legado {
 			hookSemScript = true
 			fmt.Println("  ✗ Erro de configuração: o hook existe, mas scripts/pr_guard.py não; o hook bloquearia todo Bash. Rode 'forge update' para gravá-lo")
 		}

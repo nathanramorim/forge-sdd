@@ -33,7 +33,13 @@ func MergeClaudeSessionStartHook(targetDir string) (bool, error) {
 
 // prGuardCommand roda a barreira de PR antes de qualquer Bash: bloqueia `gh pr create` sem
 // draft, `gh pr ready` e `gh pr merge` sem veredito conforme para o HEAD (feat-106-14).
-const prGuardCommand = "uv run scripts/pr_guard.py --hook"
+const prGuardCommand = "forge hook pr-guard"
+
+// prGuardMarkers reconhece o hook nos dois comandos (o novo e o antigo, ainda por migrar).
+var prGuardMarkers = []string{"hook pr-guard", "pr_guard.py"}
+
+// prGuardLegacyCommand é o comando anterior (fix-106-14b): o merge o substitui pelo novo.
+const prGuardLegacyCommand = "uv run scripts/pr_guard.py --hook"
 
 // prGuardMatcher restringe o hook a comandos de shell; sem ele o guard seria chamado em toda
 // ferramenta, inclusive Read/Edit, e o custo não se pagaria.
@@ -44,11 +50,33 @@ const prGuardMatcher = "Bash"
 // inválido). Vale só no Claude Code; o aviso de cobertura fica no `forge doctor` (feat-106-15).
 func MergeClaudePreToolUseHRook(targetDir string) (bool, error) {
 	return mergeClaudeHookWithMatcher(targetDir, "PreToolUse", prGuardMatcher, prGuardCommand,
-		[]string{"pr_guard.py"}, false)
+		prGuardMarkers, false)
 }
 
 func mergeClaudeHook(targetDir, event, command string, markers []string, dryRun bool) (bool, error) {
 	return mergeClaudeHookWithMatcher(targetDir, event, "", command, markers, dryRun)
+}
+
+// migrateLegacyHook troca, no lugar, o comando `legacy` pelo `command` dentro das entradas do
+// evento; só toca o campo command exato, nunca hooks do usuário. Devolve true se trocou algo.
+func migrateLegacyHook(groups []any, legacy, command string) bool {
+	changed := false
+	for _, g := range groups {
+		gm, ok := g.(map[string]any)
+		if !ok {
+			continue
+		}
+		inner, _ := gm["hooks"].([]any)
+		for _, h := range inner {
+			if hm, ok := h.(map[string]any); ok {
+				if cmd, _ := hm["command"].(string); cmd == legacy {
+					hm["command"] = command
+					changed = true
+				}
+			}
+		}
+	}
+	return changed
 }
 
 // mergeClaudeHookWithMatcher é o mergeClaudeHook com `matcher` opcional (só o PreToolUse usa).
@@ -90,6 +118,10 @@ func mergeClaudeHookWithMatcher(targetDir, event, matcher, command string, marke
 	if hooks[event] != nil && !ok {
 		return false, fmt.Errorf("%s: \"hooks.%s\" não é uma lista; adicione o hook manualmente", path, event)
 	}
+	migrated := false
+	if event == "PreToolUse" && command == prGuardCommand {
+		migrated = migrateLegacyHook(groups, prGuardLegacyCommand, command)
+	}
 	for _, g := range groups {
 		if gm, ok := g.(map[string]any); ok {
 			if inner, ok := gm["hooks"].([]any); ok {
@@ -98,7 +130,10 @@ func mergeClaudeHookWithMatcher(targetDir, event, matcher, command string, marke
 						cmd, _ := hm["command"].(string)
 						for _, m := range markers {
 							if strings.Contains(cmd, m) {
-								return false, nil // já instalado
+								if !migrated {
+									return false, nil // já instalado
+								}
+								return writeHooksRoot(targetDir, path, root, hooks, event, groups, dryRun)
 							}
 						}
 					}
@@ -113,6 +148,11 @@ func mergeClaudeHookWithMatcher(targetDir, event, matcher, command string, marke
 		entrada["matcher"] = matcher
 	}
 	groups = append(groups, entrada)
+	return writeHooksRoot(targetDir, path, root, hooks, event, groups, dryRun)
+}
+
+// writeHooksRoot grava o settings.json com a lista de grupos do evento já atualizada.
+func writeHooksRoot(targetDir, path string, root, hooks map[string]any, event string, groups []any, dryRun bool) (bool, error) {
 	hooks[event] = groups
 	root["hooks"] = hooks
 	if dryRun {

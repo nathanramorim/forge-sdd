@@ -130,6 +130,13 @@ func TestDoctorAcusaHookSemScript(t *testing.T) {
 	assert.NotContains(t, out, "Erro de configuração")
 
 	require.NoError(t, os.Remove(filepath.Join(dir, "scripts", "pr_guard.py")))
+	// O comando novo tolera o script ausente; só o comando antigo bloquearia o Bash.
+	out = captureStdout(t, func() { _, err = runRoot(t, "doctor", dir) })
+	require.NoError(t, err)
+	assert.NotContains(t, out, "Erro de configuração")
+	sp := filepath.Join(dir, ".claude", "settings.json")
+	cur, _ := os.ReadFile(sp)
+	require.NoError(t, os.WriteFile(sp, []byte(strings.ReplaceAll(string(cur), "forge hook pr-guard", "uv run scripts/pr_guard.py --hook")), 0o644))
 	out = captureStdout(t, func() { _, err = runRoot(t, "doctor", dir) })
 	require.Error(t, err)
 	assert.Contains(t, out, "Erro de configuração")
@@ -147,5 +154,5 @@ func TestUpdateReparaHookSemScript(t *testing.T) {
 	_, statErr := os.Stat(script)
 	require.NoError(t, statErr)
 	s, _ := os.ReadFile(filepath.Join(dir, ".claude", "settings.json"))
-	assert.Equal(t, 1, strings.Count(string(s), "pr_guard.py"), "não duplica o hook")
+	assert.Equal(t, 1, strings.Count(string(s), "hook pr-guard"), "não duplica o hook")
 }

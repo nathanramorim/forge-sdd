@@ -107,7 +107,7 @@ func installPRGuard(targetDir, version string, dryRun bool) (changed []string, e
 	} else if ok {
 		changed = append(changed, prGuardScriptRel)
 	}
-	ok, err := mergeClaudeHookWithMatcher(targetDir, "PreToolUse", prGuardMatcher, prGuardCommand, []string{"pr_guard.py"}, dryRun)
+	ok, err := mergeClaudeHookWithMatcher(targetDir, "PreToolUse", prGuardMatcher, prGuardCommand, prGuardMarkers, dryRun)
 	if err != nil {
 		return changed, err
 	}
