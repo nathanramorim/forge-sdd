@@ -97,3 +97,16 @@ func TestDoctorHarness_JSONECodigoDeSaida(t *testing.T) {
 	_ = runDoctorHarness(&buf, t.TempDir(), false, deps)
 	assert.Contains(t, buf.String(), "[falha] versao:")
 }
+
+func TestDoctorAvisaRuleComVersaoNova(t *testing.T) {
+	dir := t.TempDir()
+	require.NoError(t, os.MkdirAll(filepath.Join(dir, "sdd"), 0o755))
+	require.NoError(t, os.MkdirAll(filepath.Join(dir, ".agents", "rules"), 0o755))
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "sdd", ".sddrc"), []byte(`{"project":"p","version":"5.0.0","agents":["claude"],"stack":"go","db":"none","lang":"pt-BR"}`), 0o644))
+	require.NoError(t, os.WriteFile(filepath.Join(dir, ".agents", "rules", "sdd-seguranca.md"), []byte("editada por mim\n"), 0o644))
+	out := captureStdout(t, func() {
+		_, err := runRoot(t, "doctor", dir)
+		require.NoError(t, err)
+	})
+	assert.Contains(t, out, ".agents/rules/sdd-seguranca.md tem versão nova do forge")
+}

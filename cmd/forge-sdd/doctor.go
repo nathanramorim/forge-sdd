@@ -109,6 +109,12 @@ inconsistências de configuração dos agentes de IA e progresso das features.`,
 			fmt.Println("⚠️  Arquivo sdd/.sdd-version não encontrado.")
 		}
 
+		if _, manter := scaffold.PlanoRegras(targetDir, config.Defaults()); len(manter) > 0 {
+			for _, rel := range manter {
+				fmt.Printf("⚠️  %s tem versão nova do forge e você o editou; revise o .novo ao lado (rode 'forge update')\n", notify.Sanitize(rel, 300, false))
+			}
+		}
+
 		// 3. Validação física dos Agentes
 		fmt.Println("\n🤖 Diagnóstico de Agentes:")
 		for _, agent := range rc.Agents {
