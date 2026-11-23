@@ -4,7 +4,9 @@ import (
 	"bytes"
 	"encoding/json"
 	"io"
+	"github.com/forge-sdd/cli/internal/config"
 	"github.com/forge-sdd/cli/internal/doctor"
+	"github.com/forge-sdd/cli/internal/scaffold"
 	"os"
 	"path/filepath"
 	"strings"
@@ -196,4 +198,18 @@ func TestBriefEHookMantemSaidaDeExitCode(t *testing.T) {
 	assert.Contains(t, out, "Error:")
 	// forge hook segue silencioso por conta própria.
 	assert.Contains(t, hookPRGuardCmd.Short, "avisa")
+}
+
+// O init novo tem de sair saudável para o doctor: o teste de "doctor saudável" acima lê o
+// veredito.md do repositório; este lê o que o próprio scaffold grava (fix-118-03).
+func TestInitNovoPassaNoDoctorHarness(t *testing.T) {
+	dir := t.TempDir()
+	_, err := scaffold.Run(config.Config{Project: "demo", Stack: "go", Lang: "pt-BR", SddVersion: version, Agents: []string{config.AgentClaude}}, dir)
+	require.NoError(t, err)
+	var out, errB bytes.Buffer
+	d := depsHarnessTeste()
+	d.Versao = version
+	d.Usuario = "eu"
+	assert.NoError(t, runDoctorHarness(&out, &errB, dir, false, d), "saída: %s", out.String())
+	assert.NotContains(t, out.String(), "[falha]")
 }

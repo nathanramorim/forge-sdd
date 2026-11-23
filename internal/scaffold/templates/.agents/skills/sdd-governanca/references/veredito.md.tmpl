@@ -18,7 +18,11 @@
     }
   ],
   "candidate_skill": null,
-  "resumo": "síntese objetiva"
+  "resumo": "síntese objetiva",
+  "head_sha": "preenchido pelo Go a partir do HEAD; não invente",
+  "ponto": "spec | entrega (preenchido pelo Go)",
+  "modo": "modo da sessão (preenchido pelo Go se vazio)",
+  "feature": "id da feature (preenchido pelo Go)"
 }
 ```
 
