@@ -8,7 +8,7 @@ Documento substituto e consolidado da v1.0. Principais mudanças:
 - Orçamentos de tokens explícitos por artefato.
 - Ciclo de sessão unificado (todos os chatmodes seguem o mesmo lifecycle).
 - Telemetria com responsável definido (Orquestrador escreve via filesystem MCP).
-- Sincronização automática da documentação wiki no repositório lp-forge-sdd via GitHub Actions.
+- Wiki e landing page vivem neste repositório (`docs/wiki.html` e `docs/index.html`), publicadas pelo `scripts/lp-deploy.sh`.
 - Skills index para descoberta sob demanda.
 - Chatmodes ampliados: Archivist (manutenção) e Migrator (upgrade de versão).
 - Protocolos de paralelismo e rollback definidos.
