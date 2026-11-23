@@ -9,6 +9,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"slices"
 	"strings"
 	"sync/atomic"
 	"text/template"
@@ -66,41 +67,9 @@ func Run(cfg config.Config, targetDir string) ([]string, error) {
 		agents = []string{config.AgentCopilot}
 	}
 
-	// 1. Templates globais (sdd/, .vscode/, e .github/ do copilot)
-	//    Sempre renderizados — são agnósticos ao agente de IA.
-	globalRoots := []string{"templates/sdd", "templates/.agents", "templates/.forge"}
-
-	// .vscode/ e .github/ só são incluídos quando copilot está selecionado
-	copilotSelected := false
-	for _, a := range agents {
-		if a == config.AgentCopilot {
-			copilotSelected = true
-			break
-		}
-	}
-	if copilotSelected {
-		globalRoots = append(globalRoots, "templates/.vscode", "templates/.github")
-	}
-
-	for _, root := range globalRoots {
-		// stripPrefix = "templates" para preservar o nome do subdiretório no destino
-		// ex: templates/.github/foo.tmpl → .github/foo
-		files, err := renderDir(templatesFS, root, "templates", cfg, targetDir)
-		if err != nil {
-			return nil, err
-		}
-		created = append(created, files...)
-	}
-
-	// 2. Templates específicos por agente
-	for _, agent := range agents {
-		root := agentTemplateRoot(agent)
-		if root == "" {
-			continue // copilot já foi tratado acima
-		}
-		// stripPrefix = root do agente para que CLAUDE.md fique na raiz do projeto
-		// ex: templates/agents/claude/CLAUDE.md.tmpl → CLAUDE.md
-		files, err := renderDir(templatesFS, root, root, cfg, targetDir)
+	// 1. Globais (sempre) e 2. específicos por agente; a lista é a mesma do plano do update.
+	for _, r := range raizesDoRun(cfg) {
+		files, err := renderDir(templatesFS, r.root, r.strip, cfg, targetDir)
 		if err != nil {
 			return nil, err
 		}
@@ -123,6 +92,29 @@ func Run(cfg config.Config, targetDir string) ([]string, error) {
 		}
 	}
 	return created, nil
+}
+
+type raizTemplate struct{ root, strip string }
+
+// raizesDoRun lista as raízes de template que Run renderiza, na ordem: globais (sdd/, .agents/, .forge/,
+// e .vscode/.github do copilot) e depois as de cada agente. Única fonte (DUP-06) de Run e do plano.
+func raizesDoRun(cfg config.Config) []raizTemplate {
+	agents := cfg.Agents
+	if len(agents) == 0 {
+		agents = []string{config.AgentCopilot}
+	}
+	raizes := []raizTemplate{
+		{"templates/sdd", "templates"}, {"templates/.agents", "templates"}, {"templates/.forge", "templates"},
+	}
+	if slices.Contains(agents, config.AgentCopilot) {
+		raizes = append(raizes, raizTemplate{"templates/.vscode", "templates"}, raizTemplate{"templates/.github", "templates"})
+	}
+	for _, agent := range agents {
+		if root := agentTemplateRoot(agent); root != "" {
+			raizes = append(raizes, raizTemplate{root, root})
+		}
+	}
+	return raizes
 }
 
 // installClaudeInboxHook liga o hook do inbox quando o Claude está entre os agentes. A mesclagem é
@@ -194,41 +186,20 @@ func renderDir(fsys embed.FS, root, stripPrefix string, cfg config.Config, targe
 			return fmt.Errorf("read template %s: %w", path, err)
 		}
 
-		// Instrução sem marcador: só a 5.0 idêntica ao template é adotada; senão é do usuário.
-		relSlash := filepath.ToSlash(rel)
-		adotada := isInstrucao(relSlash) && !IsGeneratedInstrucao(dest) && adotavelDe50(relSlash, dest, cfg)
-
-		// Rules sdd-* e schema.json: do forge (igual à 5.0 ou ao template atual) são atualizados;
-		// divergentes são do usuário (preservados, com aviso e .novo ao lado).
-		if regraGerenciada(relSlash) {
-			if _, serr := os.Lstat(dest); serr == nil {
-				rendered, rerr := renderTemplate(path, data, cfg)
-				if rerr != nil {
-					return rerr
-				}
-				if !arquivoDoForge(relSlash, dest, rendered, cfg) {
-					avisaRegraPreservada(targetDir, dest, relSlash, rendered)
-					created = append(created, dest)
-					return nil
-				}
-				adotada = true
-			}
-		}
-
-		// Se o arquivo destino já existe e deve ser preservado, pulamos a escrita física
-		if !adotada && shouldPreserve(dest, targetDir) {
-			if isInstrucao(relSlash) {
-				if rendered, rerr := renderTemplate(path, data, cfg); rerr == nil {
-					avisaInstrucaoPreservada(targetDir, dest, rendered)
-				}
-			}
-			created = append(created, dest)
-			return nil
-		}
-
 		rendered, err := renderTemplate(path, data, cfg)
 		if err != nil {
 			return err
+		}
+		relSlash := filepath.ToSlash(rel)
+		if d := decideDestino(relSlash, dest, targetDir, rendered, cfg); d.Preservar {
+			switch d.Tipo {
+			case tipoRegra:
+				avisaRegraPreservada(targetDir, dest, relSlash, rendered)
+			case tipoInstrucao:
+				avisaInstrucaoPreservada(targetDir, dest, rendered)
+			}
+			created = append(created, dest)
+			return nil
 		}
 
 		perm := os.FileMode(0644)
@@ -248,6 +219,44 @@ func renderDir(fsys embed.FS, root, stripPrefix string, cfg config.Config, targe
 	})
 
 	return created, err
+}
+
+const (
+	tipoInstrucao = "instrucao"
+	tipoRegra     = "regra"
+	tipoOutro     = "outro"
+)
+
+// decisao é o veredito sobre um destino: preservar (com o tipo, que define o aviso) ou escrever.
+type decisao struct {
+	Preservar bool
+	Tipo      string
+}
+
+// decideDestino é a única regra de "escrever ou preservar" (DUP-06), usada por renderDir e pelo plano
+// do `update --dry-run`. Não escreve nada.
+func decideDestino(rel, dest, targetDir string, rendered []byte, cfg config.Config) decisao {
+	tipo := tipoOutro
+	if isInstrucao(rel) {
+		tipo = tipoInstrucao
+	}
+	// Instrução sem marcador: só a 5.0 idêntica ao template é adotada; senão é do usuário.
+	adotada := isInstrucao(rel) && !IsGeneratedInstrucao(dest) && adotavelDe50(rel, dest, cfg)
+
+	// Rules sdd-* e schema.json: do forge (igual à 5.0 ou ao template atual) são atualizados;
+	// divergentes são do usuário (preservados, com aviso e .novo ao lado).
+	if regraGerenciada(rel) {
+		if _, serr := os.Lstat(dest); serr == nil {
+			if !arquivoDoForge(rel, dest, rendered, cfg) {
+				return decisao{Preservar: true, Tipo: tipoRegra}
+			}
+			adotada = true
+		}
+	}
+	if !adotada && shouldPreserve(dest, targetDir) {
+		return decisao{Preservar: true, Tipo: tipo}
+	}
+	return decisao{Tipo: tipo}
 }
 
 func renderTemplate(path string, data []byte, cfg config.Config) ([]byte, error) {

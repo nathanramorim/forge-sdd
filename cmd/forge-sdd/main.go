@@ -257,13 +257,18 @@ func runUpdateFlow(cmd *cobra.Command, targetDir string) error {
 		if _, err := printUpgradePlan(cmd.OutOrStdout(), targetDir, planCfg); err != nil {
 			return err
 		}
-		if ci {
-			planCfg.DryRun = true
-			if _, err := scaffold.RenderCI(planCfg, targetDir); err != nil {
-				return err
-			}
+		planCfg.DryRun = true
+		if planCfg.NamingConvention == "" {
+			planCfg.NamingConvention = config.DetectNamingConvention(targetDir)
 		}
-		return nil
+		planCfg.SddVersion = version
+		rotulo := version
+		if v, _ := cmd.Flags().GetString("version"); v != "" {
+			planCfg.SddVersion, rotulo = v, v
+		} else if up, _ := cmd.Flags().GetBool("upgrade"); up {
+			rotulo = version + " (a do binário; com --upgrade o update real grava a mais recente do NPM)"
+		}
+		return printPlanoCompleto(cmd.OutOrStdout(), targetDir, planCfg, ci, rotulo)
 	}
 	upgradeFlag, _ := cmd.Flags().GetBool("upgrade")
 	versionFlag, _ := cmd.Flags().GetString("version")
