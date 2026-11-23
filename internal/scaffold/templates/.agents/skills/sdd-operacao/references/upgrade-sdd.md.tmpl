@@ -8,33 +8,36 @@
 4. **Preservação de domínio:** nunca sobrescreva `sdd/memory/constitution.md` fora de blocos demarcados, iniciativas em `sdd/discovery/`, `sdd/spec/` ou `.agents/rules/` customizadas.
 5. Liste arquivos criados, atualizados e removidos e sugira `/doctor`.
 
-## A política de PR em draft vai junto (feat-106-36)
+## O que o upgrade entrega (e o que fica com você)
 
-O `/upgrade-sdd` é o **canal de entrega** da política de PR (ADR-0022, ADR-0023). Ao atualizar a
-estrutura, ele leva as peças novas do fluxo para o projeto existente:
+O `/upgrade-sdd` é o **canal de entrega** da política de PR (ADR-0022, ADR-0023). O forge só promete
+o que o código entrega:
 
-| Peça | O que instala | Onde |
+| Peça | O que o forge faz | Onde |
 |---|---|---|
-| **Hook `PreToolUse`** | chama a barreira de PR (`forge hook pr-guard`, que roda `scripts/pr_guard.py` e tolera a ausência dele), que bloqueia `gh pr ready` e `gh pr merge` sem parecer `conforme` para o HEAD; o `forge init` e o `forge update` entregam o script e o hook, não copie à mão | `.claude/settings.json` |
-| **Job `pronto?`** | recusa PR em draft na branch principal | `.github/workflows/ci.yml` |
-| **Scripts de política** | `ci-politica.py` (custo do CI) e `atestado.py` (veredito no CI); estes dois seguem cópia manual, o `pr_guard.py` já vem do `forge` | `scripts/` |
-| **Campos de modo** | `Modo do atestado`, `Modo de revisão humana`, `WIP humano`, `Módulos permitidos`, `Início automático do Builder` | `sdd/memory/constitution.md` |
+| **Hook `PreToolUse`** | `forge init` e `forge update` mesclam o hook (`forge hook pr-guard`), que bloqueia `gh pr ready` e `gh pr merge` sem parecer `conforme` para o HEAD | `.claude/settings.json` |
+| **Script `pr_guard.py`** | `forge init` e `forge update` gravam o script; sem o marcador `# forge-sdd:generated` ele é seu e fica intocado | `scripts/pr_guard.py` |
+| **Campos de modo** | entregues pela feat-118-03: `Modo do atestado`, `Modo de revisão humana`, `WIP humano`, `Módulos permitidos`, `Início automático do Builder`, só se ainda não existirem | `sdd/memory/constitution.md` |
+| **Workflow `forge-pronto.yml`** | **só com `--ci`**: `forge update --ci` (ou `forge init --ci`) cria o arquivo novo com o job `pronto?`, que recusa PR em draft; sem `--ci` nada é criado | `.github/workflows/forge-pronto.yml` |
 
-### Regras do upgrade para o CI e o hook
+### O que o forge NÃO faz
 
-1. **O `ci.yml` do user é preservado.** O forge **não sobrescreve** o workflow existente: ele
-   acrescenta só o job `pronto?` e, quando não houver nenhum `if` de draft, avisa o que falta e
-   mostra o diff. Passos customizados do projeto nunca são perdidos.
-2. **O `settings.json` do usuário é mesclado, nunca substituído.** O hook entra sem duplicar e sem
-   remover permissões, modelos ou outros hooks. JSON inválido **não é tocado**: o upgrade avisa e
+1. **Não lê nem altera o seu `ci.yml`.** O que mudar nele é decisão sua: se quiser a recusa de PR em
+   draft no seu CI, copie o job `pronto?` do `forge-pronto.yml` ou use o arquivo como está.
+2. **Não entrega `ci-politica.py` nem `atestado.py`.** Se o seu CI usa scripts assim, eles são seus.
+3. **Um `forge-pronto.yml` seu** (sem o marcador `# forge-sdd:generated`) é preservado, com aviso.
+4. **O `settings.json` é mesclado, nunca substituído.** JSON inválido não é tocado: o upgrade avisa e
    pede a adição manual.
-3. **Os campos de modo entram na Constituição só se ainda não existirem.** Valores já escolhidos
-   pelo dono são preservados; uma mudança de valor exige ADR (`GOV-01`).
-4. **A prévia é obrigatória.** Rode `forge update --dry-run` primeiro e mostre a lista; o upgrade
-   só grava depois do OK do dono.
+5. **Edição nas skills `sdd-*` é sobrescrita** a cada upgrade; personalize em `.agents/rules/` ou
+   em skills próprias, que o forge preserva.
+
+Os valores dos campos de modo já escolhidos pelo dono são preservados; mudar um valor exige ADR (`GOV-01`).
+A prévia é obrigatória: rode `forge update --dry-run` (ou `forge update --ci --dry-run`) e mostre a
+lista; o upgrade só grava depois do OK do dono.
 
 ### Ao terminar
 
-Liste o que mudou por categoria (hook, workflow, scripts, Constituição) e rode `forge doctor`: a
+Liste o que mudou por categoria (hook, script, workflow, Constituição) e rode `forge doctor`: a
 seção **Barreira de PR** informa se o hook está instalado, se o `uv` está no PATH e em quais
-agentes a barreira vale (só o Claude Code executa hooks; nos outros, o job `pronto?` segura).
+agentes a barreira vale (só o Claude Code executa hooks; nos outros, vale o job `pronto?` se você
+criou o workflow com `--ci`).

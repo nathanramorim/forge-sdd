@@ -194,6 +194,13 @@ func runInitFlow(cmd *cobra.Command, dirArg string) error {
 	if err != nil {
 		return fmt.Errorf("scaffold falhou: %w", err)
 	}
+	if ci, _ := cmd.Flags().GetBool("ci"); ci {
+		ciFiles, err := scaffold.RenderCI(cfg, targetDir)
+		if err != nil {
+			return fmt.Errorf("workflow forge-pronto falhou: %w", err)
+		}
+		created = append(created, ciFiles...)
+	}
 
 	printSummaryReport(cfg, targetDir, len(created))
 	if !cfg.DryRun {
@@ -235,6 +242,7 @@ func runUpdateFlow(cmd *cobra.Command, targetDir string) error {
 
 	yes, _ := cmd.Flags().GetBool("yes")
 	dryRun, _ := cmd.Flags().GetBool("dry-run")
+	ci, _ := cmd.Flags().GetBool("ci")
 	if err := reportAgentModels(cmd, targetDir, dryRun); err != nil {
 		return err
 	}
@@ -243,8 +251,16 @@ func runUpdateFlow(cmd *cobra.Command, targetDir string) error {
 		// Plano da atualização de estrutura: não consulta o NPM, não pergunta nada e não grava.
 		planCfg := rc.ToConfig()
 		fmt.Fprintf(cmd.OutOrStdout(), "[DRY-RUN] Nada será gravado. Plano para %s:\n", targetDir)
-		_, err := printUpgradePlan(cmd.OutOrStdout(), targetDir, planCfg)
-		return err
+		if _, err := printUpgradePlan(cmd.OutOrStdout(), targetDir, planCfg); err != nil {
+			return err
+		}
+		if ci {
+			planCfg.DryRun = true
+			if _, err := scaffold.RenderCI(planCfg, targetDir); err != nil {
+				return err
+			}
+		}
+		return nil
 	}
 	upgradeFlag, _ := cmd.Flags().GetBool("upgrade")
 	versionFlag, _ := cmd.Flags().GetString("version")
@@ -277,7 +293,7 @@ func runUpdateFlow(cmd *cobra.Command, targetDir string) error {
 			}
 		}
 
-		if len(toAdd) == 0 && targetVersion == "" && !namingConventionChanged {
+		if len(toAdd) == 0 && targetVersion == "" && !namingConventionChanged && !ci {
 			versionOutdated := config.CompareVersions(projectVersion, version) < 0
 			if versionOutdated {
 				fmt.Printf("Versão desatualizada: projeto v%s → CLI v%s\n", projectVersion, version)
@@ -352,9 +368,17 @@ func runUpdateFlow(cmd *cobra.Command, targetDir string) error {
 			return fmt.Errorf("atualizar sdd/.sddrc: %w", err)
 		}
 		fmt.Printf("✓ Convenção de nomenclatura atualizada para: %s\n", baseCfg.NamingConvention)
-	} else {
+	} else if !ci {
 		fmt.Println("Nenhuma modificação realizada.")
 		return nil
+	}
+
+	if ci {
+		ciFiles, err := scaffold.RenderCI(baseCfg, targetDir)
+		if err != nil {
+			return fmt.Errorf("workflow forge-pronto falhou: %w", err)
+		}
+		created = append(created, ciFiles...)
 	}
 
 	// Recria a config base atualizada com as escolhas finais
@@ -449,6 +473,7 @@ func init() {
 	initCmd.Flags().String("version", "", "Versão Forge-SDD (default: 5.0.0)")
 	initCmd.Flags().Bool("no-telemetry", false, "Desabilitar telemetria local")
 	initCmd.Flags().String("agent", "", "Agente(s) de IA: copilot, claude, gemini (csv, default: copilot)")
+	initCmd.Flags().Bool("ci", false, "Criar .github/workflows/forge-pronto.yml (job pronto? que recusa PR em draft); opt-in")
 	initCmd.Flags().String("naming-convention", "", "Convenção de nomenclatura: sequencial, hash, workitem")
 	rootCmd.PersistentFlags().String("iniciativa", "", "Iniciativa a usar (id <N>-<nome>); vence FORGE_INICIATIVA e a branch")
 	rootCmd.AddCommand(initCmd)
@@ -458,6 +483,7 @@ func init() {
 	updateCmd.Flags().String("agent", "", "Agente(s) a adicionar: copilot, claude, gemini, openai (csv)")
 	updateCmd.Flags().Bool("upgrade", false, "Atualizar estrutura para a versão mais recente do binário")
 	updateCmd.Flags().String("version", "", "Atualizar estrutura para uma versão específica (ex: 5.0.0)")
+	updateCmd.Flags().Bool("ci", false, "Criar .github/workflows/forge-pronto.yml (job pronto? que recusa PR em draft); opt-in")
 	updateCmd.Flags().String("naming-convention", "", "Convenção de nomenclatura: sequencial, hash, workitem")
 	rootCmd.AddCommand(updateCmd)
 

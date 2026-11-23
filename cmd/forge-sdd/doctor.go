@@ -406,7 +406,11 @@ func reportPRGuardCoverage(targetDir string, agents []string) (hookSemScript boo
 		fmt.Printf("  ⚠️  Cobertura: %s configurado, mas o hook não está instalado\n", strings.Join(comHook, ", "))
 	}
 	if len(semHook) > 0 {
-		fmt.Printf("  ℹ️  Sem hook: %s — nesses agentes vale o job \"pronto?\" do CI\n", strings.Join(semHook, ", "))
+		if _, err := os.Stat(scaffold.ForgeProntoPath(targetDir)); err == nil {
+			fmt.Printf("  ℹ️  Sem hook: %s — nesses agentes vale o job \"pronto?\" do CI (.github/workflows/forge-pronto.yml)\n", strings.Join(semHook, ", "))
+		} else {
+			fmt.Printf("  ℹ️  Sem hook: %s — a barreira não vale nesses agentes; para o job \"pronto?\" no CI rode 'forge update --ci'\n", strings.Join(semHook, ", "))
+		}
 	}
 	return hookSemScript
 }
