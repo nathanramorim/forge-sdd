@@ -1,6 +1,6 @@
 {
   "name": "@nathanramorim/forge-sdd",
-  "version": "5.2.1-beta",
+  "version": "5.2.2-beta",
   "description": "CLI que scaffolda estruturas Forge-SDD em segundos",
   "homepage": "https://github.com/nathanramorim/forge-sdd",
   "repository": {
