@@ -30,7 +30,7 @@ Nenhuma (`SEG-07`).
 ## Decisões do projeto aplicadas
 
 - Em `--harness` com código ≠ 0, as linhas `[falha]` e `[aviso]` com a sugestão vão também para **stderr** (o canal que o hook mostra); o stdout continua igual (texto ou `--json`).
-- `exitCodeErr` com `msg` vazia não imprime `Error:` nem o bloco de uso.
+- `exitCodeErr` com `msg` vazia não imprime `Error:` nem o bloco de uso: `SilenceErrors` e `SilenceUsage` são ligados no ponto que devolve o erro em `runDoctorHarness` (o `PersistentPreRunE` os zera antes). `forge brief` (`brief.go:47`) e `forge hook` mantêm o comportamento atual.
 - Uma falha de `versao` (binário mais novo que o projeto) diz o comando que resolve: `forge update`.
 
 ## O que já existe
@@ -43,15 +43,16 @@ Nenhuma (`SEG-07`).
 ## Comportamento esperado
 
 1. `forge doctor --harness` com falha: stdout inalterado; stderr traz as linhas de falha e aviso com a sugestão; sem `Error:` vazio nem `Usage:`; código 3.
-2. Projeto saudável: nada em stderr, código 0.
-3. `--json`: o JSON segue só no stdout.
+2. Falha de `versao` traz `forge update` na sugestão (coberto dentro de `TestDoctorHarnessFalhaEscreveEmStderr`); `forge brief` e `forge hook` não mudam (`TestBriefEHookMantemSaidaDeExitCode`).
+3. Projeto saudável: nada em stderr, código 0.
+4. `--json`: o JSON segue só no stdout.
 
 ## Critérios de Aceitação Executáveis
 
 ```bash
 set -o pipefail
-go test ./cmd/forge-sdd -run '^(TestDoctorHarnessFalhaEscreveEmStderr|TestDoctorHarnessSaudavelNaoEscreveEmStderr|TestExitCodeVazioNaoImprimeErroNemUso)$' -count=1
-[ "$(go test ./cmd/forge-sdd -list '^(TestDoctorHarnessFalhaEscreveEmStderr|TestDoctorHarnessSaudavelNaoEscreveEmStderr|TestExitCodeVazioNaoImprimeErroNemUso)$' | grep -c '^Test')" -eq 3 ]
+go test ./cmd/forge-sdd -run '^(TestDoctorHarnessFalhaEscreveEmStderr|TestDoctorHarnessSaudavelNaoEscreveEmStderr|TestDoctorHarnessSemErroVazioNemUsoViaRootCmd|TestBriefEHookMantemSaidaDeExitCode)$' -count=1
+[ "$(go test ./cmd/forge-sdd -list '^(TestDoctorHarnessFalhaEscreveEmStderr|TestDoctorHarnessSaudavelNaoEscreveEmStderr|TestDoctorHarnessSemErroVazioNemUsoViaRootCmd|TestBriefEHookMantemSaidaDeExitCode)$' | grep -c '^Test')" -eq 4 ]
 go test ./... -count=1
 ```
 
