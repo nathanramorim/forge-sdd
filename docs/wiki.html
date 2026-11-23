@@ -23,6 +23,7 @@
       <a href="#jornada" class="sidebar-link" data-pt="Jornada" data-en="Journey">Jornada</a>
       <a href="#exemplos" class="sidebar-link" data-pt="Exemplos" data-en="Examples">Exemplos</a>
       <a href="#hub-mode" class="sidebar-link" data-pt="Hub mode" data-en="Hub mode">Hub mode</a>
+      <a href="#atualizar" class="sidebar-link" data-pt="Atualizar" data-en="Update">Atualizar</a>
     </nav>
   </aside>
 
@@ -231,6 +232,45 @@ Me diga quando terminar e mostre os repos vinculados.</pre>
 forge pipeline
 Mostre quais têm features abertas e quais estão sem atividade.</pre>
       </div>
+    </section>
+
+    <section id="atualizar">
+      <h2 class="section-title" data-pt="Atualizar o Forge-SDD" data-en="Updating Forge-SDD">Atualizar o Forge-SDD</h2>
+      <p class="section-lead">Vale para qualquer versão nova, estável ou beta. Seus arquivos não são sobrescritos: quando algo seu conflita com o que mudou, a versão nova fica ao lado, num arquivo <code>.novo.md</code>, para você comparar.</p>
+
+      <ol class="example-steps">
+        <li>
+          <strong>Instale a versão nova.</strong>
+          <pre class="code-block">npm install -g @nathanramorim/forge-sdd          # estável
+npm install -g @nathanramorim/forge-sdd@beta     # prévia</pre>
+        </li>
+        <li>
+          <strong>Veja o que vai mudar, sem mexer em nada.</strong>
+          <pre class="code-block">forge update --dry-run</pre>
+        </li>
+        <li>
+          <strong>Aplique a atualização.</strong>
+          <p>Rode no seu terminal, fora do agente.</p>
+          <pre class="code-block">forge update --upgrade</pre>
+        </li>
+        <li>
+          <strong>Reconfigure o projeto.</strong>
+          <p>No chat do seu agente, leve a estrutura, as regras e os prompts novos para o projeto:</p>
+          <pre class="code-block">/upgrade-sdd</pre>
+        </li>
+        <li>
+          <strong>Confira se ficou tudo certo.</strong>
+          <pre class="code-block">forge doctor</pre>
+        </li>
+      </ol>
+
+      <h3 class="subsection-title">O que esperar</h3>
+      <ul>
+        <li>Instruções e regras que você editou não são trocadas; a versão nova aparece como <code>.novo.md</code>.</li>
+        <li>A Constituição ganha os campos novos por acréscimo, sem apagar o que você escreveu.</li>
+        <li>O workflow de CI do forge é opcional e só entra se você pedir (<code>--ci</code>). CI próprio nunca é tocado.</li>
+        <li>Se algo estranho aparecer, rode <code>forge doctor</code> e envie a saída a quem mantém o projeto.</li>
+      </ul>
     </section>
 
   </main>
