@@ -73,3 +73,21 @@ func TestInitFlagCIEOptIn(t *testing.T) {
 	require.NoError(t, err)
 	assert.FileExists(t, filepath.Join(com, ".github/workflows/forge-pronto.yml"))
 }
+
+func TestDoctorNaoPrometeProtecaoDoWorkflow(t *testing.T) {
+	dir := t.TempDir()
+	wf := filepath.Join(dir, ".github/workflows/forge-pronto.yml")
+	require.NoError(t, os.MkdirAll(filepath.Dir(wf), 0o755))
+
+	require.NoError(t, os.WriteFile(wf, []byte("name: meu\non: push\n"), 0o644))
+	out := captureStdout(t, func() { reportPRGuardCoverage(dir, []string{"gemini"}) })
+	assert.NotContains(t, out, "forge-pronto.yml", "workflow sem marcador não é do forge")
+	assert.NotContains(t, out, "vale o job")
+
+	require.NoError(t, os.WriteFile(wf, []byte("# forge-sdd:generated\nname: x\n"), 0o644))
+	out = captureStdout(t, func() { reportPRGuardCoverage(dir, []string{"gemini", "copilot"}) })
+	assert.Contains(t, out, "só registra a transição")
+	assert.Contains(t, out, "não bloqueia")
+	assert.NotContains(t, out, "vale o job")
+	assert.NotContains(t, out, "segura")
+}

@@ -18,12 +18,11 @@ o que o código entrega:
 | **Hook `PreToolUse`** | `forge init` e `forge update` mesclam o hook (`forge hook pr-guard`), que bloqueia `gh pr ready` e `gh pr merge` sem parecer `conforme` para o HEAD | `.claude/settings.json` |
 | **Script `pr_guard.py`** | `forge init` e `forge update` gravam o script; sem o marcador `# forge-sdd:generated` ele é seu e fica intocado | `scripts/pr_guard.py` |
 | **Campos de modo** | entregues pela feat-118-03: `Modo do atestado`, `Modo de revisão humana`, `WIP humano`, `Módulos permitidos`, `Início automático do Builder`, só se ainda não existirem | `sdd/memory/constitution.md` |
-| **Workflow `forge-pronto.yml`** | **só com `--ci`**: `forge update --ci` (ou `forge init --ci`) cria o arquivo novo com o job `pronto?`, que recusa PR em draft; sem `--ci` nada é criado | `.github/workflows/forge-pronto.yml` |
+| **Workflow `forge-pronto.yml`** | **só com `--ci`**: `forge update --ci` (ou `forge init --ci`) cria o arquivo novo com o job `pronto?`, que só registra a transição do PR de draft para pronto (não bloqueia e não substitui a revisão); sem `--ci` nada é criado | `.github/workflows/forge-pronto.yml` |
 
 ### O que o forge NÃO faz
 
-1. **Não lê nem altera o seu `ci.yml`.** O que mudar nele é decisão sua: se quiser a recusa de PR em
-   draft no seu CI, copie o job `pronto?` do `forge-pronto.yml` ou use o arquivo como está.
+1. **Não lê nem altera o seu `ci.yml`.** O que mudar nele é decisão sua: se quiser esse registro no seu CI, copie o job `pronto?` do `forge-pronto.yml` ou use o arquivo como está.
 2. **Não entrega `ci-politica.py` nem `atestado.py`.** Se o seu CI usa scripts assim, eles são seus.
 3. **Um `forge-pronto.yml` seu** (sem o marcador `# forge-sdd:generated`) é preservado, com aviso.
 4. **O `settings.json` é mesclado, nunca substituído.** JSON inválido não é tocado: o upgrade avisa e
@@ -39,5 +38,5 @@ lista; o upgrade só grava depois do OK do dono.
 
 Liste o que mudou por categoria (hook, script, workflow, Constituição) e rode `forge doctor`: a
 seção **Barreira de PR** informa se o hook está instalado, se o `uv` está no PATH e em quais
-agentes a barreira vale (só o Claude Code executa hooks; nos outros, vale o job `pronto?` se você
-criou o workflow com `--ci`).
+agentes a barreira vale. Só o Claude Code tem barreira local (hook); em Gemini, Copilot e Codex não há
+barreira local, e o `forge-pronto.yml` não a substitui.

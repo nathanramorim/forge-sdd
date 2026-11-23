@@ -363,7 +363,7 @@ func runDoctorHarness(w io.Writer, dir string, asJSON bool, deps doctor.Deps) er
 
 // reportPRGuardCoverage informa se o hook PreToolUse do pr_guard está instalado e em quais
 // agentes a barreira de fato vale. Só o Claude Code executa hooks (feat-106-15); nos demais, o
-// job "pronto?" do CI é quem segura o PR em draft.
+// workflow forge-pronto.yml (se existir) só registra a transição, não bloqueia.
 func reportPRGuardCoverage(targetDir string, agents []string) (hookSemScript bool) {
 	settings := filepath.Join(targetDir, ".claude", "settings.json")
 	instalado, legado := false, false
@@ -406,10 +406,9 @@ func reportPRGuardCoverage(targetDir string, agents []string) (hookSemScript boo
 		fmt.Printf("  ⚠️  Cobertura: %s configurado, mas o hook não está instalado\n", strings.Join(comHook, ", "))
 	}
 	if len(semHook) > 0 {
-		if _, err := os.Stat(scaffold.ForgeProntoPath(targetDir)); err == nil {
-			fmt.Printf("  ℹ️  Sem hook: %s — nesses agentes vale o job \"pronto?\" do CI (.github/workflows/forge-pronto.yml)\n", strings.Join(semHook, ", "))
-		} else {
-			fmt.Printf("  ℹ️  Sem hook: %s — a barreira não vale nesses agentes; para o job \"pronto?\" no CI rode 'forge update --ci'\n", strings.Join(semHook, ", "))
+		fmt.Printf("  ℹ️  Sem barreira local: %s — só o hook do Claude Code (pr_guard) bloqueia 'gh pr ready' e 'gh pr merge'\n", strings.Join(semHook, ", "))
+		if scaffold.IsGeneratedCI(scaffold.ForgeProntoPath(targetDir)) {
+			fmt.Println("  ℹ️  .github/workflows/forge-pronto.yml só registra a transição de draft para pronto; não bloqueia nem substitui a revisão")
 		}
 	}
 	return hookSemScript

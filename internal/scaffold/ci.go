@@ -1,6 +1,7 @@
 package scaffold
 
 import (
+	"bytes"
 	"bufio"
 	"fmt"
 	"os"
@@ -24,7 +25,8 @@ func ForgeProntoPath(targetDir string) string {
 	return filepath.Join(targetDir, filepath.FromSlash(forgeProntoRel))
 }
 
-func isGeneratedCI(path string) bool {
+// IsGeneratedCI diz se o arquivo existe e tem o marcador do forge-sdd nas três primeiras linhas.
+func IsGeneratedCI(path string) bool {
 	f, err := os.Open(path)
 	if err != nil {
 		return false
@@ -48,7 +50,7 @@ func RenderCI(cfg config.Config, targetDir string) ([]string, error) {
 		fmt.Printf("[DRY] %s\n", dest)
 		return []string{dest}, nil
 	}
-	if _, err := os.Lstat(dest); err == nil && !isGeneratedCI(dest) {
+	if _, err := os.Lstat(dest); err == nil && !IsGeneratedCI(dest) {
 		fmt.Fprintf(os.Stderr, "aviso: %s já existe e não é do forge-sdd (sem o marcador %s); preservado\n",
 			notify.Sanitize(forgeProntoRel, 300, false), ciGeneratedMarker)
 		return nil, nil
@@ -60,6 +62,9 @@ func RenderCI(cfg config.Config, targetDir string) ([]string, error) {
 	rendered, err := renderTemplate(forgeProntoTemplate, data, cfg)
 	if err != nil {
 		return nil, err
+	}
+	if cur, err := os.ReadFile(dest); err == nil && bytes.Equal(cur, rendered) {
+		return []string{dest}, nil
 	}
 	if err := writeFileSafeMode(targetDir, dest, rendered, 0o644); err != nil {
 		fmt.Fprintf(os.Stderr, "aviso: %s não instalado: %s\n", notify.Sanitize(forgeProntoRel, 300, false), notify.Sanitize(err.Error(), 400, false))

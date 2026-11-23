@@ -1,6 +1,7 @@
 # forge-sdd:generated
-# Workflow opt-in do forge-sdd (forge init --ci / forge update --ci). Recusa PR em draft.
-# Seu ci.yml nao e lido nem alterado. Para desligar, apague este arquivo.
+# Workflow opt-in do forge-sdd (forge init --ci / forge update --ci).
+# Registra a transicao do PR de draft para pronto (ready_for_review). Nao bloqueia o merge
+# e nao substitui a revisao. Seu ci.yml nao e lido nem alterado. Para desligar, apague este arquivo.
 name: forge-pronto
 
 on:
@@ -16,7 +17,7 @@ jobs:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
-      - name: PR não pode estar em draft
+      - name: Registra PR pronto (recusa se ainda draft)
         env:
           GH_TOKEN: ${{ "{{" }} secrets.GITHUB_TOKEN {{ "}}" }}
           PR: ${{ "{{" }} github.event.pull_request.number {{ "}}" }}
