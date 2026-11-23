@@ -35,6 +35,8 @@ Quebra de baixo para cima; máx. 7 tasks por onda.
 
 **Ordem e bloqueios:** a 118-01 vem **antes** da 118-02 (ambas reescrevem os adaptadores de instrução; a 02 usa o `.sddrc` com stack e banco que a 01 grava). A onda 1 depende do aceite do dono para a ADR-0027 (14b); as ondas 2 e 3 **não** dependem dela e podem seguir. A 118-06 mistura três achados e será **fatiada no `/split-features`** em 06a (doctor e confirmação do hook), 06b (`--dry-run` completo) e 06c (JSON inválido e `--yes`).
 
+Ordem da onda 4 (split): 06a depois de 14a e 118-05; 06b depois de 06a e de 02 a 05; 06c depois de 06b (mesmos arquivos); 07 depois de tudo.
+
 Paralelismo: 118-02 depois da 118-01; 118-03, 04 e 05 juntas depois da onda 2; 118-06 e 118-07 por último. `/split-features` fatia cada uma em spec própria.
 
 ## Rules e IDs por task
