@@ -36,10 +36,12 @@ Usuários do 5.0 que atualizam projetos existentes e usuários de projetos novos
 
 ## Escopo
 
-**Dentro:** os achados 1 a 10. **Fora:** o achado 11 (cosmético), o `Deploy LP`, hooks para Gemini/Copilot/Codex (não têm hook), reescrever o `/upgrade-sdd` além do texto.
+**Dentro:** os achados 1 a 10 e, como verificação na 118-07, os itens (a) a (e) abaixo. **Fora:** o achado 11 (cosmético), o `Deploy LP`, hooks para Gemini/Copilot/Codex (não têm hook), reescrever o `/upgrade-sdd` além do texto.
+
+**Itens que a 118-07 só verifica (sem achado, por ora):** (a) `.forge/config/forge.json` e a versão de esquema dele no `update`; (b) `.gemini/` e os prompts e chatmodes do Copilot: reescritos como o `CLAUDE.md` (cobertos pela 118-02); (c) `sdd/.sdd-version` e o campo `version` do `.sddrc` mudam juntos (observado 5.0.0 para 5.2.0-beta; a 118-06 impede gravar a versão se o hook falhar); (d) migração de layout: o dry-run diz "nenhuma necessária" no 5.0 real, e a fixture da 118-07 prova; (e) `update` sem `--yes` em terminal não interativo dá erro de TTY: a 118-06 faz o comando orientar `--yes` em vez de falhar com mensagem do terminal.
 
 ## Riscos
 
 - Propagar rules/Constituição mexe em conteúdo do usuário: só **acréscimo** com marcador, nunca reescrita.
 - Entregar um workflow novo pode duplicar CI em quem já tem o seu: opt-in com `--ci`.
-- A 14b emenda a `ARQ-06` e traz ADR: exige aprovação do dono.
+- A 14b emenda a `ARQ-06` e traz ADR-0027: exige aprovação do dono. **Esse aceite bloqueia as ondas seguintes que dependem do wrapper**; as features 118-01 a 118-05 não dependem dela e podem andar antes.

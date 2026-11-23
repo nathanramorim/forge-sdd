@@ -2,7 +2,7 @@
 
 ## Restrições (IDs da Constituição)
 
-`ARQ-03` (templates por `embed.FS`), `ARQ-05` (`--dry-run` sem efeito e completo), `ARQ-06` (subcomando novo pede ADR), `ARQ-11`, `SEG-01`, `SEG-02` (gravação atômica; preserva domínio do usuário), `TST-02`, `TST-03`, `DUP-02`, `GOV-01`.
+`DUP-03`, `DUP-06` (um só mecanismo de atualização, ver fronteira com o fix-106-09 no `plan.md`), `FLX-05` (contrato estrutural novo pede ADR), `ARQ-03` (templates por `embed.FS`), `ARQ-05` (`--dry-run` sem efeito e completo), `ARQ-06` (subcomando novo pede ADR), `ARQ-11`, `SEG-01`, `SEG-02` (gravação atômica; preserva domínio do usuário), `TST-02`, `TST-03`, `DUP-02`, `GOV-01` (só vale para a Constituição **deste** repositório: o acréscimo no `update` e o template do `init` mudam projetos de usuário, não a nossa; a 118-03 traz **ADR curta por `FLX-05`** e fixa a exceção no `shouldPreserve`).
 
 ## Modelo do módulo
 
@@ -28,6 +28,8 @@ Nenhuma (`SEG-07`).
 
 ## Critérios de aceitação executáveis (iniciativa)
 
+Todos ficam **vermelhos até a feature indicada** (os testes ainda não existem): `TestUpgradeDe50` em `./internal/scaffold` e `./cmd/forge-sdd` (verde na 118-07, depois de 01 a 06), `TestNenhumHookSemScript` em `./internal/scaffold` (verde na 14a) e `TestUpdateNaoPerdeDadoDoUsuario` em `./internal/scaffold` (verde na 118-01 e 118-02).
+
 ```bash
 set -o pipefail
 # num projeto 5.0 (fixture), update --upgrade deixa tudo coerente
@@ -41,6 +43,24 @@ go test ./internal/scaffold -run 'TestUpdateNaoPerdeDadoDoUsuario' -count=1
 Os critérios por feature vivem em cada `features/feat-118-NN-*.md`.
 
 ## Diagramas
+
+```mermaid
+flowchart LR
+  subgraph CLI[cmd/forge-sdd]
+    UP[update / doctor / init]
+  end
+  subgraph SC[internal/scaffold]
+    ST[Run + shouldPreserve]
+    HK[hooks.go merge]
+    TP[templates embed.FS: scripts, workflow, constituição]
+  end
+  CFG[internal/config: .sddrc com stack e banco]
+  UP --> ST
+  ST --> TP
+  ST --> HK
+  UP --> CFG
+  HK -. "só depois do script" .-> TP
+```
 
 ```mermaid
 sequenceDiagram
