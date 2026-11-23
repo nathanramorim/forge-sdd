@@ -22,7 +22,7 @@ func settingsTemPRGuard(t *testing.T, dir string) bool {
 	if err != nil {
 		return false
 	}
-	return strings.Contains(string(data), "pr_guard.py")
+	return strings.Contains(string(data), "hook pr-guard")
 }
 
 func linhasIniciais(t *testing.T, path string, n int) []string {
@@ -68,7 +68,7 @@ func TestUpdateEntregaPRGuardAntesDoHook(t *testing.T) {
 	assert.NotContains(t, changed, "scripts/pr_guard.py")
 	assert.NotContains(t, changed, "hook PreToolUse")
 	data, _ := os.ReadFile(filepath.Join(dir, ".claude", "settings.json"))
-	assert.Equal(t, 1, strings.Count(string(data), "pr_guard.py"))
+	assert.Equal(t, 1, strings.Count(string(data), "hook pr-guard"))
 }
 
 func TestFalhaDeGravacaoNaoInstalaOHook(t *testing.T) {

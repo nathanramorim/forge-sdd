@@ -473,7 +473,7 @@ func TestUpgradeNaoSobrescreveSettingsDoUsuario(t *testing.T) {
 	assert.NotNil(t, hooks["UserPromptSubmit"], "hook do usuário preservado")
 
 	// E a política foi levada: o hook da barreira de PR está presente.
-	assert.Contains(t, string(data), "pr_guard.py", "o upgrade leva a barreira de PR")
+	assert.Contains(t, string(data), "hook pr-guard", "o upgrade leva a barreira de PR")
 
 	// JSON inválido nunca é tocado: o upgrade avisa e mantém o arquivo do usuário.
 	quebrado := `{"model":`

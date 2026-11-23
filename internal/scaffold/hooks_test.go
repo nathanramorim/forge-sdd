@@ -218,3 +218,40 @@ func TestMergePreToolUseHookJSONInvalidoNaoETocado(t *testing.T) {
 		assert.Contains(t, err.Error(), "manualmente", name)
 	}
 }
+
+func TestHookPRGuardMigraComandoAntigo(t *testing.T) {
+	dir := t.TempDir()
+	require.NoError(t, os.MkdirAll(filepath.Join(dir, ".claude"), 0o755))
+	antigo := `{"hooks":{"PreToolUse":[{"matcher":"Bash","hooks":[{"type":"command","command":"uv run scripts/pr_guard.py --hook"}]}]}}`
+	p := filepath.Join(dir, ".claude", "settings.json")
+	require.NoError(t, os.WriteFile(p, []byte(antigo), 0o644))
+
+	changed, err := MergeClaudePreToolUseHRook(dir)
+	require.NoError(t, err)
+	assert.True(t, changed)
+	assert.Equal(t, []string{"forge hook pr-guard"}, eventoCmds(readSettings(t, dir), "PreToolUse"))
+
+	changed, err = MergeClaudePreToolUseHRook(dir)
+	require.NoError(t, err)
+	assert.False(t, changed, "já migrado: nada muda")
+}
+
+func TestHookPRGuardNaoDuplicaNemTocaHooksDoUsuario(t *testing.T) {
+	dir := t.TempDir()
+	require.NoError(t, os.MkdirAll(filepath.Join(dir, ".claude"), 0o755))
+	cfg := `{"hooks":{"PreToolUse":[{"matcher":"Bash","hooks":[{"type":"command","command":"echo meu"},{"type":"command","command":"uv run scripts/pr_guard.py --hook"}]},{"matcher":"Edit","hooks":[{"type":"command","command":"uv run scripts/pr_guard.py --hook --extra"}]}]}}`
+	p := filepath.Join(dir, ".claude", "settings.json")
+	require.NoError(t, os.WriteFile(p, []byte(cfg), 0o644))
+
+	_, err := MergeClaudePreToolUseHRook(dir)
+	require.NoError(t, err)
+	assert.Equal(t, []string{"echo meu", "forge hook pr-guard", "uv run scripts/pr_guard.py --hook --extra"},
+		eventoCmds(readSettings(t, dir), "PreToolUse"), "troca só o comando exato, sem duplicar nem tocar o resto")
+
+	invalido := `{"hooks":`
+	require.NoError(t, os.WriteFile(p, []byte(invalido), 0o644))
+	_, err = MergeClaudePreToolUseHRook(dir)
+	require.Error(t, err)
+	got, _ := os.ReadFile(p)
+	assert.Equal(t, invalido, string(got), "JSON inválido não é tocado")
+}
