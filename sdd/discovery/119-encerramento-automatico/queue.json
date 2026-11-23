@@ -1,0 +1,14 @@
+{
+  "feature_id": "",
+  "branch": "fix/119-encerramento-automatico",
+  "base_branch": "main",
+  "spec_status": "reviewed",
+  "items": [
+    {
+      "task_id": "fix-119-01-encerramento-de-entrega-concluida",
+      "title": "fix-119-01 — Entrega concluída não encerra tarefas nem iniciativa",
+      "spec_path": "sdd/discovery/119-encerramento-automatico/fixes/fix-119-01-encerramento-de-entrega-concluida.md",
+      "status": "queued"
+    }
+  ]
+}
