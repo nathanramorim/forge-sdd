@@ -93,13 +93,13 @@ func mergeClaudeHookWithMatcher(targetDir, event, matcher, command string, marke
 	case err == nil:
 		dec := json.NewDecoder(bytes.NewReader(data))
 		if err := dec.Decode(&root); err != nil {
-			return false, fmt.Errorf("%s não é JSON válido; adicione o hook manualmente (%s): %w", path, command, err)
+			return false, &InvalidJSONError{Path: path, Fix: "adicione o hook manualmente (" + command + ")", Err: err}
 		}
 		if dec.More() {
-			return false, fmt.Errorf("%s tem conteúdo extra após o objeto JSON; adicione o hook manualmente", path)
+			return false, &InvalidJSONError{Path: path, Fix: "adicione o hook manualmente", Err: errors.New("conteúdo extra após o objeto JSON")}
 		}
 		if root == nil {
-			return false, fmt.Errorf("%s não contém um objeto JSON; adicione o hook manualmente", path)
+			return false, &InvalidJSONError{Path: path, Fix: "adicione o hook manualmente", Err: errors.New("não contém um objeto JSON")}
 		}
 	case errors.Is(err, os.ErrNotExist):
 		// cria do zero
@@ -190,10 +190,10 @@ func mergeClaudeMCPServer(targetDir string, dryRun bool) (bool, error) {
 	case err == nil:
 		dec := json.NewDecoder(bytes.NewReader(data))
 		if err := dec.Decode(&root); err != nil || root == nil {
-			return false, fmt.Errorf("%s não é um objeto JSON válido; registre o servidor manualmente (forge mcp serve): %v", path, err)
+			return false, &InvalidJSONError{Path: path, Fix: "registre o servidor manualmente (forge mcp serve)", Err: err}
 		}
 		if dec.More() {
-			return false, fmt.Errorf("%s tem conteúdo extra após o objeto JSON; registre o servidor manualmente", path)
+			return false, &InvalidJSONError{Path: path, Fix: "registre o servidor manualmente (forge mcp serve)", Err: errors.New("conteúdo extra após o objeto JSON")}
 		}
 	case errors.Is(err, os.ErrNotExist):
 	default:
@@ -201,7 +201,7 @@ func mergeClaudeMCPServer(targetDir string, dryRun bool) (bool, error) {
 	}
 	servers, ok := root["mcpServers"].(map[string]any)
 	if root["mcpServers"] != nil && !ok {
-		return false, fmt.Errorf("%s: \"mcpServers\" não é um objeto; registre o servidor manualmente", path)
+		return false, &InvalidJSONError{Path: path, Fix: "registre o servidor manualmente (forge mcp serve)", Err: errors.New("\"mcpServers\" não é um objeto")}
 	}
 	if servers == nil {
 		servers = map[string]any{}
@@ -222,6 +222,40 @@ func mergeClaudeMCPServer(targetDir string, dryRun bool) (bool, error) {
 		return false, err
 	}
 	return true, nil
+}
+
+// InvalidJSONError indica que um arquivo de integração do Claude (settings.json, .mcp.json) não é
+// JSON utilizável. O arquivo nunca é reescrito (SEG-01); quem chama decide abortar (SEG-02).
+type InvalidJSONError struct {
+	Path string
+	Fix  string
+	Err  error
+}
+
+func (e *InvalidJSONError) Error() string {
+	if e.Err == nil {
+		return fmt.Sprintf("%s não é JSON válido; %s", e.Path, e.Fix)
+	}
+	return fmt.Sprintf("%s não é JSON válido (%v); %s", e.Path, e.Err, e.Fix)
+}
+
+func (e *InvalidJSONError) Unwrap() error { return e.Err }
+
+// ClaudeJSONInvalidos confere, sem gravar nada, se settings.json e .mcp.json (quando existem) são
+// JSON utilizáveis e devolve um erro tipado por arquivo inválido.
+func ClaudeJSONInvalidos(targetDir string) []*InvalidJSONError {
+	var out []*InvalidJSONError
+	add := func(err error) {
+		var ij *InvalidJSONError
+		if errors.As(err, &ij) {
+			out = append(out, ij)
+		}
+	}
+	_, err := mergeClaudeHook(targetDir, "SessionStart", doctorHookCommand, []string{"forge doctor", "forge-sdd doctor"}, true)
+	add(err)
+	_, err = mergeClaudeMCPServer(targetDir, true)
+	add(err)
+	return out
 }
 
 // SyncClaudeIntegration aplica o hook SessionStart do doctor e o servidor MCP forge-sdd mesmo sem

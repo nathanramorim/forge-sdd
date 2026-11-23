@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"os"
 	"path/filepath"
 	"strings"
@@ -48,10 +49,8 @@ func TestUpdateClaudeIntegracaoMCPInvalidoIntacto(t *testing.T) {
 	mcp := filepath.Join(dir, ".mcp.json")
 	require.NoError(t, os.WriteFile(mcp, []byte(`{"mcpServers":`), 0o644))
 	out, err := updateRun(t, dir, false)
-	require.NoError(t, err)
+	require.Error(t, err) // 118-06c: JSON inválido aborta o update
 	assert.NotContains(t, out, "MCP forge-sdd instalado")
-	st, _ := os.ReadFile(filepath.Join(dir, ".claude", "settings.json"))
-	assert.Contains(t, string(st), "forge doctor --harness") // o resto segue
 	got, _ := os.ReadFile(mcp)
 	assert.Equal(t, `{"mcpServers":`, string(got))
 }
@@ -155,4 +154,68 @@ func TestUpdateReparaHookSemScript(t *testing.T) {
 	require.NoError(t, statErr)
 	s, _ := os.ReadFile(filepath.Join(dir, ".claude", "settings.json"))
 	assert.Equal(t, 1, strings.Count(string(s), "hook pr-guard"), "não duplica o hook")
+}
+
+// jsonInvalidoProject prepara um projeto 5.0 com settings.json e .mcp.json inválidos.
+func jsonInvalidoProject(t *testing.T) (dir, settings, mcp string) {
+	t.Helper()
+	dir = modelProject(t, nil)
+	settings = filepath.Join(dir, ".claude", "settings.json")
+	mcp = filepath.Join(dir, ".mcp.json")
+	require.NoError(t, os.WriteFile(settings, []byte(`{ "hooks": {bad`), 0o644))
+	require.NoError(t, os.WriteFile(mcp, []byte(`{"mcpServers": `), 0o644))
+	return dir, settings, mcp
+}
+
+func TestUpdateJSONInvalidoSaiComErroENaoGravaVersao(t *testing.T) {
+	dir, settings, mcp := jsonInvalidoProject(t)
+	versaoAntes, _ := os.ReadFile(filepath.Join(dir, "sdd", ".sdd-version"))
+	rcAntes, _ := os.ReadFile(filepath.Join(dir, "sdd", ".sddrc"))
+	_ = updateCmd.Flags().Set("version", "9.9.9")
+	t.Cleanup(func() { _ = updateCmd.Flags().Set("version", "") })
+
+	var errBuf bytes.Buffer
+	rootCmd.SetErr(&errBuf)
+	t.Cleanup(func() { rootCmd.SetErr(nil) })
+	_, err := updateRun(t, dir, false)
+	require.Error(t, err)
+
+	got, _ := os.ReadFile(settings)
+	assert.Equal(t, `{ "hooks": {bad`, string(got))
+	got, _ = os.ReadFile(mcp)
+	assert.Equal(t, `{"mcpServers": `, string(got))
+	versaoDepois, _ := os.ReadFile(filepath.Join(dir, "sdd", ".sdd-version"))
+	rcDepois, _ := os.ReadFile(filepath.Join(dir, "sdd", ".sddrc"))
+	assert.Equal(t, string(versaoAntes), string(versaoDepois))
+	assert.Equal(t, string(rcAntes), string(rcDepois))
+	// a orientação sai uma vez só por arquivo
+	assert.Equal(t, 1, strings.Count(errBuf.String(), ".mcp.json"), errBuf.String())
+	assert.NotContains(t, errBuf.String(), "servidor MCP não registrado")
+	assert.NotContains(t, errBuf.String(), "MCP forge-sdd não registrado")
+}
+
+func TestUpdateSemTTYOrientaYes(t *testing.T) {
+	dir := modelProject(t, nil)
+	old := stdinIsTerminal
+	stdinIsTerminal = func() bool { return false }
+	t.Cleanup(func() { stdinIsTerminal = old })
+	rootCmd.SetArgs([]string{"update", dir})
+	err := rootCmd.Execute()
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "--yes")
+	assert.NotContains(t, err.Error(), "TTY")
+}
+
+func TestUpdateDryRunRelataJSONInvalidoSemFalhar(t *testing.T) {
+	dir, settings, mcp := jsonInvalidoProject(t)
+	var errBuf bytes.Buffer
+	rootCmd.SetErr(&errBuf)
+	t.Cleanup(func() { rootCmd.SetErr(nil) })
+	_, err := updateRun(t, dir, true)
+	require.NoError(t, err)
+	assert.Contains(t, errBuf.String(), ".mcp.json")
+	got, _ := os.ReadFile(settings)
+	assert.Equal(t, `{ "hooks": {bad`, string(got))
+	got, _ = os.ReadFile(mcp)
+	assert.Equal(t, `{"mcpServers": `, string(got))
 }

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -254,4 +255,57 @@ func TestHookPRGuardNaoDuplicaNemTocaHooksDoUsuario(t *testing.T) {
 	require.Error(t, err)
 	got, _ := os.ReadFile(p)
 	assert.Equal(t, invalido, string(got), "JSON inválido não é tocado")
+}
+
+func TestJSONInvalidoNoSettingsRetornaErroTipado(t *testing.T) {
+	dir := t.TempDir()
+	require.NoError(t, os.MkdirAll(filepath.Join(dir, ".claude"), 0o755))
+	require.NoError(t, os.WriteFile(filepath.Join(dir, ".claude", "settings.json"), []byte(`{ "hooks": {bad`), 0o644))
+	require.NoError(t, os.WriteFile(filepath.Join(dir, ".mcp.json"), []byte(`{"mcpServers": `), 0o644))
+
+	_, err := MergeClaudeSessionStartHook(dir)
+	var ij *InvalidJSONError
+	require.ErrorAs(t, err, &ij)
+	assert.Equal(t, filepath.Join(dir, ".claude", "settings.json"), ij.Path)
+
+	bad := ClaudeJSONInvalidos(dir)
+	require.Len(t, bad, 2)
+	assert.Contains(t, bad[1].Path, ".mcp.json")
+
+	// caso conforme: JSON válido não gera erro
+	ok := t.TempDir()
+	require.NoError(t, os.WriteFile(filepath.Join(ok, ".mcp.json"), []byte(`{}`), 0o644))
+	assert.Empty(t, ClaudeJSONInvalidos(ok))
+}
+
+func TestJSONInvalidoNaoReescreveOArquivo(t *testing.T) {
+	dir := t.TempDir()
+	require.NoError(t, os.MkdirAll(filepath.Join(dir, ".claude"), 0o755))
+	settings := filepath.Join(dir, ".claude", "settings.json")
+	mcp := filepath.Join(dir, ".mcp.json")
+	require.NoError(t, os.WriteFile(settings, []byte(`{ "hooks": {bad`), 0o644))
+	require.NoError(t, os.WriteFile(mcp, []byte(`{"mcpServers": `), 0o644))
+
+	SyncClaudeIntegration(dir, "5.0.0", false)
+	_, _ = MergeClaudeMCPServer(dir)
+	_, _ = MergeClaudeInboxHook(dir)
+
+	got, _ := os.ReadFile(settings)
+	assert.Equal(t, `{ "hooks": {bad`, string(got))
+	got, _ = os.ReadFile(mcp)
+	assert.Equal(t, `{"mcpServers": `, string(got))
+}
+
+func TestAvisoDoMCPSaiUmaVez(t *testing.T) {
+	dir := t.TempDir()
+	require.NoError(t, os.WriteFile(filepath.Join(dir, ".mcp.json"), []byte(`{"mcpServers": `), 0o644))
+	_, warns := SyncClaudeIntegration(dir, "5.0.0", false)
+	n := 0
+	for _, w := range warns {
+		if strings.Contains(w, ".mcp.json") {
+			n++
+		}
+	}
+	assert.Equal(t, 1, n, "%v", warns)
+	assert.Len(t, ClaudeJSONInvalidos(dir), 1)
 }
