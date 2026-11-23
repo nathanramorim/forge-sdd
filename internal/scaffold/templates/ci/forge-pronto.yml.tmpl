@@ -1,0 +1,31 @@
+# forge-sdd:generated
+# Workflow opt-in do forge-sdd (forge init --ci / forge update --ci).
+# Registra a transicao do PR de draft para pronto (ready_for_review). Nao bloqueia o merge
+# e nao substitui a revisao. Seu ci.yml nao e lido nem alterado. Para desligar, apague este arquivo.
+name: forge-pronto
+
+on:
+  pull_request:
+    types: [ready_for_review]
+
+permissions:
+  pull-requests: read
+
+jobs:
+  pronto:
+    name: pronto?
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Registra a transição do PR para pronto
+        env:
+          GH_TOKEN: ${{ "{{" }} secrets.GITHUB_TOKEN {{ "}}" }}
+          PR: ${{ "{{" }} github.event.pull_request.number {{ "}}" }}
+        run: |
+          set -euo pipefail
+          draft=$(gh pr view "$PR" --repo "$GITHUB_REPOSITORY" --json isDraft -q .isDraft)
+          if [ "$draft" = "true" ]; then
+            echo "::error::O PR #$PR está em draft. Marque como pronto só depois da conferência do Reviewer."
+            exit 1
+          fi
+          echo "PR #$PR pronto para revisão."
