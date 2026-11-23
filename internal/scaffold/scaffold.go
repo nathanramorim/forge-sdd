@@ -198,6 +198,23 @@ func renderDir(fsys embed.FS, root, stripPrefix string, cfg config.Config, targe
 		relSlash := filepath.ToSlash(rel)
 		adotada := isInstrucao(relSlash) && !IsGeneratedInstrucao(dest) && adotavelDe50(relSlash, dest, cfg)
 
+		// Rules sdd-* e schema.json: do forge (igual à 5.0 ou ao template atual) são atualizados;
+		// divergentes são do usuário (preservados, com aviso e .novo ao lado).
+		if regraGerenciada(relSlash) {
+			if _, serr := os.Lstat(dest); serr == nil {
+				rendered, rerr := renderTemplate(path, data, cfg)
+				if rerr != nil {
+					return rerr
+				}
+				if !arquivoDoForge(relSlash, dest, rendered, cfg) {
+					avisaRegraPreservada(targetDir, dest, relSlash, rendered)
+					created = append(created, dest)
+					return nil
+				}
+				adotada = true
+			}
+		}
+
 		// Se o arquivo destino já existe e deve ser preservado, pulamos a escrita física
 		if !adotada && shouldPreserve(dest, targetDir) {
 			if isInstrucao(relSlash) {

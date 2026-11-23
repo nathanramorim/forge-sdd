@@ -43,6 +43,12 @@ var v50Table = map[string]struct{ file, sha string }{
 	".github/copilot-instructions.md": {"copilot-instructions.md.tmpl", "db004c07a7f1cc12569ba214230abaed7423f24a570f823ce03bcd19598d66d4"},
 	".gemini/system_instructions.md":  {".gemini__system_instructions.md.tmpl", "885090124f113f5c842303a6cc4333909dae97f11111351448931e8590f6f834"},
 	".openai/system_instructions.md":  {".openai__system_instructions.md.tmpl", "e6cd16cd7f87c1b5947cf6b35bbff8da653f7edf039b2b68eb06ff9c8b3b5330"},
+	".agents/rules/sdd-arquitetura.md": {".agents__rules__sdd-arquitetura.md.tmpl", "c9f87c461025b2ac602333920d9ecf56005e31ef2a3afb4de6e9a61539038971"},
+	".agents/rules/sdd-codigo-e-testes.md": {".agents__rules__sdd-codigo-e-testes.md.tmpl", "891321d57f28cfb910f7d82e9be105f049a6e52387bce6a7ef9f7ba7d4a3c154"},
+	".agents/rules/sdd-fluxo-e-portao.md": {".agents__rules__sdd-fluxo-e-portao.md.tmpl", "cfee9d39f9a0109bfaaae1a2d443606d360a1022fab3b506613c66086073eb29"},
+	".agents/rules/sdd-reuso-e-duplicacao.md": {".agents__rules__sdd-reuso-e-duplicacao.md.tmpl", "3e790c0ad14f20690b5c36b75cc90b7388f3f036085717bca74ea0fa552a84d0"},
+	".agents/rules/sdd-seguranca.md": {".agents__rules__sdd-seguranca.md.tmpl", "34aae185420926822bd34b3e369b24a16a072f7a8dcc0db17a3bf11f1836013e"},
+	"sdd/.metrics/schema.json": {"sdd__.metrics__schema.json.tmpl", "31fc36e246325dd30451fdca302efc4f069994d423fbdcc34e6a93d794d5bd15"},
 }
 
 // instrucaoAgentFiles: arquivos de instrução por agente (copilot incluso).
@@ -152,9 +158,10 @@ func InstrucoesDoUsuario(targetDir string, cfg config.Config) []string {
 	return out
 }
 
-// novoPath devolve `<nome>.novo.md` ao lado do arquivo.
+// novoPath devolve `<nome>.novo.<ext>` ao lado do arquivo.
 func novoPath(dest string) string {
-	return strings.TrimSuffix(dest, ".md") + ".novo.md"
+	ext := filepath.Ext(dest)
+	return strings.TrimSuffix(dest, ext) + ".novo" + ext
 }
 
 // avisaInstrucaoPreservada avisa em stderr e grava `<nome>.novo.md` com o que o forge geraria.
