@@ -12,7 +12,7 @@
 <body>
 
 <header class="wiki-header">
-  <a href="/" class="wiki-brand">Forge-SDD <span class="wiki-badge">v5.0</span></a>
+  <a href="/" class="wiki-brand">Forge-SDD <span class="wiki-badge">v5.2</span></a>
   <a href="/" class="wiki-back">&#8592; forge-sdd.org</a>
 </header>
 
@@ -20,7 +20,7 @@
   <aside class="sidebar">
     <nav class="sidebar-nav">
       <a href="#get-started" class="sidebar-link" data-pt="Get Started" data-en="Get Started">Get Started</a>
-      <a href="#jornada" class="sidebar-link" data-pt="Jornada" data-en="Journey">Jornada</a>
+      <a href="#como-funciona" class="sidebar-link" data-pt="Como funciona" data-en="How it works">Como funciona</a>
       <a href="#exemplos" class="sidebar-link" data-pt="Exemplos" data-en="Examples">Exemplos</a>
       <a href="#hub-mode" class="sidebar-link" data-pt="Hub mode" data-en="Hub mode">Hub mode</a>
       <a href="#atualizar" class="sidebar-link" data-pt="Atualizar" data-en="Update">Atualizar</a>
@@ -35,6 +35,8 @@
 
       <h3 class="subsection-title">1. Instalação e setup</h3>
       <p>O <code>forge init</code> faz perguntas interativas sobre o projeto (nome, stack, banco). Se a sua IA faz o setup por você, use o prompt abaixo — ele coleta essas respostas antes de rodar o comando, sem travar em prompts interativos.</p>
+
+      <p>Para a prévia, instale com <code>npm install -g @nathanramorim/forge-sdd@beta</code>. O prompt abaixo instala a versão estável. Depois do <code>forge init</code>, rode <code>forge doctor</code> para conferir se tudo ficou no lugar. Já usa o forge? Veja <a href="#atualizar">Atualizar</a>.</p>
 
       <div class="ai-prompt">
         <div class="ai-prompt__header">
@@ -112,7 +114,7 @@ quais são as decisões que mais causam atrito se não forem definidas logo no i
       </div>
 
       <h3 class="subsection-title">3. Primeira feature</h3>
-      <p>Com o setup e a Constitution no lugar, peça à IA para criar a primeira feature. Ela vai rodar o discovery, montar um plano e aguardar sua aprovação antes de escrever uma linha de código.</p>
+      <p>Com o setup e a Constitution no lugar, peça à IA para criar a primeira feature. Ela roda o <code>/discovery</code>, escreve a spec num PR em draft, o Reviewer confere o julgamento e a IA espera o seu <strong>[Seguir]</strong> antes de escrever uma linha de código. Veja o passo a passo em <a href="#como-funciona">Como funciona</a>.</p>
 
       <div class="ai-prompt">
         <div class="ai-prompt__header">
@@ -129,33 +131,33 @@ Me mostre o plano antes de implementar.</pre>
       </div>
     </section>
 
-    <section id="jornada">
-      <h2 class="section-title" data-pt="Jornada ideal" data-en="Ideal Journey">Jornada ideal</h2>
-      <p class="section-lead">O Forge-SDD organiza o trabalho em três papéis simples. Você não precisa saber programar — só precisa tomar decisões.</p>
+    <section id="como-funciona">
+      <a id="jornada"></a>
+      <h2 class="section-title" data-pt="Como funciona o processo" data-en="How the process works">Como funciona o processo</h2>
+      <p class="section-lead">O Forge-SDD divide o trabalho em três sessões, cada uma com uma responsabilidade: o <strong>Discovery</strong> conversa com você e escreve a spec, o <strong>Builder</strong> implementa, e o <strong>Reviewer</strong> confere. Você não precisa programar: você decide em dois pontos.</p>
 
-      <div class="steps">
-        <div class="step">
-          <div class="step-number">1</div>
-          <div class="step-body">
-            <h3 class="step-title">Discovery</h3>
-            <p class="step-desc">Você descreve o que quer. A IA analisa o projeto, levanta riscos e monta um plano detalhado. Você lê e decide se faz sentido.</p>
-          </div>
-        </div>
-        <div class="step">
-          <div class="step-number">2</div>
-          <div class="step-body">
-            <h3 class="step-title">Builder implementa</h3>
-            <p class="step-desc">Depois da sua aprovação, a IA segue exatamente o plano: escreve o código, cria os testes e prepara tudo para você conferir.</p>
-          </div>
-        </div>
-        <div class="step">
-          <div class="step-number">3</div>
-          <div class="step-body">
-            <h3 class="step-title">Você aprova</h3>
-            <p class="step-desc">As mudanças chegam sem surpresas. Você confere o que foi feito e aprova. Se não estiver bom, a IA corrige até ficar.</p>
-          </div>
-        </div>
+      <div style="margin:18px 0">
+      <svg viewBox="0 0 925 520" role="img" aria-labelledby="fluxo-t fluxo-d" style="width:100%;height:auto;max-width:925px;background:var(--bg2);border:1px solid var(--border);border-radius:12px;font-family:var(--font-sans)"><title id="fluxo-t">Como o Forge-SDD leva uma ideia até o merge</title><desc id="fluxo-d">Dez passos: Discovery escreve a spec e abre o PR em draft, o Reviewer confere, você dá o Seguir, o Builder implementa com CI local, o Reviewer emite o parecer, o PR sai do draft, o CI do GitHub roda uma vez e você mescla.</desc><defs><marker id="seta" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="var(--text2)"/></marker></defs><rect x="30" y="50" width="190" height="84" rx="10" fill="var(--bg3)" stroke="#4f8ef7" stroke-width="1.6"/><circle cx="46" cy="66" r="11" fill="#4f8ef7"/><text x="46" y="70" text-anchor="middle" font-size="12" font-weight="700" fill="#0d0f14">1</text><text x="125" y="84" text-anchor="middle" font-size="12.5" fill="var(--text)"><tspan x="125" dy="0" font-weight="700">/discovery</tspan><tspan x="125" dy="16" >a demanda vira spec</tspan></text><text x="208" y="126" text-anchor="end" font-size="10" fill="#4f8ef7">Discovery</text><rect x="255" y="50" width="190" height="84" rx="10" fill="var(--bg3)" stroke="#4f8ef7" stroke-width="1.6"/><circle cx="271" cy="66" r="11" fill="#4f8ef7"/><text x="271" y="70" text-anchor="middle" font-size="12" font-weight="700" fill="#0d0f14">2</text><text x="350" y="84" text-anchor="middle" font-size="12.5" fill="var(--text)"><tspan x="350" dy="0" font-weight="700">PR da spec</tspan><tspan x="350" dy="16" >aberto em draft</tspan></text><text x="433" y="126" text-anchor="end" font-size="10" fill="#4f8ef7">Discovery</text><rect x="480" y="50" width="190" height="84" rx="10" fill="var(--bg3)" stroke="#f5b04a" stroke-width="1.6"/><circle cx="496" cy="66" r="11" fill="#f5b04a"/><text x="496" y="70" text-anchor="middle" font-size="12" font-weight="700" fill="#0d0f14">3</text><text x="575" y="84" text-anchor="middle" font-size="12.5" fill="var(--text)"><tspan x="575" dy="0" font-weight="700">Conferência 1</tspan><tspan x="575" dy="16" >confere o julgamento</tspan><tspan x="575" dy="16" >da spec</tspan></text><text x="658" y="126" text-anchor="end" font-size="10" fill="#f5b04a">Reviewer</text><rect x="705" y="50" width="190" height="84" rx="10" fill="var(--bg3)" stroke="#b58cf7" stroke-width="1.6"/><circle cx="721" cy="66" r="11" fill="#b58cf7"/><text x="721" y="70" text-anchor="middle" font-size="12" font-weight="700" fill="#0d0f14">4</text><text x="800" y="84" text-anchor="middle" font-size="12.5" fill="var(--text)"><tspan x="800" dy="0" font-weight="700">Você decide</tspan><tspan x="800" dy="16" >[Seguir] e a spec</tspan><tspan x="800" dy="16" >entra na main</tspan></text><text x="883" y="126" text-anchor="end" font-size="10" fill="#b58cf7">Você</text><rect x="30" y="230" width="190" height="84" rx="10" fill="var(--bg3)" stroke="#3ecf8e" stroke-width="1.6"/><circle cx="46" cy="246" r="11" fill="#3ecf8e"/><text x="46" y="250" text-anchor="middle" font-size="12" font-weight="700" fill="#0d0f14">5</text><text x="125" y="264" text-anchor="middle" font-size="12.5" fill="var(--text)"><tspan x="125" dy="0" font-weight="700">/implementar</tspan><tspan x="125" dy="16" >uma branch e um PR</tspan><tspan x="125" dy="16" >draft por feature</tspan></text><text x="208" y="306" text-anchor="end" font-size="10" fill="#3ecf8e">Builder</text><rect x="255" y="230" width="190" height="84" rx="10" fill="var(--bg3)" stroke="#3ecf8e" stroke-width="1.6"/><circle cx="271" cy="246" r="11" fill="#3ecf8e"/><text x="271" y="250" text-anchor="middle" font-size="12" font-weight="700" fill="#0d0f14">6</text><text x="350" y="264" text-anchor="middle" font-size="12.5" fill="var(--text)"><tspan x="350" dy="0" font-weight="700">CI local (opcional)</tspan><tspan x="350" dy="16" >testes na sua máquina</tspan><tspan x="350" dy="16" >e selo do commit</tspan></text><text x="433" y="306" text-anchor="end" font-size="10" fill="#3ecf8e">Builder</text><rect x="480" y="230" width="190" height="84" rx="10" fill="var(--bg3)" stroke="#f5b04a" stroke-width="1.6"/><circle cx="496" cy="246" r="11" fill="#f5b04a"/><text x="496" y="250" text-anchor="middle" font-size="12" font-weight="700" fill="#0d0f14">7</text><text x="575" y="264" text-anchor="middle" font-size="12.5" fill="var(--text)"><tspan x="575" dy="0" font-weight="700">/revisar</tspan><tspan x="575" dy="16" >parecer do commit</tspan><tspan x="575" dy="16" >atual</tspan></text><text x="658" y="306" text-anchor="end" font-size="10" fill="#f5b04a">Reviewer</text><rect x="705" y="230" width="190" height="84" rx="10" fill="var(--bg3)" stroke="#9ba3b8" stroke-width="1.6"/><circle cx="721" cy="246" r="11" fill="#9ba3b8"/><text x="721" y="250" text-anchor="middle" font-size="12" font-weight="700" fill="#0d0f14">8</text><text x="800" y="264" text-anchor="middle" font-size="12.5" fill="var(--text)"><tspan x="800" dy="0" font-weight="700">gh pr ready</tspan><tspan x="800" dy="16" >exige o parecer</tspan><tspan x="800" dy="16" >(e o selo, se houver)</tspan></text><text x="883" y="306" text-anchor="end" font-size="10" fill="#9ba3b8">GitHub</text><rect x="30" y="410" width="190" height="84" rx="10" fill="var(--bg3)" stroke="#9ba3b8" stroke-width="1.6"/><circle cx="46" cy="426" r="11" fill="#9ba3b8"/><text x="46" y="430" text-anchor="middle" font-size="12" font-weight="700" fill="#0d0f14">9</text><text x="125" y="444" text-anchor="middle" font-size="12.5" fill="var(--text)"><tspan x="125" dy="0" font-weight="700">CI do GitHub</tspan><tspan x="125" dy="16" >uma vez, ao sair</tspan><tspan x="125" dy="16" >do draft (no seu CI)</tspan></text><text x="208" y="486" text-anchor="end" font-size="10" fill="#9ba3b8">GitHub</text><rect x="255" y="410" width="190" height="84" rx="10" fill="var(--bg3)" stroke="#b58cf7" stroke-width="1.6"/><circle cx="271" cy="426" r="11" fill="#b58cf7"/><text x="271" y="430" text-anchor="middle" font-size="12" font-weight="700" fill="#0d0f14">10</text><text x="350" y="444" text-anchor="middle" font-size="12.5" fill="var(--text)"><tspan x="350" dy="0" font-weight="700">Você mescla</tspan><tspan x="350" dy="16" >o PR da feature</tspan><tspan x="350" dy="16" >na main</tspan></text><text x="433" y="486" text-anchor="end" font-size="10" fill="#b58cf7">Você</text><line x1="220" y1="92" x2="255" y2="92" stroke="var(--text2)" stroke-width="1.6" marker-end="url(#seta)"/><line x1="445" y1="92" x2="480" y2="92" stroke="var(--text2)" stroke-width="1.6" marker-end="url(#seta)"/><line x1="670" y1="92" x2="705" y2="92" stroke="var(--text2)" stroke-width="1.6" marker-end="url(#seta)"/><line x1="220" y1="272" x2="255" y2="272" stroke="var(--text2)" stroke-width="1.6" marker-end="url(#seta)"/><line x1="445" y1="272" x2="480" y2="272" stroke="var(--text2)" stroke-width="1.6" marker-end="url(#seta)"/><line x1="670" y1="272" x2="705" y2="272" stroke="var(--text2)" stroke-width="1.6" marker-end="url(#seta)"/><line x1="220" y1="452" x2="255" y2="452" stroke="var(--text2)" stroke-width="1.6" marker-end="url(#seta)"/><path d="M800 134 V182 H125 V230" fill="none" stroke="var(--text2)" stroke-width="1.6"  marker-end="url(#seta)"/><path d="M800 314 V380 H125 V410" fill="none" stroke="var(--text2)" stroke-width="1.6"  marker-end="url(#seta)"/><path d="M575 314 V344 H160 V314" fill="none" stroke="var(--text2)" stroke-width="1.6" stroke-dasharray="5 4" marker-end="url(#seta)"/><text x="365" y="338" text-anchor="middle" font-size="11" fill="var(--text2)">não conforme: volta ao Builder com o feedback</text></svg>
       </div>
+
+      <h3 class="subsection-title">O que acontece em cada passo</h3>
+      <ol class="example-steps">
+        <li><strong>Spec primeiro (passos 1 a 4).</strong>
+          <p>O <code>/discovery</code> (ou <code>/nova-feature</code> e <code>/novo-fix</code>) escreve o que será feito e como saberemos que ficou certo. A spec vai num PR próprio, em draft. O Reviewer faz a <em>Conferência 1</em>: confere se o julgamento da spec está certo. Só com o seu <code>[Seguir]</code> a spec entra na <code>main</code>. É o primeiro ponto onde você decide.</p></li>
+        <li><strong>Uma branch e um PR draft por feature (passos 5 e 6).</strong>
+          <p>O <code>/implementar</code> abre uma branch por feature, sempre a partir da <code>main</code>, e o Builder escreve código e testes. Se o projeto tem um script de CI local (<code>scripts/ci-local.sh</code>), ele roda na sua máquina e grava o selo do commit: o GitHub não gasta CI enquanto o trabalho não foi conferido. Sem esse script, este passo não existe e vale só o parecer.</p></li>
+        <li><strong>Parecer do commit atual (passos 7 e 8).</strong>
+          <p>O Reviewer confere o PR contra a spec, as decisões do projeto (ADRs) e as regras. Se não estiver conforme, devolve ao Builder com o feedback. Se estiver, o PR sai do draft. Onde a barreira de PR está instalada (hoje, o Claude Code), o <code>gh pr ready</code> só passa com parecer <code>conforme</code> do commit atual, e com o selo do CI local quando o projeto o usa; se o código mudou depois da revisão, ele pede uma nova.</p></li>
+        <li><strong>CI do GitHub uma vez, e você mescla (passos 9 e 10).</strong>
+          <p>O fluxo prevê o CI do GitHub uma vez, quando o PR sai do draft (configure o seu workflow para rodar em <code>ready_for_review</code>). Com tudo verde, você decide o merge: é o segundo ponto onde você decide. O pipeline nunca mescla sozinho.</p></li>
+      </ol>
+
+      <h3 class="subsection-title">O que ficou mais leve</h3>
+      <ul>
+        <li>O fluxo guarda o CI do GitHub para o final, depois de tudo validado em casa.</li>
+        <li>Nenhum PR depende de outro: cada feature sai da <code>main</code> e volta para ela.</li>
+        <li>O <code>forge doctor</code> mostra se a barreira de PR está ligada no seu agente (ela vale no Claude Code; nos outros agentes não há barreira local, e o workflow opcional <code>forge-pronto.yml</code> só registra a passagem do PR para pronto).</li>
+      </ul>
     </section>
 
     <section id="exemplos">
@@ -179,12 +181,12 @@ Execute /discovery e me mostre o plano antes de implementar.</pre>
           </div>
         </li>
         <li>
-          <strong>Aprove o plano.</strong>
-          <p>A IA vai mostrar o que pretende criar. Se estiver certo, diga "aprovado" ou "pode implementar".</p>
+          <strong>Dê o [Seguir] na spec.</strong>
+          <p>A IA mostra a spec (num PR em draft) e o Reviewer confere o julgamento. Se estiver certo, responda <code>[Seguir]</code> no menu; a spec entra na <code>main</code> e só então o código começa.</p>
         </li>
         <li>
-          <strong>Revise o PR no GitHub.</strong>
-          <p>Quando a IA terminar, ela abre um PR com o código. Você revisa o diff e faz o merge.</p>
+          <strong>Acompanhe a feature até o merge.</strong>
+          <p>O Builder abre um PR em draft para a feature e o Reviewer emite o parecer. Com o parecer <code>conforme</code>, o PR sai do draft e o CI do GitHub roda uma vez. Você confere o diff e faz o merge.</p>
         </li>
       </ol>
     </section>
