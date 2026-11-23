@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "chave_conteudo": "293ade65bacd6eaa",
-  "versao_historico": "af3739c",
+  "chave_conteudo": "c5209b83a13e4b72",
+  "versao_historico": "b345692",
   "versoes": [
     {
       "versao": "5.0.0",
@@ -122,8 +122,40 @@
           "texto": "São quatro blocos \"cole isto na sua IA\", um por agente, cada um apontando para o arquivo de instruções que ele lê."
         },
         {
+          "titulo": "Atualizar do 5.0 não deixa mais o Claude Code travado.",
+          "texto": "O `forge update` agora grava o script da barreira de PR antes de instalar o hook, e o hook tolera a falta do script em vez de bloquear todo comando do agente (`scripts/pr_guard.py` e `forge hook pr-guard`, ADR-0027)."
+        },
+        {
+          "titulo": "Agora o update respeita o que você escreveu.",
+          "texto": "Stack e banco ficam guardados no projeto e voltam nos arquivos dos agentes; `CLAUDE.md`, `GEMINI.md`, `AGENTS.md` e os demais arquivos de instrução que você editou ficam intactos, e a versão nova do forge vai para um `.novo.md` ao lado (marcador `<!-- forge-sdd:generated -->`)."
+        },
+        {
+          "titulo": "As regras e o schema chegam ao projeto antigo sem pisar nas suas edições.",
+          "texto": "Quem não editou recebe a versão nova; quem editou mantém o arquivo e ganha um `.novo.md` com o aviso (`.agents/rules/sdd-*` e `sdd/.metrics/schema.json`)."
+        },
+        {
+          "titulo": "A Constituição do projeto ganha os modos novos por acréscimo.",
+          "texto": "Atestado, revisão humana, WIP, módulos e início automático entram com valores seguros só quando faltam, sem alterar uma linha sua (ADR-0028)."
+        },
+        {
+          "titulo": "Agora você vê tudo o que o update vai fazer antes de ele fazer.",
+          "texto": "O `forge update --dry-run` lista hooks, arquivos reescritos, o que fica preservado, os campos de modo e a versão, sem gravar nada."
+        },
+        {
+          "titulo": "Acabou o update pela metade.",
+          "texto": "Se `settings.json` ou `.mcp.json` estiverem com JSON inválido, o update para antes de gravar qualquer coisa, diz o que consertar uma vez só e não troca a versão; sem terminal interativo, ele pede `--yes` em vez de falhar com mensagem de TTY."
+        },
+        {
+          "titulo": "Quer o aviso de PR pronto no GitHub? Peça.",
+          "texto": "`forge init --ci` e `forge update --ci` criam o `forge-pronto.yml`, um workflow separado que só registra a passagem do PR para pronto; o seu `ci.yml` nunca é tocado."
+        },
+        {
+          "titulo": "O `forge doctor` fala a verdade sobre a barreira.",
+          "texto": "Ele confere se o script existe e diz que, fora do Claude Code, não há barreira local de PR."
+        },
+        {
           "titulo": "Como atualizar",
-          "texto": "`npm install -g @nathanramorim/forge-sdd@beta` para a prévia; nos projetos existentes, `forge update --upgrade` e depois `/upgrade-sdd`, que leva a política de PR. Rode `forge doctor` no fim: a seção \"Barreira de PR\" diz o que ficou instalado."
+          "texto": "`npm install -g @nathanramorim/forge-sdd@beta` para a prévia; nos projetos existentes, veja o plano com `forge update --dry-run`, rode `forge update --upgrade` (fora do agente, no terminal) e depois `/upgrade-sdd`. Rode `forge doctor` no fim: a seção \"Barreira de PR\" diz o que ficou instalado."
         },
         {
           "titulo": "Avisos da beta",
