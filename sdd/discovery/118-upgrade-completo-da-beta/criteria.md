@@ -28,14 +28,14 @@ Nenhuma (`SEG-07`).
 
 ## Critérios de aceitação executáveis (iniciativa)
 
-Todos ficam **vermelhos até a feature indicada** (os testes ainda não existem): `TestUpgradeDe50` em `./internal/scaffold` e `./cmd/forge-sdd` (verde na 118-07, depois de 01 a 06), `TestNenhumHookSemScript` em `./internal/scaffold` (verde na 14a) e `TestUpdateNaoPerdeDadoDoUsuario` em `./internal/scaffold` (verde na 118-01 e 118-02).
+Todos ficam **vermelhos até a feature indicada** (os testes ainda não existem): `TestUpgradeDe50` em `./internal/scaffold` e `./cmd/forge-sdd` (verde na 118-07, depois de 01 a 06), `TestUpgradeDe50NenhumHookSemScript` em `./internal/scaffold` (verde na 118-07; a 14a cobre a unidade com os testes dela) e `TestUpdateNaoPerdeDadoDoUsuario` em `./internal/scaffold` (verde na 118-01 e 118-02).
 
 ```bash
 set -o pipefail
 # num projeto 5.0 (fixture), update --upgrade deixa tudo coerente
 go test ./internal/scaffold ./cmd/forge-sdd -run 'TestUpgradeDe50' -count=1
 # nenhum hook sem script, em init e em update
-go test ./internal/scaffold -run 'TestNenhumHookSemScript' -count=1
+go test ./internal/scaffold -run '^TestUpgradeDe50NenhumHookSemScript$' -count=1
 # update nunca perde stack/banco nem edição em arquivo preservado
 go test ./internal/scaffold -run 'TestUpdateNaoPerdeDadoDoUsuario' -count=1
 ```

@@ -8,5 +8,7 @@
     "endpoint": "local"
   },
   "lang": "pt-BR",
-  "naming_convention": ""
+  "naming_convention": "",
+  "stack": "go",
+  "db": "postgres"
 }

@@ -31,9 +31,11 @@ Quebra de baixo para cima; máx. 7 tasks por onda.
 | feat-118-06 | `doctor` e `--dry-run` completos (lista o plano; hook confirmado; sem aviso circular; JSON inválido retorna erro e não grava versão) | 7, 8, 9 |
 | feat-118-07 | fixture 5.0 e teste ponta a ponta `TestUpgradeDe50` para os 4 agentes | todos |
 
-**Fronteira com o fix-106-09 (DUP-03):** o fix-106-09 é o **contrato** de atualização (manifesto, rule não editada atualiza, N-1 para N); a 118 é a **implementação**. As features 118-02, 118-04 e 118-07 implementam os furos 1, 3 e 6 do 106-09 e **não** haverá implementação separada do 106-09: ele fica como referência e é marcado "implementado pela 118" no fim.
+**Fronteira com o fix-106-09 (DUP-03):** o fix-106-09 é o **contrato** de atualização (manifesto, rule não editada atualiza, N-1 para N); a 118 é a **implementação**. A 118-04 implementa o furo 1 do 106-09 (rules com dono) e a 118-07 o furo 6 (fixture N-1); a 118-02 é extensão própria da 118. O furo 3 (esquema de versão de `queue.json` e dos estados) **fica no fix-106-09**, que não será marcado "implementado pela 118" e fica reduzido a esse furo.
 
 **Ordem e bloqueios:** a 118-01 vem **antes** da 118-02 (ambas reescrevem os adaptadores de instrução; a 02 usa o `.sddrc` com stack e banco que a 01 grava). A onda 1 depende do aceite do dono para a ADR-0027 (14b); as ondas 2 e 3 **não** dependem dela e podem seguir. A 118-06 mistura três achados e será **fatiada no `/split-features`** em 06a (doctor e confirmação do hook), 06b (`--dry-run` completo) e 06c (JSON inválido e `--yes`).
+
+Ordem da onda 4 (split): 06a depois de 14a e 118-05; 06b depois de 06a e de 02 a 05; 06c depois de 06b (mesmos arquivos); 07 depois de tudo.
 
 Paralelismo: 118-02 depois da 118-01; 118-03, 04 e 05 juntas depois da onda 2; 118-06 e 118-07 por último. `/split-features` fatia cada uma em spec própria.
 
