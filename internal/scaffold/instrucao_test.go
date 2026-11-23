@@ -81,6 +81,9 @@ func projeto5_0(t *testing.T, dir string, cfg config.Config) map[string]string {
 	require.NoError(t, err)
 	out := map[string]string{}
 	for rel := range v50Table {
+		if !isInstrucao(rel) {
+			continue
+		}
 		b, ok := renderV50(rel, cfg)
 		require.True(t, ok, rel)
 		escreverRel(t, dir, rel, string(b))
