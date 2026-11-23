@@ -4,6 +4,14 @@ Este arquivo registra o histórico de entregas de produto deste projeto.
 
 ## Entregas
 
+### Versão 5.2.3 — Projeto Novo ou Atualizado Abre o Claude Code Sem Erro (Beta)
+
+Compatível com a 5.0.0 e inclui tudo da 5.2.2-beta. Corrige um defeito da 5.2.2-beta que aparecia em todo projeto.
+
+*   **Acabou o erro ao abrir o Claude Code num projeto novo ou atualizado.** O diagnóstico que roda ao iniciar a sessão reclamava do contrato do parecer da Governança e falhava em todo projeto criado ou atualizado pela 5.2.2-beta; agora o arquivo que o forge grava já traz os campos certos e o diagnóstico passa (`forge doctor --harness`; o `veredito.md` do template ganhou `head_sha`, `ponto`, `modo` e `feature`).
+*   **Como atualizar:** `npm install -g @nathanramorim/forge-sdd@beta` para a prévia; nos projetos existentes, veja o plano com `forge update --dry-run`, rode `forge update --upgrade` (fora do agente, no terminal) e depois `/upgrade-sdd`. Rode `forge doctor` no fim: a seção "Barreira de PR" diz o que ficou instalado.
+*   **Avisos da beta:** esta versão não substitui a estável; quem usa `npm install -g @nathanramorim/forge-sdd` sem `@beta` continua na 5.0.0. Se você atualizou com a 5.2.2-beta e o Claude Code mostra erro ao abrir, instale a 5.2.3-beta e rode `forge update --upgrade`.
+
 ### Versão 5.2.2 — A Barreira de PR Se Atualiza Sozinha e o Aviso ao Abrir o Claude Fala Claro (Beta)
 
 Compatível com a 5.0.0 e inclui tudo da 5.2.1-beta. Corrige dois pontos que apareceram ao atualizar um projeto real.
