@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -148,7 +149,7 @@ inconsistências de configuração dos agentes de IA e progresso das features.`,
 
 		// 3b. Cobertura da barreira de PR (feat-106-15)
 		fmt.Println("\n🛡️  Barreira de PR (pr_guard):")
-		reportPRGuardCoverage(targetDir, rc.Agents)
+		hookSemScript := reportPRGuardCoverage(targetDir, rc.Agents)
 
 		// 4. Verificação de arquivos essenciais de metodologia
 		fmt.Println("\n📁 Arquivos de Metodologia:")
@@ -309,6 +310,9 @@ inconsistências de configuração dos agentes de IA e progresso das features.`,
 		}
 
 		fmt.Println("\n🩺 Diagnóstico finalizado.")
+		if hookSemScript {
+			return errors.New("erro de configuração: o hook PreToolUse chama scripts/pr_guard.py, que não existe; rode 'forge update'")
+		}
 		return nil
 	},
 }
@@ -360,7 +364,7 @@ func runDoctorHarness(w io.Writer, dir string, asJSON bool, deps doctor.Deps) er
 // reportPRGuardCoverage informa se o hook PreToolUse do pr_guard está instalado e em quais
 // agentes a barreira de fato vale. Só o Claude Code executa hooks (feat-106-15); nos demais, o
 // job "pronto?" do CI é quem segura o PR em draft.
-func reportPRGuardCoverage(targetDir string, agents []string) {
+func reportPRGuardCoverage(targetDir string, agents []string) (hookSemScript bool) {
 	settings := filepath.Join(targetDir, ".claude", "settings.json")
 	instalado := false
 	if data, err := os.ReadFile(settings); err == nil {
@@ -369,6 +373,10 @@ func reportPRGuardCoverage(targetDir string, agents []string) {
 
 	if instalado {
 		fmt.Println("  ✓ Hook PreToolUse instalado (.claude/settings.json)")
+		if _, err := os.Stat(scaffold.PRGuardScriptPath(targetDir)); err != nil {
+			hookSemScript = true
+			fmt.Println("  ✗ Erro de configuração: o hook existe, mas scripts/pr_guard.py não; o hook bloquearia todo Bash. Rode 'forge update' para gravá-lo")
+		}
 	} else {
 		fmt.Println("  ⚠️  Hook PreToolUse ausente; rode 'forge update --upgrade' para instalar")
 	}
@@ -395,6 +403,7 @@ func reportPRGuardCoverage(targetDir string, agents []string) {
 	if len(semHook) > 0 {
 		fmt.Printf("  ℹ️  Sem hook: %s — nesses agentes vale o job \"pronto?\" do CI\n", strings.Join(semHook, ", "))
 	}
+	return hookSemScript
 }
 
 func init() {

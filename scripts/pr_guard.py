@@ -11,7 +11,8 @@ Uso:
 
 Regras (RN-7, SEG-01, SEG-03, FLX-08):
 - `gh pr create`: permitido somente com `--draft` ou `-d`.
-- `gh pr ready` (e `az repos pr update --draft false`) exige também o selo de `scripts/ci-local.sh` do HEAD.
+- `gh pr ready` (e `az repos pr update --draft false`) exige também o selo de `scripts/ci-local.sh` do HEAD,
+  mas só quando esse script existe no projeto; sem ele, exige apenas o veredito.
 - `gh pr ready` e `gh pr merge`: bloqueados sem veredito `conforme` válido para o HEAD atual.
 - `gh pr merge`: bloqueado quando a base do PR não é a principal. Um PR com base em outra branch
   entra por squash e deixa os commits de cima órfãos — o arquivo some da principal (feat-106-24d).
@@ -443,7 +444,8 @@ def avaliar_comando(cmd, raiz=".", veredito_arg=None, head_arg=None):
     def selo_ok():
         nonlocal cache_selo
         if cache_selo is None:
-            cache_selo = selo_local_valido(raiz, head_arg)
+            # O ci-local.sh é do projeto (no forge-sdd é específico de Go e não é entregue): sem ele não há selo a exigir.
+            cache_selo = not (Path(raiz) / "scripts" / "ci-local.sh").is_file() or selo_local_valido(raiz, head_arg)
         return cache_selo
 
     def veredito_ok():

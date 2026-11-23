@@ -33,7 +33,7 @@ func reportClaudeIntegration(cmd *cobra.Command, dir string, agents []string, dr
 	if !slices.Contains(agents, config.AgentClaude) {
 		return
 	}
-	changed, warns := scaffold.SyncClaudeIntegration(dir, dryRun)
+	changed, warns := scaffold.SyncClaudeIntegration(dir, version, dryRun)
 	verb := "instalado"
 	if dryRun {
 		verb = "seria instalado"

@@ -187,11 +187,16 @@ func mergeClaudeMCPServer(targetDir string, dryRun bool) (bool, error) {
 // SyncClaudeIntegration aplica o hook SessionStart do doctor e o servidor MCP forge-sdd mesmo sem
 // atualização de versão (forge update). Com dryRun só informa o que gravaria. Erros de um item
 // (ex.: JSON inválido) viram aviso e não impedem o outro; o arquivo inválido nunca é tocado.
-func SyncClaudeIntegration(targetDir string, dryRun bool) (changed, warnings []string) {
+func SyncClaudeIntegration(targetDir, version string, dryRun bool) (changed, warnings []string) {
 	if ok, err := mergeClaudeHook(targetDir, "SessionStart", doctorHookCommand, []string{"forge doctor", "forge-sdd doctor"}, dryRun); err != nil {
 		warnings = append(warnings, "hook SessionStart não instalado: "+err.Error())
 	} else if ok {
 		changed = append(changed, "hook SessionStart")
+	}
+	if c, err := installPRGuard(targetDir, version, dryRun); err != nil {
+		warnings = append(warnings, err.Error())
+	} else {
+		changed = append(changed, c...)
 	}
 	if ok, err := mergeClaudeMCPServer(targetDir, dryRun); err != nil {
 		warnings = append(warnings, "MCP forge-sdd não registrado: "+err.Error())
