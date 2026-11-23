@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "chave_conteudo": "5081cfbfc0923763",
-  "versao_historico": "c9798e4",
+  "chave_conteudo": "9eb2fd91db5e998c",
+  "versao_historico": "4bd945c",
   "versoes": [
     {
       "versao": "5.0.0",
@@ -52,18 +52,14 @@
       ]
     },
     {
-      "versao": "5.2.2",
-      "rotulo": "5.2.2-beta",
+      "versao": "5.2.3",
+      "rotulo": "5.2.3-beta",
       "canal": "beta",
-      "titulo": "A Barreira de PR Se Atualiza Sozinha e o Aviso ao Abrir o Claude Fala Claro (Beta)",
+      "titulo": "Projeto Novo ou Atualizado Abre o Claude Code Sem Erro (Beta)",
       "itens": [
         {
-          "titulo": "Agora a barreira de PR que você copiou à mão também é atualizada.",
-          "texto": "Se o `scripts/pr_guard.py` do projeto é idêntico a um que o forge já entregou, o `forge update` o reconhece, grava a versão nova e passa a cuidar dele; se você o editou de verdade, ele fica como está e a versão nova vem num `pr_guard.novo.py`, com o aviso de que a barreira não recebe correções enquanto isso (`forge update --dry-run` mostra a adoção antes; `forge doctor` avisa)."
-        },
-        {
-          "titulo": "Acabou o \"Error:\" vazio ao abrir o Claude Code.",
-          "texto": "Quando o diagnóstico de início de sessão encontra um problema, a mensagem agora diz o que está errado e o que fazer, em vez de mostrar só `Error:` (`forge doctor --harness` escreve as falhas e avisos na saída de erro)."
+          "titulo": "Acabou o erro ao abrir o Claude Code num projeto novo ou atualizado.",
+          "texto": "O diagnóstico que roda ao iniciar a sessão reclamava do contrato do parecer da Governança e falhava em todo projeto criado ou atualizado pela 5.2.2-beta; agora o arquivo que o forge grava já traz os campos certos e o diagnóstico passa (`forge doctor --harness`; o `veredito.md` do template ganhou `head_sha`, `ponto`, `modo` e `feature`)."
         },
         {
           "titulo": "Como atualizar",
@@ -71,7 +67,7 @@
         },
         {
           "titulo": "Avisos da beta",
-          "texto": "esta versão não substitui a estável; quem usa `npm install -g @nathanramorim/forge-sdd` sem `@beta` continua na 5.0.0. Se você rodou o `forge update --upgrade` com a 5.2.0-beta, veja a seção \"Recuperação\" da wiki antes de seguir."
+          "texto": "esta versão não substitui a estável; quem usa `npm install -g @nathanramorim/forge-sdd` sem `@beta` continua na 5.0.0. Se você atualizou com a 5.2.2-beta e o Claude Code mostra erro ao abrir, instale a 5.2.3-beta e rode `forge update --upgrade`."
         }
       ]
     }

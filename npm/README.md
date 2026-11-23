@@ -11,7 +11,7 @@
 
 <h3 align="center">Seu time de IA, com método.<br>Do plano ao PR, sem repetir instruções.</h3>
 
-<p align="center"><strong>Versão atual: 5.0.0 (estável) · prévia: 5.2.2-beta (<code>@beta</code>)</strong> · <a href="https://github.com/nathanramorim/forge-sdd/blob/main/sdd/releases/history.md">veja as novidades</a></p>
+<p align="center"><strong>Versão atual: 5.0.0 (estável) · prévia: 5.2.3-beta (<code>@beta</code>)</strong> · <a href="https://github.com/nathanramorim/forge-sdd/blob/main/sdd/releases/history.md">veja as novidades</a></p>
 
 <p align="center">
   <a href="https://forge-sdd.org">Site oficial</a> ·
@@ -105,6 +105,7 @@ A telemetria é opcional e fica no seu projeto. No modo `forge worker --raw`, a 
 
 | Versão | Novidades |
 |---|---|
+| **5.2.3-beta** | Prévia (`@beta`): projeto novo ou atualizado passa no diagnóstico do início de sessão do Claude Code; acabou o erro ao abrir. |
 | **5.2.2-beta** | Prévia (`@beta`): o script da barreira de PR copiado à mão passa a ser atualizado pelo `forge update`, e o aviso ao abrir o Claude Code mostra o que está errado. |
 | **5.2.1-beta** | Prévia (`@beta`): a atualização de projetos 5.0 passa a funcionar de ponta a ponta. `forge update --dry-run` mostra o plano, o que você editou é preservado (a versão nova vem num `.novo.md`) e a Constituição ganha os campos novos por acréscimo. |
 | **5.2.0-beta** | Prévia (`@beta`, fora da `main`): o CI só roda quando o PR sai do draft, a revisão acontece em dois pontos (spec e feature), cada feature tem branch e PR em draft, e `gh pr ready`/`merge` exigem parecer do commit atual. `/upgrade-sdd` leva a política aos projetos existentes. |
