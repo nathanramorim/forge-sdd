@@ -15,7 +15,7 @@ estrutura, ele leva as peças novas do fluxo para o projeto existente:
 
 | Peça | O que instala | Onde |
 |---|---|---|
-| **Hook `PreToolUse`** | chama a barreira de PR (`scripts/pr_guard.py`), que bloqueia `gh pr ready` e `gh pr merge` sem parecer `conforme` para o HEAD; o `forge init` e o `forge update` entregam o script e o hook, não copie à mão | `.claude/settings.json` |
+| **Hook `PreToolUse`** | chama a barreira de PR (`forge hook pr-guard`, que roda `scripts/pr_guard.py` e tolera a ausência dele), que bloqueia `gh pr ready` e `gh pr merge` sem parecer `conforme` para o HEAD; o `forge init` e o `forge update` entregam o script e o hook, não copie à mão | `.claude/settings.json` |
 | **Job `pronto?`** | recusa PR em draft na branch principal | `.github/workflows/ci.yml` |
 | **Scripts de política** | `ci-politica.py` (custo do CI) e `atestado.py` (veredito no CI); estes dois seguem cópia manual, o `pr_guard.py` já vem do `forge` | `scripts/` |
 | **Campos de modo** | `Modo do atestado`, `Modo de revisão humana`, `WIP humano`, `Módulos permitidos`, `Início automático do Builder` | `sdd/memory/constitution.md` |
