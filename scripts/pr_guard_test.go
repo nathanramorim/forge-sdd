@@ -253,15 +253,44 @@ func raizComSelo(t *testing.T, sha string) string {
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		t.Fatal(err)
 	}
+	comCILocal(t, raiz)
 	if err := os.WriteFile(filepath.Join(dir, "ci-local.json"), []byte(`{"head_sha":"`+sha+`","gerado_em":"2026-11-22T00:00:00Z"}`), 0o644); err != nil {
 		t.Fatal(err)
 	}
 	return raiz
 }
 
+// comCILocal cria scripts/ci-local.sh na raiz: o selo só é exigido onde o projeto tem esse script.
+func comCILocal(t *testing.T, raiz string) {
+	t.Helper()
+	if err := os.MkdirAll(filepath.Join(raiz, "scripts"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(raiz, "scripts", "ci-local.sh"), []byte("#!/bin/sh\n"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestPRGuardSemCILocalNaoExigeSelo(t *testing.T) {
+	v := veredito(t, vJSON(headFalso, "entrega", "conforme"))
+	semScript := t.TempDir() // sem scripts/ci-local.sh e sem selo
+	for _, c := range []string{"gh pr ready 7", "az repos pr update --id 7 --draft false"} {
+		out, rc := rodarPRGuard(t, "", "--check", c, "--veredito", v, "--head", headFalso, "--raiz", semScript)
+		if rc != 0 {
+			t.Fatalf("%q sem ci-local.sh no projeto deveria liberar com o parecer: rc=%d out=%s", c, rc, out)
+		}
+	}
+	// Negativo: sem ci-local.sh, o parecer continua obrigatório.
+	_, rc := rodarPRGuard(t, "", "--check", "gh pr ready 7", "--head", headFalso, "--raiz", semScript)
+	if rc == 0 {
+		t.Fatalf("sem veredito, gh pr ready deveria bloquear mesmo sem ci-local.sh")
+	}
+}
+
 func TestPRGuardExigeSeloLocalNoReady(t *testing.T) {
 	v := veredito(t, vJSON(headFalso, "entrega", "conforme"))
 	semSelo := t.TempDir()
+	comCILocal(t, semSelo)
 	for _, c := range []string{"gh pr ready 7", "az repos pr update --id 7 --draft false"} {
 		out, rc := rodarPRGuard(t, "", "--check", c, "--veredito", v, "--head", headFalso, "--raiz", semSelo)
 		if rc == 0 || !strings.Contains(out, "scripts/ci-local.sh") {

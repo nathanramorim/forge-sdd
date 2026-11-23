@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"io"
+	"slices"
 
 	"github.com/forge-sdd/cli/internal/config"
 	"github.com/forge-sdd/cli/internal/scaffold"
@@ -38,6 +39,9 @@ func printUpgradePlan(w io.Writer, targetDir string, cfg config.Config) (bool, e
 	}
 	for _, p := range obsolete.Preserve {
 		fmt.Fprintf(w, "  mantido %s (editado pelo usuário ou fora do padrão)\n", p)
+	}
+	if slices.Contains(cfg.Agents, config.AgentClaude) && scaffold.PRGuardUserOwned(targetDir) {
+		fmt.Fprintln(w, "  mantido scripts/pr_guard.py (sem o marcador forge-sdd:generated; é do usuário e não é atualizado)")
 	}
 
 	acted := len(migration.Moves) > 0 || len(obsolete.Remove) > 0

@@ -112,7 +112,7 @@ func Run(cfg config.Config, targetDir string) ([]string, error) {
 		if err := applyStructureUpgrade(cfg, targetDir); err != nil {
 			return created, err
 		}
-		installClaudeInboxHook(agents, targetDir)
+		installClaudeInboxHook(agents, targetDir, cfg.SddVersion)
 		if _, err := applyAgentModels(targetDir); err != nil {
 			return created, err
 		}
@@ -127,7 +127,7 @@ func Run(cfg config.Config, targetDir string) ([]string, error) {
 
 // installClaudeInboxHook liga o hook do inbox quando o Claude está entre os agentes. A mesclagem é
 // segura (nunca sobrescreve a configuração do usuário); se não for possível, só avisa (SEG-02).
-func installClaudeInboxHook(agents []string, targetDir string) {
+func installClaudeInboxHook(agents []string, targetDir, version string) {
 	for _, a := range agents {
 		if a != config.AgentClaude {
 			continue
@@ -138,7 +138,7 @@ func installClaudeInboxHook(agents []string, targetDir string) {
 		if _, err := MergeClaudeSessionStartHook(targetDir); err != nil {
 			fmt.Fprintf(os.Stderr, "aviso: hook SessionStart do doctor não instalado: %s\n", notify.Sanitize(err.Error(), 400, false))
 		}
-		if _, err := MergeClaudePreToolUseHRook(targetDir); err != nil {
+		if _, err := installPRGuard(targetDir, version, false); err != nil {
 			fmt.Fprintf(os.Stderr, "aviso: hook PreToolUse do pr_guard não instalado: %s\n", notify.Sanitize(err.Error(), 400, false))
 		}
 		if _, err := MergeClaudeMCPServer(targetDir); err != nil {
@@ -264,7 +264,7 @@ func RunAgents(cfg config.Config, agents []string, targetDir string) ([]string, 
 	}
 	if !cfg.DryRun {
 		cleanObsoleteFiles(targetDir)
-		installClaudeInboxHook(agents, targetDir)
+		installClaudeInboxHook(agents, targetDir, cfg.SddVersion)
 		if _, err := applyAgentModels(targetDir); err != nil {
 			return created, err
 		}
@@ -307,6 +307,12 @@ func shouldPreserve(dest string, targetDir string) bool {
 
 	// Padroniza separadores para "/"
 	rel = filepath.ToSlash(rel)
+
+	// scripts/pr_guard.py: sem o marcador `# forge-sdd:generated` é do usuário e nunca é sobrescrito
+	// (a regra vem antes do laço genérico; a atualização por versão está em installPRGuardScript).
+	if rel == prGuardScriptRel {
+		return !IsGeneratedPRGuard(targetDir)
+	}
 
 	// Regras de preservação de domínio sob a pasta sdd/
 	if strings.HasPrefix(rel, "sdd/") {

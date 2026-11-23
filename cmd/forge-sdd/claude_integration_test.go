@@ -3,6 +3,7 @@ package main
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -119,4 +120,32 @@ func TestUpdateClaudeMCPExistenteDiferenteRespeitadoEModo0600(t *testing.T) {
 	data, _ := os.ReadFile(mcp)
 	assert.Contains(t, string(data), "forge-sdd")
 	assert.Contains(t, string(data), "outro")
+}
+
+func TestDoctorAcusaHookSemScript(t *testing.T) {
+	dir := modelProject(t, nil)
+	var err error
+	out := captureStdout(t, func() { _, err = runRoot(t, "doctor", dir) })
+	require.NoError(t, err)
+	assert.NotContains(t, out, "Erro de configuração")
+
+	require.NoError(t, os.Remove(filepath.Join(dir, "scripts", "pr_guard.py")))
+	out = captureStdout(t, func() { _, err = runRoot(t, "doctor", dir) })
+	require.Error(t, err)
+	assert.Contains(t, out, "Erro de configuração")
+	assert.Contains(t, out, "forge update")
+}
+
+func TestUpdateReparaHookSemScript(t *testing.T) {
+	dir := modelProject(t, nil)
+	script := filepath.Join(dir, "scripts", "pr_guard.py")
+	require.NoError(t, os.Remove(script))
+
+	out, err := updateRun(t, dir, false)
+	require.NoError(t, err)
+	assert.Contains(t, out, "scripts/pr_guard.py instalado")
+	_, statErr := os.Stat(script)
+	require.NoError(t, statErr)
+	s, _ := os.ReadFile(filepath.Join(dir, ".claude", "settings.json"))
+	assert.Equal(t, 1, strings.Count(string(s), "pr_guard.py"), "não duplica o hook")
 }
