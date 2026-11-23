@@ -1,0 +1,23 @@
+{
+  "$schema": "forge-sdd/metrics/1.0",
+  "feature": "sdd/discovery/118-upgrade-completo-da-beta/status.md",
+  "agent_path": null,
+  "tokens_input": 858,
+  "tokens_output": 2935,
+  "turns": 0,
+  "duration_seconds": 0,
+  "criterio_atendido": true,
+  "model": "",
+  "rework_lines": 0,
+  "context7_calls": 0,
+  "git_calls": 0,
+  "files_touched": [
+    "sdd/discovery/118-upgrade-completo-da-beta/status.md",
+    "sdd/memory/progress-log.md",
+    "sdd/memory/lessons.md"
+  ],
+  "outcome": "approved",
+  "sdd_version": "5.2.1-beta",
+  "medicao": "estimado",
+  "complexidade": null
+}

@@ -52,3 +52,4 @@ Restricoes: zero deps runtime (ARQ-03/04), sem emojis, UI em pt-BR.
 - 2026-11-18: Iniciativa 88-modo-pipeline-avancado concluída e arquivada com sucesso.
 - 2026-11-19: Iniciativa 94-finalizar-fixes-pendentes concluída e arquivada com sucesso.
 - 2026-11-22: Iniciativa 113-criacao-automatica-issue-concepcao concluída e arquivada: 6 features (#236 a #241), fix-113-01 (#254) e nota da 5.2.0 (#242).
+- 2026-11-23: Iniciativa 118-upgrade-completo-da-beta concluída e arquivada: 7 features, fix-118-01 (#280) e fix-118-02 (#279), beta 5.2.1 (#277) e 5.2.2 (#282), wiki (#276, #281, #283), lp-deploy com conta explícita (#284); 4 lições e 2 skills propostas.
