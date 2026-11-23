@@ -353,6 +353,9 @@ func shouldPreserve(dest string, targetDir string) bool {
 	// scripts/pr_guard.py: sem o marcador `# forge-sdd:generated` é do usuário e nunca é sobrescrito
 	// (a regra vem antes do laço genérico; a atualização por versão está em installPRGuardScript).
 	if rel == prGuardScriptRel {
+		if _, adotavel := PRGuardAdotavel(targetDir); adotavel {
+			return false
+		}
 		return !IsGeneratedPRGuard(targetDir)
 	}
 

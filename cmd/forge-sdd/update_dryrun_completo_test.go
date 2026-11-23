@@ -94,3 +94,23 @@ func TestUpdateDryRunCIPreservaWorkflowDoUsuario(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, "name: meu\n", string(b))
 }
+
+func TestDryRunListaAdocaoDoGuard(t *testing.T) {
+	dir := projetoParaDryRun(t)
+	guard, err := os.ReadFile(filepath.Join("..", "..", "internal", "scaffold", "testdata", "guard-publicado", "v5.2.0-beta.py"))
+	require.NoError(t, err)
+	script := filepath.Join(dir, "scripts", "pr_guard.py")
+	require.NoError(t, os.WriteFile(script, guard, 0o755))
+
+	out := dryRun(t, dir)
+	assert.Contains(t, out, "atualizar scripts/pr_guard.py (igual ao entregue pelo forge na 5.2.0-beta)")
+	assert.NotContains(t, out, "mantido scripts/pr_guard.py")
+	got, _ := os.ReadFile(script)
+	assert.Equal(t, guard, got, "dry-run não grava")
+
+	// negativo: um byte a mais continua do usuário
+	require.NoError(t, os.WriteFile(script, append(guard, '\n'), 0o755))
+	out = dryRun(t, dir)
+	assert.Contains(t, out, "mantido scripts/pr_guard.py")
+	assert.NotContains(t, out, "atualizar scripts/pr_guard.py")
+}

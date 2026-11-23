@@ -1,6 +1,8 @@
 package scaffold
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"os"
 	"path/filepath"
 	"strings"
@@ -131,4 +133,83 @@ func TestPRGuardTemplateIgualAoDoRepositorio(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, string(repo), string(tmpl), "copie scripts/pr_guard.py para %s", prGuardTemplate)
 	assert.NotContains(t, string(tmpl), prGuardMarker, "o marcador é injetado na gravação, não fica no template")
+}
+
+func fixtureGuard(t *testing.T, nome string) []byte {
+	t.Helper()
+	b, err := os.ReadFile(filepath.Join("testdata", "guard-publicado", nome))
+	require.NoError(t, err)
+	return b
+}
+
+func TestTabelaDeHashesDoGuardBateComAsFixtures(t *testing.T) {
+	esperado := map[string]string{"v5.2.0-beta.py": "5.2.0-beta", "v5.2.1-beta.py": "5.2.1-beta"}
+	assert.Len(t, prGuardPublicados, len(esperado))
+	for nome, versao := range esperado {
+		sum := sha256.Sum256(fixtureGuard(t, nome))
+		assert.Equal(t, versao, prGuardPublicados[hex.EncodeToString(sum[:])], nome)
+	}
+}
+
+func TestGuardCopiadoAMaoIgualAoPublicadoEAdotado(t *testing.T) {
+	for _, nome := range []string{"v5.2.0-beta.py", "v5.2.1-beta.py"} {
+		t.Run(nome, func(t *testing.T) {
+			dir := t.TempDir()
+			script := filepath.Join(dir, "scripts", "pr_guard.py")
+			require.NoError(t, os.MkdirAll(filepath.Dir(script), 0o755))
+			require.NoError(t, os.WriteFile(script, fixtureGuard(t, nome), 0o755))
+
+			assert.False(t, PRGuardUserOwned(dir))
+			assert.False(t, shouldPreserve(script, dir))
+			v, ok := PRGuardAdotavel(dir)
+			assert.True(t, ok)
+			assert.NotEmpty(t, v)
+
+			changed, warns := SyncClaudeIntegration(dir, "5.3.0", false)
+			assert.Empty(t, warns)
+			assert.Contains(t, changed, "scripts/pr_guard.py")
+			assert.Equal(t, "# forge-sdd:generated v5.3.0", linhasIniciais(t, script, 2)[1])
+			assert.NoFileExists(t, filepath.Join(dir, "scripts", "pr_guard.novo.py"))
+		})
+	}
+}
+
+func TestGuardEditadoFicaIntactoEGravaNovoPy(t *testing.T) {
+	dir := t.TempDir()
+	script := filepath.Join(dir, "scripts", "pr_guard.py")
+	novo := filepath.Join(dir, "scripts", "pr_guard.novo.py")
+	require.NoError(t, os.MkdirAll(filepath.Dir(script), 0o755))
+	// negativo: um byte a mais que o publicado continua do usuário.
+	editado := append(fixtureGuard(t, "v5.2.0-beta.py"), '\n')
+	require.NoError(t, os.WriteFile(script, editado, 0o755))
+
+	assert.True(t, PRGuardUserOwned(dir))
+	assert.True(t, shouldPreserve(script, dir))
+
+	// dry-run informa e não grava
+	changed, _ := SyncClaudeIntegration(dir, "5.3.0", true)
+	assert.Contains(t, changed, "scripts/pr_guard.novo.py")
+	assert.NoFileExists(t, novo)
+
+	changed, warns := SyncClaudeIntegration(dir, "5.3.0", false)
+	assert.Contains(t, changed, "scripts/pr_guard.novo.py")
+	assert.NotContains(t, changed, "scripts/pr_guard.py")
+	assert.Contains(t, strings.Join(warns, "\n"), "não receberá correções")
+	got, _ := os.ReadFile(script)
+	assert.Equal(t, editado, got, "guard do usuário intocado")
+	assert.Equal(t, "# forge-sdd:generated v5.3.0", linhasIniciais(t, novo, 2)[1])
+
+	// idempotente: segunda rodada não regrava o .novo.py
+	changed, _ = SyncClaudeIntegration(dir, "5.3.0", false)
+	assert.NotContains(t, changed, "scripts/pr_guard.novo.py")
+
+	// link simbólico no lugar do .novo.py é recusado e o alvo não é tocado
+	require.NoError(t, os.Remove(novo))
+	alvo := filepath.Join(t.TempDir(), "alvo.py")
+	require.NoError(t, os.WriteFile(alvo, []byte("x"), 0o644))
+	require.NoError(t, os.Symlink(alvo, novo))
+	_, warns = SyncClaudeIntegration(dir, "5.3.0", false)
+	assert.NotEmpty(t, warns)
+	b, _ := os.ReadFile(alvo)
+	assert.Equal(t, "x", string(b))
 }
