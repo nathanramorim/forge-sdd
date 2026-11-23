@@ -50,10 +50,18 @@ Nada novo duplica conceito: tudo estende o que já existe.
 
 1. `forge status` sinaliza "entregue? rode `forge archive --reconciliar`" quando há PR mesclado para as branches da fila, mas itens ainda abertos.
 2. `forge archive --reconciliar [--aplicar]` lista as tarefas cujo PR está mesclado; com `--aplicar` fecha na fila, atualiza `Status` e `Próximo passo` do `status.md` (≤ 1 KB) e sugere `/archive`.
-3. Iniciativa sem fila, com `status.md` declarando concluída, entra em `--concluidas`.
+3. Iniciativa sem fila, com a linha `Estado: concluida` no `status.md`, entra em `--concluidas`. Se o `status.md` ainda diz "Não arquivar até a T…" e a fila (ou o PR) já está fechada, o `forge archive` avisa a divergência.
 4. `ListArchiveCandidates` e `status` usam a mesma função de "concluída".
 5. O CLOSE das skills de Builder e Reviewer manda rodar a reconciliação após o merge.
 6. `forge doctor` avisa (não falha) sobre iniciativa entregue e não encerrada.
+
+## Decisões do gate (Nathan, 2026-11-23)
+
+1. **Escopo:** um fix só, dentro da iniciativa 119 (escopo M); o Builder divide em tasks na fila.
+2. **Prova de entrega:** só PR mesclado. "Publicado" (Planning, wiki) não conta.
+3. **Modo:** reconciliar só com `--aplicar`; nada muda sozinho, nem no merge pelo Reviewer.
+4. **Iniciativa sem fila:** declara-se concluída pela linha `Estado: concluida` no `status.md`.
+5. **hub-busize (f52d e 3c23):** correção manual lá, fora deste repositório.
 
 ## Critérios de Aceitação Executáveis
 
