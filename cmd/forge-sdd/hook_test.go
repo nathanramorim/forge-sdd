@@ -108,3 +108,15 @@ func TestDoctorReconheceOsDoisComandosDoHook(t *testing.T) {
 		})
 	}
 }
+
+func TestDoctorSemClaudeNaoMandaUpgrade(t *testing.T) {
+	dir := t.TempDir()
+	out := captureStdout(t, func() { reportPRGuardCoverage(dir, []string{"gemini"}) })
+	assert.NotContains(t, out, "update --upgrade")
+	assert.NotContains(t, out, "Hook PreToolUse ausente")
+	assert.Contains(t, out, "Sem hook neste agente")
+
+	out = captureStdout(t, func() { reportPRGuardCoverage(dir, []string{"claude"}) })
+	assert.NotContains(t, out, "update --upgrade")
+	assert.Contains(t, out, "rode 'forge update'")
+}
