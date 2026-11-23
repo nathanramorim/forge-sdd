@@ -1,0 +1,12 @@
+{
+  "project": "demo",
+  "version": "5.0.0",
+  "agents": ["claude", "gemini", "copilot", "openai"],
+  "telemetry": {
+    "enabled": false,
+    "anonymous": true,
+    "endpoint": "local"
+  },
+  "lang": "pt-BR",
+  "naming_convention": "sequencial"
+}
