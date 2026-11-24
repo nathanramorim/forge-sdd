@@ -1,6 +1,6 @@
 # Status: 121-claude-ship-como-modulo
 
-**Status:** spec-para-revisao. Discovery, criteria e plan escritos em 24/11/2026; nada implementado.
-**Próximo passo:** Gate 1 do dono (G1 a G5 em `discovery.md`); depois o dono cria `forge-sdd-ship` privado (P-00).
-**Depende de:** 109-05 e 109-12 (execução de módulo); 107-13 para `pendentes`.
-**A confirmar:** branch da spec (sessão usou `claude/project-thread-37y7ao`, convenção pede `feat/121-claude-ship-como-modulo`); se trocar `Módulos permitidos` exige ADR pelo GOV-01; retenção de dados do Ship no DPA.
+**Status:** estacionada pelo dono em 24/11/2026: só vale para projeto em plano Team ou Enterprise. Spec registrada; nada será construído até lá.
+**Motivo:** em Pro/Max o Code Review, o PR Steward e o Approvals não existem, e o `/ship` abre PR pronto (fora da esteira). O forge já cobre o equivalente dentro da assinatura.
+**Para reativar:** projeto em Team/Enterprise com usage credits; então Gate 1 (G1 a G5) e P-00.
+**Depende de:** 109-05, 109-12 e 107-13.

@@ -3,6 +3,9 @@
 ## Pedido do dono (Nathan, 24/11/2026)
 Descobrir como o **Claude Ship** se encaixa no fluxo do forge-sdd **sem mudar a mecânica da esteira**: uma nova forma de trabalho habilitada por configuração quando se instala uma extensão. Cobrir quem já usa o fluxo atual e quer ativar a extensão depois. Toda extensão nasce em **repositório novo e privado**; esta discovery só **propõe** o repositório (nome, estrutura, contrato), não o cria.
 
+## Estacionada (dono, 24/11/2026)
+Só faz sentido em projeto com plano **Team ou Enterprise** e usage credits. Em Pro/Max as três peças não existem e o forge já cobre o equivalente (Reviewer, retrabalho do Builder, Gate humano) sem custo extra. A spec fica registrada para reativação.
+
 ## Claude Ship em linguagem simples (leia antes do Gate 1)
 **O que é:** um serviço da Anthropic que trabalha **depois que o PR é aberto no GitHub**. São três agentes que rodam na nuvem da Anthropic, mais um comando local.
 
