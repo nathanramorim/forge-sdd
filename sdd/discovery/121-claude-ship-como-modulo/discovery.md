@@ -3,6 +3,22 @@
 ## Pedido do dono (Nathan, 24/11/2026)
 Descobrir como o **Claude Ship** se encaixa no fluxo do forge-sdd **sem mudar a mecânica da esteira**: uma nova forma de trabalho habilitada por configuração quando se instala uma extensão. Cobrir quem já usa o fluxo atual e quer ativar a extensão depois. Toda extensão nasce em **repositório novo e privado**; esta discovery só **propõe** o repositório (nome, estrutura, contrato), não o cria.
 
+## Claude Ship em linguagem simples (leia antes do Gate 1)
+**O que é:** um serviço da Anthropic que trabalha **depois que o PR é aberto no GitHub**. São três agentes que rodam na nuvem da Anthropic, mais um comando local.
+
+| Peça | Em uma frase | Quem liga | Como é cobrada |
+|---|---|---|---|
+| Code Review (GA) | lê o PR e comenta achados por severidade; não aprova nem bloqueia | Owner da organização, por repositório | tokens, em usage credits da organização, **fora do uso incluído no plano** |
+| PR Steward (beta) | faz commits no PR para corrigir CI falho, conflito e comentários de review | Owner, por repositório | tokens, em usage credits; **sem limite até o Owner definir** |
+| Claude Approvals (beta) | aplica uma política de aprovação escrita em `.claude/approvals.yml` | quem mescla o arquivo no branch padrão | tokens das reviews e dos classificadores que a política chama; **observe também cobra**; teto de US$ 10 por execução |
+| `/ship` (Claude Code local) | o dev manda: push, abre PR, revisa e acompanha | o próprio dev | conta no uso do plano do dev, não em usage credits |
+
+**Cobrança em resumo:** não há preço fixo por PR nem preço por token publicado nas páginas lidas. O custo varia com o nível do review (Quick, Standard, Deep), o tamanho do PR, a frequência (`After every push` multiplica) e o trabalho do Steward. A recomendação da própria documentação é fazer piloto e olhar o custo médio em `claude.ai/analytics/code-review` e `claude.ai/analytics/pr-steward`. Limites: Organization settings > Usage (por serviço) e teto por repositório para o Steward. Requisitos: plano Team ou Enterprise, repositório no GitHub, usage credits ativos, sem ZDR, HIPAA ou CMEK. Enterprise elegível pode resgatar créditos promocionais (pelo menos US$ 10.000, prazo para resgatar até 15/01/2027).
+
+**Como se usa no dia a dia:** o admin liga no claude.ai; o GitHub mostra o check `Claude Code Review` e comentários do bot; qualquer pessoa com escrita comenta `@claude review`, `@claude steward` ou `@claude stop`. Atenção: esses comentários **disparam gasto**.
+
+**Onde entra no forge:** como módulo opcional, ele decide **quando** cada agente pode agir para não brigar com o PR em draft e com a prova por `head_sha`. Sem o módulo, o forge segue igual e não gasta nada com o Ship.
+
 ## Por que o ID é 121
 `forge next-id` (que consulta todas as branches) devolveu 121 em 24/11/2026. Branch: o ambiente desta sessão exige `claude/project-thread-37y7ao`; a convenção `feat/121-claude-ship-como-modulo` (FLX-02, Regra 15) fica para o dono decidir no merge (ver `status.md`).
 
