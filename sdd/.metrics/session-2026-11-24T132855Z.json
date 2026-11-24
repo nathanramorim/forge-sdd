@@ -1,0 +1,32 @@
+{
+  "$schema": "forge-sdd/metrics/1.0",
+  "feature": "sdd/discovery/121-claude-ship-como-modulo/discovery.md",
+  "agent_path": null,
+  "tokens_input": 12234,
+  "tokens_output": 5759,
+  "turns": 0,
+  "duration_seconds": 0,
+  "criterio_atendido": true,
+  "model": "",
+  "rework_lines": 0,
+  "context7_calls": 0,
+  "git_calls": 0,
+  "files_touched": [
+    "sdd/discovery/121-claude-ship-como-modulo/discovery.md",
+    "sdd/discovery/121-claude-ship-como-modulo/criteria.md",
+    "sdd/discovery/121-claude-ship-como-modulo/plan.md",
+    "sdd/discovery/121-claude-ship-como-modulo/status.md"
+  ],
+  "outcome": "approved",
+  "sdd_version": "5.2.3-beta",
+  "medicao": "estimado",
+  "complexidade": null,
+  "spec": {
+    "tipo": "discovery",
+    "iniciativa": "121-claude-ship-como-modulo",
+    "bytes": 12234,
+    "criteria_bytes": 8205,
+    "plan_bytes": 2033,
+    "status_bytes": 561
+  }
+}
