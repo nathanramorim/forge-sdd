@@ -2,7 +2,7 @@ import { atom, read, update } from 'claude-code'
 import type { EngineInterface, Register } from 'claude-code'
 
 import { PAPEIS, ESTADOS, DIR_FILAS, DIR_LOGS, RE_ID_JOB, tokensDoLog, caudaDoLog, sanear } from './lib/esteira'
-import { duracao, escolherIniciativa, estacaoAtual, lerJob, montarQuadro, resumoInbox, tokensCurtos } from './lib/quadro'
+import { duracao, escolherIniciativa, estacaoAtual, lerJob, montarQuadro, resumoInbox, sparkline, tokensCurtos } from './lib/quadro'
 import type { JobLido } from './lib/quadro'
 import { resumir, textoDoResumo } from './lib/gastos'
 import { avaliarAlertas, horaDeRenovacao, conteudoJanela, janelaMaisCheia, linhaDeStatus, LIMITE_ORCAMENTO, rotuloJanela } from './lib/janelas'
@@ -20,8 +20,9 @@ const DIR_INICIATIVAS = 'sdd/discovery'
 const MAX_REGISTROS_GASTOS = 500
 
 // Cache do painel: não é fonte de verdade, só o que a tela mostra (o barramento é do Go).
-const VAZIA: Esteira = { quadro: null, outras: [], agentes: [], erro: '', inbox: { naoLidas: 0, prConforme: [] }, temFilas: false }
-const esteira = atom({ plugin: 'forge-painel', key: 'esteira' } as const, VAZIA)
+const VAZIA: Esteira = { quadro: null, outras: [], agentes: [], erro: '', inbox: { naoLidas: 0, prConforme: [] }, temFilas: false, series: {} }
+// shape: um valor gravado por versão anterior do mod é descartado, não lido pela metade.
+const esteira = atom({ plugin: 'forge-painel', key: 'esteira' } as const, VAZIA, { shape: 'esteira-3' })
 // tool_use_id da chamada Agent -> id do subagente, para o cartão de consumo embaixo da chamada.
 const cartoes = atom({ plugin: 'forge-painel', key: 'cartoes' } as const, {} as Record<string, string>)
 const DIR_INBOX = '.forge/runtime/queues/discovery/inbox'
@@ -34,6 +35,8 @@ let iniciativa: string | undefined
 let estacao = 'discovery'
 let telemetriaOn: boolean | undefined
 let ultimaMedida: any
+// Amostras de tokens por job em execução, para a tendência ao vivo (somem no reload, e tudo bem).
+const amostras = new Map<string, number[]>()
 let alertas: EstadoAlertas = {}
 let janelaGravadaEm = 0
 let inicioSessao = 0
@@ -159,7 +162,15 @@ async function atualizar($: EngineInterface): Promise<void> {
       if (typeof st?.task === 'string' && typeof st?.estado === 'string') estadosTask[sanear(st.task, 40)] = sanear(st.estado, 20)
     }
     quadro = montarQuadro(jobs, iniciativa, estadosTask, agora)
+    for (const j of jobs) {
+      if (j.iniciativa !== iniciativa || j.estado !== 'processing' || j.tokens === undefined) continue
+      const v = amostras.get(j.id) ?? []
+      if (v[v.length - 1] !== j.tokens || v.length === 0) v.push(j.tokens)
+      amostras.set(j.id, v.slice(-24))
+    }
   }
+  const series: Record<string, number[]> = {}
+  for (const c of quadro?.cartoes ?? []) if (c.classe === 'run' && amostras.has(c.jobId)) series[c.jobId] = amostras.get(c.jobId)!
   const outras = [...new Set(jobs.filter(j => j.iniciativa !== '' && j.iniciativa !== iniciativa && (j.estado === 'pending' || j.estado === 'processing')).map(j => j.iniciativa))]
   const brutosInbox: string[] = []
   for (const nome of (await listar($, DIR_INBOX)).slice(-50)) {
@@ -181,7 +192,7 @@ async function atualizar($: EngineInterface): Promise<void> {
   telemetriaOn = await telemetriaLigada($)
   if (ultimaMedida !== undefined) $.ui.status(linhaDeStatus(ultimaMedida, iniciativa, estacao, telemetriaOn))
   try {
-    await update($, esteira, () => ({ quadro, outras, agentes, erro, inbox: resumoInbox(brutosInbox), temFilas }))
+    await update($, esteira, () => ({ quadro, outras, agentes, erro, inbox: resumoInbox(brutosInbox), temFilas, series }))
   } catch {
     // a sessão pode ter terminado entre a leitura e a gravação do cache
   }
@@ -376,36 +387,59 @@ export const register: Register = on => {
     const { Box, Text } = $.ui.resolve(e)
     const d = { ...VAZIA, ...(await read($, esteira)) }
     const q = d.quadro ?? null
-    const col = (t: string, n: number) => (t.length > n ? `${t.slice(0, n - 1)}…` : t.padEnd(n))
+    const cor = { ok: 'green', run: 'blue', wait: 'gray', fail: 'red' } as const
+    const sala = Math.max(1, Math.floor(((e.viewport?.rows ?? 24) - 8) / 3))
     return (
       <Box flexDirection="column">
-        <Text bold>Esteira{q ? ` · ${q.iniciativa}` : ''}</Text>
+        <Box justifyContent="space-between">
+          <Text bold>Esteira</Text>
+          {q !== null && <Text dimColor>iniciativa {q.iniciativa}</Text>}
+        </Box>
         {!d.temFilas && <Text dimColor>Nenhum job no barramento (rode `forge up --terminal painel`).</Text>}
         {d.temFilas && q === null && <Text dimColor>Nenhuma iniciativa em andamento.</Text>}
-        {q !== null && (
+        {q !== null && q.total > 1 && (
           <Text dimColor>
-            pares ativos {q.ativos}
-            {q.total > 0 ? ` · ${q.mescladas}/${q.total} tasks mescladas` : ''}
+            {q.ativos} par(es) ativo(s) · {q.mescladas}/{q.total} tasks mescladas
           </Text>
         )}
-        {q !== null && q.linhas.length > 0 && <Text dimColor>{`${col('task', 18)} ${col('builder', 11)} ${col('reviewer', 11)} ${col('tokens', 8)} tempo`}</Text>}
-        {q?.linhas.map(l => (
-          <Text key={`t-${l.task}`} bold={l.ativo} dimColor={!l.ativo}>
-            {`${col(l.task, 18)} ${col(l.builder, 11)} ${col(l.reviewer, 11)} ${col(l.tokens > 0 ? tokensCurtos(l.tokens) : '·', 8)} ${l.tempo}`}
-          </Text>
+        {q?.cartoes.slice(0, sala).map(c => (
+          <Box key={`c-${c.nome}`} flexDirection="column" marginTop={1}>
+            <Box justifyContent="space-between">
+              <Text bold={c.classe === 'run'} dimColor={c.classe === 'ok'}>
+                {c.nome}
+              </Text>
+              <Text color={cor[c.classe]}>{c.estado}</Text>
+            </Box>
+            {c.classe === 'run' && sparkline(d.series[c.jobId] ?? []) !== '' && <Text color="blue">{sparkline(d.series[c.jobId] ?? [])}</Text>}
+            <Box justifyContent="space-between">
+              <Text dimColor>{c.tokens > 0 ? `${tokensCurtos(c.tokens)} tok` : '0 tok'}</Text>
+              <Text dimColor>{c.tempo}</Text>
+            </Box>
+          </Box>
         ))}
-        {q?.modoFeature && <Text color="yellow">⚠ um Builder para a feature inteira: o forge que despachou é anterior à 6.0 (rode `forge --version`)</Text>}
-        {q !== null && <Text>Total da iniciativa {tokensCurtos(q.tokens)} tokens</Text>}
-        {d.outras.length > 0 && <Text dimColor>Também em andamento: {d.outras.join(', ')}</Text>}
-        <Text bold>Subagentes desta sessão</Text>
-        {d.agentes.length === 0 && <Text dimColor>Nenhum.</Text>}
-        {d.agentes.map((a, i) => (
-          <Text key={`ag-${i}`}>
-            {a.tipo} [{a.estado}] {tokensCurtos(a.tokens)} tok
-          </Text>
-        ))}
+        {q !== null && q.cartoes.length > sala && <Text dimColor>+{q.cartoes.length - sala} encerrado(s)</Text>}
+        {q?.modoFeature && <Text color="yellow">⚠ um Builder para a feature inteira: o forge que despachou é anterior à 6.0</Text>}
+        {q !== null && (
+          <Box justifyContent="space-between" marginTop={1}>
+            <Text>iniciativa</Text>
+            <Text bold>{tokensCurtos(q.tokens)} tok</Text>
+          </Box>
+        )}
+        {d.outras.length > 0 && <Text dimColor>também em andamento: {d.outras.join(', ')}</Text>}
+        {d.agentes.length > 0 && (
+          <Box flexDirection="column" marginTop={1}>
+            <Text bold>Subagentes desta sessão</Text>
+            {d.agentes.map((a, i) => (
+              <Box key={`ag-${i}`} justifyContent="space-between">
+                <Text>{a.tipo}</Text>
+                <Text dimColor>
+                  {a.estado} · {tokensCurtos(a.tokens)} tok
+                </Text>
+              </Box>
+            ))}
+          </Box>
+        )}
         {d.erro !== '' && <Text dimColor>{d.erro}</Text>}
-        <Text dimColor>Tokens medidos pelo Claude Code; dólar, quando aparece, é custo de tabela.</Text>
       </Box>
     )
   })

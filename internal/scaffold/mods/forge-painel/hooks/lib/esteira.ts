@@ -68,22 +68,39 @@ export function linhaDoJob(papel: string, estado: string, bruto: string, agora: 
   }
 }
 
-// Tokens de um log stream-json: soma de input e output do último evento `result`.
+// Tokens de um log stream-json: o evento `result` final quando existe; em execução, o último
+// uso que uma mensagem do assistente trouxe (entrada mais cache) somado às saídas, ao vivo.
 export function tokensDoLog(texto: string): number | undefined {
   const linhas = texto.split('\n')
+  const n = (u: Record<string, unknown> | undefined, k: string) => (typeof u?.[k] === 'number' ? (u[k] as number) : 0)
   for (let i = linhas.length - 1; i >= 0; i--) {
     const l = linhas[i] ?? ''
     if (!l.includes('"result"')) continue
     try {
       const ev = JSON.parse(l) as { type?: string; usage?: Record<string, unknown> }
       if (ev.type !== 'result' || ev.usage === undefined) continue
-      const n = (k: string) => (typeof ev.usage?.[k] === 'number' ? (ev.usage[k] as number) : 0)
-      return n('input_tokens') + n('output_tokens') + n('cache_read_input_tokens') + n('cache_creation_input_tokens')
+      return n(ev.usage, 'input_tokens') + n(ev.usage, 'output_tokens') + n(ev.usage, 'cache_read_input_tokens') + n(ev.usage, 'cache_creation_input_tokens')
     } catch {
       continue
     }
   }
-  return undefined
+  let saida = 0
+  let entrada = 0
+  let viu = false
+  for (const l of linhas) {
+    if (!l.includes('"usage"')) continue
+    try {
+      const ev = JSON.parse(l) as { type?: string; message?: { usage?: Record<string, unknown> } }
+      const u = ev.type === 'assistant' ? ev.message?.usage : undefined
+      if (u === undefined) continue
+      viu = true
+      saida += n(u, 'output_tokens')
+      entrada = n(u, 'input_tokens') + n(u, 'cache_read_input_tokens') + n(u, 'cache_creation_input_tokens')
+    } catch {
+      continue
+    }
+  }
+  return viu ? entrada + saida : undefined
 }
 
 // Últimas linhas de um log, saneadas, para o `/painel log`.

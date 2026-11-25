@@ -38,16 +38,18 @@ test('o painel mostra só a iniciativa atual, um par por task, com estado, token
   await $.command.run(cmd('painel'))
   const ui = await $.ui.mount({ ...PANE, surface: 'terminal' })
 
-  expect((await ui.find({ type: 'Text', text: /^Esteira/ }))?.text).toContain('77-auth-oauth')
-  const um = (await ui.find({ type: 'Text', text: /^77-01/ }))?.text ?? ''
-  expect(um).toContain('rodando')
-  expect(um).toContain('1,0k')
-  expect(um).toContain('10m 00s')
-  const dois = (await ui.find({ type: 'Text', text: /^77-02/ }))?.text ?? ''
-  expect(dois).toContain('commitado')
-  expect(dois).toContain('mesclada')
-  expect((await ui.find({ type: 'Text', text: /pares ativos/ }))?.text).toContain('pares ativos 1 · 1/2 tasks mescladas')
-  expect((await ui.find({ type: 'Text', text: /Total da iniciativa/ }))?.text).toContain('1,0k')
+  expect((await ui.find({ type: 'Text', text: /^Esteira$/ }))).toBeDefined()
+  expect((await ui.find({ type: 'Text', text: /^iniciativa 77/ }))?.text).toBe('iniciativa 77-auth-oauth')
+  expect(await ui.find({ type: 'Text', text: /^builder · 77-01$/ })).toBeDefined()
+  expect(await ui.find({ type: 'Text', text: /^rodando$/ })).toBeDefined()
+  expect(await ui.find({ type: 'Text', text: /^1,0k tok$/ })).toBeDefined()
+  expect(await ui.find({ type: 'Text', text: /^10m 00s$/ })).toBeDefined()
+  expect(await ui.find({ type: 'Text', text: /^builder · 77-02$/ })).toBeDefined()
+  expect(await ui.find({ type: 'Text', text: /^commitado$/ })).toBeDefined()
+  expect(await ui.find({ type: 'Text', text: /^reviewer · 77-02$/ })).toBeDefined()
+  expect(await ui.find({ type: 'Text', text: /^mesclada$/ })).toBeDefined()
+  expect((await ui.find({ type: 'Text', text: /par\(es\) ativo/ }))?.text).toContain('1 par(es) ativo(s) · 1/2 tasks mescladas')
+  expect(await ui.find({ type: 'Text', text: /^iniciativa$/ })).toBeDefined()
   expect(await ui.find({ type: 'Text', text: /55e0/ })).toBeUndefined()
   await ui.unmount()
 
@@ -62,7 +64,7 @@ test('job por feature (forge antigo) vira uma linha só e o painel avisa', async
   await $.session.start({ cwd: '/', surface: 'terminal', isInteractive: true })
   await $.command.run(cmd('painel'))
   const ui = await $.ui.mount({ ...PANE, surface: 'terminal' })
-  expect((await ui.find({ type: 'Text', text: /^feature/ }))?.text).toContain('feature (3 tasks)')
+  expect(await ui.find({ type: 'Text', text: /^builder · feature \(3 tasks\)$/ })).toBeDefined()
   expect((await ui.find({ type: 'Text', text: /um Builder para a feature inteira/ }))?.text).toContain('anterior à 6.0')
   await ui.unmount()
 })
@@ -74,7 +76,7 @@ test('lease vencido aparece como parado', async ($, on) => {
   await $.session.start({ cwd: '/', surface: 'terminal', isInteractive: true })
   await $.command.run(cmd('painel'))
   const ui = await $.ui.mount({ ...PANE, surface: 'terminal' })
-  expect((await ui.find({ type: 'Text', text: /^77-01/ }))?.text).toContain('parado')
+  expect(await ui.find({ type: 'Text', text: /^parado$/ })).toBeDefined()
   await ui.unmount()
 })
 
@@ -107,7 +109,7 @@ test('a status line diz forge, a iniciativa do job e a estação em curso', asyn
   await $.session.measure({ context: { window: 200000, percent: 41 }, rateLimits: [{ kind: 'five_hour', percentUsed: 72 }], changed: ['context' as const] })
   const linha = m.status[m.status.length - 1] ?? ''
   expect(linha).toContain('forge · 77-auth-oauth · builder')
-  expect(linha).toContain('│ 5h 72%')
+  expect(linha).toContain('│ 5h 72% ▰▰▰▰▰▰▱▱')
   expect(linha).toContain('│ ctx 41%')
   expect(linha).toContain('● telemetria real')
 })
@@ -180,4 +182,17 @@ test('/gastos sem registros avisa em vez de falhar', async ($, on) => {
   const r = await $.command.run(cmd('gastos'))
   expect(r.text).toContain('Sem registros')
   expect(AGORA).toBeGreaterThan(0)
+})
+
+test('agente em execução ganha a tendência de tokens ao vivo', async ($, on) => {
+  const m = montarMundo(on, CENARIO)
+  await $.session.start({ cwd: '/', surface: 'terminal', isInteractive: true })
+  await $.command.run(cmd('painel'))
+  // o log cresce entre duas releituras
+  m.arquivos.set('.forge/runtime/logs/builder-job-b1.log', '{"type":"assistant","message":{"usage":{"input_tokens":3000,"output_tokens":800}}}\n')
+  await $.command.run(cmd('painel'))
+  const ui = await $.ui.mount({ ...PANE, surface: 'terminal' })
+  expect(await ui.find({ type: 'Text', text: /^[▁▂▃▄▅▆▇█]+$/ })).toBeDefined()
+  expect(await ui.find({ type: 'Text', text: /^3,8k tok$/ })).toBeDefined()
+  await ui.unmount()
 })

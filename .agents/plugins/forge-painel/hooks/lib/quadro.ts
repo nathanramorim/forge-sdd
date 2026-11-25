@@ -26,9 +26,19 @@ export type LinhaQuadro = {
   ativo: boolean
 }
 
+export type Cartao = {
+  nome: string
+  estado: string
+  classe: 'ok' | 'run' | 'wait' | 'fail'
+  tokens: number
+  tempo: string
+  jobId: string
+}
+
 export type Quadro = {
   iniciativa: string
   linhas: LinhaQuadro[]
+  cartoes: Cartao[]
   modoFeature: boolean
   ativos: number
   mescladas: number
@@ -137,6 +147,7 @@ export function montarQuadro(jobs: JobLido[], ini: string, estadosTask: Record<s
     grupos.set(chave, g)
   }
   const linhas: LinhaQuadro[] = []
+  const cartoes: Cartao[] = []
   let ativos = 0
   let tokens = 0
   for (const [task, g] of grupos) {
@@ -152,13 +163,30 @@ export function montarQuadro(jobs: JobLido[], ini: string, estadosTask: Record<s
     if (est === 'mesclada') reviewer = 'mesclada'
     else if (est === 'bloqueada') reviewer = 'bloqueada'
     linhas.push({ task, builder: rotulo(b, 'builder'), reviewer, tokens: t, tempo: duracao(fim - inicio), ativo: algumAtivo })
+    for (const [papel, j] of [['builder', b], ['reviewer', r]] as const) {
+      if (j === undefined && !(papel === 'reviewer' && b?.estado === 'done')) continue
+      const est = papel === 'reviewer' ? reviewer : rotulo(j, papel)
+      const ini0 = j?.criado ?? agora
+      const fim0 = j === undefined ? agora : ativo(j) ? agora : quando(j)
+      cartoes.push({
+        nome: `${papel} · ${task}`,
+        estado: est,
+        classe: classeDe(est),
+        tokens: j?.tokens ?? 0,
+        tempo: j === undefined || j.estado === 'pending' ? '·' : duracao(fim0 - ini0),
+        jobId: j?.id ?? '',
+      })
+    }
     if (algumAtivo) ativos++
     tokens += t
   }
   linhas.sort((a, b) => a.task.localeCompare(b.task))
+  // Em execução primeiro, depois na fila, depois os encerrados (mais recentes no fim da tela).
+  const ordem = { run: 0, wait: 1, fail: 2, ok: 3 }
+  cartoes.sort((a, b) => ordem[a.classe] - ordem[b.classe] || a.nome.localeCompare(b.nome))
   const mescladas = Object.values(estadosTask).filter(e => e === 'mesclada').length
   const total = Math.max(linhas.length, Object.keys(estadosTask).length)
-  return { iniciativa: ini, linhas, modoFeature, ativos, mescladas, total, tokens }
+  return { iniciativa: ini, linhas, cartoes, modoFeature, ativos, mescladas, total, tokens }
 }
 
 // Faixa acima do prompt: não lidas do inbox e PRs conformes entre elas.
@@ -179,4 +207,28 @@ export function resumoInbox(brutos: string[]): { naoLidas: number; prConforme: s
     }
   }
   return { naoLidas, prConforme }
+}
+
+export function classeDe(estado: string): 'ok' | 'run' | 'wait' | 'fail' {
+  if (estado === 'rodando' || estado === 'revisando') return 'run'
+  if (estado === 'falhou' || estado === 'parado' || estado === 'bloqueada') return 'fail'
+  if (estado === 'na fila' || estado === '·') return 'wait'
+  return 'ok'
+}
+
+const BLOCOS = '▁▂▃▄▅▆▇█'
+
+// Tendência ao vivo dos tokens de um agente em execução (as amostras vêm de cada releitura).
+export function sparkline(amostras: number[], largura = 24): string {
+  const v = amostras.slice(-largura)
+  if (v.length < 2) return ''
+  const min = Math.min(...v)
+  const max = Math.max(...v)
+  return v.map(x => BLOCOS[max === min ? 3 : Math.round(((x - min) / (max - min)) * 7)]).join('')
+}
+
+// Barra curta de percentual para a status line.
+export function barra(pct: number, largura = 8): string {
+  const cheio = Math.max(0, Math.min(largura, Math.round((pct / 100) * largura)))
+  return '▰'.repeat(cheio) + '▱'.repeat(largura - cheio)
 }

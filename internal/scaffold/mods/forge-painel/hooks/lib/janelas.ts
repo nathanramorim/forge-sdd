@@ -1,6 +1,8 @@
 // Funções puras da status line e dos alertas de janela. Nada aqui toca disco nem a API:
 // recebe os números que o Claude Code já mediu (`session.measure`) e devolve texto.
 
+import { barra } from './quadro'
+
 export type Janela = { kind: string; percentUsed: number; resetsAt?: string }
 
 export type Medida = {
@@ -54,7 +56,7 @@ export function linhaDeStatus(m: Medida, iniciativa: string | undefined, estacao
   const partes: string[] = [cabeca.join(' · ')]
   const janelas = janelasDeTempo(m.rateLimits)
   for (const j of janelas) {
-    partes.push(`${rotuloJanela(j.kind)} ${pct(j.percentUsed)}`)
+    partes.push(`${rotuloJanela(j.kind)} ${pct(j.percentUsed)} ${barra(j.percentUsed)}`)
   }
   partes.push(m.context.percent === undefined ? 'ctx -' : `ctx ${pct(m.context.percent)}`)
   if (janelas.length === 0 && m.cost !== undefined) {

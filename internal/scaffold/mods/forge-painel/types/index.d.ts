@@ -1,10 +1,13 @@
 // Estado do mod forge-painel: só cache do que a tela mostra; o barramento é do Go (RN-10).
 export type LinhaQuadro = { task: string; builder: string; reviewer: string; tokens: number; tempo: string; ativo: boolean }
 
+export type Cartao = { nome: string; estado: string; classe: 'ok' | 'run' | 'wait' | 'fail'; tokens: number; tempo: string; jobId: string }
+
 export type Esteira = {
   quadro: {
     iniciativa: string
     linhas: LinhaQuadro[]
+    cartoes: Cartao[]
     modoFeature: boolean
     ativos: number
     mescladas: number
@@ -16,10 +19,11 @@ export type Esteira = {
   erro: string
   inbox: { naoLidas: number; prConforme: string[] }
   temFilas: boolean
+  series: Record<string, number[]>
 }
 
 declare module 'claude-code' {
   interface PluginState {
-    'forge-painel': { esteira: Esteira; cartoes: Record<string, string> }
+    'forge-painel': { esteira: Shaped<Esteira>; cartoes: Record<string, string> }
   }
 }
