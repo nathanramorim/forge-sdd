@@ -5,7 +5,20 @@ export type Cartao = { nome: string; estado: string; classe: 'ok' | 'run' | 'wai
 
 export type Estacao = { papel: string; estado: string; classe: 'ok' | 'run' | 'wait' | 'fail'; tokens: number; tempo: string; detalhe: string; jobId: string }
 
+export type Recursos = {
+  worktrees: { iniciativa: string; task: string; estado: string }[]
+  discoTotal: number
+  discoUsado: number
+  memLivre: number
+  memPar: number
+  pares: number
+  motivo: string
+  modoTask: boolean
+  em: number
+}
+
 export type Esteira = {
+  recursos: Recursos | null
   sessao: { texto: string; desde: number } | null
   estacoes: Estacao[]
   progresso: { feitas: number; total: number; atual: string } | null

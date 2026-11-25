@@ -73,6 +73,10 @@ func FormatDiagnostico(dir string, now time.Time) string {
 		fmt.Fprintf(&b, "⚠ %d pendente(s) com mais de 24h na fila (o worker pega antes dos novos): %s\n", len(velhos), strings.Join(velhos, ", "))
 	}
 
+	if r, ok := LerRecursos(dir); ok {
+		b.WriteString(FormatRecursos(r, now))
+		return b.String()
+	}
 	cfg, _, err := config.LoadForgeConfig(dir)
 	if err == nil {
 		if cfg.Builder.PorTask() && !cfg.IsAdvanced() {

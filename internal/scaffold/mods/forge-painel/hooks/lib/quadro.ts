@@ -267,22 +267,28 @@ export type Estacao = {
 export function montarEstacoes(jobs: JobLido[], ini: string, agora: number, atividade: Record<string, string> = {}): Estacao[] {
   const out: Estacao[] = []
   for (const papel of ['builder', 'reviewer']) {
-    const j = jobs.filter(x => x.iniciativa === ini && x.papel === papel).sort((a, b) => Number(ativo(b)) - Number(ativo(a)) || quando(b) - quando(a))[0]
-    if (j === undefined) {
+    const doPapel = jobs.filter(x => x.iniciativa === ini && x.papel === papel)
+    const rodando = doPapel.filter(x => x.estado === 'processing').sort((a, b) => a.taskId.localeCompare(b.taskId))
+    // Tasks em paralelo: um cartão por job em execução; sem nenhum, o mais recente da estação.
+    const escolhidos = rodando.length > 0 ? rodando : doPapel.sort((a, b) => Number(ativo(b)) - Number(ativo(a)) || quando(b) - quando(a)).slice(0, 1)
+    if (escolhidos.length === 0) {
       out.push({ papel, estado: 'ocioso', classe: 'wait', tokens: 0, tempo: '·', detalhe: '', jobId: '' })
       continue
     }
-    const estado = rotulo(j, papel) === 'commitado' ? 'concluído' : rotulo(j, papel)
-    const classe = classeDe(estado)
-    let tempo = '·'
-    if (j.estado !== 'pending' && j.inicio !== undefined) {
-      const fim = j.estado === 'processing' ? agora : j.fim ?? quando(j)
-      tempo = duracao(fim - j.inicio)
+    for (const j of escolhidos) {
+      const nome = rodando.length > 1 && j.taskId !== '' ? `${papel} · ${j.taskId}` : papel
+      const estado = rotulo(j, papel) === 'commitado' ? 'concluído' : rotulo(j, papel)
+      const classe = classeDe(estado)
+      let tempo = '·'
+      if (j.estado !== 'pending' && j.inicio !== undefined) {
+        const fim = j.estado === 'processing' ? agora : j.fim ?? quando(j)
+        tempo = duracao(fim - j.inicio)
+      }
+      let detalhe = ''
+      if (classe === 'fail') detalhe = j.parado ? 'worker parou no meio (rode forge up)' : j.motivo
+      else if (classe === 'run') detalhe = atividade[papel] ?? ''
+      out.push({ papel: nome, estado, classe, tokens: j.tokens ?? 0, tempo, detalhe: rodando.length > 1 ? '' : detalhe, jobId: j.id })
     }
-    let detalhe = ''
-    if (classe === 'fail') detalhe = j.parado ? 'worker parou no meio (rode forge up)' : j.motivo
-    else if (classe === 'run') detalhe = atividade[papel] ?? ''
-    out.push({ papel, estado, classe, tokens: j.tokens ?? 0, tempo, detalhe, jobId: j.id })
   }
   return out
 }
@@ -320,4 +326,40 @@ export function atividadeDoWorker(texto: string | undefined, papel: string): str
     return sanear(l.slice(papel.length + 2).trim().replace(/^[^\p{L}\d]+/u, ''), 70)
   }
   return ''
+}
+
+export type RecursosLidos = {
+  worktrees: { iniciativa: string; task: string; estado: string }[]
+  discoTotal: number
+  discoUsado: number
+  memLivre: number
+  memPar: number
+  pares: number
+  motivo: string
+  modoTask: boolean
+  em: number
+}
+
+// Retrato que o worker do Builder grava (o painel só lê, nunca mede).
+export function lerRecursos(bruto: string | undefined): RecursosLidos | null {
+  if (bruto === undefined || bruto.length > 16384) return null
+  let r: any
+  try {
+    r = JSON.parse(bruto)
+  } catch {
+    return null
+  }
+  const num = (v: unknown) => (typeof v === 'number' && Number.isFinite(v) ? v : 0)
+  const ws: any[] = Array.isArray(r?.worktrees) ? r.worktrees.slice(0, 40) : []
+  return {
+    worktrees: ws.map(w => ({ iniciativa: sanear(w?.iniciativa, 60), task: sanear(w?.task, 40), estado: sanear(w?.estado, 10) })),
+    discoTotal: num(r?.disco_total_bytes),
+    discoUsado: num(r?.disco_usado_bytes),
+    memLivre: typeof r?.memoria_livre_mb === 'number' ? r.memoria_livre_mb : -1,
+    memPar: num(r?.memoria_por_par_mb),
+    pares: num(r?.pares),
+    motivo: sanear(r?.motivo, 40),
+    modoTask: r?.modo_task === true,
+    em: data(r?.em) ?? 0,
+  }
 }

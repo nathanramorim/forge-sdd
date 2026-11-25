@@ -107,6 +107,22 @@ func RunWorker(ctx context.Context, opts WorkerOptions) error {
 	}
 	fmt.Fprintf(opts.Out, "[%s] agente: %s · permissões: %s\n", opts.Name, opts.CLI, config.PermissionSummary(cfg.Permissions, cfg.AllowCommands))
 
+	if opts.Role == layout.RoleBuilder && !opts.Once {
+		// Retrato de recursos para o painel (o painel só lê; quem mede é o worker, em segundo plano).
+		go func() {
+			_ = GravarRecursos(opts.Dir, time.Now())
+			t := time.NewTicker(GravarRecursosACada)
+			defer t.Stop()
+			for {
+				select {
+				case <-ctx.Done():
+					return
+				case <-t.C:
+					_ = GravarRecursos(opts.Dir, time.Now())
+				}
+			}
+		}()
+	}
 	var wasIdle bool
 	for {
 		if ctx.Err() != nil {

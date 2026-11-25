@@ -2,7 +2,7 @@ import { atom, read, update } from 'claude-code'
 import type { EngineInterface, Register } from 'claude-code'
 
 import { PAPEIS, ESTADOS, DIR_FILAS, DIR_LOGS, RE_ID_JOB, tokensDoLog, caudaDoLog, sanear } from './lib/esteira'
-import { atividadeDoWorker, barra, duracao, escolherIniciativa, estacaoAtual, lerJob, montarEstacoes, montarQuadro, progressoDaFila, resumoInbox, sparkline, tokensCurtos } from './lib/quadro'
+import { atividadeDoWorker, barra, lerRecursos, duracao, escolherIniciativa, estacaoAtual, lerJob, montarEstacoes, montarQuadro, progressoDaFila, resumoInbox, sparkline, tokensCurtos } from './lib/quadro'
 import type { JobLido } from './lib/quadro'
 import { resumir, textoDoResumo } from './lib/gastos'
 import { avaliarAlertas, horaDeRenovacao, conteudoJanela, janelaMaisCheia, linhaDeStatus, LIMITE_ORCAMENTO, rotuloJanela } from './lib/janelas'
@@ -13,6 +13,7 @@ import type { Esteira } from '../types'
 
 const PAINEL = 'forge-painel'
 const DIR_PAINEL = '.forge/runtime/painel'
+const ARQ_RECURSOS = `${DIR_PAINEL}/recursos.json`
 const ARQ_ALERTAS = `${DIR_PAINEL}/alertas.json`
 const ARQ_JANELA = `${DIR_PAINEL}/janela.json`
 const JANELA_A_CADA_MS = 60_000
@@ -20,9 +21,9 @@ const DIR_INICIATIVAS = 'sdd/discovery'
 const MAX_REGISTROS_GASTOS = 500
 
 // Cache do painel: não é fonte de verdade, só o que a tela mostra (o barramento é do Go).
-const VAZIA: Esteira = { sessao: null, estacoes: [], progresso: null, quadro: null, outras: [], agentes: [], erro: '', inbox: { naoLidas: 0, prConforme: [] }, temFilas: false, series: {} }
+const VAZIA: Esteira = { recursos: null, sessao: null, estacoes: [], progresso: null, quadro: null, outras: [], agentes: [], erro: '', inbox: { naoLidas: 0, prConforme: [] }, temFilas: false, series: {} }
 // shape: um valor gravado por versão anterior do mod é descartado, não lido pela metade.
-const esteira = atom({ plugin: 'forge-painel', key: 'esteira' } as const, VAZIA, { shape: 'esteira-5' })
+const esteira = atom({ plugin: 'forge-painel', key: 'esteira' } as const, VAZIA, { shape: 'esteira-6' })
 // tool_use_id da chamada Agent -> id do subagente, para o cartão de consumo embaixo da chamada.
 const cartoes = atom({ plugin: 'forge-painel', key: 'cartoes' } as const, {} as Record<string, string>)
 const DIR_INBOX = '.forge/runtime/queues/discovery/inbox'
@@ -247,7 +248,8 @@ async function atualizar($: EngineInterface): Promise<void> {
   telemetriaOn = await telemetriaLigada($)
   if (ultimaMedida !== undefined) $.ui.status(linhaDeStatus(ultimaMedida, iniciativa, estacao, telemetriaOn))
   try {
-    await update($, esteira, v => ({ sessao: v?.sessao ?? null, estacoes, progresso, quadro, outras, agentes, erro, inbox: resumoInbox(brutosInbox), temFilas, series }))
+    const recursos = lerRecursos(await lerTexto($, ARQ_RECURSOS))
+  await update($, esteira, v => ({ recursos, sessao: v?.sessao ?? null, estacoes, progresso, quadro, outras, agentes, erro, inbox: resumoInbox(brutosInbox), temFilas, series }))
   } catch {
     // a sessão pode ter terminado entre a leitura e a gravação do cache
   }
@@ -530,6 +532,47 @@ export const register: Register = on => {
           <Text>iniciativa</Text>
           <Text bold>{tokensCurtos(total)} tok</Text>
         </Box>
+        {d.recursos !== null && (() => {
+          const r = d.recursos
+          const gb = (v: number) => `${(v / 2 ** 30).toFixed(1).replace('.', ',')} GB`
+          const daIni = r.worktrees.filter(w => iniciativa === undefined || w.iniciativa === iniciativa)
+          const n = (e: string) => daIni.filter(w => w.estado === e).length
+          const pctDisco = r.discoTotal > 0 ? (r.discoUsado / r.discoTotal) * 100 : 0
+          return (
+            <Box flexDirection="column" borderStyle="round" borderColor="gray" paddingX={1} marginTop={1}>
+              <Box justifyContent="space-between">
+                <Text bold>Recursos</Text>
+                {r.modoTask && <Text dimColor>cabem {r.pares} par(es) · {r.motivo}</Text>}
+              </Box>
+              {r.discoTotal > 0 && (
+                <Box justifyContent="space-between">
+                  <Text dimColor>disco {barra(pctDisco, 10)}</Text>
+                  <Text dimColor>{gb(r.discoTotal - r.discoUsado)} livres</Text>
+                </Box>
+              )}
+              {r.memLivre >= 0 && (
+                <Box justifyContent="space-between">
+                  <Text dimColor>memória</Text>
+                  <Text dimColor>
+                    {(r.memLivre / 1024).toFixed(1).replace('.', ',')} GB livres · {(r.memPar / 1024).toFixed(1).replace('.', ',')} GB por par
+                  </Text>
+                </Box>
+              )}
+              <Box justifyContent="space-between">
+                <Text dimColor>worktrees {daIni.length}</Text>
+                <Text dimColor>
+                  {n('ativo')} ativo(s) · {n('ocioso')} ocioso(s){n('orfao') > 0 ? ` · ${n('orfao')} órfão(s)` : ''}
+                </Text>
+              </Box>
+              {daIni.slice(0, 6).map(w => (
+                <Text key={`wt-${w.task}`} color={w.estado === 'ativo' ? 'blue' : w.estado === 'orfao' ? 'yellow' : undefined} dimColor={w.estado === 'ocioso'}>
+                  {'  '}
+                  {w.task} · {w.estado === 'orfao' ? 'órfão' : w.estado}
+                </Text>
+              ))}
+            </Box>
+          )
+        })()}
         {d.inbox.naoLidas > 0 && (
           <Box paddingX={1}>
             <Text dimColor>inbox {d.inbox.naoLidas}</Text>

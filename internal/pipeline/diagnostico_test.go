@@ -45,3 +45,30 @@ func TestDiagnostico_UmBlocoComFalhaEPendenteVelho(t *testing.T) {
 func TestDiagnostico_SemRuntimeVazio(t *testing.T) {
 	assert.Empty(t, FormatDiagnostico(t.TempDir(), time.Now()))
 }
+
+// Conforme: o retrato conta os worktrees por estado (ativo, ocioso, órfão) e entra no diagnóstico.
+func TestRecursos_RetratoDosWorktrees(t *testing.T) {
+	dir := t.TempDir()
+	now := time.Date(2026, 11, 25, 10, 0, 0, 0, time.UTC)
+	ini := "d7e6-auditoria"
+	for _, task := range []string{"feat-d7e6-01", "feat-d7e6-02", "feat-d7e6-03"} {
+		require.NoError(t, os.MkdirAll(filepath.Join(layout.Worktrees(dir), ini, task), 0o755))
+	}
+	require.NoError(t, GravarEstadoTask(dir, ini, "feat-d7e6-01", TaskMesclada, "", "", now))
+	j := jobDeTeste("job-x-d7e6-02", ini, bus.TypeTaskBuild, "forge/x")
+	j.TaskID, j.FeatureJob, j.TaskIDs = "d7e6-02", "job-pai-d7e6", []string{"d7e6-01", "d7e6-02", "d7e6-03"}
+	_, _, err := bus.Enqueue(dir, layout.RoleBuilder, j, now)
+	require.NoError(t, err)
+	_, err = bus.Claim(dir, layout.RoleBuilder, "w", time.Hour, now)
+	require.NoError(t, err)
+
+	require.NoError(t, GravarRecursos(dir, now))
+	r, ok := LerRecursos(dir)
+	require.True(t, ok)
+	est := map[string]string{}
+	for _, w := range r.Worktrees {
+		est[w.Task] = w.Estado
+	}
+	assert.Equal(t, map[string]string{"feat-d7e6-01": "orfao", "feat-d7e6-02": "ativo", "feat-d7e6-03": "ocioso"}, est)
+	assert.Contains(t, FormatDiagnostico(dir, now), "worktrees: 3 (ativos 1 · ociosos 1 · órfãos 1)")
+}
