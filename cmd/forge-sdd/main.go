@@ -296,6 +296,9 @@ func runUpdateFlow(cmd *cobra.Command, targetDir string) error {
 			if fetchErr != nil {
 				return fmt.Errorf("--upgrade: falha ao consultar o NPM Registry: %w", fetchErr)
 			}
+			if version != "dev" && config.CompareVersions(version, beta) > 0 && config.CompareVersions(version, latest) > 0 {
+				beta = version
+			}
 			targetVersion = config.ResolveUpgradeTarget(latest, beta)
 			if targetVersion == "" {
 				return fmt.Errorf("--upgrade: NPM Registry não retornou nenhuma versão (latest/beta) publicada")
@@ -325,6 +328,10 @@ func runUpdateFlow(cmd *cobra.Command, targetDir string) error {
 			beta = ""
 		} else {
 			fmt.Println(" [ok]")
+		}
+		// Binário mais novo que o publicado (beta local, antes do npm): ele também é opção.
+		if version != "dev" && config.CompareVersions(version, beta) > 0 && config.CompareVersions(version, latest) > 0 {
+			beta = version
 		}
 
 		if versionFlag != "" {
