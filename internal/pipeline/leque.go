@@ -18,6 +18,8 @@ import (
 const (
 	JuncaoIntegrada = "integrada"
 	JuncaoBloqueada = "bloqueada"
+	// JuncaoAguardando: aprovada, mas uma task anterior do plano ainda não foi integrada (feat-122-07).
+	JuncaoAguardando = "aguardando"
 )
 
 const (
@@ -443,6 +445,61 @@ func (l *Leque) ReabrirTask(task string) (string, error) {
 	delete(l.aprovadas, task) // volta a ser revisada
 	l.caminhos[task] = path
 	return path, nil
+}
+
+// JuntarAprovada integra a task assim que aprovada, em série sob o lock do leque e na ordem do plano:
+// uma task posterior aprovada antes espera a anterior (estado "aguardando"); quando a anterior entra,
+// as posteriores já aprovadas entram em seguida. Conflito bloqueia, aborta o merge e preserva a
+// branch; chamar de novo depois de resolver tenta outra vez. Devolve o desfecho de cada task tocada
+// nesta chamada, e o da própria task, se ela não foi tocada, como aguardando.
+func (l *Leque) JuntarAprovada(task string) (*RetornoJuncao, error) {
+	if l == nil || l.lock == nil {
+		return nil, errors.New("leque não preparado")
+	}
+	if !l.conhece(task) {
+		return nil, fmt.Errorf("task %q não pertence a este leque", task)
+	}
+	ret := &RetornoJuncao{}
+	if l.integradas[task] {
+		return ret, fmt.Errorf("task %q já integrada", task)
+	}
+	l.aprovadas[task] = true
+	for _, t := range l.tasks {
+		if l.integradas[t] {
+			continue
+		}
+		if !l.aprovadas[t] {
+			break // a predecessora ainda não foi aprovada: as demais esperam
+		}
+		if err := l.lock.Renovar(l.agora()); err != nil {
+			return ret, err
+		}
+		r, err := l.juntarTask(t, l.caminhos[t])
+		if err != nil {
+			return ret, err
+		}
+		ret.Resultados = append(ret.Resultados, r)
+		if r.Estado == JuncaoBloqueada {
+			break // sem a predecessora, as posteriores esperam
+		}
+	}
+	if !l.integradas[task] && !contemResultado(ret.Resultados, task) {
+		ret.Resultados = append(ret.Resultados, ResultadoJuncao{Task: task, Estado: JuncaoAguardando, Motivo: "espera a task anterior do plano"})
+	}
+	if ret.Bloqueadas() {
+		ret.Opcoes = opcoesBloqueio()
+		ret.Recomendada = "resolver"
+	}
+	return ret, nil
+}
+
+func contemResultado(rs []ResultadoJuncao, task string) bool {
+	for _, r := range rs {
+		if r.Task == task {
+			return true
+		}
+	}
+	return false
 }
 
 func opcoesBloqueio() []Opcao {
