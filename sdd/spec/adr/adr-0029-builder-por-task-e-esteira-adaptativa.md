@@ -17,13 +17,13 @@ O barramento cria um job `feature_build` por feature e um único `claude -p` imp
 
 ## Decisão
 
-Opção 2, atrás da chave `builder.granularidade` (`feature`, padrão, ou `task`).
+Opção 2, atrás da chave `builder.granularidade` (`task`, padrão da 6.0 beta, também para `forge.json` antigo sem a chave; `feature` continua aceito).
 
 - **Job por task:** novo tipo `task_build` com `task_id` e `feature_job` (id do `feature_build` pai). `task_id` precisa estar em `task_ids`, o plano da feature. Um Builder novo por task; o pacote é o de `forge context <task>` mais a spec da task (RN-1, RN-2).
 - **Worktree efêmero:** nasce para a task, é apagado no commit; a branch da task continua com o commit. Só fica se o commit falhar ou houver trabalho não commitado (órfão vira menu, contrato do leque).
 - **Pares:** cada commit de task gera um job de review com o diff `base...task`, sem worktree, tier econômico; até um Reviewer ativo por Builder ativo.
 - **Junção contínua:** task aprovada entra na branch da feature por merge sob lock, em série, na ordem do plano; conflito bloqueia a task e preserva a branch. Um PR em draft por feature.
-- **Teto por disco:** `pares = min(vagas de disco, largura da onda, teto da janela)`, com vagas = (`builder.limite_disco`% da capacidade − uso) ÷ tamanho do worktree; `max_parallel_tasks` vira teto máximo. `builder.limite_disco` fica entre 50 e 95 (padrão 80). Medição só com a biblioteca padrão (`ARQ-04`), recalculada a cada worktree apagado.
+- **Teto por recurso, sem teto fixo:** `pares = min(vagas de disco, vagas de memória, largura da onda, teto da janela, teto opcional se > 0)`, com piso de 1 quando há task elegível e vaga de disco e de memória. Vagas de disco = (`builder.limite_disco`% da capacidade − uso) ÷ tamanho medido do worktree (limite 50 a 95, padrão 80). Vagas de memória = (memória disponível − `builder.reserva_memoria_mb`, padrão 2048) ÷ memória por par Builder e Reviewer (estimativa de 1,5 GB até haver medida guardada por máquina). Janela de uso acima de 85% derruba para 1 par. `builder.max_parallel_tasks` aceita 0 a 64: 0 ou ausente = sem teto fixo; valor > 0 é teto opcional. Medição só com a biblioteca padrão (`ARQ-04`), recalculada a cada worktree apagado.
 - **Contrato compacto entre agentes:** entrada em seções de tags XML com chave e valor e listas em tabela de cabeçalho único, sem moldura nem emoji, com teto de bytes; saída lida pelo Go em JSON validado. Para o humano, texto em tópicos gerado pelo Go a partir dos dados estruturados, nunca a saída crua do agente (`SEG-08`). O formato final da entrada é decidido por `forge eval compare`.
 - **Reversão:** voltar `builder.granularidade` a `feature`; nenhum dado migra.
 

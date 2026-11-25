@@ -96,9 +96,9 @@ func BuilderHints(cfg config.BuilderConfig, job bus.Job) string {
 	var b strings.Builder
 	b.WriteString(testsHint(cfg))
 	if cfg.UseGitWorktrees {
-		fmt.Fprintf(&b, "Para tarefas independentes em paralelo (até %d), isole cada uma com `forge-sdd pipeline worktree add --id %s --task <task>` e remova ao fim, inclusive em falha, com `forge-sdd pipeline worktree remove --id %s --task <task>`.\n", cfg.MaxParallelTasks, job.ID, job.ID)
+		fmt.Fprintf(&b, "Para tarefas independentes em paralelo (até %d), isole cada uma com `forge-sdd pipeline worktree add --id %s --task <task>` e remova ao fim, inclusive em falha, com `forge-sdd pipeline worktree remove --id %s --task <task>`.\n", cfg.LarguraDePlano(), job.ID, job.ID)
 	} else {
-		fmt.Fprintf(&b, "Worktrees por tarefa estão desligados (builder.use_git_worktrees); paralelize só com subagentes (até %d) em arquivos disjuntos.\n", cfg.MaxParallelTasks)
+		fmt.Fprintf(&b, "Worktrees por tarefa estão desligados (builder.use_git_worktrees); paralelize só com subagentes (até %d) em arquivos disjuntos.\n", cfg.LarguraDePlano())
 	}
 	return b.String()
 }

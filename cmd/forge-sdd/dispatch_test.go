@@ -22,6 +22,7 @@ func dispatchProject(t *testing.T) string {
 	dir := t.TempDir()
 	def := config.DefaultForgeConfig()
 	def.PMMCP.RequireExistingCard = true // estes cenários partem do card obrigatório
+	def.Builder.Granularidade = config.GranularidadeFeature
 	cfg, _ := json.Marshal(def)
 	testutil.WriteFile(t, dir, ".forge/config/forge.json", string(cfg))
 	testutil.WriteFile(t, dir, "sdd/memory/constitution.md", "- **SEG-01:** Entrada validada.\n")

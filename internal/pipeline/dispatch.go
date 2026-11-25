@@ -56,6 +56,11 @@ type DispatchOptions struct {
 	// Fix despacha um fix da iniciativa (ex.: fix-88-01) em vez das tasks de features/.
 	Fix string
 	Git queue.GitFunc // injetável nos testes; padrão: git real
+	// Disco e JanelaPct alimentam o teto de paralelo do modo por task; nil mede o volume real e
+	// trata a janela de uso como desconhecida.
+	Disco     func(dir string) (UsoDisco, error)
+	JanelaPct func() (int, bool)
+	Memoria   func() (int, error) // memória disponível em MB; nil lê a da máquina
 	// EmiteSpecAberta é o gancho aditivo do evento spec.aberta; nil = no-op (113-05).
 	EmiteSpecAberta EmissorSpecAberta
 }
@@ -164,16 +169,9 @@ func Dispatch(dir, feature string, opts DispatchOptions) (*DispatchResult, error
 			rulesSet[r.Path] = true
 		}
 		rulesSection := sectionBody(string(data), "rules e ids da constituição aplicáveis")
-		refs := &taskJobRefs{Spec: trel}
-		for _, r := range pack.Rules {
-			refs.Rules = append(refs.Rules, r.Path)
-		}
-		porTask[trel] = refs
+		porTask[trel] = refsDaTask(dir, cfg.ADRDirs, trel, pack, rulesSection)
 		for _, tok := range adrTokensIn(rulesSection) {
 			adrCited[tok] = true
-			if p, ok := findADR(dir, cfg.ADRDirs, tok); ok {
-				refs.ADRs = append(refs.ADRs, p)
-			}
 		}
 		for _, name := range ruleNameRe.FindAllString(rulesSection, -1) {
 			if _, err := os.Stat(filepath.Join(dir, ".agents", "rules", name)); err != nil {
@@ -187,7 +185,7 @@ func Dispatch(dir, feature string, opts DispatchOptions) (*DispatchResult, error
 	modoTask := cfg.Builder.PorTask() && opts.Fix == "" && !cfg.IsAdvanced()
 	if modoTask && len(tasks) > 0 {
 		var perr error
-		if plano, perr = planoDeTasks(dir, initiative, cfg.Builder.MaxParallelTasks); perr != nil {
+		if plano, perr = planoDeTasks(dir, initiative, cfg.Builder.LarguraDePlano()); perr != nil {
 			res.Pending = append(res.Pending, fmt.Sprintf("plano de ondas inválido: %s", firstLine(perr.Error())))
 		}
 	}
@@ -293,7 +291,17 @@ func Dispatch(dir, feature string, opts DispatchOptions) (*DispatchResult, error
 	if modoTask {
 		// Um task_build por task elegível (dependências já na branch da feature); as demais entram
 		// quando o despachante as liberar. O pai (feature_build) só nomeia os jobs.
-		for _, t := range ElegiveisDoPlano(plano, nil) {
+		elegiveis := ElegiveisDoPlano(plano, nil)
+		teto, terr := tetoDaRodada(dir, cfg.Builder, len(elegiveis), opts, !opts.DryRun)
+		if terr != nil {
+			res.Warnings = append(res.Warnings, "teto de paralelo: "+terr.Error()+"; começa com 1 task")
+			teto = Teto{Pares: 1, Motivo: "medição indisponível"}
+		}
+		if teto.Pares < len(elegiveis) {
+			res.Warnings = append(res.Warnings, fmt.Sprintf("teto de paralelo %d (%s): %d de %d tasks elegíveis começam agora", teto.Pares, teto.Motivo, teto.Pares, len(elegiveis)))
+			elegiveis = elegiveis[:teto.Pares]
+		}
+		for _, t := range elegiveis {
 			refs := porTask[rel(t.File)]
 			if refs == nil {
 				continue

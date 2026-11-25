@@ -50,7 +50,7 @@ func TestDispatch_PorTaskUmJobPorTaskElegivel(t *testing.T) {
 		"feat-77-02-tokens.md":       specTask("feat-77-02", "Tokens", ""),
 		"feat-77-03-logout.md":       specTask("feat-77-03", "Logout", "feat-77-01"),
 	})
-	res, err := Dispatch(dir, "auth-oauth", DispatchOptions{Now: now})
+	res, err := Dispatch(dir, "auth-oauth", DispatchOptions{Now: now, Disco: discoFalso(10), Memoria: memFalsa(65536)})
 	require.NoError(t, err)
 	require.False(t, res.Blocked(), "%v", res.Pending)
 	require.Len(t, res.TaskJobs, 2, "a 03 depende da 01 e espera")
@@ -69,7 +69,7 @@ func TestDispatch_PorTaskUmJobPorTaskElegivel(t *testing.T) {
 	}
 
 	// idempotente
-	again, err := Dispatch(dir, "auth-oauth", DispatchOptions{Now: now})
+	again, err := Dispatch(dir, "auth-oauth", DispatchOptions{Now: now, Disco: discoFalso(10), Memoria: memFalsa(65536)})
 	require.NoError(t, err)
 	assert.False(t, again.Created)
 	assert.Len(t, builderPending(t, dir), 2)
@@ -80,7 +80,7 @@ func TestDispatch_PorTaskPlanoComCicloBloqueia(t *testing.T) {
 		"feat-77-01-autenticacao.md": specTask("feat-77-01", "A", "feat-77-02"),
 		"feat-77-02-tokens.md":       specTask("feat-77-02", "B", "feat-77-01"),
 	})
-	res, err := Dispatch(dir, "auth-oauth", DispatchOptions{Now: now})
+	res, err := Dispatch(dir, "auth-oauth", DispatchOptions{Now: now, Disco: discoFalso(10), Memoria: memFalsa(65536)})
 	require.NoError(t, err)
 	require.True(t, res.Blocked())
 	assert.Contains(t, strings.Join(res.Pending, " "), "plano de ondas inválido")
@@ -89,7 +89,7 @@ func TestDispatch_PorTaskPlanoComCicloBloqueia(t *testing.T) {
 
 func TestDispatch_GranularidadeFeatureContinuaIgual(t *testing.T) {
 	dir := project(t, nil) // padrão: feature
-	res, err := Dispatch(dir, "auth-oauth", DispatchOptions{Now: now})
+	res, err := Dispatch(dir, "auth-oauth", DispatchOptions{Now: now, Disco: discoFalso(10), Memoria: memFalsa(65536)})
 	require.NoError(t, err)
 	assert.Empty(t, res.TaskJobs)
 	jobs := builderPending(t, dir)
@@ -104,7 +104,7 @@ func TestWorker_PorTaskPromptsIsolados(t *testing.T) {
 		"feat-77-01-autenticacao.md": specTask("feat-77-01", "Autenticação", ""),
 		"feat-77-02-tokens.md":       specTask("feat-77-02", "Tokens", ""),
 	})
-	res, err := Dispatch(dir, "auth-oauth", DispatchOptions{Now: now})
+	res, err := Dispatch(dir, "auth-oauth", DispatchOptions{Now: now, Disco: discoFalso(10), Memoria: memFalsa(65536)})
 	require.NoError(t, err)
 	require.Len(t, res.TaskJobs, 2)
 
