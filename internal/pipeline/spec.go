@@ -78,9 +78,6 @@ func ApplySpecVerdict(dir, jobID, worker string, v queue.Verdict, deps notify.De
 	if !found {
 		return nil, ErrNotPipelineMode
 	}
-	if !cfg.IsAdvanced() {
-		return nil, fmt.Errorf("a revisão de spec só vale no modo avançado (autonomy: %s)", config.AutonomyAdvanced)
-	}
 	ncfg, err := config.LoadNotificationsConfig(dir)
 	if err != nil {
 		return nil, err
@@ -102,6 +99,9 @@ func ApplySpecVerdict(dir, jobID, worker string, v queue.Verdict, deps notify.De
 		return nil, fmt.Errorf("o job %s está em %s; só jobs em processing recebem parecer", jobID, entry.State)
 	}
 	job := entry.Job
+	if !cfg.IsAdvanced() && !isRevisaoDiscovery(job) {
+		return nil, fmt.Errorf("a revisão de spec só vale no modo avançado (autonomy: %s) ou pedida ao fim da Discovery (forge revisar-spec)", config.AutonomyAdvanced)
+	}
 	if err := bus.CheckOwner(dir, layout.RoleReviewer, jobID, worker); err != nil {
 		return nil, err
 	}
@@ -118,6 +118,24 @@ func ApplySpecVerdict(dir, jobID, worker string, v queue.Verdict, deps notify.De
 	switch {
 	case v.Veredito == queue.VerdictConforme:
 		res.Action = ActionApproved
+		if isRevisaoDiscovery(job) {
+			// Fluxo da 6.0: a aprovação volta para a pessoa decidir; quem despacha é o /split-features.
+			n := notify.Notification{
+				ID: notificationID(job.ID, "aprovada"), Type: notify.TypeInfo,
+				Title:   "Spec aprovada: " + job.Initiative,
+				Message: fmt.Sprintf("O Reviewer aprovou a spec (%s). Se estiver de acordo, rode /split-features: ele quebra em tasks e despacha direto ao Builder.\n%s", specReviewRel(job), oneLine(v.Resumo, 600)),
+				Feature: job.Feature, JobID: job.ID,
+			}
+			out, err := notify.Dispatch(dir, ncfg, n, deps)
+			if err != nil {
+				return nil, err
+			}
+			res.Notification, res.Channels = &n, out.Channels
+			if _, err := bus.Complete(dir, layout.RoleReviewer, jobID, worker, "spec: aprovada; volta para a pessoa decidir", now); err != nil {
+				return nil, err
+			}
+			break
+		}
 		if isGoalJob(job) {
 			// /toca-ai: a aprovação libera as etapas (um job por etapa), não um build único.
 			if _, err := bus.Complete(dir, layout.RoleReviewer, jobID, worker, "spec: aprovada; etapas liberadas ao Builder", now); err != nil {
@@ -152,7 +170,7 @@ func ApplySpecVerdict(dir, jobID, worker string, v queue.Verdict, deps notify.De
 		n := notify.Notification{
 			ID: notificationID(job.ID, "ajustar"), Type: notify.TypeInfo,
 			Title:   "Ajuste a spec: " + job.Feature,
-			Message: fmt.Sprintf("O Reviewer pediu ajustes na spec (tentativa %d de %d). Veja %s e rode forge dispatch de novo.\n%s", job.Attempt, job.MaxReworkAttempts, specReviewRel(job), oneLine(v.Resumo, 600)),
+			Message: fmt.Sprintf("O Reviewer pediu ajustes na spec (tentativa %d de %d). Veja %s e rode %s de novo.\n%s", job.Attempt, job.MaxReworkAttempts, specReviewRel(job), comandoDeNovaRevisao(job), oneLine(v.Resumo, 600)),
 			Feature: job.Feature, JobID: job.ID,
 		}
 		out, err := notify.Dispatch(dir, ncfg, n, deps)
@@ -167,7 +185,9 @@ func ApplySpecVerdict(dir, jobID, worker string, v queue.Verdict, deps notify.De
 	default: // escalar (dúvida) ou limite de tentativas: bloqueia e avisa; as independentes seguem
 		res.Action = ActionEscalated
 		reason := fmt.Sprintf("spec não aprovada (veredito %s, tentativa %d de %d)", v.Veredito, job.Attempt, job.MaxReworkAttempts)
-		if _, err := queue.BlockTasks(dir, job.Initiative, job.TaskIDs, reason); err != nil {
+		if len(job.TaskIDs) == 0 {
+			// revisão de discovery: ainda não há tasks para bloquear
+		} else if _, err := queue.BlockTasks(dir, job.Initiative, job.TaskIDs, reason); err != nil {
 			return nil, fmt.Errorf("bloquear as tasks: %w", err)
 		}
 		res.Warning = unmatchedWarning(dir, job)
@@ -220,4 +240,11 @@ func writeSpecReview(dir string, job bus.Job, v queue.Verdict, now time.Time) er
 		}
 	}
 	return os.WriteFile(filepath.Join(base, specReviewFile), []byte(b.String()), 0o644)
+}
+
+func comandoDeNovaRevisao(job bus.Job) string {
+	if isRevisaoDiscovery(job) {
+		return "forge revisar-spec " + job.Initiative
+	}
+	return "forge dispatch"
 }

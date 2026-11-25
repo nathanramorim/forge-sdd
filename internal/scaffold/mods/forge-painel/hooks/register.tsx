@@ -20,9 +20,9 @@ const DIR_INICIATIVAS = 'sdd/discovery'
 const MAX_REGISTROS_GASTOS = 500
 
 // Cache do painel: não é fonte de verdade, só o que a tela mostra (o barramento é do Go).
-const VAZIA: Esteira = { estacoes: [], progresso: null, quadro: null, outras: [], agentes: [], erro: '', inbox: { naoLidas: 0, prConforme: [] }, temFilas: false, series: {} }
+const VAZIA: Esteira = { sessao: null, estacoes: [], progresso: null, quadro: null, outras: [], agentes: [], erro: '', inbox: { naoLidas: 0, prConforme: [] }, temFilas: false, series: {} }
 // shape: um valor gravado por versão anterior do mod é descartado, não lido pela metade.
-const esteira = atom({ plugin: 'forge-painel', key: 'esteira' } as const, VAZIA, { shape: 'esteira-4' })
+const esteira = atom({ plugin: 'forge-painel', key: 'esteira' } as const, VAZIA, { shape: 'esteira-5' })
 // tool_use_id da chamada Agent -> id do subagente, para o cartão de consumo embaixo da chamada.
 const cartoes = atom({ plugin: 'forge-painel', key: 'cartoes' } as const, {} as Record<string, string>)
 const DIR_INBOX = '.forge/runtime/queues/discovery/inbox'
@@ -31,6 +31,7 @@ const DIR_TAREFAS = '.forge/runtime/tarefas'
 // Estado em memória do módulo: some no reload, e tudo bem (sem estado próprio além de cache).
 let mudoCache: boolean | undefined
 let interativa = false
+let projeto = ''
 let iniciativa: string | undefined
 let estacao = 'discovery'
 let telemetriaOn: boolean | undefined
@@ -134,6 +135,26 @@ async function lerCauda($: EngineInterface, caminho: string, bytes: number): Pro
 // Tokens de job encerrado não mudam: lidos uma vez e guardados.
 const tokensEncerrados = new Map<string, number>()
 
+function descreverFerramenta(tool: string, input: any): string {
+  const arq = (p: unknown) => (typeof p === 'string' ? p.split(/[\\/]/).pop() ?? '' : '')
+  switch (tool) {
+    case 'Bash':
+      return sanear(input?.description || input?.command, 60) || 'comando'
+    case 'Agent':
+    case 'Task':
+      return `subagente ${sanear(input?.subagent_type ?? input?.description, 40)}`
+    case 'Read':
+      return `lendo ${sanear(arq(input?.file_path), 50)}`
+    case 'Edit':
+    case 'Write':
+      return `editando ${sanear(arq(input?.file_path), 50)}`
+    case 'Grep':
+    case 'Glob':
+      return `buscando ${sanear(input?.pattern, 50)}`
+  }
+  return sanear(tool, 40)
+}
+
 async function listar($: EngineInterface, dir: string): Promise<string[]> {
   try {
     const ents = (await $.fs.list(dir)) as any[]
@@ -214,9 +235,11 @@ async function atualizar($: EngineInterface): Promise<void> {
   try {
     const lista = await $.agent.list()
     agentes = lista.slice(-10).map((a: any) => ({
-      tipo: sanear(a.type, 30),
+      tipo: sanear(a.name ?? a.type, 30),
       estado: sanear(a.status, 20),
       tokens: typeof a.tokenCount === 'number' ? a.tokenCount : 0,
+      desde: typeof a.startTime === 'number' ? a.startTime : 0,
+      descricao: sanear(a.description, 60),
     }))
   } catch {
     erro = 'lista de agentes indisponível'
@@ -224,7 +247,7 @@ async function atualizar($: EngineInterface): Promise<void> {
   telemetriaOn = await telemetriaLigada($)
   if (ultimaMedida !== undefined) $.ui.status(linhaDeStatus(ultimaMedida, iniciativa, estacao, telemetriaOn))
   try {
-    await update($, esteira, () => ({ estacoes, progresso, quadro, outras, agentes, erro, inbox: resumoInbox(brutosInbox), temFilas, series }))
+    await update($, esteira, v => ({ sessao: v?.sessao ?? null, estacoes, progresso, quadro, outras, agentes, erro, inbox: resumoInbox(brutosInbox), temFilas, series }))
   } catch {
     // a sessão pode ter terminado entre a leitura e a gravação do cache
   }
@@ -239,6 +262,7 @@ export const register: Register = on => {
   on('session.start', async ($, e, next) => {
     if (await mudo($)) return next(e)
     interativa = e.isInteractive
+    projeto = sanear(e.cwd.split(/[\\/]/).filter(Boolean).pop() ?? '', 40)
     inicioSessao = await $.clock.now()
     await $.command.register({ name: 'gastos', description: 'Gastos da iniciativa por estação (custo de tabela)' })
     await $.command.register({ name: 'painel', description: 'Abre o painel da esteira; "/painel log <papel> <job>" mostra o fim de um log' })
@@ -356,6 +380,19 @@ export const register: Register = on => {
   })
 
   // Aviso de orçamento (RN-5): só avisa; nunca bloqueia o spawn.
+  // O que a sessão principal está fazendo agora (o painel não via revisões e comandos feitos aqui).
+  on('tool.call', async ($, e, next) => {
+    if (!interativa || (e as any).agentId !== undefined || (await mudo($))) return next(e)
+    const texto = descreverFerramenta(e.tool, e as any)
+    const desde = await $.clock.now()
+    await update($, esteira, v => ({ ...VAZIA, ...v, sessao: { texto, desde } })).catch(() => undefined)
+    try {
+      return await next(e)
+    } finally {
+      await update($, esteira, v => ({ ...VAZIA, ...v, sessao: v?.sessao?.desde === desde ? null : v?.sessao ?? null })).catch(() => undefined)
+    }
+  })
+
   on('agent.spawn', async ($, e, next) => {
     if (await mudo($)) return next(e)
     try {
@@ -422,7 +459,7 @@ export const register: Register = on => {
     const curta = (ini: string) => ini.split('-')[0] ?? ini
     const ctx = ultimaMedida?.context?.percent
     const sessao = inicioSessao > 0 ? duracao(Date.now() - inicioSessao) : '·'
-    const total = d.estacoes.reduce((s, c) => s + c.tokens, 0)
+    const total = d.estacoes.reduce((s, c) => s + c.tokens, 0) + d.agentes.reduce((s, a) => s + a.tokens, 0)
     const cartao = (key: string, nome: string, estado: string, classe: 'ok' | 'run' | 'wait' | 'fail', esquerda: string, direita: string, extra?: any) => (
       <Box key={key} flexDirection="column" borderStyle="round" borderColor="gray" paddingX={1}>
         <Box justifyContent="space-between">
@@ -442,7 +479,32 @@ export const register: Register = on => {
           <Text bold>Esteira</Text>
           {iniciativa !== undefined && <Text dimColor>iniciativa {curta(iniciativa)}</Text>}
         </Box>
-        {cartao('discovery', 'discovery', 'nesta sessão', 'ok', ctx !== undefined ? `ctx ${Math.round(ctx)}%` : 'ctx ·', sessao)}
+        {cartao(
+          'sessao',
+          projeto || 'sessão',
+          d.sessao !== null ? 'trabalhando' : 'nesta sessão',
+          d.sessao !== null ? 'run' : 'ok',
+          ctx !== undefined ? `ctx ${Math.round(ctx)}%` : 'ctx ·',
+          sessao,
+          d.sessao !== null ? (
+            <Text dimColor wrap="truncate-end">
+              {d.sessao.texto} · {duracao(Date.now() - d.sessao.desde)}
+            </Text>
+          ) : undefined,
+        )}
+        {d.agentes
+          .filter(a => a.estado === 'running' || a.estado === 'pending' || a.estado === 'waiting')
+          .map((a, i) =>
+            cartao(
+              `ag-${i}`,
+              a.tipo,
+              a.estado === 'running' ? 'rodando' : 'na fila',
+              a.estado === 'running' ? 'run' : 'wait',
+              a.tokens > 0 ? `${tokensCurtos(a.tokens)} tok` : '· tok',
+              a.desde > 0 ? duracao(Date.now() - a.desde) : '·',
+              a.descricao !== '' ? <Text dimColor wrap="truncate-end">{a.descricao}</Text> : undefined,
+            ),
+          )}
         {d.estacoes.map(c => {
           const sp = c.classe === 'run' ? sparkline(d.series[c.jobId] ?? []) : ''
           const prog = c.papel === 'builder' && d.progresso !== null ? (

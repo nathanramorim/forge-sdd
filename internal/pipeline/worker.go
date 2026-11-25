@@ -269,6 +269,20 @@ func processJob(ctx context.Context, opts WorkerOptions, cfg config.ForgeConfig,
 		reason = "falha ao executar o agente: " + runErr.Error()
 	case res.TimedOut:
 		reason = fmt.Sprintf("timeout após %d minutos", cfg.Builder.JobTimeoutMinutes)
+	case res.Sinal != "" || (res.ExitCode != 0 && ctx.Err() != nil):
+		// Morto de fora (janela fechada, Mac dormindo, falta de memória, worker parado): não é erro do
+		// agente. Volta à fila uma vez sem gastar tentativa; o worktree da task fica para a retomada.
+		reason = fmt.Sprintf("o agente foi encerrado pelo sinal %s (%s)", orDefault(res.Sinal, "do worker"), CausaDoSinal(res.Sinal))
+		if retomadasPorSinal(job) < maxRetomadasPorSinal || ctx.Err() != nil {
+			if _, rerr := bus.Requeue(opts.Dir, opts.Role, job.ID, opts.Name, marcaRetomada+reason, opts.Now()); rerr == nil {
+				live.Line("↻ " + reason + ": o job voltou à fila e será retomado")
+				if opts.OnJobDone != nil {
+					opts.OnJobDone(job, OutcomeDeferred)
+				}
+				return nil
+			}
+		}
+		reason += "; já foi retomado uma vez. Rode /implementar de novo depois de ver a causa"
 	case res.ExitCode != 0:
 		reason = fmt.Sprintf("o agente saiu com código %d", res.ExitCode)
 		// Limite de uso (só com saída diferente de zero): o job volta à fila sem gastar tentativa e o
@@ -434,7 +448,7 @@ const maxUsageLimitDeferrals = 3
 func deferrals(job bus.Job) int {
 	n := 0
 	for _, e := range job.Events {
-		if strings.HasPrefix(e.Note, "adiado:") {
+		if strings.HasPrefix(e.Note, "adiado:") && !strings.Contains(e.Note, marcaRetomada) {
 			n++
 		}
 	}
@@ -465,4 +479,42 @@ func deferJob(ctx context.Context, opts WorkerOptions, job bus.Job, ul UsageLimi
 		return
 	}
 	live.Line("▶ retomando")
+}
+
+// marcaRetomada identifica no histórico do job as devoluções por sinal (não contam como limite de uso).
+const marcaRetomada = "retomada: "
+
+// maxRetomadasPorSinal é quantas vezes um job morto de fora volta sozinho à fila.
+const maxRetomadasPorSinal = 1
+
+func retomadasPorSinal(job bus.Job) int {
+	n := 0
+	for _, e := range job.Events {
+		if strings.Contains(e.Note, marcaRetomada) {
+			n++
+		}
+	}
+	return n
+}
+
+// CausaDoSinal traduz o sinal na causa provável, para a pessoa saber o que fazer.
+func CausaDoSinal(sinal string) string {
+	switch sinal {
+	case "killed":
+		return "provável falta de memória ou processo morto à força"
+	case "hangup":
+		return "a janela ou o terminal que abriu o worker foi fechado"
+	case "terminated", "interrupt":
+		return "o worker foi parado (forge up, pkill ou Ctrl+C)"
+	case "":
+		return "o worker foi parado no meio do job"
+	}
+	return "encerrado de fora"
+}
+
+func orDefault(s, padrao string) string {
+	if s == "" {
+		return padrao
+	}
+	return s
 }

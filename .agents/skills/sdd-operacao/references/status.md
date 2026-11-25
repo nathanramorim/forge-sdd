@@ -2,11 +2,13 @@
 
 **Uso:** `/status` mostra o status executivo da esteira em formato tríplice e de baixo consumo de tokens (< 200 tokens).
 
-Você pode rodar `forge status --live` diretamente para obter a consolidação instantânea, ou executar os 3 passos de inspeção:
+Rode `forge status --diagnostico` primeiro: um comando só responde workers vivos, fila por papel, job em execução, última falha com motivo e log, pendentes velhos e o modo do Builder. Não liste pastas de `.forge/runtime` nem rode `ls`/`cat` na fila; se o diagnóstico apontar um log, leia só a cauda dele (`tail -n 40 <log>`). Versão do binário: `forge --version`.
 
-1. **Ao vivo no painel:** capture o painel do worker ativo (`tmux capture-pane -p -t <painel>`) ou leia as últimas linhas do arquivo mais recente em `.forge/runtime/logs/` caso tmux não esteja em execução.
-2. **Fila de tarefas:** execute `forge queue panel` (ou inspecione a fila ativa da iniciativa em `queue.json`).
-3. **Commits recentes:** execute `git log --oneline -n 5`.
+Depois, se precisar do restante do template:
+
+1. **Ao vivo:** a cauda do log do job em execução que o diagnóstico mostra.
+2. **Fila de tarefas:** `forge status` (traz a esteira por task quando houver).
+3. **Commits recentes:** `git log --oneline -n 5`.
 
 ## Template Canônico Padronizado (< 200 Tokens)
 

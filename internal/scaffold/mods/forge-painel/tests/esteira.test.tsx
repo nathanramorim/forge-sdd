@@ -42,7 +42,7 @@ test('o painel tem um cartão por estação, como no protótipo: estado, progres
 
   expect(await ui.find({ type: 'Text', text: /^Esteira$/ })).toBeDefined()
   expect((await ui.find({ type: 'Text', text: /^iniciativa 77/ }))?.text).toBe('iniciativa 77')
-  expect(await ui.find({ type: 'Text', text: /^discovery$/ })).toBeDefined()
+  expect(await ui.find({ type: 'Text', text: /^sessão$/ })).toBeDefined()
   expect(await ui.find({ type: 'Text', text: /^builder$/ })).toBeDefined()
   expect(await ui.find({ type: 'Text', text: /^● rodando$/ })).toBeDefined()
   expect((await ui.find({ type: 'Text', text: /tasks/ }))?.text).toBe('▰▰▰▱▱▱▱▱▱▱ 1/3 tasks · 77-01')
@@ -205,4 +205,27 @@ test('agente em execução ganha a tendência de tokens ao vivo', async ($, on) 
   expect(await ui.find({ type: 'Text', text: /^[▁▂▃▄▅▆▇█]+$/ })).toBeDefined()
   expect(await ui.find({ type: 'Text', text: /^3,8k tok$/ })).toBeDefined()
   await ui.unmount()
+})
+
+test('o cartão da sessão mostra o que ela está fazendo agora (revisão feita na própria sessão)', async ($, on) => {
+  montarMundo(on, CENARIO)
+  let soltar: () => void = () => {}
+  const segura = new Promise<void>(r => (soltar = r))
+  on('tool.call', { tool: 'Bash' }, async () => {
+    await segura
+    return { result: { stdout: '', stderr: '', interrupted: false } } as never
+  })
+  await $.session.start({ cwd: '/Users/n/git/barbearia-app', surface: 'terminal', isInteractive: true })
+  const rodando = $.tool.call({ tool: 'Bash', command: 'forge gate --spec x', description: 'Running executable acceptance criteria' } as never)
+  await new Promise(r => setTimeout(r, 20))
+  const ui = await $.ui.mount({ ...PANE, surface: 'terminal' })
+  expect(await ui.find({ type: 'Text', text: /^barbearia-app$/ })).toBeDefined()
+  expect(await ui.find({ type: 'Text', text: /^● trabalhando$/ })).toBeDefined()
+  expect((await ui.find({ type: 'Text', text: /acceptance criteria/ }))?.text).toContain('Running executable acceptance criteria')
+  await ui.unmount()
+  soltar()
+  await rodando.catch(() => undefined)
+  const ui2 = await $.ui.mount({ ...PANE, surface: 'terminal' })
+  expect(await ui2.find({ type: 'Text', text: /^● nesta sessão$/ })).toBeDefined()
+  await ui2.unmount()
 })

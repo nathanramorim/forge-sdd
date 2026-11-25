@@ -218,8 +218,8 @@ func TestLoadForgeConfig_MigraEPersisteGeminiLegado(t *testing.T) {
 
 func TestBuilderGranularidadeELimiteDisco(t *testing.T) {
 	d := DefaultForgeConfig().Builder
-	assert.Equal(t, GranularidadeFeature, d.Granularidade, "padrão da 6.0 beta: por feature; task é opcional")
-	assert.False(t, d.PorTask())
+	assert.Equal(t, GranularidadeTask, d.Granularidade, "padrão da 6.0 beta: por task, em paralelo")
+	assert.True(t, d.PorTask())
 	assert.Equal(t, 2048, d.ReservaMemoriaEfetiva())
 	assert.Equal(t, 80, d.LimiteDisco)
 
@@ -239,12 +239,12 @@ func TestBuilderGranularidadeELimiteDisco(t *testing.T) {
 	assert.Equal(t, 4096, cfg.Builder.ReservaMemoriaEfetiva())
 	assert.Equal(t, 64, cfg.Builder.LarguraDePlano(), "0 = sem teto fixo")
 
-	// arquivo antigo, sem as chaves, segue por feature (fluxo da 5.x) com o limite padrão
+	// arquivo antigo, sem as chaves, passa a usar task e o limite padrão
 	dir = t.TempDir()
 	writeForge(t, dir, ".forge/config/forge.json", `{"builder":{"max_parallel_tasks":3,"job_timeout_minutes":60}}`)
 	cfg, _, err = LoadForgeConfig(dir)
 	require.NoError(t, err)
-	assert.False(t, cfg.Builder.PorTask())
+	assert.True(t, cfg.Builder.PorTask())
 	assert.Equal(t, 80, cfg.Builder.LimiteDiscoEfetivo())
 }
 

@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "chave_conteudo": "72ca1e72aa84ade0",
-  "versao_historico": "be9976e",
+  "chave_conteudo": "e3d0930e296da6a8",
+  "versao_historico": "67bc326",
   "versoes": [
     {
       "versao": "5.0.0",
@@ -59,7 +59,7 @@
       "itens": [
         {
           "titulo": "Cada task tem o próprio Builder, com contexto novo.",
-          "texto": "O agente recebe só a spec da task e as referências dela, num pacote compacto; o contexto não cresce ao longo da feature e o gasto de tokens cai Opcional nesta beta: ligue com `builder.granularidade: task`; o padrão segue por feature, como na 5.x."
+          "texto": "O agente recebe só a spec da task e as referências dela, num pacote compacto; o contexto não cresce ao longo da feature e o gasto de tokens cai Padrão nesta beta (`builder.granularidade: task`); `feature` volta ao modo da 5.x."
         },
         {
           "titulo": "Um Reviewer para cada Builder, lendo só o diff da task.",
@@ -72,6 +72,14 @@
         {
           "titulo": "Desligou o computador no meio? A esteira continua de onde parou.",
           "texto": "Worktree com trabalho não commitado nunca é apagado; a próxima execução retoma dele com um resumo curto do que já foi feito, e commits `wip(<task>)` marcam cada passo que passou nos testes. Limite de uso devolve o job à fila sem perder nada."
+        },
+        {
+          "titulo": "Fluxo da 6.0: você pede na sessão do projeto.",
+          "texto": "A sessão abre com o nome do projeto; o fim do `/discovery` manda a spec ao Reviewer (`forge revisar-spec`) e o veredito volta pelo inbox para você decidir; o `/split-features` cria a branch da entrega e despacha direto, sem nova revisão de spec."
+        },
+        {
+          "titulo": "Agente morto de fora volta sozinho.",
+          "texto": "Janela fechada, Mac dormindo ou falta de memória: o motivo diz o sinal e a causa provável, e o job é retomado uma vez sem gastar tentativa."
         },
         {
           "titulo": "`forge status --diagnostico` acha a causa em um comando.",
@@ -99,7 +107,7 @@
         },
         {
           "titulo": "Avisos da beta",
-          "texto": "esta versão não substitui a estável; quem usa `npm install -g @nathanramorim/forge-sdd` sem `@beta` continua na 5.0.0. O modo avançado (revisão da spec antes da fila) ainda roda por feature. A medição comparando os dois modos vem depois da beta; o modo por task fica opcional até a medição."
+          "texto": "esta versão não substitui a estável; quem usa `npm install -g @nathanramorim/forge-sdd` sem `@beta` continua na 5.0.0. O modo avançado (revisão da spec antes da fila) ainda roda por feature. A medição comparando os dois modos vem depois da beta; se preferir o modo antigo, use `builder.granularidade: feature`."
         }
       ]
     }

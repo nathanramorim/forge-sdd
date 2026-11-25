@@ -39,6 +39,8 @@ type RunSpec struct {
 type RunResult struct {
 	ExitCode int
 	TimedOut bool
+	// Sinal é o nome do sinal que matou o agente ("killed", "hangup", "terminated"...), vazio se ele saiu sozinho.
+	Sinal string
 }
 
 // Runner executa o agente. A implementação real usa os/exec; os testes usam um executor falso.
@@ -156,6 +158,11 @@ func (r ExecRunner) Run(ctx context.Context, spec RunSpec, out io.Writer) (RunRe
 		var ee *exec.ExitError
 		if errors.As(err, &ee) {
 			res.ExitCode = ee.ExitCode()
+			if st := ee.ProcessState; st != nil {
+				if txt := st.String(); strings.HasPrefix(txt, "signal: ") {
+					res.Sinal = strings.TrimPrefix(txt, "signal: ")
+				}
+			}
 			return res, nil
 		}
 		return res, fmt.Errorf("executar %s: %w", command, err)

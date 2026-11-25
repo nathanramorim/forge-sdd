@@ -6,6 +6,7 @@ export type Cartao = { nome: string; estado: string; classe: 'ok' | 'run' | 'wai
 export type Estacao = { papel: string; estado: string; classe: 'ok' | 'run' | 'wait' | 'fail'; tokens: number; tempo: string; detalhe: string; jobId: string }
 
 export type Esteira = {
+  sessao: { texto: string; desde: number } | null
   estacoes: Estacao[]
   progresso: { feitas: number; total: number; atual: string } | null
   quadro: {
@@ -19,7 +20,7 @@ export type Esteira = {
     tokens: number
   } | null
   outras: string[]
-  agentes: { tipo: string; estado: string; tokens: number }[]
+  agentes: { tipo: string; estado: string; tokens: number; desde: number; descricao: string }[]
   erro: string
   inbox: { naoLidas: number; prConforme: string[] }
   temFilas: boolean

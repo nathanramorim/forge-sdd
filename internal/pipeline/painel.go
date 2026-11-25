@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -74,7 +75,7 @@ func BuildPainelPlan(env LaunchEnv, cfg config.ForgeConfig) (*PainelPlan, error)
 	if !ok {
 		return nil, fmt.Errorf("cli_profiles sem perfil para %q", discoveryCLI)
 	}
-	spec := RunSpec{Agent: "lider", Name: SessionDiscovery, Prompt: DiscoveryPrompt}
+	spec := RunSpec{Agent: "lider", Name: NomeDaSessaoPrincipal(env.Dir), Prompt: DiscoveryPrompt}
 	spec.Model, spec.Effort = cfg.SessionModelArgs(config.SessionRoleDiscovery)
 	args, err := expandArgs(profile.InteractiveArgs, spec)
 	if err != nil {
@@ -201,4 +202,26 @@ func EnvComEsteBinario() []string {
 		}
 	}
 	return append(env, "PATH="+pasta)
+}
+
+var reNomeSessao = regexp.MustCompile(`[^a-zA-Z0-9._-]+`)
+
+// NomeDaSessaoPrincipal é o nome da sessão em que a pessoa conversa: o do projeto (sdd/.sddrc ou a
+// pasta). A Discovery é um agente que essa sessão chama; a sessão não é "a discovery".
+func NomeDaSessaoPrincipal(dir string) string {
+	nome := ""
+	if rc, err := config.ReadSddrc(dir); err == nil {
+		nome = rc.Project
+	}
+	if strings.TrimSpace(nome) == "" {
+		nome = filepath.Base(dir)
+	}
+	nome = strings.Trim(reNomeSessao.ReplaceAllString(nome, "-"), "-")
+	if len(nome) > 40 {
+		nome = nome[:40]
+	}
+	if nome == "" {
+		return SessionDiscovery
+	}
+	return nome
 }
