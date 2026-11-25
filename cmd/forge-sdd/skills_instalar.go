@@ -38,7 +38,11 @@ var skillsDestinosCmd = &cobra.Command{
 var skillsInstalarCmd = &cobra.Command{
 	Use:   "instalar <skill|plugin> <slug> --de <diretório-origem> [--destino <dir>]",
 	Short: "Instala uma skill ou plugin no projeto aberto (opcional, sem rede, sem ~/.claude)",
-	Args:  cobra.ExactArgs(2),
+	Long: `Copia a skill ou o plugin de --de para .agents/skills/<slug> ou .agents/plugins/<slug> (ADR-0025).
+Plugin que é mod do Claude Code (traz módulo de ganchos ou .claude-plugin/forge.json) só é instalado
+com o contrato completo da ADR-0030: manifesto, permissões e versões mínimas. Manifesto incompleto é
+recusado antes de gravar qualquer arquivo.`,
+	Args: cobra.ExactArgs(2),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		dir, _ := cmd.Flags().GetString("dir")
 		origem, _ := cmd.Flags().GetString("de")

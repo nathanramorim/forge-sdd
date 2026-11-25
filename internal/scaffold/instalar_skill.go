@@ -7,6 +7,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/forge-sdd/cli/internal/config"
 	"github.com/forge-sdd/cli/internal/layout"
 	"github.com/forge-sdd/cli/internal/skills"
 )
@@ -113,6 +114,12 @@ func instalar(tipo, projetoAberto, destino, slug string, arquivos map[string][]b
 	destinoAbs, err := validarDestino(projetoAberto, destino)
 	if err != nil {
 		return res, err
+	}
+	if tipo == TipoPlugin {
+		// ADR-0030: plugin que é mod só entra com manifesto e permissões completos; nada é gravado antes.
+		if err := skills.ValidarMod(slug, arquivos, config.BinaryVersion()); err != nil {
+			return res, err
+		}
 	}
 	if onde, ok := DisponivelViaHub(projetoAberto, tipo, slug); ok {
 		res.DisponivelEm = onde

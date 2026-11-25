@@ -1,7 +1,7 @@
 {
   "schema": "forge-sdd/mod/1.0",
   "minClaudeCode": "2.1.331",
-  "minForge": "6.0.0",
+  "minForge": "5.2.3",
   "permissions": {
     "network": false,
     "model": false,
