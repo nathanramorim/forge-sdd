@@ -339,6 +339,19 @@ func Fail(dir, role, id, worker, reason string, now time.Time) (*Entry, error) {
 	return move(dir, role, e, layout.StateFailed, worker, reason, now)
 }
 
+// Descartar move um job ainda pendente (ninguém o reivindicou) para failed, com o motivo. Serve
+// para tirar da fila um job que um despacho mais novo substituiu; job em execução não é tocado.
+func Descartar(dir, role, id, by, reason string, now time.Time) (*Entry, error) {
+	e, err := Find(dir, role, id)
+	if err != nil {
+		return nil, err
+	}
+	if e.State != layout.StatePending {
+		return nil, fmt.Errorf("job %s está em %s; só pendente pode ser descartado", id, e.State)
+	}
+	return move(dir, role, e, layout.StateFailed, by, reason, now)
+}
+
 // Requeue devolve um job de processing a pending sem gastar tentativa (attempt fica como está): o
 // agente não conseguiu trabalhar por um motivo externo, como o limite de uso. Só o dono do lease
 // pode devolver. O nome do arquivo (prioridade e data) não muda, então a ordem da fila é mantida.

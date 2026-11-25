@@ -41,6 +41,14 @@ Com --compact, imprime a versão tríplice enxuta (< 200 tokens) para agentes.`,
 		if interactive {
 			return RunInteractiveQueue(dir, cmd.OutOrStdout())
 		}
+		if diag, _ := cmd.Flags().GetBool("diagnostico"); diag {
+			d := pipeline.FormatDiagnostico(dir, time.Now())
+			if d == "" {
+				d = "Sem .forge/runtime: a esteira nunca rodou neste projeto (rode forge up).\n"
+			}
+			_, err := fmt.Fprint(cmd.OutOrStdout(), d)
+			return err
+		}
 		compact, _ := cmd.Flags().GetBool("compact")
 		if compact {
 			out, err := pipeline.FormatLiveStatus(dir)
@@ -86,6 +94,9 @@ Com --compact, imprime a versão tríplice enxuta (< 200 tokens) para agentes.`,
 			if err == nil {
 				_, err = fmt.Fprint(cmd.OutOrStdout(), pipeline.FormatEsteiraPorTask(dir, time.Now()))
 			}
+			if err == nil {
+				_, err = fmt.Fprint(cmd.OutOrStdout(), pipeline.FormatDiagnostico(dir, time.Now()))
+			}
 			return err
 		}
 
@@ -100,6 +111,11 @@ Com --compact, imprime a versão tríplice enxuta (< 200 tokens) para agentes.`,
 		if pt := pipeline.FormatEsteiraPorTask(dir, time.Now()); pt != "" {
 			fmt.Fprintln(cmd.OutOrStdout())
 			fmt.Fprint(cmd.OutOrStdout(), pt)
+		}
+
+		if d := pipeline.FormatDiagnostico(dir, time.Now()); d != "" {
+			fmt.Fprintln(cmd.OutOrStdout())
+			fmt.Fprint(cmd.OutOrStdout(), d)
 		}
 
 		// Lista complementar de iniciativas em sdd/discovery
@@ -207,6 +223,7 @@ func init() {
 	statusCmd.Flags().BoolP("tmux", "t", false, "Abre ou anexa o painel vivo diretamente em uma janela/sessão do tmux")
 	statusCmd.Flags().Bool("once", false, "Executa uma única iteração do painel vivo e encerra")
 	statusCmd.Flags().Bool("compact", false, "Exibe o status tríplice compacto (< 200 tokens) para prompts de IA")
+	statusCmd.Flags().Bool("diagnostico", false, "Só o diagnóstico da esteira: workers, fila, job em execução, última falha com motivo e log, pendentes velhos e teto")
 	statusCmd.Flags().Bool("all", false, "Inclui as iniciativas com fila concluída, marcadas (o padrão as esconde)")
 	statusCmd.Flags().Bool("full", false, "Mostra o painel completo mesmo sem terminal (sem terminal o padrão é o status curto)")
 	statusCmd.Flags().BoolP("interactive", "i", false, "Exibe a fila de tarefas interativa com drill-down de detalhes")

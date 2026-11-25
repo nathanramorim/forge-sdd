@@ -20,7 +20,8 @@ var version = "6.0.0-beta"
 func init() { config.SetBinaryVersion(version) }
 
 var rootCmd = &cobra.Command{
-	Use:   "forge",
+	Use:     "forge",
+	Version: version,
 	Short: "Scaffolda estruturas Forge-SDD em qualquer projeto",
 	Long: `forge é um CLI que gera a estrutura completa Forge-SDD
 (sdd/, .agents/, arquivos de instrução por agente) e conduz o fluxo em 3 sessões
@@ -529,6 +530,7 @@ type exitCoder interface {
 }
 
 func main() {
+	rootCmd.SetVersionTemplate("{{.Version}}\n")
 	if err := rootCmd.Execute(); err != nil {
 		if ec, ok := err.(exitCoder); ok {
 			if err.Error() != "" {

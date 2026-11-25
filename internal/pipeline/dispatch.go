@@ -79,6 +79,10 @@ type DispatchResult struct {
 	// TaskJobs são os task_build enfileirados (ou que seriam, no dry-run) com builder.granularidade=task.
 	// Job é então o pai (feature_build) que só dá nome a eles e não vai para a fila.
 	TaskJobs []bus.Job
+	// ModoTask indica despacho por task (builder.granularidade=task).
+	ModoTask bool
+	// Descartados são jobs pendentes de despachos anteriores da iniciativa tirados da fila.
+	Descartados []string
 }
 
 // Blocked informa se o gate reprovou.
@@ -288,6 +292,7 @@ func Dispatch(dir, feature string, opts DispatchOptions) (*DispatchResult, error
 		job.Attempt = nextSpecAttempt(dir, initiative, job.MaxReworkAttempts)
 	}
 	res.Job = &job
+	res.ModoTask = modoTask
 	if modoTask {
 		// Um task_build por task elegível (dependências já na branch da feature); as demais entram
 		// quando o despachante as liberar. O pai (feature_build) só nomeia os jobs.
@@ -297,7 +302,9 @@ func Dispatch(dir, feature string, opts DispatchOptions) (*DispatchResult, error
 			res.Warnings = append(res.Warnings, "teto de paralelo: "+terr.Error()+"; começa com 1 task")
 			teto = Teto{Pares: 1, Motivo: "medição indisponível"}
 		}
-		if teto.Pares < len(elegiveis) {
+		if teto.Pares == 0 && len(elegiveis) > 0 {
+			res.Warnings = append(res.Warnings, fmt.Sprintf("nenhuma task começou: o teto de paralelo deu 0 por %s. Libere espaço ou ajuste builder.limite_disco, ou use builder.granularidade=feature", teto.Motivo))
+		} else if teto.Pares < len(elegiveis) {
 			res.Warnings = append(res.Warnings, fmt.Sprintf("teto de paralelo %d (%s): %d de %d tasks elegíveis começam agora", teto.Pares, teto.Motivo, teto.Pares, len(elegiveis)))
 			elegiveis = elegiveis[:teto.Pares]
 		}
@@ -314,6 +321,17 @@ func Dispatch(dir, feature string, opts DispatchOptions) (*DispatchResult, error
 	}
 	if opts.DryRun {
 		return res, nil
+	}
+	if opts.Fix == "" && role == layout.RoleBuilder {
+		manter := map[string]bool{job.ID: true}
+		for _, tj := range res.TaskJobs {
+			manter[tj.ID] = true
+		}
+		fora, derr := DescartarJobsSubstituidos(dir, initiative, manter, job.ID, now)
+		if derr != nil {
+			res.Warnings = append(res.Warnings, "jobs antigos na fila: "+firstLine(derr.Error()))
+		}
+		res.Descartados = fora
 	}
 	var path string
 	var created bool

@@ -106,8 +106,8 @@ type BuilderConfig struct {
 	UseGitWorktrees   bool `json:"use_git_worktrees"`
 	RunTestsBeforePR  bool `json:"run_tests_before_pr"`
 	JobTimeoutMinutes int  `json:"job_timeout_minutes"`
-	// Granularidade escolhe a unidade do job do Builder: "feature" (um job por feature) ou
-	// "task" (padrão: um job e um contexto novo por task, ADR-0029).
+	// Granularidade escolhe a unidade do job do Builder: "feature" (padrão: um job por feature) ou
+	// "task" (opcional na beta: um job e um contexto novo por task, ADR-0029).
 	Granularidade string `json:"granularidade,omitempty"`
 	// LimiteDisco é a porcentagem máxima de ocupação do volume dos worktrees ao paralelizar (50 a 95,
 	// padrão 80, ADR-0029).
@@ -137,7 +137,7 @@ func (b BuilderConfig) LarguraDePlano() int {
 
 // PorTask informa se o Builder roda um job por task. Vazio vale "task" (padrão da 6.0 beta, também
 // para forge.json antigo sem a chave); "feature" volta ao job único por feature.
-func (b BuilderConfig) PorTask() bool { return b.Granularidade != GranularidadeFeature }
+func (b BuilderConfig) PorTask() bool { return b.Granularidade == GranularidadeTask }
 
 // ReservaMemoriaEfetiva devolve reserva_memoria_mb ou o padrão quando omitido (zero).
 func (b BuilderConfig) ReservaMemoriaEfetiva() int {
@@ -237,7 +237,7 @@ func DefaultForgeConfig() ForgeConfig {
 			StatusOnPRApproved:    "Ready for Review",
 			EvidenceMaxAgeMinutes: 30,
 		},
-		Builder:    BuilderConfig{MaxParallelTasks: 3, UseGitWorktrees: true, RunTestsBeforePR: true, JobTimeoutMinutes: 60, Granularidade: GranularidadeTask, LimiteDisco: LimiteDiscoPadrao, ReservaMemoriaMB: ReservaMemoriaPadrao},
+		Builder:    BuilderConfig{MaxParallelTasks: 3, UseGitWorktrees: true, RunTestsBeforePR: true, JobTimeoutMinutes: 60, Granularidade: GranularidadeFeature, LimiteDisco: LimiteDiscoPadrao, ReservaMemoriaMB: ReservaMemoriaPadrao},
 		Reviewer:   ReviewerConfig{MaxReworkAttempts: 3, CommentOnPR: true},
 		ADRDirs:    []string{"sdd/spec/adr"},
 		BaseBranch: "main",

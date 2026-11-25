@@ -62,6 +62,16 @@ o comando orienta forge pipeline init.`,
 			fmt.Fprintf(out, "Job %s já estava na fila (idempotente)\n", res.Job.ID)
 		}
 		fmt.Fprintf(out, "Base do PR: %s (fonte: %s)\n", res.BaseBranch, res.BaseSource)
+		for _, w := range res.Warnings {
+			fmt.Fprintf(out, "⚠ %s\n", w)
+		}
+		if len(res.Descartados) > 0 {
+			fmt.Fprintf(out, "Tirados da fila (despachos anteriores desta iniciativa): %s\n", strings.Join(res.Descartados, ", "))
+		}
+		if res.ModoTask && len(res.TaskJobs) == 0 {
+			fmt.Fprintln(out, "Nenhum job foi para o Builder; veja o aviso acima.")
+			return nil
+		}
 		if res.CardInstruction != "" {
 			fmt.Fprintf(out, "Próximo passo do agente: %s\n", res.CardInstruction)
 		} else {

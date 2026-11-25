@@ -106,3 +106,29 @@ func EnfileiraTasks(dir string, jobs []bus.Job, now time.Time) (criados []string
 	}
 	return criados, paths, nil
 }
+
+// DescartarJobsSubstituidos tira da fila do Builder os jobs pendentes da mesma iniciativa que um
+// despacho novo substitui: feature_build e task_build de despachos anteriores (inclusive os da 5.x,
+// que um worker novo pegaria antes das tasks). Fixes (branch fix/) e os jobs do despacho atual
+// (manter) ficam. Devolve os ids descartados.
+func DescartarJobsSubstituidos(dir, initiative string, manter map[string]bool, novo string, now time.Time) ([]string, error) {
+	pend, err := bus.List(dir, layout.RoleBuilder, layout.StatePending)
+	if err != nil {
+		return nil, err
+	}
+	var fora []string
+	for _, e := range pend {
+		j := e.Job
+		if j.Initiative != initiative || manter[j.ID] || strings.HasPrefix(j.PR.Branch, "fix/") {
+			continue
+		}
+		if j.Type != bus.TypeFeatureBuild && j.Type != bus.TypeTaskBuild {
+			continue
+		}
+		if _, derr := bus.Descartar(dir, layout.RoleBuilder, j.ID, "dispatch", "substituído pelo despacho "+novo, now); derr != nil {
+			return fora, derr
+		}
+		fora = append(fora, j.ID)
+	}
+	return fora, nil
+}

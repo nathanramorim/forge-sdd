@@ -34,18 +34,27 @@ func paramsBase() ParamsTeto {
 
 func TestTeto_Disco(t *testing.T) {
 	p := paramsBase()
-	assert.Equal(t, 6, VagasDeDisco(p.Disco, 80, 5*gb), "50% de 100 GB, worktree de 5 GB, limite 80%: 6 vagas")
-	assert.Equal(t, 6, TetoDeParalelo(p).Pares)
+	assert.Equal(t, 8, VagasDeDisco(p.Disco, 80, 5*gb), "50% de 100 GB, worktree de 5 GB: a reserva fica em 10 GB (menor que 20%), 8 vagas")
+	assert.Equal(t, 8, TetoDeParalelo(p).Pares)
 
-	p.Disco.Usado = 79 * gb
-	assert.Equal(t, 0, TetoDeParalelo(p).Pares, "em 79% não cabe um worktree de 5 GB")
+	p.Disco.Usado = 89 * gb
+	assert.Equal(t, 0, TetoDeParalelo(p).Pares, "com 11 GB livres e 10 de reserva não cabe um worktree de 5 GB")
 
 	p.Disco.Usado = 90 * gb
 	assert.Equal(t, 0, VagasDeDisco(p.Disco, 80, 5*gb), "acima do limite nunca fica negativo")
 
 	p = paramsBase()
 	p.LarguraOnda = 3
-	assert.Equal(t, Teto{Vagas: 6, VagasMemoria: semLimite, Largura: 3, Janela: semLimite, Fixo: semLimite, Pares: 3, Motivo: "onda"}, TetoDeParalelo(p))
+	assert.Equal(t, Teto{Vagas: 8, VagasMemoria: semLimite, Largura: 3, Janela: semLimite, Fixo: semLimite, Pares: 3, Motivo: "onda"}, TetoDeParalelo(p))
+}
+
+// Caso real: Mac de 228 GB com 87% ocupado por outras coisas e 29 GB livres. A regra antiga (20%
+// livre) dava 0 vagas e travava a esteira; com a reserva de 10 GB cabem dezenas de worktrees.
+func TestTeto_DiscoGrandeCheioNaoTrava(t *testing.T) {
+	u := UsoDisco{Total: 228 * gb, Usado: 199 * gb}
+	assert.Equal(t, 38, VagasDeDisco(u, 80, gb/2))
+	u = UsoDisco{Total: 40 * gb, Usado: 33 * gb}
+	assert.Equal(t, 0, VagasDeDisco(u, 80, gb/2), "disco pequeno mantém os 20% de reserva")
 }
 
 func TestTeto_Janela(t *testing.T) {
@@ -54,14 +63,14 @@ func TestTeto_Janela(t *testing.T) {
 	p.LimiteJanelaPct = 85
 	assert.Equal(t, 1, TetoDeParalelo(p).Pares, "janela em 90% com limite 85% derruba para 1 par")
 	p.JanelaPct = 85
-	assert.Equal(t, 6, TetoDeParalelo(p).Pares, "no limite ainda vale o teto normal")
+	assert.Equal(t, 8, TetoDeParalelo(p).Pares, "no limite ainda vale o teto normal")
 	p.JanelaPct = 99
 	p.LimiteJanelaPct = 0
 	assert.Equal(t, 1, TetoDeParalelo(p).Pares, "limite omitido vale 85")
 }
 
 func TestTeto_MemoriaLimitaAntesDoDisco(t *testing.T) {
-	p := paramsBase() // disco dá 6
+	p := paramsBase() // disco dá 8
 	p.ReservaMemoriaMB = 2048
 	p.MemoriaDisponivelM = 2048 + 2*MemoriaPorParPadraoMB + 100 // 2 pares
 	got := TetoDeParalelo(p)
@@ -77,7 +86,7 @@ func TestTeto_MemoriaLimitaAntesDoDisco(t *testing.T) {
 	assert.Equal(t, 2, TetoDeParalelo(p).VagasMemoria)
 
 	p.MemoriaDisponivelM = -1 // memória desconhecida não trava
-	assert.Equal(t, 6, TetoDeParalelo(p).Pares)
+	assert.Equal(t, 8, TetoDeParalelo(p).Pares)
 }
 
 func TestTeto_SemTetoFixoSobeAlemDeOito(t *testing.T) {
@@ -86,7 +95,7 @@ func TestTeto_SemTetoFixoSobeAlemDeOito(t *testing.T) {
 	p.TamanhoWorktree = 1 * gb
 	p.MaxParalelo = 0 // sem teto fixo
 	got := TetoDeParalelo(p)
-	assert.Equal(t, 80, got.Pares, "só o recurso limita")
+	assert.Equal(t, 90, got.Pares, "só o recurso limita (100 GB menos 10 de reserva)")
 
 	p.MaxParalelo = 12 // teto opcional escolhido
 	got = TetoDeParalelo(p)
@@ -208,9 +217,9 @@ func TestDespachar_Liberacao_QuatroVagasQuatroTasks(t *testing.T) {
 	cfg.MaxParallelTasks = 0
 	require.NoError(t, GravarEstadoDisco(dir, EstadoDisco{TamanhoWorktree: 5 * gb}))
 
-	// 50 GB usados de 100, limite 80%, worktree 5 GB: 6 vagas; com 2 ativos sobram 4.
+	// 60 GB usados de 100, reserva de 10 GB, worktree 5 GB: 6 vagas; com 2 ativos sobram 4.
 	estados := map[string]string{"feat-77-01": OndaEmAndamento, "feat-77-02": OndaEmAndamento}
-	res, err := Despachar(EntradaDespacho{Dir: dir, Pai: pai, Plano: plano, Estados: estados, Builder: cfg, Disco: discoFalso(50), Memoria: memFalsa(64 * 1024), Now: now})
+	res, err := Despachar(EntradaDespacho{Dir: dir, Pai: pai, Plano: plano, Estados: estados, Builder: cfg, Disco: discoFalso(60), Memoria: memFalsa(64 * 1024), Now: now})
 	require.NoError(t, err)
 	assert.Equal(t, 6, res.Teto.Pares)
 	assert.Equal(t, 2, res.Ativos)
@@ -219,7 +228,7 @@ func TestDespachar_Liberacao_QuatroVagasQuatroTasks(t *testing.T) {
 	assert.Len(t, builderPending(t, dir), 4)
 
 	// idempotente: a mesma rodada não duplica
-	_, err = Despachar(EntradaDespacho{Dir: dir, Pai: pai, Plano: plano, Estados: estados, Builder: cfg, Disco: discoFalso(50), Memoria: memFalsa(64 * 1024), Now: now})
+	_, err = Despachar(EntradaDespacho{Dir: dir, Pai: pai, Plano: plano, Estados: estados, Builder: cfg, Disco: discoFalso(60), Memoria: memFalsa(64 * 1024), Now: now})
 	require.NoError(t, err)
 	assert.Len(t, builderPending(t, dir), 4)
 }
@@ -229,7 +238,7 @@ func TestDespachar_SemVagaNaoComecaNada(t *testing.T) {
 	cfg := config.DefaultForgeConfig().Builder
 	require.NoError(t, GravarEstadoDisco(dir, EstadoDisco{TamanhoWorktree: 5 * gb}))
 
-	res, err := Despachar(EntradaDespacho{Dir: dir, Pai: pai, Plano: plano, Builder: cfg, Disco: discoFalso(79), Memoria: memFalsa(64 * 1024), Now: now})
+	res, err := Despachar(EntradaDespacho{Dir: dir, Pai: pai, Plano: plano, Builder: cfg, Disco: discoFalso(89), Memoria: memFalsa(64 * 1024), Now: now})
 	require.NoError(t, err)
 	assert.Empty(t, res.Jobs)
 	assert.Empty(t, builderPending(t, dir))

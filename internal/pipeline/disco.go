@@ -22,6 +22,8 @@ const (
 	RemedirACada = 20
 	// tamanhoMinimoWorktree evita divisão por zero e vagas infinitas com medição ínfima.
 	tamanhoMinimoWorktree = 1 << 20
+	// reservaDiscoMaxima é o máximo de espaço que a trava de disco deixa livre (10 GiB).
+	reservaDiscoMaxima uint64 = 10 << 30
 )
 
 // UsoDisco é a capacidade e o uso de um volume, em bytes.
@@ -65,7 +67,12 @@ func VagasDeDisco(u UsoDisco, limitePct int, tamanhoWorktree uint64) int {
 	if tamanhoWorktree < tamanhoMinimoWorktree {
 		tamanhoWorktree = tamanhoMinimoWorktree
 	}
+	// A reserva livre é a menor entre (100 - limite)% do volume e reservaDiscoMaxima: num disco
+	// grande e já cheio de outras coisas, 20% viraria dezenas de GB parados e o teto daria 0.
 	teto := u.Total / 100 * uint64(limitePct)
+	if reserva := u.Total - teto; reserva > reservaDiscoMaxima {
+		teto = u.Total - reservaDiscoMaxima
+	}
 	if u.Usado >= teto {
 		return 0
 	}
