@@ -49,6 +49,16 @@ func CreateWorktree(dir, jobID, taskID, baseRef string) (string, error) {
 // RemoveWorktree remove o worktree e a branch auxiliar. O caminho precisa estar dentro de
 // .forge/runtime/worktrees (links simbólicos são resolvidos antes de conferir).
 func RemoveWorktree(dir, jobID, taskID string) error {
+	if err := RemoveWorktreeKeepBranch(dir, jobID, taskID); err != nil {
+		return err
+	}
+	_, _ = layout.Git(dir, "branch", "-D", "forge/"+jobID+"-"+taskID)
+	return nil
+}
+
+// RemoveWorktreeKeepBranch remove só o diretório do worktree (ciclo efêmero, feat-122-03): a branch
+// forge/<job>-<task> e os commits dela continuam. Mesmas proteções de RemoveWorktree.
+func RemoveWorktreeKeepBranch(dir, jobID, taskID string) error {
 	path, err := WorktreePath(dir, jobID, taskID)
 	if err != nil {
 		return err
@@ -68,9 +78,35 @@ func RemoveWorktree(dir, jobID, taskID string) error {
 	if _, err := layout.Git(dir, "worktree", "remove", "--force", real); err != nil {
 		return fmt.Errorf("remover worktree: %w", err)
 	}
-	_, _ = layout.Git(dir, "branch", "-D", "forge/"+jobID+"-"+taskID)
 	_ = os.Remove(filepath.Dir(path)) // remove a pasta do job quando vazia
 	return nil
+}
+
+// ReopenWorktree recria o worktree de uma task a partir da branch forge/<job>-<task> que já existe
+// (retrabalho, feat-122-03): o commit anterior da task é o ponto de partida. Recusa se a branch não
+// existe ou se o caminho já está ocupado.
+func ReopenWorktree(dir, jobID, taskID string) (string, error) {
+	path, err := WorktreePath(dir, jobID, taskID)
+	if err != nil {
+		return "", err
+	}
+	branch := "forge/" + jobID + "-" + taskID
+	if _, err := layout.Git(dir, "rev-parse", "--verify", "-q", "refs/heads/"+branch); err != nil {
+		return "", fmt.Errorf("branch %s não existe: não há o que retomar", branch)
+	}
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+		return "", err
+	}
+	if err := confirmarDentroDeWorktrees(dir, path); err != nil {
+		return "", err
+	}
+	if _, err := os.Lstat(path); err == nil {
+		return "", fmt.Errorf("já existe worktree em %s", path)
+	}
+	if _, err := layout.Git(dir, "worktree", "add", path, branch); err != nil {
+		return "", fmt.Errorf("reabrir worktree: %w", err)
+	}
+	return path, nil
 }
 
 // confirmarDentroDeWorktrees recusa um caminho cujo pai, depois de resolver links simbólicos, saia

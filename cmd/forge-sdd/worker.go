@@ -75,26 +75,48 @@ func recordJobTelemetry(dir, role string) func(job bus.Job, outcome string) {
 		if outcome == pipeline.OutcomeDeferred {
 			return // o job voltou à fila sem gastar tentativa: não é um resultado da sessão
 		}
-		ok := outcome == pipeline.OutcomeDone
-		result := "approved"
-		if !ok {
-			result = "blocked"
-		}
 		u := monitor.ReadJobUsage(dir, role, job.ID, job.SpecPath)
 		ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 		defer cancel()
-		_ = exec.CommandContext(ctx, self, "session", "record", "--dir", dir, "--feature", job.SpecPath, "--phase", job.ID,
-			"--agent-path", role, "--outcome", result, fmt.Sprintf("--criterio-atendido=%t", ok),
-			"--tokens-input", strconv.Itoa(u.TokensInput),
-			"--tokens-output", strconv.Itoa(u.TokensOutput),
-			"--tokens-cache-read", strconv.Itoa(u.TokensCacheRead),
-			"--tokens-cache-creation", strconv.Itoa(u.TokensCacheCreation),
-			"--turns", strconv.Itoa(u.Turns),
-			"--duration-seconds", strconv.Itoa(u.DurationSeconds),
-			"--model", u.Model,
-			"--cost-usd-tabela", strconv.FormatFloat(u.CostUSDTabela, 'f', 4, 64),
-			"--medicao", u.Medicao,
-		).Run()
+		_ = exec.CommandContext(ctx, self, sessionRecordArgs(dir, role, job, taskIDDoJob(job), outcome, u)...).Run()
+	}
+}
+
+// tipoTaskBuild é o tipo de job por task (bus.TypeTaskBuild, criado pela feat-122-01).
+const tipoTaskBuild = "task_build"
+
+// taskIDDoJob devolve o id da task de um job por task; vazio nos demais jobs.
+func taskIDDoJob(job bus.Job) string {
+	if job.Type == tipoTaskBuild && len(job.TaskIDs) == 1 {
+		return job.TaskIDs[0]
+	}
+	return ""
+}
+
+// sessionRecordArgs monta o argv de `forge session record` de um job. Job por task (taskID não vazio)
+// gera um registro por task e papel sem campo novo no schema 1.0: `feature` é o caminho da spec da
+// task e `phase` é o papel; `medicao` é "real" quando o log tem evento `result` (FLX-04).
+func sessionRecordArgs(dir, role string, job bus.Job, taskID, outcome string, u monitor.JobUsage) []string {
+	ok := outcome == pipeline.OutcomeDone
+	result := "approved"
+	if !ok {
+		result = "blocked"
+	}
+	phase := job.ID
+	if taskID != "" {
+		phase = role
+	}
+	return []string{"session", "record", "--dir", dir, "--feature", job.SpecPath, "--phase", phase,
+		"--agent-path", role, "--outcome", result, fmt.Sprintf("--criterio-atendido=%t", ok),
+		"--tokens-input", strconv.Itoa(u.TokensInput),
+		"--tokens-output", strconv.Itoa(u.TokensOutput),
+		"--tokens-cache-read", strconv.Itoa(u.TokensCacheRead),
+		"--tokens-cache-creation", strconv.Itoa(u.TokensCacheCreation),
+		"--turns", strconv.Itoa(u.Turns),
+		"--duration-seconds", strconv.Itoa(u.DurationSeconds),
+		"--model", u.Model,
+		"--cost-usd-tabela", strconv.FormatFloat(u.CostUSDTabela, 'f', 4, 64),
+		"--medicao", u.Medicao,
 	}
 }
 
