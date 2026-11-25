@@ -2,51 +2,61 @@
 
 **Origem:** Nathan, 24/11/2026, no chat: "a gente já consegue fazer a quebra por tasks, só não consegue colocar um agente de builder para implementar cada task. Quando a gente vai fazendo a fila e coloca o mesmo agente, o contexto fica muito grande. [...] escalar os agentes, até mesmo o revisor, gastar menos token quando quebrar para implementação [...] e não travar tanto quando a coisa é simples, mas quando a fila já é maior, não tem como."
 
+Ajuste do dono no mesmo dia: "acabei de implementar no worktree, fiz o meu commit, já apago o worktree [...] todos podem trabalhar na mesma branch da feature [...] squash depois [...] não tenho espaço de armazenamento para rodar vários worktrees e eu quero ter escala [...] até 80% da capacidade de armazenamento é o limite de paralelizar [...] para cada builder tem que ter um revisor."
+
 Retoma o item que a 90 deixou para a próxima onda: "Builder por tarefa com contexto novo" (`90/discovery.md`, Fora).
 
 ## Problema
-1. **Um contexto para a feature inteira.** O barramento cria um job `feature_build` por feature e o worker roda um único `claude -p` para todas as tasks dela (`internal/pipeline/worker.go`, `processJob`). Cada task nova relê o histórico das anteriores: o custo por turno cresce com o tamanho da feature. Linha de base da 90: o Builder da 88 usou 81 turnos e 8,3 mi de tokens relidos, cerca de 102 mil por turno.
-2. **Paralelismo só como sugestão.** `PlanWaves` já calcula as ondas por "Depende de" e `max_parallel_tasks` (padrão 3), mas o resultado vira só uma dica no prompt (`BuilderHints`). Paralelizar fica a critério do modelo.
-3. **Peças prontas sem quem as acione.** O leque (`leque.go`: worktree por task, junção em ordem, conflito vira bloqueio), a continuação por onda (`onda.go`: `PodeComecar`, `FimDaOnda`) e o laço por task (`laco.go`: estados gravados pelo Go) existem e têm teste, mas nenhum comando os chama.
-4. **Revisão cara e uniforme.** O parecer LLM roda no mesmo ritmo do Builder, mesmo quando a Camada A (determinística) já reprovaria.
-5. **Ritmo fixo.** Fila de uma task e fila de quinze seguem o mesmo caminho. Não há regra para rodar em sequência quando é simples, nem para subir o paralelo quando a fila cresce, nem para segurar quando a janela de uso está no fim.
+1. **Um contexto para a feature inteira.** O barramento cria um job `feature_build` por feature e o worker roda um único `claude -p` para todas as tasks dela (`internal/pipeline/worker.go`, `processJob`). Cada task nova relê o histórico das anteriores. Linha de base da 90: o Builder da 88 usou 81 turnos e 8,3 mi de tokens relidos, cerca de 102 mil por turno.
+2. **Paralelismo só como sugestão.** `PlanWaves` calcula as ondas por "Depende de", mas o resultado vira só uma dica no prompt (`BuilderHints`).
+3. **Peças prontas sem quem as acione.** O leque (`leque.go`: worktree e branch por task, merge na branch base, remoção do worktree), a continuação por onda (`onda.go`) e o laço por task (`laco.go`) existem e têm teste, mas nenhum comando os chama.
+4. **Worktree vive demais e ocupa disco.** No leque, o worktree só sai na junção, no fim da onda inteira. Com muitas tasks, o disco enche antes de a onda acabar.
+5. **Paralelo sem noção da máquina.** `max_parallel_tasks` é um número fixo (1 a 8). Não olha disco livre, e cada máquina tem uma capacidade.
+6. **Revisão desacoplada do Builder.** Um único Reviewer atende a fila. Com vários Builders, a revisão vira gargalo.
 
 ## Para quem
-Quem deixa a esteira rodando depois do Gate 1 e quer entregar mais rápido, com menos tokens e sem perder o controle do que cada agente está fazendo.
+Quem deixa a esteira rodando depois do Gate 1, em uma ou mais máquinas, e quer entregar mais rápido, com menos tokens, sem travar o computador.
 
 ## Jornada alvo
 1. O split aprovado gera as tasks com "Depende de" e tier (115).
-2. `forge dispatch <feature>` enfileira **uma unidade de trabalho por task**, com o pacote mínimo dela (`forge context <task>`).
-3. O despachante calcula as ondas e decide o paralelo: 1 worker quando a onda tem 1 ou 2 tasks simples; até `max_parallel_tasks` quando a onda é larga; menos quando a janela de uso passou do limite configurado.
-4. Cada task roda num **Builder novo**, no seu worktree, e termina com a Camada A da task. Falha da Camada A volta para a mesma task, sem gastar parecer LLM.
-5. Ao fim da onda, o leque junta as tasks na branch da feature, na ordem do plano. Conflito vira bloqueio com menu, nunca resolução automática.
-6. Com a feature junta, o PR em draft sai e o Reviewer emite **um** parecer LLM para a feature.
-7. Cada task grava sua telemetria (`sdd/.metrics`, `medicao: real` quando houver evento `result`), e o `forge status` mostra tokens por task.
+2. `forge dispatch <feature>` enfileira **uma unidade de trabalho por task** na branch da feature, com o pacote mínimo dela (`forge context <task>`).
+3. O despachante calcula quantos **pares Builder e Reviewer** cabem nesta máquina: o disco ocupado não pode passar de 80% contando os worktrees novos, e a janela de uso não pode estar no limite.
+4. Cada Builder novo trabalha no **seu worktree efêmero**, roda a Camada A, faz o commit na branch da task e o worktree é **apagado na hora**. A vaga de disco volta para a fila.
+5. O Reviewer do par recebe o commit pelo git (sem worktree) e emite o parecer da task. Pediu ajuste: um worktree novo nasce da branch da task, o Builder corrige, apaga de novo.
+6. Aprovada, a task entra na **branch da feature** por merge sob lock, na ordem do plano, e a branch da task é apagada.
+7. Quando várias vagas liberam de uma vez, o despachante sobe vários pares de uma vez, até o teto.
+8. Fechadas as tasks, sai **um PR em draft da feature**, com squash no merge final quando o dono preferir.
+9. Cada task grava telemetria real do Builder e do Reviewer em `sdd/.metrics`.
 
 ## Regras de negócio
-- **RN-1** Uma task, um processo de agente, um contexto. Nenhum Builder recebe o histórico de outra task.
+- **RN-1** Uma task, um Builder novo, um contexto. Nenhum Builder recebe o histórico de outra task.
 - **RN-2** O pacote de entrada é o de `forge context <task>` mais a spec da task. Nada de `status.md` inteiro, logs ou diffs de outras tasks.
-- **RN-3** A ordem é a do plano: uma task só começa com as dependências integradas (`PodeComecar`).
-- **RN-4** Paralelo efetivo = mínimo entre largura da onda, `max_parallel_tasks` e o teto pela janela de uso. Fila simples (até 2 tasks, tier `fast`) roda em sequência num worker.
-- **RN-5** Janela de uso acima do limite configurado (padrão 85%) reduz o paralelo para 1. O adiamento por limite de uso que já existe (`OutcomeDeferred`) continua valendo.
-- **RN-6** Camada A por task, sem modelo. Parecer LLM só por feature, depois da junção. O teto de `max_rework_attempts` vale por task.
-- **RN-7** Conflito na junção nunca é resolvido pelo modelo sem decisão humana (mesmo contrato do leque, RN-9 da 104).
-- **RN-8** O modo atual (um job por feature) continua disponível por configuração enquanto a medição não comprovar ganho.
-- **RN-9** O modelo de cada task vem do tier da 115; esta iniciativa não cria outra classificação.
+- **RN-3** Uma task só começa com as dependências já na branch da feature (`PodeComecar`).
+- **RN-4** Worktree é efêmero: nasce para a task, morre no commit. Só fica se o commit falhar ou houver trabalho não commitado (órfão vira menu, contrato do leque).
+- **RN-5** Teto de paralelo por máquina: `pares = min(vagas de disco, largura da onda, teto da janela)`. Vagas de disco = (80% da capacidade do volume dos worktrees − uso atual) ÷ tamanho estimado de um worktree. O limite de 80% é configurável (`builder.limite_disco`).
+- **RN-6** O tamanho de um worktree é medido no primeiro checkout do projeto e guardado no estado local da máquina; reavaliado a cada 20 tasks.
+- **RN-7** O cálculo roda de novo a cada worktree apagado. Se várias vagas abrem juntas, várias tasks começam juntas.
+- **RN-8** Um Reviewer por Builder ativo. O Reviewer lê só o diff da task (`git diff base...task`) e a spec da task, com tier econômico; não precisa de worktree.
+- **RN-9** Junção na branch da feature em série, sob lock, na ordem do plano. Conflito nunca é resolvido pelo modelo sem decisão humana (contrato do leque).
+- **RN-10** Janela de uso acima do limite (padrão 85%) reduz o teto para 1 par. O adiamento por limite de uso que já existe continua valendo.
+- **RN-11** Cada máquina calcula o próprio teto. Várias máquinas na mesma fila exigem barramento compartilhado, que fica fora desta iniciativa.
+- **RN-12** O modo atual (um job por feature) continua disponível por configuração (`builder.granularidade`) até a medição comprovar ganho.
+- **RN-13** O modelo de cada task vem do tier da 115; esta iniciativa não cria outra classificação.
 
 ## Escopo
-**Dentro:** job por task no barramento; despachante de ondas com paralelo adaptativo; leque ligado ao worker no modo `sessions`; Camada A por task e parecer por feature; telemetria por task; chave de configuração para voltar ao modo por feature; medição antes e depois.
+**Dentro:** job por task; worktree efêmero apagado no commit; despachante com teto por disco e por janela; pares Builder e Reviewer; junção contínua na branch da feature; telemetria por task; chave para voltar ao modo por feature; medição antes e depois.
 
-**Fora:** classificação de tier (é da 115); modo `chat` em subagentes (é da 104, que poderá reusar o despachante depois); orquestrador de sessões da 107; painel visual (é da 123); qualquer mudança no fluxo de aprovação humana.
+**Fora:** barramento compartilhado entre máquinas; classificação de tier (115); modo `chat` em subagentes (104, que poderá reusar o despachante); orquestrador de sessões (107); painel visual (123); mudança no fluxo de aprovação humana.
 
 ## Riscos
 | Risco | Mitigação |
 |---|---|
-| Conflito de merge entre tasks paralelas | Ondas por "Depende de", junção em ordem, bloqueio com menu (leque) |
-| Task sem contexto suficiente | Pacote de `forge context` validado na Camada A; falha volta à mesma task |
-| Paralelo esgota a janela de uso mais rápido | RN-5 e adiamento por limite já existente |
-| Mais processos, mais custo fixo de arranque por task | Medição antes e depois (RN-8); fila simples segue em sequência |
+| Conflito de merge entre tasks paralelas | Ondas por "Depende de", junção em série na ordem do plano, bloqueio com menu |
+| Disco medido errado trava a máquina | Limite conservador (80%), tamanho remedido a cada 20 tasks, piso de 1 par |
+| Build e testes também ocupam disco e memória | O tamanho medido inclui o primeiro build; memória livre mínima como segunda trava (a confirmar) |
+| Dobrar revisores dobra tokens de revisão | Reviewer só com o diff da task e tier econômico; medição na onda 3 |
+| Retrabalho recria worktree e gasta disco | Recria só quando o Reviewer pede ajuste; mesma regra de vagas |
 | Dependência da 115-03 (tier no job) | Sem tier, usa o modelo do papel (fallback da ADR-0024) |
 
 ## Esforço estimado
-Entre 4 e 5 dias de esteira, sem histórico de velocidade para calibrar. O maior risco é a junção paralela (onda 2 do plano).
+Entre 4 e 5 dias de esteira, sem histórico de velocidade para calibrar. O maior risco é a junção contínua com pares em paralelo (onda 2 do plano).

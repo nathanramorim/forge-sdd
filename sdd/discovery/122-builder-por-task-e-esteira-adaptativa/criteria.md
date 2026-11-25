@@ -1,30 +1,33 @@
 # Critérios — 122 Builder por task e esteira adaptativa
 
 ## Modelo do módulo
-**Completo** (`ARQ-11`): muda o contrato do job no barramento, o laço do worker e a política de despacho. Módulos tocados, todos existentes: `internal/bus` (tipo de job), `internal/pipeline` (despachante, worker, leque, onda), `internal/monitor` (telemetria por task), `internal/config` (chaves novas), `cmd/forge-sdd` (flags de `dispatch` e `worker`). Nenhum pacote novo.
+**Completo** (`ARQ-11`): muda o contrato do job no barramento, o laço do worker, o ciclo de vida do worktree e a política de despacho. Módulos tocados, todos existentes: `internal/bus` (tipo de job), `internal/pipeline` (despachante, worker, leque, onda, worktree), `internal/monitor` (telemetria por task), `internal/config` (chaves novas), `cmd/forge-sdd` (flags de `dispatch` e `worker`). Nenhum pacote novo.
 
 ## Decisões do projeto aplicadas
-- **ADR-0004** pipeline multi-sessão: Discovery, Builder e Reviewer continuam sessões distintas; muda só a granularidade do job do Builder.
+- **ADR-0004** pipeline multi-sessão: Discovery, Builder e Reviewer continuam papéis distintos; muda a granularidade e o número de instâncias.
 - **ADR-0009** tokens por janela: o reset suave deixa de ser necessário para o Builder, porque cada task nasce limpa.
-- **ADR-0022 e ADR-0023** PR em draft, branch por feature, estado isolado: um PR por feature, não por task; as branches de task vivem só no worktree.
-- **ADR-0024** orquestração por iniciativa e tier: o worker atende só a iniciativa dele e resolve o modelo pelo tier da task.
+- **ADR-0022 e ADR-0023** branch por feature e PR em draft: um PR por feature; as branches de task são internas e apagadas após a junção.
+- **ADR-0024** orquestração por iniciativa e tier: os workers atendem só a iniciativa deles e resolvem o modelo pelo tier da task.
 - **ADR-0015** modo chat: convive; o despachante fica em `internal/pipeline` para a 104 reusar.
-- `DUP-01` e `DUP-03`: leque, onda e `PlanWaves` são reusados, não reescritos. `FLX-05`: o contrato novo do job exige ADR (ADR-0029, proposta nesta iniciativa). `FLX-06`: Camada A por task, B por feature.
+- `ARQ-04`: medição de disco só com a biblioteca padrão (`syscall`, com implementação por sistema). `SEG-02` e `SEG-03`: worktrees só dentro de `layout.Worktrees`, git com argumentos explícitos. `DUP-01` e `DUP-03`: leque, onda, `PlanWaves` e `worktree_gc` reusados. `FLX-05`: o contrato novo exige ADR (ADR-0029, proposta nesta iniciativa). `FLX-06`: Camada A por task, parecer por task no par.
 
 ## O que já existe
 | Procurei | Onde | Achei | Decisão | Justificativa |
 |---|---|---|---|---|
 | Job do Builder | `internal/bus/job.go` | `feature_build` e `pr_rework`, um por feature | estender | novo tipo `task_build` com `task_id` e `feature_job` pai |
-| Laço do worker | `internal/pipeline/worker.go` `processJob` | um `Runner.Run` por job | reusar | com job por task, o mesmo laço já roda um Builder novo por task |
-| Ondas | `internal/pipeline/waves.go` `PlanWaves` | ondas por "Depende de" e teto | reusar | entra no despachante em vez de virar dica |
-| Worktree por task e junção | `internal/pipeline/leque.go` | `PrepararLeque`, `Juntar`, bloqueio por conflito; sem chamador | reusar | é exatamente a junção que a RN-7 pede |
-| Continuação por onda | `internal/pipeline/onda.go` | `PodeComecar`, `FimDaOnda`, `ContinuarPorOnda`; sem chamador | reusar | implementa RN-3 |
-| Laço por task do modo chat | `internal/pipeline/laco.go` | estados por task gravados pelo Go | reusar os estados | mesma máquina de estados para os dois modos (`DUP-04`) |
-| Pacote mínimo de contexto | `cmd/forge-sdd/context.go` (`forge context`) | contexto por task ou spec | reusar | RN-2 |
-| Uso real do agente | `internal/monitor/usage.go` | lê o evento `result` do stream-json | reusar | telemetria por task com `medicao: real` |
-| Limite de uso | `internal/pipeline/usagelimit.go`, `OutcomeDeferred` | adia sem gastar tentativa | estender | entra no cálculo do paralelo (RN-5) |
-| Tier por task | 115-03 (pendente), ADR-0024 | contrato de tier no job | depender | RN-9; fallback para modelo do papel |
-| Dica de paralelo no prompt | `internal/pipeline/prompt.go` `BuilderHints` | texto sobre worktree e subagentes | remover no modo por task | o Go passa a decidir (`COD-04`) |
+| Laço do worker | `internal/pipeline/worker.go` `processJob` | um `Runner.Run` por job | reusar | com job por task, o mesmo laço roda um Builder novo por task |
+| Ondas | `internal/pipeline/waves.go` `PlanWaves` | ondas por "Depende de" | reusar | ordem e largura da onda |
+| Worktree e branch por task | `internal/pipeline/worktree.go`, `leque.go` `prepararTask` | branch `forge/<ini>-<task>`, worktree em `layout.Worktrees` | reusar | mesmo local e mesmas proteções |
+| Junção | `leque.go` `Juntar`, `juntarTask` | merge `--no-ff` na base, sob lock, remove o worktree; só no fim da onda | estender | junção por task assim que aprovada; worktree sai antes, no commit |
+| Órfãos | `leque.go` `ErroOrfao`, `worktree_gc.go` | menu retomar, preservar, abortar; varredura de worktrees velhos | reusar | RN-4 |
+| Continuação por onda | `onda.go` `PodeComecar` | dependência integrada libera | reusar | RN-3 |
+| Estados por task | `laco.go` | estados gravados pelo Go | reusar | mesma máquina de estados nos dois modos (`DUP-04`) |
+| Pacote mínimo | `forge context` | contexto por task | reusar | RN-2 |
+| Uso real | `internal/monitor/usage.go` | evento `result` do stream-json | reusar | telemetria por task |
+| Limite de uso | `usagelimit.go`, `OutcomeDeferred` | adia sem gastar tentativa | estender | entra no teto (RN-10) |
+| Teto fixo | `config` `max_parallel_tasks` (1 a 8) | número fixo | estender | vira teto máximo; o efetivo vem do disco e da janela |
+| Medição de disco | `internal/` | nenhuma | criar | função pequena em `internal/pipeline`, só stdlib |
+| Dica de paralelo no prompt | `prompt.go` `BuilderHints` | texto sobre worktree e subagentes | remover no modo por task | o Go decide (`COD-04`) |
 
 ## Dependências novas
 Nenhuma (`ARQ-04`).
@@ -34,54 +37,57 @@ Nenhuma (`ARQ-04`).
 C4Context
 Person(dono, "Pessoa do projeto", "aprova spec e PR")
 System(forge, "forge-sdd", "CLI e esteira")
-System_Ext(agente, "CLI do agente", "claude -p, um processo por task")
-System_Ext(git, "Git e GitHub", "worktrees, branch e PR da feature")
+System_Ext(agente, "CLI do agente", "um Builder e um Reviewer por task")
+System_Ext(git, "Git e GitHub", "branch da feature e PR em draft")
 Rel(dono, forge, "dispatch, status")
-Rel(forge, agente, "um Builder novo por task")
-Rel(forge, git, "leque e PR em draft")
+Rel(forge, agente, "pares em paralelo")
+Rel(forge, git, "commits por task, PR da feature")
 ```
 ```mermaid
 C4Container
-Container(disp, "Despachante", "internal/pipeline", "ondas e paralelo adaptativo")
-Container(bus, "Barramento", "internal/bus", "jobs task_build")
-Container(wk, "Workers", "internal/pipeline/worker", "N processos, um job por vez")
-Container(leq, "Leque", "internal/pipeline/leque", "worktree por task e junção")
+Container(disp, "Despachante", "internal/pipeline", "teto por disco, onda e janela")
+Container(bus, "Barramento", "internal/bus", "task_build e review por task")
+Container(bw, "Builders", "worker", "worktree efêmero, commit, apaga")
+Container(rw, "Reviewers", "worker", "diff da task, sem worktree")
+Container(jun, "Junção", "leque", "merge em série na branch da feature")
 Container(met, "Telemetria", "internal/monitor", "sdd/.metrics por task")
-Rel(disp, bus, "enfileira a onda")
-Rel(wk, bus, "reivindica")
-Rel(wk, leq, "trabalha no worktree")
-Rel(wk, met, "grava uso real")
-Rel(disp, leq, "junta ao fim da onda")
+Rel(disp, bus, "enfileira até o teto")
+Rel(bw, bus, "commit pronto")
+Rel(rw, bus, "parecer")
+Rel(jun, bus, "aprovada entra")
+Rel(bw, met, "uso real")
+Rel(rw, met, "uso real")
 ```
 ```mermaid
 sequenceDiagram
 participant D as Despachante
-participant B as Barramento
-participant W as Worker (Builder novo)
-participant L as Leque
-participant R as Reviewer
-D->>D: PlanWaves + janela de uso => paralelo
-D->>L: PrepararLeque(onda)
-D->>B: task_build x N
-W->>B: claim
-W->>W: claude -p com forge context <task>
-W->>W: Camada A da task
-W->>B: complete (telemetria real)
-D->>L: Juntar (ordem do plano)
-alt conflito
-  L-->>D: bloqueio com menu
-else integrada
-  D->>R: PR draft da feature, um parecer
+participant B as Builder (novo)
+participant R as Reviewer (par)
+participant J as Junção
+D->>D: vagas = (80% do disco - uso) / tamanho do worktree
+D->>B: task 1..N (até o teto)
+B->>B: worktree, implementa, Camada A, commit
+B->>B: apaga worktree
+B-->>D: vaga livre
+D->>D: recalcula e puxa a próxima
+B->>R: commit da task
+alt ajuste
+  R->>B: parecer; worktree novo da branch da task
+else aprovado
+  R->>J: merge na branch da feature (lock, ordem do plano)
+  J->>J: apaga branch da task
 end
 ```
 
 ## Critérios de aceitação executáveis
-- **CA-01** `go test ./internal/bus/...`: job `task_build` valida `task_id` e `feature_job`; recusa task fora do plano (casos conforme e negativo, `TST-03`).
-- **CA-02** `go test ./internal/pipeline/ -run Despachante`: com 1 task `fast` o paralelo é 1; com onda de 5 e teto 3 é 3; com janela em 90% e limite 85% é 1.
-- **CA-03** `go test ./internal/pipeline/ -run PorTask`: dois jobs de tasks diferentes geram dois `Runner.Run` com prompts que não contêm o id nem a spec da outra task.
-- **CA-04** `go test ./internal/pipeline/ -run Leque`: o despachante chama `PrepararLeque` e `Juntar`; conflito resulta em estado bloqueado e nenhum PR.
-- **CA-05** `go test ./internal/pipeline/ -run Revisao`: falha da Camada A devolve a task sem criar job de review; o review nasce uma vez por feature.
-- **CA-06** `go test ./internal/monitor/...`: um registro de telemetria por task com `feature`, `task` e `medicao: real` quando há evento `result`.
-- **CA-07** `go test ./internal/config/...`: `builder.granularidade` aceita `feature` e `task`; padrão `feature` até a medição (RN-8); limite de janela entre 50 e 100.
-- **CA-08** `go build ./... && go vet ./... && go test ./...` saem 0; ADR-0029 em `sdd/spec/adr/`.
-- **CA-09** Medição: `forge report` de uma iniciativa real nos dois modos, com tokens relidos por task e duração total registrados no `status.md`.
+- **CA-01** `go test ./internal/bus/...`: job `task_build` valida `task_id` e `feature_job`; recusa task fora do plano (conforme e negativo, `TST-03`).
+- **CA-02** `go test ./internal/pipeline/ -run Teto`: com disco simulado em 50% de 100 GB, worktree de 5 GB e limite 80%, as vagas são 6; em 79% são 0 e nenhuma task começa; com onda de 3 o teto é 3; janela em 90% com limite 85% dá 1.
+- **CA-03** `go test ./internal/pipeline/ -run Efemero`: depois do commit da task o diretório do worktree não existe e a branch da task continua com o commit.
+- **CA-04** `go test ./internal/pipeline/ -run PorTask`: dois jobs de tasks diferentes geram dois `Runner.Run` cujos prompts não contêm o id nem a spec da outra task.
+- **CA-05** `go test ./internal/pipeline/ -run Par`: cada commit de task gera um job de review com só o diff daquela task; com 3 Builders ativos existem até 3 Reviewers ativos.
+- **CA-06** `go test ./internal/pipeline/ -run Juncao`: tasks aprovadas entram na branch da feature em série na ordem do plano; conflito deixa a task bloqueada, aborta o merge e preserva a branch.
+- **CA-07** `go test ./internal/pipeline/ -run Liberacao`: liberar 4 vagas de uma vez faz 4 tasks elegíveis começarem na mesma rodada.
+- **CA-08** `go test ./internal/monitor/...`: um registro por task e papel com `feature`, `task` e `medicao: real` quando há evento `result`.
+- **CA-09** `go test ./internal/config/...`: `builder.granularidade` aceita `feature` e `task` (padrão `feature`); `builder.limite_disco` entre 50 e 95 (padrão 80).
+- **CA-10** `GOOS=windows go build ./... && GOOS=darwin go build ./... && go build ./... && go vet ./... && go test ./...` saem 0; ADR-0029 em `sdd/spec/adr/`.
+- **CA-11** Medição: uma iniciativa real nos dois modos, com tokens por task, duração total e pico de disco no `status.md`.
