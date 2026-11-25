@@ -11,6 +11,9 @@ export type Recursos = {
   discoUsado: number
   memLivre: number
   memPar: number
+  memTotal: number
+  limiteMem: number
+  limiteDisco: number
   pares: number
   motivo: string
   modoTask: boolean

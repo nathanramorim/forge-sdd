@@ -80,7 +80,7 @@ func FormatDiagnostico(dir string, now time.Time) string {
 	cfg, _, err := config.LoadForgeConfig(dir)
 	if err == nil {
 		if cfg.Builder.PorTask() && !cfg.IsAdvanced() {
-			if teto, terr := calculaTetoMem(dir, cfg.Builder, 1<<10, nil, nil, nil, false); terr == nil {
+			if teto, terr := calculaTetoMem(dir, cfg.Builder, 1<<10, nil, nil, nil, nil, false); terr == nil {
 				fmt.Fprintf(&b, "builder: por task · teto agora %d par(es) (limitado por %s)\n", teto.Pares, teto.Motivo)
 			} else {
 				fmt.Fprintf(&b, "builder: por task · teto indisponível: %s\n", firstLine(terr.Error()))

@@ -23,7 +23,7 @@ const MAX_REGISTROS_GASTOS = 500
 // Cache do painel: não é fonte de verdade, só o que a tela mostra (o barramento é do Go).
 const VAZIA: Esteira = { recursos: null, sessao: null, estacoes: [], progresso: null, quadro: null, outras: [], agentes: [], erro: '', inbox: { naoLidas: 0, prConforme: [] }, temFilas: false, series: {} }
 // shape: um valor gravado por versão anterior do mod é descartado, não lido pela metade.
-const esteira = atom({ plugin: 'forge-painel', key: 'esteira' } as const, VAZIA, { shape: 'esteira-6' })
+const esteira = atom({ plugin: 'forge-painel', key: 'esteira' } as const, VAZIA, { shape: 'esteira-7' })
 // tool_use_id da chamada Agent -> id do subagente, para o cartão de consumo embaixo da chamada.
 const cartoes = atom({ plugin: 'forge-painel', key: 'cartoes' } as const, {} as Record<string, string>)
 const DIR_INBOX = '.forge/runtime/queues/discovery/inbox'
@@ -538,6 +538,9 @@ export const register: Register = on => {
           const daIni = r.worktrees.filter(w => iniciativa === undefined || w.iniciativa === iniciativa)
           const n = (e: string) => daIni.filter(w => w.estado === e).length
           const pctDisco = r.discoTotal > 0 ? (r.discoUsado / r.discoTotal) * 100 : 0
+          const pctMem = r.memTotal > 0 && r.memLivre >= 0 ? Math.max(0, ((r.memTotal - r.memLivre) / r.memTotal) * 100) : -1
+          const teto = (l: number) => (l > 0 ? ` · teto ${l}%` : '')
+          const cor = (pct: number, l: number) => (l > 0 && pct >= l ? 'red' : undefined)
           return (
             <Box flexDirection="column" borderStyle="round" borderColor="gray" paddingX={1} marginTop={1}>
               <Box justifyContent="space-between">
@@ -547,14 +550,14 @@ export const register: Register = on => {
               {r.discoTotal > 0 && (
                 <Box justifyContent="space-between">
                   <Text dimColor>disco {barra(pctDisco, 10)}</Text>
-                  <Text dimColor>{gb(r.discoTotal - r.discoUsado)} livres</Text>
+                  <Text dimColor color={cor(pctDisco, r.limiteDisco)}>{Math.round(pctDisco)}% em uso{teto(r.limiteDisco)} · {gb(r.discoTotal - r.discoUsado)} livres</Text>
                 </Box>
               )}
               {r.memLivre >= 0 && (
                 <Box justifyContent="space-between">
-                  <Text dimColor>memória</Text>
-                  <Text dimColor>
-                    {(r.memLivre / 1024).toFixed(1).replace('.', ',')} GB livres · {(r.memPar / 1024).toFixed(1).replace('.', ',')} GB por par
+                  <Text dimColor>memória{pctMem >= 0 ? ` ${barra(pctMem, 10)}` : ''}</Text>
+                  <Text dimColor color={pctMem >= 0 ? cor(pctMem, r.limiteMem) : undefined}>
+                    {pctMem >= 0 ? `${Math.round(pctMem)}% em uso${teto(r.limiteMem)} · ` : ''}{(r.memLivre / 1024).toFixed(1).replace('.', ',')} GB livres · {(r.memPar / 1024).toFixed(1).replace('.', ',')} GB por par
                   </Text>
                 </Box>
               )}

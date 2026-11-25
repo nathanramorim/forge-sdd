@@ -20,10 +20,24 @@ func MemoriaDisponivelMB() (int, error) {
 	return memAvailableDe(bufio.NewScanner(f))
 }
 
+// MemoriaTotalMB lê MemTotal de /proc/meminfo.
+func MemoriaTotalMB() (int, error) {
+	f, err := os.Open("/proc/meminfo")
+	if err != nil {
+		return 0, err
+	}
+	defer f.Close()
+	return campoMeminfo(bufio.NewScanner(f), "MemTotal:")
+}
+
 func memAvailableDe(sc *bufio.Scanner) (int, error) {
+	return campoMeminfo(sc, "MemAvailable:")
+}
+
+func campoMeminfo(sc *bufio.Scanner, campo string) (int, error) {
 	for sc.Scan() {
 		campos := strings.Fields(sc.Text())
-		if len(campos) >= 2 && campos[0] == "MemAvailable:" {
+		if len(campos) >= 2 && campos[0] == campo {
 			kb, err := strconv.Atoi(campos[1])
 			if err != nil {
 				return 0, err
@@ -31,5 +45,5 @@ func memAvailableDe(sc *bufio.Scanner) (int, error) {
 			return kb / 1024, nil
 		}
 	}
-	return 0, fmt.Errorf("MemAvailable ausente em /proc/meminfo")
+	return 0, fmt.Errorf("%s ausente em /proc/meminfo", campo)
 }

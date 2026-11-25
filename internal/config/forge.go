@@ -112,7 +112,10 @@ type BuilderConfig struct {
 	// LimiteDisco é a porcentagem máxima de ocupação do volume dos worktrees ao paralelizar (50 a 95,
 	// padrão 80, ADR-0029).
 	LimiteDisco int `json:"limite_disco,omitempty"`
-	// ReservaMemoriaMB é a memória que o despachante deixa livre ao paralelizar (padrão 2048).
+	// LimiteMemoria é a porcentagem máxima de uso da RAM ao paralelizar (50 a 95, padrão 80).
+	LimiteMemoria int `json:"limite_memoria,omitempty"`
+	// ReservaMemoriaMB é um piso opcional, em MB, de memória livre; vale o maior entre ele e o
+	// que sobra acima de limite_memoria (0 ou ausente = só o limite).
 	ReservaMemoriaMB int `json:"reserva_memoria_mb,omitempty"`
 }
 
@@ -121,7 +124,7 @@ const (
 	GranularidadeFeature = "feature"
 	GranularidadeTask    = "task"
 	LimiteDiscoPadrao    = 80
-	ReservaMemoriaPadrao = 2048
+	LimiteMemoriaPadrao  = 80
 	limiteDiscoMin       = 50
 	limiteDiscoMax       = 95
 )
@@ -139,12 +142,12 @@ func (b BuilderConfig) LarguraDePlano() int {
 // para forge.json antigo sem a chave); "feature" volta ao job único por feature.
 func (b BuilderConfig) PorTask() bool { return b.Granularidade != GranularidadeFeature }
 
-// ReservaMemoriaEfetiva devolve reserva_memoria_mb ou o padrão quando omitido (zero).
-func (b BuilderConfig) ReservaMemoriaEfetiva() int {
-	if b.ReservaMemoriaMB == 0 {
-		return ReservaMemoriaPadrao
+// LimiteMemoriaEfetivo devolve limite_memoria ou o padrão quando omitido (zero).
+func (b BuilderConfig) LimiteMemoriaEfetivo() int {
+	if b.LimiteMemoria == 0 {
+		return LimiteMemoriaPadrao
 	}
-	return b.ReservaMemoriaMB
+	return b.LimiteMemoria
 }
 
 // LimiteDiscoEfetivo devolve limite_disco ou o padrão quando omitido (zero).
@@ -237,7 +240,7 @@ func DefaultForgeConfig() ForgeConfig {
 			StatusOnPRApproved:    "Ready for Review",
 			EvidenceMaxAgeMinutes: 30,
 		},
-		Builder:    BuilderConfig{MaxParallelTasks: 3, UseGitWorktrees: true, RunTestsBeforePR: true, JobTimeoutMinutes: 60, Granularidade: GranularidadeTask, LimiteDisco: LimiteDiscoPadrao, ReservaMemoriaMB: ReservaMemoriaPadrao},
+		Builder:    BuilderConfig{MaxParallelTasks: 3, UseGitWorktrees: true, RunTestsBeforePR: true, JobTimeoutMinutes: 60, Granularidade: GranularidadeTask, LimiteDisco: LimiteDiscoPadrao, LimiteMemoria: LimiteMemoriaPadrao},
 		Reviewer:   ReviewerConfig{MaxReworkAttempts: 3, CommentOnPR: true},
 		ADRDirs:    []string{"sdd/spec/adr"},
 		BaseBranch: "main",
@@ -384,6 +387,9 @@ func (c ForgeConfig) Validate() error {
 	}
 	if l := c.Builder.LimiteDisco; l != 0 && (l < limiteDiscoMin || l > limiteDiscoMax) {
 		return fmt.Errorf("builder.limite_disco %d fora da faixa %d a %d", l, limiteDiscoMin, limiteDiscoMax)
+	}
+	if l := c.Builder.LimiteMemoria; l != 0 && (l < limiteDiscoMin || l > limiteDiscoMax) {
+		return fmt.Errorf("builder.limite_memoria %d fora da faixa %d a %d", l, limiteDiscoMin, limiteDiscoMax)
 	}
 	if m := c.Builder.ReservaMemoriaMB; m < 0 || m > 1048576 {
 		return fmt.Errorf("builder.reserva_memoria_mb %d fora da faixa 0 a 1048576", m)

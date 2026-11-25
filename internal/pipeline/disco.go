@@ -22,8 +22,6 @@ const (
 	RemedirACada = 20
 	// tamanhoMinimoWorktree evita divisão por zero e vagas infinitas com medição ínfima.
 	tamanhoMinimoWorktree = 1 << 20
-	// reservaDiscoMaxima é o máximo de espaço que a trava de disco deixa livre (10 GiB).
-	reservaDiscoMaxima uint64 = 10 << 30
 )
 
 // UsoDisco é a capacidade e o uso de um volume, em bytes.
@@ -67,12 +65,8 @@ func VagasDeDisco(u UsoDisco, limitePct int, tamanhoWorktree uint64) int {
 	if tamanhoWorktree < tamanhoMinimoWorktree {
 		tamanhoWorktree = tamanhoMinimoWorktree
 	}
-	// A reserva livre é a menor entre (100 - limite)% do volume e reservaDiscoMaxima: num disco
-	// grande e já cheio de outras coisas, 20% viraria dezenas de GB parados e o teto daria 0.
+	// O limite é rígido: nenhum worktree novo leva o volume acima de limitePct.
 	teto := u.Total / 100 * uint64(limitePct)
-	if reserva := u.Total - teto; reserva > reservaDiscoMaxima {
-		teto = u.Total - reservaDiscoMaxima
-	}
 	if u.Usado >= teto {
 		return 0
 	}
@@ -90,7 +84,9 @@ type ParamsTeto struct {
 	JanelaPct          int    // ocupação da janela de uso; negativo = desconhecida
 	LimiteJanelaPct    int    // padrão LimiteJanelaPadrao
 	MemoriaDisponivelM int    // MB disponíveis agora; negativo = desconhecida
-	ReservaMemoriaMB   int    // builder.reserva_memoria_mb
+	MemoriaTotalMB     int    // RAM total em MB; 0 ou negativo = desconhecida (só a reserva vale)
+	LimiteMemoriaPct   int    // builder.limite_memoria (padrão 80)
+	ReservaMemoriaMB   int    // builder.reserva_memoria_mb, piso opcional
 	MemoriaPorParMB    int    // estimativa por par; 0 usa MemoriaPorParPadraoMB
 }
 
@@ -109,6 +105,21 @@ type Teto struct {
 	Fixo         int // teto opcional max_parallel_tasks
 	Pares        int // o mínimo de todos
 	Motivo       string
+}
+
+// ReservaDeMemoria é o que fica livre: o maior entre (100 − limite)% da RAM total e o piso em MB.
+// Com o total desconhecido vale só o piso.
+func ReservaDeMemoria(totalMB, limitePct, pisoMB int) int {
+	if limitePct <= 0 {
+		limitePct = 80
+	}
+	r := pisoMB
+	if totalMB > 0 {
+		if pct := totalMB * (100 - limitePct) / 100; pct > r {
+			r = pct
+		}
+	}
+	return r
 }
 
 // VagasDeMemoria calcula (disponível − reserva) ÷ memória por par, nunca negativa.
@@ -135,7 +146,7 @@ func TetoDeParalelo(p ParamsTeto) Teto {
 		Fixo:         semLimite,
 	}
 	if p.MemoriaDisponivelM >= 0 {
-		t.VagasMemoria = VagasDeMemoria(p.MemoriaDisponivelM, p.ReservaMemoriaMB, p.MemoriaPorParMB)
+		t.VagasMemoria = VagasDeMemoria(p.MemoriaDisponivelM, ReservaDeMemoria(p.MemoriaTotalMB, p.LimiteMemoriaPct, p.ReservaMemoriaMB), p.MemoriaPorParMB)
 	}
 	lim := p.LimiteJanelaPct
 	if lim <= 0 {

@@ -220,7 +220,8 @@ func TestBuilderGranularidadeELimiteDisco(t *testing.T) {
 	d := DefaultForgeConfig().Builder
 	assert.Equal(t, GranularidadeTask, d.Granularidade, "padrão da 6.0 beta: por task, em paralelo")
 	assert.True(t, d.PorTask())
-	assert.Equal(t, 2048, d.ReservaMemoriaEfetiva())
+	assert.Equal(t, 80, d.LimiteMemoriaEfetivo())
+	assert.Zero(t, d.ReservaMemoriaMB, "sem reserva fixa: o teto é 80% da RAM")
 	assert.Equal(t, 80, d.LimiteDisco)
 
 	dir := t.TempDir()
@@ -236,7 +237,8 @@ func TestBuilderGranularidadeELimiteDisco(t *testing.T) {
 	cfg, _, err = LoadForgeConfig(dir)
 	require.NoError(t, err)
 	assert.False(t, cfg.Builder.PorTask())
-	assert.Equal(t, 4096, cfg.Builder.ReservaMemoriaEfetiva())
+	assert.Equal(t, 4096, cfg.Builder.ReservaMemoriaMB)
+	assert.Equal(t, 80, cfg.Builder.LimiteMemoriaEfetivo())
 	assert.Equal(t, 64, cfg.Builder.LarguraDePlano(), "0 = sem teto fixo")
 
 	// arquivo antigo, sem as chaves, passa a usar task e o limite padrão

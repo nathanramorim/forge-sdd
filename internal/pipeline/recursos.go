@@ -33,6 +33,9 @@ type Recursos struct {
 	DiscoTotal      uint64            `json:"disco_total_bytes"`
 	DiscoUsado      uint64            `json:"disco_usado_bytes"`
 	MemoriaLivreMB  int               `json:"memoria_livre_mb"` // -1 = desconhecida
+	MemoriaTotalMB  int               `json:"memoria_total_mb"` // 0 = desconhecida
+	LimiteMemoria   int               `json:"limite_memoria"`   // % máximo de uso da RAM
+	LimiteDisco     int               `json:"limite_disco"`     // % máximo de ocupação do disco
 	MemoriaPorParMB int               `json:"memoria_por_par_mb"`
 	Pares           int               `json:"pares"`
 	Motivo          string            `json:"motivo"`
@@ -55,6 +58,9 @@ func MedirRecursos(dir string, now time.Time) Recursos {
 	}
 	if mb, err := MemoriaDisponivelMB(); err == nil {
 		r.MemoriaLivreMB = mb
+	}
+	if mb, err := MemoriaTotalMB(); err == nil {
+		r.MemoriaTotalMB = mb
 	}
 	ativos := map[string]bool{}
 	for _, papel := range []string{layout.RoleBuilder, layout.RoleReviewer} {
@@ -94,6 +100,7 @@ func MedirRecursos(dir string, now time.Time) Recursos {
 	}
 	if cfg, _, err := config.LoadForgeConfig(dir); err == nil {
 		r.ModoTask = cfg.Builder.PorTask() && !cfg.IsAdvanced()
+		r.LimiteMemoria, r.LimiteDisco = cfg.Builder.LimiteMemoriaEfetivo(), cfg.Builder.LimiteDiscoEfetivo()
 		if teto, terr := calculaTetoMem(dir, cfg.Builder, 1<<10, func(string) (UsoDisco, error) {
 			return UsoDisco{Total: r.DiscoTotal, Usado: r.DiscoUsado}, nil
 		}, nil, func() (int, error) {
@@ -101,7 +108,7 @@ func MedirRecursos(dir string, now time.Time) Recursos {
 				return 0, fmt.Errorf("desconhecida")
 			}
 			return r.MemoriaLivreMB, nil
-		}, false); terr == nil {
+		}, func() (int, error) { return r.MemoriaTotalMB, nil }, false); terr == nil {
 			r.Pares, r.Motivo = teto.Pares, teto.Motivo
 		}
 	}
@@ -140,10 +147,22 @@ func LerRecursos(dir string) (Recursos, bool) {
 func FormatRecursos(r Recursos, now time.Time) string {
 	var b strings.Builder
 	gb := func(v uint64) string { return fmt.Sprintf("%.1f GB", float64(v)/(1<<30)) }
-	if r.DiscoTotal > 0 {
-		fmt.Fprintf(&b, "disco: %s livres de %s (%d%% ocupado)\n", gb(r.DiscoTotal-r.DiscoUsado), gb(r.DiscoTotal), int(r.DiscoUsado*100/r.DiscoTotal))
+	teto := func(l int) string {
+		if l <= 0 {
+			return ""
+		}
+		return fmt.Sprintf(" · teto %d%%", l)
 	}
-	if r.MemoriaLivreMB >= 0 {
+	if r.DiscoTotal > 0 {
+		fmt.Fprintf(&b, "disco: %s livres de %s (%d%% ocupado%s)\n", gb(r.DiscoTotal-r.DiscoUsado), gb(r.DiscoTotal), int(r.DiscoUsado*100/r.DiscoTotal), teto(r.LimiteDisco))
+	}
+	if r.MemoriaLivreMB >= 0 && r.MemoriaTotalMB > 0 {
+		usado := r.MemoriaTotalMB - r.MemoriaLivreMB
+		if usado < 0 {
+			usado = 0
+		}
+		fmt.Fprintf(&b, "memória: %d MB livres de %d MB (%d%% em uso%s) · cerca de %d MB por par\n", r.MemoriaLivreMB, r.MemoriaTotalMB, usado*100/r.MemoriaTotalMB, teto(r.LimiteMemoria), r.MemoriaPorParMB)
+	} else if r.MemoriaLivreMB >= 0 {
 		fmt.Fprintf(&b, "memória: %d MB livres · cerca de %d MB por par\n", r.MemoriaLivreMB, r.MemoriaPorParMB)
 	}
 	cont := map[string]int{}

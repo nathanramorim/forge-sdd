@@ -334,6 +334,9 @@ export type RecursosLidos = {
   discoUsado: number
   memLivre: number
   memPar: number
+  memTotal: number
+  limiteMem: number
+  limiteDisco: number
   pares: number
   motivo: string
   modoTask: boolean
@@ -357,6 +360,9 @@ export function lerRecursos(bruto: string | undefined): RecursosLidos | null {
     discoUsado: num(r?.disco_usado_bytes),
     memLivre: typeof r?.memoria_livre_mb === 'number' ? r.memoria_livre_mb : -1,
     memPar: num(r?.memoria_por_par_mb),
+    memTotal: num(r?.memoria_total_mb),
+    limiteMem: num(r?.limite_memoria),
+    limiteDisco: num(r?.limite_disco),
     pares: num(r?.pares),
     motivo: sanear(r?.motivo, 40),
     modoTask: r?.modo_task === true,

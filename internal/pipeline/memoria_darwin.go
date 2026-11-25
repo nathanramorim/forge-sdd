@@ -7,6 +7,7 @@ import (
 	"os/exec"
 	"regexp"
 	"strconv"
+	"strings"
 )
 
 var (
@@ -22,6 +23,19 @@ func MemoriaDisponivelMB() (int, error) {
 		return 0, err
 	}
 	return memDoVMStat(string(out))
+}
+
+// MemoriaTotalMB lê hw.memsize pelo sysctl (sem argumentos vindos de fora).
+func MemoriaTotalMB() (int, error) {
+	out, err := exec.Command("sysctl", "-n", "hw.memsize").Output()
+	if err != nil {
+		return 0, err
+	}
+	b, err := strconv.ParseUint(strings.TrimSpace(string(out)), 10, 64)
+	if err != nil {
+		return 0, err
+	}
+	return int(b >> 20), nil
 }
 
 func memDoVMStat(s string) (int, error) {

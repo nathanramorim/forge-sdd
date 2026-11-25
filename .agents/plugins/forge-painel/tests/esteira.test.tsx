@@ -236,6 +236,7 @@ test('tasks em paralelo viram um cartão por builder e o bloco de recursos lê o
     [`${FILAS}/builder/processing/1-2-job-b3.json`]: job('job-b3', { task_id: '77-03', lease: { worker: 'w', expires_at: '2026-11-25T18:10:00Z' } }),
     '.forge/runtime/painel/recursos.json': JSON.stringify({
       em: '2026-11-25T17:59:50Z', disco_total_bytes: 228 * 2 ** 30, disco_usado_bytes: 199 * 2 ** 30, memoria_livre_mb: 4096, memoria_por_par_mb: 1536,
+      memoria_total_mb: 16384, limite_memoria: 80, limite_disco: 80,
       pares: 2, motivo: 'memória', modo_task: true,
       worktrees: [
         { iniciativa: INI, task: 'feat-77-01', estado: 'ativo' },
@@ -252,7 +253,8 @@ test('tasks em paralelo viram um cartão por builder e o bloco de recursos lê o
   expect(await ui.find({ type: 'Text', text: /^builder · 77-03$/ })).toBeDefined()
   expect(await ui.find({ type: 'Text', text: /^Recursos$/ })).toBeDefined()
   expect(await ui.find({ type: 'Text', text: /^cabem 2 par\(es\) · memória$/ })).toBeDefined()
-  expect(await ui.find({ type: 'Text', text: /^29,0 GB livres$/ })).toBeDefined()
+  expect(await ui.find({ type: 'Text', text: /^87% em uso · teto 80% · 29,0 GB livres$/ })).toBeDefined()
+  expect(await ui.find({ type: 'Text', text: /^75% em uso · teto 80% · 4,0 GB livres · 1,5 GB por par$/ })).toBeDefined()
   expect(await ui.find({ type: 'Text', text: /^worktrees 3$/ })).toBeDefined()
   expect(await ui.find({ type: 'Text', text: /2 ativo\(s\) · 0 ocioso\(s\) · 1 órfão\(s\)/ })).toBeDefined()
   expect(await ui.find({ type: 'Text', text: /feat-55e0-01/ })).toBeUndefined()

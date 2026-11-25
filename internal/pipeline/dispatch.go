@@ -61,6 +61,8 @@ type DispatchOptions struct {
 	Disco     func(dir string) (UsoDisco, error)
 	JanelaPct func() (int, bool)
 	Memoria   func() (int, error) // memória disponível em MB; nil lê a da máquina
+	// MemoriaTotal é a RAM total em MB; nil lê a da máquina só quando Memoria também é nil.
+	MemoriaTotal func() (int, error)
 	// EmiteSpecAberta é o gancho aditivo do evento spec.aberta; nil = no-op (113-05).
 	EmiteSpecAberta EmissorSpecAberta
 }

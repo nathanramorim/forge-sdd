@@ -28,15 +28,20 @@ func refsDaTask(dir string, adrDirs []string, trel string, pack gate.ContextPack
 // tetoDaRodada mede o disco e calcula o teto de pares para a rodada (RN-5). Usa as injeções de opts
 // quando existem; com gravar, persiste o tamanho do worktree medido.
 func tetoDaRodada(dir string, b config.BuilderConfig, largura int, opts DispatchOptions, gravar bool) (Teto, error) {
-	return calculaTetoMem(dir, b, largura, opts.Disco, opts.JanelaPct, opts.Memoria, gravar)
+	return calculaTetoMem(dir, b, largura, opts.Disco, opts.JanelaPct, opts.Memoria, opts.MemoriaTotal, gravar)
 }
 
-func calculaTetoMem(dir string, b config.BuilderConfig, largura int, disco func(string) (UsoDisco, error), janela func() (int, bool), mem func() (int, error), gravar bool) (Teto, error) {
+func calculaTetoMem(dir string, b config.BuilderConfig, largura int, disco func(string) (UsoDisco, error), janela func() (int, bool), mem, total func() (int, error), gravar bool) (Teto, error) {
 	if disco == nil {
 		disco = MedirDiscoDosWorktrees
 	}
+	// O total só é lido da máquina quando a disponível também é; com a disponível injetada (testes),
+	// o total vem injetado ou fica desconhecido, e o cálculo não depende da RAM de quem roda.
 	if mem == nil {
 		mem = MemoriaDisponivelMB
+		if total == nil {
+			total = MemoriaTotalMB
+		}
 	}
 	uso, err := disco(dir)
 	if err != nil {
@@ -56,10 +61,16 @@ func calculaTetoMem(dir string, b config.BuilderConfig, largura int, disco func(
 	if v, merr := mem(); merr == nil {
 		memMB = v
 	}
+	totalMB := 0 // desconhecida: vale só a reserva em MB
+	if total != nil {
+		if v, terr := total(); terr == nil {
+			totalMB = v
+		}
+	}
 	return TetoDeParalelo(ParamsTeto{
 		Disco: uso, LimiteDiscoPct: b.LimiteDiscoEfetivo(), TamanhoWorktree: tam,
 		LarguraOnda: largura, MaxParalelo: b.MaxParallelTasks, JanelaPct: pct,
-		MemoriaDisponivelM: memMB, ReservaMemoriaMB: b.ReservaMemoriaEfetiva(), MemoriaPorParMB: MemoriaDoPar(dir),
+		MemoriaDisponivelM: memMB, MemoriaTotalMB: totalMB, LimiteMemoriaPct: b.LimiteMemoriaEfetivo(), ReservaMemoriaMB: b.ReservaMemoriaMB, MemoriaPorParMB: MemoriaDoPar(dir),
 	}), nil
 }
 
@@ -74,7 +85,9 @@ type EntradaDespacho struct {
 	Disco   func(dir string) (UsoDisco, error)
 	Janela  func() (int, bool)
 	Memoria func() (int, error) // memória disponível em MB; nil lê a da máquina
-	Now     time.Time
+	// MemoriaTotal é a RAM total em MB; nil lê a da máquina só quando Memoria também é nil.
+	MemoriaTotal func() (int, error)
+	Now          time.Time
 }
 
 // ResultadoDespacho descreve a rodada.
@@ -101,7 +114,7 @@ func Despachar(in EntradaDespacho) (*ResultadoDespacho, error) {
 	if len(elegiveis) == 0 {
 		return res, nil
 	}
-	teto, err := calculaTetoMem(in.Dir, in.Builder, len(elegiveis)+ativos, in.Disco, in.Janela, in.Memoria, true)
+	teto, err := calculaTetoMem(in.Dir, in.Builder, len(elegiveis)+ativos, in.Disco, in.Janela, in.Memoria, in.MemoriaTotal, true)
 	if err != nil {
 		return nil, err
 	}

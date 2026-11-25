@@ -83,7 +83,7 @@ func FormatEsteiraPorTask(dir string, now time.Time) string {
 		largura := len(ElegiveisDoPlano(plano, est)) + ativos
 		linha := fmt.Sprintf("%s · %d/%d mescladas · pares ativos %d", ini, mescladas, total, ativos)
 		if largura > 0 {
-			if teto, terr := calculaTetoMem(dir, cfg.Builder, largura, nil, func() (int, bool) { return LerJanelaDoPainel(dir, now) }, nil, false); terr == nil {
+			if teto, terr := calculaTetoMem(dir, cfg.Builder, largura, nil, func() (int, bool) { return LerJanelaDoPainel(dir, now) }, nil, nil, false); terr == nil {
 				linha += fmt.Sprintf(" de %d (%s) · vagas de disco %d", teto.Pares, teto.Motivo, teto.Vagas)
 			}
 		}
