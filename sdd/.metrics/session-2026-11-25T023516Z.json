@@ -1,0 +1,22 @@
+{
+  "$schema": "forge-sdd/metrics/1.0",
+  "feature": "sdd/discovery/122-builder-por-task-e-esteira-adaptativa/criteria.md",
+  "phase": "builder",
+  "agent_path": [
+    "builder"
+  ],
+  "tokens_input": 8875,
+  "tokens_output": 500,
+  "turns": 0,
+  "duration_seconds": 0,
+  "criterio_atendido": true,
+  "model": "",
+  "rework_lines": 0,
+  "context7_calls": 0,
+  "git_calls": 0,
+  "files_touched": null,
+  "outcome": "approved",
+  "sdd_version": "6.0.0-beta",
+  "medicao": "estimado",
+  "complexidade": null
+}

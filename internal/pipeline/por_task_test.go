@@ -104,6 +104,7 @@ func TestWorker_PorTaskPromptsIsolados(t *testing.T) {
 		"feat-77-01-autenticacao.md": specTask("feat-77-01", "Autenticação", ""),
 		"feat-77-02-tokens.md":       specTask("feat-77-02", "Tokens", ""),
 	})
+	testutil.InitRepo(t, dir, "feat/77-auth-oauth") // o Builder da task roda no worktree efêmero
 	res, err := Dispatch(dir, "auth-oauth", DispatchOptions{Now: now, Disco: discoFalso(10), Memoria: memFalsa(65536)})
 	require.NoError(t, err)
 	require.Len(t, res.TaskJobs, 2)

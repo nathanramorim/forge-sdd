@@ -9,7 +9,7 @@ export type Medida = {
   cost?: { usd: number }
 }
 
-// Limites dos alertas (a confirmar com o dono, status.md da 123).
+// Limites dos alertas (decididos pelo dono em 24/11/2026, status.md da 123).
 export const NIVEIS_ALERTA = [70, 90] as const
 
 const ROTULO: Record<string, string> = { five_hour: '5h', seven_day: '7d' }
@@ -108,5 +108,23 @@ export function janelaMaisCheia(rateLimits: Janela[]): Janela | undefined {
   return pior
 }
 
-// Limite do aviso de orçamento (a confirmar com o dono).
-export const LIMITE_ORCAMENTO = 80
+// Limite do aviso de orçamento: o mesmo em que o despachante do forge cai para 1 par (ADR-0029).
+export const LIMITE_ORCAMENTO = 85
+
+// Conteúdo de .forge/runtime/painel/janela.json: o forge lê esse arquivo para o teto de paralelo
+// (LerJanelaDoPainel, válido por 15 minutos). Sem janelas de tempo, não há o que gravar.
+export function conteudoJanela(rateLimits: Janela[], agora: number): string | undefined {
+  let cinco: number | undefined
+  let sete: number | undefined
+  for (const j of janelasDeTempo(rateLimits)) {
+    const p = Math.max(0, Math.min(100, Math.round(j.percentUsed * 10) / 10))
+    if (j.kind === 'five_hour') cinco = p
+    if (j.kind === 'seven_day') sete = p
+  }
+  if (cinco === undefined && sete === undefined) return undefined
+  const o: Record<string, unknown> = {}
+  if (cinco !== undefined) o.five_hour_pct = cinco
+  if (sete !== undefined) o.seven_day_pct = sete
+  o.at = new Date(agora).toISOString().replace(/\.\d{3}Z$/, 'Z')
+  return `${JSON.stringify(o)}\n`
+}

@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-const versaoAlvoCmd50 = "5.2.3-beta"
+const versaoAlvoCmd50 = "6.0.0-beta"
 
 // updateExplicito roda `forge update <dir> --yes --version X` (nunca --upgrade: ele consulta o NPM).
 func updateExplicito(t *testing.T, dir string) string {

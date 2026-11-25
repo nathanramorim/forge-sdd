@@ -4,6 +4,21 @@ Este arquivo registra o histórico de entregas de produto deste projeto.
 
 ## Entregas
 
+### Versão 6.0.0 — Um Agente por Task, Paralelo do Tamanho da Sua Máquina e Painel no Claude Code (Beta)
+
+Compatível com a 5.0.0 e inclui tudo da 5.2.3-beta. Muda o jeito de implementar uma feature: em vez de um agente carregando a feature inteira, cada task ganha o próprio agente.
+
+*   **Cada task tem o próprio Builder, com contexto novo.** O agente recebe só a spec da task e as referências dela, num pacote compacto; o contexto não cresce ao longo da feature e o gasto de tokens cai (`builder.granularidade: task`, padrão nesta beta; `feature` volta ao modo antigo).
+*   **Um Reviewer para cada Builder, lendo só o diff da task.** A task aprovada entra na hora na branch da feature, com um commit por task (squash); conflito para só aquela task, avisa e preserva o trabalho.
+*   **O paralelo se ajusta à sua máquina, sem número fixo.** O forge abre quantos pares couberem no disco (até 80% de ocupação), na memória (reserva de 2 GB para o sistema) e na largura da onda; acima de 85% da janela de uso, cai para 1 par. Cada worktree é apagado depois do commit, então o disco não acumula cópias (`builder.limite_disco`, `builder.reserva_memoria_mb`, `builder.max_parallel_tasks` opcional).
+*   **Desligou o computador no meio? A esteira continua de onde parou.** Worktree com trabalho não commitado nunca é apagado; a próxima execução retoma dele com um resumo curto do que já foi feito, e commits `wip(<task>)` marcam cada passo que passou nos testes. Limite de uso devolve o job à fila sem perder nada.
+*   **`forge status` mostra a esteira por task.** Pares ativos, o que segura o teto, vagas de disco, estado e tokens de cada task, e o aviso quando a feature está pronta para o PR em draft.
+*   **Novo mod `forge-painel` para o Claude Code.** Status line com iniciativa, janelas de 5h e 7d e contexto; alerta ao passar de 70% e de 90%; aviso (sem bloquear) antes de abrir subagente acima de 85%; telemetria real gravada sozinha; painel com os jobs da esteira; `/gastos` por estação. Carrega com `claude --plugin-dir .agents/plugins/forge-painel`; sem rede e com escrita só em `sdd/.metrics` e `.forge/runtime/painel` (ADR-0030).
+*   **`forge up --terminal painel`.** Os workers rodam em segundo plano, sem janelas nem tmux, com log em arquivo; o painel do Claude Code vira o único lugar para acompanhar. Janelas do sistema e tmux continuam disponíveis.
+*   **Mods têm contrato.** `forge skills instalar plugin` confere o manifesto do mod (permissões de rede, escrita e ganchos, versões mínimas do Claude Code e do forge) antes de instalar.
+*   **Como atualizar:** `npm install -g @nathanramorim/forge-sdd@beta` para a prévia; nos projetos existentes, veja o plano com `forge update --dry-run`, rode `forge update --upgrade` (fora do agente, no terminal) e depois `/upgrade-sdd`. Rode `forge doctor` no fim.
+*   **Avisos da beta:** esta versão não substitui a estável; quem usa `npm install -g @nathanramorim/forge-sdd` sem `@beta` continua na 5.0.0. O modo avançado (revisão da spec antes da fila) ainda roda por feature. A medição comparando os dois modos vem depois da beta; se preferir o modo antigo, use `builder.granularidade: feature`.
+
 ### Versão 5.2.3 — Projeto Novo ou Atualizado Abre o Claude Code Sem Erro (Beta)
 
 Compatível com a 5.0.0 e inclui tudo da 5.2.2-beta. Corrige um defeito da 5.2.2-beta que aparecia em todo projeto.

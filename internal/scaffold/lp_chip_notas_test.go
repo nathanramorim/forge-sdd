@@ -53,7 +53,7 @@ func TestLPChipVersaoLeva(t *testing.T) {
 	assert.True(t, chipBeta, `o chip Beta deve ser <a href="#novidades"> contendo data-versao="beta"`)
 	assert.Zero(t, aninhados, `nenhum <a> pode ficar dentro de <a class="brand">`)
 	assert.Contains(t, doc, `data-nv-alvo="beta"`)
-	assert.Regexp(t, `data-versao="beta"[^>]*>5\.2\.3-beta<`, doc)
+	assert.Regexp(t, `data-versao="beta"[^>]*>6\.0\.0-beta<`, doc)
 	assert.Contains(t, doc, ".chip[href]:focus-visible")
 	assert.NotRegexp(t, `<a[^>]*data-nv-alvo[^>]*aria-label`, doc)
 }

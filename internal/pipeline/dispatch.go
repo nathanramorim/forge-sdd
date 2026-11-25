@@ -318,6 +318,13 @@ func Dispatch(dir, feature string, opts DispatchOptions) (*DispatchResult, error
 	var path string
 	var created bool
 	if modoTask {
+		// O pai fica salvo para o despacho contínuo; a branch da feature nasce da base do PR.
+		if serr := SalvarPai(dir, job); serr != nil {
+			return nil, fmt.Errorf("salvar o job da feature: %w", serr)
+		}
+		if gerr := GarantirBranchDaFeature(dir, initiative, baseBranch); gerr != nil && !errors.Is(gerr, layout.ErrNotRepo) {
+			res.Warnings = append(res.Warnings, "branch da feature: "+firstLine(gerr.Error())+"; o worker cria a partir do HEAD")
+		}
 		criados, paths, eerr := EnfileiraTasks(dir, res.TaskJobs, now)
 		if eerr != nil {
 			return nil, eerr

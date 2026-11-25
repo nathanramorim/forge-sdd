@@ -39,6 +39,15 @@ func projetoGitComTasks(t *testing.T, n int) string {
 // commitNaBranchDaTask cria a branch da task a partir da feature com um commit só dela.
 func commitNaBranchDaTask(t *testing.T, dir, taskID string) string {
 	t.Helper()
+	if wt, err := WorktreePath(dir, "77-auth-oauth", PlanTaskID(taskID)); err == nil {
+		if _, serr := os.Stat(wt); serr == nil {
+			// O worker já abriu o worktree efêmero da task na branch dela: o commit nasce lá.
+			require.NoError(t, os.WriteFile(filepath.Join(wt, "arq-"+taskID+".go"), []byte("package x // "+taskID+"\n"), 0o644))
+			testutil.Git(t, wt, "add", "arq-"+taskID+".go")
+			testutil.Git(t, wt, "commit", "-q", "-m", "task "+taskID)
+			return strings.TrimSpace(testutil.Git(t, wt, "rev-parse", "HEAD"))
+		}
+	}
 	branch := TaskBranch("77-auth-oauth", taskID)
 	testutil.Git(t, dir, "checkout", "-q", "-b", branch, "feat/77-auth-oauth")
 	require.NoError(t, os.WriteFile(filepath.Join(dir, "arq-"+taskID+".go"), []byte("package x // "+taskID+"\n"), 0o644))

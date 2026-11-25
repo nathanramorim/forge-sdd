@@ -7,6 +7,7 @@ import (
 	"os"
 	"sort"
 	"strings"
+	"time"
 
 	"github.com/forge-sdd/cli/internal/config"
 	"github.com/forge-sdd/cli/internal/layout"
@@ -82,6 +83,9 @@ Com --compact, imprime a versão tríplice enxuta (< 200 tokens) para agentes.`,
 				return err
 			}
 			_, err = fmt.Fprint(cmd.OutOrStdout(), short)
+			if err == nil {
+				_, err = fmt.Fprint(cmd.OutOrStdout(), pipeline.FormatEsteiraPorTask(dir, time.Now()))
+			}
 			return err
 		}
 
@@ -92,6 +96,10 @@ Com --compact, imprime a versão tríplice enxuta (< 200 tokens) para agentes.`,
 		}
 		if _, err := fmt.Fprint(cmd.OutOrStdout(), dashboard); err != nil {
 			return err
+		}
+		if pt := pipeline.FormatEsteiraPorTask(dir, time.Now()); pt != "" {
+			fmt.Fprintln(cmd.OutOrStdout())
+			fmt.Fprint(cmd.OutOrStdout(), pt)
 		}
 
 		// Lista complementar de iniciativas em sdd/discovery

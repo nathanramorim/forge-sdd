@@ -38,8 +38,10 @@ type ReviewResult struct {
 	Notification    *notify.Notification
 	Channels        map[string]string
 	CardInstruction string
-	PRComment       string // comentário sugerido para o PR (quando reviewer.comment_on_pr está ligado)
-	Warning         string // aviso quando os TaskIDs do job não casam com nenhuma task da fila
+	PRComment       string               // comentário sugerido para o PR (quando reviewer.comment_on_pr está ligado)
+	Warning         string               // aviso quando os TaskIDs do job não casam com nenhuma task da fila
+	Juncao          *ResultadoJuncaoTask // junção da task na branch da feature (modo por task)
+	Despachados     int                  // task_build enfileirados pelo despachante depois da junção
 }
 
 // unmatchedWarning devolve o aviso quando o job traz TaskIDs e nenhum casa com a fila (fix-84-03).
@@ -105,6 +107,53 @@ func ApplyVerdict(dir, jobID, worker string, v queue.Verdict, deps notify.Deps, 
 
 	res := &ReviewResult{}
 	switch {
+	case v.Veredito == "conforme" && job.TaskID != "":
+		// Par de uma task (ADR-0029): aprovada entra na branch da feature por squash, na hora.
+		jr, err := JuntarTaskNaFeature(dir, job, worker, now)
+		if err != nil {
+			return nil, fmt.Errorf("juntar a task %s na feature: %w", job.TaskID, err)
+		}
+		res.Juncao = jr
+		if jr.Estado == JuncaoBloqueada {
+			res.Action = ActionEscalated
+			n := notify.Notification{
+				ID: notificationID(job.ID, "juncao-bloqueada"), Type: notify.TypeEscalation,
+				Title:   "Junção bloqueada: " + job.Feature + " · task " + job.TaskID,
+				Message: fmt.Sprintf("A task foi aprovada, mas não entrou em %s: %s.\nArquivos: %s\nAção: resolva na branch %s (merge da feature nela) e rode a revisão de novo; nada foi descartado.", job.PR.BaseBranch, jr.Motivo, strings.Join(jr.Conflitos, ", "), job.PR.Branch),
+				Feature: job.Feature, JobID: job.ID,
+			}
+			out, err := notify.Dispatch(dir, ncfg, n, deps)
+			if err != nil {
+				return nil, err
+			}
+			res.Notification, res.Channels = &n, out.Channels
+			if _, err := bus.Complete(dir, layout.RoleReviewer, jobID, worker, "aprovado, junção bloqueada: "+oneLine(jr.Motivo, 200), now); err != nil {
+				return nil, err
+			}
+			return res, nil
+		}
+		res.Action = ActionApproved
+		if _, err := queue.SetTaskStatuses(dir, job.Initiative, job.TaskIDs, queue.StatusApproved); err != nil {
+			return nil, fmt.Errorf("atualizar a fila da iniciativa: %w", err)
+		}
+		if _, err := bus.Complete(dir, layout.RoleReviewer, jobID, worker, "aprovado: task "+job.TaskID+" mesclada na feature ("+shortSHA(jr.Commit)+")", now); err != nil {
+			return nil, err
+		}
+		if jr.FeatPronta {
+			n := notify.Notification{
+				ID: notificationID(job.FeatureJob, "feature-pronta"), Type: notify.TypePRApproved,
+				Title:   "Feature pronta: " + job.Feature,
+				Message: fmt.Sprintf("Todas as tasks foram revisadas e mescladas em %s. Abra o PR da feature em draft (forge pipeline pr) e use squash no merge.", job.PR.BaseBranch),
+				Feature: job.Feature, JobID: job.FeatureJob,
+			}
+			if out, err := notify.Dispatch(dir, ncfg, n, deps); err == nil {
+				res.Notification, res.Channels = &n, out.Channels
+			}
+			_, _ = CheckAndAutoArchive(dir, job, now, ncfg, deps)
+		} else if r, err := DespacharIniciativa(dir, job.Initiative, now); err == nil && r != nil {
+			res.Despachados = len(r.Jobs)
+		}
+
 	case v.Veredito == "conforme":
 		res.Action = ActionApproved
 		if job.Card.ID != "" {
@@ -349,4 +398,11 @@ func persistVerdict(dir string, job bus.Job, ponto string, v queue.Verdict) (que
 	}
 	_ = queue.WriteJSONAtomic(filepath.Join(vdir, job.ID+".json"), v, 0o644)
 	return v, nil
+}
+
+func shortSHA(s string) string {
+	if len(s) > 10 {
+		return s[:10]
+	}
+	return s
 }

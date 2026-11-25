@@ -40,7 +40,7 @@ Verificado no Claude Code 2.1.332 (documentação da 2.1.331 e execução local)
    {
      "schema": "forge-sdd/mod/1.0",
      "minClaudeCode": "2.1.331",
-     "minForge": "5.2.3",
+     "minForge": "6.0.0",
      "permissions": {
        "network": false,
        "write": ["sdd/.metrics", ".forge/runtime/painel"],

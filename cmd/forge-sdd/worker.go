@@ -82,12 +82,12 @@ func recordJobTelemetry(dir, role string) func(job bus.Job, outcome string) {
 	}
 }
 
-// tipoTaskBuild é o tipo de job por task (bus.TypeTaskBuild, criado pela feat-122-01).
-const tipoTaskBuild = "task_build"
-
 // taskIDDoJob devolve o id da task de um job por task; vazio nos demais jobs.
 func taskIDDoJob(job bus.Job) string {
-	if job.Type == tipoTaskBuild && len(job.TaskIDs) == 1 {
+	if job.TaskID != "" { // task_build e a revisão do par da task
+		return job.TaskID
+	}
+	if job.Type == bus.TypeTaskBuild && len(job.TaskIDs) == 1 {
 		return job.TaskIDs[0]
 	}
 	return ""

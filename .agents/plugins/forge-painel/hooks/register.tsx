@@ -4,7 +4,7 @@ import type { EngineInterface, Register } from 'claude-code'
 import { PAPEIS, ESTADOS, DIR_FILAS, DIR_LOGS, RE_ID_JOB, linhaDoJob, tokensDoLog, caudaDoLog, rotuloEstado, tempoDecorrido, sanear } from './lib/esteira'
 import type { Linha } from './lib/esteira'
 import { resumir, textoDoResumo } from './lib/gastos'
-import { avaliarAlertas, horaDeRenovacao, janelaMaisCheia, linhaDeStatus, LIMITE_ORCAMENTO, rotuloJanela } from './lib/janelas'
+import { avaliarAlertas, horaDeRenovacao, conteudoJanela, janelaMaisCheia, linhaDeStatus, LIMITE_ORCAMENTO, rotuloJanela } from './lib/janelas'
 import type { EstadoAlertas } from './lib/janelas'
 import { DIR_METRICAS, RE_INICIATIVA, faseDaIniciativa, featureDoRegistro, montarRegistro, nomeBase, papelDoSubagente } from './lib/telemetria'
 import type { Uso } from './lib/telemetria'
@@ -13,6 +13,8 @@ import type { Esteira } from '../types'
 const PAINEL = 'forge-painel'
 const DIR_PAINEL = '.forge/runtime/painel'
 const ARQ_ALERTAS = `${DIR_PAINEL}/alertas.json`
+const ARQ_JANELA = `${DIR_PAINEL}/janela.json`
+const JANELA_A_CADA_MS = 60_000
 const DIR_INICIATIVAS = 'sdd/discovery'
 const MAX_REGISTROS_GASTOS = 500
 
@@ -24,6 +26,7 @@ let mudoCache: boolean | undefined
 let interativa = false
 let iniciativa: string | undefined
 let alertas: EstadoAlertas = {}
+let janelaGravadaEm = 0
 let inicioSessao = 0
 let turnos = 0
 const usoSessao: Uso[] = []
@@ -171,6 +174,14 @@ export const register: Register = on => {
     if (await mudo($)) return next(e)
     const agora = await $.clock.now()
     $.ui.status(linhaDeStatus(e, iniciativa))
+    // A janela vai para o forge decidir o teto de paralelo (no máximo uma escrita por minuto).
+    if (agora - janelaGravadaEm >= JANELA_A_CADA_MS) {
+      const txt = conteudoJanela(e.rateLimits, agora)
+      if (txt !== undefined) {
+        janelaGravadaEm = agora
+        await gravar($, ARQ_JANELA, txt).catch(() => undefined)
+      }
+    }
     const r = avaliarAlertas(e.rateLimits, alertas, agora)
     if (r.alertas.length > 0) {
       for (const a of r.alertas) $.ui.toast(a.texto)

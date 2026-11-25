@@ -89,3 +89,22 @@ test('só grava em sdd/.metrics e .forge/runtime/painel', async ($, on) => {
     expect(caminho.startsWith('.forge/runtime/painel/') || caminho.startsWith('sdd/.metrics/')).toBe(true)
   }
 })
+
+test('grava a janela para o forge decidir o teto de paralelo', async ($, on) => {
+  const m = montarMundo(on)
+  await $.session.start({ cwd: '/', surface: 'terminal', isInteractive: true })
+  await $.session.measure(medida(87.44, 40))
+
+  const txt = m.arquivos.get('.forge/runtime/painel/janela.json') ?? ''
+  const j = JSON.parse(txt)
+  expect(j.five_hour_pct).toBe(87.4)
+  expect(j.seven_day_pct).toBe(40)
+  expect(typeof j.at).toBe('string')
+})
+
+test('sem janelas de tempo não grava janela.json', async ($, on) => {
+  const m = montarMundo(on)
+  await $.session.start({ cwd: '/', surface: 'terminal', isInteractive: true })
+  await $.session.measure({ context: { window: 200000, percent: 10 }, rateLimits: [], changed: ['context' as const] })
+  expect(m.arquivos.has('.forge/runtime/painel/janela.json')).toBe(false)
+})

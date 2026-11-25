@@ -226,21 +226,42 @@ func processJob(ctx context.Context, opts WorkerOptions, cfg config.ForgeConfig,
 	rel, _ := filepath.Rel(opts.Dir, entry.Path)
 	modelArgs, effortArgs := cfg.SessionModelArgs(opts.Role)
 	timeout := time.Duration(cfg.Builder.JobTimeoutMinutes) * time.Minute
-	res, runErr := opts.Runner.Run(ctx, RunSpec{
-		Agent:       opts.Role,
-		Name:        opts.Name,
-		Prompt:      workerPrompt(opts.Role, job, filepath.ToSlash(rel), cfg),
-		Permissions: cfg.WorkerPermissionArgs(opts.CLI),
-		Model:       modelArgs,
-		Effort:      effortArgs,
-		Dir:         opts.Dir,
-		Timeout:     timeout,
-	}, out)
+	prompt := workerPrompt(opts.Role, job, filepath.ToSlash(rel), cfg)
+	// Por task (ADR-0029): o Builder roda no worktree efêmero da task, nunca no principal.
+	runDir, wt, prepErr := opts.Dir, (*WorktreeDaTask)(nil), error(nil)
+	porTask := opts.Role == layout.RoleBuilder && job.Type == bus.TypeTaskBuild
+	if porTask {
+		if wt, prepErr = PrepararWorktreeDaTask(opts.Dir, job, opts.Name); prepErr == nil {
+			runDir = wt.Path
+			prepErr = copiarJobParaWorktree(entry.Path, filepath.Join(wt.Path, rel))
+			prompt += SecaoRetomada(job, wt)
+			live.Line(fmt.Sprintf("▶ worktree da task: %s", filepath.ToSlash(mustRel(opts.Dir, wt.Path))))
+		}
+	}
+	var res RunResult
+	var runErr error
+	if prepErr != nil {
+		runErr = fmt.Errorf("preparar o worktree da task: %w", prepErr)
+	} else {
+		res, runErr = opts.Runner.Run(ctx, RunSpec{
+			Agent:       opts.Role,
+			Name:        opts.Name,
+			Prompt:      prompt,
+			Permissions: cfg.WorkerPermissionArgs(opts.CLI),
+			Model:       modelArgs,
+			Effort:      effortArgs,
+			Dir:         runDir,
+			Timeout:     timeout,
+		}, out)
+	}
 	close(stop)
 	wg.Wait()
 	stopWatch()
 	<-watchDone // o watcher termina antes do rodapé: nenhuma linha sai depois dele
 	live.Flush()
+	if porTask && wt != nil {
+		_ = CopiarRetorno(opts.Dir, wt.Path, job.ID)
+	}
 
 	reason := ""
 	switch {
@@ -290,6 +311,10 @@ func processJob(ctx context.Context, opts WorkerOptions, cfg config.ForgeConfig,
 	}
 	if reason == "" {
 		reason = verifyHandoff(opts, entry.Job.ID)
+	}
+
+	if porTask && wt != nil {
+		encerrarTask(opts, job, reason, live)
 	}
 
 	outcome := OutcomeDone

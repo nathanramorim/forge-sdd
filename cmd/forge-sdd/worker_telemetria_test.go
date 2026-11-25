@@ -14,7 +14,7 @@ import (
 )
 
 func jobDaTask(id, task string) bus.Job {
-	return bus.Job{ID: id, Type: tipoTaskBuild, Initiative: "122-x", TaskIDs: []string{task},
+	return bus.Job{ID: id, Type: bus.TypeTaskBuild, Initiative: "122-x", TaskIDs: []string{task},
 		SpecPath: "sdd/discovery/122-x/features/" + task + ".md"}
 }
 
@@ -43,8 +43,10 @@ func TestTelemetriaPorTask_JobPorFeatureMantemContrato(t *testing.T) {
 	assert.Equal(t, "job-1", argDe(args, "--phase"))
 	assert.Equal(t, "blocked", argDe(args, "--outcome"))
 	// Job por task com mais de uma task não é válido: sem id de task.
-	assert.Equal(t, "", taskIDDoJob(bus.Job{Type: tipoTaskBuild, TaskIDs: []string{"a", "b"}}))
-	assert.Equal(t, "a", taskIDDoJob(bus.Job{Type: tipoTaskBuild, TaskIDs: []string{"a"}}))
+	assert.Equal(t, "", taskIDDoJob(bus.Job{Type: bus.TypeTaskBuild, TaskIDs: []string{"a", "b"}}))
+	assert.Equal(t, "a", taskIDDoJob(bus.Job{Type: bus.TypeTaskBuild, TaskIDs: []string{"a"}}))
+	assert.Equal(t, "b", taskIDDoJob(bus.Job{Type: bus.TypeTaskBuild, TaskID: "b", TaskIDs: []string{"a", "b"}}), "o plano tem várias tasks; vale a do job")
+	assert.Equal(t, "b", taskIDDoJob(bus.Job{Type: bus.TypePRReview, TaskID: "b", TaskIDs: []string{"b"}}), "revisão do par também conta por task")
 }
 
 func TestSessionRecordPorTask_UmRegistroPorTaskEPapelComUsoReal(t *testing.T) {
