@@ -231,6 +231,7 @@ func TestDespachar_Liberacao_QuatroVagasQuatroTasks(t *testing.T) {
 	dir, plano, pai := planoLargo(t, 10)
 	cfg := config.DefaultForgeConfig().Builder
 	cfg.MaxParallelTasks = 0
+	cfg.LimiteDisco = 80
 	require.NoError(t, GravarEstadoDisco(dir, EstadoDisco{TamanhoWorktree: 5 * gb}))
 
 	// 50 GB usados de 100, limite 80%, worktree 5 GB: 6 vagas; com 2 ativos sobram 4.
@@ -252,6 +253,7 @@ func TestDespachar_Liberacao_QuatroVagasQuatroTasks(t *testing.T) {
 func TestDespachar_SemVagaNaoComecaNada(t *testing.T) {
 	dir, plano, pai := planoLargo(t, 3)
 	cfg := config.DefaultForgeConfig().Builder
+	cfg.LimiteDisco = 80
 	require.NoError(t, GravarEstadoDisco(dir, EstadoDisco{TamanhoWorktree: 5 * gb}))
 
 	res, err := Despachar(EntradaDespacho{Dir: dir, Pai: pai, Plano: plano, Builder: cfg, Disco: discoFalso(79), Memoria: memFalsa(64 * 1024), Now: now})

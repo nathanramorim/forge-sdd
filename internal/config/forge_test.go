@@ -222,7 +222,7 @@ func TestBuilderGranularidadeELimiteDisco(t *testing.T) {
 	assert.True(t, d.PorTask())
 	assert.Equal(t, 80, d.LimiteMemoriaEfetivo())
 	assert.Zero(t, d.ReservaMemoriaMB, "sem reserva fixa: o teto é 80% da RAM")
-	assert.Equal(t, 80, d.LimiteDisco)
+	assert.Equal(t, 90, d.LimiteDisco)
 
 	dir := t.TempDir()
 	writeForge(t, dir, ".forge/config/forge.json", `{"builder":{"max_parallel_tasks":3,"job_timeout_minutes":60,"granularidade":"task","limite_disco":70}}`)
@@ -247,7 +247,7 @@ func TestBuilderGranularidadeELimiteDisco(t *testing.T) {
 	cfg, _, err = LoadForgeConfig(dir)
 	require.NoError(t, err)
 	assert.True(t, cfg.Builder.PorTask())
-	assert.Equal(t, 80, cfg.Builder.LimiteDiscoEfetivo())
+	assert.Equal(t, 90, cfg.Builder.LimiteDiscoEfetivo())
 }
 
 func TestBuilderGranularidadeELimiteDisco_Violacoes(t *testing.T) {

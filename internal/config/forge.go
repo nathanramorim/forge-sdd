@@ -110,7 +110,7 @@ type BuilderConfig struct {
 	// um Reviewer por task, em paralelo, ADR-0029) ou "feature" (um job por feature, como na 5.x).
 	Granularidade string `json:"granularidade,omitempty"`
 	// LimiteDisco é a porcentagem máxima de ocupação do volume dos worktrees ao paralelizar (50 a 95,
-	// padrão 80, ADR-0029).
+	// padrão 90, rígido, ADR-0029).
 	LimiteDisco int `json:"limite_disco,omitempty"`
 	// LimiteMemoria é a porcentagem máxima de uso da RAM ao paralelizar (50 a 95, padrão 80).
 	LimiteMemoria int `json:"limite_memoria,omitempty"`
@@ -123,7 +123,7 @@ type BuilderConfig struct {
 const (
 	GranularidadeFeature = "feature"
 	GranularidadeTask    = "task"
-	LimiteDiscoPadrao    = 80
+	LimiteDiscoPadrao    = 90
 	LimiteMemoriaPadrao  = 80
 	limiteDiscoMin       = 50
 	limiteDiscoMax       = 95
