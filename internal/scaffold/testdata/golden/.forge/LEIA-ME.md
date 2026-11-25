@@ -62,7 +62,7 @@ Com `tmux` instalado, `forge` e `forge up` abrem **uma tela com três painéis**
 - Se você recusar ou a instalação falhar, o Forge cai com graça (**contingência do tmux**) para **janelas nativas do sistema**. No Windows com Windows Terminal (`wt.exe`), ele abre as 3 sessões em abas/painéis divididos do Windows Terminal; no Windows nativo sem `wt.exe`, abre janelas separadas de `cmd.exe`.
 - No **WSL** (Windows Subsystem for Linux), o tmux funciona nativamente dentro da distribuição Linux.
 - Você pode forçar a escolha com `forge up --terminal tmux|native|auto|painel` ou definindo `"terminal": "tmux"`, `"native"` ou `"painel"` em `forge.json`.
-- **Modo painel** (`--terminal painel`): nenhuma janela nem tmux. Builder e Reviewer rodam em segundo plano, com a saída em `.forge/runtime/logs/<papel>-worker.log`, e você acompanha pelo Claude Code com o mod `forge-painel` (instale com `forge skills instalar plugin forge-painel --de <origem>`; o `forge up` imprime o comando com `--plugin-dir`). Fechar o Claude não para os workers.
+- **Modo painel** (`--terminal painel`): nenhuma janela nem tmux. Builder e Reviewer rodam em segundo plano, com a saída em `.forge/runtime/logs/<papel>-worker.log`, e você acompanha pelo Claude Code com o mod `forge-painel` (instale com `forge skills instalar plugin forge-painel`, o mod vem no binário; o `forge up` imprime o comando com `--plugin-dir`). Fechar o Claude não para os workers.
 
 Dentro do tmux: `Ctrl+b` e as setas trocam de painel, `Ctrl+b d` solta a tela sem encerrar nada, e `tmux ls` mostra o nome da sessão (`forge-<projeto>-<6 hex do caminho>`) para reconectar com `tmux attach -t =<nome>`; rodar `forge` ou `forge up` de novo também reconecta.
 

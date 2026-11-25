@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/forge-sdd/cli/internal/scaffold"
 	"github.com/spf13/cobra"
@@ -36,25 +37,31 @@ var skillsDestinosCmd = &cobra.Command{
 }
 
 var skillsInstalarCmd = &cobra.Command{
-	Use:   "instalar <skill|plugin> <slug> --de <diretório-origem> [--destino <dir>]",
+	Use:   "instalar <skill|plugin> <slug> [--de <diretório-origem>] [--destino <dir>]",
 	Short: "Instala uma skill ou plugin no projeto aberto (opcional, sem rede, sem ~/.claude)",
 	Long: `Copia a skill ou o plugin de --de para .agents/skills/<slug> ou .agents/plugins/<slug> (ADR-0025).
 Plugin que é mod do Claude Code (traz módulo de ganchos ou .claude-plugin/forge.json) só é instalado
 com o contrato completo da ADR-0030: manifesto, permissões e versões mínimas. Manifesto incompleto é
-recusado antes de gravar qualquer arquivo.`,
+recusado antes de gravar qualquer arquivo. Sem --de, instala um mod que viaja no binário
+(forge-painel).`,
 	Args: cobra.ExactArgs(2),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		dir, _ := cmd.Flags().GetString("dir")
 		origem, _ := cmd.Flags().GetString("de")
 		destino, _ := cmd.Flags().GetString("destino")
-		if origem == "" {
-			return fmt.Errorf("--de <diretório-origem> é obrigatório")
-		}
 		if destino == "" {
 			destino = dir
 		}
-		arquivos, err := scaffold.LerOrigemInstalacao(origem)
-		if err != nil {
+		var arquivos map[string][]byte
+		var err error
+		if origem == "" {
+			// Sem --de, só um mod que viaja no binário pode ser instalado (ADR-0030).
+			embutido, ok := scaffold.ModEmbutido(args[1])
+			if args[0] != scaffold.TipoPlugin || !ok {
+				return fmt.Errorf("--de <diretório-origem> é obrigatório (sem ele, só os mods embutidos: %s)", strings.Join(scaffold.ModsEmbutidos(), ", "))
+			}
+			arquivos = embutido
+		} else if arquivos, err = scaffold.LerOrigemInstalacao(origem); err != nil {
 			return err
 		}
 		var res scaffold.Resultado
@@ -87,7 +94,7 @@ func init() {
 	skillsDestinosCmd.Flags().String("tipo", "", "skill ou plugin (com --slug, informa se já está disponível)")
 	skillsDestinosCmd.Flags().String("slug", "", "Slug a consultar")
 	skillsInstalarCmd.Flags().String("dir", ".", "Projeto aberto")
-	skillsInstalarCmd.Flags().String("de", "", "Diretório de origem já obtido fora do Go (obrigatório)")
+	skillsInstalarCmd.Flags().String("de", "", "Diretório de origem já obtido fora do Go (opcional para os mods embutidos)")
 	skillsInstalarCmd.Flags().String("destino", "", "Destino de ListarDestinosInstalacao (padrão: o projeto aberto)")
 	skillsCmd.AddCommand(skillsDestinosCmd)
 	skillsCmd.AddCommand(skillsInstalarCmd)

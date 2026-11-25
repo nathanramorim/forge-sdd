@@ -64,7 +64,7 @@ func BuildPainelPlan(env LaunchEnv, cfg config.ForgeConfig) (*PainelPlan, error)
 		return nil, errors.New("binário do forge-sdd vazio")
 	}
 	if !PainelModInstalado(env) {
-		return nil, fmt.Errorf("%w: instale com `forge skills instalar plugin %s --de <origem>` e rode `forge up --terminal painel` de novo (sem o mod não há como acompanhar os workers)", ErrPainelSemMod, PainelPluginSlug)
+		return nil, fmt.Errorf("%w: instale com `forge skills instalar plugin %s` (o mod vem no binário) e rode `forge up --terminal painel` de novo (sem o mod não há como acompanhar os workers)", ErrPainelSemMod, PainelPluginSlug)
 	}
 	discoveryCLI := cfg.CLIFor(config.SessionRoleDiscovery)
 	if discoveryCLI != config.CLIClaude {
