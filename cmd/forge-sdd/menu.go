@@ -531,6 +531,9 @@ func (e *menuEnv) terminalLabel(cfg config.ForgeConfig) string {
 	}
 	env := pipeline.LaunchEnv{GOOS: runtime.GOOS, LookPath: look}
 	term, err := pipeline.ResolveTerminal("", cfg, env)
+	if err == nil && term == config.TerminalPainel {
+		return "em segundo plano (modo painel, acompanhe pelo Claude Code)"
+	}
 	if err != nil || term == config.TerminalNative {
 		if runtime.GOOS == "windows" {
 			if _, err := look("wt.exe"); err == nil {

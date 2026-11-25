@@ -28,7 +28,7 @@ func IsValidTmuxSessionName(name string) bool {
 }
 
 // ResolveTerminal escolhe entre tmux e as janelas do sistema. Precedência: flag, forge.json, auto.
-// O padrão (auto ou vazio) é native; o tmux é opção (ADR-0024): pedido e ausente (ou no Windows
+// O padrão (auto ou vazio) é native; `painel` vale sempre (workers em segundo plano, painel.go); o tmux é opção (ADR-0024): pedido e ausente (ou no Windows
 // nativo) cai para native sem erro, e quem avisa é DecideTerminal.
 func ResolveTerminal(flag string, cfg config.ForgeConfig, env LaunchEnv) (string, error) {
 	choice := cfg.Terminal
@@ -39,7 +39,10 @@ func ResolveTerminal(flag string, cfg config.ForgeConfig, env LaunchEnv) (string
 		choice = config.TerminalAuto
 	}
 	if !config.ValidTerminal(choice) {
-		return "", fmt.Errorf("terminal %q inválido (use auto, tmux ou native)", choice)
+		return "", fmt.Errorf("terminal %q inválido (use auto, tmux, native ou painel)", choice)
+	}
+	if choice == config.TerminalPainel {
+		return config.TerminalPainel, nil
 	}
 	if choice == config.TerminalTmux && env.GOOS != "windows" && has(env, "tmux") {
 		return config.TerminalTmux, nil

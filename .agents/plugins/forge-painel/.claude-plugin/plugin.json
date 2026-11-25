@@ -1,0 +1,7 @@
+{
+  "name": "forge-painel",
+  "version": "0.1.0",
+  "description": "Painel do Forge SDD no Claude Code: status line, alertas de janela, telemetria real, painel da esteira e /gastos",
+  "author": { "name": "Forge SDD" },
+  "types": "./types/index.d.ts"
+}
