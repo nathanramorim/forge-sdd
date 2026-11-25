@@ -47,6 +47,11 @@ o comando orienta forge pipeline init.`,
 		}
 		if dry {
 			fmt.Fprintf(out, "[DRY-RUN] gate aprovado para %s; criaria o job %s (nada foi gravado)\n", res.Initiative, res.Job.ID)
+		} else if len(res.TaskJobs) > 0 {
+			fmt.Fprintf(out, "%d job(s) por task em builder/pending (%s)\n", len(res.TaskJobs), map[bool]string{true: "novos", false: "já estavam na fila"}[res.Created])
+			for _, tj := range res.TaskJobs {
+				fmt.Fprintf(out, "  - %s (task %s)\n", tj.ID, tj.TaskID)
+			}
 		} else if res.Created {
 			queueName := "builder"
 			if res.Job.Type == bus.TypeSpecReview {
