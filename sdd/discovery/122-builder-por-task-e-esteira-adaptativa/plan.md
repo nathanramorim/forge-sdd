@@ -13,6 +13,7 @@
 | 1.3 | `dispatch` enfileira uma task por job com o pacote de `forge context`; remove `BuilderHints` de paralelo nesse modo | 1.2 | DUP-03, COD-04 |
 | 1.4 | Worktree efêmero: cria, commit, apaga; órfão vira menu | 1.2 | SEG-02, SEG-03, TST-04 |
 | 1.5 | Telemetria por task e papel com uso real | 1.2 | FLX-04, SEG-05 |
+| 1.6 | Contrato compacto entre agentes (prompt, handoff, retorno, parecer) e saída em tópicos para o humano gerada pelo Go | 1.2 | DUP-04, SEG-08, COD-01 |
 
 ## Onda 2 — Pares em paralelo com teto por disco (2 dias)
 | # | Task | Depende de | Rules/IDs |

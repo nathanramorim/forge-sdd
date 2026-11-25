@@ -42,9 +42,11 @@ Quem deixa a esteira rodando depois do Gate 1, em uma ou mais máquinas, e quer 
 - **RN-11** Cada máquina calcula o próprio teto. Várias máquinas na mesma fila exigem barramento compartilhado, que fica fora desta iniciativa.
 - **RN-12** O modo atual (um job por feature) continua disponível por configuração (`builder.granularidade`) até a medição comprovar ganho.
 - **RN-13** O modelo de cada task vem do tier da 115; esta iniciativa não cria outra classificação.
+- **RN-14** Dois registros de comunicação. **Entre agentes** (prompt do job, handoff, retorno do Builder, parecer do Reviewer): formato compacto e estruturado, chave e valor ou JSON, ids e códigos no lugar de frases, sem moldura, emoji nem repetição, com teto de tamanho por campo. **Para o humano** (status, notificação, corpo do PR, menu de decisão): texto assertivo em tópicos, gerado pelo Go a partir dos dados estruturados, nunca a saída crua do agente.
+- **RN-15** O agente devolve só o contrato estruturado. Prosa livre do agente fica no log, não segue para o próximo agente.
 
 ## Escopo
-**Dentro:** job por task; worktree efêmero apagado no commit; despachante com teto por disco e por janela; pares Builder e Reviewer; junção contínua na branch da feature; telemetria por task; chave para voltar ao modo por feature; medição antes e depois.
+**Dentro:** job por task; worktree efêmero apagado no commit; despachante com teto por disco e por janela; pares Builder e Reviewer; junção contínua na branch da feature; contrato compacto entre agentes e saída legível para o humano; telemetria por task; chave para voltar ao modo por feature; medição antes e depois.
 
 **Fora:** barramento compartilhado entre máquinas; classificação de tier (115); modo `chat` em subagentes (104, que poderá reusar o despachante); orquestrador de sessões (107); painel visual (123); mudança no fluxo de aprovação humana.
 
@@ -56,6 +58,7 @@ Quem deixa a esteira rodando depois do Gate 1, em uma ou mais máquinas, e quer 
 | Build e testes também ocupam disco e memória | O tamanho medido inclui o primeiro build; memória livre mínima como segunda trava (a confirmar) |
 | Dobrar revisores dobra tokens de revisão | Reviewer só com o diff da task e tier econômico; medição na onda 3 |
 | Retrabalho recria worktree e gasta disco | Recria só quando o Reviewer pede ajuste; mesma regra de vagas |
+| Formato compacto perde informação que o próximo agente precisa | Contrato com campos obrigatórios validados na borda; prosa completa preservada no log |
 | Dependência da 115-03 (tier no job) | Sem tier, usa o modelo do papel (fallback da ADR-0024) |
 
 ## Esforço estimado

@@ -27,6 +27,9 @@
 | Limite de uso | `usagelimit.go`, `OutcomeDeferred` | adia sem gastar tentativa | estender | entra no teto (RN-10) |
 | Teto fixo | `config` `max_parallel_tasks` (1 a 8) | número fixo | estender | vira teto máximo; o efetivo vem do disco e da janela |
 | Medição de disco | `internal/` | nenhuma | criar | função pequena em `internal/pipeline`, só stdlib |
+| Card de handoff | `internal/pipeline/handoff.go` `BuildHandoffCard` | card com moldura e marcadores, feito para leitura humana, vai no prompt | estender | versão compacta para agente; a versão em tópicos fica para o humano |
+| Prompt do job | `internal/pipeline/prompt.go` `BuildPrompt` | frases completas por papel | estender | cabeçalho chave e valor (RN-14) |
+| Parecer do Reviewer | `internal/harness/parecer.go` | JSON com `explicacao` e `correcao` livres | reusar com teto | já é estruturado; só limita tamanho dos campos de texto |
 | Dica de paralelo no prompt | `prompt.go` `BuilderHints` | texto sobre worktree e subagentes | remover no modo por task | o Go decide (`COD-04`) |
 
 ## Dependências novas
@@ -90,4 +93,6 @@ end
 - **CA-08** `go test ./internal/monitor/...`: um registro por task e papel com `feature`, `task` e `medicao: real` quando há evento `result`.
 - **CA-09** `go test ./internal/config/...`: `builder.granularidade` aceita `feature` e `task` (padrão `feature`); `builder.limite_disco` entre 50 e 95 (padrão 80).
 - **CA-10** `GOOS=windows go build ./... && GOOS=darwin go build ./... && go build ./... && go vet ./... && go test ./...` saem 0; ADR-0029 em `sdd/spec/adr/`.
-- **CA-11** Medição: uma iniciativa real nos dois modos, com tokens por task, duração total e pico de disco no `status.md`.
+- **CA-11** `go test ./internal/pipeline/ -run Compacto`: o prompt e o handoff entre agentes não têm moldura nem emoji, usam chave e valor e ficam abaixo do teto de bytes configurado; o retorno do Builder sem campo obrigatório é recusado.
+- **CA-12** `go test ./internal/pipeline/ -run Humano`: a mensagem para o humano é gerada a partir do retorno estruturado, em tópicos, sem trecho cru da saída do agente (`SEG-08`).
+- **CA-13** Medição: uma iniciativa real nos dois modos, com tokens por task, duração total e pico de disco no `status.md`.
