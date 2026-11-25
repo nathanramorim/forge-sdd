@@ -422,3 +422,42 @@ func TestRequeue_DevolveSemGastarTentativaEPreservaAOrdem(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, "job-a", again.Job.ID)
 }
+
+func newTaskJob() Job {
+	j := newJob("task-1", TypeTaskBuild, PriorityNormal)
+	j.TaskIDs = []string{"1.1", "1.2"}
+	j.SchemaVersion = SchemaVersion
+	j.TaskID = "1.2"
+	j.FeatureJob = "feat-1"
+	return j
+}
+
+func TestTaskBuild_ConformeEFilaDoBuilder(t *testing.T) {
+	j := newTaskJob()
+	require.NoError(t, j.Validate(layout.RoleBuilder))
+	role, ok := RoleForType(TypeTaskBuild)
+	assert.True(t, ok)
+	assert.Equal(t, layout.RoleBuilder, role)
+	assert.Error(t, j.Validate(layout.RoleReviewer))
+}
+
+func TestTaskBuild_Negativos(t *testing.T) {
+	casos := map[string]func(*Job){
+		"sem task_id":          func(j *Job) { j.TaskID = "" },
+		"sem feature_job":      func(j *Job) { j.FeatureJob = "" },
+		"task fora do plano":   func(j *Job) { j.TaskID = "9.9" },
+		"task_id inválido":     func(j *Job) { j.TaskID = "../x"; j.TaskIDs = []string{"../x"} },
+		"feature_job inválido": func(j *Job) { j.FeatureJob = "A B" },
+	}
+	for nome, mut := range casos {
+		t.Run(nome, func(t *testing.T) {
+			j := newTaskJob()
+			mut(&j)
+			assert.ErrorIs(t, j.Validate(""), ErrInvalidJob)
+		})
+	}
+	f := newJob("f1", TypeFeatureBuild, PriorityNormal)
+	f.SchemaVersion = SchemaVersion
+	f.TaskID = "1.1"
+	assert.ErrorIs(t, f.Validate(""), ErrInvalidJob, "task_id só vale em task_build")
+}

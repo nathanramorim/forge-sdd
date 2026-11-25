@@ -215,3 +215,40 @@ func TestLoadForgeConfig_MigraEPersisteGeminiLegado(t *testing.T) {
 	assert.Contains(t, disk, `"command": "agy"`, "arquivo no disco deve ter sido atualizado com agy")
 	assert.NotContains(t, disk, `"command": "gemini"`, "não deve mais conter o comando legado no disco")
 }
+
+func TestBuilderGranularidadeELimiteDisco(t *testing.T) {
+	d := DefaultForgeConfig().Builder
+	assert.Equal(t, GranularidadeFeature, d.Granularidade)
+	assert.False(t, d.PorTask())
+	assert.Equal(t, 80, d.LimiteDisco)
+
+	dir := t.TempDir()
+	writeForge(t, dir, ".forge/config/forge.json", `{"builder":{"max_parallel_tasks":3,"job_timeout_minutes":60,"granularidade":"task","limite_disco":70}}`)
+	cfg, _, err := LoadForgeConfig(dir)
+	require.NoError(t, err)
+	assert.True(t, cfg.Builder.PorTask())
+	assert.Equal(t, 70, cfg.Builder.LimiteDiscoEfetivo())
+
+	// arquivo antigo, sem as chaves, mantém o modo por feature e o limite padrão
+	dir = t.TempDir()
+	writeForge(t, dir, ".forge/config/forge.json", `{"builder":{"max_parallel_tasks":3,"job_timeout_minutes":60}}`)
+	cfg, _, err = LoadForgeConfig(dir)
+	require.NoError(t, err)
+	assert.False(t, cfg.Builder.PorTask())
+	assert.Equal(t, 80, cfg.Builder.LimiteDiscoEfetivo())
+}
+
+func TestBuilderGranularidadeELimiteDisco_Violacoes(t *testing.T) {
+	for nome, corpo := range map[string]string{
+		"granularidade inválida": `"granularidade":"onda"`,
+		"limite abaixo":          `"limite_disco":49`,
+		"limite acima":           `"limite_disco":96`,
+	} {
+		t.Run(nome, func(t *testing.T) {
+			dir := t.TempDir()
+			writeForge(t, dir, ".forge/config/forge.json", `{"builder":{"max_parallel_tasks":3,"job_timeout_minutes":60,`+corpo+`}}`)
+			_, _, err := LoadForgeConfig(dir)
+			assert.Error(t, err)
+		})
+	}
+}

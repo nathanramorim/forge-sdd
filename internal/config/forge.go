@@ -106,6 +106,32 @@ type BuilderConfig struct {
 	UseGitWorktrees   bool `json:"use_git_worktrees"`
 	RunTestsBeforePR  bool `json:"run_tests_before_pr"`
 	JobTimeoutMinutes int  `json:"job_timeout_minutes"`
+	// Granularidade escolhe a unidade do job do Builder: "feature" (um job por feature, padrão) ou
+	// "task" (um job e um contexto novo por task, ADR-0029).
+	Granularidade string `json:"granularidade,omitempty"`
+	// LimiteDisco é a porcentagem máxima de ocupação do volume dos worktrees ao paralelizar (50 a 95,
+	// padrão 80, ADR-0029).
+	LimiteDisco int `json:"limite_disco,omitempty"`
+}
+
+// Granularidades aceitas em builder.granularidade e limites de builder.limite_disco.
+const (
+	GranularidadeFeature = "feature"
+	GranularidadeTask    = "task"
+	LimiteDiscoPadrao    = 80
+	limiteDiscoMin       = 50
+	limiteDiscoMax       = 95
+)
+
+// PorTask informa se o Builder roda um job por task. Vazio vale "feature" (arquivos anteriores à 122).
+func (b BuilderConfig) PorTask() bool { return b.Granularidade == GranularidadeTask }
+
+// LimiteDiscoEfetivo devolve limite_disco ou o padrão quando omitido (zero).
+func (b BuilderConfig) LimiteDiscoEfetivo() int {
+	if b.LimiteDisco == 0 {
+		return LimiteDiscoPadrao
+	}
+	return b.LimiteDisco
 }
 
 // ReviewerConfig configura a sessão Reviewer.
@@ -190,7 +216,7 @@ func DefaultForgeConfig() ForgeConfig {
 			StatusOnPRApproved:    "Ready for Review",
 			EvidenceMaxAgeMinutes: 30,
 		},
-		Builder:    BuilderConfig{MaxParallelTasks: 3, UseGitWorktrees: true, RunTestsBeforePR: true, JobTimeoutMinutes: 60},
+		Builder:    BuilderConfig{MaxParallelTasks: 3, UseGitWorktrees: true, RunTestsBeforePR: true, JobTimeoutMinutes: 60, Granularidade: GranularidadeFeature, LimiteDisco: LimiteDiscoPadrao},
 		Reviewer:   ReviewerConfig{MaxReworkAttempts: 3, CommentOnPR: true},
 		ADRDirs:    []string{"sdd/spec/adr"},
 		BaseBranch: "main",
@@ -331,6 +357,12 @@ func (c ForgeConfig) Validate() error {
 	}
 	if c.Builder.JobTimeoutMinutes < 1 || c.Builder.JobTimeoutMinutes > 720 {
 		return fmt.Errorf("builder.job_timeout_minutes %d fora da faixa 1 a 720", c.Builder.JobTimeoutMinutes)
+	}
+	if g := c.Builder.Granularidade; g != "" && g != GranularidadeFeature && g != GranularidadeTask {
+		return fmt.Errorf("builder.granularidade %q inválida (use feature ou task)", g)
+	}
+	if l := c.Builder.LimiteDisco; l != 0 && (l < limiteDiscoMin || l > limiteDiscoMax) {
+		return fmt.Errorf("builder.limite_disco %d fora da faixa %d a %d", l, limiteDiscoMin, limiteDiscoMax)
 	}
 	if c.Reviewer.MaxReworkAttempts < 1 || c.Reviewer.MaxReworkAttempts > 10 {
 		return fmt.Errorf("reviewer.max_rework_attempts %d fora da faixa 1 a 10", c.Reviewer.MaxReworkAttempts)
