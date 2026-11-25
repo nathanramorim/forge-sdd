@@ -4,13 +4,16 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"runtime"
 	"strings"
 
 	"github.com/forge-sdd/cli/internal/config"
 	"github.com/forge-sdd/cli/internal/pipeline"
+	"github.com/forge-sdd/cli/internal/scaffold"
 	"github.com/forge-sdd/cli/internal/survey"
+	"github.com/mattn/go-isatty"
 	"github.com/spf13/cobra"
 )
 
@@ -32,8 +35,10 @@ não tiverem escolha própria. --dry-run só imprime os comandos.
 
 Com --terminal painel nenhuma janela nem tmux é aberta: forge-builder e forge-reviewer rodam em
 segundo plano, com a saída em .forge/runtime/logs/<papel>-worker.log, e o acompanhamento é o mod
-forge-painel no Claude Code (exige o mod instalado: forge skills instalar plugin forge-painel).
-O comando que abre o Claude Code com o mod é impresso; fechar o Claude não para os workers.`,
+forge-painel no Claude Code.
+O mod vem no binário: o forge up o instala ou atualiza em .agents/plugins/forge-painel, sobe os
+workers e abre o Claude Code com o mod no próprio terminal (sem terminal, imprime o comando).
+Fechar o Claude não para os workers.`,
 	Args: cobra.NoArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		dir, _ := cmd.Flags().GetString("dir")
@@ -123,6 +128,17 @@ O comando que abre o Claude Code com o mod é impresso; fechar o Claude não par
 // upPainel adapta o modo painel (RN-13): imprime o plano e, sem --dry-run, inicia os workers em
 // segundo plano. A decisão e o argv vivem em internal/pipeline (ARQ-01).
 func upPainel(out io.Writer, env pipeline.LaunchEnv, cfg config.ForgeConfig, dir string, dry bool) error {
+	// Um comando só: o mod vem no binário e é instalado ou atualizado aqui, sem passo manual.
+	if dry {
+		if !pipeline.PainelModInstalado(env) {
+			fmt.Fprintf(out, "[DRY-RUN] o mod %s seria instalado em .agents/plugins/%s (vem no binário)\n", pipeline.PainelPluginSlug, pipeline.PainelPluginSlug)
+			env.Exists = func(string) bool { return true }
+		}
+	} else if n, err := scaffold.SincronizarModEmbutido(dir, pipeline.PainelPluginSlug); err != nil {
+		return fmt.Errorf("instalar o mod %s: %w", pipeline.PainelPluginSlug, err)
+	} else if n > 0 {
+		fmt.Fprintf(out, "✓ mod %s instalado ou atualizado (%d arquivo(s))\n", pipeline.PainelPluginSlug, n)
+	}
 	plan, err := pipeline.BuildPainelPlan(env, cfg)
 	if err != nil {
 		return err
@@ -147,9 +163,27 @@ func upPainel(out io.Writer, env pipeline.LaunchEnv, cfg config.ForgeConfig, dir
 	if err != nil {
 		return err
 	}
-	fmt.Fprintf(out, "Para acompanhar, abra o Claude Code com o mod: %s\n", abrir)
-	return nil
+	if abrirClaudeNoTerminal == nil {
+		fmt.Fprintf(out, "Para acompanhar, abra o Claude Code com o mod: %s\n", abrir)
+		return nil
+	}
+	fmt.Fprintln(out, "Abrindo o Claude Code com o painel (fechar o Claude não para os workers)…")
+	return abrirClaudeNoTerminal(plan.Discovery, dir)
 }
+
+// abrirClaudeNoTerminal abre a sessão interativa no próprio terminal quando há um (nil sem terminal
+// ou nos testes: aí o comando é só impresso).
+var abrirClaudeNoTerminal = func() func([]string, string) error {
+	if !isatty.IsTerminal(os.Stdin.Fd()) || !isatty.IsTerminal(os.Stdout.Fd()) {
+		return nil
+	}
+	return func(argv []string, dir string) error {
+		c := exec.Command(argv[0], argv[1:]...)
+		c.Dir, c.Stdin, c.Stdout, c.Stderr = dir, os.Stdin, os.Stdout, os.Stderr
+		c.Env = pipeline.EnvComEsteBinario()
+		return c.Run()
+	}
+}()
 
 func quoteArgs(argv []string) []string {
 	out := make([]string, len(argv))

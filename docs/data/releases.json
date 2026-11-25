@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "chave_conteudo": "7e93d532be541213",
-  "versao_historico": "8cff774",
+  "chave_conteudo": "26d184fb5d7701e0",
+  "versao_historico": "a3c69b7",
   "versoes": [
     {
       "versao": "5.0.0",
@@ -79,11 +79,11 @@
         },
         {
           "titulo": "Novo mod `forge-painel` para o Claude Code.",
-          "texto": "Status line com iniciativa, janelas de 5h e 7d e contexto; alerta ao passar de 70% e de 90%; aviso (sem bloquear) antes de abrir subagente acima de 85%; telemetria real gravada sozinha; painel com os jobs da esteira; `/gastos` por estação. Vem dentro do binário: `forge skills instalar plugin forge-painel` grava o mod no projeto e o `forge up --terminal painel` imprime o comando que abre o Claude com ele; sem rede e com escrita só em `sdd/.metrics` e `.forge/runtime/painel` (ADR-0030)."
+          "texto": "Status line com iniciativa, estação, janelas de 5h e 7d, contexto e telemetria; painel com um par por task da iniciativa atual (estado, tokens, tempo e total); faixa acima do prompt com inbox e PR conforme; consumo embaixo de cada subagente; alerta ao passar de 70% e de 90%; aviso (sem bloquear) antes de abrir subagente acima de 85%; telemetria real gravada sozinha; `/gastos` por estação. Vem dentro do binário; sem rede e com escrita só em `sdd/.metrics` e `.forge/runtime/painel` (ADR-0030)."
         },
         {
-          "titulo": "`forge up --terminal painel`.",
-          "texto": "Os workers rodam em segundo plano, sem janelas nem tmux, com log em arquivo; o painel do Claude Code vira o único lugar para acompanhar. Janelas do sistema e tmux continuam disponíveis."
+          "titulo": "Um comando abre tudo: `forge up --terminal painel`.",
+          "texto": "Instala ou atualiza o mod (ele vem dentro do binário), sobe Builder e Reviewer em segundo plano com log em arquivo e abre o Claude Code com o painel no próprio terminal, sem janelas nem tmux. Janelas do sistema e tmux continuam disponíveis."
         },
         {
           "titulo": "Mods têm contrato.",

@@ -47,9 +47,11 @@ export function janelasDeTempo(rateLimits: Janela[]): Janela[] {
 
 // Linha de status: iniciativa, janelas de 5h e 7d e contexto. Fora de assinatura (rateLimits
 // vazio) mostra só contexto e o custo de tabela (RN-4: nunca fatura).
-export function linhaDeStatus(m: Medida, iniciativa: string | undefined): string {
-  const partes: string[] = []
-  if (iniciativa) partes.push(iniciativa)
+export function linhaDeStatus(m: Medida, iniciativa: string | undefined, estacao?: string, telemetria?: boolean): string {
+  const cabeca = ['forge']
+  if (iniciativa) cabeca.push(iniciativa.length > 28 ? `${iniciativa.slice(0, 27)}…` : iniciativa)
+  if (estacao) cabeca.push(estacao)
+  const partes: string[] = [cabeca.join(' · ')]
   const janelas = janelasDeTempo(m.rateLimits)
   for (const j of janelas) {
     partes.push(`${rotuloJanela(j.kind)} ${pct(j.percentUsed)}`)
@@ -58,7 +60,8 @@ export function linhaDeStatus(m: Medida, iniciativa: string | undefined): string
   if (janelas.length === 0 && m.cost !== undefined) {
     partes.push(`custo de tabela US$ ${m.cost.usd.toFixed(2)}`)
   }
-  return partes.join(' · ')
+  if (telemetria !== undefined) partes.push(telemetria ? '● telemetria real' : '○ telemetria desligada')
+  return partes.join(' │ ')
 }
 
 // Estado dos alertas por janela: qual nível já avisou, para a janela que vale agora (resetsAt).

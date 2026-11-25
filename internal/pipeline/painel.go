@@ -173,6 +173,7 @@ func DefaultPainelStarter(w PainelWorker, dir string) (int, error) {
 	defer log.Close()
 	cmd := exec.Command(w.Argv[0], w.Argv[1:]...)
 	cmd.Dir = dir
+	cmd.Env = EnvComEsteBinario()
 	cmd.Stdout = log
 	cmd.Stderr = log
 	detach(cmd)
@@ -182,4 +183,22 @@ func DefaultPainelStarter(w PainelWorker, dir string) (int, error) {
 	pid := cmd.Process.Pid
 	_ = cmd.Process.Release()
 	return pid, nil
+}
+
+// EnvComEsteBinario devolve o ambiente com a pasta deste binário à frente do PATH: o Claude e os
+// workers abertos pelo forge up chamam `forge` e `forge-sdd` pelo nome e precisam achar esta mesma
+// versão, não outra instalada antes no PATH.
+func EnvComEsteBinario() []string {
+	pasta := filepath.Dir(ResolveBin())
+	env := os.Environ()
+	if !filepath.IsAbs(pasta) {
+		return env
+	}
+	for i, kv := range env {
+		if strings.HasPrefix(kv, "PATH=") {
+			env[i] = "PATH=" + pasta + string(os.PathListSeparator) + strings.TrimPrefix(kv, "PATH=")
+			return env
+		}
+	}
+	return append(env, "PATH="+pasta)
 }

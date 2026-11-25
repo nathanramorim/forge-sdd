@@ -16,33 +16,55 @@ const PANE = {
   },
 } as const
 
+const INI = '77-auth-oauth'
 const job = (id: string, extra: object = {}) =>
-  JSON.stringify({ id, feature: 'feat-123-02', task_ids: ['2.1'], attempt: 1, updated_at: '2026-11-25T17:50:00Z', ...extra })
+  JSON.stringify({ id, type: 'task_build', initiative: INI, feature: 'auth', task_id: '77-01', task_ids: ['77-01', '77-02'], attempt: 1,
+    created_at: '2026-11-25T17:50:00Z', updated_at: '2026-11-25T17:55:00Z', ...extra })
 
 const FILAS = '.forge/runtime/queues'
 const CENARIO: Record<string, string> = {
   [`${FILAS}/builder/processing/1-1-job-b1.json`]: job('job-b1', { lease: { worker: 'w', expires_at: '2026-11-25T18:10:00Z' } }),
-  [`${FILAS}/reviewer/done/1-2-job-r1.json`]: job('job-r1', { task_ids: ['2.2'] }),
-  '.forge/runtime/logs/builder-job-b1.log':
-    '{"type":"system"}\n{"type":"result","usage":{"input_tokens":900,"output_tokens":100}}\n',
+  [`${FILAS}/builder/done/1-0-job-b2.json`]: job('job-b2', { task_id: '77-02', updated_at: '2026-11-25T17:58:00Z' }),
+  [`${FILAS}/reviewer/done/1-2-job-r2.json`]: job('job-r2', { type: 'pr_review', task_id: '77-02', updated_at: '2026-11-25T17:59:00Z' }),
+  // de outra iniciativa, de dez dias atrás: não entra no quadro
+  [`${FILAS}/builder/failed/0-0-job-velho.json`]: job('job-velho', { initiative: '55e0-outra', task_id: '', task_ids: ['55e0-01', '55e0-02'], created_at: '2026-11-15T10:00:00Z', updated_at: '2026-11-15T10:00:00Z' }),
+  '.forge/runtime/logs/builder-job-b1.log': '{"type":"system"}\n{"type":"result","usage":{"input_tokens":900,"output_tokens":100}}\n',
+  '.forge/runtime/tarefas/77-auth-oauth/feat-77-02.json': '{"task":"feat-77-02","estado":"mesclada"}',
 }
 
-test('o painel mostra um job em execução e um concluído, com papel, task e estado', async ($, on) => {
+test('o painel mostra só a iniciativa atual, um par por task, com estado, tokens e tempo', async ($, on) => {
   const m = montarMundo(on, CENARIO)
   await $.session.start({ cwd: '/', surface: 'terminal', isInteractive: true })
   await $.command.run(cmd('painel'))
   const ui = await $.ui.mount({ ...PANE, surface: 'terminal' })
 
-  const b = await ui.find({ type: 'Text', text: /builder 2\.1/ })
-  expect(b?.text).toContain('em execução')
-  expect(b?.text).toContain('1000 tokens')
-  const r = await ui.find({ type: 'Text', text: /reviewer 2\.2/ })
-  expect(r?.text).toContain('concluído')
+  expect((await ui.find({ type: 'Text', text: /^Esteira/ }))?.text).toContain('77-auth-oauth')
+  const um = (await ui.find({ type: 'Text', text: /^77-01/ }))?.text ?? ''
+  expect(um).toContain('rodando')
+  expect(um).toContain('1,0k')
+  expect(um).toContain('10m 00s')
+  const dois = (await ui.find({ type: 'Text', text: /^77-02/ }))?.text ?? ''
+  expect(dois).toContain('commitado')
+  expect(dois).toContain('mesclada')
+  expect((await ui.find({ type: 'Text', text: /pares ativos/ }))?.text).toContain('pares ativos 1 · 1/2 tasks mescladas')
+  expect((await ui.find({ type: 'Text', text: /Total da iniciativa/ }))?.text).toContain('1,0k')
+  expect(await ui.find({ type: 'Text', text: /55e0/ })).toBeUndefined()
   await ui.unmount()
 
   // só leitura: nenhuma escrita no barramento nem nos logs
-  expect(m.escritas.filter(p => p.startsWith(FILAS) || p.startsWith('.forge/runtime/logs'))).toEqual([])
-  expect(m.arquivos.get(`${FILAS}/builder/processing/1-1-job-b1.json`)).toBe(CENARIO[`${FILAS}/builder/processing/1-1-job-b1.json`])
+  expect(m.escritas.filter(p => p.startsWith(FILAS) || p.startsWith('.forge/runtime/logs') || p.startsWith('.forge/runtime/tarefas'))).toEqual([])
+})
+
+test('job por feature (forge antigo) vira uma linha só e o painel avisa', async ($, on) => {
+  montarMundo(on, {
+    [`${FILAS}/builder/processing/1-1-job-f.json`]: job('job-f', { type: 'feature_build', task_id: '', task_ids: ['77-01', '77-02', '77-03'] }),
+  })
+  await $.session.start({ cwd: '/', surface: 'terminal', isInteractive: true })
+  await $.command.run(cmd('painel'))
+  const ui = await $.ui.mount({ ...PANE, surface: 'terminal' })
+  expect((await ui.find({ type: 'Text', text: /^feature/ }))?.text).toContain('feature (3 tasks)')
+  expect((await ui.find({ type: 'Text', text: /um Builder para a feature inteira/ }))?.text).toContain('anterior à 6.0')
+  await ui.unmount()
 })
 
 test('lease vencido aparece como parado', async ($, on) => {
@@ -52,19 +74,19 @@ test('lease vencido aparece como parado', async ($, on) => {
   await $.session.start({ cwd: '/', surface: 'terminal', isInteractive: true })
   await $.command.run(cmd('painel'))
   const ui = await $.ui.mount({ ...PANE, surface: 'terminal' })
-  expect((await ui.find({ type: 'Text', text: /builder/ }))?.text).toContain('parado')
+  expect((await ui.find({ type: 'Text', text: /^77-01/ }))?.text).toContain('parado')
   await ui.unmount()
 })
 
 test('texto do job passa por saneamento (sem escapes de terminal)', async ($, on) => {
   montarMundo(on, {
-    [`${FILAS}/builder/pending/1-1-job-b1.json`]: job('job-b1', { task_ids: ['\u001b[31mvermelho\u001b[0m\u0007'] }),
+    [`${FILAS}/builder/pending/1-1-job-b1.json`]: job('job-b1', { task_id: '\u001b[31mvermelho\u001b[0m\u0007' }),
   })
   await $.session.start({ cwd: '/', surface: 'terminal', isInteractive: true })
   await $.command.run(cmd('painel'))
   const ui = await $.ui.mount({ ...PANE, surface: 'terminal' })
   const t = (await ui.find({ type: 'Text', text: /vermelho/ }))?.text ?? ''
-  expect(t).toContain('builder vermelho')
+  expect(t).toContain('vermelho')
   expect(t).not.toContain('\u001b')
   await ui.unmount()
 })
@@ -76,6 +98,30 @@ test('sem filas o painel diz como abrir a esteira e o mod não abre sozinho', as
   await $.command.run(cmd('painel'))
   const ui = await $.ui.mount({ ...PANE, surface: 'terminal' })
   expect((await ui.find({ type: 'Text', text: /Nenhum job/ }))?.text).toContain('forge up --terminal painel')
+  await ui.unmount()
+})
+
+test('a status line diz forge, a iniciativa do job e a estação em curso', async ($, on) => {
+  const m = montarMundo(on, CENARIO)
+  await $.session.start({ cwd: '/', surface: 'terminal', isInteractive: true })
+  await $.session.measure({ context: { window: 200000, percent: 41 }, rateLimits: [{ kind: 'five_hour', percentUsed: 72 }], changed: ['context' as const] })
+  const linha = m.status[m.status.length - 1] ?? ''
+  expect(linha).toContain('forge · 77-auth-oauth · builder')
+  expect(linha).toContain('│ 5h 72%')
+  expect(linha).toContain('│ ctx 41%')
+  expect(linha).toContain('● telemetria real')
+})
+
+test('a faixa acima do prompt mostra o inbox e o PR conforme', async ($, on) => {
+  montarMundo(on, {
+    ...CENARIO,
+    [`${FILAS}/discovery/inbox/n1.json`]: JSON.stringify({ id: 'n1', type: 'pr_approved', pr_url: 'https://github.com/o/r/pull/77', read: false }),
+    [`${FILAS}/discovery/inbox/n2.json`]: JSON.stringify({ id: 'n2', type: 'info', read: false }),
+    [`${FILAS}/discovery/inbox/n3.json`]: JSON.stringify({ id: 'n3', type: 'info', read: true }),
+  })
+  await $.session.start({ cwd: '/', surface: 'terminal', isInteractive: true })
+  const ui = await $.ui.mount({ plugin: 'forge-painel', component: 'AbovePrompt', surface: 'terminal', props: { hasSurvey: false, isCollapsed: false, isWorking: false } } as never)
+  expect((await ui.find({ type: 'Text', text: /inbox/ }))?.text).toContain('forge · inbox 2 · PR #77 conforme')
   await ui.unmount()
 })
 

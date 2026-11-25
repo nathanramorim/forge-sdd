@@ -1,10 +1,15 @@
 package scaffold
 
 import (
+	"bytes"
 	"embed"
+	"fmt"
 	"io/fs"
+	"os"
 	"path"
+	"path/filepath"
 
+	"github.com/forge-sdd/cli/internal/config"
 	"github.com/forge-sdd/cli/internal/skills"
 )
 
@@ -52,4 +57,30 @@ func ModsEmbutidos() []string {
 		}
 	}
 	return out
+}
+
+// SincronizarModEmbutido grava em <projeto>/.agents/plugins/<slug> o mod embutido no binário: cria o
+// que falta e atualiza o que difere (o mod de referência é do forge; personalizar é outro slug).
+// Devolve quantos arquivos foram gravados; zero quando já estava igual.
+func SincronizarModEmbutido(projeto, slug string) (int, error) {
+	arquivos, ok := ModEmbutido(slug)
+	if !ok {
+		return 0, fmt.Errorf("mod %q não vem no binário", slug)
+	}
+	if err := skills.ValidarMod(slug, arquivos, config.BinaryVersion()); err != nil {
+		return 0, err
+	}
+	base := filepath.Join(projeto, ".agents", "plugins", slug)
+	n := 0
+	for rel, data := range arquivos {
+		alvo := filepath.Join(base, filepath.FromSlash(rel))
+		if atual, err := os.ReadFile(alvo); err == nil && bytes.Equal(atual, data) {
+			continue
+		}
+		if err := WriteFileSafe(projeto, alvo, data); err != nil {
+			return n, err
+		}
+		n++
+	}
+	return n, nil
 }

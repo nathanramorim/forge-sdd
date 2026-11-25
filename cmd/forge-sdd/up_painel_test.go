@@ -56,20 +56,28 @@ func TestUp_PainelDryRunListaWorkersEmSegundoPlanoSemJanela(t *testing.T) {
 	assert.NoDirExists(t, filepath.Join(dir, ".forge", "runtime", "painel"))
 }
 
-func TestUp_PainelSemOModRecusaEIndicaAInstalacao(t *testing.T) {
+// Um comando só: sem o mod, o forge up o instala do binário (dry-run só avisa e não grava nada).
+func TestUp_PainelSemOModInstalaSozinho(t *testing.T) {
 	dir := pipelineDir(t, nil)
 	chamados := iniciadorFalso(t)
-	for _, dry := range []bool{true, false} {
-		resetWorkerFlags()
-		args := []string{"up", "--dir", dir, "--terminal", "painel"}
-		if dry {
-			args = append(args, "--dry-run")
-		}
-		_, err := runRoot(t, args...)
-		require.Error(t, err)
-		assert.Contains(t, err.Error(), "forge skills instalar plugin forge-painel")
-	}
-	assert.Empty(t, *chamados)
+	resetWorkerFlags()
+	out, err := runRoot(t, "up", "--dir", dir, "--terminal", "painel", "--dry-run")
+	require.NoError(t, err)
+	assert.Contains(t, out, "o mod forge-painel seria instalado")
+	assert.NoDirExists(t, filepath.Join(dir, ".agents", "plugins", "forge-painel"))
+
+	resetWorkerFlags()
+	out, err = runRoot(t, "up", "--dir", dir, "--terminal", "painel")
+	require.NoError(t, err)
+	assert.Contains(t, out, "✓ mod forge-painel instalado ou atualizado")
+	assert.FileExists(t, filepath.Join(dir, ".agents", "plugins", "forge-painel", ".claude-plugin", "forge.json"))
+	assert.Len(t, *chamados, 2)
+
+	// De novo, já igual: nada a gravar.
+	resetWorkerFlags()
+	out, err = runRoot(t, "up", "--dir", dir, "--terminal", "painel")
+	require.NoError(t, err)
+	assert.NotContains(t, out, "instalado ou atualizado")
 }
 
 func TestUp_PainelIniciaOsWorkersEmSegundoPlano(t *testing.T) {

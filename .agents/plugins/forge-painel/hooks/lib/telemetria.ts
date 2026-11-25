@@ -106,11 +106,11 @@ export function nomeBase(agora: number): string {
 export const DIR_METRICAS = 'sdd/.metrics'
 
 // Slug de iniciativa `<id>-<nome>` (mesma regra de internal/layout): minúsculo, sem separadores.
-export const RE_INICIATIVA = /^[0-9]+(-[a-z0-9]+)+$/
+export const RE_INICIATIVA = /^[0-9a-z]+(-[a-z0-9]+)+$/
 
 export function faseDaIniciativa(iniciativa: string | undefined): string | undefined {
   if (iniciativa === undefined) return undefined
-  const m = /^([0-9]+)-/.exec(iniciativa)
+  const m = /^([0-9a-z]+)-/.exec(iniciativa)
   return m ? m[1] : undefined
 }
 

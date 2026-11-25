@@ -1,8 +1,9 @@
 import { atom, read, update } from 'claude-code'
 import type { EngineInterface, Register } from 'claude-code'
 
-import { PAPEIS, ESTADOS, DIR_FILAS, DIR_LOGS, RE_ID_JOB, linhaDoJob, tokensDoLog, caudaDoLog, rotuloEstado, tempoDecorrido, sanear } from './lib/esteira'
-import type { Linha } from './lib/esteira'
+import { PAPEIS, ESTADOS, DIR_FILAS, DIR_LOGS, RE_ID_JOB, tokensDoLog, caudaDoLog, sanear } from './lib/esteira'
+import { duracao, escolherIniciativa, estacaoAtual, lerJob, montarQuadro, resumoInbox, tokensCurtos } from './lib/quadro'
+import type { JobLido } from './lib/quadro'
 import { resumir, textoDoResumo } from './lib/gastos'
 import { avaliarAlertas, horaDeRenovacao, conteudoJanela, janelaMaisCheia, linhaDeStatus, LIMITE_ORCAMENTO, rotuloJanela } from './lib/janelas'
 import type { EstadoAlertas } from './lib/janelas'
@@ -19,12 +20,20 @@ const DIR_INICIATIVAS = 'sdd/discovery'
 const MAX_REGISTROS_GASTOS = 500
 
 // Cache do painel: não é fonte de verdade, só o que a tela mostra (o barramento é do Go).
-const esteira = atom({ plugin: 'forge-painel', key: 'esteira' } as const, { jobs: [], agentes: [], erro: '' } as Esteira)
+const VAZIA: Esteira = { quadro: null, outras: [], agentes: [], erro: '', inbox: { naoLidas: 0, prConforme: [] }, temFilas: false }
+const esteira = atom({ plugin: 'forge-painel', key: 'esteira' } as const, VAZIA)
+// tool_use_id da chamada Agent -> id do subagente, para o cartão de consumo embaixo da chamada.
+const cartoes = atom({ plugin: 'forge-painel', key: 'cartoes' } as const, {} as Record<string, string>)
+const DIR_INBOX = '.forge/runtime/queues/discovery/inbox'
+const DIR_TAREFAS = '.forge/runtime/tarefas'
 
 // Estado em memória do módulo: some no reload, e tudo bem (sem estado próprio além de cache).
 let mudoCache: boolean | undefined
 let interativa = false
 let iniciativa: string | undefined
+let estacao = 'discovery'
+let telemetriaOn: boolean | undefined
+let ultimaMedida: any
 let alertas: EstadoAlertas = {}
 let janelaGravadaEm = 0
 let inicioSessao = 0
@@ -58,7 +67,7 @@ async function lerJson($: EngineInterface, caminho: string): Promise<any | undef
   }
 }
 
-async function descobrirIniciativa($: EngineInterface): Promise<void> {
+async function iniciativaPorStatus($: EngineInterface): Promise<string | undefined> {
   try {
     const entradas = await $.fs.list(DIR_INICIATIVAS)
     let melhor: string | undefined
@@ -71,10 +80,14 @@ async function descobrirIniciativa($: EngineInterface): Promise<void> {
         melhor = en.name
       }
     }
-    iniciativa = melhor
+    return melhor
   } catch {
-    iniciativa = undefined
+    return undefined
   }
+}
+
+async function descobrirIniciativa($: EngineInterface): Promise<void> {
+  await atualizar($).catch(() => undefined)
 }
 
 async function telemetriaLigada($: EngineInterface): Promise<boolean> {
@@ -95,42 +108,66 @@ async function gravarRegistro($: EngineInterface, registro: unknown): Promise<st
   return nome
 }
 
+async function lerTexto($: EngineInterface, caminho: string): Promise<string | undefined> {
+  try {
+    return await $.fs.read(caminho)
+  } catch {
+    return undefined
+  }
+}
+
+async function listar($: EngineInterface, dir: string): Promise<string[]> {
+  try {
+    const ents = (await $.fs.list(dir)) as any[]
+    return ents.filter(en => en.kind === 'file' && en.name.endsWith('.json') && !en.name.startsWith('.')).map(en => en.name as string).sort()
+  } catch {
+    return []
+  }
+}
+
+// Relê o barramento e monta o quadro da iniciativa atual (RN-10: só leitura).
 async function atualizar($: EngineInterface): Promise<void> {
   const agora = await $.clock.now()
-  const jobs: Linha[] = []
-  let erro = ''
+  const jobs: JobLido[] = []
+  let temFilas = false
   for (const papel of PAPEIS) {
     for (const estado of ESTADOS) {
       const dir = `${DIR_FILAS}/${papel}/${estado}`
-      let entradas: any[] = []
-      try {
-        entradas = await $.fs.list(dir)
-      } catch {
-        continue // fila ainda não existe: o forge up não rodou
-      }
-      const nomes = entradas.filter(en => en.kind === 'file' && en.name.endsWith('.json') && !en.name.startsWith('.')).map(en => en.name as string).sort()
-      // Concluídos e falhos: só os últimos para a tela não crescer sem fim.
-      const recorte = estado === 'done' || estado === 'failed' ? nomes.slice(-5) : nomes.slice(0, 20)
+      const nomes = await listar($, dir)
+      if (nomes.length > 0) temFilas = true
+      // Concluídos e falhos: os mais recentes bastam para o quadro (o histórico fica em /gastos).
+      const recorte = estado === 'done' || estado === 'failed' ? nomes.slice(-60) : nomes.slice(0, 40)
       for (const nome of recorte) {
-        let bruto = ''
-        try {
-          bruto = await $.fs.read(`${dir}/${nome}`)
-        } catch {
-          continue
-        }
-        const l = linhaDoJob(papel, estado, bruto, agora)
-        if (l === undefined) continue
-        try {
-          const log = await $.fs.read(`${DIR_LOGS}/${papel}-${l.id}.log`, { as: 'text', offset: 0, length: 65536 })
-          l.tokens = tokensDoLog(log)
-        } catch {
-          // sem log ainda
-        }
-        jobs.push(l)
+        const bruto = await lerTexto($, `${dir}/${nome}`)
+        const j = bruto === undefined ? undefined : lerJob(papel, estado, bruto, agora)
+        if (j !== undefined) jobs.push(j)
       }
     }
   }
+  iniciativa = escolherIniciativa(jobs, await iniciativaPorStatus($), agora)
+  estacao = estacaoAtual(jobs, iniciativa)
+  let quadro: Esteira['quadro'] = null
+  if (iniciativa !== undefined) {
+    for (const j of jobs.filter(x => x.iniciativa === iniciativa)) {
+      const log = await $.fs.read(`${DIR_LOGS}/${j.papel}-${j.id}.log`, { as: 'text', offset: 0, length: 262144 }).catch(() => undefined)
+      if (typeof log === 'string') j.tokens = tokensDoLog(log)
+    }
+    const estadosTask: Record<string, string> = {}
+    for (const nome of await listar($, `${DIR_TAREFAS}/${iniciativa}`)) {
+      if (!nome.startsWith('feat-')) continue
+      const st = JSON.parse((await lerTexto($, `${DIR_TAREFAS}/${iniciativa}/${nome}`)) ?? '{}')
+      if (typeof st?.task === 'string' && typeof st?.estado === 'string') estadosTask[sanear(st.task, 40)] = sanear(st.estado, 20)
+    }
+    quadro = montarQuadro(jobs, iniciativa, estadosTask, agora)
+  }
+  const outras = [...new Set(jobs.filter(j => j.iniciativa !== '' && j.iniciativa !== iniciativa && (j.estado === 'pending' || j.estado === 'processing')).map(j => j.iniciativa))]
+  const brutosInbox: string[] = []
+  for (const nome of (await listar($, DIR_INBOX)).slice(-50)) {
+    const b = await lerTexto($, `${DIR_INBOX}/${nome}`)
+    if (b !== undefined) brutosInbox.push(b)
+  }
   let agentes: Esteira['agentes'] = []
+  let erro = ''
   try {
     const lista = await $.agent.list()
     agentes = lista.slice(-10).map((a: any) => ({
@@ -141,8 +178,10 @@ async function atualizar($: EngineInterface): Promise<void> {
   } catch {
     erro = 'lista de agentes indisponível'
   }
+  telemetriaOn = await telemetriaLigada($)
+  if (ultimaMedida !== undefined) $.ui.status(linhaDeStatus(ultimaMedida, iniciativa, estacao, telemetriaOn))
   try {
-    await update($, esteira, () => ({ jobs, agentes, erro }))
+    await update($, esteira, () => ({ quadro, outras, agentes, erro, inbox: resumoInbox(brutosInbox), temFilas }))
   } catch {
     // a sessão pode ter terminado entre a leitura e a gravação do cache
   }
@@ -173,7 +212,8 @@ export const register: Register = on => {
   on('session.measure', async ($, e, next) => {
     if (await mudo($)) return next(e)
     const agora = await $.clock.now()
-    $.ui.status(linhaDeStatus(e, iniciativa))
+    ultimaMedida = e
+    $.ui.status(linhaDeStatus(e, iniciativa, estacao, telemetriaOn))
     // A janela vai para o forge decidir o teto de paralelo (no máximo uma escrita por minuto).
     if (agora - janelaGravadaEm >= JANELA_A_CADA_MS) {
       const txt = conteudoJanela(e.rateLimits, agora)
@@ -285,7 +325,11 @@ export const register: Register = on => {
     } catch {
       // sem leitura de janela, sem aviso
     }
-    return next(e)
+    const r = await next(e)
+    if (e.tool_use_id && typeof (r as any)?.agentId === 'string') {
+      await update($, cartoes, c => ({ ...c, [e.tool_use_id]: (r as any).agentId })).catch(() => undefined)
+    }
+    return r
   }).catch(($, e, next) => next(e))
 
   on('command.run', { command: 'painel' }, async ($, e) => {
@@ -330,28 +374,84 @@ export const register: Register = on => {
 
   on('ui.render', { component: 'Pane', requestId: PAINEL }, async ($, e) => {
     const { Box, Text } = $.ui.resolve(e)
-    const dados = await read($, esteira)
-    const agora = await $.clock.now()
-    const sala = Math.max(1, (e.viewport?.rows ?? 24) - 6)
+    const d = { ...VAZIA, ...(await read($, esteira)) }
+    const q = d.quadro ?? null
+    const col = (t: string, n: number) => (t.length > n ? `${t.slice(0, n - 1)}…` : t.padEnd(n))
     return (
       <Box flexDirection="column">
-        <Text bold>Jobs da esteira</Text>
-        {dados.jobs.length === 0 && <Text dimColor>Nenhum job no barramento (rode `forge up --terminal painel`).</Text>}
-        {dados.jobs.slice(0, sala).map(j => (
-          <Text key={`${j.papel}-${j.id}`} dimColor={j.estado === 'done'}>
-            {j.papel} {j.tarefa} [{rotuloEstado(j)}] {tempoDecorrido(j.desde, agora)}
-            {j.tokens === undefined ? '' : ` ${j.tokens} tokens`}
+        <Text bold>Esteira{q ? ` · ${q.iniciativa}` : ''}</Text>
+        {!d.temFilas && <Text dimColor>Nenhum job no barramento (rode `forge up --terminal painel`).</Text>}
+        {d.temFilas && q === null && <Text dimColor>Nenhuma iniciativa em andamento.</Text>}
+        {q !== null && (
+          <Text dimColor>
+            pares ativos {q.ativos}
+            {q.total > 0 ? ` · ${q.mescladas}/${q.total} tasks mescladas` : ''}
+          </Text>
+        )}
+        {q !== null && q.linhas.length > 0 && <Text dimColor>{`${col('task', 18)} ${col('builder', 11)} ${col('reviewer', 11)} ${col('tokens', 8)} tempo`}</Text>}
+        {q?.linhas.map(l => (
+          <Text key={`t-${l.task}`} bold={l.ativo} dimColor={!l.ativo}>
+            {`${col(l.task, 18)} ${col(l.builder, 11)} ${col(l.reviewer, 11)} ${col(l.tokens > 0 ? tokensCurtos(l.tokens) : '·', 8)} ${l.tempo}`}
           </Text>
         ))}
+        {q?.modoFeature && <Text color="yellow">⚠ um Builder para a feature inteira: o forge que despachou é anterior à 6.0 (rode `forge --version`)</Text>}
+        {q !== null && <Text>Total da iniciativa {tokensCurtos(q.tokens)} tokens</Text>}
+        {d.outras.length > 0 && <Text dimColor>Também em andamento: {d.outras.join(', ')}</Text>}
         <Text bold>Subagentes desta sessão</Text>
-        {dados.agentes.length === 0 && <Text dimColor>Nenhum.</Text>}
-        {dados.agentes.map((a, i) => (
+        {d.agentes.length === 0 && <Text dimColor>Nenhum.</Text>}
+        {d.agentes.map((a, i) => (
           <Text key={`ag-${i}`}>
-            {a.tipo} [{a.estado}] {a.tokens} tokens
+            {a.tipo} [{a.estado}] {tokensCurtos(a.tokens)} tok
           </Text>
         ))}
-        {dados.erro !== '' && <Text dimColor>{dados.erro}</Text>}
-        <Text dimColor>Tokens aqui são medidos; dólar, quando aparece, é custo de tabela.</Text>
+        {d.erro !== '' && <Text dimColor>{d.erro}</Text>}
+        <Text dimColor>Tokens medidos pelo Claude Code; dólar, quando aparece, é custo de tabela.</Text>
+      </Box>
+    )
+  })
+
+  // Faixa acima do prompt: inbox e PR conforme sem precisar perguntar.
+  on('ui.render', { component: 'AbovePrompt' }, async ($, e, next) => {
+    if (await mudo($)) return next(e)
+    const d = { ...VAZIA, ...(await read($, esteira)) }
+    if (e.props.hasSurvey || (d.inbox?.naoLidas ?? 0) === 0) return next(e)
+    const { Box, Text } = $.ui.resolve(e)
+    const pr = d.inbox.prConforme.length > 0 ? ` · ${d.inbox.prConforme.slice(0, 3).join(', ')} conforme` : ''
+    return (
+      <Box>
+        <Text>
+          forge · inbox {d.inbox.naoLidas}
+          {pr}
+        </Text>
+        <Text dimColor> (forge inbox)</Text>
+      </Box>
+    )
+  })
+
+  // Cartão embaixo da chamada de subagente: consumo daquele agente.
+  on('ui.render', { component: 'ToolUse' }, async ($, e, next) => {
+    const linha = await next(e)
+    if (e.props.tool !== 'Agent' && e.props.tool !== 'Task') return linha
+    const id = ((await read($, cartoes)) ?? {})[e.props.tool_use_id]
+    if (id === undefined) return linha
+    let info: any
+    try {
+      info = (await $.agent.list()).find((a: any) => a.id === id)
+    } catch {
+      return linha
+    }
+    if (info === undefined) return linha
+    const { Box, Text } = $.ui.resolve(e)
+    const agora = await $.clock.now()
+    const ctx = typeof info.contextWindowSize === 'number' && info.contextWindowSize > 0 && typeof info.tokenCount === 'number'
+      ? ` · contexto ${Math.min(100, Math.round((100 * info.tokenCount) / info.contextWindowSize))}%`
+      : ''
+    return (
+      <Box flexDirection="column">
+        {linha}
+        <Text dimColor>
+          {`  ● ${sanear(info.type, 30)} · ${tokensCurtos(info.tokenCount ?? 0)} tok · ${duracao(agora - (info.startTime ?? agora))}${ctx}`}
+        </Text>
       </Box>
     )
   })
