@@ -85,14 +85,14 @@ end
 
 ## Critérios de aceitação executáveis
 - **CA-01** `go test ./internal/bus/...`: job `task_build` valida `task_id` e `feature_job`; recusa task fora do plano (conforme e negativo, `TST-03`).
-- **CA-02** `go test ./internal/pipeline/ -run Teto`: com disco simulado em 50% de 100 GB, worktree de 5 GB e limite 80%, as vagas são 6; em 79% são 0 e nenhuma task começa; com onda de 3 o teto é 3; janela em 90% com limite 85% dá 1.
+- **CA-02** `go test ./internal/pipeline/ -run Teto`: disco em 50% de 100 GB, worktree de 5 GB e limite 80% dão 6 vagas; em 79%, 0; memória com 8 GB disponíveis, reserva de 2 GB e 1,5 GB por par dá 4 e limita antes do disco; sem teto fixo, recurso sobrando e onda de 12 sobem 12 pares; janela em 90% com limite 85% dá 1.
 - **CA-03** `go test ./internal/pipeline/ -run Efemero`: depois do commit da task o diretório do worktree não existe e a branch da task continua com o commit.
 - **CA-04** `go test ./internal/pipeline/ -run PorTask`: dois jobs de tasks diferentes geram dois `Runner.Run` cujos prompts não contêm o id nem a spec da outra task.
 - **CA-05** `go test ./internal/pipeline/ -run Par`: cada commit de task gera um job de review com só o diff daquela task; com 3 Builders ativos existem até 3 Reviewers ativos.
 - **CA-06** `go test ./internal/pipeline/ -run Juncao`: tasks aprovadas entram na branch da feature em série na ordem do plano; conflito deixa a task bloqueada, aborta o merge e preserva a branch.
 - **CA-07** `go test ./internal/pipeline/ -run Liberacao`: liberar 4 vagas de uma vez faz 4 tasks elegíveis começarem na mesma rodada.
 - **CA-08** `go test ./internal/monitor/...`: um registro por task e papel com `feature`, `task` e `medicao: real` quando há evento `result`.
-- **CA-09** `go test ./internal/config/...`: `builder.granularidade` aceita `feature` e `task` (padrão `feature`); `builder.limite_disco` entre 50 e 95 (padrão 80).
+- **CA-09** `go test ./internal/config/...`: `builder.granularidade` aceita `feature` e `task` (padrão `feature`); `builder.limite_disco` entre 50 e 95 (padrão 80); `builder.reserva_memoria_mb` (padrão 2048); `max_parallel_tasks` aceita 0 (sem teto fixo) até 64.
 - **CA-10** `GOOS=windows go build ./... && GOOS=darwin go build ./... && go build ./... && go vet ./... && go test ./...` saem 0; ADR-0029 em `sdd/spec/adr/`.
 - **CA-11** `go test ./internal/pipeline/ -run Compacto`: o prompt e o handoff entre agentes usam seções em tags XML, chave e valor e listas em tabela de cabeçalho único, sem moldura nem emoji, abaixo do teto de bytes; o retorno JSON do Builder sem campo obrigatório é recusado. `forge eval compare` registra tokens e acerto do formato atual contra o compacto.
 - **CA-12** `go test ./internal/pipeline/ -run Humano`: a mensagem para o humano é gerada a partir do retorno estruturado, em tópicos, sem trecho cru da saída do agente (`SEG-08`).

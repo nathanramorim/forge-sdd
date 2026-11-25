@@ -9,7 +9,7 @@ Tasks 1.1 e 1.2. Trilha A.
 ADR-0004, ADR-0022, ADR-0024; FLX-05 exige a ADR-0029 (job por task, worktree efêmero, pares Builder e Reviewer, junção contínua, teto por disco, contrato compacto entre agentes).
 
 ## O que já existe
-`internal/bus/job.go` (tipos `feature_build`, `pr_rework`): estender com `task_build`, campos `task_id` e `feature_job`. `internal/config/forge.go` `BuilderConfig`: estender com `granularidade` (`feature`|`task`, padrão `feature`) e `limite_disco` (50..95, padrão 80).
+`internal/bus/job.go` (tipos `feature_build`, `pr_rework`): estender com `task_build`, campos `task_id` e `feature_job`. `internal/config/forge.go` `BuilderConfig`: estender com `granularidade` (`feature`|`task`, padrão `task` na 6.0 beta, decisão do dono) e `limite_disco` (50..95, padrão 80).
 
 ## Dependências novas
 Nenhuma (`ARQ-04`, `SEG-07`).

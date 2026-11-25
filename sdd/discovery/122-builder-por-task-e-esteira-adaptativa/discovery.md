@@ -33,7 +33,7 @@ Quem deixa a esteira rodando depois do Gate 1, em uma ou mais máquinas, e quer 
 - **RN-2** O pacote de entrada é o de `forge context <task>` mais a spec da task. Nada de `status.md` inteiro, logs ou diffs de outras tasks.
 - **RN-3** Uma task só começa com as dependências já na branch da feature (`PodeComecar`).
 - **RN-4** Worktree é efêmero: nasce para a task, morre no commit. Só fica se o commit falhar ou houver trabalho não commitado (órfão vira menu, contrato do leque).
-- **RN-5** Teto de paralelo por máquina: `pares = min(vagas de disco, largura da onda, teto da janela)`. Vagas de disco = (80% da capacidade do volume dos worktrees − uso atual) ÷ tamanho estimado de um worktree. O limite de 80% é configurável (`builder.limite_disco`).
+- **RN-5** Sem teto fixo: o limite é o que a máquina aguenta sem travar. `pares = min(vagas de disco, vagas de memória, largura da onda, teto da janela)`. Vagas de disco = (80% da capacidade do volume dos worktrees − uso atual) ÷ tamanho de um worktree (`builder.limite_disco`). Vagas de memória = (memória disponível − reserva de 2 GB) ÷ memória medida de um par Builder e Reviewer (`builder.reserva_memoria_mb`). `max_parallel_tasks` vira teto opcional (0 = só recurso). Decisão do dono em 24/11/2026.
 - **RN-6** O tamanho de um worktree é medido no primeiro checkout do projeto e guardado no estado local da máquina; reavaliado a cada 20 tasks.
 - **RN-7** O cálculo roda de novo a cada worktree apagado. Se várias vagas abrem juntas, várias tasks começam juntas.
 - **RN-8** Um Reviewer por Builder ativo. O Reviewer lê só o diff da task (`git diff base...task`) e a spec da task, com tier econômico; não precisa de worktree.
@@ -55,7 +55,7 @@ Quem deixa a esteira rodando depois do Gate 1, em uma ou mais máquinas, e quer 
 |---|---|
 | Conflito de merge entre tasks paralelas | Ondas por "Depende de", junção em série na ordem do plano, bloqueio com menu |
 | Disco medido errado trava a máquina | Limite conservador (80%), tamanho remedido a cada 20 tasks, piso de 1 par |
-| Build e testes também ocupam disco e memória | O tamanho medido inclui o primeiro build; memória livre mínima como segunda trava (a confirmar) |
+| Build e testes também ocupam disco e memória | O tamanho medido inclui o primeiro build; memória com reserva de 2 GB e consumo por par medido |
 | Dobrar revisores dobra tokens de revisão | Reviewer só com o diff da task e tier econômico; medição na onda 3 |
 | Retrabalho recria worktree e gasta disco | Recria só quando o Reviewer pede ajuste; mesma regra de vagas |
 | Formato compacto perde informação que o próximo agente precisa | Contrato com campos obrigatórios validados na borda; prosa completa preservada no log |
