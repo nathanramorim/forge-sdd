@@ -2,7 +2,7 @@ import { atom, read, update } from 'claude-code'
 import type { EngineInterface, Register } from 'claude-code'
 
 import { PAPEIS, ESTADOS, DIR_FILAS, DIR_LOGS, RE_ID_JOB, tokensDoLog, caudaDoLog, sanear } from './lib/esteira'
-import { duracao, escolherIniciativa, estacaoAtual, lerJob, montarQuadro, resumoInbox, sparkline, tokensCurtos } from './lib/quadro'
+import { atividadeDoWorker, barra, duracao, escolherIniciativa, estacaoAtual, lerJob, montarEstacoes, montarQuadro, progressoDaFila, resumoInbox, sparkline, tokensCurtos } from './lib/quadro'
 import type { JobLido } from './lib/quadro'
 import { resumir, textoDoResumo } from './lib/gastos'
 import { avaliarAlertas, horaDeRenovacao, conteudoJanela, janelaMaisCheia, linhaDeStatus, LIMITE_ORCAMENTO, rotuloJanela } from './lib/janelas'
@@ -20,9 +20,9 @@ const DIR_INICIATIVAS = 'sdd/discovery'
 const MAX_REGISTROS_GASTOS = 500
 
 // Cache do painel: não é fonte de verdade, só o que a tela mostra (o barramento é do Go).
-const VAZIA: Esteira = { quadro: null, outras: [], agentes: [], erro: '', inbox: { naoLidas: 0, prConforme: [] }, temFilas: false, series: {} }
+const VAZIA: Esteira = { estacoes: [], progresso: null, quadro: null, outras: [], agentes: [], erro: '', inbox: { naoLidas: 0, prConforme: [] }, temFilas: false, series: {} }
 // shape: um valor gravado por versão anterior do mod é descartado, não lido pela metade.
-const esteira = atom({ plugin: 'forge-painel', key: 'esteira' } as const, VAZIA, { shape: 'esteira-3' })
+const esteira = atom({ plugin: 'forge-painel', key: 'esteira' } as const, VAZIA, { shape: 'esteira-4' })
 // tool_use_id da chamada Agent -> id do subagente, para o cartão de consumo embaixo da chamada.
 const cartoes = atom({ plugin: 'forge-painel', key: 'cartoes' } as const, {} as Record<string, string>)
 const DIR_INBOX = '.forge/runtime/queues/discovery/inbox'
@@ -119,6 +119,21 @@ async function lerTexto($: EngineInterface, caminho: string): Promise<string | u
   }
 }
 
+// Só a cauda de um arquivo (logs crescem; o refresh de 5s não pode reler tudo).
+async function lerCauda($: EngineInterface, caminho: string, bytes: number): Promise<string | undefined> {
+  try {
+    const { size } = await $.fs.stat(caminho)
+    const inicio = Math.max(0, size - bytes)
+    const t = await $.fs.read(caminho, { as: 'text', offset: inicio, length: bytes })
+    return typeof t === 'string' ? t : undefined
+  } catch {
+    return undefined
+  }
+}
+
+// Tokens de job encerrado não mudam: lidos uma vez e guardados.
+const tokensEncerrados = new Map<string, number>()
+
 async function listar($: EngineInterface, dir: string): Promise<string[]> {
   try {
     const ents = (await $.fs.list(dir)) as any[]
@@ -139,7 +154,7 @@ async function atualizar($: EngineInterface): Promise<void> {
       const nomes = await listar($, dir)
       if (nomes.length > 0) temFilas = true
       // Concluídos e falhos: os mais recentes bastam para o quadro (o histórico fica em /gastos).
-      const recorte = estado === 'done' || estado === 'failed' ? nomes.slice(-60) : nomes.slice(0, 40)
+      const recorte = estado === 'done' || estado === 'failed' ? nomes.slice(-12) : nomes.slice(0, 40)
       for (const nome of recorte) {
         const bruto = await lerTexto($, `${dir}/${nome}`)
         const j = bruto === undefined ? undefined : lerJob(papel, estado, bruto, agora)
@@ -152,8 +167,15 @@ async function atualizar($: EngineInterface): Promise<void> {
   let quadro: Esteira['quadro'] = null
   if (iniciativa !== undefined) {
     for (const j of jobs.filter(x => x.iniciativa === iniciativa)) {
-      const log = await $.fs.read(`${DIR_LOGS}/${j.papel}-${j.id}.log`, { as: 'text', offset: 0, length: 262144 }).catch(() => undefined)
-      if (typeof log === 'string') j.tokens = tokensDoLog(log)
+      const encerrado = j.estado === 'done' || j.estado === 'failed'
+      if (encerrado && tokensEncerrados.has(j.id)) {
+        j.tokens = tokensEncerrados.get(j.id)
+        continue
+      }
+      if (j.estado === 'pending') continue
+      const log = await lerCauda($, `${DIR_LOGS}/${j.papel}-${j.id}.log`, 65536)
+      if (log !== undefined) j.tokens = tokensDoLog(log)
+      if (encerrado) tokensEncerrados.set(j.id, j.tokens ?? 0)
     }
     const estadosTask: Record<string, string> = {}
     for (const nome of await listar($, `${DIR_TAREFAS}/${iniciativa}`)) {
@@ -169,8 +191,18 @@ async function atualizar($: EngineInterface): Promise<void> {
       amostras.set(j.id, v.slice(-24))
     }
   }
+  let estacoes: Esteira['estacoes'] = []
+  let progresso: Esteira['progresso'] = null
+  if (iniciativa !== undefined) {
+    const atividade: Record<string, string> = {}
+    for (const papel of PAPEIS) {
+      atividade[papel] = atividadeDoWorker(await lerCauda($, `${DIR_LOGS}/${papel}-worker.log`, 4096), papel)
+    }
+    estacoes = montarEstacoes(jobs, iniciativa, agora, atividade)
+    progresso = progressoDaFila(await lerTexto($, `sdd/discovery/${iniciativa}/queue.json`))
+  }
   const series: Record<string, number[]> = {}
-  for (const c of quadro?.cartoes ?? []) if (c.classe === 'run' && amostras.has(c.jobId)) series[c.jobId] = amostras.get(c.jobId)!
+  for (const c of [...(quadro?.cartoes ?? []), ...estacoes]) if (c.classe === 'run' && amostras.has(c.jobId)) series[c.jobId] = amostras.get(c.jobId)!
   const outras = [...new Set(jobs.filter(j => j.iniciativa !== '' && j.iniciativa !== iniciativa && (j.estado === 'pending' || j.estado === 'processing')).map(j => j.iniciativa))]
   const brutosInbox: string[] = []
   for (const nome of (await listar($, DIR_INBOX)).slice(-50)) {
@@ -192,7 +224,7 @@ async function atualizar($: EngineInterface): Promise<void> {
   telemetriaOn = await telemetriaLigada($)
   if (ultimaMedida !== undefined) $.ui.status(linhaDeStatus(ultimaMedida, iniciativa, estacao, telemetriaOn))
   try {
-    await update($, esteira, () => ({ quadro, outras, agentes, erro, inbox: resumoInbox(brutosInbox), temFilas, series }))
+    await update($, esteira, () => ({ estacoes, progresso, quadro, outras, agentes, erro, inbox: resumoInbox(brutosInbox), temFilas, series }))
   } catch {
     // a sessão pode ter terminado entre a leitura e a gravação do cache
   }
@@ -386,60 +418,64 @@ export const register: Register = on => {
   on('ui.render', { component: 'Pane', requestId: PAINEL }, async ($, e) => {
     const { Box, Text } = $.ui.resolve(e)
     const d = { ...VAZIA, ...(await read($, esteira)) }
-    const q = d.quadro ?? null
     const cor = { ok: 'green', run: 'blue', wait: 'gray', fail: 'red' } as const
-    const sala = Math.max(1, Math.floor(((e.viewport?.rows ?? 24) - 8) / 3))
+    const curta = (ini: string) => ini.split('-')[0] ?? ini
+    const ctx = ultimaMedida?.context?.percent
+    const sessao = inicioSessao > 0 ? duracao(Date.now() - inicioSessao) : '·'
+    const total = d.estacoes.reduce((s, c) => s + c.tokens, 0)
+    const cartao = (key: string, nome: string, estado: string, classe: 'ok' | 'run' | 'wait' | 'fail', esquerda: string, direita: string, extra?: any) => (
+      <Box key={key} flexDirection="column" borderStyle="round" borderColor="gray" paddingX={1}>
+        <Box justifyContent="space-between">
+          <Text bold={classe === 'run'}>{nome}</Text>
+          <Text color={cor[classe]}>● {estado}</Text>
+        </Box>
+        {extra}
+        <Box justifyContent="space-between">
+          <Text dimColor>{esquerda}</Text>
+          <Text dimColor>{direita}</Text>
+        </Box>
+      </Box>
+    )
     return (
       <Box flexDirection="column">
-        <Box justifyContent="space-between">
+        <Box justifyContent="space-between" marginBottom={1}>
           <Text bold>Esteira</Text>
-          {q !== null && <Text dimColor>iniciativa {q.iniciativa}</Text>}
+          {iniciativa !== undefined && <Text dimColor>iniciativa {curta(iniciativa)}</Text>}
         </Box>
-        {!d.temFilas && <Text dimColor>Nenhum job no barramento (rode `forge up --terminal painel`).</Text>}
-        {d.temFilas && q === null && <Text dimColor>Nenhuma iniciativa em andamento.</Text>}
-        {q !== null && q.total > 1 && (
-          <Text dimColor>
-            {q.ativos} par(es) ativo(s) · {q.mescladas}/{q.total} tasks mescladas
-          </Text>
-        )}
-        {q?.cartoes.slice(0, sala).map(c => (
-          <Box key={`c-${c.nome}`} flexDirection="column" marginTop={1}>
-            <Box justifyContent="space-between">
-              <Text bold={c.classe === 'run'} dimColor={c.classe === 'ok'}>
-                {c.nome}
-              </Text>
-              <Text color={cor[c.classe]}>{c.estado}</Text>
-            </Box>
-            {c.classe === 'run' && sparkline(d.series[c.jobId] ?? []) !== '' && <Text color="blue">{sparkline(d.series[c.jobId] ?? [])}</Text>}
-            <Box justifyContent="space-between">
-              <Text dimColor>{c.tokens > 0 ? `${tokensCurtos(c.tokens)} tok` : '0 tok'}</Text>
-              <Text dimColor>{c.tempo}</Text>
-            </Box>
-          </Box>
-        ))}
-        {q !== null && q.cartoes.length > sala && <Text dimColor>+{q.cartoes.length - sala} encerrado(s)</Text>}
-        {q?.modoFeature && <Text color="yellow">⚠ um Builder para a feature inteira: o forge que despachou é anterior à 6.0</Text>}
-        {q !== null && (
-          <Box justifyContent="space-between" marginTop={1}>
-            <Text>iniciativa</Text>
-            <Text bold>{tokensCurtos(q.tokens)} tok</Text>
-          </Box>
-        )}
-        {d.outras.length > 0 && <Text dimColor>também em andamento: {d.outras.join(', ')}</Text>}
-        {d.agentes.length > 0 && (
-          <Box flexDirection="column" marginTop={1}>
-            <Text bold>Subagentes desta sessão</Text>
-            {d.agentes.map((a, i) => (
-              <Box key={`ag-${i}`} justifyContent="space-between">
-                <Text>{a.tipo}</Text>
-                <Text dimColor>
-                  {a.estado} · {tokensCurtos(a.tokens)} tok
+        {cartao('discovery', 'discovery', 'nesta sessão', 'ok', ctx !== undefined ? `ctx ${Math.round(ctx)}%` : 'ctx ·', sessao)}
+        {d.estacoes.map(c => {
+          const sp = c.classe === 'run' ? sparkline(d.series[c.jobId] ?? []) : ''
+          const prog = c.papel === 'builder' && d.progresso !== null ? (
+            <Text dimColor>
+              {barra((d.progresso.feitas / d.progresso.total) * 100, 10)} {d.progresso.feitas}/{d.progresso.total} tasks{d.progresso.atual !== '' ? ` · ${d.progresso.atual}` : ''}
+            </Text>
+          ) : false
+          const extra = (
+            <Box flexDirection="column">
+              {prog}
+              {sp !== '' && <Text color="blue">{sp}</Text>}
+              {c.detalhe !== '' && (
+                <Text color={c.classe === 'fail' ? 'red' : undefined} dimColor={c.classe !== 'fail'} wrap="truncate-end">
+                  {c.detalhe}
                 </Text>
-              </Box>
-            ))}
+              )}
+              {c.classe === 'fail' && iniciativa !== undefined && <Text dimColor>próximo: /implementar {curta(iniciativa)}</Text>}
+            </Box>
+          )
+          return cartao(`e-${c.papel}`, c.papel, c.estado, c.classe, c.tokens > 0 ? `${tokensCurtos(c.tokens)} tok` : '· tok', c.tempo, extra)
+        })}
+        <Box justifyContent="space-between" marginTop={1} paddingX={1}>
+          <Text>iniciativa</Text>
+          <Text bold>{tokensCurtos(total)} tok</Text>
+        </Box>
+        {d.inbox.naoLidas > 0 && (
+          <Box paddingX={1}>
+            <Text dimColor>inbox {d.inbox.naoLidas}</Text>
+            {d.inbox.prConforme.length > 0 && <Text color="green"> · {d.inbox.prConforme.slice(0, 2).join(', ')} conforme</Text>}
           </Box>
         )}
-        {d.erro !== '' && <Text dimColor>{d.erro}</Text>}
+        {d.outras.length > 0 && <Text dimColor> também em andamento: {d.outras.map(curta).join(', ')}</Text>}
+        {!d.temFilas && <Text dimColor> Esteira parada: rode forge up --terminal painel.</Text>}
       </Box>
     )
   })

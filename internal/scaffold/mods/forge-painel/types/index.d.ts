@@ -3,7 +3,11 @@ export type LinhaQuadro = { task: string; builder: string; reviewer: string; tok
 
 export type Cartao = { nome: string; estado: string; classe: 'ok' | 'run' | 'wait' | 'fail'; tokens: number; tempo: string; jobId: string }
 
+export type Estacao = { papel: string; estado: string; classe: 'ok' | 'run' | 'wait' | 'fail'; tokens: number; tempo: string; detalhe: string; jobId: string }
+
 export type Esteira = {
+  estacoes: Estacao[]
+  progresso: { feitas: number; total: number; atual: string } | null
   quadro: {
     iniciativa: string
     linhas: LinhaQuadro[]

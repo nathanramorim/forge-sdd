@@ -15,6 +15,9 @@ export type JobLido = {
   atualizado?: number
   tokens?: number
   parado: boolean
+  inicio?: number // quando o worker pegou o job (último evento processing)
+  fim?: number // último evento done ou failed
+  motivo: string // nota do último evento (motivo da falha)
 }
 
 export type LinhaQuadro = {
@@ -65,7 +68,20 @@ export function lerJob(papel: string, estado: string, bruto: string, agora: numb
   const ini = typeof j.initiative === 'string' && RE_SLUG.test(j.initiative) ? j.initiative : ''
   const taskIds = Array.isArray(j.task_ids) ? j.task_ids.filter((t: unknown): t is string => typeof t === 'string').map((t: string) => sanear(t, 30)) : []
   const expira = data(j.lease?.expires_at)
+  const evs: any[] = Array.isArray(j.events) ? j.events : []
+  let inicio: number | undefined
+  let fim: number | undefined
+  for (const ev of evs) {
+    const t = data(ev?.at)
+    if (t === undefined) continue
+    if (ev.state === 'processing') inicio = t
+    if (ev.state === 'done' || ev.state === 'failed') fim = t
+  }
+  const ultimo = evs[evs.length - 1]
   return {
+    inicio,
+    fim,
+    motivo: typeof ultimo?.note === 'string' ? sanear(ultimo.note, 120) : '',
     papel,
     estado,
     id: j.id,
@@ -231,4 +247,77 @@ export function sparkline(amostras: number[], largura = 24): string {
 export function barra(pct: number, largura = 8): string {
   const cheio = Math.max(0, Math.min(largura, Math.round((pct / 100) * largura)))
   return '▰'.repeat(cheio) + '▱'.repeat(largura - cheio)
+}
+
+// ---- Painel como no protótipo: um cartão por estação (Builder e Reviewer) da iniciativa atual ----
+
+export type Estacao = {
+  papel: string
+  estado: string
+  classe: 'ok' | 'run' | 'wait' | 'fail'
+  tokens: number
+  tempo: string
+  detalhe: string
+  jobId: string
+}
+
+// O job mais recente de cada papel na iniciativa vira o cartão daquela estação. O tempo conta de
+// quando o worker pegou o job (não de quando foi criado) e o detalhe diz o motivo da falha ou o que
+// o agente está fazendo agora (atividade, da última linha útil do log do worker).
+export function montarEstacoes(jobs: JobLido[], ini: string, agora: number, atividade: Record<string, string> = {}): Estacao[] {
+  const out: Estacao[] = []
+  for (const papel of ['builder', 'reviewer']) {
+    const j = jobs.filter(x => x.iniciativa === ini && x.papel === papel).sort((a, b) => Number(ativo(b)) - Number(ativo(a)) || quando(b) - quando(a))[0]
+    if (j === undefined) {
+      out.push({ papel, estado: 'ocioso', classe: 'wait', tokens: 0, tempo: '·', detalhe: '', jobId: '' })
+      continue
+    }
+    const estado = rotulo(j, papel) === 'commitado' ? 'concluído' : rotulo(j, papel)
+    const classe = classeDe(estado)
+    let tempo = '·'
+    if (j.estado !== 'pending' && j.inicio !== undefined) {
+      const fim = j.estado === 'processing' ? agora : j.fim ?? quando(j)
+      tempo = duracao(fim - j.inicio)
+    }
+    let detalhe = ''
+    if (classe === 'fail') detalhe = j.parado ? 'worker parou no meio (rode forge up)' : j.motivo
+    else if (classe === 'run') detalhe = atividade[papel] ?? ''
+    out.push({ papel, estado, classe, tokens: j.tokens ?? 0, tempo, detalhe, jobId: j.id })
+  }
+  return out
+}
+
+// Progresso da feature pelo queue.json da iniciativa: tasks prontas, total e a em andamento.
+export function progressoDaFila(bruto: string | undefined): { feitas: number; total: number; atual: string } | null {
+  if (bruto === undefined) return null
+  let q: any
+  try {
+    q = JSON.parse(bruto)
+  } catch {
+    return null
+  }
+  const itens: any[] = Array.isArray(q?.items) ? q.items : []
+  if (itens.length === 0) return null
+  const prontas = new Set(['approved', 'success', 'review_pending', 'done'])
+  let feitas = 0
+  let atual = ''
+  for (const it of itens) {
+    const st = typeof it?.status === 'string' ? it.status : ''
+    if (prontas.has(st)) feitas++
+    else if (atual === '' && (st === 'building' || st === 'running')) atual = sanear(it.task_id, 30)
+  }
+  return { feitas, total: itens.length, atual }
+}
+
+// Última linha útil do log limpo do worker ("[builder] 🔨 Editando ..."), sem o prefixo do papel.
+export function atividadeDoWorker(texto: string | undefined, papel: string): string {
+  if (texto === undefined) return ''
+  const linhas = texto.split('\n')
+  for (let i = linhas.length - 1; i >= 0; i--) {
+    const l = linhas[i] ?? ''
+    if (l.startsWith('[forge-')) return ''
+    if (!l.startsWith(`[${papel}]`)) continue
+    return sanear(l.slice(papel.length + 2).trim().replace(/^[^\p{L}\d]+/u, ''), 70)
+  }
+  return ''
 }

@@ -23,32 +23,34 @@ const job = (id: string, extra: object = {}) =>
 
 const FILAS = '.forge/runtime/queues'
 const CENARIO: Record<string, string> = {
-  [`${FILAS}/builder/processing/1-1-job-b1.json`]: job('job-b1', { lease: { worker: 'w', expires_at: '2026-11-25T18:10:00Z' } }),
+  [`${FILAS}/builder/processing/1-1-job-b1.json`]: job('job-b1', { lease: { worker: 'w', expires_at: '2026-11-25T18:10:00Z' }, events: [{ at: '2026-11-25T17:50:00Z', state: 'processing' }] }),
   [`${FILAS}/builder/done/1-0-job-b2.json`]: job('job-b2', { task_id: '77-02', updated_at: '2026-11-25T17:58:00Z' }),
   [`${FILAS}/reviewer/done/1-2-job-r2.json`]: job('job-r2', { type: 'pr_review', task_id: '77-02', updated_at: '2026-11-25T17:59:00Z' }),
   // de outra iniciativa, de dez dias atrás: não entra no quadro
   [`${FILAS}/builder/failed/0-0-job-velho.json`]: job('job-velho', { initiative: '55e0-outra', task_id: '', task_ids: ['55e0-01', '55e0-02'], created_at: '2026-11-15T10:00:00Z', updated_at: '2026-11-15T10:00:00Z' }),
   '.forge/runtime/logs/builder-job-b1.log': '{"type":"system"}\n{"type":"result","usage":{"input_tokens":900,"output_tokens":100}}\n',
   '.forge/runtime/tarefas/77-auth-oauth/feat-77-02.json': '{"task":"feat-77-02","estado":"mesclada"}',
+  '.forge/runtime/logs/builder-worker.log': '[forge-builder] Aguardando jobs na fila...\n[builder] 🔨 Editando backend/src/auth.ts...\n  ✎ backend/src/auth.ts\n',
+  'sdd/discovery/77-auth-oauth/queue.json': JSON.stringify({ items: [{ task_id: '77-01', status: 'building' }, { task_id: '77-02', status: 'approved' }, { task_id: '77-03', status: 'queued' }] }),
 }
 
-test('o painel mostra só a iniciativa atual, um par por task, com estado, tokens e tempo', async ($, on) => {
+test('o painel tem um cartão por estação, como no protótipo: estado, progresso, o que faz agora, tokens e tempo', async ($, on) => {
   const m = montarMundo(on, CENARIO)
   await $.session.start({ cwd: '/', surface: 'terminal', isInteractive: true })
   await $.command.run(cmd('painel'))
   const ui = await $.ui.mount({ ...PANE, surface: 'terminal' })
 
-  expect((await ui.find({ type: 'Text', text: /^Esteira$/ }))).toBeDefined()
-  expect((await ui.find({ type: 'Text', text: /^iniciativa 77/ }))?.text).toBe('iniciativa 77-auth-oauth')
-  expect(await ui.find({ type: 'Text', text: /^builder · 77-01$/ })).toBeDefined()
-  expect(await ui.find({ type: 'Text', text: /^rodando$/ })).toBeDefined()
+  expect(await ui.find({ type: 'Text', text: /^Esteira$/ })).toBeDefined()
+  expect((await ui.find({ type: 'Text', text: /^iniciativa 77/ }))?.text).toBe('iniciativa 77')
+  expect(await ui.find({ type: 'Text', text: /^discovery$/ })).toBeDefined()
+  expect(await ui.find({ type: 'Text', text: /^builder$/ })).toBeDefined()
+  expect(await ui.find({ type: 'Text', text: /^● rodando$/ })).toBeDefined()
+  expect((await ui.find({ type: 'Text', text: /tasks/ }))?.text).toBe('▰▰▰▱▱▱▱▱▱▱ 1/3 tasks · 77-01')
+  expect((await ui.find({ type: 'Text', text: /Editando/ }))?.text).toBe('Editando backend/src/auth.ts...')
   expect(await ui.find({ type: 'Text', text: /^1,0k tok$/ })).toBeDefined()
   expect(await ui.find({ type: 'Text', text: /^10m 00s$/ })).toBeDefined()
-  expect(await ui.find({ type: 'Text', text: /^builder · 77-02$/ })).toBeDefined()
-  expect(await ui.find({ type: 'Text', text: /^commitado$/ })).toBeDefined()
-  expect(await ui.find({ type: 'Text', text: /^reviewer · 77-02$/ })).toBeDefined()
-  expect(await ui.find({ type: 'Text', text: /^mesclada$/ })).toBeDefined()
-  expect((await ui.find({ type: 'Text', text: /par\(es\) ativo/ }))?.text).toContain('1 par(es) ativo(s) · 1/2 tasks mescladas')
+  expect(await ui.find({ type: 'Text', text: /^reviewer$/ })).toBeDefined()
+  expect(await ui.find({ type: 'Text', text: /^● aprovado$/ })).toBeDefined()
   expect(await ui.find({ type: 'Text', text: /^iniciativa$/ })).toBeDefined()
   expect(await ui.find({ type: 'Text', text: /55e0/ })).toBeUndefined()
   await ui.unmount()
@@ -57,32 +59,40 @@ test('o painel mostra só a iniciativa atual, um par por task, com estado, token
   expect(m.escritas.filter(p => p.startsWith(FILAS) || p.startsWith('.forge/runtime/logs') || p.startsWith('.forge/runtime/tarefas'))).toEqual([])
 })
 
-test('job por feature (forge antigo) vira uma linha só e o painel avisa', async ($, on) => {
+test('falha mostra o motivo e o próximo passo, com o tempo do job e não desde a criação', async ($, on) => {
   montarMundo(on, {
-    [`${FILAS}/builder/processing/1-1-job-f.json`]: job('job-f', { type: 'feature_build', task_id: '', task_ids: ['77-01', '77-02', '77-03'] }),
+    [`${FILAS}/builder/failed/1-1-job-f.json`]: job('job-f', {
+      type: 'feature_build', task_id: '', task_ids: ['77-01', '77-02', '77-03'], created_at: '2026-11-17T11:05:00Z',
+      events: [{ at: '2026-11-25T17:00:00Z', state: 'processing' }, { at: '2026-11-25T17:18:03Z', state: 'failed', note: 'o agente saiu com código -1' }],
+    }),
   })
   await $.session.start({ cwd: '/', surface: 'terminal', isInteractive: true })
   await $.command.run(cmd('painel'))
   const ui = await $.ui.mount({ ...PANE, surface: 'terminal' })
-  expect(await ui.find({ type: 'Text', text: /^builder · feature \(3 tasks\)$/ })).toBeDefined()
-  expect((await ui.find({ type: 'Text', text: /um Builder para a feature inteira/ }))?.text).toContain('anterior à 6.0')
+  expect(await ui.find({ type: 'Text', text: /^● falhou$/ })).toBeDefined()
+  expect(await ui.find({ type: 'Text', text: /^o agente saiu com código -1$/ })).toBeDefined()
+  expect(await ui.find({ type: 'Text', text: /^próximo: \/implementar 77$/ })).toBeDefined()
+  expect(await ui.find({ type: 'Text', text: /^18m 03s$/ })).toBeDefined()
+  expect(await ui.find({ type: 'Text', text: /anterior à 6.0/ })).toBeUndefined()
   await ui.unmount()
 })
 
-test('lease vencido aparece como parado', async ($, on) => {
+test('lease vencido aparece como parado, com o que fazer', async ($, on) => {
   montarMundo(on, {
     [`${FILAS}/builder/processing/1-1-job-b1.json`]: job('job-b1', { lease: { worker: 'w', expires_at: '2026-11-25T17:00:00Z' } }),
   })
   await $.session.start({ cwd: '/', surface: 'terminal', isInteractive: true })
   await $.command.run(cmd('painel'))
   const ui = await $.ui.mount({ ...PANE, surface: 'terminal' })
-  expect(await ui.find({ type: 'Text', text: /^parado$/ })).toBeDefined()
+  expect(await ui.find({ type: 'Text', text: /^● parado$/ })).toBeDefined()
+  expect(await ui.find({ type: 'Text', text: /rode forge up/ })).toBeDefined()
   await ui.unmount()
 })
 
-test('texto do job passa por saneamento (sem escapes de terminal)', async ($, on) => {
+test('texto do log passa por saneamento (sem escapes de terminal)', async ($, on) => {
   montarMundo(on, {
-    [`${FILAS}/builder/pending/1-1-job-b1.json`]: job('job-b1', { task_id: '\u001b[31mvermelho\u001b[0m\u0007' }),
+    ...CENARIO,
+    '.forge/runtime/logs/builder-worker.log': '[builder] \u001b[31mvermelho\u001b[0m\u0007 rodando\n',
   })
   await $.session.start({ cwd: '/', surface: 'terminal', isInteractive: true })
   await $.command.run(cmd('painel'))
@@ -99,7 +109,7 @@ test('sem filas o painel diz como abrir a esteira e o mod não abre sozinho', as
   expect(m.abertos).toEqual([])
   await $.command.run(cmd('painel'))
   const ui = await $.ui.mount({ ...PANE, surface: 'terminal' })
-  expect((await ui.find({ type: 'Text', text: /Nenhum job/ }))?.text).toContain('forge up --terminal painel')
+  expect((await ui.find({ type: 'Text', text: /Esteira parada/ }))?.text).toContain('forge up --terminal painel')
   await ui.unmount()
 })
 
