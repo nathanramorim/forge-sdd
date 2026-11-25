@@ -1,0 +1,32 @@
+{
+  "$schema": "forge-sdd/metrics/1.0",
+  "feature": "sdd/discovery/122-builder-por-task-e-esteira-adaptativa/discovery.md",
+  "agent_path": null,
+  "tokens_input": 5582,
+  "tokens_output": 3463,
+  "turns": 0,
+  "duration_seconds": 0,
+  "criterio_atendido": true,
+  "model": "",
+  "rework_lines": 0,
+  "context7_calls": 0,
+  "git_calls": 0,
+  "files_touched": [
+    "sdd/discovery/122-builder-por-task-e-esteira-adaptativa/discovery.md",
+    "sdd/discovery/122-builder-por-task-e-esteira-adaptativa/criteria.md",
+    "sdd/discovery/122-builder-por-task-e-esteira-adaptativa/plan.md",
+    "sdd/discovery/122-builder-por-task-e-esteira-adaptativa/status.md"
+  ],
+  "outcome": "approved",
+  "sdd_version": "5.2.3-beta",
+  "medicao": "estimado",
+  "complexidade": null,
+  "spec": {
+    "tipo": "discovery",
+    "iniciativa": "122-builder-por-task-e-esteira-adaptativa",
+    "bytes": 5582,
+    "criteria_bytes": 6086,
+    "plan_bytes": 1812,
+    "status_bytes": 371
+  }
+}
