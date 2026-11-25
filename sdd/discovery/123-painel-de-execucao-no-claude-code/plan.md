@@ -13,12 +13,13 @@
 | 1.3 | Mod `forge-painel`: status line e alertas de janela | 1.2 | SEG-05, SEG-08 |
 | 1.4 | `forge skills instalar plugin` valida o manifesto do mod | 1.2 | SEG-01, SEG-02, TST-03 |
 
-## Onda 2 — Telemetria e agentes (1 a 2 dias)
+## Onda 2 — Telemetria, agentes e modo painel (2 dias)
 | # | Task | Depende de | Rules/IDs |
 |---|---|---|---|
 | 2.1 | Telemetria automática da sessão interativa e subagentes, dono único (mudo com `FORGE_WORKER`) | 1.3 | FLX-04, DUP-04 |
 | 2.2 | Painel lateral da esteira: jobs do `forge up` lidos do barramento e dos logs, mais subagentes da sessão | 1.3 | SEG-08, DUP-01 |
 | 2.3 | Aviso de orçamento em `agent.spawn` | 1.3 | — |
 | 2.4 | `/gastos` por iniciativa e estação | 2.1 | DUP-01 |
+| 2.5 | `forge up --terminal painel`: workers em segundo plano, sem janela, log em arquivo; painel abre o log sob demanda | 2.2 | ARQ-06, SEG-03, TST-02 |
 
 Com a 122 em `granularidade: task`, a 2.1 passa a registrar um Builder por task sem mudança.

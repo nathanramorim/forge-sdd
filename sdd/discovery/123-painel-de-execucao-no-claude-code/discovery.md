@@ -34,10 +34,12 @@ Quem usa o Forge SDD com o Claude Code no terminal ou no app desktop e quer ver,
 - **RN-10** O painel enxerga os workers lendo o que o Go já grava: estados do barramento em `.forge/runtime/`, logs dos jobs e `sdd/.metrics`. O mod nunca escreve no barramento nem em arquivo de outro processo; o Go segue como escritor único.
 - **RN-11** Um dono por registro de telemetria. Job de worker é gravado pelo worker (`recordJobTelemetry`); o mod grava só a sessão interativa e os subagentes dela. Se o mod carregar dentro de um worker (variável `FORGE_WORKER` presente), ele não grava nada e não abre painel.
 - **RN-12** O gancho `UserPromptSubmit` do inbox em `.claude/settings.json` continua; o mod não repete o aviso enquanto esse gancho existir.
+- **RN-13** Modo painel no `forge up` (`--terminal painel`): nenhuma janela nem tmux. Os workers rodam em segundo plano, com log em arquivo; a sessão interativa com o mod é o único ponto de acompanhamento, e o painel abre o log de um job quando a pessoa pede. Fechar o Claude não para os workers; ao reabrir, o painel retoma pelo barramento.
+- **RN-14** Janelas do sistema e tmux continuam como opções (ADR-0026), e são o caminho para quem não usa o Claude Code.
 - **RN-8** Dado sensível nunca entra na telemetria nem na tela (`SEG-05`): só ids, contagens e nomes de papel.
 
 ## Escopo
-**Dentro:** contrato de mod (manifesto e permissões) com ADR; mod de referência `forge-painel` com status line, alertas, telemetria automática, painel de agentes, aviso de orçamento e `/gastos`; instalação pelo `forge skills instalar plugin`; testes do mod com `claude plugin test`.
+**Dentro:** modo painel no `forge up` (workers em segundo plano, sem janela); contrato de mod (manifesto e permissões) com ADR; mod de referência `forge-painel` com status line, alertas, telemetria automática, painel de agentes, aviso de orçamento e `/gastos`; instalação pelo `forge skills instalar plugin`; testes do mod com `claude plugin test`.
 
 **Fora:** painel HTML de métricas (é da 111); estimativa de tokens antes da execução (110); distribuição fora do projeto (`/plugin install` está rejeitado pela ADR-0025); mods para outros agentes.
 
@@ -48,9 +50,10 @@ Quem usa o Forge SDD com o Claude Code no terminal ou no app desktop e quer ver,
 | Carregar plugin do projeto sem `/plugin install` | Spike na onda 1 (configuração do projeto ou `--plugin-dir`); se não houver caminho, ADR registra a exceção |
 | Workers headless (`claude -p`) podem não carregar o mod | Spike na onda 1; sem carga, o worker segue gravando por `usage.go` (122) |
 | Primeira linguagem não Go no repositório (TypeScript) | Fica fora do binário (`ARQ-04`), em `.agents/plugins/forge-painel/`, sem dependência de runtime |
+| Worker em segundo plano some sem ninguém ver | Lease e heartbeat que já existem; o painel marca job sem renovação como parado e alerta |
 | Telemetria em dobro (worker e mod gravando o mesmo job) | RN-11: dono único por registro, mod mudo com `FORGE_WORKER` |
 | Painel e janelas mostrando coisas diferentes | Os dois leem a mesma fonte (barramento e logs); o mod não tem estado próprio além de cache |
 | Percentual das janelas só existe em assinatura | Sem janelas, a status line mostra só contexto e custo de tabela |
 
 ## Esforço estimado
-Entre 2 e 3 dias, incluindo o spike de carregamento.
+Cerca de 3 dias, incluindo o spike de carregamento e o modo painel no `forge up`.

@@ -4,6 +4,7 @@
 **Enxuto** (`ARQ-11`): nenhum pacote Go novo. O mod é um artefato de agente em `.agents/plugins/forge-painel/` (TypeScript executado pelo Claude Code, fora do binário). No Go muda só o que a instalação já faz (`internal/skills`, `internal/scaffold`) e a validação do manifesto.
 
 ## Decisões do projeto aplicadas
+- **ADR-0026** tmux como opção de interface: o modo painel é mais uma opção, ao lado de janelas e tmux.
 - **ADR-0025** instalação limitada ao projeto: o mod mora em `.agents/plugins/<slug>/` e entra por `forge skills instalar plugin`; `/plugin install` não é usado.
 - **ADR-0003 e `DUP-10`** fonte única dos artefatos de agente em `.agents/`.
 - **ADR-0009** tokens por janela: a status line substitui o rótulo de tokens por painel do tmux quando o mod está ativo.
@@ -75,4 +76,5 @@ M->>FS: lê e resume
 - **CA-07** `grep` no código do mod não encontra `fetch`, chamadas de `$.model` nem escrita fora de `sdd/.metrics` e `.forge/runtime/painel`.
 - **CA-09** Mesmo teste do mod: com `FORGE_WORKER` definido o mod não grava em `sdd/.metrics` nem abre painel; sem ele, um job de worker já registrado não é gravado de novo.
 - **CA-10** Mesmo teste: com o barramento simulado (um job em `claimed` e um em `done`), o painel mostra os dois com papel, task e estado, sem escrever em `.forge/runtime/<papel>/`.
+- **CA-11** `go test ./internal/pipeline/ -run Painel` e `go test ./cmd/forge-sdd/ -run Up`: `forge up --terminal painel --dry-run` lista os workers em segundo plano com log em arquivo e nenhum comando de janela ou tmux; sem o mod instalado, recusa com mensagem que indica `forge skills instalar plugin forge-painel`.
 - **CA-08** `go build ./... && go vet ./... && go test ./...` saem 0; ADR-0030 em `sdd/spec/adr/`.
