@@ -45,6 +45,11 @@ Quem deixa a esteira rodando depois do Gate 1, em uma ou mais máquinas, e quer 
 - **RN-14** Dois registros de comunicação. **Entre agentes**, compacto e sem moldura, emoji ou repetição, com teto por campo: (a) **entrada do agente** (prompt do job, handoff): seções delimitadas por tags XML, como a Anthropic recomenda, com chave e valor dentro; listas uniformes (tasks, arquivos, achados anteriores) em tabela com cabeçalho único, no estilo TOON, gerada por um codificador próprio sem dependência; (b) **saída do agente lida pelo Go** (retorno do Builder, parecer): JSON validado, porque é o formato que os modelos geram com mais acerto e o Go lê só com a biblioteca padrão. **Para o humano** (status, notificação, corpo do PR, menu): texto assertivo em tópicos, gerado pelo Go a partir dos dados estruturados, nunca a saída crua do agente. A escolha final de formato da entrada é decidida por `forge eval compare` com dados reais (tokens e acerto), não por benchmark de terceiros.
 - **RN-15** O agente devolve só o contrato estruturado. Prosa livre do agente fica no log, não segue para o próximo agente.
 
+- **RN-16** Nada vive só na memória do agente. O estado da esteira mora em disco: barramento com lease em `.forge/runtime/`, commits nas branches de task, estado das tasks gravado pelo Go e telemetria em `sdd/.metrics`. Fechar o Claude, perder a sessão ou desligar o computador não perde trabalho commitado.
+- **RN-17** Retomada automática: ao subir (`forge up` ou um worker), leases vencidos voltam para a fila (já existe), worktree com trabalho não commitado vira task "retomar" e o Builder novo recebe um handoff compacto de retomada (task, branch, arquivos alterados, último critério que passou), sem precisar do histórico da conversa anterior.
+- **RN-18** Janela de uso esgotada no meio da task: o job volta para a fila sem gastar tentativa (já existe) e o worker retoma no horário de renovação; worktree sujo fica preservado para a retomada.
+- **RN-19** O Builder faz commit de checkpoint (`wip(<task>)`) ao passar a Camada A parcial ou a cada etapa do plano da task; a junção na branch da feature usa só o commit final aprovado (squash da task).
+
 ## Escopo
 **Dentro:** job por task; worktree efêmero apagado no commit; despachante com teto por disco e por janela; pares Builder e Reviewer; junção contínua na branch da feature; contrato compacto entre agentes e saída legível para o humano; telemetria por task; chave para voltar ao modo por feature; medição antes e depois.
 
@@ -59,6 +64,7 @@ Quem deixa a esteira rodando depois do Gate 1, em uma ou mais máquinas, e quer 
 | Dobrar revisores dobra tokens de revisão | Reviewer só com o diff da task e tier econômico; medição na onda 3 |
 | Retrabalho recria worktree e gasta disco | Recria só quando o Reviewer pede ajuste; mesma regra de vagas |
 | Formato compacto perde informação que o próximo agente precisa | Contrato com campos obrigatórios validados na borda; prosa completa preservada no log |
+| Queda no meio da task perde trabalho | RN-16 a RN-19: estado em disco, checkpoint por commit, worktree sujo preservado, retomada com handoff compacto |
 | Dependência da 115-03 (tier no job) | Sem tier, usa o modelo do papel (fallback da ADR-0024) |
 
 ## Esforço estimado

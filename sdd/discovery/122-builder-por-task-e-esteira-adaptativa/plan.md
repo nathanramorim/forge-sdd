@@ -28,6 +28,7 @@
 |---|---|---|---|
 | 3.1 | `forge status` mostra pares ativos, vagas de disco e tokens por task | 2.2 | COD-01 |
 | 3.2 | PR em draft da feature ao fim das tasks; squash opcional no merge | 2.4 | FLX-03 |
+| 3.4 | Retomada após queda: lease vencido, worktree sujo vira retomar, handoff compacto, checkpoint `wip` (RN-16 a RN-19) | 2.4 | SEG-02, TST-03 |
 | 3.3 | Medição nos dois modos e decisão do padrão (RN-12) | 3.1 | FLX-04 |
 
 Depende da 115-03 (tier por task) só para o modelo; sem ela, vale o modelo do papel.

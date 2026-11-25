@@ -96,4 +96,5 @@ end
 - **CA-10** `GOOS=windows go build ./... && GOOS=darwin go build ./... && go build ./... && go vet ./... && go test ./...` saem 0; ADR-0029 em `sdd/spec/adr/`.
 - **CA-11** `go test ./internal/pipeline/ -run Compacto`: o prompt e o handoff entre agentes usam seções em tags XML, chave e valor e listas em tabela de cabeçalho único, sem moldura nem emoji, abaixo do teto de bytes; o retorno JSON do Builder sem campo obrigatório é recusado. `forge eval compare` registra tokens e acerto do formato atual contra o compacto.
 - **CA-12** `go test ./internal/pipeline/ -run Humano`: a mensagem para o humano é gerada a partir do retorno estruturado, em tópicos, sem trecho cru da saída do agente (`SEG-08`).
+- **CA-14** `go test ./internal/pipeline/ -run Retomada`: com lease vencido e worktree sujo simulados, o próximo worker recupera o job, não apaga o worktree e monta o handoff de retomada com task, branch e arquivos alterados; com limite de uso, o job volta à fila sem gastar tentativa e o worktree continua.
 - **CA-13** Medição: uma iniciativa real nos dois modos, com tokens por task, duração total e pico de disco no `status.md`.
