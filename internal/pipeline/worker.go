@@ -339,6 +339,9 @@ func VerifyJobHandoff(dir, role, workerName string, now func() time.Time, jobID 
 			return "job fora de processing: " + e.State
 		}
 		j := e.Job
+		if j.Type == bus.TypeTaskBuild {
+			return verificaTaskBuild(dir, role, workerName, now, j)
+		}
 		if j.PR.URL == nil || j.PR.Number == nil {
 			return "o agente terminou sem registrar o PR (forge pipeline pr)"
 		}
@@ -377,6 +380,10 @@ func reviewJobID(id string) string {
 
 func workerPrompt(role string, job bus.Job, rel string, cfg config.ForgeConfig) string {
 	p := BuildPrompt(role, job, rel)
+	if role == layout.RoleBuilder && job.Type == bus.TypeTaskBuild {
+		// Por task o Go decide o paralelo (COD-04): sem dica de worktree nem de subagentes.
+		return p + testsHint(cfg.Builder)
+	}
 	if role == layout.RoleBuilder {
 		p += "\n" + BuilderHints(cfg.Builder, job)
 	}

@@ -307,6 +307,9 @@ func RunDeliverWorker(ctx context.Context, opts WorkerOptions) error {
 		prompt := workerPrompt(opts.Role, job, filepath.ToSlash(rel), cfg)
 		if contextMode == config.ContextClear && profile.ResetCommand != "" {
 			card := HandoffCardFromJob(job, lastCompletedTaskID, "concluída e arquivada com sucesso")
+			if job.Type == bus.TypeTaskBuild {
+				card = HandoffCompactoFromJob(job, lastCompletedTaskID, "concluída")
+			}
 			prompt = card + "\n" + prompt
 		}
 

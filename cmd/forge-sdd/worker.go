@@ -169,11 +169,11 @@ var busPlanCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		batches, err := pipeline.PlanWaves(base, cfg.Builder.MaxParallelTasks)
+		batches, err := pipeline.PlanWaves(base, cfg.Builder.LarguraDePlano())
 		if err != nil {
 			return err
 		}
-		fmt.Fprintf(cmd.OutOrStdout(), "até %d tarefas em paralelo (use_git_worktrees=%t)\n%s", cfg.Builder.MaxParallelTasks, cfg.Builder.UseGitWorktrees, pipeline.FormatWaves(batches))
+		fmt.Fprintf(cmd.OutOrStdout(), "até %d tarefas em paralelo (use_git_worktrees=%t)\n%s", cfg.Builder.LarguraDePlano(), cfg.Builder.UseGitWorktrees, pipeline.FormatWaves(batches))
 		return nil
 	},
 }

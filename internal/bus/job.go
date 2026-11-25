@@ -32,7 +32,10 @@ const (
 const (
 	TypeFeatureBuild = "feature_build"
 	TypePRRework     = "pr_rework"
-	TypePRReview     = "pr_review"
+	// TypeTaskBuild é o Builder de uma única task, com contexto novo (ADR-0029). Exige TaskID e
+	// FeatureJob; TaskIDs traz as tasks do plano da feature e TaskID precisa estar nele.
+	TypeTaskBuild = "task_build"
+	TypePRReview  = "pr_review"
 	// TypeSpecReview é a revisão da spec pelo Reviewer no modo avançado (ADR-0013).
 	TypeSpecReview = "spec_review"
 )
@@ -100,14 +103,17 @@ type Event struct {
 
 // Job é o contrato de trabalho entre as sessões (D-5).
 type Job struct {
-	SchemaVersion     int        `json:"schema_version"`
-	ID                string     `json:"id"`
-	Type              string     `json:"type"`
-	Priority          string     `json:"priority"`
-	Feature           string     `json:"feature"`
-	Title             string     `json:"title"`
-	Initiative        string     `json:"initiative,omitempty"`
-	TaskIDs           []string   `json:"task_ids,omitempty"`
+	SchemaVersion int      `json:"schema_version"`
+	ID            string   `json:"id"`
+	Type          string   `json:"type"`
+	Priority      string   `json:"priority"`
+	Feature       string   `json:"feature"`
+	Title         string   `json:"title"`
+	Initiative    string   `json:"initiative,omitempty"`
+	TaskIDs       []string `json:"task_ids,omitempty"`
+	// TaskID e FeatureJob só existem no tipo task_build: a task e o id do job feature_build pai.
+	TaskID            string     `json:"task_id,omitempty"`
+	FeatureJob        string     `json:"feature_job,omitempty"`
 	SpecPath          string     `json:"spec_path"`
 	ADRRefs           []string   `json:"adr_refs"`
 	RulesRefs         []string   `json:"rules_refs"`
@@ -125,7 +131,7 @@ type Job struct {
 // RoleForType devolve o papel cuja fila recebe o tipo de job.
 func RoleForType(t string) (string, bool) {
 	switch t {
-	case TypeFeatureBuild, TypePRRework:
+	case TypeFeatureBuild, TypePRRework, TypeTaskBuild:
 		return layout.RoleBuilder, true
 	case TypePRReview, TypeSpecReview:
 		return layout.RoleReviewer, true
@@ -191,6 +197,9 @@ func (j *Job) Validate(role string) error {
 			return bad("task_ids: %q inválido", id)
 		}
 	}
+	if err := j.validateTask(); err != nil {
+		return bad("%v", err)
+	}
 	for field, v := range map[string]string{"card.provider": j.Card.Provider, "card.id": j.Card.ID, "card.url": j.Card.URL} {
 		if err := checkText(field, v, 512, false); err != nil {
 			return bad("%v", err)
@@ -230,6 +239,31 @@ func (j *Job) Validate(role string) error {
 		}
 	}
 	return nil
+}
+
+// validateTask confere os campos de task_build e da revisão de uma task (pr_review com task_id); nos outros tipos, TaskID e FeatureJob ficam vazios.
+func (j *Job) validateTask() error {
+	if j.Type == TypePRReview && j.TaskID == "" && j.FeatureJob == "" {
+		return nil
+	}
+	if j.Type != TypeTaskBuild && j.Type != TypePRReview {
+		if j.TaskID != "" || j.FeatureJob != "" {
+			return fmt.Errorf("task_id e feature_job só valem nos tipos %s e %s", TypeTaskBuild, TypePRReview)
+		}
+		return nil
+	}
+	if !idRe.MatchString(j.TaskID) {
+		return fmt.Errorf("task_id %q inválido", j.TaskID)
+	}
+	if !idRe.MatchString(j.FeatureJob) {
+		return fmt.Errorf("feature_job %q inválido", j.FeatureJob)
+	}
+	for _, id := range j.TaskIDs {
+		if id == j.TaskID {
+			return nil
+		}
+	}
+	return fmt.Errorf("task_id %q fora do plano da feature (task_ids)", j.TaskID)
 }
 
 // checkText recusa caracteres de controle e textos acima do limite; multiline libera \n e \t.

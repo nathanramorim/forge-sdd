@@ -116,6 +116,7 @@ func mustInbox(t *testing.T, dir string) []notify.InboxItem {
 func TestE2E_WorkerVisaoLimpaELimiteDeUso(t *testing.T) {
 	dir := project(t, func(dir string) {
 		cfg := config.DefaultForgeConfig()
+		cfg.Builder.Granularidade = config.GranularidadeFeature
 		cfg.Sessions = map[string]string{config.SessionRoleBuilder: config.CLICodex, config.SessionRoleReviewer: config.CLIGemini}
 		data, _ := json.Marshal(cfg)
 		testutil.WriteFile(t, dir, ".forge/config/forge.json", string(data))

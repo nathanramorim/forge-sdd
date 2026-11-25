@@ -88,7 +88,7 @@ func ApplyVerdict(dir, jobID, worker string, v queue.Verdict, deps notify.Deps, 
 		return nil, fmt.Errorf("o job %s está em %s; só jobs em processing recebem veredito", jobID, entry.State)
 	}
 	job := entry.Job
-	if job.PR.URL == nil {
+	if job.PR.URL == nil && job.TaskID == "" {
 		return nil, fmt.Errorf("%w: o job %s não tem PR registrado", bus.ErrInvalidJob, jobID)
 	}
 
@@ -113,7 +113,7 @@ func ApplyVerdict(dir, jobID, worker string, v queue.Verdict, deps notify.Deps, 
 		n := notify.Notification{
 			Type: notify.TypePRApproved, Title: "PR pronto: " + job.Feature,
 			Message: "PR revisado, sem inconformidades e pronto para aprovação final.\n" + oneLine(v.Resumo, 600),
-			PRURL:   *job.PR.URL, CardURL: job.Card.URL, Feature: job.Feature, JobID: job.ID,
+			PRURL:   prURLDe(job), CardURL: job.Card.URL, Feature: job.Feature, JobID: job.ID,
 			ID: notificationID(job.ID, "aprovado"), // determinístico: reaplicar não duplica o inbox
 		}
 		out, err := notify.Dispatch(dir, ncfg, n, deps)
@@ -139,6 +139,10 @@ func ApplyVerdict(dir, jobID, worker string, v queue.Verdict, deps notify.Deps, 
 		rework := job
 		rework.ID = reworkID(job.ID, job.Attempt+1)
 		rework.Type = bus.TypePRRework
+		if job.TaskID != "" {
+			// A revisão de uma task devolve a task ao Builder (worktree novo da branch da task).
+			rework.Type = bus.TypeTaskBuild
+		}
 		rework.Priority = bus.PriorityHigh
 		rework.Attempt = job.Attempt + 1
 		rework.ReworkFeedback = feedback
@@ -166,7 +170,7 @@ func ApplyVerdict(dir, jobID, worker string, v queue.Verdict, deps notify.Deps, 
 			title = "Confirmação humana necessária: " + job.Feature
 			msg = "O Reviewer ficou em dúvida e não devolveu o PR automaticamente. Confirme o que precisa ser decidido.\n" + oneLine(v.Resumo, 600)
 		}
-		n := notify.Notification{ID: notificationID(job.ID, "escalado"), Type: notify.TypeEscalation, Title: title, Message: msg, PRURL: *job.PR.URL, CardURL: job.Card.URL, Feature: job.Feature, JobID: job.ID}
+		n := notify.Notification{ID: notificationID(job.ID, "escalado"), Type: notify.TypeEscalation, Title: title, Message: msg, PRURL: prURLDe(job), CardURL: job.Card.URL, Feature: job.Feature, JobID: job.ID}
 		out, err := notify.Dispatch(dir, ncfg, n, deps)
 		if err != nil {
 			return nil, err
@@ -231,6 +235,14 @@ func toFeedback(v queue.Verdict) []bus.Feedback {
 		}
 	}
 	return out
+}
+
+// prURLDe devolve a URL do PR do job, ou vazio quando a revisão é de uma task sem PR.
+func prURLDe(j bus.Job) string {
+	if j.PR.URL == nil {
+		return ""
+	}
+	return *j.PR.URL
 }
 
 func max0(n int) int {

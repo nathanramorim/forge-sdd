@@ -56,6 +56,11 @@ type DispatchOptions struct {
 	// Fix despacha um fix da iniciativa (ex.: fix-88-01) em vez das tasks de features/.
 	Fix string
 	Git queue.GitFunc // injetável nos testes; padrão: git real
+	// Disco e JanelaPct alimentam o teto de paralelo do modo por task; nil mede o volume real e
+	// trata a janela de uso como desconhecida.
+	Disco     func(dir string) (UsoDisco, error)
+	JanelaPct func() (int, bool)
+	Memoria   func() (int, error) // memória disponível em MB; nil lê a da máquina
 	// EmiteSpecAberta é o gancho aditivo do evento spec.aberta; nil = no-op (113-05).
 	EmiteSpecAberta EmissorSpecAberta
 }
@@ -71,6 +76,9 @@ type DispatchResult struct {
 	BaseBranch      string   // base do PR da iniciativa
 	BaseSource      string   // de onde a base veio (flag, fila, git ou forge.json)
 	Warnings        []string // avisos que não bloqueiam (ex.: evidência opcional descartada)
+	// TaskJobs são os task_build enfileirados (ou que seriam, no dry-run) com builder.granularidade=task.
+	// Job é então o pai (feature_build) que só dá nome a eles e não vai para a fila.
+	TaskJobs []bus.Job
 }
 
 // Blocked informa se o gate reprovou.
@@ -133,6 +141,7 @@ func Dispatch(dir, feature string, opts DispatchOptions) (*DispatchResult, error
 		res.Pending = append(res.Pending, fmt.Sprintf("nenhuma task em %s/features (rode /split-features)", rel(base)))
 	}
 	rulesSet := map[string]bool{}
+	porTask := map[string]*taskJobRefs{} // spec relativa -> referências próprias da task
 	adrCited := map[string]bool{}
 	adrMissing := map[string]bool{}
 	for _, t := range tasks {
@@ -160,6 +169,7 @@ func Dispatch(dir, feature string, opts DispatchOptions) (*DispatchResult, error
 			rulesSet[r.Path] = true
 		}
 		rulesSection := sectionBody(string(data), "rules e ids da constituição aplicáveis")
+		porTask[trel] = refsDaTask(dir, cfg.ADRDirs, trel, pack, rulesSection)
 		for _, tok := range adrTokensIn(rulesSection) {
 			adrCited[tok] = true
 		}
@@ -170,6 +180,15 @@ func Dispatch(dir, feature string, opts DispatchOptions) (*DispatchResult, error
 		}
 	}
 	res.Pending = append(res.Pending, taskSpecProblems(dir, base, opts.Fix)...)
+	// Com um job por task o plano de ondas precisa ser válido (ciclo ou dependência inexistente bloqueia).
+	var plano [][]Task
+	modoTask := cfg.Builder.PorTask() && opts.Fix == "" && !cfg.IsAdvanced()
+	if modoTask && len(tasks) > 0 {
+		var perr error
+		if plano, perr = planoDeTasks(dir, initiative, cfg.Builder.LarguraDePlano()); perr != nil {
+			res.Pending = append(res.Pending, fmt.Sprintf("plano de ondas inválido: %s", firstLine(perr.Error())))
+		}
+	}
 	for _, f := range []string{"criteria.md"} {
 		if data, err := os.ReadFile(filepath.Join(base, f)); err == nil {
 			for _, tok := range adrTokensIn(sectionBody(string(data), "adrs aplicáveis")) {
@@ -269,15 +288,49 @@ func Dispatch(dir, feature string, opts DispatchOptions) (*DispatchResult, error
 		job.Attempt = nextSpecAttempt(dir, initiative, job.MaxReworkAttempts)
 	}
 	res.Job = &job
+	if modoTask {
+		// Um task_build por task elegível (dependências já na branch da feature); as demais entram
+		// quando o despachante as liberar. O pai (feature_build) só nomeia os jobs.
+		elegiveis := ElegiveisDoPlano(plano, nil)
+		teto, terr := tetoDaRodada(dir, cfg.Builder, len(elegiveis), opts, !opts.DryRun)
+		if terr != nil {
+			res.Warnings = append(res.Warnings, "teto de paralelo: "+terr.Error()+"; começa com 1 task")
+			teto = Teto{Pares: 1, Motivo: "medição indisponível"}
+		}
+		if teto.Pares < len(elegiveis) {
+			res.Warnings = append(res.Warnings, fmt.Sprintf("teto de paralelo %d (%s): %d de %d tasks elegíveis começam agora", teto.Pares, teto.Motivo, teto.Pares, len(elegiveis)))
+			elegiveis = elegiveis[:teto.Pares]
+		}
+		for _, t := range elegiveis {
+			refs := porTask[rel(t.File)]
+			if refs == nil {
+				continue
+			}
+			res.TaskJobs = append(res.TaskJobs, TaskJobFrom(job, idCurtoDaTask(t.ID), tituloDoArquivo(t.File, t.ID), *refs))
+		}
+	}
 	if cfg.PMMCP.RequireExistingCard {
 		res.CardInstruction = fmt.Sprintf("Atualize o card %s (%s) para %q via MCP.", ev.ID, ev.URL, cfg.PMMCP.StatusOnImplement)
 	}
 	if opts.DryRun {
 		return res, nil
 	}
-	path, created, err := bus.Enqueue(dir, role, job, now)
-	if err != nil {
-		return nil, err
+	var path string
+	var created bool
+	if modoTask {
+		criados, paths, eerr := EnfileiraTasks(dir, res.TaskJobs, now)
+		if eerr != nil {
+			return nil, eerr
+		}
+		created = len(criados) > 0
+		if len(paths) > 0 {
+			path = paths[0]
+		}
+	} else {
+		var eerr error
+		if path, created, eerr = bus.Enqueue(dir, role, job, now); eerr != nil {
+			return nil, eerr
+		}
 	}
 	res.JobPath, res.Created = path, created
 	if created && !cfg.PMMCP.RequireExistingCard && ev.ID != "" {
@@ -523,7 +576,12 @@ func jobID(feature string, now time.Time) string {
 }
 
 func initiativeTitle(base, feature string) string {
-	data, err := os.ReadFile(filepath.Join(base, "discovery.md"))
+	return tituloDoArquivo(filepath.Join(base, "discovery.md"), feature)
+}
+
+// tituloDoArquivo devolve o primeiro "# título" do arquivo, saneado, ou o fallback.
+func tituloDoArquivo(path, feature string) string {
+	data, err := os.ReadFile(path)
 	if err == nil {
 		for _, line := range strings.Split(string(data), "\n") {
 			if strings.HasPrefix(line, "# ") {

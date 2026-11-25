@@ -106,6 +106,53 @@ type BuilderConfig struct {
 	UseGitWorktrees   bool `json:"use_git_worktrees"`
 	RunTestsBeforePR  bool `json:"run_tests_before_pr"`
 	JobTimeoutMinutes int  `json:"job_timeout_minutes"`
+	// Granularidade escolhe a unidade do job do Builder: "feature" (um job por feature) ou
+	// "task" (padrão: um job e um contexto novo por task, ADR-0029).
+	Granularidade string `json:"granularidade,omitempty"`
+	// LimiteDisco é a porcentagem máxima de ocupação do volume dos worktrees ao paralelizar (50 a 95,
+	// padrão 80, ADR-0029).
+	LimiteDisco int `json:"limite_disco,omitempty"`
+	// ReservaMemoriaMB é a memória que o despachante deixa livre ao paralelizar (padrão 2048).
+	ReservaMemoriaMB int `json:"reserva_memoria_mb,omitempty"`
+}
+
+// Granularidades aceitas em builder.granularidade e limites de builder.limite_disco.
+const (
+	GranularidadeFeature = "feature"
+	GranularidadeTask    = "task"
+	LimiteDiscoPadrao    = 80
+	ReservaMemoriaPadrao = 2048
+	limiteDiscoMin       = 50
+	limiteDiscoMax       = 95
+)
+
+// LarguraDePlano é a largura máxima de lote usada ao planejar ondas: max_parallel_tasks, ou um valor
+// largo quando não há teto fixo (0). Só a ordem das ondas importa ao despachante.
+func (b BuilderConfig) LarguraDePlano() int {
+	if b.MaxParallelTasks <= 0 {
+		return 64
+	}
+	return b.MaxParallelTasks
+}
+
+// PorTask informa se o Builder roda um job por task. Vazio vale "task" (padrão da 6.0 beta, também
+// para forge.json antigo sem a chave); "feature" volta ao job único por feature.
+func (b BuilderConfig) PorTask() bool { return b.Granularidade != GranularidadeFeature }
+
+// ReservaMemoriaEfetiva devolve reserva_memoria_mb ou o padrão quando omitido (zero).
+func (b BuilderConfig) ReservaMemoriaEfetiva() int {
+	if b.ReservaMemoriaMB == 0 {
+		return ReservaMemoriaPadrao
+	}
+	return b.ReservaMemoriaMB
+}
+
+// LimiteDiscoEfetivo devolve limite_disco ou o padrão quando omitido (zero).
+func (b BuilderConfig) LimiteDiscoEfetivo() int {
+	if b.LimiteDisco == 0 {
+		return LimiteDiscoPadrao
+	}
+	return b.LimiteDisco
 }
 
 // ReviewerConfig configura a sessão Reviewer.
@@ -190,7 +237,7 @@ func DefaultForgeConfig() ForgeConfig {
 			StatusOnPRApproved:    "Ready for Review",
 			EvidenceMaxAgeMinutes: 30,
 		},
-		Builder:    BuilderConfig{MaxParallelTasks: 3, UseGitWorktrees: true, RunTestsBeforePR: true, JobTimeoutMinutes: 60},
+		Builder:    BuilderConfig{MaxParallelTasks: 3, UseGitWorktrees: true, RunTestsBeforePR: true, JobTimeoutMinutes: 60, Granularidade: GranularidadeTask, LimiteDisco: LimiteDiscoPadrao, ReservaMemoriaMB: ReservaMemoriaPadrao},
 		Reviewer:   ReviewerConfig{MaxReworkAttempts: 3, CommentOnPR: true},
 		ADRDirs:    []string{"sdd/spec/adr"},
 		BaseBranch: "main",
@@ -326,11 +373,20 @@ func (c ForgeConfig) Validate() error {
 	if c.Live.ReadyQuietSeconds < 0 || c.Live.ReadyQuietSeconds > 30 {
 		return fmt.Errorf("live.ready_quiet_seconds %d fora da faixa 0 a 30", c.Live.ReadyQuietSeconds)
 	}
-	if c.Builder.MaxParallelTasks < 1 || c.Builder.MaxParallelTasks > 8 {
-		return fmt.Errorf("builder.max_parallel_tasks %d fora da faixa 1 a 8", c.Builder.MaxParallelTasks)
+	if c.Builder.MaxParallelTasks < 0 || c.Builder.MaxParallelTasks > 64 {
+		return fmt.Errorf("builder.max_parallel_tasks %d fora da faixa 0 a 64 (0 = sem teto fixo)", c.Builder.MaxParallelTasks)
 	}
 	if c.Builder.JobTimeoutMinutes < 1 || c.Builder.JobTimeoutMinutes > 720 {
 		return fmt.Errorf("builder.job_timeout_minutes %d fora da faixa 1 a 720", c.Builder.JobTimeoutMinutes)
+	}
+	if g := c.Builder.Granularidade; g != "" && g != GranularidadeFeature && g != GranularidadeTask {
+		return fmt.Errorf("builder.granularidade %q inválida (use feature ou task)", g)
+	}
+	if l := c.Builder.LimiteDisco; l != 0 && (l < limiteDiscoMin || l > limiteDiscoMax) {
+		return fmt.Errorf("builder.limite_disco %d fora da faixa %d a %d", l, limiteDiscoMin, limiteDiscoMax)
+	}
+	if m := c.Builder.ReservaMemoriaMB; m < 0 || m > 1048576 {
+		return fmt.Errorf("builder.reserva_memoria_mb %d fora da faixa 0 a 1048576", m)
 	}
 	if c.Reviewer.MaxReworkAttempts < 1 || c.Reviewer.MaxReworkAttempts > 10 {
 		return fmt.Errorf("reviewer.max_rework_attempts %d fora da faixa 1 a 10", c.Reviewer.MaxReworkAttempts)
