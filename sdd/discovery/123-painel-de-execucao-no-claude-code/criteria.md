@@ -17,6 +17,10 @@
 | Uso real por evento | `internal/monitor/usage.go` | leitura do `result` do stream-json | reusar como referência | mesmos campos e nomes de `medicao` |
 | Instalação de plugin | `cmd/forge-sdd/skills_instalar.go`, ADR-0025 | `instalar <skill\|plugin> <slug> --de` | reusar | é o caminho oficial |
 | Gancho do Claude no projeto | `.claude/settings.json` | `UserPromptSubmit` chama `forge-sdd inbox` | manter | a faixa do inbox via mod fica para depois |
+| Sessões do `forge up` | `cmd/forge-sdd/up.go`, `internal/pipeline/launcher.go` | forge-discovery interativa; builder e reviewer como `forge worker` com `claude -p` | reusar sem mudar | o mod carrega só na interativa |
+| Telemetria dos workers | `cmd/forge-sdd/worker.go` `recordJobTelemetry` | grava um registro por job | reusar | dono dos registros de job (RN-11) |
+| Marca de processo de worker | `internal/pipeline/runner.go` | `FORGE_WORKER` no ambiente do agente | reusar | mod fica mudo dentro de worker |
+| Estado da esteira | `.forge/runtime/<papel>/<estado>/`, `internal/bus` | jobs por estado e lease | reusar só leitura | fonte do painel (RN-10) |
 | Painel de métricas | 111 (módulo) | painel HTML que lê `sdd/.metrics` | depender | o mod produz, a 111 consome |
 | Tokens por painel | 81, ADR-0009 | rótulo de tokens no tmux | estender | status line é o equivalente no Claude Code |
 | Contrato de módulos | 109 | manifesto e autorização para binários externos | alinhar | mesmo vocabulário de manifesto e permissões; mod não é binário |
@@ -69,4 +73,6 @@ M->>FS: lê e resume
 - **CA-05** Mesmo teste: aviso de orçamento em `agent.spawn` acima do limite não bloqueia.
 - **CA-06** `go test ./internal/skills/...`: instalar o plugin grava só em `.agents/plugins/forge-painel/` e recusa manifesto sem permissões ou versão mínima.
 - **CA-07** `grep` no código do mod não encontra `fetch`, chamadas de `$.model` nem escrita fora de `sdd/.metrics` e `.forge/runtime/painel`.
+- **CA-09** Mesmo teste do mod: com `FORGE_WORKER` definido o mod não grava em `sdd/.metrics` nem abre painel; sem ele, um job de worker já registrado não é gravado de novo.
+- **CA-10** Mesmo teste: com o barramento simulado (um job em `claimed` e um em `done`), o painel mostra os dois com papel, task e estado, sem escrever em `.forge/runtime/<papel>/`.
 - **CA-08** `go build ./... && go vet ./... && go test ./...` saem 0; ADR-0030 em `sdd/spec/adr/`.

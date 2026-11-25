@@ -18,7 +18,7 @@ Quem usa o Forge SDD com o Claude Code no terminal ou no app desktop e quer ver,
 2. Ao abrir o Claude Code, a status line mostra iniciativa, estação, janela de 5h, janela de 7d e contexto.
 3. Ao passar de 70% e de 90% de uma janela, um alerta avisa e diz quando ela renova.
 4. Cada subagente que termina grava sua telemetria em `sdd/.metrics` com `medicao: real`, sem o passo manual.
-5. Um painel lateral lista os agentes da sessão com estado, tokens, tendência e custo de tabela.
+5. Um painel lateral mostra a esteira inteira aberta pelo `forge up`: jobs de Builder e Reviewer com estado, task, tokens e tempo (lidos do barramento e dos logs), mais os subagentes da própria sessão.
 6. Antes de abrir um subagente com a janela acima do limite, o mod avisa (não bloqueia na primeira versão).
 7. `/gastos` resume a iniciativa por estação, lendo `sdd/.metrics`.
 
@@ -30,6 +30,10 @@ Quem usa o Forge SDD com o Claude Code no terminal ou no app desktop e quer ver,
 - **RN-5** Guarda de orçamento começa só avisando; bloquear exige decisão do dono depois de medir.
 - **RN-6** O mod é opcional e exclusivo do Claude Code. Os outros agentes seguem com `forge session record`.
 - **RN-7** Todo mod do Forge SDD segue o mesmo contrato: manifesto, permissões declaradas (rede, escrita, ganchos), versão mínima do Claude Code e versão mínima do forge. O `forge-painel` é o mod de referência desse contrato.
+- **RN-9** Convivência com `forge up`: o mod roda na sessão interativa (forge-discovery), que vira o painel da esteira inteira. Os workers (forge-builder e forge-reviewer, com `claude -p`) continuam como estão, em janelas do sistema ou tmux (ADR-0026).
+- **RN-10** O painel enxerga os workers lendo o que o Go já grava: estados do barramento em `.forge/runtime/`, logs dos jobs e `sdd/.metrics`. O mod nunca escreve no barramento nem em arquivo de outro processo; o Go segue como escritor único.
+- **RN-11** Um dono por registro de telemetria. Job de worker é gravado pelo worker (`recordJobTelemetry`); o mod grava só a sessão interativa e os subagentes dela. Se o mod carregar dentro de um worker (variável `FORGE_WORKER` presente), ele não grava nada e não abre painel.
+- **RN-12** O gancho `UserPromptSubmit` do inbox em `.claude/settings.json` continua; o mod não repete o aviso enquanto esse gancho existir.
 - **RN-8** Dado sensível nunca entra na telemetria nem na tela (`SEG-05`): só ids, contagens e nomes de papel.
 
 ## Escopo
@@ -44,6 +48,8 @@ Quem usa o Forge SDD com o Claude Code no terminal ou no app desktop e quer ver,
 | Carregar plugin do projeto sem `/plugin install` | Spike na onda 1 (configuração do projeto ou `--plugin-dir`); se não houver caminho, ADR registra a exceção |
 | Workers headless (`claude -p`) podem não carregar o mod | Spike na onda 1; sem carga, o worker segue gravando por `usage.go` (122) |
 | Primeira linguagem não Go no repositório (TypeScript) | Fica fora do binário (`ARQ-04`), em `.agents/plugins/forge-painel/`, sem dependência de runtime |
+| Telemetria em dobro (worker e mod gravando o mesmo job) | RN-11: dono único por registro, mod mudo com `FORGE_WORKER` |
+| Painel e janelas mostrando coisas diferentes | Os dois leem a mesma fonte (barramento e logs); o mod não tem estado próprio além de cache |
 | Percentual das janelas só existe em assinatura | Sem janelas, a status line mostra só contexto e custo de tabela |
 
 ## Esforço estimado

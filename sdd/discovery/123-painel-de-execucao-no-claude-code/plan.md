@@ -16,8 +16,8 @@
 ## Onda 2 — Telemetria e agentes (1 a 2 dias)
 | # | Task | Depende de | Rules/IDs |
 |---|---|---|---|
-| 2.1 | Telemetria automática por subagente em `sdd/.metrics` | 1.3 | FLX-04, DUP-04 |
-| 2.2 | Painel lateral de agentes da sessão | 1.3 | SEG-08 |
+| 2.1 | Telemetria automática da sessão interativa e subagentes, dono único (mudo com `FORGE_WORKER`) | 1.3 | FLX-04, DUP-04 |
+| 2.2 | Painel lateral da esteira: jobs do `forge up` lidos do barramento e dos logs, mais subagentes da sessão | 1.3 | SEG-08, DUP-01 |
 | 2.3 | Aviso de orçamento em `agent.spawn` | 1.3 | — |
 | 2.4 | `/gastos` por iniciativa e estação | 2.1 | DUP-01 |
 
