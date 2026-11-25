@@ -38,11 +38,12 @@ const (
 	TerminalAuto   = "auto"
 	TerminalTmux   = "tmux"
 	TerminalNative = "native"
+	TerminalPainel = "painel" // workers em segundo plano, sem janela nem tmux; o acompanhamento é o mod forge-painel (ADR-0030)
 )
 
 // ValidTerminal diz se v é um destino aceito.
 func ValidTerminal(v string) bool {
-	return v == TerminalAuto || v == TerminalTmux || v == TerminalNative
+	return v == TerminalAuto || v == TerminalTmux || v == TerminalNative || v == TerminalPainel
 }
 
 // MarkerModel e MarkerEffort expandem em zero ou mais argumentos, como MarkerPermissions: sem
@@ -222,7 +223,7 @@ func (c ForgeConfig) validateSessions() error {
 		return err
 	}
 	if !ValidTerminal(c.Terminal) {
-		return fmt.Errorf("terminal %q inválido (use auto, tmux ou native)", c.Terminal)
+		return fmt.Errorf("terminal %q inválido (use auto, tmux, native ou painel)", c.Terminal)
 	}
 	if c.Permissions != PermissionProject && c.Permissions != PermissionFull {
 		return fmt.Errorf("permissions %q inválido (use project ou full)", c.Permissions)
