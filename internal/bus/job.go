@@ -241,11 +241,14 @@ func (j *Job) Validate(role string) error {
 	return nil
 }
 
-// validateTask confere os campos de task_build; nos outros tipos, TaskID e FeatureJob ficam vazios.
+// validateTask confere os campos de task_build e da revisão de uma task (pr_review com task_id); nos outros tipos, TaskID e FeatureJob ficam vazios.
 func (j *Job) validateTask() error {
-	if j.Type != TypeTaskBuild {
+	if j.Type == TypePRReview && j.TaskID == "" && j.FeatureJob == "" {
+		return nil
+	}
+	if j.Type != TypeTaskBuild && j.Type != TypePRReview {
 		if j.TaskID != "" || j.FeatureJob != "" {
-			return fmt.Errorf("task_id e feature_job só valem no tipo %s", TypeTaskBuild)
+			return fmt.Errorf("task_id e feature_job só valem nos tipos %s e %s", TypeTaskBuild, TypePRReview)
 		}
 		return nil
 	}

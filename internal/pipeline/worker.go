@@ -339,6 +339,9 @@ func VerifyJobHandoff(dir, role, workerName string, now func() time.Time, jobID 
 			return "job fora de processing: " + e.State
 		}
 		j := e.Job
+		if j.Type == bus.TypeTaskBuild {
+			return verificaTaskBuild(dir, role, workerName, now, j)
+		}
 		if j.PR.URL == nil || j.PR.Number == nil {
 			return "o agente terminou sem registrar o PR (forge pipeline pr)"
 		}
