@@ -89,6 +89,28 @@ test('lease vencido aparece como parado, com o que fazer', async ($, on) => {
   await ui.unmount()
 })
 
+test('job na fila sem builder vivo neste projeto vira "sem worker", com o comando para subir', async ($, on) => {
+  montarMundo(on, { [`${FILAS}/builder/pending/1-1-job-b1.json`]: job('job-b1') })
+  await $.session.start({ cwd: '/', surface: 'terminal', isInteractive: true })
+  await $.command.run(cmd('painel'))
+  const ui = await $.ui.mount({ ...PANE, surface: 'terminal' })
+  expect(await ui.find({ type: 'Text', text: /^● sem worker$/ })).toBeDefined()
+  expect(await ui.find({ type: 'Text', text: /forge up --terminal painel/ })).toBeDefined()
+  await ui.unmount()
+})
+
+test('com retrato recente do builder, o job pendente segue "na fila"', async ($, on) => {
+  montarMundo(on, {
+    [`${FILAS}/builder/pending/1-1-job-b1.json`]: job('job-b1'),
+    '.forge/runtime/painel/recursos.json': JSON.stringify({ em: '2026-11-25T17:59:50Z', worktrees: [] }),
+  })
+  await $.session.start({ cwd: '/', surface: 'terminal', isInteractive: true })
+  await $.command.run(cmd('painel'))
+  const ui = await $.ui.mount({ ...PANE, surface: 'terminal' })
+  expect(await ui.find({ type: 'Text', text: /^● na fila$/ })).toBeDefined()
+  await ui.unmount()
+})
+
 test('texto do log passa por saneamento (sem escapes de terminal)', async ($, on) => {
   montarMundo(on, {
     ...CENARIO,

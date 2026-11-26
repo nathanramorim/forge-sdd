@@ -227,7 +227,7 @@ export function resumoInbox(brutos: string[]): { naoLidas: number; prConforme: s
 
 export function classeDe(estado: string): 'ok' | 'run' | 'wait' | 'fail' {
   if (estado === 'rodando' || estado === 'revisando') return 'run'
-  if (estado === 'falhou' || estado === 'parado' || estado === 'bloqueada') return 'fail'
+  if (estado === 'falhou' || estado === 'parado' || estado === 'bloqueada' || estado === 'sem worker') return 'fail'
   if (estado === 'na fila' || estado === '·') return 'wait'
   return 'ok'
 }
@@ -264,7 +264,12 @@ export type Estacao = {
 // O job mais recente de cada papel na iniciativa vira o cartão daquela estação. O tempo conta de
 // quando o worker pegou o job (não de quando foi criado) e o detalhe diz o motivo da falha ou o que
 // o agente está fazendo agora (atividade, da última linha útil do log do worker).
-export function montarEstacoes(jobs: JobLido[], ini: string, agora: number, atividade: Record<string, string> = {}): Estacao[] {
+// O worker do Builder grava recursos.json a cada 15 s: sem retrato recente, ninguém pega os jobs.
+export const BUILDER_VIVO_MS = 60_000
+// Folga para o worker pegar um job recém-criado antes de acusar "sem worker".
+const FOLGA_FILA_MS = 30_000
+
+export function montarEstacoes(jobs: JobLido[], ini: string, agora: number, atividade: Record<string, string> = {}, builderVivo = true): Estacao[] {
   const out: Estacao[] = []
   for (const papel of ['builder', 'reviewer']) {
     const doPapel = jobs.filter(x => x.iniciativa === ini && x.papel === papel)
@@ -277,7 +282,8 @@ export function montarEstacoes(jobs: JobLido[], ini: string, agora: number, ativ
     }
     for (const j of escolhidos) {
       const nome = rodando.length > 1 && j.taskId !== '' ? `${papel} · ${j.taskId}` : papel
-      const estado = rotulo(j, papel) === 'commitado' ? 'concluído' : rotulo(j, papel)
+      let estado = rotulo(j, papel) === 'commitado' ? 'concluído' : rotulo(j, papel)
+      if (papel === 'builder' && !builderVivo && j.estado === 'pending' && agora - quando(j) > FOLGA_FILA_MS) estado = 'sem worker'
       const classe = classeDe(estado)
       let tempo = '·'
       if (j.estado !== 'pending' && j.inicio !== undefined) {
@@ -285,7 +291,8 @@ export function montarEstacoes(jobs: JobLido[], ini: string, agora: number, ativ
         tempo = duracao(fim - j.inicio)
       }
       let detalhe = ''
-      if (classe === 'fail') detalhe = j.parado ? 'worker parou no meio (rode forge up)' : j.motivo
+      if (estado === 'sem worker') detalhe = 'nenhum builder rodando neste projeto: forge up --terminal painel'
+      else if (classe === 'fail') detalhe = j.parado ? 'worker parou no meio (rode forge up)' : j.motivo
       else if (classe === 'run') detalhe = atividade[papel] ?? ''
       out.push({ papel: nome, estado, classe, tokens: j.tokens ?? 0, tempo, detalhe: rodando.length > 1 ? '' : detalhe, jobId: j.id })
     }

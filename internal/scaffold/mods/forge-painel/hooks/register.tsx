@@ -2,7 +2,7 @@ import { atom, read, update } from 'claude-code'
 import type { EngineInterface, Register } from 'claude-code'
 
 import { PAPEIS, ESTADOS, DIR_FILAS, DIR_LOGS, RE_ID_JOB, tokensDoLog, caudaDoLog, sanear } from './lib/esteira'
-import { atividadeDoWorker, barra, lerRecursos, duracao, escolherIniciativa, estacaoAtual, lerJob, montarEstacoes, montarQuadro, progressoDaFila, resumoInbox, sparkline, tokensCurtos } from './lib/quadro'
+import { BUILDER_VIVO_MS, atividadeDoWorker, barra, lerRecursos, duracao, escolherIniciativa, estacaoAtual, lerJob, montarEstacoes, montarQuadro, progressoDaFila, resumoInbox, sparkline, tokensCurtos } from './lib/quadro'
 import type { JobLido } from './lib/quadro'
 import { resumir, textoDoResumo } from './lib/gastos'
 import { avaliarAlertas, horaDeRenovacao, conteudoJanela, janelaMaisCheia, linhaDeStatus, LIMITE_ORCAMENTO, rotuloJanela } from './lib/janelas'
@@ -220,7 +220,8 @@ async function atualizar($: EngineInterface): Promise<void> {
     for (const papel of PAPEIS) {
       atividade[papel] = atividadeDoWorker(await lerCauda($, `${DIR_LOGS}/${papel}-worker.log`, 4096), papel)
     }
-    estacoes = montarEstacoes(jobs, iniciativa, agora, atividade)
+    const ret = lerRecursos(await lerTexto($, ARQ_RECURSOS))
+    estacoes = montarEstacoes(jobs, iniciativa, agora, atividade, ret !== null && agora - ret.em < BUILDER_VIVO_MS)
     progresso = progressoDaFila(await lerTexto($, `sdd/discovery/${iniciativa}/queue.json`))
   }
   const series: Record<string, number[]> = {}
