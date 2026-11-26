@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "chave_conteudo": "e3d0930e296da6a8",
-  "versao_historico": "67bc326",
+  "chave_conteudo": "3a2603b54c3335b2",
+  "versao_historico": "c37a0a9",
   "versoes": [
     {
       "versao": "5.0.0",
@@ -66,8 +66,8 @@
           "texto": "A task aprovada entra na hora na branch da feature, com um commit por task (squash); conflito para só aquela task, avisa e preserva o trabalho."
         },
         {
-          "titulo": "O paralelo se ajusta à sua máquina, sem número fixo.",
-          "texto": "O forge abre quantos pares couberem no disco (até 80% de ocupação), na memória (reserva de 2 GB para o sistema) e na largura da onda; acima de 85% da janela de uso, cai para 1 par. Cada worktree é apagado depois do commit, então o disco não acumula cópias (`builder.limite_disco`, `builder.reserva_memoria_mb`, `builder.max_parallel_tasks` opcional)."
+          "titulo": "O paralelo se ajusta à sua máquina, sem número fixo, e nunca passa do teto.",
+          "texto": "O forge só abre mais um par enquanto o disco fica abaixo de 90% de ocupação e a memória abaixo de 80% da RAM, respeitando também a largura da onda; acima de 85% da janela de uso, cai para 1 par. Cada worktree é apagado depois do commit, então o disco não acumula cópias (`builder.limite_disco`, `builder.limite_memoria`, `builder.max_parallel_tasks` opcional)."
         },
         {
           "titulo": "Desligou o computador no meio? A esteira continua de onde parou.",
@@ -83,7 +83,11 @@
         },
         {
           "titulo": "`forge status --diagnostico` acha a causa em um comando.",
-          "texto": "Workers vivos, fila por papel, job em execução, última falha com motivo e log, pendentes velhos e teto; `forge --version` também responde. O despacho tira da fila jobs pendentes antigos da mesma iniciativa, e a trava de disco reserva no máximo 10 GB livres."
+          "texto": "Workers vivos, fila por papel, job em execução, última falha com motivo e log, pendentes velhos e quantos pares cabem; `forge --version` também responde. O despacho tira da fila jobs pendentes antigos da mesma iniciativa, e o painel mostra \"sem worker\" quando há job na fila e nenhum Builder vivo. O perfil `claude` da 4.1 migra sozinho para a saída com tokens reais e as permissões escolhidas."
+        },
+        {
+          "titulo": "Rode na nuvem do Claude, sem gastar o seu disco.",
+          "texto": "`forge nuvem ativar` grava um hook de início de sessão no repositório: nas sessões do Claude Code na nuvem ele instala o forge e sobe o Builder e o Reviewer; no seu computador não faz nada. Cada prompt mostra o estado da esteira quando ele muda, e `--repos` cobre um hub de vários repositórios. Fica em Configurações, junto com a granularidade, os tetos de disco e memória e o retrato de recursos agora."
         },
         {
           "titulo": "`forge status` mostra a esteira por task.",
