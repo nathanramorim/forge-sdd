@@ -1,13 +1,18 @@
 package pipeline
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
 	"os"
 	"path"
 	"path/filepath"
+	"regexp"
 	"strings"
+	"time"
 
 	"github.com/forge-sdd/cli/internal/config"
+	"github.com/forge-sdd/cli/internal/layout"
 )
 
 // NaNuvem diz se o processo roda numa sessão do Claude Code na nuvem.
@@ -56,4 +61,39 @@ func ChecklistNuvem(n config.NuvemConfig, projeto string) string {
 	b.WriteString("  3. Segredos: nenhum. O hook só roda comandos fixos e fica versionado no repositório.\n")
 	b.WriteString("Depois, faça commit de .claude/settings.json e .claude/hooks/forge-nuvem.sh: a próxima sessão na nuvem já sobe a esteira.\n")
 	return b.String()
+}
+
+var duracaoNoResumoRe = regexp.MustCompile(`há [0-9hms ]+`)
+
+// assinaturaDoResumo ignora o que muda a cada segundo (durações, disco e memória) para o resumo só
+// reaparecer quando a esteira de fato mudou.
+func assinaturaDoResumo(texto string) string {
+	var b strings.Builder
+	for _, l := range strings.Split(texto, "\n") {
+		if strings.HasPrefix(l, "disco:") || strings.HasPrefix(l, "memória:") || strings.HasPrefix(l, "(retrato") {
+			continue
+		}
+		b.WriteString(duracaoNoResumoRe.ReplaceAllString(l, "há _"))
+		b.WriteByte('\n')
+	}
+	h := sha256.Sum256([]byte(b.String()))
+	return hex.EncodeToString(h[:8])
+}
+
+// ResumoNuvem devolve o diagnóstico da esteira só quando ele mudou desde a última chamada (a
+// assinatura fica em .forge/runtime/painel/resumo.sig); texto vazio quando nada mudou.
+func ResumoNuvem(dir string, now time.Time) string {
+	texto := FormatDiagnostico(dir, now)
+	if texto == "" {
+		return ""
+	}
+	sig := assinaturaDoResumo(texto)
+	arq := filepath.Join(layout.ForgeRuntime(dir), "painel", "resumo.sig")
+	if ant, err := os.ReadFile(arq); err == nil && strings.TrimSpace(string(ant)) == sig {
+		return ""
+	}
+	if err := os.MkdirAll(filepath.Dir(arq), 0o755); err == nil {
+		_ = os.WriteFile(arq, []byte(sig), 0o600)
+	}
+	return texto
 }

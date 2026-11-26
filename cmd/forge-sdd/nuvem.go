@@ -95,6 +95,25 @@ var nuvemIniciarCmd = &cobra.Command{
 	},
 }
 
+var nuvemResumoCmd = &cobra.Command{
+	Use:    "resumo",
+	Short:  "Chamado a cada prompt na nuvem: mostra o estado da esteira só quando ele mudou",
+	Args:   cobra.NoArgs,
+	Hidden: true,
+	RunE: func(cmd *cobra.Command, args []string) error {
+		dir, _ := cmd.Flags().GetString("dir")
+		forcar, _ := cmd.Flags().GetBool("forcar")
+		if !forcar && !pipeline.NaNuvem(os.Getenv) {
+			return nil
+		}
+		if cfg, found, err := config.LoadForgeConfig(dir); err != nil || !found || !cfg.NuvemAtiva() {
+			return nil
+		}
+		fmt.Fprint(cmd.OutOrStdout(), pipeline.ResumoNuvem(dir, time.Now()))
+		return nil
+	},
+}
+
 func carregarPipeline(dir string) (config.ForgeConfig, error) {
 	cfg, found, err := config.LoadForgeConfig(dir)
 	if err != nil {
@@ -234,7 +253,7 @@ func nuvemIniciar(out io.Writer, dir string, forcar bool, getenv func(string) st
 }
 
 func init() {
-	for _, c := range []*cobra.Command{nuvemAtivarCmd, nuvemDesativarCmd, nuvemStatusCmd, nuvemIniciarCmd} {
+	for _, c := range []*cobra.Command{nuvemAtivarCmd, nuvemDesativarCmd, nuvemStatusCmd, nuvemIniciarCmd, nuvemResumoCmd} {
 		c.Flags().String("dir", ".", "Diretório alvo do projeto Forge-SDD")
 		nuvemCmd.AddCommand(c)
 	}
@@ -242,5 +261,6 @@ func init() {
 	nuvemAtivarCmd.Flags().String("instalar", "", "Como instalar o forge na nuvem: npm (padrão) ou git (compila da branch)")
 	nuvemAtivarCmd.Flags().String("ref", "", "Versão npm ou branch git (padrão: a versão deste forge, ou main no git)")
 	nuvemIniciarCmd.Flags().Bool("forcar", false, "Roda mesmo fora da nuvem (testes)")
+	nuvemResumoCmd.Flags().Bool("forcar", false, "Roda mesmo fora da nuvem (testes)")
 	rootCmd.AddCommand(nuvemCmd)
 }

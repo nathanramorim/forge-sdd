@@ -28,6 +28,13 @@ const (
 	NuvemRepoGit   = "https://github.com/nathanramorim/forge-sdd.git"
 )
 
+// nuvemResumoCommand roda a cada prompt da sessão na nuvem e só imprime quando o estado da esteira
+// mudou desde o último resumo: é a visibilidade do que os workers estão fazendo.
+const (
+	nuvemResumoCommand = `forge nuvem resumo`
+	nuvemResumoMarker  = "forge nuvem resumo"
+)
+
 const nuvemHookCommand = `bash "$CLAUDE_PROJECT_DIR/` + NuvemScriptRel + `"`
 
 // NuvemRef devolve a versão (npm) ou a branch (git) que o script instala.
@@ -130,6 +137,17 @@ func NuvemHookInstalado(targetDir string) bool {
 // ajustarHookNuvem põe a entrada do hook no início de SessionStart (antes do doctor, que precisa
 // do forge instalado) ou a tira. Devolve true se o arquivo mudou.
 func ajustarHookNuvem(targetDir string, instalar, dryRun bool) (bool, error) {
+	a, err := ajustarHook(targetDir, "SessionStart", nuvemHookMarker, nuvemHookCommand, nuvemHookTimeout, true, instalar, dryRun)
+	if err != nil {
+		return a, err
+	}
+	b, err := ajustarHook(targetDir, "UserPromptSubmit", nuvemResumoMarker, nuvemResumoCommand, 10, false, instalar, dryRun)
+	return a || b, err
+}
+
+// ajustarHook põe (ou tira) a entrada do evento identificada por marker, no início da lista quando
+// primeiro é true. Devolve true se o arquivo mudou.
+func ajustarHook(targetDir, event, marker, command string, timeout int, primeiro, instalar, dryRun bool) (bool, error) {
 	path := filepath.Join(targetDir, ".claude", "settings.json")
 	if err := checkSafeTarget(targetDir, path); err != nil {
 		return false, err
@@ -143,7 +161,7 @@ func ajustarHookNuvem(targetDir string, instalar, dryRun bool) (bool, error) {
 			if err == nil {
 				err = errors.New("não é um único objeto JSON")
 			}
-			return false, &InvalidJSONError{Path: path, Fix: "adicione o hook SessionStart manualmente (" + nuvemHookCommand + ")", Err: err}
+			return false, &InvalidJSONError{Path: path, Fix: "adicione o hook SessionStart manualmente (" + command + ")", Err: err}
 		}
 	case errors.Is(err, os.ErrNotExist):
 		if !instalar {
@@ -159,14 +177,14 @@ func ajustarHookNuvem(targetDir string, instalar, dryRun bool) (bool, error) {
 	if hooks == nil {
 		hooks = map[string]any{}
 	}
-	groups, ok := hooks["SessionStart"].([]any)
-	if hooks["SessionStart"] != nil && !ok {
-		return false, fmt.Errorf("%s: \"hooks.SessionStart\" não é uma lista; ajuste o hook manualmente", path)
+	groups, ok := hooks[event].([]any)
+	if hooks[event] != nil && !ok {
+		return false, fmt.Errorf("%s: \"hooks.%s\" não é uma lista; ajuste o hook manualmente", path, event)
 	}
 	var resto []any
 	tinha := false
 	for _, g := range groups {
-		if grupoDaNuvem(g) {
+		if grupoComMarca(g, marker) {
 			tinha = true
 			continue
 		}
@@ -176,11 +194,15 @@ func ajustarHookNuvem(targetDir string, instalar, dryRun bool) (bool, error) {
 		return false, nil
 	}
 	if instalar {
-		entrada := map[string]any{"hooks": []any{map[string]any{"type": "command", "command": nuvemHookCommand, "timeout": nuvemHookTimeout}}}
-		resto = append([]any{entrada}, resto...)
+		entrada := map[string]any{"hooks": []any{map[string]any{"type": "command", "command": command, "timeout": timeout}}}
+		if primeiro {
+			resto = append([]any{entrada}, resto...)
+		} else {
+			resto = append(resto, entrada)
+		}
 	}
 	if len(resto) == 0 {
-		delete(hooks, "SessionStart")
+		delete(hooks, event)
 		root["hooks"] = hooks
 		if dryRun {
 			return true, nil
@@ -191,10 +213,10 @@ func ajustarHookNuvem(targetDir string, instalar, dryRun bool) (bool, error) {
 		}
 		return true, writeFileSafe(targetDir, path, append(out, '\n'))
 	}
-	return writeHooksRoot(targetDir, path, root, hooks, "SessionStart", resto, dryRun)
+	return writeHooksRoot(targetDir, path, root, hooks, event, resto, dryRun)
 }
 
-func grupoDaNuvem(g any) bool {
+func grupoComMarca(g any, marker string) bool {
 	gm, ok := g.(map[string]any)
 	if !ok {
 		return false
@@ -202,7 +224,7 @@ func grupoDaNuvem(g any) bool {
 	inner, _ := gm["hooks"].([]any)
 	for _, h := range inner {
 		if hm, ok := h.(map[string]any); ok {
-			if cmd, _ := hm["command"].(string); strings.Contains(cmd, nuvemHookMarker) {
+			if cmd, _ := hm["command"].(string); strings.Contains(cmd, marker) {
 				return true
 			}
 		}

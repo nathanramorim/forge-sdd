@@ -4,8 +4,11 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
 
+	"github.com/forge-sdd/cli/internal/bus"
 	"github.com/forge-sdd/cli/internal/config"
+	"github.com/forge-sdd/cli/internal/layout"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -35,4 +38,17 @@ func TestChecklistNuvem(t *testing.T) {
 		s := ChecklistNuvem(config.NuvemConfig{Instalar: "git"}, "app")
 		assert.Contains(t, s, "proxy.golang.org")
 	})
+}
+
+func TestResumoNuvem_SoReapareceQuandoAEsteiraMuda(t *testing.T) {
+	dir := t.TempDir()
+	require.NoError(t, os.MkdirAll(filepath.Join(dir, ".forge", "runtime", "queues", "builder", "pending"), 0o755))
+	agora := time.Date(2026, 11, 26, 1, 0, 0, 0, time.UTC)
+	primeiro := ResumoNuvem(dir, agora)
+	assert.Contains(t, primeiro, "DIAGNÓSTICO")
+	assert.Empty(t, ResumoNuvem(dir, agora.Add(40*time.Second)), "nada mudou: não repete")
+
+	_, _, err := bus.Enqueue(dir, layout.RoleBuilder, jobDeTeste("job-x", "77-a", bus.TypeFeatureBuild, "feat/77-a"), agora)
+	require.NoError(t, err)
+	assert.Contains(t, ResumoNuvem(dir, agora.Add(time.Minute)), "1 pendente", "um job novo reaparece")
 }

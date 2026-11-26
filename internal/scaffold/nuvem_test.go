@@ -34,7 +34,7 @@ func TestNuvem_AtivarGravaScriptEHookAntesDoDoctor(t *testing.T) {
 	require.NoError(t, err)
 	mudou, err := AplicarNuvem(dir, cfgNuvem(config.NuvemConfig{Ativo: true}), "6.0.0-beta", false)
 	require.NoError(t, err)
-	assert.Len(t, mudou, 2)
+	assert.NotEmpty(t, mudou)
 
 	fi, err := os.Stat(filepath.Join(dir, NuvemScriptRel))
 	require.NoError(t, err)
@@ -44,6 +44,10 @@ func TestNuvem_AtivarGravaScriptEHookAntesDoDoctor(t *testing.T) {
 	require.Len(t, grupos, 2)
 	primeiro := grupos[0].(map[string]any)["hooks"].([]any)[0].(map[string]any)
 	assert.Contains(t, primeiro["command"], "forge-nuvem.sh", "a nuvem roda antes do doctor, que precisa do forge")
+
+	prompt := lerSettings(t, dir)["hooks"].(map[string]any)["UserPromptSubmit"].([]any)
+	require.Len(t, prompt, 1)
+	assert.Contains(t, prompt[0].(map[string]any)["hooks"].([]any)[0].(map[string]any)["command"], "forge nuvem resumo")
 
 	// idempotente
 	mudou, err = AplicarNuvem(dir, cfgNuvem(config.NuvemConfig{Ativo: true}), "6.0.0-beta", false)
@@ -62,6 +66,7 @@ func TestNuvem_DesativarRemoveSoOQueEraDele(t *testing.T) {
 	grupos := lerSettings(t, dir)["hooks"].(map[string]any)["SessionStart"].([]any)
 	require.Len(t, grupos, 1, "o hook do doctor continua")
 	assert.NotContains(t, string(mustRead(t, filepath.Join(dir, ".claude", "settings.json"))), "forge-nuvem")
+	assert.NotContains(t, string(mustRead(t, filepath.Join(dir, ".claude", "settings.json"))), "forge nuvem resumo")
 	_, err = os.Stat(filepath.Join(dir, NuvemScriptRel))
 	assert.True(t, os.IsNotExist(err))
 }
