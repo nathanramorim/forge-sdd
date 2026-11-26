@@ -75,6 +75,7 @@ func Diagnose(dir string, d Deps) Relatorio {
 		checaWorktrees(dir),
 		checaWorkers(d),
 		checaFilaSemWorker(dir, d),
+		checaNuvem(dir),
 	}}
 	for _, c := range r.Checagens {
 		switch c.Status {
@@ -204,6 +205,28 @@ func checaConfig(dir string) Checagem {
 		return ok(id, "sem .forge/config/forge.json: modo sessions, padrões em uso")
 	}
 	return ok(id, "forge.json válido, com modelos e esforços")
+}
+
+// checaNuvem confere, com a nuvem ligada, se o hook e o script estão no repositório e, dentro de
+// uma sessão na nuvem, se os repositórios do hub estão clonados.
+func checaNuvem(dir string) Checagem {
+	const id = "nuvem"
+	cfg, found, err := config.LoadForgeConfig(dir)
+	if err != nil || !found || !cfg.NuvemAtiva() {
+		return ok(id, "nuvem desligada")
+	}
+	settings, _ := os.ReadFile(filepath.Join(dir, ".claude", "settings.json"))
+	_, errScript := os.Stat(filepath.Join(dir, ".claude", "hooks", "forge-nuvem.sh"))
+	if !strings.Contains(string(settings), "forge-nuvem.sh") || errScript != nil {
+		return aviso(id, "nuvem ligada, mas o hook ou o script não estão no repositório", "rode forge nuvem ativar e faça commit de .claude/")
+	}
+	if pipeline.NaNuvem(nil) {
+		if falta := pipeline.ReposFaltando(dir, cfg.NuvemOuPadrao().Repos); len(falta) > 0 {
+			return aviso(id, "faltam nesta sessão: "+strings.Join(falta, ", "), "adicione os repositórios ao ambiente da nuvem no claude.ai (forge nuvem status)")
+		}
+		return ok(id, "sessão na nuvem com o forge ligado")
+	}
+	return ok(id, "nuvem ligada; o hook só age nas sessões na nuvem")
 }
 
 func checaSkills(dir string) Checagem {

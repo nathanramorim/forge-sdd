@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/forge-sdd/cli/internal/config"
 	"os"
 	"path/filepath"
 	"strings"
@@ -279,6 +280,14 @@ func SyncClaudeIntegration(targetDir, version string, dryRun bool) (changed, war
 		warnings = append(warnings, "MCP forge-sdd não registrado: "+err.Error())
 	} else if ok {
 		changed = append(changed, "MCP forge-sdd")
+	}
+	// Nuvem ligada: o script acompanha a versão do forge (modo npm instala a versão nova).
+	if cfg, found, err := config.LoadForgeConfig(targetDir); err == nil && found && cfg.NuvemAtiva() {
+		if c, err := AplicarNuvem(targetDir, cfg, version, dryRun); err != nil {
+			warnings = append(warnings, "hook da nuvem não atualizado: "+err.Error())
+		} else {
+			changed = append(changed, c...)
+		}
 	}
 	return changed, warnings
 }

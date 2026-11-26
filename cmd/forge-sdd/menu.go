@@ -7,7 +7,9 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strconv"
 	"strings"
+	"time"
 
 	"github.com/forge-sdd/cli/internal/config"
 	"github.com/forge-sdd/cli/internal/gate"
@@ -455,12 +457,20 @@ func (e *menuEnv) startSessions(gesture string) {
 
 func (e *menuEnv) configMenu() error {
 	for {
+		atual, _, _ := config.LoadForgeConfig(e.dir)
+		b := atual.Builder
 		choice, err := e.p.Select("Ativar ou reconfigurar o pipeline", []menuOption{
 			{Label: "Ativar o pipeline (cria .forge/config/forge.json)", Value: "init"},
 			{Label: "Escolher o agente de cada sessão (sem abrir)", Value: "agents"},
 			{Label: "Permissões do Builder e do Reviewer", Value: "perms"},
 			{Label: "Modo de sessão (ao vivo no painel ou worker headless)", Value: "mode"},
 			{Label: "Contexto entre jobs (limpar ou contínuo)", Value: "context"},
+			{Label: fmt.Sprintf("Builder: granularidade (%s)", granularidadeLabel(b)), Value: "granularidade"},
+			{Label: fmt.Sprintf("Builder: teto de disco (%d%%)", b.LimiteDiscoEfetivo()), Value: "disco"},
+			{Label: fmt.Sprintf("Builder: teto de memória (%d%% da RAM)", b.LimiteMemoriaEfetivo()), Value: "memoria"},
+			{Label: fmt.Sprintf("Builder: tasks em paralelo (%s)", paraleloLabel(b.MaxParallelTasks)), Value: "paralelo"},
+			{Label: "Recursos agora (disco, memória, worktrees e quantos pares cabem)", Value: "recursos"},
+			{Label: fmt.Sprintf("Nuvem: rodar em sessões do Claude Code na nuvem (%s)", onOff(atual.NuvemAtiva())), Value: "nuvem"},
 			{Label: "Voltar", Value: valBack},
 		}, "agents")
 		if errors.Is(err, errBack) || choice == valBack {
@@ -473,11 +483,56 @@ func (e *menuEnv) configMenu() error {
 			e.act("pipeline", "init", "--dir", e.dir)
 			continue
 		}
+		if choice == "recursos" {
+			fmt.Fprintf(e.out, "\n%s", pipeline.FormatRecursos(pipeline.MedirRecursos(e.dir, time.Now()), time.Now()))
+			_ = e.p.Pause("Enter para voltar")
+			continue
+		}
 		cfg, ok := e.loadPipeline()
 		if !ok {
 			continue
 		}
+		if choice == "nuvem" {
+			if err := e.nuvemMenu(cfg); err != nil && !errors.Is(err, errBack) {
+				return err
+			}
+			continue
+		}
 		switch choice {
+		case "granularidade":
+			var g string
+			g, err = e.p.Select("Como o Builder trabalha", []menuOption{
+				{Label: "Por task, em paralelo (padrão; um reviewer por task)", Value: config.GranularidadeTask},
+				{Label: "Por feature, um job só (como na 5.x)", Value: config.GranularidadeFeature},
+			}, granularidadeLabel(cfg.Builder))
+			if err == nil {
+				cfg.Builder.Granularidade = g
+			}
+		case "disco", "memoria":
+			atualPct, titulo := cfg.Builder.LimiteDiscoEfetivo(), "Teto de ocupação do disco (nenhum worktree novo passa disso)"
+			if choice == "memoria" {
+				atualPct, titulo = cfg.Builder.LimiteMemoriaEfetivo(), "Teto de uso da RAM (nenhum par novo passa disso)"
+			}
+			var v string
+			v, err = e.p.Select(titulo, opcoesPct(), strconv.Itoa(atualPct))
+			if err == nil {
+				n, _ := strconv.Atoi(v)
+				if choice == "memoria" {
+					cfg.Builder.LimiteMemoria = n
+				} else {
+					cfg.Builder.LimiteDisco = n
+				}
+			}
+		case "paralelo":
+			var v string
+			opts := []menuOption{{Label: "Sem teto fixo (só disco, memória e janela de uso decidem)", Value: "0"}}
+			for _, n := range []int{1, 2, 3, 4, 6, 8, 12} {
+				opts = append(opts, menuOption{Label: fmt.Sprintf("No máximo %d", n), Value: strconv.Itoa(n)})
+			}
+			v, err = e.p.Select("Tasks do Builder em paralelo", opts, strconv.Itoa(cfg.Builder.MaxParallelTasks))
+			if err == nil {
+				cfg.Builder.MaxParallelTasks, _ = strconv.Atoi(v)
+			}
 		case "agents":
 			cfg, err = e.chooseAgents(cfg)
 		case "perms":
@@ -512,6 +567,73 @@ func (e *menuEnv) configMenu() error {
 		} else {
 			fmt.Fprintln(e.out, "\n✓ Gravado em .forge/config/forge.json")
 		}
+	}
+}
+
+func granularidadeLabel(b config.BuilderConfig) string {
+	if b.PorTask() {
+		return config.GranularidadeTask
+	}
+	return config.GranularidadeFeature
+}
+
+func paraleloLabel(n int) string {
+	if n <= 0 {
+		return "sem teto fixo"
+	}
+	return fmt.Sprintf("até %d", n)
+}
+
+func opcoesPct() []menuOption {
+	var opts []menuOption
+	for p := 50; p <= 95; p += 5 {
+		opts = append(opts, menuOption{Label: fmt.Sprintf("%d%%", p), Value: strconv.Itoa(p)})
+	}
+	return opts
+}
+
+// nuvemMenu liga ou desliga a nuvem e escolhe como o forge é instalado lá; grava forge.json e o hook.
+func (e *menuEnv) nuvemMenu(cfg config.ForgeConfig) error {
+	for {
+		n := cfg.NuvemOuPadrao()
+		liga := "Ligar: grava o hook de início de sessão no repositório"
+		if n.Ativo {
+			liga = "Desligar: remove o hook do repositório"
+		}
+		choice, err := e.p.Select("Forge em sessões do Claude Code na nuvem", []menuOption{
+			{Label: liga, Value: "alternar"},
+			{Label: fmt.Sprintf("Como instalar o forge na nuvem (%s)", n.InstalarEfetivo()), Value: "instalar"},
+			{Label: "Ver status e o que falta configurar no claude.ai", Value: "status"},
+			{Label: "Voltar", Value: valBack},
+		}, "alternar")
+		if errors.Is(err, errBack) || choice == valBack {
+			return errBack
+		}
+		if err != nil {
+			return err
+		}
+		switch choice {
+		case "status":
+			fmt.Fprintf(e.out, "\n%s", formatNuvemStatus(e.dir, cfg))
+			_ = e.p.Pause("Enter para voltar")
+			continue
+		case "alternar":
+			n.Ativo = !n.Ativo
+		case "instalar":
+			v, err := e.p.Select("Como instalar o forge na nuvem", []menuOption{
+				{Label: "npm (pacote publicado, poucos segundos)", Value: config.NuvemInstalarNPM},
+				{Label: "git (compila da branch com Go; para versões ainda não publicadas)", Value: config.NuvemInstalarGit},
+			}, n.InstalarEfetivo())
+			if err != nil {
+				continue
+			}
+			n.Instalar = v
+		}
+		if err := gravarNuvem(e.out, e.dir, cfg, n); err != nil {
+			fmt.Fprintf(e.out, "\n✗ %v\n", err)
+		}
+		cfg.Nuvem = &n
+		_ = e.p.Pause("Enter para voltar")
 	}
 }
 

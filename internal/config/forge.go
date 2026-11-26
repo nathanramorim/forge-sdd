@@ -207,6 +207,8 @@ type ForgeConfig struct {
 	Reviewer      ReviewerConfig        `json:"reviewer"`
 	ADRDirs       []string              `json:"adr_dirs"`
 	BaseBranch    string                `json:"base_branch"`
+	// Nuvem liga o forge em sessões do Claude Code na nuvem (forge nuvem ativar).
+	Nuvem *NuvemConfig `json:"nuvem,omitempty"`
 }
 
 var (
@@ -287,6 +289,13 @@ func LoadForgeConfig(dir string) (cfg ForgeConfig, found bool, err error) {
 				cfg.CLIProfiles[CLIGemini] = norm
 			}
 		}
+		// Perfil claude da 4.1 (sem stream-json, {permissions}, {model} e {effort}): o worker não lia
+		// os tokens nem aplicava a permissão escolhida. Só o argv exato antigo é trocado.
+		if p, ok := cfg.CLIProfiles[CLIClaude]; ok && equalArgs(p.Args, claudeArgsDa41) {
+			p.Args = append([]string(nil), defaultProfiles()[CLIClaude].Args...)
+			cfg.CLIProfiles[CLIClaude] = p
+			changed = true
+		}
 		if p, ok := cfg.CLIProfiles[CLIAgy]; ok {
 			if norm, ok := cfg.Profile(CLIAgy); ok {
 				if len(p.InteractiveArgs) != len(norm.InteractiveArgs) {
@@ -317,6 +326,21 @@ func MigrateLegacyProfiles(dir string) (bool, error) {
 		return false, err
 	}
 	return true, nil
+}
+
+// claudeArgsDa41 é o argv headless do perfil claude gravado pela 4.1.
+var claudeArgsDa41 = []string{"-p", "{prompt}", "--agent", "{agent}", "-n", "{name}"}
+
+func equalArgs(a, b []string) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i := range a {
+		if a[i] != b[i] {
+			return false
+		}
+	}
+	return true
 }
 
 func strictDecode(data []byte, v any) error {
@@ -419,6 +443,11 @@ func (c ForgeConfig) Validate() error {
 	}
 	if !branchRe.MatchString(c.BaseBranch) || containsDotDot(c.BaseBranch) || strings.HasPrefix(c.BaseBranch, "-") {
 		return fmt.Errorf("base_branch %q inválida", c.BaseBranch)
+	}
+	if c.Nuvem != nil {
+		if err := c.Nuvem.Validate(); err != nil {
+			return err
+		}
 	}
 	return nil
 }
