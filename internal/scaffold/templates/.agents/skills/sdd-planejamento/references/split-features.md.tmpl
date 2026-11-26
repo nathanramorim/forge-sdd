@@ -3,14 +3,14 @@
 **Uso:** `/split-features [iniciativa]`.
 
 1. **Brief primeiro:** rode `forge brief` no início; se o estado for `rascunho`, proponha `/constitution` antes de fatiar tarefas.
-2. **Gate (`FLX-01`):** leia `plan.md` e `criteria.md` da iniciativa e confirme a revisão humana da Spec.
+2. **Gate (`FLX-01`):** leia `plan.md` e `criteria.md`. A spec já passou pela revisão (`forge revisar-spec`) e pela decisão humana; quebrar é a confirmação, então não peça outra.
 3. **ADRs e rules:** carregue as ADRs e as rules aplicáveis antes de fatiar; nenhuma task pode violá-las, e cada task cita as que a governam na seção `## Decisões do projeto aplicadas`.
 4. **Critérios de quebra:** fatie quando a feature cruzar mais de um contexto delimitado ou tiver mais de 7 tarefas. Sem dependência circular; cada task testável sozinha; ordem de baixo para cima (infraestrutura, domínio, aplicação, interface).
-5. **Sem branch nova aqui (`FLX-01`, ADR-0022):** o split **não** cria branch. A spec já voltou à principal pelo PR dela; cada feature terá **a sua própria branch** (`feat/<id>-<nome>-<sid>`), aberta pelo Builder a partir da principal, com o seu PR em draft. Só cria specs em `sdd/discovery/<id>-<nome>/features/`, na branch atual.
+5. **Branch da entrega:** no pipeline, o `forge dispatch` do passo 9 cria a branch da entrega (`feat/<id>-<nome>`), onde cada task aprovada sobe. Aqui só crie as specs em `sdd/discovery/<id>-<nome>/features/`.
 6. **Tasks:** crie `sdd/discovery/<id>-<nome>/features/feat-<id>-<nn>-<nome>.md` com `Modelo do módulo`, `Decisões do projeto aplicadas`, `O que já existe`, `Dependências novas`, `Rules e IDs da Constituição Aplicáveis` e `Critérios de Aceitação Executáveis`.
 7. **Estado:** atualize `status.md` da iniciativa; não escreva índice nem progresso globais.
 
-**Visualizar artefatos (antes do Gate 1)**
+**Visualizar artefatos (só fora do pipeline)**
 
 Use AskUserQuestion com as opções:
 - "Abrir pasta no Finder" → `open sdd/discovery/<id>-<nome>/`
@@ -20,8 +20,8 @@ Use AskUserQuestion com as opções:
 
 Execute a ação escolhida. Consulte `sdd/memory/clarify.md` → seção "Visualização pós-spec" para comportamento detalhado (macOS-only, fallbacks).
 
-8. **Fila:** com a confirmação do humano, `forge queue enqueue --task <spec> --task-id <id> --rules <IDs>` para cada task, na ordem de dependência.
-9. **Pipeline (existe `.forge/config/forge.json`):** depois da confirmação humana que enfileirou as tasks, rode `forge dispatch <iniciativa>` (gate e job para o Builder), informe "entregue ao Builder" e **pare**: o Builder e o Reviewer rodam nas outras sessões. Esta sessão não implementa, não edita `forge.json`, `card-evidence.json` nem o código da feature; pendência do gate vai para a pessoa. Com `pm_mcp.require_existing_card: false` o despacho não pede card.
+8. **Fila (só fora do pipeline):** com a confirmação do humano, `forge queue enqueue --task <spec> --task-id <id> --rules <IDs>` para cada task, na ordem de dependência.
+9. **Pipeline (existe `.forge/config/forge.json`):** logo depois de criar as tasks, sem perguntar, rode `forge dispatch <iniciativa>`: as tasks vão em paralelo, cada uma com o seu Builder e o seu Reviewer, e sobem na branch da entrega ao serem aprovadas. Informe "entregue ao Builder" e **pare**: o Builder e o Reviewer rodam nas outras sessões. Esta sessão não implementa, não edita `forge.json`, `card-evidence.json` nem o código da feature; pendência do gate vai para a pessoa. Com `pm_mcp.require_existing_card: false` o despacho não pede card.
 10. **Telemetria:** `forge session record --feature "sdd/discovery/<id>-<nome>/features/" --tokens-input <N> --tokens-output <N> --outcome approved --criterio-atendido=true --files-touched <lista>`. Nunca passe zeros: se não souber os tokens, omita as flags (o CLI vai estimar).
 
 Use `/nova-feature` apenas para adições manuais e isoladas.

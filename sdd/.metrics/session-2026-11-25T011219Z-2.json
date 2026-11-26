@@ -1,0 +1,32 @@
+{
+  "$schema": "forge-sdd/metrics/1.0",
+  "feature": "sdd/discovery/123-painel-de-execucao-no-claude-code/discovery.md",
+  "agent_path": null,
+  "tokens_input": 4781,
+  "tokens_output": 2848,
+  "turns": 0,
+  "duration_seconds": 0,
+  "criterio_atendido": true,
+  "model": "",
+  "rework_lines": 0,
+  "context7_calls": 0,
+  "git_calls": 0,
+  "files_touched": [
+    "sdd/discovery/123-painel-de-execucao-no-claude-code/discovery.md",
+    "sdd/discovery/123-painel-de-execucao-no-claude-code/criteria.md",
+    "sdd/discovery/123-painel-de-execucao-no-claude-code/plan.md",
+    "sdd/discovery/123-painel-de-execucao-no-claude-code/status.md"
+  ],
+  "outcome": "approved",
+  "sdd_version": "5.2.3-beta",
+  "medicao": "estimado",
+  "complexidade": null,
+  "spec": {
+    "tipo": "discovery",
+    "iniciativa": "123-painel-de-execucao-no-claude-code",
+    "bytes": 4781,
+    "criteria_bytes": 4952,
+    "plan_bytes": 1307,
+    "status_bytes": 349
+  }
+}

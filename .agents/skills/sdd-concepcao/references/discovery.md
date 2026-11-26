@@ -24,7 +24,7 @@ Use AskUserQuestion com as opções:
 - "Pular"
 
 Execute a ação escolhida. Consulte `sdd/memory/clarify.md` → seção "Visualização pós-spec" para comportamento detalhado (macOS-only, fallbacks).
-11. **Gate 1 (`FLX-01`):** submeta ao humano; após aprovar, sugira `/split-features`. Em modo pipeline (existe `.forge/config/forge.json`) esta sessão nunca constrói: o `/split-features` termina entregando ao Builder.
+11. **Gate 1 (`FLX-01`):** em modo pipeline (existe `.forge/config/forge.json`) rode `forge revisar-spec <id>-<nome>`; o veredito do Reviewer chega no inbox e o humano decide. Aprovado, sugira `/split-features`; esta sessão nunca constrói.
 
 ## PR da spec em draft e a volta à principal (ADR-0022, RN-1)
 

@@ -4,6 +4,25 @@ Este arquivo registra o histórico de entregas de produto deste projeto.
 
 ## Entregas
 
+### Versão 6.0.0 — Um Agente por Task, Paralelo do Tamanho da Sua Máquina e Painel no Claude Code (Beta)
+
+Compatível com a 5.0.0 e inclui tudo da 5.2.3-beta. Muda o jeito de implementar uma feature: em vez de um agente carregando a feature inteira, cada task ganha o próprio agente.
+
+*   **Cada task tem o próprio Builder, com contexto novo.** O agente recebe só a spec da task e as referências dela, num pacote compacto; o contexto não cresce ao longo da feature e o gasto de tokens cai Padrão nesta beta (`builder.granularidade: task`); `feature` volta ao modo da 5.x.
+*   **Um Reviewer para cada Builder, lendo só o diff da task.** A task aprovada entra na hora na branch da feature, com um commit por task (squash); conflito para só aquela task, avisa e preserva o trabalho.
+*   **O paralelo se ajusta à sua máquina, sem número fixo, e nunca passa do teto.** O forge só abre mais um par enquanto o disco fica abaixo de 90% de ocupação e a memória abaixo de 80% da RAM, respeitando também a largura da onda; acima de 85% da janela de uso, cai para 1 par. Cada worktree é apagado depois do commit, então o disco não acumula cópias (`builder.limite_disco`, `builder.limite_memoria`, `builder.max_parallel_tasks` opcional).
+*   **Desligou o computador no meio? A esteira continua de onde parou.** Worktree com trabalho não commitado nunca é apagado; a próxima execução retoma dele com um resumo curto do que já foi feito, e commits `wip(<task>)` marcam cada passo que passou nos testes. Limite de uso devolve o job à fila sem perder nada.
+*   **Fluxo da 6.0: você pede na sessão do projeto.** A sessão abre com o nome do projeto; o fim do `/discovery` manda a spec ao Reviewer (`forge revisar-spec`) e o veredito volta pelo inbox para você decidir; o `/split-features` cria a branch da entrega e despacha direto, sem nova revisão de spec.
+*   **Agente morto de fora volta sozinho.** Janela fechada, Mac dormindo ou falta de memória: o motivo diz o sinal e a causa provável, e o job é retomado uma vez sem gastar tentativa.
+*   **`forge status --diagnostico` acha a causa em um comando.** Workers vivos, fila por papel, job em execução, última falha com motivo e log, pendentes velhos e quantos pares cabem; `forge --version` também responde. O despacho tira da fila jobs pendentes antigos da mesma iniciativa, e o painel mostra "sem worker" quando há job na fila e nenhum Builder vivo. O perfil `claude` da 4.1 migra sozinho para a saída com tokens reais e as permissões escolhidas.
+*   **Rode na nuvem do Claude, sem gastar o seu disco.** `forge nuvem ativar` grava um hook de início de sessão no repositório: nas sessões do Claude Code na nuvem ele instala o forge e sobe o Builder e o Reviewer; no seu computador não faz nada. Cada prompt mostra o estado da esteira quando ele muda, e `--repos` cobre um hub de vários repositórios. Fica em Configurações, junto com a granularidade, os tetos de disco e memória e o retrato de recursos agora.
+*   **`forge status` mostra a esteira por task.** Pares ativos, o que segura o teto, vagas de disco, estado e tokens de cada task, e o aviso quando a feature está pronta para o PR em draft.
+*   **Novo mod `forge-painel` para o Claude Code.** Status line com iniciativa, estação, janelas de 5h e 7d, contexto e telemetria; painel com um par por task da iniciativa atual (estado, tokens, tempo e total); faixa acima do prompt com inbox e PR conforme; consumo embaixo de cada subagente; alerta ao passar de 70% e de 90%; aviso (sem bloquear) antes de abrir subagente acima de 85%; telemetria real gravada sozinha; `/gastos` por estação. Vem dentro do binário; sem rede e com escrita só em `sdd/.metrics` e `.forge/runtime/painel` (ADR-0030).
+*   **Um comando abre tudo: `forge up --terminal painel`.** Instala ou atualiza o mod (ele vem dentro do binário), sobe Builder e Reviewer em segundo plano com log em arquivo e abre o Claude Code com o painel no próprio terminal, sem janelas nem tmux. Janelas do sistema e tmux continuam disponíveis.
+*   **Mods têm contrato.** `forge skills instalar plugin` confere o manifesto do mod (permissões de rede, escrita e ganchos, versões mínimas do Claude Code e do forge) antes de instalar.
+*   **Como atualizar:** `npm install -g @nathanramorim/forge-sdd@beta` para a prévia; nos projetos existentes, veja o plano com `forge update --dry-run`, rode `forge update --upgrade` (fora do agente, no terminal) e depois `/upgrade-sdd`. Rode `forge doctor` no fim.
+*   **Avisos da beta:** esta versão não substitui a estável; quem usa `npm install -g @nathanramorim/forge-sdd` sem `@beta` continua na 5.0.0. O modo avançado (revisão da spec antes da fila) ainda roda por feature. A medição comparando os dois modos vem depois da beta; se preferir o modo antigo, use `builder.granularidade: feature`.
+
 ### Versão 5.2.3 — Projeto Novo ou Atualizado Abre o Claude Code Sem Erro (Beta)
 
 Compatível com a 5.0.0 e inclui tudo da 5.2.2-beta. Corrige um defeito da 5.2.2-beta que aparecia em todo projeto.

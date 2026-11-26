@@ -11,7 +11,7 @@
 
 <h3 align="center">Seu time de IA, com método.<br>Do plano ao PR, sem repetir instruções.</h3>
 
-<p align="center"><strong>Versão atual: 5.0.0 (estável) · prévia: 5.2.3-beta (<code>@beta</code>)</strong> · <a href="sdd/releases/history.md">veja as novidades</a></p>
+<p align="center"><strong>Versão atual: 5.0.0 (estável) · prévia: 6.0.0-beta (<code>@beta</code>)</strong> · <a href="sdd/releases/history.md">veja as novidades</a></p>
 
 <p align="center">
   <a href="https://forge-sdd.org">Site oficial</a> ·
@@ -205,6 +205,7 @@ A telemetria é opcional e fica no seu projeto. No modo `forge worker --raw`, a 
 
 | Versão | Novidades |
 |---|---|
+| **6.0.0-beta** | Prévia (`@beta`): um Builder por task, cada um com contexto novo, worktree que some depois do commit, um Reviewer por Builder e junção contínua na branch da feature; o paralelo se ajusta ao disco, à memória e à janela de uso, e a esteira retoma depois de uma queda. Mod `forge-painel` para acompanhar janelas, gastos e agentes no Claude Code, e `forge up --terminal painel`. |
 | **5.2.3-beta** | Prévia (`@beta`): projeto novo ou atualizado passa no diagnóstico do início de sessão do Claude Code; acabou o erro ao abrir. |
 | **5.2.2-beta** | Prévia (`@beta`): o script da barreira de PR copiado à mão passa a ser atualizado pelo `forge update`, e o aviso ao abrir o Claude Code mostra o que está errado. |
 | **5.2.1-beta** | Prévia (`@beta`): a atualização de projetos 5.0 passa a funcionar de ponta a ponta. `forge update --dry-run` mostra o plano, o que você editou é preservado (a versão nova vem num `.novo.md`) e a Constituição ganha os campos novos por acréscimo. |

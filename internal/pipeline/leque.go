@@ -18,6 +18,8 @@ import (
 const (
 	JuncaoIntegrada = "integrada"
 	JuncaoBloqueada = "bloqueada"
+	// JuncaoAguardando: aprovada, mas uma task anterior do plano ainda não foi integrada (feat-122-07).
+	JuncaoAguardando = "aguardando"
 )
 
 const (
@@ -35,7 +37,10 @@ type ParamsLeque struct {
 	Dono       string
 	Base       string   // branch da iniciativa; precisa ser a que está em checkout no worktree principal
 	Tasks      []string // na ordem do plano; a junção respeita essa ordem
-	Agora      func() time.Time
+	// Efemero: o worktree de cada task nasce em IniciarTask e é apagado em EncerrarTask, logo depois
+	// do commit; a branch da task continua até a junção (feat-122-03). Sem ele, todos nascem na preparação.
+	Efemero bool
+	Agora   func() time.Time
 }
 
 // Leque é um lote de tasks com worktree próprio, sob o lock do worktree principal.
@@ -43,6 +48,8 @@ type Leque struct {
 	dir, iniciativa, base string
 	tasks                 []string
 	caminhos              map[string]string
+	efemero               bool
+	aprovadas, integradas map[string]bool
 	lock                  *harness.Lock
 	agora                 func() time.Time
 }
@@ -121,7 +128,8 @@ func PrepararLeque(dir string, p ParamsLeque) (*Leque, error) {
 	if err != nil {
 		return nil, fmt.Errorf("worktree principal ocupado: %w", err)
 	}
-	lq := &Leque{dir: dir, iniciativa: p.Iniciativa, base: p.Base, tasks: p.Tasks, caminhos: map[string]string{}, lock: lock, agora: p.Agora}
+	lq := &Leque{dir: dir, iniciativa: p.Iniciativa, base: p.Base, tasks: p.Tasks, caminhos: map[string]string{}, efemero: p.Efemero,
+		aprovadas: map[string]bool{}, integradas: map[string]bool{}, lock: lock, agora: p.Agora}
 	pronto := false
 	defer func() {
 		if !pronto { // erro ou panic: o lock nunca fica preso até a lease vencer
@@ -149,9 +157,11 @@ func PrepararLeque(dir string, p ParamsLeque) (*Leque, error) {
 	} else if sujo != "" {
 		return fail(errors.New("o worktree principal tem alterações não commitadas: recusado"))
 	}
-	for _, t := range p.Tasks {
-		if err := lq.prepararTask(t); err != nil {
-			return fail(err)
+	if !p.Efemero {
+		for _, t := range p.Tasks {
+			if err := lq.prepararTask(t); err != nil {
+				return fail(err)
+			}
 		}
 	}
 	pronto = true
@@ -269,7 +279,7 @@ func (l *Leque) Juntar() (*RetornoJuncao, error) {
 	ret := &RetornoJuncao{}
 	for _, t := range l.tasks {
 		path, ok := l.caminhos[t]
-		if !ok {
+		if !ok && !(l.efemero && !l.integradas[t] && l.existeBranch(t)) {
 			continue
 		}
 		if err := l.lock.Renovar(l.agora()); err != nil {
@@ -282,11 +292,7 @@ func (l *Leque) Juntar() (*RetornoJuncao, error) {
 		ret.Resultados = append(ret.Resultados, r)
 	}
 	if ret.Bloqueadas() {
-		ret.Opcoes = []Opcao{
-			{ID: "resolver", Rotulo: "Resolver o conflito", Descricao: "Resolva na branch da task (merge da base nela) e rode a junção de novo; nada foi descartado."},
-			{ID: "pular", Rotulo: "Seguir sem a task", Descricao: "Mantém a task bloqueada com a branch preservada e conclui o resto."},
-			{ID: "abortar", Rotulo: "Parar o lote", Descricao: "Encerra sem mais junções; branches e worktrees ficam intactos."},
-		}
+		ret.Opcoes = opcoesBloqueio()
 		ret.Recomendada = "resolver"
 	}
 	return ret, nil
@@ -299,10 +305,12 @@ func (l *Leque) juntarTask(task, path string) (ResultadoJuncao, error) {
 		r.Estado, r.Motivo = JuncaoBloqueada, motivo
 		return r, nil
 	}
-	if sujo, err := gitLimpo(path, "status", "--porcelain"); err != nil {
-		return bloquear(err.Error())
-	} else if sujo != "" {
-		return bloquear("worktree da task tem alterações não commitadas; nada foi integrado")
+	if path != "" { // no ciclo efêmero o worktree já foi apagado e só a branch resta
+		if sujo, err := gitLimpo(path, "status", "--porcelain"); err != nil {
+			return bloquear(err.Error())
+		} else if sujo != "" {
+			return bloquear("worktree da task tem alterações não commitadas; nada foi integrado")
+		}
 	}
 	if atual, err := gitLimpo(l.dir, "symbolic-ref", "--short", "HEAD"); err != nil || atual != l.base {
 		return r, errors.New("o worktree principal saiu da branch base durante a junção")
@@ -341,8 +349,13 @@ func (l *Leque) juntarTask(task, path string) (ResultadoJuncao, error) {
 		return bloquear("falhou (não é conflito): " + notify.Sanitize(msg, 300, false))
 	}
 	r.Estado = JuncaoIntegrada
-	if err := RemoveWorktree(l.dir, l.iniciativa, task); err != nil {
+	l.integradas[task] = true
+	if err := RemoveWorktreeKeepBranch(l.dir, l.iniciativa, task); err != nil {
 		r.Motivo = "integrada; limpeza do worktree falhou: " + notify.Sanitize(err.Error(), 200, false)
+	}
+	// -d (não -D): integrada, a branch da task é apagada; o git recusa se por algum motivo não estiver.
+	if _, err := gitLimpo(l.dir, "branch", "-d", branch); err != nil && r.Motivo == "" {
+		r.Motivo = "integrada; branch da task não foi apagada: " + notify.Sanitize(err.Error(), 200, false)
 	}
 	delete(l.caminhos, task)
 	return r, nil
@@ -361,4 +374,138 @@ func (l *Leque) Encerrar() error {
 		return nil
 	}
 	return l.lock.Liberar()
+}
+
+func (l *Leque) existeBranch(task string) bool {
+	_, err := layout.Git(l.dir, "rev-parse", "--verify", "-q", "refs/heads/forge/"+l.iniciativa+"-"+task)
+	return err == nil
+}
+
+func (l *Leque) conhece(task string) bool {
+	for _, t := range l.tasks {
+		if t == task {
+			return true
+		}
+	}
+	return false
+}
+
+// IniciarTask cria o worktree efêmero da task a partir da base (ou reabre o da branch, se já houver
+// trabalho dela: veja ReabrirTask). Só vale no leque efêmero; órfão que guarda trabalho vira menu.
+func (l *Leque) IniciarTask(task string) (string, error) {
+	if l == nil || l.lock == nil || !l.efemero {
+		return "", errors.New("leque efêmero não preparado")
+	}
+	if !l.conhece(task) || l.integradas[task] {
+		return "", fmt.Errorf("task %q não está pendente neste leque", task)
+	}
+	if _, ok := l.caminhos[task]; ok {
+		return "", fmt.Errorf("task %q já tem worktree", task)
+	}
+	if err := l.prepararTask(task); err != nil {
+		return "", err
+	}
+	return l.caminhos[task], nil
+}
+
+// EncerrarTask apaga o worktree da task logo depois do commit; a branch com o commit continua.
+// Recusa se há alteração não commitada: nada se perde.
+func (l *Leque) EncerrarTask(task string) error {
+	path, ok := l.caminhos[task]
+	if !ok {
+		return fmt.Errorf("task %q não tem worktree aberto", task)
+	}
+	if sujo, err := gitLimpo(path, "status", "--porcelain"); err != nil {
+		return err
+	} else if sujo != "" {
+		return fmt.Errorf("task %q tem alterações não commitadas: worktree preservado", task)
+	}
+	if err := RemoveWorktreeKeepBranch(l.dir, l.iniciativa, task); err != nil {
+		return err
+	}
+	delete(l.caminhos, task)
+	return nil
+}
+
+// ReabrirTask recria o worktree da task a partir da branch dela (retrabalho após parecer de ajuste).
+func (l *Leque) ReabrirTask(task string) (string, error) {
+	if l == nil || l.lock == nil {
+		return "", errors.New("leque não preparado")
+	}
+	if !l.conhece(task) || l.integradas[task] {
+		return "", fmt.Errorf("task %q não está pendente neste leque", task)
+	}
+	if _, ok := l.caminhos[task]; ok {
+		return "", fmt.Errorf("task %q já tem worktree aberto", task)
+	}
+	path, err := ReopenWorktree(l.dir, l.iniciativa, task)
+	if err != nil {
+		return "", err
+	}
+	delete(l.aprovadas, task) // volta a ser revisada
+	l.caminhos[task] = path
+	return path, nil
+}
+
+// JuntarAprovada integra a task assim que aprovada, em série sob o lock do leque e na ordem do plano:
+// uma task posterior aprovada antes espera a anterior (estado "aguardando"); quando a anterior entra,
+// as posteriores já aprovadas entram em seguida. Conflito bloqueia, aborta o merge e preserva a
+// branch; chamar de novo depois de resolver tenta outra vez. Devolve o desfecho de cada task tocada
+// nesta chamada, e o da própria task, se ela não foi tocada, como aguardando.
+func (l *Leque) JuntarAprovada(task string) (*RetornoJuncao, error) {
+	if l == nil || l.lock == nil {
+		return nil, errors.New("leque não preparado")
+	}
+	if !l.conhece(task) {
+		return nil, fmt.Errorf("task %q não pertence a este leque", task)
+	}
+	ret := &RetornoJuncao{}
+	if l.integradas[task] {
+		return ret, fmt.Errorf("task %q já integrada", task)
+	}
+	l.aprovadas[task] = true
+	for _, t := range l.tasks {
+		if l.integradas[t] {
+			continue
+		}
+		if !l.aprovadas[t] {
+			break // a predecessora ainda não foi aprovada: as demais esperam
+		}
+		if err := l.lock.Renovar(l.agora()); err != nil {
+			return ret, err
+		}
+		r, err := l.juntarTask(t, l.caminhos[t])
+		if err != nil {
+			return ret, err
+		}
+		ret.Resultados = append(ret.Resultados, r)
+		if r.Estado == JuncaoBloqueada {
+			break // sem a predecessora, as posteriores esperam
+		}
+	}
+	if !l.integradas[task] && !contemResultado(ret.Resultados, task) {
+		ret.Resultados = append(ret.Resultados, ResultadoJuncao{Task: task, Estado: JuncaoAguardando, Motivo: "espera a task anterior do plano"})
+	}
+	if ret.Bloqueadas() {
+		ret.Opcoes = opcoesBloqueio()
+		ret.Recomendada = "resolver"
+	}
+	return ret, nil
+}
+
+func contemResultado(rs []ResultadoJuncao, task string) bool {
+	for _, r := range rs {
+		if r.Task == task {
+			return true
+		}
+	}
+	return false
+}
+
+func opcoesBloqueio() []Opcao {
+	return []Opcao{
+		{ID: "resolver", Rotulo: "Resolver o conflito", Descricao: "Resolva na branch da task (merge da base nela) e rode a junção de novo; nada foi descartado."},
+		{ID: "pular", Rotulo: "Seguir sem a task", Descricao: "Mantém a task bloqueada com a branch preservada e conclui o resto."},
+		{ID: "abortar", Rotulo: "Parar o lote", Descricao: "Encerra sem mais junções; branches e worktrees ficam intactos."},
+	}
 }

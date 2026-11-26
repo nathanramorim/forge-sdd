@@ -44,7 +44,7 @@ func TestLP_NovidadesMarcadores(t *testing.T) {
 
 	// As abas reutilizam os mesmos marcadores de versão do topo: uma fonte só.
 	assert.Regexp(t, `data-versao="latest"[^>]*>5\.0\.0<`, html)
-	assert.Regexp(t, `data-versao="beta"[^>]*>5\.2\.3-beta<`, html)
+	assert.Regexp(t, `data-versao="beta"[^>]*>6\.0\.0-beta<`, html)
 
 	// A seção fica antes do rodapé e depois do fim do conteúdo.
 	iNov := strings.Index(html, `id="novidades"`)

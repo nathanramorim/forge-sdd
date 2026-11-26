@@ -3,7 +3,7 @@
 ## Painel Executivo (Camada C)
 Ao reportar status, apresente quatro blocos:
 1. **Feito e aprovado** pelas Camadas A e B.
-2. **Como está cada etapa:** situação da fila da iniciativa (`forge status`, `forge queue list`).
+2. **Como está cada etapa:** situação da fila da iniciativa (`forge status`, `forge queue list`). Esteira parada ou job que não começa: `forge status --diagnostico`, um comando só, sem listar pastas.
 3. **Ainda não desenvolvido:** tasks `queued` e features pendentes.
 4. **Exceções e Auto-Skills:** exceções (`GOV-02`), ADRs (`FLX-05`) e skills propostas aguardando `forge skills approve`.
 

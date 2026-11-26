@@ -1,0 +1,13 @@
+{
+  "schema": "forge-sdd/mod/1.0",
+  "minClaudeCode": "2.1.331",
+  "minForge": "6.0.0",
+  "permissions": {
+    "network": false,
+    "model": false,
+    "read": ["sdd/.metrics", "sdd/.sddrc", "sdd/discovery", ".forge/runtime/queues", ".forge/runtime/logs", ".forge/runtime/painel", ".forge/runtime/tarefas"],
+    "write": ["sdd/.metrics", ".forge/runtime/painel"],
+    "env": ["FORGE_WORKER"],
+    "hooks": ["session.start", "session.measure", "turn.complete", "agent.spawn", "agent.report", "session.end", "command.run", "ui.render"]
+  }
+}

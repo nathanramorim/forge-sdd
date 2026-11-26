@@ -4,17 +4,23 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"runtime"
 	"strings"
 
 	"github.com/forge-sdd/cli/internal/config"
 	"github.com/forge-sdd/cli/internal/pipeline"
+	"github.com/forge-sdd/cli/internal/scaffold"
 	"github.com/forge-sdd/cli/internal/survey"
+	"github.com/mattn/go-isatty"
 	"github.com/spf13/cobra"
 )
 
 var newLaunchEnv = pipeline.DefaultLaunchEnv
+
+// newPainelStarter é o iniciador dos workers em segundo plano; os testes o trocam por um falso.
+var newPainelStarter pipeline.PainelStarter = pipeline.DefaultPainelStarter
 
 var upCmd = &cobra.Command{
 	Use:   "up",
@@ -25,7 +31,14 @@ var upCmd = &cobra.Command{
   forge-reviewer    forge worker --role reviewer
 O agente de cada sessão (claude, gemini, copilot ou codex) vem de --discovery, --builder e
 --reviewer, depois de "sessions" em .forge/config/forge.json; --cli vale para as três sessões que
-não tiverem escolha própria. --dry-run só imprime os comandos.`,
+não tiverem escolha própria. --dry-run só imprime os comandos.
+
+Com --terminal painel nenhuma janela nem tmux é aberta: forge-builder e forge-reviewer rodam em
+segundo plano, com a saída em .forge/runtime/logs/<papel>-worker.log, e o acompanhamento é o mod
+forge-painel no Claude Code.
+O mod vem no binário: o forge up o instala ou atualiza em .agents/plugins/forge-painel, sobe os
+workers e abre o Claude Code com o mod no próprio terminal (sem terminal, imprime o comando).
+Fechar o Claude não para os workers.`,
 	Args: cobra.NoArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		dir, _ := cmd.Flags().GetString("dir")
@@ -56,6 +69,9 @@ não tiverem escolha própria. --dry-run só imprime os comandos.`,
 		decision, err := pipeline.DecideTerminal(termFlag, cfg, prompt)
 		if err != nil {
 			return err
+		}
+		if decision.Terminal == config.TerminalPainel {
+			return upPainel(out, env, cfg, abs, dry)
 		}
 		if decision.Terminal == config.TerminalTmux {
 			plan, err := pipeline.BuildTmuxPlan(env, cfg, os.Getenv("TMUX") != "")
@@ -109,6 +125,66 @@ não tiverem escolha própria. --dry-run só imprime os comandos.`,
 	},
 }
 
+// upPainel adapta o modo painel (RN-13): imprime o plano e, sem --dry-run, inicia os workers em
+// segundo plano. A decisão e o argv vivem em internal/pipeline (ARQ-01).
+func upPainel(out io.Writer, env pipeline.LaunchEnv, cfg config.ForgeConfig, dir string, dry bool) error {
+	// Um comando só: o mod vem no binário e é instalado ou atualizado aqui, sem passo manual.
+	if dry {
+		if !pipeline.PainelModInstalado(env) {
+			fmt.Fprintf(out, "[DRY-RUN] o mod %s seria instalado em .agents/plugins/%s (vem no binário)\n", pipeline.PainelPluginSlug, pipeline.PainelPluginSlug)
+			env.Exists = func(string) bool { return true }
+		}
+	} else if n, err := scaffold.SincronizarModEmbutido(dir, pipeline.PainelPluginSlug); err != nil {
+		return fmt.Errorf("instalar o mod %s: %w", pipeline.PainelPluginSlug, err)
+	} else if n > 0 {
+		fmt.Fprintf(out, "✓ mod %s instalado ou atualizado (%d arquivo(s))\n", pipeline.PainelPluginSlug, n)
+	}
+	plan, err := pipeline.BuildPainelPlan(env, cfg)
+	if err != nil {
+		return err
+	}
+	for _, w := range plan.Workers {
+		fmt.Fprintf(out, "%-16s %s > %s\n", w.Title, strings.Join(quoteArgs(w.Argv), " "), w.LogPath)
+	}
+	abrir := strings.Join(quoteArgs(plan.Discovery), " ")
+	if dry {
+		fmt.Fprintf(out, "[DRY-RUN] Nada foi iniciado (modo painel: workers em segundo plano, sem janela nem tmux).\nPara acompanhar, abra o Claude Code com o mod: %s\n", abrir)
+		return nil
+	}
+	res, err := pipeline.LaunchPainel(plan, dir, newPainelStarter)
+	for _, w := range plan.Workers {
+		if pid, ok := res.Started[w.Title]; ok {
+			fmt.Fprintf(out, "%s iniciado em segundo plano (pid %d); log: %s\n", w.Title, pid, res.LogPaths[w.Title])
+		}
+		if pid, ok := res.Already[w.Title]; ok {
+			fmt.Fprintf(out, "%s já estava em execução (pid %d); log: %s\n", w.Title, pid, res.LogPaths[w.Title])
+		}
+	}
+	if err != nil {
+		return err
+	}
+	if abrirClaudeNoTerminal == nil {
+		fmt.Fprintf(out, "Para acompanhar, abra o Claude Code com o mod: %s\n", abrir)
+		return nil
+	}
+	fmt.Fprintln(out, "Abrindo o Claude Code com o painel (fechar o Claude não para os workers)…")
+	return abrirClaudeNoTerminal(plan.Discovery, dir)
+}
+
+// abrirClaudeNoTerminal abre a sessão interativa no próprio terminal quando há um (nil sem terminal
+// ou nos testes: aí o comando é só impresso).
+var abrirClaudeNoTerminal = func() func([]string, string) error {
+	if !isatty.IsTerminal(os.Stdin.Fd()) || !isatty.IsTerminal(os.Stdout.Fd()) {
+		return nil
+	}
+	return func(argv []string, dir string) error {
+		c := exec.Command(argv[0], argv[1:]...)
+		c.Dir, c.Stdin, c.Stdout, c.Stderr = dir, os.Stdin, os.Stdout, os.Stderr
+		c.Env = pipeline.EnvComEsteBinario()
+		return c.Run()
+	}
+}()
+
 func quoteArgs(argv []string) []string {
 	out := make([]string, len(argv))
 	for i, a := range argv {
@@ -127,7 +203,7 @@ func init() {
 	upCmd.Flags().String("discovery", "", "Agente da sessão forge-discovery: claude, gemini, copilot ou codex")
 	upCmd.Flags().String("builder", "", "Agente da sessão forge-builder: claude, gemini, copilot ou codex")
 	upCmd.Flags().String("reviewer", "", "Agente da sessão forge-reviewer: claude, gemini, copilot ou codex")
-	upCmd.Flags().String("terminal", "", "Onde abrir: native ou auto (janelas do sistema, padrão) ou tmux (opção: três painéis; sem tmux, avisa e usa janelas)")
+	upCmd.Flags().String("terminal", "", "Onde abrir: native ou auto (janelas do sistema, padrão), tmux (opção: três painéis; sem tmux, avisa e usa janelas) ou painel (workers em segundo plano, sem janela; acompanhe pelo mod forge-painel)")
 	upCmd.Flags().Bool("dry-run", false, "Só imprime os comandos de abertura")
 	rootCmd.AddCommand(upCmd)
 }

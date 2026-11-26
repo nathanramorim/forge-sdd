@@ -546,9 +546,11 @@ func TestImplementarSemGhPrCreateFill(t *testing.T) {
 	assert.Contains(t, texto, "base na principal")
 	assert.Contains(t, texto, "gh pr ready", "marcar pronto é etapa separada, com parecer do HEAD")
 
-	// O split não cria mais a branch da construção.
+	// Fluxo da 6.0: o split termina despachando; quem cria a branch da entrega é o forge dispatch
+	// (determinístico), nunca o agente com git na mão.
 	split, err := os.ReadFile(filepath.Join("..", "..", ".agents/skills/sdd-planejamento/references/split-features.md"))
 	require.NoError(t, err)
-	assert.Contains(t, string(split), "Sem branch nova aqui",
-		"o split não pode criar a branch da iniciativa")
+	assert.Contains(t, string(split), "cria a branch da entrega", "a branch da entrega nasce no forge dispatch")
+	assert.NotContains(t, string(split), "git checkout -b", "o agente não cria branch no split")
+	assert.Contains(t, string(split), "sem perguntar, rode `forge dispatch", "o split despacha direto ao Builder")
 }

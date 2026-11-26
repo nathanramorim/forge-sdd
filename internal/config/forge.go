@@ -106,6 +106,56 @@ type BuilderConfig struct {
 	UseGitWorktrees   bool `json:"use_git_worktrees"`
 	RunTestsBeforePR  bool `json:"run_tests_before_pr"`
 	JobTimeoutMinutes int  `json:"job_timeout_minutes"`
+	// Granularidade escolhe a unidade do job do Builder: "task" (padrão: um job, um contexto novo e
+	// um Reviewer por task, em paralelo, ADR-0029) ou "feature" (um job por feature, como na 5.x).
+	Granularidade string `json:"granularidade,omitempty"`
+	// LimiteDisco é a porcentagem máxima de ocupação do volume dos worktrees ao paralelizar (50 a 95,
+	// padrão 90, rígido, ADR-0029).
+	LimiteDisco int `json:"limite_disco,omitempty"`
+	// LimiteMemoria é a porcentagem máxima de uso da RAM ao paralelizar (50 a 95, padrão 80).
+	LimiteMemoria int `json:"limite_memoria,omitempty"`
+	// ReservaMemoriaMB é um piso opcional, em MB, de memória livre; vale o maior entre ele e o
+	// que sobra acima de limite_memoria (0 ou ausente = só o limite).
+	ReservaMemoriaMB int `json:"reserva_memoria_mb,omitempty"`
+}
+
+// Granularidades aceitas em builder.granularidade e limites de builder.limite_disco.
+const (
+	GranularidadeFeature = "feature"
+	GranularidadeTask    = "task"
+	LimiteDiscoPadrao    = 90
+	LimiteMemoriaPadrao  = 80
+	limiteDiscoMin       = 50
+	limiteDiscoMax       = 95
+)
+
+// LarguraDePlano é a largura máxima de lote usada ao planejar ondas: max_parallel_tasks, ou um valor
+// largo quando não há teto fixo (0). Só a ordem das ondas importa ao despachante.
+func (b BuilderConfig) LarguraDePlano() int {
+	if b.MaxParallelTasks <= 0 {
+		return 64
+	}
+	return b.MaxParallelTasks
+}
+
+// PorTask informa se o Builder roda um job por task. Vazio vale "task" (padrão da 6.0 beta, também
+// para forge.json antigo sem a chave); "feature" volta ao job único por feature.
+func (b BuilderConfig) PorTask() bool { return b.Granularidade != GranularidadeFeature }
+
+// LimiteMemoriaEfetivo devolve limite_memoria ou o padrão quando omitido (zero).
+func (b BuilderConfig) LimiteMemoriaEfetivo() int {
+	if b.LimiteMemoria == 0 {
+		return LimiteMemoriaPadrao
+	}
+	return b.LimiteMemoria
+}
+
+// LimiteDiscoEfetivo devolve limite_disco ou o padrão quando omitido (zero).
+func (b BuilderConfig) LimiteDiscoEfetivo() int {
+	if b.LimiteDisco == 0 {
+		return LimiteDiscoPadrao
+	}
+	return b.LimiteDisco
 }
 
 // ReviewerConfig configura a sessão Reviewer.
@@ -157,6 +207,8 @@ type ForgeConfig struct {
 	Reviewer      ReviewerConfig        `json:"reviewer"`
 	ADRDirs       []string              `json:"adr_dirs"`
 	BaseBranch    string                `json:"base_branch"`
+	// Nuvem liga o forge em sessões do Claude Code na nuvem (forge nuvem ativar).
+	Nuvem *NuvemConfig `json:"nuvem,omitempty"`
 }
 
 var (
@@ -190,7 +242,7 @@ func DefaultForgeConfig() ForgeConfig {
 			StatusOnPRApproved:    "Ready for Review",
 			EvidenceMaxAgeMinutes: 30,
 		},
-		Builder:    BuilderConfig{MaxParallelTasks: 3, UseGitWorktrees: true, RunTestsBeforePR: true, JobTimeoutMinutes: 60},
+		Builder:    BuilderConfig{MaxParallelTasks: 3, UseGitWorktrees: true, RunTestsBeforePR: true, JobTimeoutMinutes: 60, Granularidade: GranularidadeTask, LimiteDisco: LimiteDiscoPadrao, LimiteMemoria: LimiteMemoriaPadrao},
 		Reviewer:   ReviewerConfig{MaxReworkAttempts: 3, CommentOnPR: true},
 		ADRDirs:    []string{"sdd/spec/adr"},
 		BaseBranch: "main",
@@ -237,6 +289,13 @@ func LoadForgeConfig(dir string) (cfg ForgeConfig, found bool, err error) {
 				cfg.CLIProfiles[CLIGemini] = norm
 			}
 		}
+		// Perfil claude da 4.1 (sem stream-json, {permissions}, {model} e {effort}): o worker não lia
+		// os tokens nem aplicava a permissão escolhida. Só o argv exato antigo é trocado.
+		if p, ok := cfg.CLIProfiles[CLIClaude]; ok && equalArgs(p.Args, claudeArgsDa41) {
+			p.Args = append([]string(nil), defaultProfiles()[CLIClaude].Args...)
+			cfg.CLIProfiles[CLIClaude] = p
+			changed = true
+		}
 		if p, ok := cfg.CLIProfiles[CLIAgy]; ok {
 			if norm, ok := cfg.Profile(CLIAgy); ok {
 				if len(p.InteractiveArgs) != len(norm.InteractiveArgs) {
@@ -267,6 +326,21 @@ func MigrateLegacyProfiles(dir string) (bool, error) {
 		return false, err
 	}
 	return true, nil
+}
+
+// claudeArgsDa41 é o argv headless do perfil claude gravado pela 4.1.
+var claudeArgsDa41 = []string{"-p", "{prompt}", "--agent", "{agent}", "-n", "{name}"}
+
+func equalArgs(a, b []string) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i := range a {
+		if a[i] != b[i] {
+			return false
+		}
+	}
+	return true
 }
 
 func strictDecode(data []byte, v any) error {
@@ -326,11 +400,23 @@ func (c ForgeConfig) Validate() error {
 	if c.Live.ReadyQuietSeconds < 0 || c.Live.ReadyQuietSeconds > 30 {
 		return fmt.Errorf("live.ready_quiet_seconds %d fora da faixa 0 a 30", c.Live.ReadyQuietSeconds)
 	}
-	if c.Builder.MaxParallelTasks < 1 || c.Builder.MaxParallelTasks > 8 {
-		return fmt.Errorf("builder.max_parallel_tasks %d fora da faixa 1 a 8", c.Builder.MaxParallelTasks)
+	if c.Builder.MaxParallelTasks < 0 || c.Builder.MaxParallelTasks > 64 {
+		return fmt.Errorf("builder.max_parallel_tasks %d fora da faixa 0 a 64 (0 = sem teto fixo)", c.Builder.MaxParallelTasks)
 	}
 	if c.Builder.JobTimeoutMinutes < 1 || c.Builder.JobTimeoutMinutes > 720 {
 		return fmt.Errorf("builder.job_timeout_minutes %d fora da faixa 1 a 720", c.Builder.JobTimeoutMinutes)
+	}
+	if g := c.Builder.Granularidade; g != "" && g != GranularidadeFeature && g != GranularidadeTask {
+		return fmt.Errorf("builder.granularidade %q inválida (use feature ou task)", g)
+	}
+	if l := c.Builder.LimiteDisco; l != 0 && (l < limiteDiscoMin || l > limiteDiscoMax) {
+		return fmt.Errorf("builder.limite_disco %d fora da faixa %d a %d", l, limiteDiscoMin, limiteDiscoMax)
+	}
+	if l := c.Builder.LimiteMemoria; l != 0 && (l < limiteDiscoMin || l > limiteDiscoMax) {
+		return fmt.Errorf("builder.limite_memoria %d fora da faixa %d a %d", l, limiteDiscoMin, limiteDiscoMax)
+	}
+	if m := c.Builder.ReservaMemoriaMB; m < 0 || m > 1048576 {
+		return fmt.Errorf("builder.reserva_memoria_mb %d fora da faixa 0 a 1048576", m)
 	}
 	if c.Reviewer.MaxReworkAttempts < 1 || c.Reviewer.MaxReworkAttempts > 10 {
 		return fmt.Errorf("reviewer.max_rework_attempts %d fora da faixa 1 a 10", c.Reviewer.MaxReworkAttempts)
@@ -357,6 +443,11 @@ func (c ForgeConfig) Validate() error {
 	}
 	if !branchRe.MatchString(c.BaseBranch) || containsDotDot(c.BaseBranch) || strings.HasPrefix(c.BaseBranch, "-") {
 		return fmt.Errorf("base_branch %q inválida", c.BaseBranch)
+	}
+	if c.Nuvem != nil {
+		if err := c.Nuvem.Validate(); err != nil {
+			return err
+		}
 	}
 	return nil
 }

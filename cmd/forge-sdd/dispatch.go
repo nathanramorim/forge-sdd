@@ -47,6 +47,11 @@ o comando orienta forge pipeline init.`,
 		}
 		if dry {
 			fmt.Fprintf(out, "[DRY-RUN] gate aprovado para %s; criaria o job %s (nada foi gravado)\n", res.Initiative, res.Job.ID)
+		} else if len(res.TaskJobs) > 0 {
+			fmt.Fprintf(out, "%d job(s) por task em builder/pending (%s)\n", len(res.TaskJobs), map[bool]string{true: "novos", false: "já estavam na fila"}[res.Created])
+			for _, tj := range res.TaskJobs {
+				fmt.Fprintf(out, "  - %s (task %s)\n", tj.ID, tj.TaskID)
+			}
 		} else if res.Created {
 			queueName := "builder"
 			if res.Job.Type == bus.TypeSpecReview {
@@ -57,6 +62,16 @@ o comando orienta forge pipeline init.`,
 			fmt.Fprintf(out, "Job %s já estava na fila (idempotente)\n", res.Job.ID)
 		}
 		fmt.Fprintf(out, "Base do PR: %s (fonte: %s)\n", res.BaseBranch, res.BaseSource)
+		for _, w := range res.Warnings {
+			fmt.Fprintf(out, "⚠ %s\n", w)
+		}
+		if len(res.Descartados) > 0 {
+			fmt.Fprintf(out, "Tirados da fila (despachos anteriores desta iniciativa): %s\n", strings.Join(res.Descartados, ", "))
+		}
+		if res.ModoTask && len(res.TaskJobs) == 0 {
+			fmt.Fprintln(out, "Nenhum job foi para o Builder; veja o aviso acima.")
+			return nil
+		}
 		if res.CardInstruction != "" {
 			fmt.Fprintf(out, "Próximo passo do agente: %s\n", res.CardInstruction)
 		} else {

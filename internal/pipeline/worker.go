@@ -107,6 +107,22 @@ func RunWorker(ctx context.Context, opts WorkerOptions) error {
 	}
 	fmt.Fprintf(opts.Out, "[%s] agente: %s · permissões: %s\n", opts.Name, opts.CLI, config.PermissionSummary(cfg.Permissions, cfg.AllowCommands))
 
+	if opts.Role == layout.RoleBuilder && !opts.Once {
+		// Retrato de recursos para o painel (o painel só lê; quem mede é o worker, em segundo plano).
+		go func() {
+			_ = GravarRecursos(opts.Dir, time.Now())
+			t := time.NewTicker(GravarRecursosACada)
+			defer t.Stop()
+			for {
+				select {
+				case <-ctx.Done():
+					return
+				case <-t.C:
+					_ = GravarRecursos(opts.Dir, time.Now())
+				}
+			}
+		}()
+	}
 	var wasIdle bool
 	for {
 		if ctx.Err() != nil {
@@ -226,21 +242,42 @@ func processJob(ctx context.Context, opts WorkerOptions, cfg config.ForgeConfig,
 	rel, _ := filepath.Rel(opts.Dir, entry.Path)
 	modelArgs, effortArgs := cfg.SessionModelArgs(opts.Role)
 	timeout := time.Duration(cfg.Builder.JobTimeoutMinutes) * time.Minute
-	res, runErr := opts.Runner.Run(ctx, RunSpec{
-		Agent:       opts.Role,
-		Name:        opts.Name,
-		Prompt:      workerPrompt(opts.Role, job, filepath.ToSlash(rel), cfg),
-		Permissions: cfg.WorkerPermissionArgs(opts.CLI),
-		Model:       modelArgs,
-		Effort:      effortArgs,
-		Dir:         opts.Dir,
-		Timeout:     timeout,
-	}, out)
+	prompt := workerPrompt(opts.Role, job, filepath.ToSlash(rel), cfg)
+	// Por task (ADR-0029): o Builder roda no worktree efêmero da task, nunca no principal.
+	runDir, wt, prepErr := opts.Dir, (*WorktreeDaTask)(nil), error(nil)
+	porTask := opts.Role == layout.RoleBuilder && job.Type == bus.TypeTaskBuild
+	if porTask {
+		if wt, prepErr = PrepararWorktreeDaTask(opts.Dir, job, opts.Name); prepErr == nil {
+			runDir = wt.Path
+			prepErr = copiarJobParaWorktree(entry.Path, filepath.Join(wt.Path, rel))
+			prompt += SecaoRetomada(job, wt)
+			live.Line(fmt.Sprintf("▶ worktree da task: %s", filepath.ToSlash(mustRel(opts.Dir, wt.Path))))
+		}
+	}
+	var res RunResult
+	var runErr error
+	if prepErr != nil {
+		runErr = fmt.Errorf("preparar o worktree da task: %w", prepErr)
+	} else {
+		res, runErr = opts.Runner.Run(ctx, RunSpec{
+			Agent:       opts.Role,
+			Name:        opts.Name,
+			Prompt:      prompt,
+			Permissions: cfg.WorkerPermissionArgs(opts.CLI),
+			Model:       modelArgs,
+			Effort:      effortArgs,
+			Dir:         runDir,
+			Timeout:     timeout,
+		}, out)
+	}
 	close(stop)
 	wg.Wait()
 	stopWatch()
 	<-watchDone // o watcher termina antes do rodapé: nenhuma linha sai depois dele
 	live.Flush()
+	if porTask && wt != nil {
+		_ = CopiarRetorno(opts.Dir, wt.Path, job.ID)
+	}
 
 	reason := ""
 	switch {
@@ -248,6 +285,20 @@ func processJob(ctx context.Context, opts WorkerOptions, cfg config.ForgeConfig,
 		reason = "falha ao executar o agente: " + runErr.Error()
 	case res.TimedOut:
 		reason = fmt.Sprintf("timeout após %d minutos", cfg.Builder.JobTimeoutMinutes)
+	case res.Sinal != "" || (res.ExitCode != 0 && ctx.Err() != nil):
+		// Morto de fora (janela fechada, Mac dormindo, falta de memória, worker parado): não é erro do
+		// agente. Volta à fila uma vez sem gastar tentativa; o worktree da task fica para a retomada.
+		reason = fmt.Sprintf("o agente foi encerrado pelo sinal %s (%s)", orDefault(res.Sinal, "do worker"), CausaDoSinal(res.Sinal))
+		if retomadasPorSinal(job) < maxRetomadasPorSinal || ctx.Err() != nil {
+			if _, rerr := bus.Requeue(opts.Dir, opts.Role, job.ID, opts.Name, marcaRetomada+reason, opts.Now()); rerr == nil {
+				live.Line("↻ " + reason + ": o job voltou à fila e será retomado")
+				if opts.OnJobDone != nil {
+					opts.OnJobDone(job, OutcomeDeferred)
+				}
+				return nil
+			}
+		}
+		reason += "; já foi retomado uma vez. Rode /implementar de novo depois de ver a causa"
 	case res.ExitCode != 0:
 		reason = fmt.Sprintf("o agente saiu com código %d", res.ExitCode)
 		// Limite de uso (só com saída diferente de zero): o job volta à fila sem gastar tentativa e o
@@ -290,6 +341,10 @@ func processJob(ctx context.Context, opts WorkerOptions, cfg config.ForgeConfig,
 	}
 	if reason == "" {
 		reason = verifyHandoff(opts, entry.Job.ID)
+	}
+
+	if porTask && wt != nil {
+		encerrarTask(opts, job, reason, live)
 	}
 
 	outcome := OutcomeDone
@@ -339,6 +394,9 @@ func VerifyJobHandoff(dir, role, workerName string, now func() time.Time, jobID 
 			return "job fora de processing: " + e.State
 		}
 		j := e.Job
+		if j.Type == bus.TypeTaskBuild {
+			return verificaTaskBuild(dir, role, workerName, now, j)
+		}
 		if j.PR.URL == nil || j.PR.Number == nil {
 			return "o agente terminou sem registrar o PR (forge pipeline pr)"
 		}
@@ -377,6 +435,10 @@ func reviewJobID(id string) string {
 
 func workerPrompt(role string, job bus.Job, rel string, cfg config.ForgeConfig) string {
 	p := BuildPrompt(role, job, rel)
+	if role == layout.RoleBuilder && job.Type == bus.TypeTaskBuild {
+		// Por task o Go decide o paralelo (COD-04): sem dica de worktree nem de subagentes.
+		return p + testsHint(cfg.Builder)
+	}
 	if role == layout.RoleBuilder {
 		p += "\n" + BuilderHints(cfg.Builder, job)
 	}
@@ -402,7 +464,7 @@ const maxUsageLimitDeferrals = 3
 func deferrals(job bus.Job) int {
 	n := 0
 	for _, e := range job.Events {
-		if strings.HasPrefix(e.Note, "adiado:") {
+		if strings.HasPrefix(e.Note, "adiado:") && !strings.Contains(e.Note, marcaRetomada) {
 			n++
 		}
 	}
@@ -433,4 +495,42 @@ func deferJob(ctx context.Context, opts WorkerOptions, job bus.Job, ul UsageLimi
 		return
 	}
 	live.Line("▶ retomando")
+}
+
+// marcaRetomada identifica no histórico do job as devoluções por sinal (não contam como limite de uso).
+const marcaRetomada = "retomada: "
+
+// maxRetomadasPorSinal é quantas vezes um job morto de fora volta sozinho à fila.
+const maxRetomadasPorSinal = 1
+
+func retomadasPorSinal(job bus.Job) int {
+	n := 0
+	for _, e := range job.Events {
+		if strings.Contains(e.Note, marcaRetomada) {
+			n++
+		}
+	}
+	return n
+}
+
+// CausaDoSinal traduz o sinal na causa provável, para a pessoa saber o que fazer.
+func CausaDoSinal(sinal string) string {
+	switch sinal {
+	case "killed":
+		return "provável falta de memória ou processo morto à força"
+	case "hangup":
+		return "a janela ou o terminal que abriu o worker foi fechado"
+	case "terminated", "interrupt":
+		return "o worker foi parado (forge up, pkill ou Ctrl+C)"
+	case "":
+		return "o worker foi parado no meio do job"
+	}
+	return "encerrado de fora"
+}
+
+func orDefault(s, padrao string) string {
+	if s == "" {
+		return padrao
+	}
+	return s
 }

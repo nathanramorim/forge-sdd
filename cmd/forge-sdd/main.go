@@ -14,13 +14,14 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// version é injetada via ldflags: -X main.version=5.2.3-beta
-var version = "5.2.3-beta"
+// version é injetada via ldflags: -X main.version=6.0.0-beta
+var version = "6.0.0-beta"
 
 func init() { config.SetBinaryVersion(version) }
 
 var rootCmd = &cobra.Command{
-	Use:   "forge",
+	Use:     "forge",
+	Version: version,
 	Short: "Scaffolda estruturas Forge-SDD em qualquer projeto",
 	Long: `forge é um CLI que gera a estrutura completa Forge-SDD
 (sdd/, .agents/, arquivos de instrução por agente) e conduz o fluxo em 3 sessões
@@ -295,6 +296,9 @@ func runUpdateFlow(cmd *cobra.Command, targetDir string) error {
 			if fetchErr != nil {
 				return fmt.Errorf("--upgrade: falha ao consultar o NPM Registry: %w", fetchErr)
 			}
+			if version != "dev" && config.CompareVersions(version, beta) > 0 && config.CompareVersions(version, latest) > 0 {
+				beta = version
+			}
 			targetVersion = config.ResolveUpgradeTarget(latest, beta)
 			if targetVersion == "" {
 				return fmt.Errorf("--upgrade: NPM Registry não retornou nenhuma versão (latest/beta) publicada")
@@ -324,6 +328,10 @@ func runUpdateFlow(cmd *cobra.Command, targetDir string) error {
 			beta = ""
 		} else {
 			fmt.Println(" [ok]")
+		}
+		// Binário mais novo que o publicado (beta local, antes do npm): ele também é opção.
+		if version != "dev" && config.CompareVersions(version, beta) > 0 && config.CompareVersions(version, latest) > 0 {
+			beta = version
 		}
 
 		if versionFlag != "" {
@@ -529,6 +537,7 @@ type exitCoder interface {
 }
 
 func main() {
+	rootCmd.SetVersionTemplate("{{.Version}}\n")
 	if err := rootCmd.Execute(); err != nil {
 		if ec, ok := err.(exitCoder); ok {
 			if err.Error() != "" {
