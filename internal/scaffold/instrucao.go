@@ -12,6 +12,7 @@ import (
 	"text/template"
 
 	"github.com/forge-sdd/cli/internal/config"
+	"github.com/forge-sdd/cli/internal/eol"
 	"github.com/forge-sdd/cli/internal/notify"
 )
 
@@ -134,7 +135,7 @@ func adotavelDe50(rel, dest string, cfg config.Config) bool {
 		return false
 	}
 	got, err := os.ReadFile(dest)
-	return err == nil && bytes.Equal(got, want)
+	return err == nil && eol.Iguais(got, want)
 }
 
 // instrucaoDoUsuario: existe, não tem marcador e não é adotável da 5.0 (fica intocado).
@@ -158,15 +159,15 @@ func InstrucoesDoUsuario(targetDir string, cfg config.Config) []string {
 	return out
 }
 
-// novoPath devolve `<nome>.novo.<ext>` ao lado do arquivo.
-func novoPath(dest string) string {
+// NovoPath devolve `<nome>.novo.<ext>` ao lado do arquivo.
+func NovoPath(dest string) string {
 	ext := filepath.Ext(dest)
 	return strings.TrimSuffix(dest, ext) + ".novo" + ext
 }
 
 // avisaInstrucaoPreservada avisa em stderr e grava `<nome>.novo.md` com o que o forge geraria.
 func avisaInstrucaoPreservada(targetDir, dest string, rendered []byte) {
-	novo := novoPath(dest)
+	novo := NovoPath(dest)
 	msg := "aviso: %s é seu (sem o marcador forge-sdd:generated) e foi mantido; o conteúdo novo do forge está em %s\n"
 	if err := writeFileSafeMode(targetDir, novo, rendered, 0644); err != nil {
 		refusals.Add(1)

@@ -350,3 +350,18 @@ func TestDiagnoseSaidaSemCaracteresDeControle(t *testing.T) {
 		achar(t, r, id)
 	}
 }
+
+// fix-118-04: checkout no Windows grava o veredito.md com CRLF; o contrato continua válido.
+func TestDiagnoseContratoComCRLFPassa(t *testing.T) {
+	dir := projeto(t, "5.0.0")
+	p := filepath.Join(dir, filepath.FromSlash(veredito))
+	b, err := os.ReadFile(p)
+	if err != nil {
+		t.Fatal(err)
+	}
+	crlf := strings.ReplaceAll(string(b), "\n", "\r\n")
+	escreve(t, dir, veredito, crlf)
+	if c := achar(t, Diagnose(dir, deps("5.0.0")), "contrato-skill-binario"); c.Status != StatusOK {
+		t.Fatalf("veredito.md com CRLF deveria passar: %+v", c)
+	}
+}
