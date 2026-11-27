@@ -1,0 +1,26 @@
+{
+  "$schema": "forge-sdd/metrics/1.0",
+  "feature": "fix-118-04-crlf-no-windows-reprova-contrato-e-regras",
+  "agent_path": null,
+  "tokens_input": 3759,
+  "tokens_output": 8102,
+  "turns": 0,
+  "duration_seconds": 0,
+  "criterio_atendido": true,
+  "model": "",
+  "rework_lines": 0,
+  "context7_calls": 0,
+  "git_calls": 0,
+  "files_touched": [
+    "internal/eol/eol.go",
+    "internal/harness/skill.go",
+    "internal/scaffold/regras.go",
+    "internal/scaffold/instrucao.go",
+    "internal/scaffold/gitattributes.go",
+    "cmd/forge-sdd/doctor.go"
+  ],
+  "outcome": "approved",
+  "sdd_version": "5.2.3-beta",
+  "medicao": "estimado",
+  "complexidade": null
+}

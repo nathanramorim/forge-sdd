@@ -103,7 +103,7 @@ func TestInstrucaoDe50IgualAoTemplateEAdotada(t *testing.T) {
 	require.NoError(t, err)
 	for rel := range antigos {
 		assert.Contains(t, lerRel(t, dir, rel), generatedMarker, rel)
-		assert.NoFileExists(t, filepath.Join(dir, novoPath(filepath.FromSlash(rel))), rel)
+		assert.NoFileExists(t, filepath.Join(dir, NovoPath(filepath.FromSlash(rel))), rel)
 	}
 	// segunda execução não muda nada
 	antes := map[string]string{}

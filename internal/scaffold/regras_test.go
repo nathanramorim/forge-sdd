@@ -3,6 +3,7 @@ package scaffold
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/forge-sdd/cli/internal/config"
@@ -97,4 +98,36 @@ func TestRuleDoUsuarioNuncaEMexida(t *testing.T) {
 	assert.Equal(t, "minha\n", lerRel(t, dir, ".agents/rules/minha-regra.md"))
 	_, err = os.Stat(filepath.Join(dir, ".agents/rules/minha-regra.novo.md"))
 	assert.True(t, os.IsNotExist(err))
+}
+
+// fix-118-04: rules e schema do forge com CRLF (checkout no Windows) não contam como editados.
+func TestRegrasComCRLFNaoViramEditadas(t *testing.T) {
+	dir := t.TempDir()
+	cfg := cfgInstrucao()
+	_, err := Run(cfg, dir)
+	require.NoError(t, err)
+	atualizar, manter := PlanoRegras(dir, cfg)
+	require.Empty(t, manter)
+	geridos := 0
+	require.NoError(t, filepath.WalkDir(dir, func(p string, d os.DirEntry, err error) error {
+		if err != nil || d.IsDir() {
+			return err
+		}
+		rel, _ := filepath.Rel(dir, p)
+		if !regraGerenciada(filepath.ToSlash(rel)) {
+			return nil
+		}
+		geridos++
+		b, rerr := os.ReadFile(p)
+		require.NoError(t, rerr)
+		return os.WriteFile(p, []byte(strings.ReplaceAll(string(b), "\n", "\r\n")), 0o644)
+	}))
+	require.Positive(t, geridos)
+	atualizar, manter = PlanoRegras(dir, cfg)
+	assert.Empty(t, manter, "CRLF não é edição do usuário")
+	assert.Empty(t, atualizar, "conteúdo igual ao template: nada a atualizar")
+	_, err = Run(cfg, dir)
+	require.NoError(t, err)
+	_, err = os.Stat(filepath.Join(dir, ".agents/rules/sdd-fluxo-e-portao.novo.md"))
+	assert.True(t, os.IsNotExist(err), "sem .novo para rule só com CRLF")
 }
