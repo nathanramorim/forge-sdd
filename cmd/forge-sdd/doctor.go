@@ -119,7 +119,12 @@ inconsistências de configuração dos agentes de IA e progresso das features.`,
 
 		if _, manter := scaffold.PlanoRegras(targetDir, config.Defaults()); len(manter) > 0 {
 			for _, rel := range manter {
-				fmt.Printf("⚠️  %s tem versão nova do forge e você o editou; revise o .novo ao lado (rode 'forge update')\n", notify.Sanitize(rel, 300, false))
+				nome := notify.Sanitize(rel, 300, false)
+				if fileExists(scaffold.NovoPath(filepath.Join(targetDir, filepath.FromSlash(rel)))) {
+					fmt.Printf("⚠️  %s tem versão nova do forge e você o editou; revise o .novo ao lado\n", nome)
+				} else {
+					fmt.Printf("⚠️  %s tem versão nova do forge e você o editou; rode 'forge update' para gravar o .novo ao lado e revisar\n", nome)
+				}
 			}
 		}
 

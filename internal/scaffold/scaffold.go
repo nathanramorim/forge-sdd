@@ -82,6 +82,7 @@ func Run(cfg config.Config, targetDir string) ([]string, error) {
 			return created, err
 		}
 		installClaudeInboxHook(agents, targetDir, cfg.SddVersion)
+		garantirGitattributes(targetDir)
 		if _, err := applyAgentModels(targetDir); err != nil {
 			return created, err
 		}
