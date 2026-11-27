@@ -8,19 +8,21 @@ import (
 	"reflect"
 	"regexp"
 	"strings"
+
+	"github.com/forge-sdd/cli/internal/eol"
 )
 
 var blocoJSON = regexp.MustCompile("(?s)```json\\n(.*?)```")
 
 // ExemploParecerDaSkill extrai o primeiro bloco ```json do contrato do parecer na skill de
-// Governança do projeto em dir.
+// Governança do projeto em dir. Aceita o arquivo com CRLF (checkout no Windows).
 func ExemploParecerDaSkill(dir string) ([]byte, error) {
 	path := filepath.Join(dir, ".agents", "skills", "sdd-governanca", "references", "veredito.md")
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return nil, fmt.Errorf("lendo exemplo da skill %s: %w", path, err)
 	}
-	m := blocoJSON.FindSubmatch(data)
+	m := blocoJSON.FindSubmatch(eol.LF(data))
 	if m == nil {
 		return nil, fmt.Errorf("bloco ```json não encontrado em %s", path)
 	}

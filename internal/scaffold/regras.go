@@ -1,7 +1,6 @@
 package scaffold
 
 import (
-	"bytes"
 	"fmt"
 	"io/fs"
 	"os"
@@ -9,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/forge-sdd/cli/internal/config"
+	"github.com/forge-sdd/cli/internal/eol"
 	"github.com/forge-sdd/cli/internal/notify"
 )
 
@@ -25,7 +25,8 @@ func regraGerenciada(rel string) bool {
 }
 
 // arquivoDoForge: o arquivo existente é regular e igual ao que o forge entregou na 5.0 (tabela embed,
-// reusa renderV50, DUP-06) ou ao template atual (nada a mudar). Qualquer outra coisa é do usuário.
+// reusa renderV50, DUP-06) ou ao template atual (nada a mudar), ignorando CRLF x LF. Qualquer outra
+// coisa é do usuário.
 func arquivoDoForge(rel, dest string, atual []byte, cfg config.Config) bool {
 	fi, err := os.Lstat(dest)
 	if err != nil || !fi.Mode().IsRegular() {
@@ -35,16 +36,16 @@ func arquivoDoForge(rel, dest string, atual []byte, cfg config.Config) bool {
 	if err != nil {
 		return false
 	}
-	if bytes.Equal(got, atual) {
+	if eol.Iguais(got, atual) {
 		return true
 	}
 	want, ok := renderV50(rel, cfg)
-	return ok && bytes.Equal(got, want)
+	return ok && eol.Iguais(got, want)
 }
 
 // avisaRegraPreservada avisa em stderr e grava `<nome>.novo.<ext>` com a versão nova do forge.
 func avisaRegraPreservada(targetDir, dest, rel string, rendered []byte) {
-	novo := novoPath(dest)
+	novo := NovoPath(dest)
 	msg := "aviso: %s tem versão nova do forge e foi mantido (você o editou); revise o conteúdo novo em %s\n"
 	if err := writeFileSafeMode(targetDir, novo, rendered, 0644); err != nil {
 		refusals.Add(1)
@@ -78,7 +79,7 @@ func PlanoRegras(targetDir string, cfg config.Config) (atualizar, manter []strin
 		}
 		got, _ := os.ReadFile(dest)
 		switch {
-		case bytes.Equal(got, rendered):
+		case eol.Iguais(got, rendered):
 		case arquivoDoForge(rel, dest, rendered, cfg):
 			atualizar = append(atualizar, rel)
 		default:
